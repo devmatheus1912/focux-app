@@ -15,6 +15,10 @@ import '../../features/assinatura/screens/assinatura_screen.dart';
 import '../../features/exercicios/screens/exercicios_list_screen.dart';
 import '../../features/exercicios/screens/exercicio_detail_screen.dart';
 import '../../features/exercicios/screens/add_exercicio_screen.dart';
+import '../../features/treinos/screens/treinos_list_screen.dart';
+import '../../features/treinos/screens/treino_detail_screen.dart';
+import '../../features/treinos/screens/create_treino_screen.dart';
+import '../../features/treinos/screens/add_exercicio_to_treino_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -84,6 +88,26 @@ class AppRouter {
         path: '/exercicios/:id',
         builder: (context, state) => ExercicioDetailScreen(
           exercicioId: int.parse(state.pathParameters['id']!),
+        ),
+      ),
+      GoRoute(
+        path: '/treinos',
+        builder: (context, state) => const TreinosListScreen(),
+      ),
+      GoRoute(
+        path: '/treinos/novo',
+        builder: (context, state) => const CreateTreinoScreen(),
+      ),
+      GoRoute(
+        path: '/treinos/:id',
+        builder: (context, state) => TreinoDetailScreen(
+          treinoId: int.parse(state.pathParameters['id']!),
+        ),
+      ),
+      GoRoute(
+        path: '/treinos/:id/exercicios/add',
+        builder: (context, state) => AddExercicioToTreinoScreen(
+          treinoId: int.parse(state.pathParameters['id']!),
         ),
       ),
     ],

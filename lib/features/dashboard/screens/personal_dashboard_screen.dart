@@ -89,6 +89,11 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Exercícios',
                 onTap: () => context.push('/exercicios'),
               ),
+              _MenuButton(
+                icon: Icons.list_alt,
+                label: 'Treinos',
+                onTap: () => context.push('/treinos'),
+              ),
             ],
           ),
         ),

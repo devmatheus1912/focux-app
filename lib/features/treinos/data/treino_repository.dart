@@ -1,0 +1,115 @@
+import 'package:dio/dio.dart';
+import '../../../core/api/api_client.dart';
+import '../../exercicios/data/exercicio_repository.dart';
+
+class TreinoExercicioItem {
+  final int id;
+  final Exercicio exercicio;
+  final int series;
+  final String repeticoes;
+  final double? cargaKg;
+  final int? descansoSegundos;
+  final int ordem;
+  final String? observacoes;
+
+  TreinoExercicioItem({
+    required this.id,
+    required this.exercicio,
+    required this.series,
+    required this.repeticoes,
+    this.cargaKg,
+    this.descansoSegundos,
+    required this.ordem,
+    this.observacoes,
+  });
+
+  factory TreinoExercicioItem.fromJson(Map<String, dynamic> json) => TreinoExercicioItem(
+        id: json['id'] as int,
+        exercicio: Exercicio.fromJson(json['exercicio'] as Map<String, dynamic>),
+        series: json['series'] as int,
+        repeticoes: json['repeticoes'] as String,
+        cargaKg: (json['cargaKg'] as num?)?.toDouble(),
+        descansoSegundos: json['descansoSegundos'] as int?,
+        ordem: json['ordem'] as int,
+        observacoes: json['observacoes'] as String?,
+      );
+}
+
+class Treino {
+  final int id;
+  final String nome;
+  final String? descricao;
+  final String? objetivo;
+  final String? nivel;
+  final List<TreinoExercicioItem> exercicios;
+
+  Treino({
+    required this.id,
+    required this.nome,
+    this.descricao,
+    this.objetivo,
+    this.nivel,
+    required this.exercicios,
+  });
+
+  factory Treino.fromJson(Map<String, dynamic> json) => Treino(
+        id: json['id'] as int,
+        nome: json['nome'] as String,
+        descricao: json['descricao'] as String?,
+        objetivo: json['objetivo'] as String?,
+        nivel: json['nivel'] as String?,
+        exercicios: (json['exercicios'] as List<dynamic>)
+            .map((e) => TreinoExercicioItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+class TreinoRepository {
+  final Dio _dio;
+
+  TreinoRepository(ApiClient client) : _dio = client.dio;
+
+  Future<List<Treino>> listar() async {
+    final response = await _dio.get('/api/treinos');
+    return (response.data as List<dynamic>)
+        .map((e) => Treino.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<Treino> buscar(int id) async {
+    final response = await _dio.get('/api/treinos/$id');
+    return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Treino> criar(String nome, String? descricao, String? objetivo, String? nivel) async {
+    final response = await _dio.post('/api/treinos', data: {
+      'nome': nome,
+      if (descricao != null && descricao.isNotEmpty) 'descricao': descricao,
+      if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+      if (nivel != null) 'nivel': nivel,
+    });
+    return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Treino> adicionarExercicio(int treinoId, int exercicioId,
+      {int series = 3, String repeticoes = '10-12', int descanso = 60}) async {
+    final response = await _dio.post('/api/treinos/$treinoId/exercicios', data: {
+      'exercicioId': exercicioId,
+      'series': series,
+      'repeticoes': repeticoes,
+      'descansoSegundos': descanso,
+    });
+    return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<void> atribuirAluno(int treinoId, int alunoId) async {
+    await _dio.post('/api/treinos/$treinoId/alunos/$alunoId');
+  }
+
+  Future<List<Treino>> listarTreinosDoAluno(int alunoId) async {
+    final response = await _dio.get('/api/alunos/$alunoId/treinos');
+    return (response.data as List<dynamic>)
+        .map((e) => Treino.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+}
