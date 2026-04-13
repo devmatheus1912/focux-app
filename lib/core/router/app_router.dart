@@ -12,6 +12,9 @@ import '../../features/perfil/screens/perfil_screen.dart';
 import '../../features/perfil/screens/editar_perfil_screen.dart';
 import '../../features/convites/screens/convites_screen.dart';
 import '../../features/assinatura/screens/assinatura_screen.dart';
+import '../../features/exercicios/screens/exercicios_list_screen.dart';
+import '../../features/exercicios/screens/exercicio_detail_screen.dart';
+import '../../features/exercicios/screens/add_exercicio_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -68,6 +71,20 @@ class AppRouter {
       GoRoute(
         path: '/planos',
         builder: (context, state) => const AssinaturaScreen(),
+      ),
+      GoRoute(
+        path: '/exercicios',
+        builder: (context, state) => const ExerciciosListScreen(),
+      ),
+      GoRoute(
+        path: '/exercicios/novo',
+        builder: (context, state) => const AddExercicioScreen(),
+      ),
+      GoRoute(
+        path: '/exercicios/:id',
+        builder: (context, state) => ExercicioDetailScreen(
+          exercicioId: int.parse(state.pathParameters['id']!),
+        ),
       ),
     ],
   );

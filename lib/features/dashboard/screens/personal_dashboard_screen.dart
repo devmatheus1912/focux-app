@@ -84,6 +84,11 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Planos e Assinatura',
                 onTap: () => context.push('/planos'),
               ),
+              _MenuButton(
+                icon: Icons.fitness_center,
+                label: 'Exercícios',
+                onTap: () => context.push('/exercicios'),
+              ),
             ],
           ),
         ),
