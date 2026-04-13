@@ -7,6 +7,10 @@ import '../../features/dashboard/screens/aluno_dashboard_screen.dart';
 import '../../features/alunos/screens/alunos_list_screen.dart';
 import '../../features/alunos/screens/add_aluno_screen.dart';
 import '../../features/alunos/screens/aluno_detail_screen.dart';
+import '../../features/perfil/data/perfil_repository.dart';
+import '../../features/perfil/screens/perfil_screen.dart';
+import '../../features/perfil/screens/editar_perfil_screen.dart';
+import '../../features/convites/screens/convites_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -45,6 +49,20 @@ class AppRouter {
         builder: (context, state) => AlunoDetailScreen(
           alunoId: int.parse(state.pathParameters['id']!),
         ),
+      ),
+      GoRoute(
+        path: '/perfil',
+        builder: (context, state) => const PerfilScreen(),
+      ),
+      GoRoute(
+        path: '/perfil/editar',
+        builder: (context, state) => EditarPerfilScreen(
+          perfil: state.extra as PerfilPersonal,
+        ),
+      ),
+      GoRoute(
+        path: '/convites',
+        builder: (context, state) => const ConvitesScreen(),
       ),
     ],
   );

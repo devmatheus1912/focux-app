@@ -69,6 +69,16 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Meus Alunos',
                 onTap: () => context.push('/alunos'),
               ),
+              _MenuButton(
+                icon: Icons.person_add,
+                label: 'Convidar Aluno',
+                onTap: () => context.push('/convites'),
+              ),
+              _MenuButton(
+                icon: Icons.person,
+                label: 'Meu Perfil',
+                onTap: () => context.push('/perfil'),
+              ),
             ],
           ),
         ),
