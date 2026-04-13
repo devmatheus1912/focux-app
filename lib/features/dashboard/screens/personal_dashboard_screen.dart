@@ -59,9 +59,39 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Limite do Plano',
                 value: '${data.alunosAtivos} / ${data.limiteAlunos}',
               ),
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 8),
+              Text('Menu', style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 12),
+              _MenuButton(
+                icon: Icons.people,
+                label: 'Meus Alunos',
+                onTap: () => context.push('/alunos'),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _MenuButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _MenuButton({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(label),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
       ),
     );
   }
