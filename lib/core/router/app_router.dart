@@ -11,6 +11,7 @@ import '../../features/perfil/data/perfil_repository.dart';
 import '../../features/perfil/screens/perfil_screen.dart';
 import '../../features/perfil/screens/editar_perfil_screen.dart';
 import '../../features/convites/screens/convites_screen.dart';
+import '../../features/assinatura/screens/assinatura_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -63,6 +64,10 @@ class AppRouter {
       GoRoute(
         path: '/convites',
         builder: (context, state) => const ConvitesScreen(),
+      ),
+      GoRoute(
+        path: '/planos',
+        builder: (context, state) => const AssinaturaScreen(),
       ),
     ],
   );

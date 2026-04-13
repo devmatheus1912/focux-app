@@ -79,6 +79,11 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Meu Perfil',
                 onTap: () => context.push('/perfil'),
               ),
+              _MenuButton(
+                icon: Icons.workspace_premium,
+                label: 'Planos e Assinatura',
+                onTap: () => context.push('/planos'),
+              ),
             ],
           ),
         ),
