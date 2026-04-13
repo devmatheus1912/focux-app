@@ -47,7 +47,7 @@ class _AddExercicioToTreinoScreenState
       );
       if (mounted) context.pop(true);
     } catch (e) {
-      setState(() { _error = 'Erro ao adicionar exercício.'; });
+      if (mounted) setState(() { _error = 'Erro ao adicionar exercício.'; });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }

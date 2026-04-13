@@ -58,7 +58,7 @@ class Treino {
         descricao: json['descricao'] as String?,
         objetivo: json['objetivo'] as String?,
         nivel: json['nivel'] as String?,
-        exercicios: (json['exercicios'] as List<dynamic>)
+        exercicios: ((json['exercicios'] as List<dynamic>?) ?? [])
             .map((e) => TreinoExercicioItem.fromJson(e as Map<String, dynamic>))
             .toList(),
       );

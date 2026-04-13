@@ -41,7 +41,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
       );
       if (mounted) context.pop(true);
     } catch (e) {
-      setState(() { _error = 'Erro ao criar treino.'; });
+      if (mounted) setState(() { _error = 'Erro ao criar treino.'; });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }

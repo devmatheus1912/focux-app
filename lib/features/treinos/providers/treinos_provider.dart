@@ -7,9 +7,9 @@ final treinoRepositoryProvider = Provider<TreinoRepository>(
 );
 
 final treinosProvider = FutureProvider<List<Treino>>((ref) async {
-  return ref.read(treinoRepositoryProvider).listar();
+  return ref.watch(treinoRepositoryProvider).listar();
 });
 
 final treinoProvider = FutureProvider.family<Treino, int>((ref, id) async {
-  return ref.read(treinoRepositoryProvider).buscar(id);
+  return ref.watch(treinoRepositoryProvider).buscar(id);
 });
