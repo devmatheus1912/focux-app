@@ -77,7 +77,7 @@ V6  alter alunos.status → VARCHAR(20)
 |---|---|---|
 | Exercícios | `GET/POST /api/exercicios` `GET/PUT/DELETE /api/exercicios/{id}` `POST /api/exercicios/{id}/gif` | ✅ |
 | Treinos | `GET/POST /api/treinos` `GET /api/treinos/{id}` `POST /api/treinos/{id}/exercicios` `POST /api/treinos/{id}/atribuir` | ✅ |
-| Check-in | `POST /api/checkin/iniciar` `PUT /api/checkin/{id}/exercicio/{eid}` `PUT /api/checkin/{id}/concluir` | ⏳ migration V11 criada, código pendente |
+| Check-in | `GET /api/checkin/meus-treinos` `POST /api/checkin/iniciar` `PUT /api/checkin/{id}/exercicio/{eid}` `PUT /api/checkin/{id}/concluir` `GET /api/checkin/historico` | ✅ |
 | Anamnese | `POST/GET /api/alunos/{id}/anamnese` | ⏳ migration V11 criada, código pendente |
 | Avaliação física | medidas + fotos + gráficos | ❌ não iniciado |
 | Plano alimentar | macros | ❌ não iniciado |
@@ -91,7 +91,7 @@ V6  alter alunos.status → VARCHAR(20)
 | Lista de Treinos | `/treinos` | ✅ |
 | Criar Treino | `/treinos/novo` | ✅ |
 | Detalhe Treino | `/treinos/:id` | ✅ |
-| Check-in Aluno | a definir | ❌ não iniciado |
+| Check-in Aluno | `/checkin/treinos` `/checkin/executar` `/checkin/historico` | ✅ |
 | Anamnese | a definir | ❌ não iniciado |
 | Avaliação física | a definir | ❌ não iniciado |
 
@@ -160,7 +160,7 @@ CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
 
 ## Próximos passos (Fase 2)
 
-1. **Check-in de treino** — backend (controller/service/repo) + Flutter (tela do aluno executar treino)
+1. ~~Check-in de treino~~ ✅
 2. **Anamnese** — backend + Flutter (formulário histórico de saúde)
 3. **Avaliação física** — medidas corporais + fotos comparativas
 4. **Plano alimentar** — macros por refeição
