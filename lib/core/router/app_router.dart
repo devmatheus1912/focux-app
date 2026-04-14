@@ -12,6 +12,9 @@ import '../../features/perfil/screens/perfil_screen.dart';
 import '../../features/perfil/screens/editar_perfil_screen.dart';
 import '../../features/convites/screens/convites_screen.dart';
 import '../../features/assinatura/screens/assinatura_screen.dart';
+import '../../features/checkin/screens/meus_treinos_screen.dart';
+import '../../features/checkin/screens/checkin_screen.dart';
+import '../../features/checkin/screens/historico_screen.dart';
 import '../../features/exercicios/screens/exercicios_list_screen.dart';
 import '../../features/exercicios/screens/exercicio_detail_screen.dart';
 import '../../features/exercicios/screens/add_exercicio_screen.dart';
@@ -109,6 +112,18 @@ class AppRouter {
         builder: (context, state) => AddExercicioToTreinoScreen(
           treinoId: int.parse(state.pathParameters['id']!),
         ),
+      ),
+      GoRoute(
+        path: '/checkin/treinos',
+        builder: (context, state) => const MeusTreinosScreen(),
+      ),
+      GoRoute(
+        path: '/checkin/executar',
+        builder: (context, state) => CheckinScreen(treinoId: state.extra as int),
+      ),
+      GoRoute(
+        path: '/checkin/historico',
+        builder: (context, state) => const HistoricoCheckinScreen(),
       ),
     ],
   );
