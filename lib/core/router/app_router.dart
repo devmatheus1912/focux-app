@@ -22,6 +22,8 @@ import '../../features/treinos/screens/treinos_list_screen.dart';
 import '../../features/treinos/screens/treino_detail_screen.dart';
 import '../../features/treinos/screens/create_treino_screen.dart';
 import '../../features/treinos/screens/add_exercicio_to_treino_screen.dart';
+import '../../features/financeiro/screens/financeiro_screen.dart';
+import '../../features/agenda/screens/agenda_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -124,6 +126,14 @@ class AppRouter {
       GoRoute(
         path: '/checkin/historico',
         builder: (context, state) => const HistoricoCheckinScreen(),
+      ),
+      GoRoute(
+        path: '/financeiro',
+        builder: (context, state) => const FinanceiroScreen(),
+      ),
+      GoRoute(
+        path: '/agenda',
+        builder: (context, state) => const AgendaScreen(),
       ),
     ],
   );

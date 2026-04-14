@@ -94,6 +94,16 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Treinos',
                 onTap: () => context.push('/treinos'),
               ),
+              _MenuButton(
+                icon: Icons.attach_money,
+                label: 'Financeiro',
+                onTap: () => context.push('/financeiro'),
+              ),
+              _MenuButton(
+                icon: Icons.calendar_month,
+                label: 'Agenda',
+                onTap: () => context.push('/agenda'),
+              ),
             ],
           ),
         ),
