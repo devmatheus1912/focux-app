@@ -4,6 +4,8 @@ import '../providers/alunos_provider.dart';
 import '../../anamnese/screens/anamnese_screen.dart';
 import '../../avaliacao/screens/avaliacao_screen.dart';
 import '../../alimentar/screens/alimentar_screen.dart';
+import '../../ia/screens/ia_screen.dart';
+import '../../chat/screens/chat_screen.dart';
 
 class AlunoDetailScreen extends ConsumerWidget {
   final int alunoId;
@@ -43,6 +45,12 @@ class AlunoDetailScreen extends ConsumerWidget {
             _MenuBtn(icon: Icons.restaurant_menu, label: 'Plano Alimentar',
               onTap: () => Navigator.push(context, MaterialPageRoute(
                 builder: (_) => AlimentarScreen(alunoId: alunoId)))),
+            _MenuBtn(icon: Icons.auto_awesome, label: 'Gerar Treino/Dieta com IA',
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => IaScreen(alunoId: alunoId)))),
+            _MenuBtn(icon: Icons.chat, label: 'Chat',
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => ChatScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
           ]),
         ),
       ),
