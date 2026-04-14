@@ -1,0 +1,131 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+import '../data/alimentar_repository.dart';
+
+class AlimentarScreen extends ConsumerStatefulWidget {
+  final int alunoId;
+  const AlimentarScreen({super.key, required this.alunoId});
+  @override
+  ConsumerState<AlimentarScreen> createState() => _AlimentarScreenState();
+}
+
+class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
+  List<PlanoAlimentar> _planos = [];
+  bool _loading = true;
+
+  @override
+  void initState() { super.initState(); _load(); }
+
+  Future<void> _load() async {
+    try {
+      final r = await AlimentarRepository(ref.read(apiClientProvider)).listar(widget.alunoId);
+      setState(() { _planos = r; _loading = false; });
+    } catch (_) { setState(() => _loading = false); }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Planos Alimentares')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await Navigator.push(context, MaterialPageRoute(
+            builder: (_) => _NovoPlanoScreen(alunoId: widget.alunoId)));
+          _load();
+        },
+        child: const Icon(Icons.add),
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _planos.isEmpty
+              ? const Center(child: Text('Nenhum plano alimentar criado.'))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _planos.length,
+                  itemBuilder: (_, i) {
+                    final p = _planos[i];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: Padding(padding: const EdgeInsets.all(16), child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(p.nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          if (p.caloriasDia != null) Text('${p.caloriasDia} kcal/dia',
+                              style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                          const SizedBox(height: 8),
+                          Wrap(spacing: 16, children: [
+                            if (p.proteinaG != null) _macro('Proteína', '${p.proteinaG}g', Colors.red),
+                            if (p.carboidratoG != null) _macro('Carbo', '${p.carboidratoG}g', Colors.orange),
+                            if (p.gorduraG != null) _macro('Gordura', '${p.gorduraG}g', Colors.yellow.shade700),
+                          ]),
+                        ],
+                      )),
+                    );
+                  },
+                ),
+    );
+  }
+
+  Widget _macro(String label, String value, Color color) => Chip(
+    label: Text('$label: $value'),
+    backgroundColor: color.withValues(alpha: 0.15),
+  );
+}
+
+class _NovoPlanoScreen extends ConsumerStatefulWidget {
+  final int alunoId;
+  const _NovoPlanoScreen({required this.alunoId});
+  @override
+  ConsumerState<_NovoPlanoScreen> createState() => _NovoPlanoScreenState();
+}
+
+class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
+  final _nome = TextEditingController(), _cal = TextEditingController(),
+      _prot = TextEditingController(), _carb = TextEditingController(),
+      _gord = TextEditingController(), _obs = TextEditingController();
+  bool _saving = false;
+
+  Future<void> _salvar() async {
+    if (_nome.text.isEmpty) return;
+    setState(() => _saving = true);
+    try {
+      await AlimentarRepository(ref.read(apiClientProvider)).criar(widget.alunoId, {
+        'nome': _nome.text,
+        if (_cal.text.isNotEmpty) 'caloriasDia': int.tryParse(_cal.text),
+        if (_prot.text.isNotEmpty) 'proteinaG': int.tryParse(_prot.text),
+        if (_carb.text.isNotEmpty) 'carboidratoG': int.tryParse(_carb.text),
+        if (_gord.text.isNotEmpty) 'gorduraG': int.tryParse(_gord.text),
+        if (_obs.text.isNotEmpty) 'observacoes': _obs.text,
+      });
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+    }
+    if (mounted) setState(() => _saving = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Novo Plano Alimentar')),
+      body: SingleChildScrollView(padding: const EdgeInsets.all(16), child: Column(children: [
+        _field(_nome, 'Nome do plano *'),
+        _num(_cal, 'Calorias/dia (kcal)'), _num(_prot, 'Proteína (g)'),
+        _num(_carb, 'Carboidrato (g)'), _num(_gord, 'Gordura (g)'),
+        _field(_obs, 'Observações', maxLines: 3),
+        const SizedBox(height: 16),
+        FilledButton(onPressed: _saving ? null : _salvar, child: const Text('Criar Plano')),
+      ])),
+    );
+  }
+
+  Widget _num(TextEditingController c, String label) =>
+      Padding(padding: const EdgeInsets.only(bottom: 12),
+        child: TextFormField(controller: c, decoration: InputDecoration(labelText: label),
+          keyboardType: TextInputType.number));
+
+  Widget _field(TextEditingController c, String label, {int maxLines = 1}) =>
+      Padding(padding: const EdgeInsets.only(bottom: 12),
+        child: TextFormField(controller: c, decoration: InputDecoration(labelText: label), maxLines: maxLines));
+}
