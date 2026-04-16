@@ -39,6 +39,13 @@ class AlunoDashboardScreen extends ConsumerWidget {
               subtitle: 'Treinos realizados',
               onTap: () => context.push('/checkin/historico'),
             ),
+            const SizedBox(height: 12),
+            _MenuButton(
+              icon: Icons.dynamic_feed,
+              label: 'Feed',
+              subtitle: 'Publicações do seu personal',
+              onTap: () => context.push('/feed/aluno'),
+            ),
           ],
         ),
       ),

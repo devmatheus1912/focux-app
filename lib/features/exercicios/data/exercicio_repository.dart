@@ -8,6 +8,7 @@ class Exercicio {
   final String? musculoAlvo;
   final String? gifUrl;
   final String? categoria;
+  final String? videoUrl;
 
   Exercicio({
     required this.id,
@@ -16,6 +17,7 @@ class Exercicio {
     this.musculoAlvo,
     this.gifUrl,
     this.categoria,
+    this.videoUrl,
   });
 
   factory Exercicio.fromJson(Map<String, dynamic> json) => Exercicio(
@@ -25,6 +27,7 @@ class Exercicio {
         musculoAlvo: json['musculoAlvo'] as String?,
         gifUrl: json['gifUrl'] as String?,
         categoria: json['categoria'] as String?,
+        videoUrl: json['videoUrl'] as String?,
       );
 }
 

@@ -24,6 +24,10 @@ import '../../features/treinos/screens/create_treino_screen.dart';
 import '../../features/treinos/screens/add_exercicio_to_treino_screen.dart';
 import '../../features/financeiro/screens/financeiro_screen.dart';
 import '../../features/agenda/screens/agenda_screen.dart';
+import '../../features/relatorio/screens/relatorio_screen.dart';
+import '../../features/onboarding/screens/onboarding_screen.dart';
+import '../../features/feed/screens/feed_screen.dart';
+import '../../features/feed/screens/feed_aluno_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -134,6 +138,25 @@ class AppRouter {
       GoRoute(
         path: '/agenda',
         builder: (context, state) => const AgendaScreen(),
+      ),
+      GoRoute(
+        path: '/alunos/:id/relatorio',
+        builder: (context, state) => RelatorioScreen(
+          alunoId: int.parse(state.pathParameters['id']!),
+          alunoNome: state.extra as String? ?? 'Aluno',
+        ),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: '/feed',
+        builder: (context, state) => const FeedScreen(),
+      ),
+      GoRoute(
+        path: '/feed/aluno',
+        builder: (context, state) => const FeedAlunoScreen(),
       ),
     ],
   );

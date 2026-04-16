@@ -45,5 +45,30 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Permissões de câmera/mídia para upload de GIF/vídeo de exercícios -->
+	<key>NSCameraUsageDescription</key>
+	<string>Usado para capturar fotos e vídeos de exercícios.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Usado para selecionar fotos e vídeos de exercícios.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Salvar imagens e vídeos gerados pelo app.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Usado para gravar vídeos de exercícios com áudio.</string>
+	<!-- FCM background notifications -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<!-- Deep link MercadoPago -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>focux</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

@@ -104,6 +104,11 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Agenda',
                 onTap: () => context.push('/agenda'),
               ),
+              _MenuButton(
+                icon: Icons.dynamic_feed,
+                label: 'Feed de Conteúdo',
+                onTap: () => context.push('/feed'),
+              ),
             ],
           ),
         ),

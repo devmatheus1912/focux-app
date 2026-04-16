@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,6 +40,72 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
     }
+  }
+
+  Future<void> _mostrarPix(int id) async {
+    PixData? pix;
+    bool carregando = true;
+    String? erro;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          if (carregando && pix == null && erro == null) {
+            FinanceiroRepository(ref.read(apiClientProvider))
+                .gerarPix(id)
+                .then((p) {
+              setDialogState(() { pix = p; carregando = false; });
+            }).catchError((e) {
+              setDialogState(() { erro = e.toString(); carregando = false; });
+            });
+          }
+
+          return AlertDialog(
+            title: const Text('PIX — Escaneie ou copie'),
+            content: carregando
+                ? const SizedBox(
+                    height: 80,
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : erro != null
+                    ? Text('Erro ao gerar PIX: $erro')
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.memory(
+                            base64Decode(pix!.qrCodeBase64),
+                            width: 200,
+                            height: 200,
+                          ),
+                          const SizedBox(height: 16),
+                          TextButton.icon(
+                            icon: const Icon(Icons.copy),
+                            label: const Text('Copiar código PIX'),
+                            onPressed: () {
+                              Clipboard.setData(
+                                ClipboardData(text: pix!.pixCopiaECola),
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Código PIX copiado!'),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   void _abrirFormularioNovaMensalidade() {
@@ -225,6 +292,12 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
                         Chip(label: Text(m.status),
                           backgroundColor: _statusColor(m.status).withValues(alpha: 0.15),
                           labelStyle: TextStyle(color: _statusColor(m.status), fontSize: 12)),
+                        if (m.status == 'PENDENTE' || m.status == 'ATRASADO')
+                          IconButton(
+                            icon: const Icon(Icons.pix, color: Colors.teal),
+                            onPressed: () => _mostrarPix(m.id),
+                            tooltip: 'Gerar PIX',
+                          ),
                         if (m.status == 'PENDENTE' || m.status == 'ATRASADO')
                           IconButton(icon: const Icon(Icons.check_circle_outline),
                             onPressed: () => _pagar(m.id)),

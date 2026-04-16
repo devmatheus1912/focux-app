@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
 
@@ -49,6 +52,42 @@ class _GerarTreinoTabState extends ConsumerState<_GerarTreinoTab> {
   int _dias = 3;
   bool _loading = false;
   String? _resultado;
+
+  Future<void> _exportarPdf(String conteudo, String titulo) async {
+    final doc = pw.Document();
+    final linhas = conteudo.split('\n');
+    doc.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (ctx) => [
+          pw.Text(titulo,
+              style: pw.TextStyle(
+                  fontSize: 22, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 16),
+          pw.Text(
+            'Gerado em: ${DateTime.now().toString().substring(0, 16)}',
+            style: const pw.TextStyle(fontSize: 10),
+          ),
+          pw.SizedBox(height: 24),
+          ...linhas.map((l) => pw.Padding(
+            padding: const pw.EdgeInsets.only(bottom: 4),
+            child: pw.Text(
+              l.replaceAll(RegExp(r'^#+\s*'), '').replaceAll('**', ''),
+              style: pw.TextStyle(
+                fontSize: l.startsWith('#') ? 14 : 11,
+                fontWeight: l.startsWith('#')
+                    ? pw.FontWeight.bold
+                    : pw.FontWeight.normal,
+              ),
+            ),
+          )),
+        ],
+      ),
+    );
+    await Printing.sharePdf(
+        bytes: await doc.save(), filename: '$titulo.pdf');
+  }
 
   Future<void> _gerar() async {
     setState(() { _loading = true; _resultado = null; });
@@ -100,6 +139,12 @@ class _GerarTreinoTabState extends ConsumerState<_GerarTreinoTab> {
         const SizedBox(height: 20),
         const Divider(),
         MarkdownBody(data: _resultado!, selectable: true),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: () => _exportarPdf(_resultado!, 'Plano de Treino'),
+          icon: const Icon(Icons.picture_as_pdf),
+          label: const Text('Exportar PDF'),
+        ),
       ],
     ]),
   );
@@ -123,6 +168,42 @@ class _GerarDietaTabState extends ConsumerState<_GerarDietaTab> {
   final _calorias = TextEditingController();
   bool _loading = false;
   String? _resultado;
+
+  Future<void> _exportarPdf(String conteudo, String titulo) async {
+    final doc = pw.Document();
+    final linhas = conteudo.split('\n');
+    doc.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (ctx) => [
+          pw.Text(titulo,
+              style: pw.TextStyle(
+                  fontSize: 22, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 16),
+          pw.Text(
+            'Gerado em: ${DateTime.now().toString().substring(0, 16)}',
+            style: const pw.TextStyle(fontSize: 10),
+          ),
+          pw.SizedBox(height: 24),
+          ...linhas.map((l) => pw.Padding(
+            padding: const pw.EdgeInsets.only(bottom: 4),
+            child: pw.Text(
+              l.replaceAll(RegExp(r'^#+\s*'), '').replaceAll('**', ''),
+              style: pw.TextStyle(
+                fontSize: l.startsWith('#') ? 14 : 11,
+                fontWeight: l.startsWith('#')
+                    ? pw.FontWeight.bold
+                    : pw.FontWeight.normal,
+              ),
+            ),
+          )),
+        ],
+      ),
+    );
+    await Printing.sharePdf(
+        bytes: await doc.save(), filename: '$titulo.pdf');
+  }
 
   Future<void> _gerar() async {
     setState(() { _loading = true; _resultado = null; });
@@ -168,6 +249,12 @@ class _GerarDietaTabState extends ConsumerState<_GerarDietaTab> {
         const SizedBox(height: 20),
         const Divider(),
         MarkdownBody(data: _resultado!, selectable: true),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: () => _exportarPdf(_resultado!, 'Plano Alimentar'),
+          icon: const Icon(Icons.picture_as_pdf),
+          label: const Text('Exportar PDF'),
+        ),
       ],
     ]),
   );

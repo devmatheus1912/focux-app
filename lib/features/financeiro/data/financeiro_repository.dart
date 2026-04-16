@@ -1,6 +1,27 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 
+class PixData {
+  final int paymentId;
+  final String pixCopiaECola;
+  final String qrCodeBase64;
+  final String status;
+
+  PixData({
+    required this.paymentId,
+    required this.pixCopiaECola,
+    required this.qrCodeBase64,
+    required this.status,
+  });
+
+  factory PixData.fromJson(Map<String, dynamic> j) => PixData(
+    paymentId: j['paymentId'] as int,
+    pixCopiaECola: j['pixCopiaECola'] as String,
+    qrCodeBase64: j['qrCodeBase64'] as String,
+    status: j['status'] as String,
+  );
+}
+
 class Mensalidade {
   final int id;
   final int alunoId;
@@ -45,5 +66,10 @@ class FinanceiroRepository {
   Future<Mensalidade> pagar(int id) async {
     final r = await _dio.put('/api/financeiro/mensalidades/$id/pagar');
     return Mensalidade.fromJson(r.data);
+  }
+
+  Future<PixData> gerarPix(int mensalidadeId) async {
+    final r = await _dio.post('/api/financeiro/mensalidades/$mensalidadeId/pix');
+    return PixData.fromJson(r.data as Map<String, dynamic>);
   }
 }

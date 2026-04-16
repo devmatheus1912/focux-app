@@ -1,0 +1,10 @@
+# Copie este arquivo para key.properties e preencha com seus dados
+# NÃO commite key.properties no git (já está no .gitignore)
+#
+# Para gerar o keystore:
+# keytool -genkey -v -keystore focux.jks -keyalg RSA -keysize 2048 -validity 10000 -alias focux
+#
+storePassword=SUA_SENHA_DO_KEYSTORE
+keyPassword=SUA_SENHA_DA_CHAVE
+keyAlias=focux
+storeFile=../focux.jks
