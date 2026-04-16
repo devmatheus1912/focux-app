@@ -73,6 +73,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     FilledButton(
                       onPressed: () => _page.nextPage(
                           duration: const Duration(milliseconds: 300), curve: Curves.easeInOut),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(100, 48),
+                      ),
                       child: const Text('Próximo'),
                     ),
                   ])
