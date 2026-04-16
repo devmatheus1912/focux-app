@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
@@ -57,16 +58,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void _onConnect(StompFrame frame) {
-    // Subscribe to personal-aluno conversation topic
-    // The topic personalId is not known here, so we listen for broadcast from server
-    // Server broadcasts on /topic/chat.{personalId}.{alunoId}
-    // For simplicity listen to all chat messages and filter
     _stomp?.subscribe(
-      destination: '/topic/chat',
+      destination: '/topic/chat.${widget.alunoId}',
       callback: (f) {
         if (f.body == null) return;
-        // Basic parse — in production use JSON decode
-        _loadHistorico();
+        try {
+          final data = jsonDecode(f.body!) as Map<String, dynamic>;
+          final msg = ChatMsg.fromJson(data);
+          if (mounted) {
+            setState(() => _msgs.add(msg));
+            _scrollToBottom();
+          }
+        } catch (_) {
+          _loadHistorico();
+        }
       },
     );
   }
