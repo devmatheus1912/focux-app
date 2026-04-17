@@ -126,6 +126,22 @@ class FinanceiroRepository {
   final Dio _dio;
   FinanceiroRepository(ApiClient c) : _dio = c.dio;
 
+  Future<List<Mensalidade>> listarPorAluno(int alunoId) async {
+    final r = await _dio.get('/api/alunos/$alunoId/historico-mensalidades');
+    return (r.data as List).map((e) => Mensalidade.fromJson(e)).toList();
+  }
+
+  Future<void> registrarContato(int mensalidadeId, String tipo, String? observacao) async {
+    await _dio.post('/api/financeiro/mensalidades/$mensalidadeId/registrar-contato', data: {
+      'tipo': tipo,
+      if (observacao != null && observacao.isNotEmpty) 'observacao': observacao,
+    });
+  }
+
+  Future<void> atualizarAtrasos() async {
+    await _dio.patch('/api/financeiro/mensalidades/atualizar-atrasos');
+  }
+
   Future<FinanceiroDashboard> dashboard() async {
     final r = await _dio.get('/api/financeiro/mensalidades/dashboard');
     return FinanceiroDashboard.fromJson(r.data as Map<String, dynamic>);

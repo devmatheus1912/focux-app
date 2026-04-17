@@ -78,6 +78,59 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     }
   }
 
+  Future<void> _atualizarAtrasos() async {
+    try {
+      await FinanceiroRepository(ref.read(apiClientProvider)).atualizarAtrasos();
+      _load();
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mensalidades atualizadas!')));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+    }
+  }
+
+  Future<void> _registrarContato(Mensalidade m) async {
+    const tipos = ['WHATSAPP', 'LIGACAO', 'EMAIL', 'PRESENCIAL', 'OUTRO'];
+    String? tipoSelecionado = tipos.first;
+    final obsCtrl = TextEditingController();
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: const Text('Registrar Contato'),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            DropdownButtonFormField<String>(
+              value: tipoSelecionado,
+              decoration: const InputDecoration(labelText: 'Tipo', border: OutlineInputBorder()),
+              items: tipos.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+              onChanged: (v) => set(() => tipoSelecionado = v),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: obsCtrl,
+              decoration: const InputDecoration(labelText: 'Observação (opcional)', border: OutlineInputBorder()),
+              maxLines: 2,
+            ),
+          ]),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Registrar')),
+          ],
+        ),
+      ),
+    );
+    if (confirm != true || tipoSelecionado == null) return;
+    try {
+      await FinanceiroRepository(ref.read(apiClientProvider))
+          .registrarContato(m.id, tipoSelecionado!, obsCtrl.text.trim());
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Contato registrado!')));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+    }
+  }
+
   Future<void> _pagar(int id) async {
     try {
       await FinanceiroRepository(ref.read(apiClientProvider)).pagar(id);
@@ -261,10 +314,23 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    floatingActionButton: FloatingActionButton(
-      onPressed: _abrirFormularioNovaMensalidade,
-      tooltip: 'Nova Mensalidade',
-      child: const Icon(Icons.add),
+    floatingActionButton: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FloatingActionButton.small(
+          heroTag: 'atualizar',
+          onPressed: _atualizarAtrasos,
+          tooltip: 'Atualizar atrasos',
+          child: const Icon(Icons.sync),
+        ),
+        const SizedBox(height: 8),
+        FloatingActionButton(
+          heroTag: 'nova',
+          onPressed: _abrirFormularioNovaMensalidade,
+          tooltip: 'Nova Mensalidade',
+          child: const Icon(Icons.add),
+        ),
+      ],
     ),
     body: _loading
         ? const Center(child: CircularProgressIndicator())
@@ -286,17 +352,22 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                           backgroundColor: _statusColor(m.status).withValues(alpha: 0.15),
                           labelStyle: TextStyle(color: _statusColor(m.status), fontSize: 12),
                         ),
-                        if (m.status == 'PENDENTE' || m.status == 'ATRASADO')
+                        if (m.status == 'PENDENTE' || m.status == 'ATRASADO') ...[
+                          IconButton(
+                            icon: const Icon(Icons.phone_in_talk, size: 20),
+                            tooltip: 'Registrar contato',
+                            onPressed: () => _registrarContato(m),
+                          ),
                           IconButton(
                             icon: const Icon(Icons.pix, color: Colors.teal),
                             onPressed: () => _mostrarPix(m.id),
                             tooltip: 'Gerar PIX',
                           ),
-                        if (m.status == 'PENDENTE' || m.status == 'ATRASADO')
                           IconButton(
                             icon: const Icon(Icons.check_circle_outline),
                             onPressed: () => _pagar(m.id),
                           ),
+                        ],
                       ]),
                     ),
                   );

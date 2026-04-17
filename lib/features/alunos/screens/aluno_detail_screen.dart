@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../providers/alunos_provider.dart';
 import '../../anamnese/screens/anamnese_screen.dart';
 import '../../avaliacao/screens/avaliacao_screen.dart';
@@ -8,6 +9,7 @@ import '../../ia/screens/ia_screen.dart';
 import '../../ia/screens/ia_progressao_screen.dart';
 import '../../chat/screens/chat_screen.dart';
 import '../../relatorio/screens/relatorio_screen.dart';
+import '../../financeiro/data/financeiro_repository.dart';
 
 class AlunoDetailScreen extends ConsumerWidget {
   final int alunoId;
@@ -29,6 +31,22 @@ class AlunoDetailScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             Center(child: Text(aluno.nome, style: Theme.of(context).textTheme.headlineSmall)),
             Center(child: Text(aluno.email, style: const TextStyle(color: Colors.grey))),
+            if (aluno.inadimplente) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                ),
+                child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.red, size: 16),
+                  SizedBox(width: 6),
+                  Text('Mensalidade em atraso', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                ]),
+              ),
+            ],
             const SizedBox(height: 16),
             Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(children: [
               _InfoRow(label: 'Status', value: aluno.status),
@@ -50,6 +68,9 @@ class AlunoDetailScreen extends ConsumerWidget {
             _MenuBtn(icon: Icons.bar_chart, label: 'Relatório de Aderência',
               onTap: () => Navigator.push(context, MaterialPageRoute(
                 builder: (_) => RelatorioScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+            _MenuBtn(icon: Icons.receipt_long, label: 'Histórico de Mensalidades',
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => _HistoricoMensalidadesScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
             _MenuBtn(icon: Icons.auto_awesome, label: 'Gerar Treino/Dieta com IA',
               onTap: () => Navigator.push(context, MaterialPageRoute(
                 builder: (_) => IaScreen(alunoId: alunoId)))),
@@ -64,6 +85,124 @@ class AlunoDetailScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _HistoricoMensalidadesScreen extends ConsumerStatefulWidget {
+  final int alunoId;
+  final String alunoNome;
+  const _HistoricoMensalidadesScreen({required this.alunoId, required this.alunoNome});
+
+  @override
+  ConsumerState<_HistoricoMensalidadesScreen> createState() => _HistoricoMensalidadesScreenState();
+}
+
+class _HistoricoMensalidadesScreenState extends ConsumerState<_HistoricoMensalidadesScreen> {
+  List<Mensalidade> _mensalidades = [];
+  bool _loading = true;
+
+  @override
+  void initState() { super.initState(); _load(); }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    try {
+      final list = await FinanceiroRepository(ref.read(apiClientProvider))
+          .listarPorAluno(widget.alunoId);
+      if (mounted) setState(() { _mensalidades = list; _loading = false; });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Color _statusColor(String s) {
+    switch (s) {
+      case 'PAGO': return Colors.green;
+      case 'ATRASADO': return Colors.red;
+      default: return Colors.orange;
+    }
+  }
+
+  Future<void> _registrarContato(Mensalidade m) async {
+    const tipos = ['WHATSAPP', 'LIGACAO', 'EMAIL', 'PRESENCIAL', 'OUTRO'];
+    String? tipoSelecionado = tipos.first;
+    final obsCtrl = TextEditingController();
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: const Text('Registrar Contato'),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            DropdownButtonFormField<String>(
+              value: tipoSelecionado,
+              decoration: const InputDecoration(labelText: 'Tipo', border: OutlineInputBorder()),
+              items: tipos.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+              onChanged: (v) => set(() => tipoSelecionado = v),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: obsCtrl,
+              decoration: const InputDecoration(labelText: 'Observação (opcional)', border: OutlineInputBorder()),
+              maxLines: 2,
+            ),
+          ]),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Registrar')),
+          ],
+        ),
+      ),
+    );
+    if (confirm != true || tipoSelecionado == null) return;
+    try {
+      await FinanceiroRepository(ref.read(apiClientProvider))
+          .registrarContato(m.id, tipoSelecionado!, obsCtrl.text.trim());
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Contato registrado!')));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: Text('Mensalidades — ${widget.alunoNome}'),
+      actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: _load)],
+    ),
+    body: _loading
+        ? const Center(child: CircularProgressIndicator())
+        : _mensalidades.isEmpty
+            ? const Center(child: Text('Nenhuma mensalidade registrada.'))
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _mensalidades.length,
+                itemBuilder: (_, i) {
+                  final m = _mensalidades[i];
+                  final color = _statusColor(m.status);
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      title: Text(m.mesReferencia.substring(0, 7),
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                      subtitle: Text('R\$ ${m.valor.toStringAsFixed(2)}${m.pagoEm != null ? " · pago ${m.pagoEm!.substring(0, 10)}" : ""}'),
+                      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Chip(
+                          label: Text(m.status, style: TextStyle(color: color, fontSize: 11)),
+                          backgroundColor: color.withValues(alpha: 0.12),
+                        ),
+                        if (m.status != 'PAGO')
+                          IconButton(
+                            icon: const Icon(Icons.phone_in_talk, size: 20),
+                            tooltip: 'Registrar contato',
+                            onPressed: () => _registrarContato(m),
+                          ),
+                      ]),
+                    ),
+                  );
+                },
+              ),
+  );
 }
 
 class _InfoRow extends StatelessWidget {

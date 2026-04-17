@@ -46,10 +46,28 @@ class _AlunoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ativo = aluno.status == 'ATIVO';
     return ListTile(
-      leading: CircleAvatar(
-        child: Text(aluno.nome[0].toUpperCase()),
+      leading: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          CircleAvatar(child: Text(aluno.nome[0].toUpperCase())),
+          if (aluno.inadimplente)
+            Positioned(
+              right: -2, top: -2,
+              child: Container(
+                width: 12, height: 12,
+                decoration: const BoxDecoration(
+                  color: Colors.red, shape: BoxShape.circle),
+              ),
+            ),
+        ],
       ),
-      title: Text(aluno.nome),
+      title: Row(children: [
+        Flexible(child: Text(aluno.nome)),
+        if (aluno.inadimplente) ...[
+          const SizedBox(width: 6),
+          const Icon(Icons.warning_amber_rounded, size: 14, color: Colors.red),
+        ],
+      ]),
       subtitle: Text(aluno.email),
       trailing: Chip(
         label: Text(ativo ? 'Ativo' : 'Inativo'),

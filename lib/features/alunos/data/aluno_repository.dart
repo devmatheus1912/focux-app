@@ -8,6 +8,7 @@ class Aluno {
   final String? objetivo;
   final String status;
   final String? fotoUrl;
+  final bool inadimplente;
 
   Aluno({
     required this.id,
@@ -16,15 +17,17 @@ class Aluno {
     this.objetivo,
     required this.status,
     this.fotoUrl,
+    this.inadimplente = false,
   });
 
   factory Aluno.fromJson(Map<String, dynamic> json) => Aluno(
         id: json['id'] as int,
         nome: json['nome'] as String,
-        email: json['email'] as String,
+        email: json['email'] as String? ?? '',
         objetivo: json['objetivo'] as String?,
         status: json['status'] as String,
         fotoUrl: json['fotoUrl'] as String?,
+        inadimplente: json['inadimplente'] as bool? ?? false,
       );
 }
 
