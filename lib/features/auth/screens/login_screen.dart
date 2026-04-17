@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -43,7 +44,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (mounted) context.go('/dashboard/personal');
       }
     } catch (e) {
-      setState(() { _error = 'Email ou senha incorretos.'; });
+      String msg = 'Email ou senha incorretos.';
+      if (e is DioException) {
+        final status = e.response?.statusCode;
+        if (status == null) msg = 'Sem conexão com o servidor.';
+        else if (status != 401) msg = 'Erro $status: ${e.response?.data?['message'] ?? e.message}';
+      }
+      setState(() { _error = msg; });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }

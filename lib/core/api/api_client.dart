@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import '../storage/secure_storage.dart';
 
 class ApiClient {
-  static const _baseUrl = 'http://localhost:8080';
+  static const _baseUrl = 'https://focux-backend.up.railway.app';
 
   late final Dio _dio;
 
