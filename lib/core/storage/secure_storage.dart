@@ -58,4 +58,36 @@ class SecureStorage {
       await _storage.delete(key: _keyRole);
     }
   }
+
+  static const _keyIsAdmin = 'is_admin';
+
+  static Future<void> saveIsAdmin(bool value) async {
+    final str = value ? 'true' : 'false';
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyIsAdmin, str);
+    } else {
+      await _storage.write(key: _keyIsAdmin, value: str);
+    }
+  }
+
+  static Future<bool> getIsAdmin() async {
+    String? val;
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      val = prefs.getString(_keyIsAdmin);
+    } else {
+      val = await _storage.read(key: _keyIsAdmin);
+    }
+    return val == 'true';
+  }
+
+  static Future<void> deleteIsAdmin() async {
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_keyIsAdmin);
+    } else {
+      await _storage.delete(key: _keyIsAdmin);
+    }
+  }
 }

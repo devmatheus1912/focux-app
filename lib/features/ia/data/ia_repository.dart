@@ -38,4 +38,13 @@ class IaRepository {
     });
     return r.data['resposta'] as String;
   }
+
+  Future<String> progressaoCarga(int alunoId, {String? objetivo, String? historicoTreinos}) async {
+    final r = await _dio.post('/api/ia/progressao-carga', data: {
+      'alunoId': alunoId,
+      if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+      if (historicoTreinos != null && historicoTreinos.isNotEmpty) 'historicoTreinos': historicoTreinos,
+    });
+    return r.data['resposta'] as String;
+  }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/dashboard_provider.dart';
+import '../../admin/screens/admin_screen.dart';
 
 class PersonalDashboardScreen extends ConsumerWidget {
   const PersonalDashboardScreen({super.key});
@@ -109,6 +110,12 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Feed de Conteúdo',
                 onTap: () => context.push('/feed'),
               ),
+              if (ref.watch(isAdminProvider))
+                _MenuButton(
+                  icon: Icons.admin_panel_settings,
+                  label: 'Painel Admin',
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScreen())),
+                ),
             ],
           ),
         ),

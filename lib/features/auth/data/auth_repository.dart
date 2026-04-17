@@ -13,8 +13,10 @@ class AuthRepository {
       'senha': password,
     });
     final token = response.data['token'] as String;
+    final isAdmin = response.data['isAdmin'] as bool? ?? false;
     await SecureStorage.saveToken(token);
     await SecureStorage.saveRole('PERSONAL');
+    await SecureStorage.saveIsAdmin(isAdmin);
     return token;
   }
 
@@ -27,6 +29,7 @@ class AuthRepository {
     final token = response.data['token'] as String;
     await SecureStorage.saveToken(token);
     await SecureStorage.saveRole('PERSONAL');
+    await SecureStorage.saveIsAdmin(false);
     return token;
   }
 
@@ -57,5 +60,6 @@ class AuthRepository {
   Future<void> logout() async {
     await SecureStorage.deleteToken();
     await SecureStorage.deleteRole();
+    await SecureStorage.deleteIsAdmin();
   }
 }
