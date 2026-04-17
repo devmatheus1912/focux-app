@@ -45,9 +45,91 @@ class Mensalidade {
   );
 }
 
+class VencimentoItem {
+  final int mensalidadeId;
+  final String alunoNome;
+  final double valor;
+  final String mesReferencia;
+  final String status;
+
+  VencimentoItem({required this.mensalidadeId, required this.alunoNome,
+    required this.valor, required this.mesReferencia, required this.status});
+
+  factory VencimentoItem.fromJson(Map<String, dynamic> j) => VencimentoItem(
+    mensalidadeId: j['mensalidadeId'] as int,
+    alunoNome: j['alunoNome'] as String,
+    valor: (j['valor'] as num).toDouble(),
+    mesReferencia: j['mesReferencia'] as String,
+    status: j['status'] as String,
+  );
+}
+
+class TopAlunoItem {
+  final int alunoId;
+  final String alunoNome;
+  final double totalPago;
+
+  TopAlunoItem({required this.alunoId, required this.alunoNome, required this.totalPago});
+
+  factory TopAlunoItem.fromJson(Map<String, dynamic> j) => TopAlunoItem(
+    alunoId: j['alunoId'] as int,
+    alunoNome: j['alunoNome'] as String,
+    totalPago: (j['totalPago'] as num).toDouble(),
+  );
+}
+
+class EvolucaoMensalItem {
+  final String mes;
+  final double recebido;
+
+  EvolucaoMensalItem({required this.mes, required this.recebido});
+
+  factory EvolucaoMensalItem.fromJson(Map<String, dynamic> j) => EvolucaoMensalItem(
+    mes: j['mes'] as String,
+    recebido: (j['recebido'] as num).toDouble(),
+  );
+}
+
+class FinanceiroDashboard {
+  final double receitaMes;
+  final double receitaAcumulada;
+  final double ticketMedio;
+  final int totalInadimplentes;
+  final double previsaoReceita;
+  final List<VencimentoItem> vencimentosProximos;
+  final List<TopAlunoItem> topAlunos;
+  final List<EvolucaoMensalItem> evolucaoMensal;
+
+  FinanceiroDashboard({
+    required this.receitaMes, required this.receitaAcumulada,
+    required this.ticketMedio, required this.totalInadimplentes,
+    required this.previsaoReceita, required this.vencimentosProximos,
+    required this.topAlunos, required this.evolucaoMensal,
+  });
+
+  factory FinanceiroDashboard.fromJson(Map<String, dynamic> j) => FinanceiroDashboard(
+    receitaMes: (j['receitaMes'] as num).toDouble(),
+    receitaAcumulada: (j['receitaAcumulada'] as num).toDouble(),
+    ticketMedio: (j['ticketMedio'] as num).toDouble(),
+    totalInadimplentes: j['totalInadimplentes'] as int,
+    previsaoReceita: (j['previsaoReceita'] as num).toDouble(),
+    vencimentosProximos: (j['vencimentosProximos'] as List)
+        .map((e) => VencimentoItem.fromJson(e as Map<String, dynamic>)).toList(),
+    topAlunos: (j['topAlunos'] as List)
+        .map((e) => TopAlunoItem.fromJson(e as Map<String, dynamic>)).toList(),
+    evolucaoMensal: (j['evolucaoMensal'] as List)
+        .map((e) => EvolucaoMensalItem.fromJson(e as Map<String, dynamic>)).toList(),
+  );
+}
+
 class FinanceiroRepository {
   final Dio _dio;
   FinanceiroRepository(ApiClient c) : _dio = c.dio;
+
+  Future<FinanceiroDashboard> dashboard() async {
+    final r = await _dio.get('/api/financeiro/mensalidades/dashboard');
+    return FinanceiroDashboard.fromJson(r.data as Map<String, dynamic>);
+  }
 
   Future<List<Mensalidade>> listar() async {
     final r = await _dio.get('/api/financeiro/mensalidades');

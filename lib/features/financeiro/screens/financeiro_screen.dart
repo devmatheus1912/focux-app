@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
+import 'financeiro_dashboard_screen.dart';
 
 class FinanceiroScreen extends ConsumerStatefulWidget {
   const FinanceiroScreen({super.key});
@@ -11,7 +12,51 @@ class FinanceiroScreen extends ConsumerStatefulWidget {
   ConsumerState<FinanceiroScreen> createState() => _FinanceiroScreenState();
 }
 
-class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
+class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: const Text('Financeiro'),
+      bottom: TabBar(
+        controller: _tabController,
+        tabs: const [
+          Tab(icon: Icon(Icons.dashboard), text: 'Dashboard'),
+          Tab(icon: Icon(Icons.list_alt), text: 'Mensalidades'),
+        ],
+      ),
+    ),
+    body: TabBarView(
+      controller: _tabController,
+      children: const [
+        FinanceiroDashboardScreen(),
+        _MensalidadesTab(),
+      ],
+    ),
+  );
+}
+
+class _MensalidadesTab extends ConsumerStatefulWidget {
+  const _MensalidadesTab();
+  @override
+  ConsumerState<_MensalidadesTab> createState() => _MensalidadesTabState();
+}
+
+class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
   List<Mensalidade> _mensalidades = [];
   bool _loading = true;
 
@@ -65,42 +110,27 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
           return AlertDialog(
             title: const Text('PIX — Escaneie ou copie'),
             content: carregando
-                ? const SizedBox(
-                    height: 80,
-                    child: Center(child: CircularProgressIndicator()),
-                  )
+                ? const SizedBox(height: 80, child: Center(child: CircularProgressIndicator()))
                 : erro != null
                     ? Text('Erro ao gerar PIX: $erro')
                     : Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Image.memory(
-                            base64Decode(pix!.qrCodeBase64),
-                            width: 200,
-                            height: 200,
-                          ),
+                          Image.memory(base64Decode(pix!.qrCodeBase64), width: 200, height: 200),
                           const SizedBox(height: 16),
                           TextButton.icon(
                             icon: const Icon(Icons.copy),
                             label: const Text('Copiar código PIX'),
                             onPressed: () {
-                              Clipboard.setData(
-                                ClipboardData(text: pix!.pixCopiaECola),
-                              );
+                              Clipboard.setData(ClipboardData(text: pix!.pixCopiaECola));
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Código PIX copiado!'),
-                                ),
-                              );
+                                const SnackBar(content: Text('Código PIX copiado!')));
                             },
                           ),
                         ],
                       ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Fechar'),
-              ),
+              TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Fechar')),
             ],
           );
         },
@@ -119,14 +149,11 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) => Padding(
           padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 24,
+            left: 24, right: 24, top: 24,
             bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
           ),
           child: Form(
@@ -135,28 +162,16 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'Nova Mensalidade',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(ctx).pop(),
-                    ),
-                  ],
-                ),
+                Row(children: [
+                  const Expanded(child: Text('Nova Mensalidade',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(ctx).pop()),
+                ]),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: alunoIdCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'ID do Aluno',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
-                  ),
+                  decoration: const InputDecoration(labelText: 'ID do Aluno',
+                    border: OutlineInputBorder(), prefixIcon: Icon(Icons.person)),
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   validator: (v) {
@@ -168,15 +183,10 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: valorCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Valor (R\$)',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.attach_money),
-                  ),
+                  decoration: const InputDecoration(labelText: 'Valor (R\$)',
+                    border: OutlineInputBorder(), prefixIcon: Icon(Icons.attach_money)),
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                  ],
+                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return 'Informe o valor';
                     final parsed = double.tryParse(v.trim().replaceAll(',', '.'));
@@ -187,12 +197,9 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: mesReferenciaCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Mês Referência',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.calendar_month),
-                    hintText: '2026-04-01',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Mês Referência',
+                    border: OutlineInputBorder(), prefixIcon: Icon(Icons.calendar_month),
+                    hintText: '2026-04-01'),
                   readOnly: true,
                   onTap: () async {
                     final now = DateTime.now();
@@ -213,48 +220,34 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
                   },
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return 'Selecione o mês de referência';
-                    final regex = RegExp(r'^\d{4}-\d{2}-01$');
-                    if (!regex.hasMatch(v.trim())) return 'Formato inválido (YYYY-MM-01)';
+                    if (!RegExp(r'^\d{4}-\d{2}-01$').hasMatch(v.trim())) return 'Formato inválido';
                     return null;
                   },
                 ),
                 const SizedBox(height: 24),
                 FilledButton.icon(
-                  onPressed: salvando
-                      ? null
-                      : () async {
-                          if (!formKey.currentState!.validate()) return;
-                          setModalState(() => salvando = true);
-                          try {
-                            final alunoId = int.parse(alunoIdCtrl.text.trim());
-                            final valor = double.parse(
-                              valorCtrl.text.trim().replaceAll(',', '.'),
-                            );
-                            final mesReferencia = mesReferenciaCtrl.text.trim();
-                            await FinanceiroRepository(ref.read(apiClientProvider))
-                                .criar(alunoId, valor, mesReferencia);
-                            if (ctx.mounted) Navigator.of(ctx).pop();
-                            _load();
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Mensalidade lançada com sucesso!')),
-                              );
-                            }
-                          } catch (e) {
-                            setModalState(() => salvando = false);
-                            if (ctx.mounted) {
-                              ScaffoldMessenger.of(ctx).showSnackBar(
-                                SnackBar(content: Text('Erro ao lançar mensalidade: $e')),
-                              );
-                            }
-                          }
-                        },
+                  onPressed: salvando ? null : () async {
+                    if (!formKey.currentState!.validate()) return;
+                    setModalState(() => salvando = true);
+                    try {
+                      final alunoId = int.parse(alunoIdCtrl.text.trim());
+                      final valor = double.parse(valorCtrl.text.trim().replaceAll(',', '.'));
+                      final mesReferencia = mesReferenciaCtrl.text.trim();
+                      await FinanceiroRepository(ref.read(apiClientProvider))
+                          .criar(alunoId, valor, mesReferencia);
+                      if (ctx.mounted) Navigator.of(ctx).pop();
+                      _load();
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Mensalidade lançada com sucesso!')));
+                    } catch (e) {
+                      setModalState(() => salvando = false);
+                      if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
+                        SnackBar(content: Text('Erro ao lançar mensalidade: $e')));
+                    }
+                  },
                   icon: salvando
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
+                      ? const SizedBox(width: 18, height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.check),
                   label: Text(salvando ? 'Salvando...' : 'Lançar Mensalidade'),
                 ),
@@ -268,7 +261,6 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Financeiro')),
     floatingActionButton: FloatingActionButton(
       onPressed: _abrirFormularioNovaMensalidade,
       tooltip: 'Nova Mensalidade',
@@ -289,9 +281,11 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
                       title: Text(m.alunoNome),
                       subtitle: Text('${m.mesReferencia.substring(0, 7)} • R\$ ${m.valor.toStringAsFixed(2)}'),
                       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Chip(label: Text(m.status),
+                        Chip(
+                          label: Text(m.status),
                           backgroundColor: _statusColor(m.status).withValues(alpha: 0.15),
-                          labelStyle: TextStyle(color: _statusColor(m.status), fontSize: 12)),
+                          labelStyle: TextStyle(color: _statusColor(m.status), fontSize: 12),
+                        ),
                         if (m.status == 'PENDENTE' || m.status == 'ATRASADO')
                           IconButton(
                             icon: const Icon(Icons.pix, color: Colors.teal),
@@ -299,8 +293,10 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
                             tooltip: 'Gerar PIX',
                           ),
                         if (m.status == 'PENDENTE' || m.status == 'ATRASADO')
-                          IconButton(icon: const Icon(Icons.check_circle_outline),
-                            onPressed: () => _pagar(m.id)),
+                          IconButton(
+                            icon: const Icon(Icons.check_circle_outline),
+                            onPressed: () => _pagar(m.id),
+                          ),
                       ]),
                     ),
                   );
