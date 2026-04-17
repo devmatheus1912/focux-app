@@ -1,0 +1,74 @@
+import 'package:dio/dio.dart';
+import '../../../core/api/api_client.dart';
+
+class MedidaCorporal {
+  final int id;
+  final String data;
+  final double? peso, cintura, quadril, braco;
+  final String? fotoUrl;
+  MedidaCorporal({required this.id, required this.data, this.peso, this.cintura, this.quadril, this.braco, this.fotoUrl});
+  factory MedidaCorporal.fromJson(Map<String, dynamic> j) => MedidaCorporal(
+    id: j['id'] as int, data: j['data'] as String,
+    peso: (j['peso'] as num?)?.toDouble(), cintura: (j['cintura'] as num?)?.toDouble(),
+    quadril: (j['quadril'] as num?)?.toDouble(), braco: (j['braco'] as num?)?.toDouble(),
+    fotoUrl: j['fotoUrl'] as String?,
+  );
+}
+
+class RecordePessoal {
+  final int id;
+  final int exercicioId;
+  final String exercicioNome;
+  final String data;
+  final double? cargaKg;
+  final int? repeticoes;
+  RecordePessoal({required this.id, required this.exercicioId, required this.exercicioNome, required this.data, this.cargaKg, this.repeticoes});
+  factory RecordePessoal.fromJson(Map<String, dynamic> j) => RecordePessoal(
+    id: j['id'] as int, exercicioId: j['exercicioId'] as int,
+    exercicioNome: j['exercicioNome'] as String, data: j['data'] as String,
+    cargaKg: (j['cargaKg'] as num?)?.toDouble(), repeticoes: j['repeticoes'] as int?,
+  );
+}
+
+class EventoEngajamento {
+  final String tipo, descricao;
+  final String dataHora;
+  EventoEngajamento({required this.tipo, required this.descricao, required this.dataHora});
+  factory EventoEngajamento.fromJson(Map<String, dynamic> j) => EventoEngajamento(
+    tipo: j['tipo'] as String, descricao: j['descricao'] as String,
+    dataHora: j['dataHora'] as String,
+  );
+}
+
+class EvolucaoRepository {
+  final Dio _dio;
+  EvolucaoRepository(ApiClient c) : _dio = c.dio;
+
+  Future<List<MedidaCorporal>> listarMedidas(int alunoId) async {
+    final r = await _dio.get('/api/alunos/$alunoId/medidas');
+    return (r.data as List).map((e) => MedidaCorporal.fromJson(e)).toList();
+  }
+
+  Future<MedidaCorporal> adicionarMedida(int alunoId, {String? data, double? peso, double? cintura, double? quadril, double? braco}) async {
+    final r = await _dio.post('/api/alunos/$alunoId/medidas', data: {
+      'data': data ?? DateTime.now().toIso8601String().substring(0, 10),
+      if (peso != null) 'peso': peso,
+      if (cintura != null) 'cintura': cintura,
+      if (quadril != null) 'quadril': quadril,
+      if (braco != null) 'braco': braco,
+    });
+    return MedidaCorporal.fromJson(r.data);
+  }
+
+  Future<List<RecordePessoal>> listarRecordes(int alunoId) async {
+    final r = await _dio.get('/api/alunos/$alunoId/recordes');
+    return (r.data as List).map((e) => RecordePessoal.fromJson(e)).toList();
+  }
+
+  Future<List<EventoEngajamento>> engajamento(int alunoId, {int dias = 30}) async {
+    final r = await _dio.get('/api/alunos/$alunoId/engajamento', queryParameters: {'dias': dias});
+    final data = r.data;
+    final eventos = data is Map ? (data['eventos'] as List?) ?? [] : data as List;
+    return eventos.map((e) => EventoEngajamento.fromJson(e as Map<String, dynamic>)).toList();
+  }
+}

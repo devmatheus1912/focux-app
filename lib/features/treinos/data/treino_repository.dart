@@ -41,6 +41,7 @@ class Treino {
   final String? descricao;
   final String? objetivo;
   final String? nivel;
+  final bool isTemplate;
   final List<TreinoExercicioItem> exercicios;
 
   Treino({
@@ -49,6 +50,7 @@ class Treino {
     this.descricao,
     this.objetivo,
     this.nivel,
+    this.isTemplate = false,
     required this.exercicios,
   });
 
@@ -58,6 +60,7 @@ class Treino {
         descricao: json['descricao'] as String?,
         objetivo: json['objetivo'] as String?,
         nivel: json['nivel'] as String?,
+        isTemplate: json['isTemplate'] as bool? ?? false,
         exercicios: ((json['exercicios'] as List<dynamic>?) ?? [])
             .map((e) => TreinoExercicioItem.fromJson(e as Map<String, dynamic>))
             .toList(),
@@ -108,6 +111,30 @@ class TreinoRepository {
 
   Future<List<Treino>> listarTreinosDoAluno(int alunoId) async {
     final response = await _dio.get('/api/alunos/$alunoId/treinos');
+    return (response.data as List<dynamic>)
+        .map((e) => Treino.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> salvarComoTemplate(int id) async {
+    await _dio.post('/api/treinos/$id/template');
+  }
+
+  Future<Treino> duplicar(int id) async {
+    final response = await _dio.post('/api/treinos/$id/duplicar');
+    return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Treino> clonarParaAluno(int treinoId, int alunoId) async {
+    final response = await _dio.post(
+      '/api/treinos/$treinoId/clonar-para-aluno',
+      queryParameters: {'alunoId': alunoId},
+    );
+    return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<List<Treino>> listarTemplates() async {
+    final response = await _dio.get('/api/treinos/templates');
     return (response.data as List<dynamic>)
         .map((e) => Treino.fromJson(e as Map<String, dynamic>))
         .toList();

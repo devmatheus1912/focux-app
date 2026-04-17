@@ -9,9 +9,12 @@ class Agendamento {
   final DateTime fim;
   final String? titulo;
   final String status;
+  final String? statusAtendimento;
+  final String? observacoesPosAtendimento;
 
   Agendamento({required this.id, required this.alunoId, required this.alunoNome,
-    required this.inicio, required this.fim, this.titulo, required this.status});
+    required this.inicio, required this.fim, this.titulo, required this.status,
+    this.statusAtendimento, this.observacoesPosAtendimento});
 
   factory Agendamento.fromJson(Map<String, dynamic> j) => Agendamento(
     id: j['id'] as int,
@@ -21,6 +24,8 @@ class Agendamento {
     fim: DateTime.parse(j['fim'] as String),
     titulo: j['titulo'] as String?,
     status: j['status'] as String,
+    statusAtendimento: j['statusAtendimento'] as String?,
+    observacoesPosAtendimento: j['observacoesPosAtendimento'] as String?,
   );
 }
 
@@ -44,4 +49,17 @@ class AgendaRepository {
   }
 
   Future<void> excluir(int id) => _dio.delete('/api/agenda/$id');
+
+  Future<List<Agendamento>> listarSemana(String data) async {
+    final r = await _dio.get('/api/agenda/semana', queryParameters: {'data': data});
+    return (r.data as List).map((e) => Agendamento.fromJson(e)).toList();
+  }
+
+  Future<Agendamento> registrarStatusAtendimento(int id, String status, String? obs) async {
+    final r = await _dio.patch('/api/agenda/$id/status-atendimento', data: {
+      'statusAtendimento': status,
+      if (obs != null && obs.isNotEmpty) 'observacoesPosAtendimento': obs,
+    });
+    return Agendamento.fromJson(r.data);
+  }
 }
