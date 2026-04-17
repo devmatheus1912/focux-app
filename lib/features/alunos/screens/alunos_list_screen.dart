@@ -44,29 +44,41 @@ class _AlunoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ativo = aluno.status == 'ATIVO';
+    final Color dotColor;
+    final Color chipColor;
+    final String chipLabel;
+
+    if (aluno.statusFinanceiro == 'INADIMPLENTE') {
+      dotColor = const Color(0xFFE53935);
+      chipColor = const Color(0xFFE53935);
+      chipLabel = 'Inadimplente';
+    } else if (aluno.status == 'INATIVO') {
+      dotColor = const Color(0xFFFFA726);
+      chipColor = const Color(0xFFFFA726);
+      chipLabel = 'Inativo';
+    } else {
+      dotColor = const Color(0xFF43A047);
+      chipColor = const Color(0xFF43A047);
+      chipLabel = 'Ativo';
+    }
+
     return ListTile(
       leading: Stack(
         clipBehavior: Clip.none,
         children: [
           CircleAvatar(child: Text(aluno.nome[0].toUpperCase())),
-          if (aluno.inadimplente)
-            Positioned(
-              right: -2, top: -2,
-              child: Container(
-                width: 12, height: 12,
-                decoration: const BoxDecoration(
-                  color: Colors.red, shape: BoxShape.circle),
-              ),
+          Positioned(
+            right: -2, top: -2,
+            child: Container(
+              width: 12, height: 12,
+              decoration: BoxDecoration(
+                color: dotColor, shape: BoxShape.circle),
             ),
+          ),
         ],
       ),
       title: Row(children: [
         Flexible(child: Text(aluno.nome)),
-        if (aluno.inadimplente) ...[
-          const SizedBox(width: 6),
-          const Icon(Icons.warning_amber_rounded, size: 14, color: Colors.red),
-        ],
         if (aluno.emRisco) ...[
           const SizedBox(width: 4),
           const Icon(Icons.trending_down, size: 14, color: Colors.orange),
@@ -74,11 +86,9 @@ class _AlunoTile extends StatelessWidget {
       ]),
       subtitle: Text(aluno.email),
       trailing: Chip(
-        label: Text(ativo ? 'Ativo' : 'Inativo'),
-        backgroundColor: ativo
-            ? Colors.green.withValues(alpha: 0.15)
-            : Colors.grey.withValues(alpha: 0.15),
-        labelStyle: TextStyle(color: ativo ? Colors.green.shade700 : Colors.grey),
+        label: Text(chipLabel),
+        backgroundColor: chipColor.withValues(alpha: 0.12),
+        labelStyle: TextStyle(color: chipColor, fontWeight: FontWeight.w500),
       ),
       onTap: () => context.push('/alunos/${aluno.id}'),
     );

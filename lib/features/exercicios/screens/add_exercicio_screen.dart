@@ -30,6 +30,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   final _nomeCtrl = TextEditingController();
   final _descricaoCtrl = TextEditingController();
   final _tagsCtrl = TextEditingController();
+  final _obsCtrl = TextEditingController();
   String? _musculoAlvo;
   String? _categoria;
   bool _loading = false;
@@ -40,6 +41,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     _nomeCtrl.dispose();
     _descricaoCtrl.dispose();
     _tagsCtrl.dispose();
+    _obsCtrl.dispose();
     super.dispose();
   }
 
@@ -53,6 +55,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         musculoAlvo: _musculoAlvo,
         categoria: _categoria,
         tags: _tagsCtrl.text.trim(),
+        observacoes: _obsCtrl.text.trim(),
       );
       if (mounted) context.pop(true);
     } catch (e) {
@@ -109,6 +112,12 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                 TextFormField(
                   controller: _descricaoCtrl,
                   decoration: const InputDecoration(labelText: 'Descrição (opcional)'),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _obsCtrl,
+                  decoration: const InputDecoration(labelText: 'Observações (opcional)'),
                   maxLines: 3,
                 ),
                 if (_error != null) ...[

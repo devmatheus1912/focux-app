@@ -31,6 +31,14 @@ class TreinoDetailScreen extends ConsumerWidget {
                   _handleMenu(context, ref, value, treino),
               itemBuilder: (_) => const [
                 PopupMenuItem(
+                  value: 'excluir',
+                  child: ListTile(
+                    leading: Icon(Icons.delete_outline, color: Colors.red),
+                    title: Text('Excluir treino', style: TextStyle(color: Colors.red)),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                PopupMenuItem(
                   value: 'template',
                   child: ListTile(
                     leading: Icon(Icons.bookmark_add_outlined),
@@ -64,7 +72,9 @@ class TreinoDetailScreen extends ConsumerWidget {
       body: treinoAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),
-        data: (treino) => Column(
+        data: (treino) {
+          final repo = ref.read(treinoRepositoryProvider);
+          return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
@@ -108,17 +118,48 @@ class TreinoDetailScreen extends ConsumerWidget {
                           title: Text(te.exercicio.nome),
                           subtitle: Text('${te.series}x${te.repeticoes}'
                               '${te.cargaKg != null ? ' · ${te.cargaKg}kg' : ''}'),
-                          trailing: te.descansoSegundos != null
-                              ? Text('${te.descansoSegundos}s',
-                                  style:
-                                      const TextStyle(color: Colors.grey))
-                              : null,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (te.descansoSegundos != null)
+                                Text('${te.descansoSegundos}s', style: const TextStyle(color: Colors.grey)),
+                              const SizedBox(width: 4),
+                              IconButton(
+                                icon: const Icon(Icons.close, size: 18),
+                                tooltip: 'Remover exercício',
+                                onPressed: () async {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Remover exercício'),
+                                      content: Text('Remover "${te.exercicio.nome}" do treino?'),
+                                      actions: [
+                                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+                                        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Remover')),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirm == true && context.mounted) {
+                                    try {
+                                      await repo.removerExercicio(treinoId, te.id);
+                                      ref.invalidate(treinoProvider(treinoId));
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+                                      }
+                                    }
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
                         );
                       },
                     ),
             ),
           ],
-        ),
+        );
+        },
       ),
     );
   }
@@ -162,6 +203,37 @@ class TreinoDetailScreen extends ConsumerWidget {
     } else if (action == 'clonar') {
       if (context.mounted) {
         await _showClonarDialog(context, ref, repo);
+      }
+    } else if (action == 'excluir') {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Excluir treino'),
+          content: Text('Tem certeza que deseja excluir "${treino.nome}"? Esta ação não pode ser desfeita.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Excluir'),
+            ),
+          ],
+        ),
+      );
+      if (confirm == true && context.mounted) {
+        try {
+          await repo.excluirTreino(treinoId);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Treino excluído!')),
+            );
+            Navigator.of(context).pop();
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+          }
+        }
       }
     }
   }

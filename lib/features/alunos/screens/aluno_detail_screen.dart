@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../anamnese/screens/anamnese_screen.dart';
 import '../../avaliacao/screens/avaliacao_screen.dart';
@@ -17,11 +19,67 @@ class AlunoDetailScreen extends ConsumerWidget {
   final int alunoId;
   const AlunoDetailScreen({super.key, required this.alunoId});
 
+  Future<void> _confirmarExclusao(BuildContext context, WidgetRef ref, Aluno aluno) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir aluno'),
+        content: Text('Tem certeza que deseja excluir ${aluno.nome}? Esta ação não pode ser desfeita.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !context.mounted) return;
+    try {
+      await AlunoRepository(ref.read(apiClientProvider)).excluirAluno(aluno.id);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Aluno excluído.')),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final alunoAsync = ref.watch(alunoProvider(alunoId));
+
+    final appBar = alunoAsync.when(
+      data: (aluno) => AppBar(
+        title: Text(aluno.nome),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Editar',
+            onPressed: () async {
+              final updated = await context.push<bool>('/alunos/$alunoId/editar', extra: aluno);
+              if (updated == true) ref.invalidate(alunoProvider(alunoId));
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Excluir',
+            onPressed: () => _confirmarExclusao(context, ref, aluno),
+          ),
+        ],
+      ),
+      loading: () => AppBar(title: const Text('Aluno')),
+      error: (_, __) => AppBar(title: const Text('Aluno')),
+    );
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Aluno')),
+      appBar: appBar,
       body: alunoAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),
@@ -33,37 +91,8 @@ class AlunoDetailScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             Center(child: Text(aluno.nome, style: Theme.of(context).textTheme.headlineSmall)),
             Center(child: Text(aluno.email, style: const TextStyle(color: Colors.grey))),
-            if (aluno.statusFinanceiro == 'INADIMPLENTE') ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-                ),
-                child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.red, size: 16),
-                  SizedBox(width: 6),
-                  Text('Inadimplente', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
-                ]),
-              ),
-            ] else if (aluno.inadimplente) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-                ),
-                child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 16),
-                  SizedBox(width: 6),
-                  Text('Mensalidade em atraso', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w600)),
-                ]),
-              ),
-            ],
+            const SizedBox(height: 8),
+            _StatusBadge(status: aluno.status, statusFinanceiro: aluno.statusFinanceiro),
             const SizedBox(height: 16),
             Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(children: [
               _InfoRow(label: 'Status', value: aluno.status),
@@ -118,6 +147,68 @@ class AlunoDetailScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String status;
+  final String statusFinanceiro;
+  const _StatusBadge({required this.status, required this.statusFinanceiro});
+
+  @override
+  Widget build(BuildContext context) {
+    Color cor;
+    IconData icone;
+    String texto;
+    if (statusFinanceiro == 'INADIMPLENTE') {
+      cor = const Color(0xFFE53935);
+      icone = Icons.warning_amber_rounded;
+      texto = 'Inadimplente';
+    } else if (status == 'INATIVO') {
+      cor = const Color(0xFFFFA726);
+      icone = Icons.pause_circle_outline;
+      texto = 'Inativo';
+    } else {
+      cor = const Color(0xFF43A047);
+      icone = Icons.check_circle_outline;
+      texto = 'Ativo';
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: cor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: cor.withValues(alpha: 0.3)),
+      ),
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Icon(icone, color: cor, size: 16),
+        const SizedBox(width: 6),
+        Text(texto, style: TextStyle(color: cor, fontWeight: FontWeight.w600)),
+      ]),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final String label, value;
+  const _InfoRow({required this.label, required this.value});
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Text(label, style: const TextStyle(color: Colors.grey)),
+      Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+    ]),
+  );
+}
+
+class _MenuBtn extends StatelessWidget {
+  final IconData icon; final String label; final VoidCallback onTap;
+  const _MenuBtn({required this.icon, required this.label, required this.onTap});
+  @override
+  Widget build(BuildContext context) => Card(
+    child: ListTile(leading: Icon(icon), title: Text(label),
+      trailing: const Icon(Icons.chevron_right), onTap: onTap),
+  );
 }
 
 class _HistoricoMensalidadesScreen extends ConsumerStatefulWidget {
@@ -317,27 +408,4 @@ class _StatEngajamento extends StatelessWidget {
       Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
     ]);
   }
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label, value;
-  const _InfoRow({required this.label, required this.value});
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6),
-    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label, style: const TextStyle(color: Colors.grey)),
-      Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
-    ]),
-  );
-}
-
-class _MenuBtn extends StatelessWidget {
-  final IconData icon; final String label; final VoidCallback onTap;
-  const _MenuBtn({required this.icon, required this.label, required this.onTap});
-  @override
-  Widget build(BuildContext context) => Card(
-    child: ListTile(leading: Icon(icon), title: Text(label),
-      trailing: const Icon(Icons.chevron_right), onTap: onTap),
-  );
 }

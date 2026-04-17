@@ -69,6 +69,7 @@ class ExercicioRepository {
     String? musculoAlvo,
     String? categoria,
     String? tags,
+    String? observacoes,
   }) async {
     final response = await _dio.post('/api/exercicios', data: {
       'nome': nome,
@@ -76,6 +77,7 @@ class ExercicioRepository {
       if (musculoAlvo != null && musculoAlvo.isNotEmpty) 'musculoAlvo': musculoAlvo,
       if (categoria != null && categoria.isNotEmpty) 'categoria': categoria,
       if (tags != null && tags.isNotEmpty) 'tags': tags,
+      if (observacoes != null && observacoes.isNotEmpty) 'observacoes': observacoes,
     });
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }

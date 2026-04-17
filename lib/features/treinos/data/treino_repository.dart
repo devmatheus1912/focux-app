@@ -139,4 +139,16 @@ class TreinoRepository {
         .map((e) => Treino.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
+  Future<void> excluirTreino(int id) async {
+    await _dio.delete('/api/treinos/$id');
+  }
+
+  Future<void> removerExercicio(int treinoId, int itemId) async {
+    await _dio.delete('/api/treinos/$treinoId/exercicios/$itemId');
+  }
+
+  Future<void> desvincularAluno(int alunoId, int treinoId) async {
+    await _dio.delete('/api/alunos/$alunoId/treinos/$treinoId');
+  }
 }
