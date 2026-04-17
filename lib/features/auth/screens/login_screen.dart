@@ -129,6 +129,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   },
                   child: const Text('Criar conta'),
                 ),
+                TextButton(
+                  onPressed: () => context.push('/esqueci-senha'),
+                  child: const Text('Esqueci minha senha'),
+                ),
               ],
             ),
           ),

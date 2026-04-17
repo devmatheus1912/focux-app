@@ -86,4 +86,16 @@ class AlunoRepository {
     await _dio.patch('/api/alunos/$alunoId/status-financeiro',
         data: {'status': status});
   }
+
+  Future<Aluno> atualizarAluno(int id, Map<String, dynamic> data) async {
+    final r = await _dio.put('/api/alunos/$id', data: data);
+    return Aluno.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<void> excluirAluno(int id) async {
+    await _dio.delete('/api/alunos/$id');
+  }
+
+  // Telefone getter helper (não está no modelo ainda)
+  String? getTelefone(Aluno aluno) => null;
 }

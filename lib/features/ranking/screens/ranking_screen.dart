@@ -1,0 +1,186 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/api/api_client.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+
+class RankingItem {
+  final int personalId;
+  final String nome;
+  final String? logoUrl;
+  final int totalAlunosAtivos;
+  final int posicao;
+  final int? descontoPercentual;
+
+  RankingItem({
+    required this.personalId,
+    required this.nome,
+    this.logoUrl,
+    required this.totalAlunosAtivos,
+    required this.posicao,
+    this.descontoPercentual,
+  });
+
+  factory RankingItem.fromJson(Map<String, dynamic> j) => RankingItem(
+        personalId: j['personalId'] as int,
+        nome: j['nome'] as String,
+        logoUrl: j['logoUrl'] as String?,
+        totalAlunosAtivos: j['totalAlunosAtivos'] as int,
+        posicao: j['posicao'] as int,
+        descontoPercentual: j['descontoPercentual'] as int?,
+      );
+}
+
+final rankingProvider = FutureProvider.autoDispose<List<RankingItem>>((ref) async {
+  final dio = ref.read(apiClientProvider).dio;
+  final r = await dio.get('/api/ranking');
+  return (r.data as List).map((e) => RankingItem.fromJson(e as Map<String, dynamic>)).toList();
+});
+
+class RankingScreen extends ConsumerWidget {
+  const RankingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rankingAsync = ref.watch(rankingProvider);
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ranking de Personais'),
+      ),
+      body: rankingAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Erro: $e')),
+        data: (ranking) {
+          final top3 = ranking.where((r) => r.posicao <= 3).toList();
+          final demais = ranking.where((r) => r.posicao > 3).toList();
+
+          return RefreshIndicator(
+            onRefresh: () async => ref.invalidate(rankingProvider),
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                // Pódio
+                if (top3.isNotEmpty) ...[
+                  Text('Pódio do Mês', style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (top3.length >= 2) _PodioCard(item: top3[1], medalha: '🥈', alturaBase: 80),
+                      if (top3.isNotEmpty) _PodioCard(item: top3[0], medalha: '🥇', alturaBase: 110),
+                      if (top3.length >= 3) _PodioCard(item: top3[2], medalha: '🥉', alturaBase: 60),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        children: [
+                          const Text('🎁 Top 3 ganham desconto na assinatura!',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 4),
+                          Text(
+                            '1º lugar: 20% off • 2º lugar: 15% off • 3º lugar: 10% off',
+                            style: theme.textTheme.bodySmall,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Lista completa
+                if (demais.isNotEmpty) ...[
+                  Text('Classificação geral', style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  ...demais.map((item) => _RankingTile(item: item)),
+                ],
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _PodioCard extends StatelessWidget {
+  final RankingItem item;
+  final String medalha;
+  final double alturaBase;
+
+  const _PodioCard({required this.item, required this.medalha, required this.alturaBase});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Column(
+          children: [
+            Text(medalha, style: const TextStyle(fontSize: 28)),
+            const SizedBox(height: 4),
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: theme.colorScheme.primaryContainer,
+              backgroundImage: item.logoUrl != null ? NetworkImage(item.logoUrl!) : null,
+              child: item.logoUrl == null
+                  ? Text(item.nome.isNotEmpty ? item.nome[0].toUpperCase() : '?',
+                      style: TextStyle(color: theme.colorScheme.onPrimaryContainer, fontSize: 20))
+                  : null,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              item.nome,
+              style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              '${item.totalAlunosAtivos} alunos',
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
+            ),
+            Container(
+              height: alturaBase,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RankingTile extends StatelessWidget {
+  final RankingItem item;
+  const _RankingTile({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+        child: Text(
+          '${item.posicao}',
+          style: TextStyle(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      title: Text(item.nome),
+      subtitle: Text('${item.totalAlunosAtivos} alunos ativos'),
+    );
+  }
+}

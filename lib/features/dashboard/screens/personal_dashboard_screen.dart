@@ -125,6 +125,16 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Copiloto IA',
                 onTap: () => context.push('/ia/copiloto'),
               ),
+              _MenuButton(
+                icon: Icons.emoji_events,
+                label: 'Ranking',
+                onTap: () => context.push('/ranking'),
+              ),
+              _MenuButton(
+                icon: Icons.palette_outlined,
+                label: 'Identidade Visual',
+                onTap: () => context.push('/identidade-visual'),
+              ),
               if (ref.watch(isAdminProvider))
                 _MenuButton(
                   icon: Icons.admin_panel_settings,

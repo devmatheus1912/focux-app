@@ -36,6 +36,11 @@ import '../../features/alertas/screens/alertas_screen.dart';
 import '../../features/evolucao/screens/evolucao_screen.dart';
 import '../../features/ia/screens/ia_copiloto_screen.dart';
 import '../../features/ia/screens/progressao_aceitar_screen.dart';
+import '../../features/alunos/screens/editar_aluno_screen.dart';
+import '../../features/alunos/data/aluno_repository.dart';
+import '../../features/auth/screens/esqueci_senha_screen.dart';
+import '../../features/ranking/screens/ranking_screen.dart';
+import '../../features/perfil/screens/identidade_visual_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -200,6 +205,28 @@ class AppRouter {
       GoRoute(
         path: '/ia/progressao/aceitar',
         builder: (context, state) => const ProgressaoAceitarScreen(),
+      ),
+      GoRoute(
+        path: '/alunos/:id/editar',
+        builder: (context, state) => EditarAlunoScreen(
+          aluno: state.extra as Aluno,
+        ),
+      ),
+      GoRoute(
+        path: '/esqueci-senha',
+        builder: (context, state) => const EsqueciSenhaScreen(),
+      ),
+      GoRoute(
+        path: '/ranking',
+        builder: (context, state) => const RankingScreen(),
+      ),
+      GoRoute(
+        path: '/identidade-visual',
+        builder: (context, state) => const IdentidadeVisualScreen(),
+      ),
+      GoRoute(
+        path: '/setup/identidade',
+        builder: (context, state) => const IdentidadeVisualScreen(isSetup: true),
       ),
     ],
   );
