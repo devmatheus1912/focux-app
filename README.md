@@ -1,90 +1,95 @@
-# Focux App
+# Focux — App Mobile
 
-Aplicativo mobile do **Focux** — plataforma SaaS para personal trainers gerenciarem alunos, exercícios, treinos e negócio.
+> Aplicativo Flutter para personal trainers independentes gerenciarem alunos, treinos, finanças e negócio numa única plataforma.
 
-## Visão Geral
+## Sobre o Projeto
 
-O Focux App é o cliente mobile da plataforma Focux. Suporta dois perfis de usuário:
+O Focux App é o cliente mobile da plataforma Focux — um SaaS multi-tenant para personal trainers. O aplicativo suporta dois perfis de usuário com fluxos completamente distintos:
 
-- **Personal Trainer** — gerencia alunos, cria exercícios/treinos, controla assinatura e finanças
-- **Aluno** — visualiza treinos, faz check-in, chata com personal, acessa feed
+- **Personal Trainer** — gestão de alunos, treinos, financeiro, CRM, alertas e IA
+- **Aluno** — execução de treinos, chat com o personal, feed de conteúdo e assistente IA
 
 ## Stack
 
 | Camada | Tecnologia |
 |---|---|
 | Framework | Flutter 3.29.3 |
-| Estado | Riverpod (flutter_riverpod) |
+| Gerência de estado | Riverpod |
 | Navegação | GoRouter |
 | HTTP | Dio |
-| Storage seguro | flutter_secure_storage |
+| Storage seguro | flutter_secure_storage / SharedPreferences (web) |
 | WebSocket | stomp_dart_client (STOMP) |
 | Push notifications | Firebase Messaging |
 | Markdown | flutter_markdown |
 | Vídeo | video_player |
-| PDF | pdf + printing |
 | Gráficos | fl_chart |
+| PDF | pdf + printing |
 
-## Estrutura do Projeto
+## Estrutura
 
 ```
 lib/
 ├── core/
-│   ├── api/            # ApiClient (Dio + interceptor JWT)
-│   ├── router/         # AppRouter (GoRouter — todas as rotas)
-│   ├── storage/        # SecureStorage (token, role, isAdmin)
-│   └── theme/          # AppTheme
+│   ├── api/          # ApiClient — Dio com interceptor JWT
+│   ├── router/       # AppRouter — todas as rotas (GoRouter)
+│   ├── storage/      # SecureStorage — token, role, isAdmin
+│   └── theme/        # AppTheme
 └── features/
-    ├── admin/          # Painel admin (stats + personais)
-    ├── agenda/         # Agenda de atendimentos
-    ├── alertas/        # Alertas de risco de abandono (Epic 4)
-    ├── alimentar/      # Plano alimentar do aluno
-    ├── alunos/         # Lista, detalhe e cadastro
-    ├── anamnese/       # Anamnese do aluno
-    ├── assinatura/     # Planos e assinatura (MercadoPago)
-    ├── auth/           # Login, Register, Splash
-    ├── avaliacao/      # Avaliação física
-    ├── checkin/        # Execução de treino + histórico
-    ├── chat/           # Chat Personal<->Aluno (WebSocket)
-    ├── convites/       # Convidar alunos por código
-    ├── dashboard/      # Dashboard do personal e do aluno
-    ├── exercicios/     # Biblioteca de exercícios (GIF + vídeo)
-    ├── feed/           # Feed de conteúdo privado
-    ├── financeiro/     # Mensalidades + PIX + dashboard (Epics 2–3)
-    ├── ia/             # IA: gerar treino, dieta, progressão, chat
-    ├── leads/          # Funil comercial (Epic 1)
-    ├── onboarding/     # Tela de onboarding
-    ├── perfil/         # Perfil do personal
-    ├── relatorio/      # Relatório de aderência
-    └── treinos/        # Treinos com exercícios ordenados
+    ├── admin/        # Painel admin da plataforma
+    ├── agenda/       # Agenda de atendimentos
+    ├── alertas/      # Score de risco de abandono
+    ├── alimentar/    # Plano alimentar
+    ├── alunos/       # Lista, detalhe, cadastro
+    ├── anamnese/     # Ficha de anamnese
+    ├── assinatura/   # Planos e assinatura
+    ├── auth/         # Login, registro, splash
+    ├── avaliacao/    # Avaliação física
+    ├── checkin/      # Execução de treino + histórico
+    ├── chat/         # Chat Personal ↔ Aluno (WebSocket)
+    ├── convites/     # Convite para onboarding do aluno
+    ├── dashboard/    # Dashboard do personal e do aluno
+    ├── exercicios/   # Biblioteca (GIF + vídeo)
+    ├── feed/         # Feed de conteúdo privado
+    ├── financeiro/   # Mensalidades, PIX, dashboard financeiro
+    ├── ia/           # IA: treino, dieta, progressão, chat
+    ├── leads/        # CRM — funil comercial
+    ├── onboarding/   # Onboarding inicial
+    ├── perfil/       # Perfil do personal
+    ├── relatorio/    # Relatório de aderência
+    └── treinos/      # Treinos com exercícios ordenados
 ```
 
-## Funcionalidades — Estado atual (v1.1.0)
+## Funcionalidades
 
 ### Personal Trainer
-- **Dashboard** — métricas, menu completo
-- **Alunos** — lista com badge inadimplência/risco, detalhe, anamnese, avaliação, plano alimentar
-- **Funil de Leads** — cadastrar, filtrar status, ligar/WhatsApp, converter em aluno *(Epic 1)*
-- **Financeiro** — dashboard com gráfico, mensalidades, PIX, registrar cobrança *(Epics 2–3)*
-- **Alertas de Risco** — score de abandono, configuração de thresholds *(Epic 4)*
-- **Convites** — código de convite para aluno criar conta
-- **Exercícios** — biblioteca com GIF (Cloudinary) e vídeo
-- **Treinos** — criar, adicionar exercícios, atribuir a aluno
-- **Agenda** — agendar e gerenciar atendimentos
-- **Chat** — WebSocket STOMP com aluno
-- **Feed** — publicar conteúdo para alunos
-- **IA** — gerar treino, dieta, progressão de carga com Claude AI, exportar PDF
-- **Relatório** — aderência por período
-- **Perfil** — editar dados e logo
-- **Assinatura** — planos FREE/PRO/PREMIUM via MercadoPago
-- **Painel Admin** *(só admin)* — stats da plataforma + gerenciar personais
+
+| Módulo | Descrição |
+|---|---|
+| **Dashboard** | Métricas de alunos ativos, acesso rápido a todos os módulos |
+| **Alunos** | Lista com badge de inadimplência e risco, detalhe completo, anamnese, avaliação física, plano alimentar |
+| **Funil de Leads** | CRM com status (Lead → Teste → Ativo), filtros, ações rápidas (ligar, WhatsApp), conversão em aluno |
+| **Financeiro** | Dashboard com gráfico de evolução mensal (fl_chart), mensalidades, geração de PIX, registro de cobrança |
+| **Alertas de Risco** | Score por aluno baseado em dias sem treino e taxa de aderência; thresholds configuráveis |
+| **Treinos** | Criação, adição de exercícios com séries/repetições, atribuição por aluno |
+| **Exercícios** | Biblioteca com upload de GIF (Cloudinary) e vídeo |
+| **Check-in** | Acompanha execuções dos alunos em tempo real |
+| **Agenda** | Agendamento e gestão de atendimentos |
+| **Chat** | WebSocket STOMP bidirecional com aluno |
+| **Feed** | Publicação de conteúdo para alunos |
+| **IA** | Geração de treino, dieta e progressão de carga com Claude AI; exportação em PDF |
+| **Relatório** | Taxa de aderência por aluno e período |
+| **Assinatura** | Planos FREE / PRO / PREMIUM via MercadoPago |
+| **Painel Admin** | Estatísticas da plataforma e gestão de personais *(acesso restrito)* |
 
 ### Aluno
-- **Dashboard** — meus treinos, feed, chat, IA
-- **Check-in** — executar treino com registro de cargas, histórico
-- **Chat** — conversar com personal
-- **Feed** — conteúdo do personal
-- **Assistente IA** — tirar dúvidas de fitness
+
+| Módulo | Descrição |
+|---|---|
+| **Dashboard** | Acesso aos treinos, feed, chat e IA |
+| **Check-in** | Executa treino com registro de séries e cargas, histórico completo |
+| **Chat** | Conversa com o personal em tempo real |
+| **Feed** | Conteúdo publicado pelo personal |
+| **Assistente IA** | Chat com IA para dúvidas sobre treino e nutrição |
 
 ## Rodando Localmente
 
@@ -97,41 +102,39 @@ flutter pub get
 flutter run
 ```
 
-Por padrão aponta para o backend em produção (`https://focux-backend-production.up.railway.app`).
+Por padrão conecta ao backend em produção (`https://focux-backend-production.up.railway.app`).
 
 ## Build Release (Android)
 
 ```bash
 flutter build appbundle --release
-# Keystore: android/app/focux.jks (senha em android/key.properties)
-# Upload .aab em play.google.com/console
 ```
+
+O `.aab` gerado é enviado ao Google Play Console.
 
 ## Backend
 
-- Repositório: [devmatheus1912/focux-backend](https://github.com/devmatheus1912/focux-backend)
-- Produção: `https://focux-backend-production.up.railway.app`
+Repositório: [devmatheus1912/focux-backend](https://github.com/devmatheus1912/focux-backend)  
+API em produção: `https://focux-backend-production.up.railway.app`
 
 ---
 
-## Roadmap — 15 Epics
+## Roadmap
 
-| Epic | Título | Status |
+| # | Funcionalidade | Status |
 |---|---|---|
-| 1 | Funil comercial do personal (Leads) | ✅ Completo |
-| 2 | Dashboard financeiro | ✅ Completo |
-| 3 | Cobrança e inadimplência inteligentes | ✅ Completo |
-| 4 | Alertas de risco de abandono | ✅ Completo |
-| 5 | Relatório de evolução do aluno | ❌ Pendente |
-| 6 | Histórico de engajamento | ❌ Pendente |
-| 7 | Templates e duplicação de treino | ❌ Pendente |
-| 8 | Ações em massa | ❌ Pendente |
-| 9 | Agenda operacional avançada | ❌ Pendente |
-| 10 | IA copiloto do personal | ❌ Pendente |
-| 11 | IA progressão — aceitar sugestão | ❌ Pendente |
-| 12 | Vídeo com feedback técnico | ❌ Pendente |
-| 13 | Onboarding premium (fluxo guiado) | ❌ Pendente |
-| 14 | White-label / identidade própria | ❌ Pendente |
-| 15 | Diferenciais de escala e retenção | ❌ Pendente |
-
-Para implementar os epics, use o prompt em `FOCUX_EPICS_PROMPT.md` na raiz do projeto pai.
+| 1 | Funil de Leads (CRM) | ✅ |
+| 2 | Dashboard financeiro com gráficos | ✅ |
+| 3 | Cobrança e inadimplência inteligentes | ✅ |
+| 4 | Alertas de risco de abandono | ✅ |
+| 5 | Relatório de evolução do aluno | 🔲 |
+| 6 | Histórico de engajamento | 🔲 |
+| 7 | Templates e duplicação de treino | 🔲 |
+| 8 | Ações em massa sobre alunos | 🔲 |
+| 9 | Agenda operacional avançada | 🔲 |
+| 10 | IA copiloto do personal | 🔲 |
+| 11 | Aceitar/editar sugestão de progressão | 🔲 |
+| 12 | Análise de vídeo com feedback técnico | 🔲 |
+| 13 | Onboarding guiado premium | 🔲 |
+| 14 | White-label / identidade própria | 🔲 |
+| 15 | Ferramentas de escala e retenção | 🔲 |
