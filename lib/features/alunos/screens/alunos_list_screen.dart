@@ -67,6 +67,10 @@ class _AlunoTile extends StatelessWidget {
           const SizedBox(width: 6),
           const Icon(Icons.warning_amber_rounded, size: 14, color: Colors.red),
         ],
+        if (aluno.emRisco) ...[
+          const SizedBox(width: 4),
+          const Icon(Icons.trending_down, size: 14, color: Colors.orange),
+        ],
       ]),
       subtitle: Text(aluno.email),
       trailing: Chip(

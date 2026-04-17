@@ -115,6 +115,11 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Funil de Leads',
                 onTap: () => context.push('/leads'),
               ),
+              _MenuButton(
+                icon: Icons.warning_amber_rounded,
+                label: 'Alertas de Risco',
+                onTap: () => context.push('/alertas'),
+              ),
               if (ref.watch(isAdminProvider))
                 _MenuButton(
                   icon: Icons.admin_panel_settings,

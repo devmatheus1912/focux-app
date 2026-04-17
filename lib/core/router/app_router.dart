@@ -32,6 +32,7 @@ import '../../features/auth/screens/register_aluno_screen.dart';
 import '../../features/chat/screens/chat_aluno_screen.dart';
 import '../../features/ia/screens/ia_chat_screen.dart';
 import '../../features/leads/screens/leads_list_screen.dart';
+import '../../features/alertas/screens/alertas_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -177,6 +178,10 @@ class AppRouter {
       GoRoute(
         path: '/leads',
         builder: (context, state) => const LeadsListScreen(),
+      ),
+      GoRoute(
+        path: '/alertas',
+        builder: (context, state) => const AlertasScreen(),
       ),
     ],
   );
