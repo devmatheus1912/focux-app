@@ -23,6 +23,7 @@ O Focux App é o cliente mobile da plataforma Focux. Suporta dois perfis de usu�
 | Markdown | flutter_markdown |
 | Vídeo | video_player |
 | PDF | pdf + printing |
+| Gráficos | fl_chart |
 
 ## Estrutura do Projeto
 
@@ -36,6 +37,7 @@ lib/
 └── features/
     ├── admin/          # Painel admin (stats + personais)
     ├── agenda/         # Agenda de atendimentos
+    ├── alertas/        # Alertas de risco de abandono (Epic 4)
     ├── alimentar/      # Plano alimentar do aluno
     ├── alunos/         # Lista, detalhe e cadastro
     ├── anamnese/       # Anamnese do aluno
@@ -48,8 +50,9 @@ lib/
     ├── dashboard/      # Dashboard do personal e do aluno
     ├── exercicios/     # Biblioteca de exercícios (GIF + vídeo)
     ├── feed/           # Feed de conteúdo privado
-    ├── financeiro/     # Mensalidades + PIX
+    ├── financeiro/     # Mensalidades + PIX + dashboard (Epics 2–3)
     ├── ia/             # IA: gerar treino, dieta, progressão, chat
+    ├── leads/          # Funil comercial (Epic 1)
     ├── onboarding/     # Tela de onboarding
     ├── perfil/         # Perfil do personal
     ├── relatorio/      # Relatório de aderência
@@ -60,14 +63,15 @@ lib/
 
 ### Personal Trainer
 - **Dashboard** — métricas, menu completo
-- **Alunos** — lista, detalhe, anamnese, avaliação física, plano alimentar
+- **Alunos** — lista com badge inadimplência/risco, detalhe, anamnese, avaliação, plano alimentar
+- **Funil de Leads** — cadastrar, filtrar status, ligar/WhatsApp, converter em aluno *(Epic 1)*
+- **Financeiro** — dashboard com gráfico, mensalidades, PIX, registrar cobrança *(Epics 2–3)*
+- **Alertas de Risco** — score de abandono, configuração de thresholds *(Epic 4)*
 - **Convites** — código de convite para aluno criar conta
 - **Exercícios** — biblioteca com GIF (Cloudinary) e vídeo
 - **Treinos** — criar, adicionar exercícios, atribuir a aluno
-- **Check-in** — personal acompanha execuções dos alunos
-- **Chat** — WebSocket STOMP com aluno
-- **Financeiro** — mensalidades, gerar PIX, marcar pagamento
 - **Agenda** — agendar e gerenciar atendimentos
+- **Chat** — WebSocket STOMP com aluno
 - **Feed** — publicar conteúdo para alunos
 - **IA** — gerar treino, dieta, progressão de carga com Claude AI, exportar PDF
 - **Relatório** — aderência por período
@@ -114,20 +118,20 @@ flutter build appbundle --release
 
 | Epic | Título | Status |
 |---|---|---|
-| 1 | Funil comercial do personal (Leads) | 🔄 Em andamento |
-| 2 | Dashboard financeiro | ❌ Pendente |
-| 3 | Cobrança e inadimplência inteligentes | ❌ Pendente |
-| 4 | Alertas de risco de abandono | ❌ Pendente |
+| 1 | Funil comercial do personal (Leads) | ✅ Completo |
+| 2 | Dashboard financeiro | ✅ Completo |
+| 3 | Cobrança e inadimplência inteligentes | ✅ Completo |
+| 4 | Alertas de risco de abandono | ✅ Completo |
 | 5 | Relatório de evolução do aluno | ❌ Pendente |
 | 6 | Histórico de engajamento | ❌ Pendente |
 | 7 | Templates e duplicação de treino | ❌ Pendente |
 | 8 | Ações em massa | ❌ Pendente |
 | 9 | Agenda operacional avançada | ❌ Pendente |
 | 10 | IA copiloto do personal | ❌ Pendente |
-| 11 | IA de progressão de treino (parcial ✅) | 🔄 Pendente aceitar sugestão |
+| 11 | IA progressão — aceitar sugestão | ❌ Pendente |
 | 12 | Vídeo com feedback técnico | ❌ Pendente |
-| 13 | Onboarding premium (parcial ✅) | 🔄 Pendente fluxo guiado |
+| 13 | Onboarding premium (fluxo guiado) | ❌ Pendente |
 | 14 | White-label / identidade própria | ❌ Pendente |
 | 15 | Diferenciais de escala e retenção | ❌ Pendente |
 
-Para implementar os epics, use o prompt em `FOCUX_EPICS_PROMPT.md` na raiz do projeto.
+Para implementar os epics, use o prompt em `FOCUX_EPICS_PROMPT.md` na raiz do projeto pai.
