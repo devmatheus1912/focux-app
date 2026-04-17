@@ -3,9 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/exercicios_provider.dart';
 
-const _categorias = [
+const _gruposMusculares = [
   'PEITO', 'COSTAS', 'OMBROS', 'BICEPS',
   'TRICEPS', 'PERNAS', 'ABDOMEN', 'CARDIO',
+];
+
+const _categoriasExercicio = [
+  'Musculação',
+  'Mobilidade',
+  'Lutas',
+  'Yoga',
+  'Funcional',
+  'Cardio',
+  'Outro',
 ];
 
 class AddExercicioScreen extends ConsumerStatefulWidget {
@@ -19,6 +29,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nomeCtrl = TextEditingController();
   final _descricaoCtrl = TextEditingController();
+  final _tagsCtrl = TextEditingController();
   String? _musculoAlvo;
   String? _categoria;
   bool _loading = false;
@@ -28,6 +39,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   void dispose() {
     _nomeCtrl.dispose();
     _descricaoCtrl.dispose();
+    _tagsCtrl.dispose();
     super.dispose();
   }
 
@@ -40,6 +52,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         descricao: _descricaoCtrl.text.trim(),
         musculoAlvo: _musculoAlvo,
         categoria: _categoria,
+        tags: _tagsCtrl.text.trim(),
       );
       if (mounted) context.pop(true);
     } catch (e) {
@@ -54,7 +67,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Novo Exercício')),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
@@ -70,8 +83,27 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                 DropdownButtonFormField<String>(
                   value: _musculoAlvo,
                   decoration: const InputDecoration(labelText: 'Músculo alvo'),
-                  items: _categorias.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                  onChanged: (v) => setState(() { _musculoAlvo = v; _categoria = v; }),
+                  items: _gruposMusculares
+                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                      .toList(),
+                  onChanged: (v) => setState(() => _musculoAlvo = v),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _categoria,
+                  decoration: const InputDecoration(labelText: 'Categoria'),
+                  items: _categoriasExercicio
+                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                      .toList(),
+                  onChanged: (v) => setState(() => _categoria = v),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _tagsCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Tags (opcional)',
+                    hintText: 'Ex: #EmCasa,#SemEquipamento',
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

@@ -68,13 +68,23 @@ class ExercicioRepository {
     String? descricao,
     String? musculoAlvo,
     String? categoria,
+    String? tags,
   }) async {
     final response = await _dio.post('/api/exercicios', data: {
       'nome': nome,
       if (descricao != null && descricao.isNotEmpty) 'descricao': descricao,
       if (musculoAlvo != null && musculoAlvo.isNotEmpty) 'musculoAlvo': musculoAlvo,
       if (categoria != null && categoria.isNotEmpty) 'categoria': categoria,
+      if (tags != null && tags.isNotEmpty) 'tags': tags,
     });
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<void> favoritarExercicio(int id) async {
+    await _dio.post('/api/exercicios/$id/favoritar');
+  }
+
+  Future<void> desfavoritarExercicio(int id) async {
+    await _dio.delete('/api/exercicios/$id/favoritar');
   }
 }
