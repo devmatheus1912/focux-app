@@ -37,4 +37,14 @@ class ChatRepository {
     });
     return ChatMsg.fromJson(r.data);
   }
+
+  Future<List<ChatMsg>> historicoAluno() async {
+    final r = await _dio.get('/api/chat/aluno/historico');
+    return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
+  }
+
+  Future<ChatMsg> enviarComoAluno(String conteudo) async {
+    final r = await _dio.post('/api/chat/aluno/enviar', data: {'conteudo': conteudo});
+    return ChatMsg.fromJson(r.data);
+  }
 }

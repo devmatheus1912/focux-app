@@ -3,25 +3,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class RegisterAlunoScreen extends ConsumerStatefulWidget {
+  const RegisterAlunoScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterAlunoScreen> createState() => _RegisterAlunoScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nomeCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _senhaCtrl = TextEditingController();
+  final _conviteCtrl = TextEditingController();
   bool _loading = false;
   String? _error;
-  String _tipoLogin = 'personal';
 
   @override
   void dispose() {
+    _nomeCtrl.dispose();
     _emailCtrl.dispose();
     _senhaCtrl.dispose();
+    _conviteCtrl.dispose();
     super.dispose();
   }
 
@@ -29,21 +32,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() { _loading = true; _error = null; });
     try {
-      if (_tipoLogin == 'aluno') {
-        await ref.read(authProvider.notifier).loginAluno(
-          _emailCtrl.text.trim(),
-          _senhaCtrl.text,
-        );
-        if (mounted) context.go('/dashboard/aluno');
-      } else {
-        await ref.read(authProvider.notifier).login(
-          _emailCtrl.text.trim(),
-          _senhaCtrl.text,
-        );
-        if (mounted) context.go('/dashboard/personal');
-      }
+      await ref.read(authProvider.notifier).registerAluno(
+        _nomeCtrl.text.trim(),
+        _emailCtrl.text.trim(),
+        _senhaCtrl.text,
+        _conviteCtrl.text.trim(),
+      );
+      if (mounted) context.go('/dashboard/aluno');
     } catch (e) {
-      setState(() { _error = 'Email ou senha incorretos.'; });
+      setState(() { _error = 'Erro ao criar conta. Verifique o código de convite.'; });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }
@@ -52,41 +49,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Criar conta — Aluno')),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Text(
-                  'FOCUX',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: 3),
+                  'Bem-vindo ao Focux!',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Plataforma para Personal Trainers',
+                  'Insira o código de convite enviado pelo seu personal.',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey),
                 ),
-                const SizedBox(height: 24),
-                Center(
-                  child: SegmentedButton<String>(
-                    segments: const [
-                      ButtonSegment(value: 'personal', label: Text('Personal')),
-                      ButtonSegment(value: 'aluno', label: Text('Aluno')),
-                    ],
-                    selected: {_tipoLogin},
-                    onSelectionChanged: (v) => setState(() {
-                      _tipoLogin = v.first;
-                      _error = null;
-                    }),
-                  ),
+                const SizedBox(height: 32),
+                TextFormField(
+                  controller: _nomeCtrl,
+                  decoration: const InputDecoration(labelText: 'Nome completo'),
+                  textCapitalization: TextCapitalization.words,
+                  validator: (v) => v == null || v.isEmpty ? 'Informe seu nome' : null,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailCtrl,
                   decoration: const InputDecoration(labelText: 'E-mail'),
@@ -98,7 +88,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   controller: _senhaCtrl,
                   decoration: const InputDecoration(labelText: 'Senha'),
                   obscureText: true,
-                  validator: (v) => v == null || v.isEmpty ? 'Informe a senha' : null,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Informe a senha';
+                    if (v.length < 6) return 'Mínimo de 6 caracteres';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _conviteCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Código do convite',
+                    hintText: 'Ex: ABC123',
+                  ),
+                  validator: (v) => v == null || v.isEmpty ? 'Informe o código de convite' : null,
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
@@ -109,18 +112,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onPressed: _loading ? null : _submit,
                   child: _loading
                       ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Entrar'),
+                      : const Text('Criar conta'),
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () {
-                    if (_tipoLogin == 'aluno') {
-                      context.go('/register/aluno');
-                    } else {
-                      context.go('/register');
-                    }
-                  },
-                  child: const Text('Criar conta'),
+                  onPressed: () => context.go('/login'),
+                  child: const Text('Já tenho conta'),
                 ),
               ],
             ),

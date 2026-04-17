@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SecureStorage {
   static const _keyToken = 'jwt_token';
+  static const _keyRole = 'user_role';
   static const _storage = FlutterSecureStorage();
 
   static Future<void> saveToken(String token) async {
@@ -29,6 +30,32 @@ class SecureStorage {
       await prefs.remove(_keyToken);
     } else {
       await _storage.delete(key: _keyToken);
+    }
+  }
+
+  static Future<void> saveRole(String role) async {
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyRole, role);
+    } else {
+      await _storage.write(key: _keyRole, value: role);
+    }
+  }
+
+  static Future<String?> getRole() async {
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_keyRole);
+    }
+    return _storage.read(key: _keyRole);
+  }
+
+  static Future<void> deleteRole() async {
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_keyRole);
+    } else {
+      await _storage.delete(key: _keyRole);
     }
   }
 }

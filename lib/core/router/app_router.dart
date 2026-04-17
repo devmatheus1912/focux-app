@@ -28,6 +28,9 @@ import '../../features/relatorio/screens/relatorio_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
 import '../../features/feed/screens/feed_screen.dart';
 import '../../features/feed/screens/feed_aluno_screen.dart';
+import '../../features/auth/screens/register_aluno_screen.dart';
+import '../../features/chat/screens/chat_aluno_screen.dart';
+import '../../features/ia/screens/ia_chat_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -157,6 +160,18 @@ class AppRouter {
       GoRoute(
         path: '/feed/aluno',
         builder: (context, state) => const FeedAlunoScreen(),
+      ),
+      GoRoute(
+        path: '/register/aluno',
+        builder: (context, state) => const RegisterAlunoScreen(),
+      ),
+      GoRoute(
+        path: '/chat/aluno',
+        builder: (context, state) => const ChatAlunoScreen(),
+      ),
+      GoRoute(
+        path: '/ia/chat',
+        builder: (context, state) => const IaChatScreen(),
       ),
     ],
   );

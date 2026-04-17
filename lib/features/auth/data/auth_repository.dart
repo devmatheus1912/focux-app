@@ -14,6 +14,7 @@ class AuthRepository {
     });
     final token = response.data['token'] as String;
     await SecureStorage.saveToken(token);
+    await SecureStorage.saveRole('PERSONAL');
     return token;
   }
 
@@ -25,8 +26,36 @@ class AuthRepository {
     });
     final token = response.data['token'] as String;
     await SecureStorage.saveToken(token);
+    await SecureStorage.saveRole('PERSONAL');
     return token;
   }
 
-  Future<void> logout() => SecureStorage.deleteToken();
+  Future<String> loginAluno(String email, String password) async {
+    final response = await _dio.post('/api/auth/login/aluno', data: {
+      'email': email,
+      'senha': password,
+    });
+    final token = response.data['token'] as String;
+    await SecureStorage.saveToken(token);
+    await SecureStorage.saveRole('ALUNO');
+    return token;
+  }
+
+  Future<String> registerAluno(String nome, String email, String password, String conviteToken) async {
+    final response = await _dio.post('/api/auth/register/aluno', data: {
+      'nome': nome,
+      'email': email,
+      'senha': password,
+      'conviteToken': conviteToken,
+    });
+    final token = response.data['token'] as String;
+    await SecureStorage.saveToken(token);
+    await SecureStorage.saveRole('ALUNO');
+    return token;
+  }
+
+  Future<void> logout() async {
+    await SecureStorage.deleteToken();
+    await SecureStorage.deleteRole();
+  }
 }

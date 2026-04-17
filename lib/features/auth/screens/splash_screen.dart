@@ -22,7 +22,12 @@ class SplashScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<AuthStatus>(authProvider, (previous, next) {
       if (next == AuthStatus.authenticated) {
-        context.go('/dashboard/personal');
+        final role = ref.read(userRoleProvider);
+        if (role == UserRole.aluno) {
+          context.go('/dashboard/aluno');
+        } else {
+          context.go('/dashboard/personal');
+        }
       } else if (next == AuthStatus.unauthenticated) {
         _handleUnauthenticated(context);
       }
