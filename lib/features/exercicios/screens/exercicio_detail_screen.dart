@@ -7,12 +7,46 @@ class ExercicioDetailScreen extends ConsumerWidget {
   final int exercicioId;
   const ExercicioDetailScreen({super.key, required this.exercicioId});
 
+  Future<void> _toggleFavorito(WidgetRef ref, BuildContext context, bool favoritado) async {
+    final repo = ref.read(exercicioRepositoryProvider);
+    try {
+      if (favoritado) {
+        await repo.desfavoritarExercicio(exercicioId);
+      } else {
+        await repo.favoritarExercicio(exercicioId);
+      }
+      ref.invalidate(exercicioProvider(exercicioId));
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao atualizar favorito.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final exercicioAsync = ref.watch(exercicioProvider(exercicioId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Exercício')),
+      appBar: AppBar(
+        title: const Text('Exercício'),
+        actions: [
+          exercicioAsync.when(
+            data: (ex) => IconButton(
+              icon: Icon(
+                ex.favoritado ? Icons.star : Icons.star_border,
+                color: ex.favoritado ? Colors.amber : null,
+              ),
+              tooltip: ex.favoritado ? 'Remover dos favoritos' : 'Adicionar aos favoritos',
+              onPressed: () => _toggleFavorito(ref, context, ex.favoritado),
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+        ],
+      ),
       body: exercicioAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),
@@ -30,10 +64,41 @@ class ExercicioDetailScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(ex.nome, style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 8),
-              if (ex.musculoAlvo != null)
-                Chip(label: Text(ex.musculoAlvo!)),
-              if (ex.categoria != null)
-                Chip(label: Text(ex.categoria!)),
+              // Chips de músculo alvo e categoria
+              Wrap(
+                spacing: 8,
+                children: [
+                  if (ex.musculoAlvo != null && ex.musculoAlvo!.isNotEmpty)
+                    Chip(
+                      avatar: const Icon(Icons.fitness_center, size: 16),
+                      label: Text(ex.musculoAlvo!),
+                    ),
+                  if (ex.categoria != null && ex.categoria!.isNotEmpty)
+                    Chip(
+                      avatar: const Icon(Icons.category, size: 16),
+                      label: Text(ex.categoria!),
+                    ),
+                ],
+              ),
+              // Tags
+              if (ex.tags != null && ex.tags!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  children: ex.tags!
+                      .split(',')
+                      .map((t) => t.trim())
+                      .where((t) => t.isNotEmpty)
+                      .map((t) => Chip(
+                            label: Text(t, style: const TextStyle(fontSize: 12)),
+                            backgroundColor:
+                                Theme.of(context).colorScheme.secondaryContainer,
+                            padding: EdgeInsets.zero,
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ))
+                      .toList(),
+                ),
+              ],
               if (ex.videoUrl != null) ...[
                 const SizedBox(height: 12),
                 _VideoPlayer(url: ex.videoUrl!),
