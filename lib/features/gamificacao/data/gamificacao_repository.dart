@@ -19,18 +19,18 @@ class Streak {
       );
 }
 
-class Badge {
+class BadgeData {
   final String tipo;
   final String descricao;
   final String conquistaEm;
 
-  Badge({
+  BadgeData({
     required this.tipo,
     required this.descricao,
     required this.conquistaEm,
   });
 
-  factory Badge.fromJson(Map<String, dynamic> j) => Badge(
+  factory BadgeData.fromJson(Map<String, dynamic> j) => BadgeData(
         tipo: j['tipo'] as String,
         descricao: j['descricao'] as String,
         conquistaEm: j['conquistaEm'] as String,
@@ -39,7 +39,7 @@ class Badge {
 
 class GamificacaoData {
   final Streak streak;
-  final List<Badge> badges;
+  final List<BadgeData> badges;
   final int totalTreinos;
 
   GamificacaoData({
@@ -51,7 +51,7 @@ class GamificacaoData {
   factory GamificacaoData.fromJson(Map<String, dynamic> j) => GamificacaoData(
         streak: Streak.fromJson(j['streak'] as Map<String, dynamic>),
         badges: (j['badges'] as List<dynamic>)
-            .map((e) => Badge.fromJson(e as Map<String, dynamic>))
+            .map((e) => BadgeData.fromJson(e as Map<String, dynamic>))
             .toList(),
         totalTreinos: j['totalTreinos'] as int,
       );

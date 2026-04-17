@@ -168,7 +168,7 @@ class _StatItem extends StatelessWidget {
 }
 
 class _BadgesSection extends StatelessWidget {
-  final List<Badge> badges;
+  final List<BadgeData> badges;
 
   const _BadgesSection({required this.badges});
 
@@ -255,7 +255,7 @@ class _BadgesSection extends StatelessWidget {
 }
 
 class _BadgeCard extends StatelessWidget {
-  final Badge badge;
+  final BadgeData badge;
   final IconData icone;
   final Color cor;
 
