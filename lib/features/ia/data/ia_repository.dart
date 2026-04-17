@@ -47,4 +47,36 @@ class IaRepository {
     });
     return r.data['resposta'] as String;
   }
+
+  // ── Copiloto ──────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> resumoSemanal() async {
+    final r = await _dio.get('/api/ia/copiloto/resumo-semanal');
+    return r.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> proximaAcao(int alunoId) async {
+    final r = await _dio.get('/api/ia/copiloto/proxima-acao/$alunoId');
+    return r.data as Map<String, dynamic>;
+  }
+
+  Future<List<Map<String, dynamic>>> insights() async {
+    final r = await _dio.get('/api/ia/copiloto/insights');
+    return (r.data as List).cast<Map<String, dynamic>>();
+  }
+
+  // ── Progressão sugestões ──────────────────────────────────────────────────
+
+  Future<List<Map<String, dynamic>>> sugestoesProgressao() async {
+    final r = await _dio.get('/api/ia/progressao/sugestoes');
+    return (r.data as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<void> aceitarSugestao(int id) async {
+    await _dio.post('/api/ia/progressao/sugestoes/$id/aceitar');
+  }
+
+  Future<void> rejeitarSugestao(int id) async {
+    await _dio.post('/api/ia/progressao/sugestoes/$id/rejeitar');
+  }
 }

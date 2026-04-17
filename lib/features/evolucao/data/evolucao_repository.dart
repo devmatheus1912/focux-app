@@ -65,10 +65,33 @@ class EvolucaoRepository {
     return (r.data as List).map((e) => RecordePessoal.fromJson(e)).toList();
   }
 
+  Future<RecordePessoal> adicionarRecorde(int alunoId, {
+    required String exercicioNome,
+    double? carga,
+    String? unidade,
+    String? observacao,
+  }) async {
+    final r = await _dio.post('/api/alunos/$alunoId/recordes', data: {
+      'exercicioNome': exercicioNome,
+      if (carga != null) 'carga': carga,
+      if (unidade != null) 'unidade': unidade,
+      if (observacao != null && observacao.isNotEmpty) 'observacao': observacao,
+    });
+    return RecordePessoal.fromJson(r.data);
+  }
+
   Future<List<EventoEngajamento>> engajamento(int alunoId, {int dias = 30}) async {
     final r = await _dio.get('/api/alunos/$alunoId/engajamento', queryParameters: {'dias': dias});
     final data = r.data;
     final eventos = data is Map ? (data['eventos'] as List?) ?? [] : data as List;
     return eventos.map((e) => EventoEngajamento.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<Map<String, dynamic>> engajamentoResumo(int alunoId) async {
+    final r = await _dio.get('/api/alunos/$alunoId/engajamento');
+    final data = r.data;
+    if (data is Map<String, dynamic>) return data;
+    // Se vier como lista, retorna mapa vazio para não quebrar a UI
+    return {};
   }
 }

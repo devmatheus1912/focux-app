@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/alunos_provider.dart';
 
+const _generos = ['Masculino', 'Feminino', 'Outro'];
+const _tiposConsultoria = ['ONLINE', 'PRESENCIAL', 'HIBRIDO'];
+const _tiposConsultoriaLabel = ['Online', 'Presencial', 'Híbrido'];
+
 class AddAlunoScreen extends ConsumerStatefulWidget {
   const AddAlunoScreen({super.key});
 
@@ -15,6 +19,9 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen> {
   final _nomeCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _objetivoCtrl = TextEditingController();
+  final _whatsappCtrl = TextEditingController();
+  String? _genero;
+  String? _tipoConsultoria;
   bool _loading = false;
   String? _error;
 
@@ -23,6 +30,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen> {
     _nomeCtrl.dispose();
     _emailCtrl.dispose();
     _objetivoCtrl.dispose();
+    _whatsappCtrl.dispose();
     super.dispose();
   }
 
@@ -31,9 +39,12 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen> {
     setState(() { _loading = true; _error = null; });
     try {
       await ref.read(alunoRepositoryProvider).criar(
-        _nomeCtrl.text.trim(),
-        _emailCtrl.text.trim(),
-        _objetivoCtrl.text.trim(),
+        nome: _nomeCtrl.text.trim(),
+        email: _emailCtrl.text.trim(),
+        objetivo: _objetivoCtrl.text.trim(),
+        whatsapp: _whatsappCtrl.text.trim(),
+        genero: _genero,
+        tipoConsultoria: _tipoConsultoria,
       );
       if (mounted) context.pop(true);
     } catch (e) {
@@ -48,7 +59,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Novo Aluno')),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
@@ -75,6 +86,37 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen> {
                     hintText: 'Ex: Hipertrofia, Emagrecimento...',
                   ),
                   maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _whatsappCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'WhatsApp (opcional)',
+                    hintText: 'Ex: (11) 99999-9999',
+                  ),
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _genero,
+                  decoration: const InputDecoration(labelText: 'Gênero (opcional)'),
+                  items: _generos
+                      .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                      .toList(),
+                  onChanged: (v) => setState(() => _genero = v),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _tipoConsultoria,
+                  decoration: const InputDecoration(labelText: 'Tipo de consultoria (opcional)'),
+                  items: List.generate(
+                    _tiposConsultoria.length,
+                    (i) => DropdownMenuItem(
+                      value: _tiposConsultoria[i],
+                      child: Text(_tiposConsultoriaLabel[i]),
+                    ),
+                  ),
+                  onChanged: (v) => setState(() => _tipoConsultoria = v),
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),

@@ -120,6 +120,11 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Alertas de Risco',
                 onTap: () => context.push('/alertas'),
               ),
+              _MenuButton(
+                icon: Icons.psychology,
+                label: 'Copiloto IA',
+                onTap: () => context.push('/ia/copiloto'),
+              ),
               if (ref.watch(isAdminProvider))
                 _MenuButton(
                   icon: Icons.admin_panel_settings,

@@ -10,6 +10,12 @@ class PerfilPersonal {
   final String? logoUrl;
   final String? corPrimaria;
   final String plano;
+  // Dados de wallet / pagamento
+  final String? chavePix;
+  final String? tipoChavePix;
+  final String? banco;
+  final String? agencia;
+  final String? conta;
 
   PerfilPersonal({
     required this.id,
@@ -20,6 +26,11 @@ class PerfilPersonal {
     this.logoUrl,
     this.corPrimaria,
     required this.plano,
+    this.chavePix,
+    this.tipoChavePix,
+    this.banco,
+    this.agencia,
+    this.conta,
   });
 
   factory PerfilPersonal.fromJson(Map<String, dynamic> json) => PerfilPersonal(
@@ -31,6 +42,11 @@ class PerfilPersonal {
         logoUrl: json['logoUrl'] as String?,
         corPrimaria: json['corPrimaria'] as String?,
         plano: json['plano'] as String,
+        chavePix: json['chavePix'] as String?,
+        tipoChavePix: json['tipoChavePix'] as String?,
+        banco: json['banco'] as String?,
+        agencia: json['agencia'] as String?,
+        conta: json['conta'] as String?,
       );
 }
 
@@ -59,5 +75,11 @@ class PerfilRepository {
       if (corPrimaria != null) 'corPrimaria': corPrimaria,
     });
     return PerfilPersonal.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Atualiza os dados de wallet (PIX, banco, agência, conta) do personal.
+  Future<Map<String, dynamic>> atualizarWallet(Map<String, dynamic> data) async {
+    final response = await _dio.put('/api/personal/wallet', data: data);
+    return response.data as Map<String, dynamic>;
   }
 }

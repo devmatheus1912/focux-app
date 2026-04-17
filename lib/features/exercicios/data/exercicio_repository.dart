@@ -9,6 +9,8 @@ class Exercicio {
   final String? gifUrl;
   final String? categoria;
   final String? videoUrl;
+  final String? tags;
+  final bool favoritado;
 
   Exercicio({
     required this.id,
@@ -18,6 +20,8 @@ class Exercicio {
     this.gifUrl,
     this.categoria,
     this.videoUrl,
+    this.tags,
+    this.favoritado = false,
   });
 
   factory Exercicio.fromJson(Map<String, dynamic> json) => Exercicio(
@@ -28,6 +32,8 @@ class Exercicio {
         gifUrl: json['gifUrl'] as String?,
         categoria: json['categoria'] as String?,
         videoUrl: json['videoUrl'] as String?,
+        tags: json['tags'] as String?,
+        favoritado: json['favoritado'] as bool? ?? false,
       );
 }
 
@@ -36,8 +42,18 @@ class ExercicioRepository {
 
   ExercicioRepository(ApiClient client) : _dio = client.dio;
 
-  Future<List<Exercicio>> listar() async {
-    final response = await _dio.get('/api/exercicios');
+  Future<List<Exercicio>> listar({
+    String? categoria,
+    String? tag,
+    bool? favoritos,
+  }) async {
+    final queryParams = <String, dynamic>{};
+    if (categoria != null && categoria.isNotEmpty) queryParams['categoria'] = categoria;
+    if (tag != null && tag.isNotEmpty) queryParams['tag'] = tag;
+    if (favoritos == true) queryParams['favoritos'] = 'true';
+
+    final response = await _dio.get('/api/exercicios',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null);
     final list = response.data as List<dynamic>;
     return list.map((e) => Exercicio.fromJson(e as Map<String, dynamic>)).toList();
   }

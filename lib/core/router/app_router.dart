@@ -33,6 +33,9 @@ import '../../features/chat/screens/chat_aluno_screen.dart';
 import '../../features/ia/screens/ia_chat_screen.dart';
 import '../../features/leads/screens/leads_list_screen.dart';
 import '../../features/alertas/screens/alertas_screen.dart';
+import '../../features/evolucao/screens/evolucao_screen.dart';
+import '../../features/ia/screens/ia_copiloto_screen.dart';
+import '../../features/ia/screens/progressao_aceitar_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -182,6 +185,21 @@ class AppRouter {
       GoRoute(
         path: '/alertas',
         builder: (context, state) => const AlertasScreen(),
+      ),
+      GoRoute(
+        path: '/alunos/:id/evolucao',
+        builder: (context, state) => EvolucaoScreen(
+          alunoId: int.parse(state.pathParameters['id']!),
+          alunoNome: state.extra as String? ?? 'Aluno',
+        ),
+      ),
+      GoRoute(
+        path: '/ia/copiloto',
+        builder: (context, state) => const IaCopilotoScreen(),
+      ),
+      GoRoute(
+        path: '/ia/progressao/aceitar',
+        builder: (context, state) => const ProgressaoAceitarScreen(),
       ),
     ],
   );

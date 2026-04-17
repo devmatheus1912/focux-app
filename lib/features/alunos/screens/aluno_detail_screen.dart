@@ -10,6 +10,8 @@ import '../../ia/screens/ia_progressao_screen.dart';
 import '../../chat/screens/chat_screen.dart';
 import '../../relatorio/screens/relatorio_screen.dart';
 import '../../financeiro/data/financeiro_repository.dart';
+import '../../evolucao/screens/evolucao_screen.dart';
+import '../../evolucao/data/evolucao_repository.dart';
 
 class AlunoDetailScreen extends ConsumerWidget {
   final int alunoId;
@@ -31,7 +33,7 @@ class AlunoDetailScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             Center(child: Text(aluno.nome, style: Theme.of(context).textTheme.headlineSmall)),
             Center(child: Text(aluno.email, style: const TextStyle(color: Colors.grey))),
-            if (aluno.inadimplente) ...[
+            if (aluno.statusFinanceiro == 'INADIMPLENTE') ...[
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -43,15 +45,37 @@ class AlunoDetailScreen extends ConsumerWidget {
                 child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Icon(Icons.warning_amber_rounded, color: Colors.red, size: 16),
                   SizedBox(width: 6),
-                  Text('Mensalidade em atraso', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                  Text('Inadimplente', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                ]),
+              ),
+            ] else if (aluno.inadimplente) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                ),
+                child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 16),
+                  SizedBox(width: 6),
+                  Text('Mensalidade em atraso', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w600)),
                 ]),
               ),
             ],
             const SizedBox(height: 16),
             Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(children: [
               _InfoRow(label: 'Status', value: aluno.status),
+              _InfoRow(label: 'Financeiro', value: aluno.statusFinanceiro),
               if (aluno.objetivo != null && aluno.objetivo!.isNotEmpty)
                 _InfoRow(label: 'Objetivo', value: aluno.objetivo!),
+              if (aluno.whatsapp != null && aluno.whatsapp!.isNotEmpty)
+                _InfoRow(label: 'WhatsApp', value: aluno.whatsapp!),
+              if (aluno.genero != null && aluno.genero!.isNotEmpty)
+                _InfoRow(label: 'Gênero', value: aluno.genero!),
+              if (aluno.tipoConsultoria != null && aluno.tipoConsultoria!.isNotEmpty)
+                _InfoRow(label: 'Consultoria', value: aluno.tipoConsultoria!),
             ]))),
             const SizedBox(height: 16),
             const Divider(),
@@ -77,9 +101,18 @@ class AlunoDetailScreen extends ConsumerWidget {
             _MenuBtn(icon: Icons.trending_up, label: 'Progressão de Carga com IA',
               onTap: () => Navigator.push(context, MaterialPageRoute(
                 builder: (_) => IaProgressaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+            _MenuBtn(icon: Icons.show_chart, label: 'Evolução (Medidas e Recordes)',
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => EvolucaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
             _MenuBtn(icon: Icons.chat, label: 'Chat',
               onTap: () => Navigator.push(context, MaterialPageRoute(
                 builder: (_) => ChatScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            Text('Engajamento', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            _SecaoEngajamento(alunoId: alunoId),
           ]),
         ),
       ),
@@ -203,6 +236,87 @@ class _HistoricoMensalidadesScreenState extends ConsumerState<_HistoricoMensalid
                 },
               ),
   );
+}
+
+class _SecaoEngajamento extends ConsumerStatefulWidget {
+  final int alunoId;
+  const _SecaoEngajamento({required this.alunoId});
+
+  @override
+  ConsumerState<_SecaoEngajamento> createState() => _SecaoEngajamentoState();
+}
+
+class _SecaoEngajamentoState extends ConsumerState<_SecaoEngajamento> {
+  Map<String, dynamic>? _dados;
+  bool _loading = true;
+  String? _erro;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregar();
+  }
+
+  Future<void> _carregar() async {
+    setState(() { _loading = true; _erro = null; });
+    try {
+      final repo = EvolucaoRepository(ref.read(apiClientProvider));
+      final r = await repo.engajamentoResumo(widget.alunoId);
+      if (mounted) setState(() { _dados = r; _loading = false; });
+    } catch (e) {
+      if (mounted) setState(() { _erro = e.toString(); _loading = false; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_erro != null) {
+      return Text('Erro ao carregar engajamento: $_erro',
+          style: const TextStyle(color: Colors.red, fontSize: 12));
+    }
+    if (_dados == null) return const SizedBox.shrink();
+
+    final totalTreinos = _dados!['totalTreinos'] ?? 0;
+    final treinosMes = _dados!['treinosMes'] ?? 0;
+    final aderencia = _dados!['aderencia'] ?? 0;
+    final diasSemTreinar = _dados!['diasSemTreino'] ?? _dados!['diasSemTreinar'] ?? 0;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Wrap(spacing: 12, runSpacing: 12, children: [
+          _StatEngajamento(label: 'Total Treinos', valor: totalTreinos.toString()),
+          _StatEngajamento(label: 'Treinos/Mês', valor: treinosMes.toString()),
+          _StatEngajamento(
+            label: 'Aderência',
+            valor: '$aderencia%',
+            cor: aderencia >= 70 ? Colors.green : (aderencia >= 40 ? Colors.orange : Colors.red),
+          ),
+          _StatEngajamento(
+            label: 'Dias sem treinar',
+            valor: diasSemTreinar.toString(),
+            cor: diasSemTreinar > 7 ? Colors.red : Colors.green,
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+class _StatEngajamento extends StatelessWidget {
+  final String label, valor;
+  final Color? cor;
+  const _StatEngajamento({required this.label, required this.valor, this.cor});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = cor ?? Theme.of(context).colorScheme.primary;
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      Text(valor, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: c)),
+      Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+    ]);
+  }
 }
 
 class _InfoRow extends StatelessWidget {

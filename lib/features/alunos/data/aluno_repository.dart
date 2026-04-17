@@ -10,6 +10,10 @@ class Aluno {
   final String? fotoUrl;
   final bool inadimplente;
   final bool emRisco;
+  final String? whatsapp;
+  final String? genero;
+  final String? tipoConsultoria;
+  final String statusFinanceiro;
 
   Aluno({
     required this.id,
@@ -20,6 +24,10 @@ class Aluno {
     this.fotoUrl,
     this.inadimplente = false,
     this.emRisco = false,
+    this.whatsapp,
+    this.genero,
+    this.tipoConsultoria,
+    this.statusFinanceiro = 'ATIVO',
   });
 
   factory Aluno.fromJson(Map<String, dynamic> json) => Aluno(
@@ -31,6 +39,10 @@ class Aluno {
         fotoUrl: json['fotoUrl'] as String?,
         inadimplente: json['inadimplente'] as bool? ?? false,
         emRisco: json['emRisco'] as bool? ?? false,
+        whatsapp: json['whatsapp'] as String?,
+        genero: json['genero'] as String?,
+        tipoConsultoria: json['tipoConsultoria'] as String?,
+        statusFinanceiro: json['statusFinanceiro'] as String? ?? 'ATIVO',
       );
 }
 
@@ -50,12 +62,28 @@ class AlunoRepository {
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<Aluno> criar(String nome, String email, String? objetivo) async {
+  Future<Aluno> criar({
+    required String nome,
+    required String email,
+    String? objetivo,
+    String? whatsapp,
+    String? genero,
+    String? tipoConsultoria,
+  }) async {
     final response = await _dio.post('/api/alunos', data: {
       'nome': nome,
       'email': email,
       if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+      if (whatsapp != null && whatsapp.isNotEmpty) 'whatsapp': whatsapp,
+      if (genero != null && genero.isNotEmpty) 'genero': genero,
+      if (tipoConsultoria != null && tipoConsultoria.isNotEmpty)
+        'tipoConsultoria': tipoConsultoria,
     });
     return Aluno.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<void> atualizarStatusFinanceiro(int alunoId, String status) async {
+    await _dio.patch('/api/alunos/$alunoId/status-financeiro',
+        data: {'status': status});
   }
 }
