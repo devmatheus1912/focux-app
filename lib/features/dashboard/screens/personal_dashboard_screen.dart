@@ -110,6 +110,11 @@ class PersonalDashboardScreen extends ConsumerWidget {
                 label: 'Feed de Conteúdo',
                 onTap: () => context.push('/feed'),
               ),
+              _MenuButton(
+                icon: Icons.people_alt,
+                label: 'Funil de Leads',
+                onTap: () => context.push('/leads'),
+              ),
               if (ref.watch(isAdminProvider))
                 _MenuButton(
                   icon: Icons.admin_panel_settings,
