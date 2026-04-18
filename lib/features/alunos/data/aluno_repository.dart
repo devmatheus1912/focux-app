@@ -10,6 +10,7 @@ class Aluno {
   final String? fotoUrl;
   final bool inadimplente;
   final bool emRisco;
+  final String? telefone;
   final String? whatsapp;
   final String? genero;
   final String? tipoConsultoria;
@@ -24,6 +25,7 @@ class Aluno {
     this.fotoUrl,
     this.inadimplente = false,
     this.emRisco = false,
+    this.telefone,
     this.whatsapp,
     this.genero,
     this.tipoConsultoria,
@@ -39,6 +41,7 @@ class Aluno {
         fotoUrl: json['fotoUrl'] as String?,
         inadimplente: json['inadimplente'] as bool? ?? false,
         emRisco: json['emRisco'] as bool? ?? false,
+        telefone: json['telefone'] as String?,
         whatsapp: json['whatsapp'] as String?,
         genero: json['genero'] as String?,
         tipoConsultoria: json['tipoConsultoria'] as String?,
