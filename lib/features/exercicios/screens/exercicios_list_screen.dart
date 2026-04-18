@@ -25,11 +25,14 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   String _categoriaFiltro = 'Todos';
   bool _apenasFavoritos = false;
   final _tagCtrl = TextEditingController();
+  final _nomeCtrl = TextEditingController();
   String _tagFiltro = '';
+  String _nomeFiltro = '';
 
   @override
   void dispose() {
     _tagCtrl.dispose();
+    _nomeCtrl.dispose();
     super.dispose();
   }
 
@@ -69,9 +72,33 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       ),
       body: Column(
         children: [
-          // Filtro por tag
+          // Busca por nome
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+            child: TextField(
+              controller: _nomeCtrl,
+              decoration: InputDecoration(
+                hintText: 'Buscar por nome',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _nomeFiltro.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _nomeCtrl.clear();
+                          setState(() => _nomeFiltro = '');
+                        },
+                      )
+                    : null,
+                isDense: true,
+                border: const OutlineInputBorder(),
+              ),
+              onChanged: (v) => setState(() => _nomeFiltro = v.trim()),
+            ),
+          ),
+          const SizedBox(height: 6),
+          // Filtro por tag
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
             child: TextField(
               controller: _tagCtrl,
               decoration: InputDecoration(
@@ -116,18 +143,28 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
             child: exerciciosAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Erro: $e')),
-              data: (exercicios) => exercicios.isEmpty
-                  ? const Center(child: Text('Nenhum exercício encontrado.'))
-                  : RefreshIndicator(
-                      onRefresh: () async => ref.invalidate(exerciciosFilteredProvider),
-                      child: ListView.builder(
-                        itemCount: exercicios.length,
-                        itemBuilder: (context, i) => _ExercicioTile(
-                          exercicio: exercicios[i],
-                          onFavoritoToggle: () => ref.invalidate(exerciciosFilteredProvider),
-                        ),
-                      ),
+              data: (exercicios) {
+                final filtrados = _nomeFiltro.isEmpty
+                    ? exercicios
+                    : exercicios
+                        .where((e) => e.nome
+                            .toLowerCase()
+                            .contains(_nomeFiltro.toLowerCase()))
+                        .toList();
+                if (filtrados.isEmpty) {
+                  return const Center(child: Text('Nenhum exercício encontrado.'));
+                }
+                return RefreshIndicator(
+                  onRefresh: () async => ref.invalidate(exerciciosFilteredProvider),
+                  child: ListView.builder(
+                    itemCount: filtrados.length,
+                    itemBuilder: (context, i) => _ExercicioTile(
+                      exercicio: filtrados[i],
+                      onFavoritoToggle: () => ref.invalidate(exerciciosFilteredProvider),
                     ),
+                  ),
+                );
+              },
             ),
           ),
         ],

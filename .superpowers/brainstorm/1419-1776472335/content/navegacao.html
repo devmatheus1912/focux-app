@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focux — Estilo de Navegação</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #222; padding: 24px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #717171; margin-bottom: 28px; }
+
+  .options-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+
+  .option-card {
+    background: white;
+    border-radius: 16px;
+    border: 2.5px solid #e0e0e0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    width: 280px;
+    flex-shrink: 0;
+  }
+  .option-card:hover { border-color: #aaa; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+  .option-card.selected { border-color: #FF5A5F; box-shadow: 0 0 0 3px rgba(255,90,95,0.15); }
+
+  .phone-wrap {
+    background: #1a1a1a;
+    padding: 10px 8px;
+    border-radius: 20px;
+    margin: 16px auto;
+    width: 200px;
+    position: relative;
+  }
+  .phone-screen {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 380px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Shared phone components */
+  .phone-statusbar {
+    background: #fff;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    font-size: 8px;
+    color: #222;
+    font-weight: 600;
+  }
+  .phone-appbar {
+    padding: 8px 12px 6px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .phone-appbar-title { font-size: 13px; font-weight: 700; color: #222; }
+  .phone-appbar-sub { font-size: 9px; color: #717171; margin-top: 1px; }
+  .phone-body { flex: 1; padding: 10px; overflow: hidden; background: #f9f9f9; }
+
+  /* Card styles */
+  .mini-card {
+    background: white;
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #efefef;
+  }
+  .mini-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .mini-text { font-size: 9px; font-weight: 600; color: #222; }
+  .mini-sub { font-size: 8px; color: #717171; margin-top: 1px; }
+  .mini-chevron { margin-left: auto; color: #ccc; font-size: 10px; }
+
+  /* Stats row */
+  .stats-row { display: flex; gap: 5px; margin-bottom: 8px; }
+  .stat-box { flex: 1; background: white; border-radius: 8px; padding: 6px 4px; text-align: center; border: 1px solid #efefef; }
+  .stat-num { font-size: 14px; font-weight: 800; color: #222; }
+  .stat-lbl { font-size: 7px; color: #717171; margin-top: 1px; }
+
+  /* Option A - Bottom Nav 5 tabs */
+  .bottom-nav-a {
+    background: white;
+    border-top: 1px solid #efefef;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+  .nav-item-a { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; cursor: pointer; }
+  .nav-icon-a { font-size: 16px; }
+  .nav-lbl-a { font-size: 7px; font-weight: 500; color: #aaa; }
+  .nav-item-a.active .nav-lbl-a { color: #FF5A5F; font-weight: 700; }
+
+  /* Option B - Bottom Nav 4 tabs + FAB */
+  .bottom-nav-b {
+    background: white;
+    border-top: 1px solid #efefef;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 4px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .nav-item-b { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+  .nav-icon-b { font-size: 16px; }
+  .nav-lbl-b { font-size: 7px; color: #aaa; }
+  .nav-item-b.active .nav-lbl-b { color: #FF5A5F; font-weight: 700; }
+  .fab-center {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 42px;
+    height: 42px;
+    background: #FF5A5F;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(255,90,95,0.4);
+  }
+
+  /* Option C - Drawer + Tabs */
+  .phone-appbar-c {
+    padding: 8px 10px 6px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hamburger { font-size: 14px; color: #222; }
+  .tab-bar {
+    display: flex;
+    border-bottom: 1px solid #efefef;
+    background: white;
+    flex-shrink: 0;
+  }
+  .tab-item {
+    flex: 1;
+    text-align: center;
+    font-size: 8px;
+    font-weight: 600;
+    padding: 6px 2px;
+    color: #aaa;
+  }
+  .tab-item.active { color: #FF5A5F; border-bottom: 2px solid #FF5A5F; }
+  .drawer-overlay {
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+  }
+  .drawer-panel {
+    background: white;
+    width: 65%;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .drawer-header { font-size: 11px; font-weight: 800; color: #222; margin-bottom: 8px; }
+  .drawer-item { font-size: 9px; color: #444; padding: 5px 0; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid #f5f5f5; }
+  .drawer-item-icon { font-size: 12px; }
+
+  .card-label {
+    padding: 12px 14px 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #222;
+    letter-spacing: 0.2px;
+  }
+  .card-desc {
+    padding: 0 14px 12px;
+    font-size: 11px;
+    color: #717171;
+    line-height: 1.4;
+  }
+  .selected-badge {
+    display: none;
+    background: #FF5A5F;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin: 0 14px 10px;
+    width: fit-content;
+  }
+  .option-card.selected .selected-badge { display: block; }
+
+  .section-title { font-size: 12px; font-weight: 700; color: #444; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<h1>Qual padrão de navegação?</h1>
+<p class="subtitle">Escolha como o usuário vai se mover pelo app no estilo Airbnb</p>
+
+<div class="options-grid">
+
+  <!-- OPTION A -->
+  <div class="option-card" onclick="select(this,'a')">
+    <div class="phone-wrap">
+      <div class="phone-screen">
+        <div class="phone-statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="phone-appbar">
+          <div class="phone-appbar-title">Olá, Matheus 👋</div>
+          <div class="phone-appbar-sub">5 alunos ativos hoje</div>
+        </div>
+        <div class="phone-body">
+          <div class="stats-row">
+            <div class="stat-box"><div class="stat-num">12</div><div class="stat-lbl">Alunos</div></div>
+            <div class="stat-box"><div class="stat-num">8</div><div class="stat-lbl">Treinos</div></div>
+            <div class="stat-box"><div class="stat-num">3</div><div class="stat-lbl">Hoje</div></div>
+          </div>
+          <div class="section-title">Acesso rápido</div>
+          <div class="mini-card"><div class="mini-icon" style="background:#FFF0F0">👥</div><div><div class="mini-text">Alunos</div><div class="mini-sub">12 cadastrados</div></div><div class="mini-chevron">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#F0F4FF">🏋️</div><div><div class="mini-text">Treinos</div><div class="mini-sub">8 criados</div></div><div class="mini-chevron">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#F0FFF4">📅</div><div><div class="mini-text">Agenda</div><div class="mini-sub">3 sessões hoje</div></div><div class="mini-chevron">›</div></div>
+        </div>
+        <div class="bottom-nav-a">
+          <div class="nav-item-a active"><span class="nav-icon-a">🏠</span><span class="nav-lbl-a" style="color:#FF5A5F">Home</span></div>
+          <div class="nav-item-a"><span class="nav-icon-a">👥</span><span class="nav-lbl-a">Alunos</span></div>
+          <div class="nav-item-a"><span class="nav-icon-a">🏋️</span><span class="nav-lbl-a">Treinos</span></div>
+          <div class="nav-item-a"><span class="nav-icon-a">📅</span><span class="nav-lbl-a">Agenda</span></div>
+          <div class="nav-item-a"><span class="nav-icon-a">👤</span><span class="nav-lbl-a">Perfil</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">A — Bottom Nav (5 abas)</div>
+    <div class="card-desc">Estilo Airbnb clássico. 5 ícones fixos na base. Acesso direto às seções principais. Sem gestos extras.</div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+  <!-- OPTION B -->
+  <div class="option-card" onclick="select(this,'b')">
+    <div class="phone-wrap">
+      <div class="phone-screen">
+        <div class="phone-statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="phone-appbar">
+          <div class="phone-appbar-title">Olá, Matheus 👋</div>
+          <div class="phone-appbar-sub">5 alunos ativos hoje</div>
+        </div>
+        <div class="phone-body">
+          <div class="stats-row">
+            <div class="stat-box"><div class="stat-num">12</div><div class="stat-lbl">Alunos</div></div>
+            <div class="stat-box"><div class="stat-num">8</div><div class="stat-lbl">Treinos</div></div>
+            <div class="stat-box"><div class="stat-num">3</div><div class="stat-lbl">Hoje</div></div>
+          </div>
+          <div class="section-title">Recentes</div>
+          <div class="mini-card"><div class="mini-icon" style="background:#FFF0F0">👤</div><div><div class="mini-text">João Silva</div><div class="mini-sub">Check-in há 2h</div></div><div class="mini-chevron">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#F0F4FF">📋</div><div><div class="mini-text">Treino ABC</div><div class="mini-sub">Atribuído ontem</div></div><div class="mini-chevron">›</div></div>
+        </div>
+        <div class="bottom-nav-b">
+          <div class="nav-item-b"><span class="nav-icon-b">👥</span><span class="nav-lbl-b">Alunos</span></div>
+          <div class="nav-item-b"><span class="nav-icon-b">🏋️</span><span class="nav-lbl-b">Treinos</span></div>
+          <div class="fab-center">＋</div>
+          <div class="nav-item-b active"><span class="nav-icon-b">📅</span><span class="nav-lbl-b" style="color:#FF5A5F">Agenda</span></div>
+          <div class="nav-item-b"><span class="nav-icon-b">👤</span><span class="nav-lbl-b">Perfil</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">B — Bottom Nav + FAB central</div>
+    <div class="card-desc">4 abas com botão "＋" flutuante no centro para ação rápida (novo aluno / treino / check-in). Estilo Instagram/Airbnb moderno.</div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+  <!-- OPTION C -->
+  <div class="option-card" onclick="select(this,'c')">
+    <div class="phone-wrap">
+      <div class="phone-screen">
+        <div class="phone-statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="phone-appbar-c">
+          <span class="hamburger">☰</span>
+          <div style="flex:1">
+            <div class="phone-appbar-title">Dashboard</div>
+          </div>
+          <span style="font-size:14px">🔔</span>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active">Visão Geral</div>
+          <div class="tab-item">Alunos</div>
+          <div class="tab-item">Treinos</div>
+          <div class="tab-item">Mais</div>
+        </div>
+        <div class="phone-body" style="position:relative; padding:0;">
+          <div class="drawer-overlay">
+            <div class="drawer-panel">
+              <div class="drawer-header">Focux</div>
+              <div class="drawer-item"><span class="drawer-item-icon">🏠</span> Dashboard</div>
+              <div class="drawer-item"><span class="drawer-item-icon">👥</span> Alunos</div>
+              <div class="drawer-item"><span class="drawer-item-icon">🏋️</span> Treinos</div>
+              <div class="drawer-item"><span class="drawer-item-icon">📅</span> Agenda</div>
+              <div class="drawer-item"><span class="drawer-item-icon">💰</span> Financeiro</div>
+              <div class="drawer-item"><span class="drawer-item-icon">🤖</span> IA Assistente</div>
+              <div class="drawer-item"><span class="drawer-item-icon">👤</span> Perfil</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">C — Drawer lateral + Tabs</div>
+    <div class="card-desc">Menu gaveta para todas as seções. Tabs no topo para sub-navegação. Acomoda melhor as 20+ telas do app.</div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+</div>
+
+<script>
+  let selected = null;
+  function select(el, choice) {
+    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selected = choice;
+    if (window.__companion) window.__companion.recordChoice(choice, el.querySelector('.card-label').textContent);
+  }
+</script>
+
+</body>
+</html>

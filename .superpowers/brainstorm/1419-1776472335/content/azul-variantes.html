@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focux — Tom de Azul</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #222; padding: 24px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #717171; margin-bottom: 28px; }
+  .options-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+  .option-card { background: white; border-radius: 16px; border: 2.5px solid #e0e0e0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; width: 220px; flex-shrink: 0; }
+  .option-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+  .option-card.selected { border-color: #333; box-shadow: 0 0 0 3px rgba(0,0,0,0.12); }
+  .selected-badge { display: none; background: #222; color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin: 0 14px 10px; width: fit-content; }
+  .option-card.selected .selected-badge { display: block; }
+
+  .phone-wrap { background: #1a1a1a; padding: 8px 7px; border-radius: 18px; margin: 14px auto; width: 180px; }
+  .phone-screen { border-radius: 10px; overflow: hidden; height: 300px; display: flex; flex-direction: column; background: #F0F4FF; }
+  .statusbar { height: 16px; display: flex; align-items: center; justify-content: space-between; padding: 0 9px; font-size: 7px; font-weight: 600; color: white; }
+  .appbar { padding: 8px 10px 7px; }
+  .appbar-title { font-size: 11px; font-weight: 700; color: white; }
+  .appbar-sub { font-size: 8px; color: rgba(255,255,255,0.7); margin-top: 1px; }
+  .body { flex: 1; padding: 9px; overflow: hidden; background: #F0F4FF; }
+  .stats-row { display: flex; gap: 4px; margin-bottom: 7px; }
+  .stat-box { flex: 1; background: white; border-radius: 8px; padding: 6px 3px; text-align: center; }
+  .stat-num { font-size: 14px; font-weight: 800; }
+  .stat-lbl { font-size: 6px; color: #717171; margin-top: 1px; }
+  .mini-card { background: white; border-radius: 9px; padding: 7px 9px; margin-bottom: 5px; display: flex; align-items: center; gap: 7px; }
+  .mini-icon { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .mini-text { font-size: 8px; font-weight: 600; color: #222; }
+  .mini-sub { font-size: 7px; color: #717171; }
+  .mini-chev { margin-left: auto; color: #ccc; font-size: 9px; }
+  .btn { width: 100%; border: none; border-radius: 7px; padding: 8px; font-size: 9px; font-weight: 700; color: white; margin-top: 7px; }
+
+  .card-label { padding: 6px 14px 2px; font-size: 12px; font-weight: 700; color: #222; }
+  .hex-tag { padding: 0 14px 4px; font-size: 11px; font-family: monospace; color: #555; }
+  .card-desc { padding: 0 14px 12px; font-size: 11px; color: #717171; line-height: 1.4; }
+
+  .swatch-bar { height: 8px; width: 100%; }
+</style>
+</head>
+<body>
+
+<h1>Qual tom de azul?</h1>
+<p class="subtitle">Todos seguem o layout Airbnb — só muda a intensidade do azul principal</p>
+
+<div class="options-grid">
+
+  <!-- A: #1A3FBF — levíssimo mais claro -->
+  <div class="option-card" onclick="pick(this,'a')">
+    <div class="swatch-bar" style="background:#1A3FBF"></div>
+    <div class="phone-wrap">
+      <div class="phone-screen">
+        <div class="statusbar" style="background:#1A3FBF">9:41 <span>●●●</span></div>
+        <div class="appbar" style="background:#1A3FBF">
+          <div class="appbar-title">Olá, Matheus 👋</div>
+          <div class="appbar-sub">5 alunos ativos hoje</div>
+        </div>
+        <div class="body">
+          <div class="stats-row">
+            <div class="stat-box"><div class="stat-num" style="color:#1A3FBF">12</div><div class="stat-lbl">Alunos</div></div>
+            <div class="stat-box"><div class="stat-num" style="color:#1A3FBF">8</div><div class="stat-lbl">Treinos</div></div>
+            <div class="stat-box"><div class="stat-num" style="color:#1A3FBF">3</div><div class="stat-lbl">Hoje</div></div>
+          </div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EEF2FF">👥</div><div><div class="mini-text">Alunos</div><div class="mini-sub">12 ativos</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#E8F0FF">🏋️</div><div><div class="mini-text">Treinos</div><div class="mini-sub">8 criados</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EDF9F0">📅</div><div><div class="mini-text">Agenda</div><div class="mini-sub">3 hoje</div></div><div class="mini-chev">›</div></div>
+          <button class="btn" style="background:#1A3FBF">+ Novo Aluno</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">A — Levíssimo (+10%)</div>
+    <div class="hex-tag">#1A3FBF</div>
+    <div class="card-desc">Quase igual ao original, mínima diferença. Mais seguro.</div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+  <!-- B: #1E50D4 — clarinho -->
+  <div class="option-card" onclick="pick(this,'b')">
+    <div class="swatch-bar" style="background:#1E50D4"></div>
+    <div class="phone-wrap">
+      <div class="phone-screen">
+        <div class="statusbar" style="background:#1E50D4">9:41 <span>●●●</span></div>
+        <div class="appbar" style="background:#1E50D4">
+          <div class="appbar-title">Olá, Matheus 👋</div>
+          <div class="appbar-sub">5 alunos ativos hoje</div>
+        </div>
+        <div class="body">
+          <div class="stats-row">
+            <div class="stat-box"><div class="stat-num" style="color:#1E50D4">12</div><div class="stat-lbl">Alunos</div></div>
+            <div class="stat-box"><div class="stat-num" style="color:#1E50D4">8</div><div class="stat-lbl">Treinos</div></div>
+            <div class="stat-box"><div class="stat-num" style="color:#1E50D4">3</div><div class="stat-lbl">Hoje</div></div>
+          </div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EEF2FF">👥</div><div><div class="mini-text">Alunos</div><div class="mini-sub">12 ativos</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#E8F0FF">🏋️</div><div><div class="mini-text">Treinos</div><div class="mini-sub">8 criados</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EDF9F0">📅</div><div><div class="mini-text">Agenda</div><div class="mini-sub">3 hoje</div></div><div class="mini-chev">›</div></div>
+          <button class="btn" style="background:#1E50D4">+ Novo Aluno</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">B — Pouco mais claro (+20%)</div>
+    <div class="hex-tag">#1E50D4</div>
+    <div class="card-desc">Perceptível mas ainda profundo. Ponto doce entre escuro e vibrante.</div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+  <!-- C: #2563EB — azul Tailwind/moderno -->
+  <div class="option-card" onclick="pick(this,'c')">
+    <div class="swatch-bar" style="background:#2563EB"></div>
+    <div class="phone-wrap">
+      <div class="phone-screen">
+        <div class="statusbar" style="background:#2563EB">9:41 <span>●●●</span></div>
+        <div class="appbar" style="background:#2563EB">
+          <div class="appbar-title">Olá, Matheus 👋</div>
+          <div class="appbar-sub">5 alunos ativos hoje</div>
+        </div>
+        <div class="body">
+          <div class="stats-row">
+            <div class="stat-box"><div class="stat-num" style="color:#2563EB">12</div><div class="stat-lbl">Alunos</div></div>
+            <div class="stat-box"><div class="stat-num" style="color:#2563EB">8</div><div class="stat-lbl">Treinos</div></div>
+            <div class="stat-box"><div class="stat-num" style="color:#2563EB">3</div><div class="stat-lbl">Hoje</div></div>
+          </div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EEF2FF">👥</div><div><div class="mini-text">Alunos</div><div class="mini-sub">12 ativos</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#E8F0FF">🏋️</div><div><div class="mini-text">Treinos</div><div class="mini-sub">8 criados</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EDF9F0">📅</div><div><div class="mini-text">Agenda</div><div class="mini-sub">3 hoje</div></div><div class="mini-chev">›</div></div>
+          <button class="btn" style="background:#2563EB">+ Novo Aluno</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">C — Vibrante (+35%)</div>
+    <div class="hex-tag">#2563EB</div>
+    <div class="card-desc">Azul Tailwind blue-600. Moderno, energético, muito usado em SaaS.</div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+</div>
+
+<script>
+  function pick(el, choice) {
+    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    if (window.__companion) window.__companion.recordChoice(choice, el.querySelector('.card-label').textContent);
+  }
+</script>
+</body>
+</html>

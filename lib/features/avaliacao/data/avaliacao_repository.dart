@@ -5,9 +5,36 @@ class AvaliacaoFisica {
   final int id;
   final double? pesoKg, alturaCm, percGordura, percMassa, cinturaCm, quadrilCm;
   final String? observacoes, avaliadoEm;
+  final double? imc;
+  final double? percentualGordura;
+  final double? massaMuscular;
+  final double? circCintura;
+  final double? circQuadril;
+  final double? circBraco;
+  final double? circCoxa;
+  final String? observacoesAvaliacao;
+  final bool enviadaAoAluno;
 
-  AvaliacaoFisica({required this.id, this.pesoKg, this.alturaCm, this.percGordura,
-      this.percMassa, this.cinturaCm, this.quadrilCm, this.observacoes, this.avaliadoEm});
+  AvaliacaoFisica({
+    required this.id,
+    this.pesoKg,
+    this.alturaCm,
+    this.percGordura,
+    this.percMassa,
+    this.cinturaCm,
+    this.quadrilCm,
+    this.observacoes,
+    this.avaliadoEm,
+    this.imc,
+    this.percentualGordura,
+    this.massaMuscular,
+    this.circCintura,
+    this.circQuadril,
+    this.circBraco,
+    this.circCoxa,
+    this.observacoesAvaliacao,
+    this.enviadaAoAluno = false,
+  });
 
   factory AvaliacaoFisica.fromJson(Map<String, dynamic> j) => AvaliacaoFisica(
     id: j['id'] as int,
@@ -19,6 +46,15 @@ class AvaliacaoFisica {
     quadrilCm: (j['quadrilCm'] as num?)?.toDouble(),
     observacoes: j['observacoes'] as String?,
     avaliadoEm: j['avaliadoEm'] as String?,
+    imc: (j['imc'] as num?)?.toDouble(),
+    percentualGordura: (j['percentualGordura'] as num?)?.toDouble(),
+    massaMuscular: (j['massaMuscular'] as num?)?.toDouble(),
+    circCintura: (j['circCintura'] as num?)?.toDouble(),
+    circQuadril: (j['circQuadril'] as num?)?.toDouble(),
+    circBraco: (j['circBraco'] as num?)?.toDouble(),
+    circCoxa: (j['circCoxa'] as num?)?.toDouble(),
+    observacoesAvaliacao: j['observacoesAvaliacao'] as String?,
+    enviadaAoAluno: j['enviadaAoAluno'] as bool? ?? false,
   );
 }
 

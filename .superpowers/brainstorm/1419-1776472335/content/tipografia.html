@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focux — Tipografia</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, sans-serif; background: #f5f5f5; color: #222; padding: 24px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #717171; margin-bottom: 28px; }
+  .options-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+
+  .option-card { background: white; border-radius: 16px; border: 2.5px solid #e0e0e0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; width: 240px; flex-shrink: 0; }
+  .option-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+  .option-card.selected { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+  .selected-badge { display: none; background: #2563EB; color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin: 0 14px 10px; width: fit-content; }
+  .option-card.selected .selected-badge { display: block; }
+
+  .phone-wrap { background: #1a1a1a; padding: 8px 7px; border-radius: 18px; margin: 14px auto; width: 190px; }
+  .phone-screen { border-radius: 10px; overflow: hidden; height: 310px; display: flex; flex-direction: column; background: #F0F4FF; }
+  .statusbar { height: 16px; display: flex; align-items: center; justify-content: space-between; padding: 0 9px; font-size: 7px; font-weight: 600; color: white; background: #2563EB; }
+  .appbar { padding: 9px 11px 8px; background: #2563EB; }
+  .body { flex: 1; padding: 10px; overflow: hidden; background: #F0F4FF; }
+  .stats-row { display: flex; gap: 5px; margin-bottom: 8px; }
+  .stat-box { flex: 1; background: white; border-radius: 9px; padding: 7px 4px; text-align: center; }
+  .mini-card { background: white; border-radius: 9px; padding: 8px 10px; margin-bottom: 5px; display: flex; align-items: center; gap: 7px; }
+  .mini-icon { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .mini-chev { margin-left: auto; color: #ccc; font-size: 10px; }
+
+  .card-label { padding: 6px 14px 2px; font-size: 12px; font-weight: 700; color: #222; font-family: -apple-system, sans-serif; }
+  .card-tag { padding: 0 14px 3px; font-size: 10px; color: #2563EB; font-family: monospace; }
+  .card-desc { padding: 0 14px 12px; font-size: 11px; color: #717171; line-height: 1.4; font-family: -apple-system, sans-serif; }
+
+  /* DM Sans */
+  .dm { font-family: 'DM Sans', sans-serif; }
+  /* Plus Jakarta */
+  .jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+  /* Poppins */
+  .poppins { font-family: 'Poppins', sans-serif; }
+  /* Inter */
+  .inter { font-family: 'Inter', sans-serif; }
+</style>
+</head>
+<body>
+
+<h1>Qual tipografia?</h1>
+<p class="subtitle">O Airbnb usa fonte geométrica própria — estas são as mais próximas disponíveis no Flutter</p>
+
+<div class="options-grid">
+
+  <!-- DM Sans -->
+  <div class="option-card" onclick="pick(this,'a')">
+    <div class="phone-wrap">
+      <div class="phone-screen dm">
+        <div class="statusbar">9:41 <span>●●●</span></div>
+        <div class="appbar">
+          <div style="font-size:13px;font-weight:700;color:white">Olá, Matheus 👋</div>
+          <div style="font-size:8px;color:rgba(255,255,255,0.7);margin-top:2px">5 alunos ativos hoje</div>
+        </div>
+        <div class="body">
+          <div class="stats-row">
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">12</div><div style="font-size:7px;color:#717171;margin-top:1px">Alunos</div></div>
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">8</div><div style="font-size:7px;color:#717171;margin-top:1px">Treinos</div></div>
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">3</div><div style="font-size:7px;color:#717171;margin-top:1px">Hoje</div></div>
+          </div>
+          <div style="font-size:8px;font-weight:700;color:#999;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px">Acesso rápido</div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EEF2FF">👥</div><div><div style="font-size:9px;font-weight:600;color:#222">Alunos</div><div style="font-size:7px;color:#717171">12 ativos</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#E8F0FF">🏋️</div><div><div style="font-size:9px;font-weight:600;color:#222">Treinos</div><div style="font-size:7px;color:#717171">8 criados</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EDF9F0">📅</div><div><div style="font-size:9px;font-weight:600;color:#222">Agenda</div><div style="font-size:7px;color:#717171">3 hoje</div></div><div class="mini-chev">›</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">A — DM Sans</div>
+    <div class="card-tag">google_fonts: DmSans</div>
+    <div class="card-desc">Mais próxima do Airbnb Cereal. Geométrica, limpa, moderna. Recomendada.</div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+  <!-- Plus Jakarta Sans -->
+  <div class="option-card" onclick="pick(this,'b')">
+    <div class="phone-wrap">
+      <div class="phone-screen jakarta">
+        <div class="statusbar">9:41 <span>●●●</span></div>
+        <div class="appbar">
+          <div style="font-size:13px;font-weight:700;color:white">Olá, Matheus 👋</div>
+          <div style="font-size:8px;color:rgba(255,255,255,0.7);margin-top:2px">5 alunos ativos hoje</div>
+        </div>
+        <div class="body">
+          <div class="stats-row">
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">12</div><div style="font-size:7px;color:#717171;margin-top:1px">Alunos</div></div>
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">8</div><div style="font-size:7px;color:#717171;margin-top:1px">Treinos</div></div>
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">3</div><div style="font-size:7px;color:#717171;margin-top:1px">Hoje</div></div>
+          </div>
+          <div style="font-size:8px;font-weight:700;color:#999;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px">Acesso rápido</div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EEF2FF">👥</div><div><div style="font-size:9px;font-weight:600;color:#222">Alunos</div><div style="font-size:7px;color:#717171">12 ativos</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#E8F0FF">🏋️</div><div><div style="font-size:9px;font-weight:600;color:#222">Treinos</div><div style="font-size:7px;color:#717171">8 criados</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EDF9F0">📅</div><div><div style="font-size:9px;font-weight:600;color:#222">Agenda</div><div style="font-size:7px;color:#717171">3 hoje</div></div><div class="mini-chev">›</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">B — Plus Jakarta Sans</div>
+    <div class="card-tag">google_fonts: PlusJakartaSans</div>
+    <div class="card-desc">Mais personalidade que DM Sans. Ligeiramente mais alta, elegante. Muito usada em SaaS premium.</div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+  <!-- Poppins -->
+  <div class="option-card" onclick="pick(this,'c')">
+    <div class="phone-wrap">
+      <div class="phone-screen poppins">
+        <div class="statusbar">9:41 <span>●●●</span></div>
+        <div class="appbar">
+          <div style="font-size:13px;font-weight:700;color:white">Olá, Matheus 👋</div>
+          <div style="font-size:8px;color:rgba(255,255,255,0.7);margin-top:2px">5 alunos ativos hoje</div>
+        </div>
+        <div class="body">
+          <div class="stats-row">
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">12</div><div style="font-size:7px;color:#717171;margin-top:1px">Alunos</div></div>
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">8</div><div style="font-size:7px;color:#717171;margin-top:1px">Treinos</div></div>
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">3</div><div style="font-size:7px;color:#717171;margin-top:1px">Hoje</div></div>
+          </div>
+          <div style="font-size:8px;font-weight:700;color:#999;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px">Acesso rápido</div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EEF2FF">👥</div><div><div style="font-size:9px;font-weight:600;color:#222">Alunos</div><div style="font-size:7px;color:#717171">12 ativos</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#E8F0FF">🏋️</div><div><div style="font-size:9px;font-weight:600;color:#222">Treinos</div><div style="font-size:7px;color:#717171">8 criados</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EDF9F0">📅</div><div><div style="font-size:9px;font-weight:600;color:#222">Agenda</div><div style="font-size:7px;color:#717171">3 hoje</div></div><div class="mini-chev">›</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">C — Poppins</div>
+    <div class="card-tag">google_fonts: Poppins</div>
+    <div class="card-desc">Mais arredondada e amigável. Menos corporativa, mais "app de fitness jovem".</div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+  <!-- Inter -->
+  <div class="option-card" onclick="pick(this,'d')">
+    <div class="phone-wrap">
+      <div class="phone-screen inter">
+        <div class="statusbar">9:41 <span>●●●</span></div>
+        <div class="appbar">
+          <div style="font-size:13px;font-weight:700;color:white">Olá, Matheus 👋</div>
+          <div style="font-size:8px;color:rgba(255,255,255,0.7);margin-top:2px">5 alunos ativos hoje</div>
+        </div>
+        <div class="body">
+          <div class="stats-row">
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">12</div><div style="font-size:7px;color:#717171;margin-top:1px">Alunos</div></div>
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">8</div><div style="font-size:7px;color:#717171;margin-top:1px">Treinos</div></div>
+            <div class="stat-box"><div style="font-size:16px;font-weight:800;color:#2563EB">3</div><div style="font-size:7px;color:#717171;margin-top:1px">Hoje</div></div>
+          </div>
+          <div style="font-size:8px;font-weight:700;color:#999;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px">Acesso rápido</div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EEF2FF">👥</div><div><div style="font-size:9px;font-weight:600;color:#222">Alunos</div><div style="font-size:7px;color:#717171">12 ativos</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#E8F0FF">🏋️</div><div><div style="font-size:9px;font-weight:600;color:#222">Treinos</div><div style="font-size:7px;color:#717171">8 criados</div></div><div class="mini-chev">›</div></div>
+          <div class="mini-card"><div class="mini-icon" style="background:#EDF9F0">📅</div><div><div style="font-size:9px;font-weight:600;color:#222">Agenda</div><div style="font-size:7px;color:#717171">3 hoje</div></div><div class="mini-chev">›</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">D — Inter</div>
+    <div class="card-tag">google_fonts: Inter</div>
+    <div class="card-desc">Ultra neutra, legível, usada no Figma/Notion/Linear. Menos "identidade", mais "ferramenta".</div>
+    <div class="selected-badge">✓ Selecionado</div>
+  </div>
+
+</div>
+
+<script>
+  function pick(el, choice) {
+    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    if (window.__companion) window.__companion.recordChoice(choice, el.querySelector('.card-label').textContent);
+  }
+</script>
+</body>
+</html>

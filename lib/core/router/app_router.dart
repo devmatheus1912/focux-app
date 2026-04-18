@@ -41,6 +41,9 @@ import '../../features/alunos/data/aluno_repository.dart';
 import '../../features/auth/screens/esqueci_senha_screen.dart';
 import '../../features/ranking/screens/ranking_screen.dart';
 import '../../features/perfil/screens/identidade_visual_screen.dart';
+import '../../features/evolucao/screens/engajamento_screen.dart';
+import '../../features/alunos/screens/acoes_massa_screen.dart';
+import '../../features/ia/screens/ia_aluno_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -73,6 +76,10 @@ class AppRouter {
       GoRoute(
         path: '/alunos/novo',
         builder: (context, state) => const AddAlunoScreen(),
+      ),
+      GoRoute(
+        path: '/alunos/acoes-massa',
+        builder: (context, state) => const AcoesMassaScreen(),
       ),
       GoRoute(
         path: '/alunos/:id',
@@ -197,6 +204,18 @@ class AppRouter {
           alunoId: int.parse(state.pathParameters['id']!),
           alunoNome: state.extra as String? ?? 'Aluno',
         ),
+      ),
+      GoRoute(
+        path: '/alunos/:id/engajamento',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          final nome = state.extra as String? ?? 'Aluno';
+          return EngajamentoScreen(alunoId: id, alunoNome: nome);
+        },
+      ),
+      GoRoute(
+        path: '/ia/aluno',
+        builder: (context, state) => const IaAlunoScreen(),
       ),
       GoRoute(
         path: '/ia/copiloto',
