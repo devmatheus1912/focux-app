@@ -122,6 +122,30 @@ class FinanceiroDashboard {
   );
 }
 
+class ResumoMensal {
+  final double totalRecebido;
+  final double totalPrevisto;
+  final int inadimplentes;
+  final double ticketMedio;
+  final double acumuladoAnual;
+
+  ResumoMensal({
+    required this.totalRecebido,
+    required this.totalPrevisto,
+    required this.inadimplentes,
+    required this.ticketMedio,
+    required this.acumuladoAnual,
+  });
+
+  factory ResumoMensal.fromJson(Map<String, dynamic> j) => ResumoMensal(
+    totalRecebido: (j['totalRecebido'] as num).toDouble(),
+    totalPrevisto: (j['totalPrevisto'] as num).toDouble(),
+    inadimplentes: j['inadimplentes'] as int,
+    ticketMedio: (j['ticketMedio'] as num).toDouble(),
+    acumuladoAnual: (j['acumuladoAnual'] as num).toDouble(),
+  );
+}
+
 class FinanceiroRepository {
   final Dio _dio;
   FinanceiroRepository(ApiClient c) : _dio = c.dio;
@@ -169,5 +193,38 @@ class FinanceiroRepository {
   Future<PixData> gerarPix(int mensalidadeId) async {
     final r = await _dio.post('/api/financeiro/mensalidades/$mensalidadeId/pix');
     return PixData.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<Mensalidade> editarMensalidade(int id, {double? valor, String? mesReferencia, String? status}) async {
+    final body = <String, dynamic>{};
+    if (valor != null) body['valor'] = valor;
+    if (mesReferencia != null) body['mesReferencia'] = mesReferencia;
+    if (status != null) body['status'] = status;
+    final r = await _dio.put('/api/financeiro/mensalidades/$id', data: body);
+    return Mensalidade.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<List<Mensalidade>> listarPorNome(String nome) async {
+    final r = await _dio.get('/api/financeiro/mensalidades', queryParameters: {'nomeAluno': nome});
+    return (r.data as List).map((e) => Mensalidade.fromJson(e)).toList();
+  }
+
+  Future<ResumoMensal> resumoMensal(int ano, int mes) async {
+    final r = await _dio.get('/api/financeiro/resumo-mensal', queryParameters: {'ano': ano, 'mes': mes});
+    return ResumoMensal.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<String> cobrarViaChat(int id) async {
+    final r = await _dio.post('/api/financeiro/mensalidades/$id/cobrar-chat');
+    final data = r.data;
+    if (data is Map<String, dynamic>) {
+      return data['mensagem']?.toString() ?? data['message']?.toString() ?? 'Cobrança enviada!';
+    }
+    return data?.toString() ?? 'Cobrança enviada!';
+  }
+
+  Future<List<Mensalidade>> minhasMensalidades() async {
+    final r = await _dio.get('/api/financeiro/mensalidades/aluno/minhas');
+    return (r.data as List).map((e) => Mensalidade.fromJson(e)).toList();
   }
 }

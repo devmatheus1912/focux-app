@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
 
@@ -23,9 +24,56 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     } catch (_) { setState(() => _loading = false); }
   }
 
+  // AG2 — retorna badge "HOJE", "AMANHÃ" ou null
+  Widget? _dateBadge(DateTime inicio) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final day = DateTime(inicio.year, inicio.month, inicio.day);
+
+    if (day == today) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.red.shade100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Text('HOJE',
+              style: TextStyle(
+                  color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
+        ),
+      );
+    } else if (day == tomorrow) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.orange.shade100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Text('AMANHÃ',
+              style: TextStyle(
+                  color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)),
+        ),
+      );
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Agenda')),
+    appBar: AppBar(
+      title: const Text('Agenda'),
+      actions: [
+        // AG4 — navega para visão semanal
+        IconButton(
+          icon: const Icon(Icons.calendar_view_week),
+          tooltip: 'Visão semanal',
+          onPressed: () => context.push('/agenda/semanal'),
+        ),
+      ],
+    ),
     floatingActionButton: FloatingActionButton(
       onPressed: () async {
         await Navigator.push(context, MaterialPageRoute(builder: (_) => const _NovoAgendamentoScreen()));
@@ -43,6 +91,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                 itemBuilder: (_, i) {
                   final ag = _ags[i];
                   final inicio = ag.inicio;
+                  final badge = _dateBadge(inicio);
                   return Dismissible(
                     key: Key('ag_${ag.id}'),
                     direction: DismissDirection.endToStart,
@@ -61,7 +110,15 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                           Text('${inicio.day}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                           Text(_monthAbbr(inicio.month), style: const TextStyle(fontSize: 12)),
                         ]),
-                        title: Text(ag.titulo ?? ag.alunoNome),
+                        title: Row(
+                          children: [
+                            Expanded(child: Text(ag.titulo ?? ag.alunoNome)),
+                            if (badge != null) ...[
+                              const SizedBox(width: 8),
+                              badge,
+                            ],
+                          ],
+                        ),
                         subtitle: Text('${ag.alunoNome} • ${_hm(inicio)} – ${_hm(ag.fim)}'),
                         trailing: _statusChip(ag.status),
                       ),
@@ -95,10 +152,14 @@ class _NovoAgendamentoScreenState extends ConsumerState<_NovoAgendamentoScreen> 
   DateTime? _fim;
   bool _saving = false;
 
+  // AG1 — date picker livre: sem restrição de dia da semana, range amplo
   Future<void> _pickDateTime(bool isInicio) async {
-    final date = await showDatePicker(context: context,
-        initialDate: DateTime.now(), firstDate: DateTime.now(),
-        lastDate: DateTime.now().add(const Duration(days: 365)));
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+    );
     if (date == null || !mounted) return;
     final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
     if (time == null) return;
