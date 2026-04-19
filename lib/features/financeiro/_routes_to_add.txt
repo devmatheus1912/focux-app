@@ -1,0 +1,8 @@
+// Imports:
+import '../../features/financeiro/screens/financeiro_aluno_screen.dart';
+
+// Routes:
+GoRoute(
+  path: '/financeiro/aluno',
+  builder: (context, state) => const FinanceiroAlunoScreen(),
+),

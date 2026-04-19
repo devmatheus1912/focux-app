@@ -60,6 +60,13 @@ class AlunoDashboardScreen extends ConsumerWidget {
               subtitle: 'Tire dúvidas com inteligência artificial',
               onTap: () => context.push('/ia/chat'),
             ),
+            const SizedBox(height: 12),
+            _MenuButton(
+              icon: Icons.payments,
+              label: 'Financeiro',
+              subtitle: 'Veja suas mensalidades e situação financeira',
+              onTap: () => context.push('/financeiro/aluno'),
+            ),
           ],
         ),
       ),

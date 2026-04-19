@@ -93,6 +93,11 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       appBar: AppBar(
         title: const Text('Alertas de Risco'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Configurações',
+            onPressed: () => context.push('/alertas/config'),
+          ),
           if (_config != null)
             IconButton(
               icon: const Icon(Icons.tune),
@@ -130,7 +135,10 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                         itemCount: _filtrados.length,
                         itemBuilder: (_, i) => _AlertaCard(
                           alerta: _filtrados[i],
-                          onTap: () => context.push('/alunos/${_filtrados[i].alunoId}'),
+                          onTap: () => context.push(
+                            '/alertas/aluno/${_filtrados[i].alunoId}',
+                            extra: _filtrados[i].alunoNome,
+                          ),
                         ),
                       ),
               ),

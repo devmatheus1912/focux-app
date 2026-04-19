@@ -62,4 +62,14 @@ class AgendaRepository {
     });
     return Agendamento.fromJson(r.data);
   }
+
+  Future<List<Agendamento>> meusAgendamentos() async {
+    final r = await _dio.get('/api/agenda/aluno/meus');
+    return (r.data as List).map((e) => Agendamento.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<Agendamento> confirmarPresenca(int id) async {
+    final r = await _dio.post('/api/agenda/$id/confirmar');
+    return Agendamento.fromJson(r.data as Map<String, dynamic>);
+  }
 }

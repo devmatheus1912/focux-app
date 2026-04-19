@@ -507,46 +507,78 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
         ),
       ],
     ),
-    body: _loading
-        ? const Center(child: CircularProgressIndicator())
-        : _mensalidades.isEmpty
-            ? const Center(child: Text('Nenhuma mensalidade lançada.'))
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _mensalidades.length,
-                itemBuilder: (_, i) {
-                  final m = _mensalidades[i];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      title: Text(m.alunoNome),
-                      subtitle: Text('${m.mesReferencia.substring(0, 7)} • R\$ ${m.valor.toStringAsFixed(2)}'),
-                      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Chip(
-                          label: Text(m.status),
-                          backgroundColor: _statusColor(m.status).withValues(alpha: 0.15),
-                          labelStyle: TextStyle(color: _statusColor(m.status), fontSize: 12),
-                        ),
-                        if (m.status == 'PENDENTE' || m.status == 'ATRASADO') ...[
-                          IconButton(
-                            icon: const Icon(Icons.phone_in_talk, size: 20),
-                            tooltip: 'Registrar contato',
-                            onPressed: () => _registrarContato(m),
+    body: Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: TextField(
+            controller: _searchCtrl,
+            decoration: InputDecoration(
+              hintText: 'Buscar por nome do aluno...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchCtrl.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchCtrl.clear();
+                        setState(() => _filtered = _mensalidades);
+                      },
+                    )
+                  : null,
+              border: const OutlineInputBorder(),
+              isDense: true,
+            ),
+          ),
+        ),
+        Expanded(
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _filtered.isEmpty
+                  ? const Center(child: Text('Nenhuma mensalidade encontrada.'))
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+                      itemCount: _filtered.length,
+                      itemBuilder: (_, i) {
+                        final m = _filtered[i];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: ListTile(
+                            title: Text(m.alunoNome),
+                            subtitle: Text('${m.mesReferencia.substring(0, 7)} • R\$ ${m.valor.toStringAsFixed(2)}'),
+                            trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                              Chip(
+                                label: Text(m.status),
+                                backgroundColor: _statusColor(m.status).withValues(alpha: 0.15),
+                                labelStyle: TextStyle(color: _statusColor(m.status), fontSize: 12),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.edit, size: 20),
+                                tooltip: 'Editar mensalidade',
+                                onPressed: () => _editarMensalidade(m),
+                              ),
+                              if (m.status == 'PENDENTE' || m.status == 'ATRASADO') ...[
+                                IconButton(
+                                  icon: const Icon(Icons.phone_in_talk, size: 20),
+                                  tooltip: 'Registrar contato',
+                                  onPressed: () => _registrarContato(m),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.pix, color: Colors.teal),
+                                  onPressed: () => _mostrarPix(m.id),
+                                  tooltip: 'Gerar PIX',
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.check_circle_outline),
+                                  onPressed: () => _pagar(m.id),
+                                ),
+                              ],
+                            ]),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.pix, color: Colors.teal),
-                            onPressed: () => _mostrarPix(m.id),
-                            tooltip: 'Gerar PIX',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.check_circle_outline),
-                            onPressed: () => _pagar(m.id),
-                          ),
-                        ],
-                      ]),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
+        ),
+      ],
+    ),
   );
 }

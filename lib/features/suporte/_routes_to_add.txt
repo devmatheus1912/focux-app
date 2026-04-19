@@ -1,0 +1,8 @@
+// Imports to add to app_router.dart:
+import '../../features/suporte/screens/suporte_screen.dart';
+
+// Routes to add:
+GoRoute(
+  path: '/suporte',
+  builder: (context, state) => const SuporteScreen(),
+),

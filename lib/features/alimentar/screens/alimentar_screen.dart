@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alimentar_repository.dart';
+import 'plano_alimentar_detail_screen.dart';
 
 class AlimentarScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -47,20 +48,36 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
                     final p = _planos[i];
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
-                      child: Padding(padding: const EdgeInsets.all(16), child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(p.nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                          if (p.caloriasDia != null) Text('${p.caloriasDia} kcal/dia',
-                              style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-                          const SizedBox(height: 8),
-                          Wrap(spacing: 16, children: [
-                            if (p.proteinaG != null) _macro('Proteína', '${p.proteinaG}g', Colors.red),
-                            if (p.carboidratoG != null) _macro('Carbo', '${p.carboidratoG}g', Colors.orange),
-                            if (p.gorduraG != null) _macro('Gordura', '${p.gorduraG}g', Colors.yellow.shade700),
-                          ]),
-                        ],
-                      )),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PlanoAlimentarDetailScreen(
+                              alunoId: widget.alunoId,
+                              plano: p,
+                            ),
+                          ),
+                        ),
+                        child: Padding(padding: const EdgeInsets.all(16), child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              Expanded(child: Text(p.nome,
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                              const Icon(Icons.chevron_right, color: Colors.grey),
+                            ]),
+                            if (p.caloriasDia != null) Text('${p.caloriasDia} kcal/dia',
+                                style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                            const SizedBox(height: 8),
+                            Wrap(spacing: 16, children: [
+                              if (p.proteinaG != null) _macro('Proteína', '${p.proteinaG}g', Colors.red),
+                              if (p.carboidratoG != null) _macro('Carbo', '${p.carboidratoG}g', Colors.orange),
+                              if (p.gorduraG != null) _macro('Gordura', '${p.gorduraG}g', Colors.yellow.shade700),
+                            ]),
+                          ],
+                        )),
+                      ),
                     );
                   },
                 ),

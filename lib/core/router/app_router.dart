@@ -44,6 +44,11 @@ import '../../features/perfil/screens/identidade_visual_screen.dart';
 import '../../features/evolucao/screens/engajamento_screen.dart';
 import '../../features/alunos/screens/acoes_massa_screen.dart';
 import '../../features/ia/screens/ia_aluno_screen.dart';
+import '../../features/financeiro/screens/financeiro_aluno_screen.dart';
+import '../../features/suporte/screens/suporte_screen.dart';
+import '../../features/alertas/screens/alerta_detalhe_screen.dart';
+import '../../features/alertas/screens/alertas_config_screen.dart';
+import '../../features/relatorio/screens/relatorio_global_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -246,6 +251,29 @@ class AppRouter {
       GoRoute(
         path: '/setup/identidade',
         builder: (context, state) => const IdentidadeVisualScreen(isSetup: true),
+      ),
+      GoRoute(
+        path: '/financeiro/aluno',
+        builder: (context, state) => const FinanceiroAlunoScreen(),
+      ),
+      GoRoute(
+        path: '/suporte',
+        builder: (context, state) => const SuporteScreen(),
+      ),
+      GoRoute(
+        path: '/alertas/aluno/:id',
+        builder: (context, state) => AlrtaDetalheScreen(
+          alunoId: int.parse(state.pathParameters['id']!),
+          alunoNome: state.extra as String? ?? 'Aluno',
+        ),
+      ),
+      GoRoute(
+        path: '/alertas/config',
+        builder: (context, state) => const AlertasConfigScreen(),
+      ),
+      GoRoute(
+        path: '/relatorios/global',
+        builder: (context, state) => const RelatorioGlobalScreen(),
       ),
     ],
   );

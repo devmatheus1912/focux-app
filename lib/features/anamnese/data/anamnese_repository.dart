@@ -3,9 +3,35 @@ import '../../../core/api/api_client.dart';
 
 class Anamnese {
   final int? id;
-  final String? objetivo, nivelAtividade, lesoes, medicamentos, observacoes;
+  final String? objetivo;
+  final String? nivelAtividade;
+  final String? lesoes;
+  final String? medicamentos;
+  final String? observacoes;
+  // Novos campos
+  final String? historicoMedico;
+  final String? cirurgias;
+  final String? doresCronicas;
+  final String? objetivoDetalhado;
+  final int? disponibilidadeSemanal;
+  final String? preferenciasTreino;
+  final String? restricoesAlimentares;
 
-  Anamnese({this.id, this.objetivo, this.nivelAtividade, this.lesoes, this.medicamentos, this.observacoes});
+  Anamnese({
+    this.id,
+    this.objetivo,
+    this.nivelAtividade,
+    this.lesoes,
+    this.medicamentos,
+    this.observacoes,
+    this.historicoMedico,
+    this.cirurgias,
+    this.doresCronicas,
+    this.objetivoDetalhado,
+    this.disponibilidadeSemanal,
+    this.preferenciasTreino,
+    this.restricoesAlimentares,
+  });
 
   factory Anamnese.fromJson(Map<String, dynamic> j) => Anamnese(
     id: j['id'] as int?,
@@ -14,6 +40,13 @@ class Anamnese {
     lesoes: j['lesoes'] as String?,
     medicamentos: j['medicamentos'] as String?,
     observacoes: j['observacoes'] as String?,
+    historicoMedico: j['historicoMedico'] as String?,
+    cirurgias: j['cirurgias'] as String?,
+    doresCronicas: j['doresCronicas'] as String?,
+    objetivoDetalhado: j['objetivoDetalhado'] as String?,
+    disponibilidadeSemanal: j['disponibilidadeSemanal'] as int?,
+    preferenciasTreino: j['preferenciasTreino'] as String?,
+    restricoesAlimentares: j['restricoesAlimentares'] as String?,
   );
 }
 

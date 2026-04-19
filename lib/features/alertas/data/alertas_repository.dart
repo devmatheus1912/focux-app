@@ -40,6 +40,36 @@ class AlertasConfiguracao {
   );
 }
 
+class AlertaDetalhe {
+  final int alunoId;
+  final String alunoNome;
+  final String alunoEmail;
+  final String? ultimoTreino;
+  final int checkIns30Dias;
+  final String statusFinanceiro;
+  final String sugestaoIa;
+
+  AlertaDetalhe({
+    required this.alunoId,
+    required this.alunoNome,
+    required this.alunoEmail,
+    this.ultimoTreino,
+    required this.checkIns30Dias,
+    required this.statusFinanceiro,
+    required this.sugestaoIa,
+  });
+
+  factory AlertaDetalhe.fromJson(Map<String, dynamic> j) => AlertaDetalhe(
+        alunoId: (j['alunoId'] as num).toInt(),
+        alunoNome: j['alunoNome'] as String,
+        alunoEmail: j['alunoEmail'] as String,
+        ultimoTreino: j['ultimoTreino'] as String?,
+        checkIns30Dias: (j['checkIns30Dias'] as num).toInt(),
+        statusFinanceiro: j['statusFinanceiro'] as String,
+        sugestaoIa: j['sugestaoIa'] as String,
+      );
+}
+
 class AlertasRepository {
   final Dio _dio;
   AlertasRepository(ApiClient c) : _dio = c.dio;
@@ -60,5 +90,10 @@ class AlertasRepository {
       'aderenciaMinima': aderenciaMinima,
     });
     return AlertasConfiguracao.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<AlertaDetalhe> detalheAluno(int alunoId) async {
+    final r = await _dio.get('/api/alertas/aluno/$alunoId/detalhe');
+    return AlertaDetalhe.fromJson(r.data as Map<String, dynamic>);
   }
 }

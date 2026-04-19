@@ -20,6 +20,7 @@ class RelatorioScreen extends ConsumerStatefulWidget {
 class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   int _dias = 30;
   AderenciaData? _dados;
+  ComparativoPeriodo? _comparativo;
   bool _carregando = false;
   String? _erro;
 
@@ -36,10 +37,14 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     });
     try {
       final repo = RelatorioRepository(ref.read(apiClientProvider));
-      final dados = await repo.aderencia(widget.alunoId, dias: _dias);
+      final results = await Future.wait([
+        repo.aderencia(widget.alunoId, dias: _dias),
+        repo.comparativo(widget.alunoId, dias: _dias).catchError((_) => null),
+      ]);
       if (mounted) {
         setState(() {
-          _dados = dados;
+          _dados = results[0] as AderenciaData;
+          _comparativo = results[1] as ComparativoPeriodo?;
           _carregando = false;
         });
       }
@@ -93,6 +98,10 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             else if (_dados != null) ...[
               _CardAderencia(dados: _dados!),
               const SizedBox(height: 16),
+              if (_comparativo != null) ...[
+                _CardComparativo(comparativo: _comparativo!),
+                const SizedBox(height: 16),
+              ],
               Row(
                 children: [
                   Expanded(
@@ -272,6 +281,114 @@ class _CardInfo extends StatelessWidget {
               titulo,
               style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
               textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CardComparativo extends StatelessWidget {
+  final ComparativoPeriodo comparativo;
+
+  const _CardComparativo({required this.comparativo});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final delta = comparativo.deltaPercent;
+    final isPositivo = delta >= 0;
+    final deltaColor = isPositivo ? Colors.green : Colors.red;
+    final deltaIcon = isPositivo ? Icons.arrow_upward : Icons.arrow_downward;
+    final deltaText = isPositivo
+        ? '+${delta.toStringAsFixed(1)}%'
+        : '${delta.toStringAsFixed(1)}%';
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'vs. período anterior',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      'Este período',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${comparativo.aderenciaAtual.toStringAsFixed(1)}%',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    Text(
+                      '${comparativo.checkInsAtual} check-ins',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: Colors.grey),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: deltaColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(deltaIcon, color: deltaColor, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        deltaText,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: deltaColor,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  children: [
+                    Text(
+                      'Anterior',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${comparativo.aderenciaAnterior.toStringAsFixed(1)}%',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    Text(
+                      '${comparativo.checkInsAnterior} check-ins',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),

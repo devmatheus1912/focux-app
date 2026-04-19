@@ -46,6 +46,56 @@ class ResumoAluno {
       );
 }
 
+class ComparativoPeriodo {
+  final double aderenciaAtual;
+  final double aderenciaAnterior;
+  final double deltaPercent;
+  final int checkInsAtual;
+  final int checkInsAnterior;
+
+  ComparativoPeriodo({
+    required this.aderenciaAtual,
+    required this.aderenciaAnterior,
+    required this.deltaPercent,
+    required this.checkInsAtual,
+    required this.checkInsAnterior,
+  });
+
+  factory ComparativoPeriodo.fromJson(Map<String, dynamic> j) =>
+      ComparativoPeriodo(
+        aderenciaAtual: (j['aderenciaAtual'] as num).toDouble(),
+        aderenciaAnterior: (j['aderenciaAnterior'] as num).toDouble(),
+        deltaPercent: (j['deltaPercent'] as num).toDouble(),
+        checkInsAtual: (j['checkInsAtual'] as num).toInt(),
+        checkInsAnterior: (j['checkInsAnterior'] as num).toInt(),
+      );
+}
+
+class ResumoGlobal {
+  final double aderenciaMediaGeral;
+  final int totalAlunos;
+  final List<ResumoAluno> maisComprometidos;
+  final List<ResumoAluno> menosComprometidos;
+
+  ResumoGlobal({
+    required this.aderenciaMediaGeral,
+    required this.totalAlunos,
+    required this.maisComprometidos,
+    required this.menosComprometidos,
+  });
+
+  factory ResumoGlobal.fromJson(Map<String, dynamic> j) => ResumoGlobal(
+        aderenciaMediaGeral: (j['aderenciaMediaGeral'] as num).toDouble(),
+        totalAlunos: (j['totalAlunos'] as num).toInt(),
+        maisComprometidos: (j['maisComprometidos'] as List)
+            .map((e) => ResumoAluno.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        menosComprometidos: (j['menosComprometidos'] as List)
+            .map((e) => ResumoAluno.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
 class RelatorioRepository {
   final Dio _dio;
 
@@ -64,5 +114,18 @@ class RelatorioRepository {
     return (r.data as List)
         .map((e) => ResumoAluno.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<ResumoGlobal> resumoGlobal() async {
+    final r = await _dio.get('/api/relatorios/resumo-global');
+    return ResumoGlobal.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<ComparativoPeriodo> comparativo(int alunoId, {int dias = 30}) async {
+    final r = await _dio.get(
+      '/api/relatorios/aderencia/$alunoId/comparativo',
+      queryParameters: {'dias': dias},
+    );
+    return ComparativoPeriodo.fromJson(r.data as Map<String, dynamic>);
   }
 }

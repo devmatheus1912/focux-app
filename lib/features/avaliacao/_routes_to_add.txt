@@ -1,0 +1,11 @@
+// Imports:
+import '../../features/avaliacao/screens/evolucao_comparativo_screen.dart';
+
+// Routes:
+GoRoute(
+  path: '/alunos/:id/evolucao-comparativo',
+  builder: (context, state) => EvolucaoComparativoScreen(
+    alunoId: int.parse(state.pathParameters['id']!),
+    alunoNome: state.extra as String? ?? 'Aluno',
+  ),
+),
