@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/avaliacao_repository.dart';
 
@@ -88,11 +89,8 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
   }
 
   void _irParaComparativo() {
-    Navigator.pushNamed(
-      context,
-      '/alunos/${widget.alunoId}/evolucao-comparativo',
-      arguments: widget.alunoNome,
-    );
+    context.push('/alunos/${widget.alunoId}/evolucao-comparativo',
+        extra: widget.alunoNome);
   }
 
   @override

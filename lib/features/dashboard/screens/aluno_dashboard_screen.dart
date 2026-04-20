@@ -67,6 +67,13 @@ class AlunoDashboardScreen extends ConsumerWidget {
               subtitle: 'Veja suas mensalidades e situação financeira',
               onTap: () => context.push('/financeiro/aluno'),
             ),
+            const SizedBox(height: 12),
+            _MenuButton(
+              icon: Icons.calendar_month,
+              label: 'Minha Agenda',
+              subtitle: 'Veja e confirme seus agendamentos',
+              onTap: () => context.push('/agenda/aluno'),
+            ),
           ],
         ),
       ),

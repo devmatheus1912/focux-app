@@ -4,6 +4,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import 'lead_detail_screen.dart';
 import 'add_lead_screen.dart';
+import 'leads_kanban_screen.dart';
 
 const _statusLabels = {
   'LEAD': 'Lead',
@@ -55,6 +56,14 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     appBar: AppBar(
       title: const Text('Funil de Leads'),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.view_column),
+          tooltip: 'Visão Kanban',
+          onPressed: () async {
+            await Navigator.push(context, MaterialPageRoute(builder: (_) => const LeadsKanbanScreen()));
+            _load();
+          },
+        ),
         IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
       ],
     ),

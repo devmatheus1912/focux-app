@@ -49,6 +49,8 @@ import '../../features/suporte/screens/suporte_screen.dart';
 import '../../features/alertas/screens/alerta_detalhe_screen.dart';
 import '../../features/alertas/screens/alertas_config_screen.dart';
 import '../../features/relatorio/screens/relatorio_global_screen.dart';
+import '../../features/avaliacao/screens/evolucao_comparativo_screen.dart';
+import '../../features/agenda/screens/agenda_aluno_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -274,6 +276,17 @@ class AppRouter {
       GoRoute(
         path: '/relatorios/global',
         builder: (context, state) => const RelatorioGlobalScreen(),
+      ),
+      GoRoute(
+        path: '/alunos/:id/evolucao-comparativo',
+        builder: (context, state) => EvolucaoComparativoScreen(
+          alunoId: int.parse(state.pathParameters['id']!),
+          alunoNome: state.extra as String? ?? 'Aluno',
+        ),
+      ),
+      GoRoute(
+        path: '/agenda/aluno',
+        builder: (context, state) => const AgendaAlunoScreen(),
       ),
     ],
   );
