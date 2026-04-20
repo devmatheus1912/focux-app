@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
 
@@ -19,6 +22,7 @@ class RelatorioScreen extends ConsumerStatefulWidget {
 
 class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   int _dias = 30;
+  DateTimeRange? _rangeCustom;
   AderenciaData? _dados;
   ComparativoPeriodo? _comparativo;
   bool _carregando = false;
@@ -30,15 +34,29 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     _carregarDados();
   }
 
+  Future<void> _escolherPeriodoCustom() async {
+    final range = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
+      lastDate: DateTime.now(),
+      initialDateRange: _rangeCustom ?? DateTimeRange(
+        start: DateTime.now().subtract(const Duration(days: 30)),
+        end: DateTime.now(),
+      ),
+    );
+    if (range != null) {
+      setState(() => _rangeCustom = range);
+      _carregarDados();
+    }
+  }
+
   Future<void> _carregarDados() async {
-    setState(() {
-      _carregando = true;
-      _erro = null;
-    });
+    setState(() { _carregando = true; _erro = null; });
     try {
       final repo = RelatorioRepository(ref.read(apiClientProvider));
       final results = await Future.wait([
-        repo.aderencia(widget.alunoId, dias: _dias),
+        repo.aderencia(widget.alunoId, dias: _dias,
+            inicio: _rangeCustom?.start, fim: _rangeCustom?.end),
         repo.comparativo(widget.alunoId, dias: _dias).catchError((_) => null),
       ]);
       if (mounted) {
@@ -50,10 +68,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _erro = e.toString();
-          _carregando = false;
-        });
+        setState(() { _erro = e.toString(); _carregando = false; });
       }
     }
   }
@@ -73,10 +88,12 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
           children: [
             _SeletorPeriodo(
               diasSelecionado: _dias,
+              rangeCustom: _rangeCustom,
               onChanged: (dias) {
-                setState(() => _dias = dias);
+                setState(() { _dias = dias; _rangeCustom = null; });
                 _carregarDados();
               },
+              onCustom: _escolherPeriodoCustom,
             ),
             const SizedBox(height: 20),
             if (_carregando)
@@ -133,37 +150,50 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
 
 class _SeletorPeriodo extends StatelessWidget {
   final int diasSelecionado;
+  final DateTimeRange? rangeCustom;
   final ValueChanged<int> onChanged;
+  final VoidCallback onCustom;
 
   const _SeletorPeriodo({
     required this.diasSelecionado,
+    required this.rangeCustom,
     required this.onChanged,
+    required this.onCustom,
   });
+
+  String _fmtDate(DateTime d) =>
+      '${d.day.toString().padLeft(2,'0')}/${d.month.toString().padLeft(2,'0')}/${d.year}';
 
   @override
   Widget build(BuildContext context) {
+    final isCustom = rangeCustom != null;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Período de análise',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Colors.grey,
-                  ),
-            ),
+            Text('Período de análise',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.grey)),
             const SizedBox(height: 8),
-            SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(value: 30, label: Text('30 dias')),
-                ButtonSegment(value: 60, label: Text('60 dias')),
-                ButtonSegment(value: 90, label: Text('90 dias')),
-              ],
-              selected: {diasSelecionado},
-              onSelectionChanged: (sel) => onChanged(sel.first),
-            ),
+            Wrap(spacing: 8, children: [
+              ChoiceChip(label: const Text('30d'), selected: !isCustom && diasSelecionado == 30,
+                  onSelected: (_) => onChanged(30)),
+              ChoiceChip(label: const Text('60d'), selected: !isCustom && diasSelecionado == 60,
+                  onSelected: (_) => onChanged(60)),
+              ChoiceChip(label: const Text('90d'), selected: !isCustom && diasSelecionado == 90,
+                  onSelected: (_) => onChanged(90)),
+              ActionChip(
+                avatar: const Icon(Icons.date_range, size: 16),
+                label: Text(isCustom
+                    ? '${_fmtDate(rangeCustom!.start)} – ${_fmtDate(rangeCustom!.end)}'
+                    : 'Personalizado'),
+                backgroundColor: isCustom
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : null,
+                onPressed: onCustom,
+              ),
+            ]),
           ],
         ),
       ),

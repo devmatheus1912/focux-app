@@ -101,10 +101,14 @@ class RelatorioRepository {
 
   RelatorioRepository(ApiClient c) : _dio = c.dio;
 
-  Future<AderenciaData> aderencia(int alunoId, {int dias = 30}) async {
+  Future<AderenciaData> aderencia(int alunoId, {int dias = 30,
+      DateTime? inicio, DateTime? fim}) async {
+    final Map<String, dynamic> params = {'dias': dias};
+    if (inicio != null) params['inicio'] = '${inicio.year.toString().padLeft(4,'0')}-${inicio.month.toString().padLeft(2,'0')}-${inicio.day.toString().padLeft(2,'0')}';
+    if (fim != null) params['fim'] = '${fim.year.toString().padLeft(4,'0')}-${fim.month.toString().padLeft(2,'0')}-${fim.day.toString().padLeft(2,'0')}';
     final r = await _dio.get(
       '/api/relatorios/aderencia/$alunoId',
-      queryParameters: {'dias': dias},
+      queryParameters: params,
     );
     return AderenciaData.fromJson(r.data as Map<String, dynamic>);
   }
