@@ -60,6 +60,11 @@ class IaRepository {
     return r.data as Map<String, dynamic>;
   }
 
+  Future<String> analisePerformance(int alunoId) async {
+    final r = await _dio.get('/api/ia/copiloto/analise-performance/$alunoId');
+    return r.data['resposta'] as String;
+  }
+
   Future<List<Map<String, dynamic>>> insights() async {
     final r = await _dio.get('/api/ia/copiloto/insights');
     return (r.data as List).cast<Map<String, dynamic>>();

@@ -14,6 +14,7 @@ import '../../relatorio/screens/relatorio_screen.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../evolucao/screens/evolucao_screen.dart';
 import '../../evolucao/data/evolucao_repository.dart';
+import '../../ia/data/ia_repository.dart';
 
 class AlunoDetailScreen extends ConsumerWidget {
   final int alunoId;
@@ -146,6 +147,9 @@ class AlunoDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 24),
                     
+                    _CopilotoCard(alunoId: alunoId),
+                    const SizedBox(height: 24),
+
                     Text('Inteligência Artificial', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
                     
@@ -475,3 +479,71 @@ class _GridToolBtn extends StatelessWidget {
     );
   }
 }
+
+class _CopilotoCard extends ConsumerStatefulWidget {
+  final int alunoId;
+  const _CopilotoCard({required this.alunoId});
+
+  @override
+  ConsumerState<_CopilotoCard> createState() => _CopilotoCardState();
+}
+
+class _CopilotoCardState extends ConsumerState<_CopilotoCard> {
+  String? _sugestao;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final repo = IaRepository(ref.read(apiClientProvider));
+      final ans = await repo.analisePerformance(widget.alunoId);
+      if (mounted) setState(() { _sugestao = ans; _loading = false; });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_sugestao == null) return const SizedBox.shrink();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Copiloto de Performance',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _sugestao!,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
