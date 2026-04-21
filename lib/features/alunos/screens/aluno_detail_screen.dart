@@ -15,6 +15,7 @@ import '../../financeiro/data/financeiro_repository.dart';
 import '../../evolucao/screens/evolucao_screen.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../ia/data/ia_repository.dart';
+import '../../feedback/screens/feedback_video_screen.dart';
 
 class AlunoDetailScreen extends ConsumerWidget {
   final int alunoId;
@@ -143,6 +144,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                         _GridToolBtn(icon: Icons.show_chart, label: 'Evolução', color: Colors.purple, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EvolucaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
                         _GridToolBtn(icon: Icons.bar_chart, label: 'Aderência', color: Colors.teal, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RelatorioScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
                         _GridToolBtn(icon: Icons.receipt_long, label: 'Financeiro', color: Colors.redAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _HistoricoMensalidadesScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                        _GridToolBtn(icon: Icons.video_camera_back, label: 'Feedback', color: Colors.indigo, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FeedbackVideoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
                       ],
                     ),
                     const SizedBox(height: 24),

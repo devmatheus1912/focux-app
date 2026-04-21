@@ -51,6 +51,7 @@ import '../../features/alertas/screens/alertas_config_screen.dart';
 import '../../features/relatorio/screens/relatorio_global_screen.dart';
 import '../../features/avaliacao/screens/evolucao_comparativo_screen.dart';
 import '../../features/agenda/screens/agenda_aluno_screen.dart';
+import '../../features/feedback/screens/feedback_video_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -287,6 +288,17 @@ class AppRouter {
       GoRoute(
         path: '/agenda/aluno',
         builder: (context, state) => const AgendaAlunoScreen(),
+      ),
+      GoRoute(
+        path: '/feedback-videos',
+        builder: (context, state) => const FeedbackVideoScreen(),
+      ),
+      GoRoute(
+        path: '/alunos/:id/feedback-videos',
+        builder: (context, state) => FeedbackVideoScreen(
+          alunoId: int.parse(state.pathParameters['id']!),
+          alunoNome: state.extra as String? ?? 'Aluno',
+        ),
       ),
     ],
   );
