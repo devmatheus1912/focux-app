@@ -191,7 +191,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
             child: FilledButton(
               onPressed: _concluindo ? null : _concluir,
               style: FilledButton.styleFrom(
-                minimumSize: const Size.infinity,
+                minimumSize: const Size(double.infinity, 50),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),

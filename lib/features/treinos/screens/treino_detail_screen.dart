@@ -335,6 +335,7 @@ class TreinoDetailScreen extends ConsumerWidget {
         }
       }
     }
+  }
 }
 
 class _HeaderChip extends StatelessWidget {

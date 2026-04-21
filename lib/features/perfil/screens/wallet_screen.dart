@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../../financeiro/data/financeiro_repository.dart';
-import '../../../core/api/api_client.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 
 /// Tela de configuração de dados de pagamento (Wallet / PIX).
 class WalletScreen extends ConsumerStatefulWidget {
