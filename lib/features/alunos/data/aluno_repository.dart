@@ -99,6 +99,11 @@ class AlunoRepository {
     await _dio.delete('/api/alunos/$id');
   }
 
+  Future<List<Map<String, dynamic>>> aderenciaSemanal(int id) async {
+    final response = await _dio.get('/api/alunos/$id/aderencia-semanal');
+    return List<Map<String, dynamic>>.from(response.data);
+  }
+
   // Telefone getter helper (não está no modelo ainda)
   String? getTelefone(Aluno aluno) => null;
 }
