@@ -192,8 +192,16 @@ class _AlunoTileState extends ConsumerState<_AlunoTile> {
       title: Row(children: [
         Flexible(child: Text(aluno.nome, style: const TextStyle(fontWeight: FontWeight.w600))),
         if (aluno.emRisco) ...[
-          const SizedBox(width: 4),
-          const Icon(Icons.trending_down, size: 16, color: Colors.orange),
+          const SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.orange.withValues(alpha: 0.5)),
+            ),
+            child: const Text('Risco CHURN', style: TextStyle(fontSize: 9, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+          ),
         ],
       ]),
       subtitle: Text(aluno.objetivo ?? aluno.email, maxLines: 1, overflow: TextOverflow.ellipsis),
