@@ -7,9 +7,18 @@ class ChatMsg {
   final String remetente;
   final String conteudo;
   final DateTime enviadoEm;
+  final String? tipoMidia;
+  final String? midiaUrl;
 
-  ChatMsg({this.id, this.alunoId, required this.remetente,
-      required this.conteudo, required this.enviadoEm});
+  ChatMsg({
+    this.id, 
+    this.alunoId, 
+    required this.remetente,
+    required this.conteudo, 
+    required this.enviadoEm,
+    this.tipoMidia,
+    this.midiaUrl,
+  });
 
   factory ChatMsg.fromJson(Map<String, dynamic> j) => ChatMsg(
     id: j['id'] as int?,
@@ -17,6 +26,8 @@ class ChatMsg {
     remetente: j['remetente'] as String,
     conteudo: j['conteudo'] as String,
     enviadoEm: DateTime.parse(j['enviadoEm'] as String),
+    tipoMidia: j['tipoMidia'] as String?,
+    midiaUrl: j['midiaUrl'] as String?,
   );
 }
 

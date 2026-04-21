@@ -191,9 +191,22 @@ class _BubbleAluno extends StatelessWidget {
             bottomRight: Radius.circular(isAluno ? 4 : 16),
           ),
         ),
-        child: Text(
-          msg.conteudo,
-          style: TextStyle(color: isAluno ? Colors.white : null),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (msg.midiaUrl != null && msg.tipoMidia == 'IMAGEM')
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(msg.midiaUrl!, fit: BoxFit.cover),
+                ),
+              ),
+            Text(
+              msg.conteudo,
+              style: TextStyle(color: isAluno ? Colors.white : null),
+            ),
+          ]
         ),
       ),
     );
