@@ -96,4 +96,14 @@ class AlertasRepository {
     final r = await _dio.get('/api/alertas/aluno/$alunoId/detalhe');
     return AlertaDetalhe.fromJson(r.data as Map<String, dynamic>);
   }
+
+  Future<void> resolver(int alunoId) async {
+    await _dio.post('/api/alertas/aluno/$alunoId/resolver');
+  }
+
+  Future<void> enviarMensagemChat(int alunoId, String mensagem) async {
+    await _dio.post('/api/alertas/aluno/$alunoId/mensagem-chat', data: {
+      'mensagem': mensagem,
+    });
+  }
 }

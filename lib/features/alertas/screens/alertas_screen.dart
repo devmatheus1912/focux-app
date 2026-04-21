@@ -82,6 +82,52 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     }
   }
 
+  Future<void> _resolverAlerta(AlertaRisco alerta) async {
+    try {
+      await AlertasRepository(ref.read(apiClientProvider)).resolver(alerta.alunoId);
+      setState(() => _alertas.removeWhere((a) => a.alunoId == alerta.alunoId));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Alerta resolvido!')));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+    }
+  }
+
+  Future<void> _enviarMensagemChat(AlertaRisco alerta) async {
+    final ctrl = TextEditingController(text: 'Olá ${alerta.alunoNome.split(' ').first}! Vi que faz um tempo que não treina. Que tal retomarmos hoje? Estou aqui para ajudar! 💪');
+    bool enviando = false;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: const Text('Enviar mensagem'),
+          content: TextField(
+            controller: ctrl,
+            maxLines: 3,
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+            FilledButton.icon(
+              onPressed: enviando ? null : () => Navigator.pop(ctx, true),
+              icon: enviando ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.send),
+              label: Text(enviando ? 'Enviando...' : 'Enviar'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirm != true || ctrl.text.trim().isEmpty) return;
+
+    try {
+      await AlertasRepository(ref.read(apiClientProvider)).enviarMensagemChat(alerta.alunoId, ctrl.text.trim());
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mensagem enviada!')));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+    }
+  }
+
   List<AlertaRisco> get _filtrados {
     if (_filtroScoreMin == null) return _alertas;
     return _alertas.where((a) => a.score >= _filtroScoreMin!).toList();
@@ -139,6 +185,8 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                             '/alertas/aluno/${_filtrados[i].alunoId}',
                             extra: _filtrados[i].alunoNome,
                           ),
+                          onResolver: () => _resolverAlerta(_filtrados[i]),
+                          onMensagemChat: () => _enviarMensagemChat(_filtrados[i]),
                         ),
                       ),
               ),
@@ -200,44 +248,74 @@ class _FiltroBar extends StatelessWidget {
 class _AlertaCard extends StatelessWidget {
   final AlertaRisco alerta;
   final VoidCallback onTap;
-  const _AlertaCard({required this.alerta, required this.onTap});
+  final VoidCallback onResolver;
+  final VoidCallback onMensagemChat;
+
+  const _AlertaCard({required this.alerta, required this.onTap, required this.onResolver, required this.onMensagemChat});
 
   Color get _cor => alerta.score >= 2 ? Colors.red : Colors.orange;
 
   @override
   Widget build(BuildContext context) => Card(
     margin: const EdgeInsets.only(bottom: 8),
-    child: ListTile(
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
       onTap: onTap,
-      leading: CircleAvatar(
-        backgroundColor: _cor.withValues(alpha: 0.15),
-        child: Icon(Icons.warning_amber_rounded, color: _cor),
+      child: Column(
+        children: [
+          ListTile(
+            leading: CircleAvatar(
+              backgroundColor: _cor.withValues(alpha: 0.15),
+              child: Icon(Icons.warning_amber_rounded, color: _cor),
+            ),
+            title: Row(children: [
+              Flexible(child: Text(alerta.alunoNome,
+                style: const TextStyle(fontWeight: FontWeight.w600))),
+              const SizedBox(width: 8),
+              _ScoreBadge(score: alerta.score),
+            ]),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: alerta.motivos.map((m) => Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Row(children: [
+                  Icon(Icons.circle, size: 6, color: _cor),
+                  const SizedBox(width: 6),
+                  Flexible(child: Text(m, style: TextStyle(color: _cor, fontSize: 12))),
+                ]),
+              )).toList(),
+            ),
+            trailing: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              if (alerta.diasSemTreino != null)
+                Text('${alerta.diasSemTreino}d',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: _cor)),
+              if (alerta.aderenciaPercent != null)
+                Text('${alerta.aderenciaPercent!.toStringAsFixed(0)}%',
+                  style: const TextStyle(fontSize: 11, color: Colors.grey)),
+            ]),
+          ),
+          const Divider(height: 1),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            color: Colors.grey.withValues(alpha: 0.05),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: onMensagemChat,
+                  icon: const Icon(Icons.chat_bubble_outline, size: 16),
+                  label: const Text('Mensagem'),
+                ),
+                TextButton.icon(
+                  onPressed: onResolver,
+                  icon: const Icon(Icons.check_circle_outline, size: 16, color: Colors.green),
+                  label: const Text('Resolvido', style: TextStyle(color: Colors.green)),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      title: Row(children: [
-        Flexible(child: Text(alerta.alunoNome,
-          style: const TextStyle(fontWeight: FontWeight.w600))),
-        const SizedBox(width: 8),
-        _ScoreBadge(score: alerta.score),
-      ]),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: alerta.motivos.map((m) => Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Row(children: [
-            Icon(Icons.circle, size: 6, color: _cor),
-            const SizedBox(width: 6),
-            Flexible(child: Text(m, style: TextStyle(color: _cor, fontSize: 12))),
-          ]),
-        )).toList(),
-      ),
-      trailing: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        if (alerta.diasSemTreino != null)
-          Text('${alerta.diasSemTreino}d',
-            style: TextStyle(fontWeight: FontWeight.bold, color: _cor)),
-        if (alerta.aderenciaPercent != null)
-          Text('${alerta.aderenciaPercent!.toStringAsFixed(0)}%',
-            style: const TextStyle(fontSize: 11, color: Colors.grey)),
-      ]),
     ),
   );
 }
