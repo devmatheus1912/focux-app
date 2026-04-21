@@ -8,6 +8,8 @@ import 'core/theme/theme_provider.dart';
 import 'core/api/api_client.dart';
 import 'core/fcm/fcm_service.dart';
 
+import 'features/perfil/data/perfil_repository.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -22,16 +24,44 @@ void main() async {
   runApp(const ProviderScope(child: FocuxApp()));
 }
 
-class FocuxApp extends ConsumerWidget {
+class FocuxApp extends ConsumerStatefulWidget {
   const FocuxApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FocuxApp> createState() => _FocuxAppState();
+}
+
+class _FocuxAppState extends ConsumerState<FocuxApp> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCustomTheme();
+    });
+  }
+
+  Future<void> _loadCustomTheme() async {
+    try {
+      final repo = PerfilRepository(ApiClient());
+      final perfil = await repo.buscar();
+      if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
+        final hex = perfil.corPrimaria!.replaceFirst('#', '0xFF');
+        ref.read(primaryColorProvider.notifier).state = Color(int.parse(hex));
+      }
+    } catch (e) {
+      // Ignora erro se não logado
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
+    final primaryColor = ref.watch(primaryColorProvider);
+
     return MaterialApp.router(
       title: 'Focux',
-      theme: AppTheme.buildTheme(AppTheme.defaultPrimary),
-      darkTheme: AppTheme.buildDarkTheme(AppTheme.defaultPrimary),
+      theme: AppTheme.buildTheme(primaryColor),
+      darkTheme: AppTheme.buildDarkTheme(primaryColor),
       themeMode: themeMode,
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
