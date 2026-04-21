@@ -229,26 +229,68 @@ class _BarChart extends StatelessWidget {
   }
 }
 
-class _VencimentoTile extends StatelessWidget {
+class _VencimentoTile extends ConsumerStatefulWidget {
   final VencimentoItem item;
   const _VencimentoTile({required this.item});
 
   @override
+  ConsumerState<_VencimentoTile> createState() => _VencimentoTileState();
+}
+
+class _VencimentoTileState extends ConsumerState<_VencimentoTile> {
+  bool _cobrindo = false;
+
+  Future<void> _cobrar() async {
+    setState(() => _cobrindo = true);
+    try {
+      final msg = await FinanceiroRepository(ref.read(apiClientProvider))
+          .cobrarViaChat(widget.item.mensalidadeId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _cobrindo = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isAtrasado = item.status == 'ATRASADO';
+    final isAtrasado = widget.item.status == 'ATRASADO';
     final color = isAtrasado ? Colors.red : Colors.orange;
     return Card(
       margin: const EdgeInsets.only(bottom: 6),
       child: ListTile(
         dense: true,
         leading: Icon(isAtrasado ? Icons.warning : Icons.schedule, color: color, size: 20),
-        title: Text(item.alunoNome),
-        subtitle: Text(item.mesReferencia.substring(0, 7)),
-        trailing: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text('R\$ ${item.valor.toStringAsFixed(2)}',
-            style: TextStyle(fontWeight: FontWeight.bold, color: color)),
-          Text(item.status, style: TextStyle(fontSize: 10, color: color)),
-        ]),
+        title: Text(widget.item.alunoNome),
+        subtitle: Text(widget.item.mesReferencia.substring(0, 7)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text('R\$ ${widget.item.valor.toStringAsFixed(2)}',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: color)),
+                Text(widget.item.status, style: TextStyle(fontSize: 10, color: color)),
+              ],
+            ),
+            const SizedBox(width: 12),
+            if (isAtrasado)
+              IconButton(
+                onPressed: _cobrindo ? null : _cobrar,
+                icon: _cobrindo
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.notifications_active, color: Colors.blue, size: 20),
+                tooltip: 'Cobrar no chat',
+              ),
+          ],
+        ),
       ),
     );
   }

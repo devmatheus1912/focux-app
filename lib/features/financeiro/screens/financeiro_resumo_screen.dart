@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 
@@ -117,6 +118,8 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
                         : ListView(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             children: [
+                              _DonutChartCard(resumo: _resumo!),
+                              const SizedBox(height: 16),
                               _ResumoCard(
                                 titulo: 'Total recebido',
                                 valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}',
@@ -152,6 +155,102 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DonutChartCard extends StatelessWidget {
+  final ResumoMensal resumo;
+  const _DonutChartCard({required this.resumo});
+
+  @override
+  Widget build(BuildContext context) {
+    final double recebido = resumo.totalRecebido;
+    final double previsto = resumo.totalPrevisto;
+    final double pendente = previsto > recebido ? (previsto - recebido) : 0;
+    
+    final bool isEmpty = previsto == 0;
+    final double percentRecebido = isEmpty ? 0 : (recebido / previsto * 100).clamp(0, 100);
+
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 180,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  PieChart(
+                    PieChartData(
+                      sectionsSpace: 2,
+                      centerSpaceRadius: 60,
+                      startDegreeOffset: -90,
+                      sections: isEmpty
+                          ? [PieChartSectionData(value: 1, color: Colors.grey.withValues(alpha: 0.3), radius: 20, showTitle: false)]
+                          : [
+                              PieChartSectionData(
+                                value: recebido,
+                                color: Colors.green,
+                                radius: 24,
+                                showTitle: false,
+                              ),
+                              if (pendente > 0)
+                                PieChartSectionData(
+                                  value: pendente,
+                                  color: Colors.orange.withValues(alpha: 0.5),
+                                  radius: 20,
+                                  showTitle: false,
+                                ),
+                            ],
+                    ),
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('${percentRecebido.toStringAsFixed(0)}%',
+                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                      const Text('Recebido', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            if (!isEmpty) ...[
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _LegendItem(color: Colors.green, label: 'Recebido'),
+                  const SizedBox(width: 16),
+                  _LegendItem(color: Colors.orange.withValues(alpha: 0.5), label: 'Pendente'),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const _LegendItem({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+      ],
     );
   }
 }
