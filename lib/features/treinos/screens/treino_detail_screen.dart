@@ -74,91 +74,137 @@ class TreinoDetailScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (treino) {
           final repo = ref.read(treinoRepositoryProvider);
-          return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+          
+          // Agrupamento por músculo alvo
+          final grouped = <String, List<TreinoExercicioItem>>{};
+          for (final te in treino.exercicios) {
+            final group = te.exercicio.musculoAlvo?.isNotEmpty == true ? te.exercicio.musculoAlvo! : 'Outros';
+            grouped.putIfAbsent(group, () => []).add(te);
+          }
+
+          return CustomScrollView(
+            slivers: [
+              // Hero Gradient Header
+              SliverToBoxAdapter(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(treino.nome,
-                            style: Theme.of(context).textTheme.headlineSmall),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+                            child: const Icon(Icons.fitness_center, color: Colors.white, size: 32),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(treino.nome, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                                if (treino.objetivo?.isNotEmpty == true)
+                                  Text(treino.objetivo!, style: const TextStyle(color: Colors.white70)),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      if (treino.isTemplate)
-                        const Chip(
-                          label: Text('Template'),
-                          avatar: Icon(Icons.bookmark, size: 14),
-                        ),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          _HeaderChip(icon: Icons.list_alt, label: '${treino.exercicios.length} exercícios'),
+                          const SizedBox(width: 8),
+                          if (treino.nivel != null) _HeaderChip(icon: Icons.speed, label: treino.nivel!),
+                          if (treino.isTemplate) ...[
+                            const SizedBox(width: 8),
+                            const _HeaderChip(icon: Icons.bookmark, label: 'Template'),
+                          ],
+                        ],
+                      ),
                     ],
                   ),
-                  if (treino.nivel != null) Chip(label: Text(treino.nivel!)),
-                  if (treino.objetivo != null)
-                    Text(treino.objetivo!,
-                        style: const TextStyle(color: Colors.grey)),
-                ],
+                ),
               ),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: treino.exercicios.isEmpty
-                  ? const Center(child: Text('Nenhum exercício no treino.'))
-                  : ListView.builder(
-                      itemCount: treino.exercicios.length,
-                      itemBuilder: (context, i) {
-                        final te = treino.exercicios[i];
-                        return ListTile(
-                          leading: Text('${i + 1}',
-                              style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold)),
-                          title: Text(te.exercicio.nome),
-                          subtitle: Text('${te.series}x${te.repeticoes}'
-                              '${te.cargaKg != null ? ' · ${te.cargaKg}kg' : ''}'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (te.descansoSegundos != null)
-                                Text('${te.descansoSegundos}s', style: const TextStyle(color: Colors.grey)),
-                              const SizedBox(width: 4),
-                              IconButton(
-                                icon: const Icon(Icons.close, size: 18),
-                                tooltip: 'Remover exercício',
-                                onPressed: () async {
-                                  final confirm = await showDialog<bool>(
-                                    context: context,
-                                    builder: (ctx) => AlertDialog(
-                                      title: const Text('Remover exercício'),
-                                      content: Text('Remover "${te.exercicio.nome}" do treino?'),
-                                      actions: [
-                                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-                                        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Remover')),
-                                      ],
-                                    ),
-                                  );
-                                  if (confirm == true && context.mounted) {
-                                    try {
-                                      await repo.removerExercicio(treinoId, te.id);
-                                      ref.invalidate(treinoProvider(treinoId));
-                                    } catch (e) {
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
-                                      }
-                                    }
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+              
+              // Iniciar Treino Button (Overlap)
+              SliverToBoxAdapter(
+                child: Transform.translate(
+                  offset: const Offset(0, -24),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: FilledButton.icon(
+                      onPressed: () {},
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      icon: const Icon(Icons.play_arrow_rounded, size: 28),
+                      label: const Text('Iniciar Treino', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
-            ),
-          ],
-        );
+                  ),
+                ),
+              ),
+              
+              // Lista de exercícios agrupada
+              if (treino.exercicios.isEmpty)
+                const SliverFillRemaining(child: Center(child: Text('Nenhum exercício no treino.')))
+              else
+                ...grouped.entries.map((entry) {
+                  return SliverMainAxisGroup(
+                    slivers: [
+                      SliverPersistentHeader(
+                        pinned: true,
+                        delegate: _SectionHeaderDelegate(title: entry.key.toUpperCase()),
+                      ),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final te = entry.value[index];
+                            return _ExercicioCard(
+                              te: te,
+                              onRemove: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Remover exercício'),
+                                    content: Text('Remover "${te.exercicio.nome}" do treino?'),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+                                      FilledButton(style: FilledButton.styleFrom(backgroundColor: Colors.red), onPressed: () => Navigator.pop(ctx, true), child: const Text('Remover')),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true && context.mounted) {
+                                  try {
+                                    await repo.removerExercicio(treinoId, te.id);
+                                    ref.invalidate(treinoProvider(treinoId));
+                                  } catch (e) {
+                                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+                                  }
+                                }
+                              },
+                            );
+                          },
+                          childCount: entry.value.length,
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              const SliverToBoxAdapter(child: SizedBox(height: 80)),
+            ],
+          );
         },
       ),
     );
@@ -289,5 +335,101 @@ class TreinoDetailScreen extends ConsumerWidget {
         }
       }
     }
+}
+
+class _HeaderChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _HeaderChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(16)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 14),
+          const SizedBox(width: 4),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final String title;
+  _SectionHeaderDelegate({required this.title});
+
+  @override
+  double get minExtent => 40;
+  @override
+  double get maxExtent => 40;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => true;
+}
+
+class _ExercicioCard extends StatelessWidget {
+  final TreinoExercicioItem te;
+  final VoidCallback onRemove;
+  const _ExercicioCard({required this.te, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+              child: const Icon(Icons.fitness_center),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(te.exercicio.nome, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      Text('${te.series}x${te.repeticoes}', style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
+                      if (te.cargaKg != null) Text('· ${te.cargaKg}kg', style: const TextStyle(color: Colors.grey)),
+                      if (te.descansoSegundos != null) Text('· ${te.descansoSegundos}s', style: const TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (val) {
+                if (val == 'remove') onRemove();
+              },
+              itemBuilder: (_) => [
+                const PopupMenuItem(value: 'remove', child: Text('Remover', style: TextStyle(color: Colors.red))),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

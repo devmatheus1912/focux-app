@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +18,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   ExecucaoTreino? _execucao;
   bool _loading = true;
   bool _concluindo = false;
+  Timer? _timer;
+  Duration _duration = Duration.zero;
 
   @override
   void initState() {
@@ -24,10 +27,25 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     _iniciar();
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _iniciar() async {
     try {
       final execucao = await ref.read(checkinRepositoryProvider).iniciar(widget.treinoId);
       setState(() { _execucao = execucao; _loading = false; });
+      if (execucao.iniciadoEm != null) {
+        final start = DateTime.parse(execucao.iniciadoEm!);
+        _duration = DateTime.now().difference(start);
+        _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          setState(() {
+            _duration = DateTime.now().difference(start);
+          });
+        });
+      }
     } catch (e) {
       setState(() { _loading = false; });
       if (mounted) {
@@ -79,6 +97,14 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     }
   }
 
+  String _formatDuration(Duration d) {
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60);
+    final s = d.inSeconds.remainder(60);
+    if (h > 0) return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -91,24 +117,68 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_execucao?.treinoNome ?? 'Treino'),
+        title: Text(_execucao?.treinoNome ?? 'Treino em andamento'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4),
-          child: LinearProgressIndicator(value: progresso),
+          child: LinearProgressIndicator(value: progresso, color: Colors.greenAccent),
         ),
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(
-              '$concluidos / ${exercicios.length} exercícios concluídos',
-              style: Theme.of(context).textTheme.bodySmall,
+          // Cronômetro central
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            color: Theme.of(context).colorScheme.surface,
+            child: Column(
+              children: [
+                const Text('TEMPO DE TREINO', style: TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1.5)),
+                const SizedBox(height: 8),
+                Text(
+                  _formatDuration(_duration),
+                  style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, fontFeatures: [FontFeature.tabularFigures()]),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '$concluidos de ${exercicios.length} exercícios concluídos',
+                  style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600),
+                ),
+              ],
             ),
           ),
+          
+          // Card Sugestão IA
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.psychology, color: Colors.blue, size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text('Sugestão IA ao vivo', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 4),
+                        Text('Baseado no seu último treino, tente aumentar 2kg no supino hoje.', style: TextStyle(fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               itemCount: exercicios.length,
               itemBuilder: (context, i) => _ExercicioCard(
                 ee: exercicios[i],
@@ -120,9 +190,14 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
             padding: const EdgeInsets.all(16),
             child: FilledButton(
               onPressed: _concluindo ? null : _concluir,
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
               child: _concluindo
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Concluir treino'),
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('FINALIZAR TREINO', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -141,53 +216,66 @@ class _ExercicioCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: ee.concluido
-          ? Colors.green.withValues(alpha: 0.08)
-          : null,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  ee.concluido ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: ee.concluido ? Colors.green : Colors.grey,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(ee.exercicioNome, style: const TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
-            if (ee.series != null || ee.repeticoes != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                '${ee.series != null ? "${ee.series} séries" : ""}${ee.series != null && ee.repeticoes != null ? " × " : ""}${ee.repeticoes ?? ""}',
-                style: const TextStyle(color: Colors.grey, fontSize: 13),
-              ),
-            ],
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text('Séries feitas: ${ee.seriesFeitas}'),
-                const Spacer(),
-                if (!ee.concluido) ...[
-                  IconButton(
-                    icon: const Icon(Icons.remove),
-                    onPressed: ee.seriesFeitas > 0 ? () => onMarcar(ee.seriesFeitas - 1) : null,
-                  ),
-                  Text('${ee.seriesFeitas}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () => onMarcar(ee.seriesFeitas + 1),
-                  ),
-                ],
-              ],
-            ),
-          ],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: ee.concluido ? Colors.green : Colors.transparent, width: 2),
+      ),
+      child: ExpansionTile(
+        initiallyExpanded: !ee.concluido,
+        shape: const Border(),
+        leading: Icon(
+          ee.concluido ? Icons.check_circle : Icons.fitness_center,
+          color: ee.concluido ? Colors.green : Theme.of(context).colorScheme.primary,
         ),
+        title: Text(
+          ee.exercicioNome,
+          style: TextStyle(fontWeight: FontWeight.bold, decoration: ee.concluido ? TextDecoration.lineThrough : null),
+        ),
+        subtitle: Text('${ee.series ?? "-"} séries × ${ee.repeticoes ?? "-"} reps', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                if (ee.gifUrl != null) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(ee.gifUrl!, height: 120, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Séries concluídas:', style: TextStyle(fontWeight: FontWeight.w500)),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove),
+                            onPressed: ee.seriesFeitas > 0 ? () => onMarcar(ee.seriesFeitas - 1) : null,
+                          ),
+                          SizedBox(
+                            width: 32,
+                            child: Text('${ee.seriesFeitas}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () => onMarcar(ee.seriesFeitas + 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
