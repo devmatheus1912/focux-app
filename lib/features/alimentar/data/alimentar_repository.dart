@@ -82,4 +82,14 @@ class AlimentarRepository {
   Future<void> excluirRefeicao(int alunoId, int planoId, int refeicaoId) async {
     await _dio.delete('/api/alunos/$alunoId/planos-alimentares/$planoId/refeicoes/$refeicaoId');
   }
+
+  Future<void> gerarDietaIa(int alunoId, int planoId, {String? objetivo, int? caloriasAlvo, int? numeroRefeicoes}) async {
+    await _dio.post('/api/ia/gerar-dieta-estruturada', data: {
+      'alunoId': alunoId,
+      'planoAlimentarId': planoId,
+      if (objetivo != null) 'objetivo': objetivo,
+      if (caloriasAlvo != null) 'caloriasAlvo': caloriasAlvo,
+      if (numeroRefeicoes != null) 'numeroRefeicoes': numeroRefeicoes,
+    });
+  }
 }

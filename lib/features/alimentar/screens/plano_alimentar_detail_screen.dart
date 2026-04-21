@@ -79,11 +79,80 @@ class _PlanoAlimentarDetailScreenState
     );
   }
 
+  Future<void> _abrirGerarIa() async {
+    final objetivoCtrl = TextEditingController(text: 'Hipertrofia');
+    final calCtrl = TextEditingController(text: '2500');
+    final refCtrl = TextEditingController(text: '4');
+    bool gerando = false;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: const Row(children: [
+            Icon(Icons.auto_awesome, color: Colors.blue),
+            SizedBox(width: 8),
+            Text('Gerar Dieta com IA')
+          ]),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('A IA vai criar refeições estruturadas e adicionar diretamente neste plano.'),
+              const SizedBox(height: 16),
+              TextField(controller: objetivoCtrl, decoration: const InputDecoration(labelText: 'Objetivo (ex: Hipertrofia)')),
+              const SizedBox(height: 8),
+              TextField(controller: calCtrl, decoration: const InputDecoration(labelText: 'Calorias Alvo'), keyboardType: TextInputType.number),
+              const SizedBox(height: 8),
+              TextField(controller: refCtrl, decoration: const InputDecoration(labelText: 'Nº de Refeições'), keyboardType: TextInputType.number),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+            FilledButton.icon(
+              onPressed: gerando ? null : () => Navigator.pop(ctx, true),
+              icon: gerando ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.auto_awesome),
+              label: Text(gerando ? 'Gerando...' : 'Gerar'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() => _loading = true);
+    try {
+      await AlimentarRepository(ref.read(apiClientProvider)).gerarDietaIa(
+        widget.alunoId,
+        widget.plano.id,
+        objetivo: objetivoCtrl.text,
+        caloriasAlvo: int.tryParse(calCtrl.text),
+        numeroRefeicoes: int.tryParse(refCtrl.text),
+      );
+      await _load();
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dieta gerada com sucesso!')));
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro na IA: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = widget.plano;
     return Scaffold(
-      appBar: AppBar(title: Text(p.nome)),
+      appBar: AppBar(
+        title: Text(p.nome),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_awesome, color: Colors.blue),
+            tooltip: 'Gerar Dieta IA',
+            onPressed: _abrirGerarIa,
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _abrirNovaRefeicao,
         icon: const Icon(Icons.add),
