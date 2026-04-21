@@ -171,6 +171,47 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                           const SizedBox(height: 24),
                         ],
                         
+                        // Perfil Profissional Destaque (P12)
+                        if (data.nomePersonal != null && data.nomePersonal!.isNotEmpty) ...[
+                          Card(
+                            margin: const EdgeInsets.only(bottom: 24),
+                            color: Theme.of(context).colorScheme.primaryContainer,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 30,
+                                    backgroundImage: data.logoUrl != null ? NetworkImage(data.logoUrl!) : null,
+                                    child: data.logoUrl == null ? const Icon(Icons.person, size: 30) : null,
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(data.nomePersonal!, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                                        if (data.descricaoProfissional != null)
+                                          Text(data.descricaoProfissional!, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+                                        if (data.instagram != null) ...[
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.link, size: 14),
+                                              const SizedBox(width: 4),
+                                              Text(data.instagram!, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                                            ],
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                        
                         // Menu Principal (Grid ou List)
                         Text('Ferramentas', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                         const SizedBox(height: 12),

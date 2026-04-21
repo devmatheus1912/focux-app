@@ -84,4 +84,9 @@ class IaRepository {
   Future<void> rejeitarSugestao(int id) async {
     await _dio.post('/api/ia/progressao/sugestoes/$id/rejeitar');
   }
+
+  Future<bool> confirmarPublicar(int alunoId) async {
+    final r = await _dio.post('/api/ia/confirmar-publicar/$alunoId');
+    return r.data['confirmado'] == true;
+  }
 }

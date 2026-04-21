@@ -145,6 +145,22 @@ class _GerarTreinoTabState extends ConsumerState<_GerarTreinoTab> {
           icon: const Icon(Icons.picture_as_pdf),
           label: const Text('Exportar PDF'),
         ),
+        const SizedBox(height: 8),
+        FilledButton.icon(
+          onPressed: () async {
+            try {
+              final repo = IaRepository(ref.read(apiClientProvider));
+              final sucesso = await repo.confirmarPublicar(widget.alunoId);
+              if (sucesso && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Plano de treino publicado no app do aluno com sucesso!')));
+              }
+            } catch (e) {
+              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao publicar: $e')));
+            }
+          },
+          icon: const Icon(Icons.check_circle),
+          label: const Text('Publicar no App do Aluno'),
+        ),
       ],
     ]),
   );
@@ -254,6 +270,22 @@ class _GerarDietaTabState extends ConsumerState<_GerarDietaTab> {
           onPressed: () => _exportarPdf(_resultado!, 'Plano Alimentar'),
           icon: const Icon(Icons.picture_as_pdf),
           label: const Text('Exportar PDF'),
+        ),
+        const SizedBox(height: 8),
+        FilledButton.icon(
+          onPressed: () async {
+            try {
+              final repo = IaRepository(ref.read(apiClientProvider));
+              final sucesso = await repo.confirmarPublicar(widget.alunoId);
+              if (sucesso && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Plano alimentar publicado no app do aluno com sucesso!')));
+              }
+            } catch (e) {
+              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao publicar: $e')));
+            }
+          },
+          icon: const Icon(Icons.check_circle),
+          label: const Text('Publicar no App do Aluno'),
         ),
       ],
     ]),

@@ -6,12 +6,24 @@ class DashboardData {
   final int alunosAtivos;
   final String planoAtual;
   final int limiteAlunos;
+  final String? nomePersonal;
+  final String? logoUrl;
+  final String? corPrimaria;
+  final String? corSecundaria;
+  final String? descricaoProfissional;
+  final String? instagram;
 
   DashboardData({
     required this.totalAlunos,
     required this.alunosAtivos,
     required this.planoAtual,
     required this.limiteAlunos,
+    this.nomePersonal,
+    this.logoUrl,
+    this.corPrimaria,
+    this.corSecundaria,
+    this.descricaoProfissional,
+    this.instagram,
   });
 
   factory DashboardData.fromJson(Map<String, dynamic> json) => DashboardData(
@@ -19,6 +31,12 @@ class DashboardData {
         alunosAtivos: json['alunosAtivos'] as int,
         planoAtual: json['planoAtual'] as String,
         limiteAlunos: json['limiteAlunos'] as int,
+        nomePersonal: json['nomePersonal'] as String?,
+        logoUrl: json['logoUrl'] as String?,
+        corPrimaria: json['corPrimaria'] as String?,
+        corSecundaria: json['corSecundaria'] as String?,
+        descricaoProfissional: json['descricaoProfissional'] as String?,
+        instagram: json['instagram'] as String?,
       );
 }
 
