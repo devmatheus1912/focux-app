@@ -21,6 +21,24 @@ class ApiClient {
         }
         handler.next(options);
       },
+      onError: (DioException e, handler) async {
+        if (e.requestOptions.path != '/api/suporte/analisar-erro' &&
+            !e.requestOptions.path.contains('/auth/')) {
+          try {
+            final token = await SecureStorage.getToken();
+            final role = await SecureStorage.getRole();
+            if (token != null && role == 'PERSONAL') {
+              final reporterDio = Dio(BaseOptions(baseUrl: _baseUrl));
+              reporterDio.options.headers['Authorization'] = 'Bearer $token';
+              await reporterDio.post('/api/suporte/analisar-erro', data: {
+                'erro': e.message ?? e.error?.toString() ?? 'Erro desconhecido',
+                'stacktrace': 'Path: ${e.requestOptions.path}\nMethod: ${e.requestOptions.method}\nResponse: ${e.response?.data}',
+              });
+            }
+          } catch (_) {}
+        }
+        handler.next(e);
+      },
     ));
   }
 
