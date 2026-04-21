@@ -84,64 +84,84 @@ class AlunoDetailScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (aluno) => SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Center(child: CircleAvatar(radius: 40,
-              child: Text(aluno.nome[0].toUpperCase(), style: const TextStyle(fontSize: 32)))),
-            const SizedBox(height: 12),
-            Center(child: Text(aluno.nome, style: Theme.of(context).textTheme.headlineSmall)),
-            Center(child: Text(aluno.email, style: const TextStyle(color: Colors.grey))),
-            const SizedBox(height: 8),
-            _StatusBadge(status: aluno.status, statusFinanceiro: aluno.statusFinanceiro),
-            const SizedBox(height: 16),
-            Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(children: [
-              _InfoRow(label: 'Status', value: aluno.status),
-              _InfoRow(label: 'Financeiro', value: aluno.statusFinanceiro),
-              if (aluno.objetivo != null && aluno.objetivo!.isNotEmpty)
-                _InfoRow(label: 'Objetivo', value: aluno.objetivo!),
-              if (aluno.whatsapp != null && aluno.whatsapp!.isNotEmpty)
-                _InfoRow(label: 'WhatsApp', value: aluno.whatsapp!),
-              if (aluno.genero != null && aluno.genero!.isNotEmpty)
-                _InfoRow(label: 'Gênero', value: aluno.genero!),
-              if (aluno.tipoConsultoria != null && aluno.tipoConsultoria!.isNotEmpty)
-                _InfoRow(label: 'Consultoria', value: aluno.tipoConsultoria!),
-            ]))),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 8),
-            _MenuBtn(icon: Icons.assignment, label: 'Anamnese',
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => AnamneseScreen(alunoId: alunoId)))),
-            _MenuBtn(icon: Icons.monitor_weight, label: 'Avaliação Física',
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => AvaliacaoScreen(alunoId: alunoId)))),
-            _MenuBtn(icon: Icons.restaurant_menu, label: 'Plano Alimentar',
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => AlimentarScreen(alunoId: alunoId)))),
-            _MenuBtn(icon: Icons.bar_chart, label: 'Relatório de Aderência',
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => RelatorioScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
-            _MenuBtn(icon: Icons.receipt_long, label: 'Histórico de Mensalidades',
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => _HistoricoMensalidadesScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
-            _MenuBtn(icon: Icons.auto_awesome, label: 'Gerar Treino/Dieta com IA',
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => IaScreen(alunoId: alunoId)))),
-            _MenuBtn(icon: Icons.trending_up, label: 'Progressão de Carga com IA',
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => IaProgressaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
-            _MenuBtn(icon: Icons.show_chart, label: 'Evolução (Medidas e Recordes)',
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => EvolucaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
-            _MenuBtn(icon: Icons.chat, label: 'Chat',
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => ChatScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 8),
-            Text('Engajamento', style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 8),
-            _SecaoEngajamento(alunoId: alunoId),
+            // Hero Gradient Header
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              padding: const EdgeInsets.only(top: 24, bottom: 40, left: 16, right: 16),
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 48,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    child: Text(aluno.nome.isNotEmpty ? aluno.nome[0].toUpperCase() : 'A', 
+                      style: const TextStyle(fontSize: 36, color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(aluno.nome, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                  Text(aluno.objetivo ?? aluno.email, style: const TextStyle(color: Colors.white70)),
+                  const SizedBox(height: 16),
+                  _StatusBadge(status: aluno.status, statusFinanceiro: aluno.statusFinanceiro),
+                ],
+              ),
+            ),
+            
+            // Transform upward to overlap
+            Transform.translate(
+              offset: const Offset(0, -20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Stats Row (Aderência, etc)
+                    _SecaoEngajamento(alunoId: alunoId),
+                    const SizedBox(height: 24),
+                    
+                    Text('Ferramentas', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    
+                    // Grid Ferramentas
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 2.5,
+                      children: [
+                        _GridToolBtn(icon: Icons.monitor_weight, label: 'Avaliação Física', color: Colors.blue, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AvaliacaoScreen(alunoId: alunoId)))),
+                        _GridToolBtn(icon: Icons.assignment, label: 'Anamnese', color: Colors.orange, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AnamneseScreen(alunoId: alunoId)))),
+                        _GridToolBtn(icon: Icons.restaurant_menu, label: 'Dieta', color: Colors.green, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AlimentarScreen(alunoId: alunoId)))),
+                        _GridToolBtn(icon: Icons.show_chart, label: 'Evolução', color: Colors.purple, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EvolucaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                        _GridToolBtn(icon: Icons.bar_chart, label: 'Aderência', color: Colors.teal, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RelatorioScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                        _GridToolBtn(icon: Icons.receipt_long, label: 'Financeiro', color: Colors.redAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _HistoricoMensalidadesScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    Text('Inteligência Artificial', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    
+                    _MenuBtn(icon: Icons.auto_awesome, label: 'Gerar Treino/Dieta', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => IaScreen(alunoId: alunoId)))),
+                    _MenuBtn(icon: Icons.trending_up, label: 'Progressão de Carga', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => IaProgressaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                    const SizedBox(height: 24),
+                    
+                    Text('Comunicação', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    _MenuBtn(icon: Icons.chat, label: 'Chat com Aluno', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChatScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                    
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ),
           ]),
         ),
       ),
@@ -407,5 +427,51 @@ class _StatEngajamento extends StatelessWidget {
       Text(valor, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: c)),
       Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
     ]);
+  }
+}
+
+class _GridToolBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _GridToolBtn({required this.icon, required this.label, required this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 18),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

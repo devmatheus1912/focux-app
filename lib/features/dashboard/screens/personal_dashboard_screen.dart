@@ -4,17 +4,41 @@ import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../../admin/screens/admin_screen.dart';
+import '../../financeiro/data/financeiro_repository.dart';
 
-class PersonalDashboardScreen extends ConsumerWidget {
+class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PersonalDashboardScreen> createState() => _PersonalDashboardScreenState();
+}
+
+class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScreen> {
+  FinanceiroDashboard? _finData;
+  bool _loadingFin = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFin();
+  }
+
+  Future<void> _loadFin() async {
+    try {
+      final data = await FinanceiroRepository(ref.read(apiClientProvider)).dashboard();
+      if (mounted) setState(() { _finData = data; _loadingFin = false; });
+    } catch (_) {
+      if (mounted) setState(() => _loadingFin = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final dashboardAsync = ref.watch(dashboardProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('Visão Geral'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -28,120 +52,155 @@ class PersonalDashboardScreen extends ConsumerWidget {
       body: dashboardAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro ao carregar: $e')),
-        data: (data) => Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Plano: ${data.planoAtual}',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(
-                      label: 'Total de Alunos',
-                      value: data.totalAlunos.toString(),
+        data: (data) => RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(dashboardProvider);
+            await _loadFin();
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Hero Receita Gradiente
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      label: 'Alunos Ativos',
-                      value: data.alunosAtivos.toString(),
-                    ),
+                  padding: const EdgeInsets.only(top: 24, bottom: 40, left: 24, right: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Receita do Mês', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                      const SizedBox(height: 8),
+                      _loadingFin
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              'R\$ ${_finData?.receitaMes.toStringAsFixed(2) ?? '0.00'}',
+                              style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold),
+                            ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(16)),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.trending_up, color: Colors.greenAccent, size: 16),
+                                const SizedBox(width: 4),
+                                Text('Previsão: R\$ ${_finData?.previsaoReceita.toStringAsFixed(2) ?? '0.00'}', 
+                                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _StatCard(
-                label: 'Limite do Plano',
-                value: '${data.alunosAtivos} / ${data.limiteAlunos}',
-              ),
-              const SizedBox(height: 24),
-              const Divider(),
-              const SizedBox(height: 8),
-              Text('Menu', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 12),
-              _MenuButton(
-                icon: Icons.people,
-                label: 'Meus Alunos',
-                onTap: () => context.push('/alunos'),
-              ),
-              _MenuButton(
-                icon: Icons.person_add,
-                label: 'Convidar Aluno',
-                onTap: () => context.push('/convites'),
-              ),
-              _MenuButton(
-                icon: Icons.person,
-                label: 'Meu Perfil',
-                onTap: () => context.push('/perfil'),
-              ),
-              _MenuButton(
-                icon: Icons.workspace_premium,
-                label: 'Planos e Assinatura',
-                onTap: () => context.push('/planos'),
-              ),
-              _MenuButton(
-                icon: Icons.fitness_center,
-                label: 'Exercícios',
-                onTap: () => context.push('/exercicios'),
-              ),
-              _MenuButton(
-                icon: Icons.list_alt,
-                label: 'Treinos',
-                onTap: () => context.push('/treinos'),
-              ),
-              _MenuButton(
-                icon: Icons.attach_money,
-                label: 'Financeiro',
-                onTap: () => context.push('/financeiro'),
-              ),
-              _MenuButton(
-                icon: Icons.calendar_month,
-                label: 'Agenda',
-                onTap: () => context.push('/agenda'),
-              ),
-              _MenuButton(
-                icon: Icons.dynamic_feed,
-                label: 'Feed de Conteúdo',
-                onTap: () => context.push('/feed'),
-              ),
-              _MenuButton(
-                icon: Icons.people_alt,
-                label: 'Funil de Leads',
-                onTap: () => context.push('/leads'),
-              ),
-              _MenuButton(
-                icon: Icons.warning_amber_rounded,
-                label: 'Alertas de Risco',
-                onTap: () => context.push('/alertas'),
-              ),
-              _MenuButton(
-                icon: Icons.psychology,
-                label: 'Copiloto IA',
-                onTap: () => context.push('/ia/copiloto'),
-              ),
-              _MenuButton(
-                icon: Icons.emoji_events,
-                label: 'Ranking',
-                onTap: () => context.push('/ranking'),
-              ),
-              _MenuButton(
-                icon: Icons.palette_outlined,
-                label: 'Identidade Visual',
-                onTap: () => context.push('/identidade-visual'),
-              ),
-              if (ref.watch(isAdminProvider))
-                _MenuButton(
-                  icon: Icons.admin_panel_settings,
-                  label: 'Painel Admin',
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScreen())),
                 ),
-            ],
+                
+                // Grid 2x2 Transform upward
+                Transform.translate(
+                  offset: const Offset(0, -24),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(child: _CardMetrica(
+                              titulo: 'Alunos Ativos',
+                              valor: data.alunosAtivos.toString(),
+                              icone: Icons.people,
+                              cor: Colors.blue,
+                            )),
+                            const SizedBox(width: 12),
+                            Expanded(child: _CardMetrica(
+                              titulo: 'Inadimplentes',
+                              valor: _finData?.totalInadimplentes.toString() ?? '0',
+                              icone: Icons.warning_amber_rounded,
+                              cor: Colors.red,
+                            )),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(child: _CardMetrica(
+                              titulo: 'Ticket Médio',
+                              valor: 'R\$ ${_finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
+                              icone: Icons.receipt_long,
+                              cor: Colors.teal,
+                            )),
+                            const SizedBox(width: 12),
+                            Expanded(child: _CardMetrica(
+                              titulo: 'Plano atual',
+                              valor: data.planoAtual,
+                              icone: Icons.workspace_premium,
+                              cor: Colors.orange,
+                            )),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        
+                        // Precisa de Atenção + WhatsApp CTA
+                        if (_finData != null && _finData!.vencimentosProximos.isNotEmpty) ...[
+                          Text('Precisa de Atenção', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          ..._finData!.vencimentosProximos.take(3).map((v) => Card(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            child: ListTile(
+                              leading: const CircleAvatar(backgroundColor: Colors.redAccent, child: Icon(Icons.warning, color: Colors.white, size: 20)),
+                              title: Text(v.alunoNome, style: const TextStyle(fontWeight: FontWeight.w600)),
+                              subtitle: Text('Atrasado: R\$ ${v.valor.toStringAsFixed(2)}', style: const TextStyle(color: Colors.redAccent)),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.message, color: Colors.green),
+                                tooltip: 'Cobrar via WhatsApp',
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Abrindo WhatsApp...')));
+                                },
+                              ),
+                            ),
+                          )),
+                          const SizedBox(height: 24),
+                        ],
+                        
+                        // Menu Principal (Grid ou List)
+                        Text('Ferramentas', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 12),
+                        GridView.count(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisCount: 2,
+                          childAspectRatio: 2.5,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                          children: [
+                            _GridBtn(icon: Icons.people, label: 'Alunos', onTap: () => context.push('/alunos')),
+                            _GridBtn(icon: Icons.fitness_center, label: 'Exercícios', onTap: () => context.push('/exercicios')),
+                            _GridBtn(icon: Icons.list_alt, label: 'Treinos', onTap: () => context.push('/treinos')),
+                            _GridBtn(icon: Icons.attach_money, label: 'Financeiro', onTap: () => context.push('/financeiro')),
+                            _GridBtn(icon: Icons.calendar_month, label: 'Agenda', onTap: () => context.push('/agenda')),
+                            _GridBtn(icon: Icons.dynamic_feed, label: 'Feed', onTap: () => context.push('/feed')),
+                            _GridBtn(icon: Icons.people_alt, label: 'Funil', onTap: () => context.push('/leads')),
+                            _GridBtn(icon: Icons.warning_amber_rounded, label: 'Alertas', onTap: () => context.push('/alertas')),
+                            _GridBtn(icon: Icons.psychology, label: 'Copiloto IA', onTap: () => context.push('/ia/copiloto')),
+                            if (ref.watch(isAdminProvider))
+                              _GridBtn(icon: Icons.admin_panel_settings, label: 'Admin', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScreen()))),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -149,43 +208,53 @@ class PersonalDashboardScreen extends ConsumerWidget {
   }
 }
 
-class _MenuButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _MenuButton({required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: Icon(icon),
-        title: Text(label),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _StatCard({required this.label, required this.value});
+class _CardMetrica extends StatelessWidget {
+  final String titulo, valor;
+  final IconData icone;
+  final Color cor;
+  const _CardMetrica({required this.titulo, required this.valor, required this.icone, required this.cor});
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 4),
-            Text(value, style: Theme.of(context).textTheme.headlineMedium),
+            Icon(icone, color: cor, size: 28),
+            const SizedBox(height: 12),
+            Text(valor, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(titulo, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GridBtn extends StatelessWidget {
+  final IconData icon; final String label; final VoidCallback onTap;
+  const _GridBtn({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 8),
+            Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13))),
           ],
         ),
       ),
