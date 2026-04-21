@@ -94,4 +94,8 @@ class EvolucaoRepository {
     // Se vier como lista, retorna mapa vazio para não quebrar a UI
     return {};
   }
+
+  Future<void> compartilharEvolucao(int alunoId) async {
+    await _dio.post('/api/alunos/$alunoId/evolucao/compartilhar');
+  }
 }

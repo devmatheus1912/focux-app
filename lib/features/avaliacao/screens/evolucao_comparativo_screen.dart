@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/avaliacao_repository.dart';
+import '../../evolucao/data/evolucao_repository.dart';
 
 String _fmtData(String? iso) {
   if (iso == null || iso.isEmpty) return '—';
@@ -213,6 +214,22 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
               SizedBox(width: 4),
               Text('Sem alteração', style: TextStyle(fontSize: 12, color: Colors.grey)),
             ],
+          ),
+          const SizedBox(height: 32),
+          FilledButton.icon(
+            onPressed: () async {
+              try {
+                final repo = EvolucaoRepository(ref.read(apiClientProvider));
+                await repo.compartilharEvolucao(widget.alunoId);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Evolução compartilhada via chat com sucesso!')));
+                }
+              } catch (e) {
+                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+              }
+            },
+            icon: const Icon(Icons.share),
+            label: const Text('Compartilhar com o aluno via Chat'),
           ),
         ],
       ),
