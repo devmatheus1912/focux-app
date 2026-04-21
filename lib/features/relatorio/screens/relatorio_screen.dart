@@ -73,6 +73,66 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     }
   }
 
+  Future<void> _exportarPdf() async {
+    if (_dados == null) return;
+    final doc = pw.Document();
+    
+    doc.addPage(pw.Page(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.all(32),
+      build: (ctx) {
+        final d = _dados!;
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text('Relatório de Aderência — ${widget.alunoNome}', style: pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 8),
+            pw.Text('Gerado em: ${DateTime.now().toString().substring(0, 16)}', style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
+            pw.SizedBox(height: 24),
+            pw.Text('Período Analisado: $_dias dias', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 16),
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                _pdfCard('Taxa de Aderência', '${d.taxaAderenciaPercent.toStringAsFixed(1)}%'),
+                _pdfCard('Treinos Concluídos', '${d.treinosConcluidos} / ${d.treinosTotal}'),
+                _pdfCard('Dias Analisados', '${d.diasAnalisados}'),
+              ]
+            ),
+            pw.SizedBox(height: 24),
+            if (_comparativo != null) ...[
+              pw.Text('Comparativo com Período Anterior', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 8),
+              pw.Text('Aderência Atual: ${_comparativo!.aderenciaAtual.toStringAsFixed(1)}% (${_comparativo!.checkInsAtual} check-ins)'),
+              pw.Text('Aderência Anterior: ${_comparativo!.aderenciaAnterior.toStringAsFixed(1)}% (${_comparativo!.checkInsAnterior} check-ins)'),
+              pw.SizedBox(height: 8),
+              pw.Text('Evolução: ${(_comparativo!.aderenciaAtual - _comparativo!.aderenciaAnterior).toStringAsFixed(1)}%', 
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: _comparativo!.aderenciaAtual >= _comparativo!.aderenciaAnterior ? PdfColors.green : PdfColors.red)),
+            ]
+          ]
+        );
+      }
+    ));
+    await Printing.layoutPdf(onLayout: (_) async => doc.save());
+  }
+
+  pw.Widget _pdfCard(String title, String value) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(12),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.grey300),
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+      ),
+      child: pw.Column(
+        children: [
+          pw.Text(value, style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 4),
+          pw.Text(title, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+        ]
+      )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -80,6 +140,13 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Relatório — ${widget.alunoNome}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            tooltip: 'Exportar PDF',
+            onPressed: _dados != null ? _exportarPdf : null,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
