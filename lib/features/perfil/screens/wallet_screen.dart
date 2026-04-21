@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
+import '../../financeiro/data/financeiro_repository.dart';
+import '../../../core/api/api_client.dart';
 
 /// Tela de configuração de dados de pagamento (Wallet / PIX).
 class WalletScreen extends ConsumerStatefulWidget {
@@ -126,6 +128,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   ),
                   const SizedBox(height: 20),
 
+                  // Resumo financeiro (FN1)
+                  const _ResumoMensalCard(),
+                  const SizedBox(height: 20),
+
                   // Seção PIX
                   Text('Dados PIX', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
@@ -227,3 +233,78 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     };
   }
 }
+
+class _ResumoMensalCard extends ConsumerStatefulWidget {
+  const _ResumoMensalCard();
+
+  @override
+  ConsumerState<_ResumoMensalCard> createState() => _ResumoMensalCardState();
+}
+
+class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
+  ResumoMensal? _resumo;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final now = DateTime.now();
+      final repo = FinanceiroRepository(ref.read(apiClientProvider));
+      final res = await repo.resumoMensal(now.year, now.month);
+      if (mounted) setState(() { _resumo = res; _loading = false; });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_resumo == null) return const SizedBox.shrink();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Resumo do Mês', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _Stat(label: 'Recebido', valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}', color: Colors.green),
+                _Stat(label: 'Previsto', valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}', color: Colors.blue),
+                _Stat(label: 'Inadimplentes', valor: '${_resumo!.inadimplentes}', color: Colors.red),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Stat extends StatelessWidget {
+  final String label, valor;
+  final Color color;
+  const _Stat({required this.label, required this.valor, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(valor, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
+      ],
+    );
+  }
+}
+
+

@@ -63,6 +63,8 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       theme: AppTheme.buildTheme(primaryColor),
       darkTheme: AppTheme.buildDarkTheme(primaryColor),
       themeMode: themeMode,
+      themeAnimationDuration: const Duration(milliseconds: 600),
+      themeAnimationCurve: Curves.easeInOutCubic,
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
       locale: const Locale('pt', 'BR'),
