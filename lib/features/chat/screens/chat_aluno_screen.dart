@@ -22,7 +22,7 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
   bool _sending = false;
   int? _alunoId;
 
-  static const _base = 'https://focux-backend.up.railway.app';
+  static const _base = 'https://focux-backend.onrender.com';
 
   @override
   void initState() {

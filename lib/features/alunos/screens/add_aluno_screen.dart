@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -39,7 +40,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() { _loading = true; _error = null; });
     try {
-      await ref.read(alunoRepositoryProvider).criar(
+      final novoAluno = await ref.read(alunoRepositoryProvider).criar(
         nome: _nomeCtrl.text.trim(),
         email: _emailCtrl.text.trim(),
         objetivo: _objetivoCtrl.text.trim(),
@@ -47,12 +48,92 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen> {
         genero: _genero,
         tipoConsultoria: _tipoConsultoria,
       );
-      if (mounted) context.pop(true);
+      if (mounted) {
+        if (novoAluno.senhaProvisoria != null) {
+          _showSenhaBottomSheet(novoAluno);
+        } else {
+          context.pop(true);
+        }
+      }
     } catch (e) {
       setState(() { _error = 'Erro ao cadastrar aluno. Verifique os dados.'; });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }
+  }
+
+  void _showSenhaBottomSheet(final aluno) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24).copyWith(bottom: 24 + MediaQuery.of(ctx).padding.bottom),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_circle, color: EagleTokens.success, size: 64),
+            const SizedBox(height: 16),
+            const Text(
+              'Aluno cadastrado com sucesso!',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'O sistema gerou uma senha provisória de 6 dígitos. Compartilhe-a com o aluno para o primeiro acesso:',
+              style: TextStyle(color: Colors.black54),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Text(
+                aluno.senhaProvisoria!,
+                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 4),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () {
+                  final texto = 'Olá ${aluno.nome.split(' ').first}! Seu perfil no Focux foi criado.\n\nAcesse com seu e-mail: ${aluno.email}\nSenha provisória: ${aluno.senhaProvisoria}\n\nLembre-se de alterar a senha no primeiro acesso!';
+                  Clipboard.setData(ClipboardData(text: texto));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Mensagem copiada para a área de transferência!')),
+                  );
+                  Navigator.of(ctx).pop();
+                  if (mounted) context.pop(true);
+                },
+                icon: const Icon(Icons.copy),
+                label: const Text('Copiar mensagem de convite'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  if (mounted) context.pop(true);
+                },
+                child: const Text('Fechar (Já enviei)'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override

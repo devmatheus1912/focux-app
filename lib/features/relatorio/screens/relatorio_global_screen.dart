@@ -137,7 +137,7 @@ class _HeroCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: EagleTokens.heroGradient(dark: isDark),
-        borderRadius: BorderRadius.circular(EagleTokens.radiusCard),
+        borderRadius: BorderRadius.circular(20),
       ),
       padding: const EdgeInsets.all(24),
       child: Column(

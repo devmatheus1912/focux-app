@@ -35,16 +35,14 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   @override
   Widget build(BuildContext context) {
     final alunosAsync = ref.watch(alunosProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Alunos')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final criado = await context.push<bool>('/alunos/novo');
-          if (criado == true) ref.invalidate(alunosProvider);
-        },
-        child: const Icon(Icons.add),
-      ),
+      backgroundColor: bg,
       body: alunosAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),
@@ -53,69 +51,107 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
           final ativosCount = alunos.where((a) => a.status == 'ATIVO').length;
           final inadCount = alunos.where((a) => a.statusFinanceiro == 'INADIMPLENTE' || a.inadimplente).length;
 
-          return Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                child: Row(
-                  children: [
-                    Text(
-                      '$ativosCount ATIVOS · $inadCount INADIMPL.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF4B5563),
-                            fontWeight: FontWeight.bold,
+          return SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header (Alunos + Botão Adicionar)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$ativosCount ativos · $inadCount inadimpl.'.toUpperCase(),
+                            style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
                           ),
-                    ),
-                  ],
-                ),
-              ),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  children: [
-                    FilterChip(
-                      label: const Text('Todos'),
-                      selected: _filtro == AlunoFiltro.todos,
-                      onSelected: (_) => setState(() => _filtro = AlunoFiltro.todos),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterChip(
-                      label: const Text('Ativos'),
-                      selected: _filtro == AlunoFiltro.ativos,
-                      selectedColor: EagleTokens.success.withValues(alpha: 0.2),
-                      onSelected: (_) => setState(() => _filtro = AlunoFiltro.ativos),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterChip(
-                      label: const Text('Inadimplentes'),
-                      selected: _filtro == AlunoFiltro.inadimplentes,
-                      selectedColor: EagleTokens.danger.withValues(alpha: 0.2),
-                      onSelected: (_) => setState(() => _filtro = AlunoFiltro.inadimplentes),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterChip(
-                      label: const Text('Em risco'),
-                      selected: _filtro == AlunoFiltro.risco,
-                      selectedColor: EagleTokens.warning.withValues(alpha: 0.2),
-                      onSelected: (_) => setState(() => _filtro = AlunoFiltro.risco),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: filtrados.isEmpty
-                    ? const Center(child: Text('Nenhum aluno encontrado.'))
-                    : RefreshIndicator(
-                        onRefresh: () async => ref.invalidate(alunosProvider),
-                        child: ListView.builder(
-                          itemCount: filtrados.length,
-                          itemBuilder: (context, i) => _AlunoTile(aluno: filtrados[i]),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Alunos',
+                            style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                          ),
+                        ],
+                      ),
+                      InkWell(
+                        onTap: () async {
+                          final criado = await context.push<bool>('/alunos/novo');
+                          if (criado == true) ref.invalidate(alunosProvider);
+                        },
+                        borderRadius: BorderRadius.circular(44),
+                        child: Container(
+                          width: 44, height: 44,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white : EagleTokens.brand,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              if (!isDark) BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.5), blurRadius: 16, offset: const Offset(0, 6), spreadRadius: -6)
+                            ],
+                          ),
+                          child: Icon(Icons.add, size: 24, color: isDark ? EagleTokens.ink : Colors.white),
                         ),
                       ),
-              ),
-            ],
+                    ],
+                  ),
+                ),
+
+                // Search Bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                      borderRadius: BorderRadius.circular(14),
+                      border: isDark ? null : Border.all(color: EagleTokens.line),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.search, size: 20, color: mute),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text('Buscar por nome, objetivo...', style: TextStyle(fontSize: 14, color: mute)),
+                        ),
+                        Icon(Icons.tune, size: 20, color: isDark ? EagleTokens.brandAccent : EagleTokens.brand),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Filter Chips
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      _FxChip(label: 'Todos', isSelected: _filtro == AlunoFiltro.todos, isDark: isDark, onTap: () => setState(() => _filtro = AlunoFiltro.todos)),
+                      _FxChip(label: 'Ativos', isSelected: _filtro == AlunoFiltro.ativos, isDark: isDark, onTap: () => setState(() => _filtro = AlunoFiltro.ativos)),
+                      _FxChip(label: 'Inadimplentes', isSelected: _filtro == AlunoFiltro.inadimplentes, isDark: isDark, onTap: () => setState(() => _filtro = AlunoFiltro.inadimplentes)),
+                      _FxChip(label: 'Risco alto', isSelected: _filtro == AlunoFiltro.risco, isDark: isDark, onTap: () => setState(() => _filtro = AlunoFiltro.risco)),
+                    ],
+                  ),
+                ),
+
+                // List
+                Expanded(
+                  child: filtrados.isEmpty
+                      ? const Center(child: Text('Nenhum aluno encontrado.'))
+                      : RefreshIndicator(
+                          onRefresh: () async => ref.invalidate(alunosProvider),
+                          child: ListView.separated(
+                            padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 120),
+                            itemCount: filtrados.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 10),
+                            itemBuilder: (context, i) => _AlunoCardFX(aluno: filtrados[i]),
+                          ),
+                        ),
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -123,15 +159,57 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   }
 }
 
-class _AlunoTile extends ConsumerStatefulWidget {
-  final Aluno aluno;
-  const _AlunoTile({required this.aluno});
+class _FxChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final bool isDark;
+  final VoidCallback onTap;
+  
+  const _FxChip({required this.label, required this.isSelected, required this.isDark, required this.onTap});
 
   @override
-  ConsumerState<_AlunoTile> createState() => _AlunoTileState();
+  Widget build(BuildContext context) {
+    final bg = isSelected 
+        ? (isDark ? Colors.white : EagleTokens.ink) 
+        : (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.white);
+    final color = isSelected 
+        ? (isDark ? EagleTokens.ink : Colors.white) 
+        : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+    final border = isSelected 
+        ? null 
+        : Border.all(color: isDark ? Colors.white.withValues(alpha: 0.09) : EagleTokens.line);
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(999),
+            border: border,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: -0.2),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _AlunoTileState extends ConsumerState<_AlunoTile> {
+class _AlunoCardFX extends ConsumerStatefulWidget {
+  final Aluno aluno;
+  const _AlunoCardFX({required this.aluno});
+
+  @override
+  ConsumerState<_AlunoCardFX> createState() => _AlunoCardFXState();
+}
+
+class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
   List<Map<String, dynamic>>? _dados;
 
   @override
@@ -150,96 +228,155 @@ class _AlunoTileState extends ConsumerState<_AlunoTile> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    
     final aluno = widget.aluno;
-    final Color dotColor;
-    final Color chipColor;
-    final String chipLabel;
 
+    // FxStatus pill colors
+    Color statusBg, statusColor;
+    String statusText;
+    
     if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
-      dotColor = EagleTokens.danger;
-      chipColor = EagleTokens.danger;
-      chipLabel = 'Inadimplente';
+      statusBg = isDark ? const Color(0x24FF8B8B) : EagleTokens.badSoft;
+      statusColor = isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad;
+      statusText = 'INADIMPLENTE';
     } else if (aluno.status == 'INATIVO') {
-      dotColor = EagleTokens.warning;
-      chipColor = EagleTokens.warning;
-      chipLabel = 'Inativo';
+      statusBg = isDark ? const Color(0x24E2B46F) : EagleTokens.warnSoft;
+      statusColor = isDark ? const Color(0xFFE2B46F) : EagleTokens.warn;
+      statusText = 'INATIVO';
+    } else if (aluno.emRisco) {
+      statusBg = isDark ? const Color(0x24FFB77A) : EagleTokens.warnSoft;
+      statusColor = isDark ? const Color(0xFFFFB77A) : EagleTokens.warn;
+      statusText = 'RISCO ALTO';
     } else {
-      dotColor = EagleTokens.success;
-      chipColor = EagleTokens.success;
-      chipLabel = 'Ativo';
+      statusBg = isDark ? const Color(0x1F6FE296) : EagleTokens.goodSoft;
+      statusColor = isDark ? const Color(0xFF6FE296) : EagleTokens.good;
+      statusText = 'ATIVO';
     }
 
-    return ListTile(
-      leading: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          CircleAvatar(
-            radius: 22,
-            child: Text(aluno.nome.isNotEmpty ? aluno.nome[0].toUpperCase() : 'A'),
-          ),
-          Positioned(
-            right: -2, top: -2,
-            child: Container(
-              width: 14, height: 14,
-              decoration: BoxDecoration(
-                color: dotColor,
-                shape: BoxShape.circle,
-                border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 2),
+    // Avatar color hashing (deterministic)
+    final palette = isDark
+        ? const [Color(0xFF2B4A9E), Color(0xFF3D5FBE), Color(0xFF1F3881), Color(0xFF4A6FD1), Color(0xFF243B7A), Color(0xFF6482D9)]
+        : const [Color(0xFF2B4A9E), Color(0xFF3D5FBE), Color(0xFF6482D9), Color(0xFF1F3881), Color(0xFF4A6FD1), Color(0xFF8DA4E2)];
+    final hash = aluno.nome.isNotEmpty ? aluno.nome.codeUnitAt(0) : 0;
+    final avatarColor = palette[hash % palette.length];
+
+    // Mocks for now as we don't have this in real model
+    final aderenciaMock = 85; 
+    final diasSem = 0;
+    final aderColor = EagleTokens.aderenciaColor(aderenciaMock.toDouble(), isDark: isDark);
+
+    return InkWell(
+      onTap: () => context.push('/alunos/${aluno.id}'),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: isDark ? null : Border.all(color: line),
+        ),
+        child: Row(
+          children: [
+            // FxAvatar
+            Container(
+              width: 48, height: 48,
+              decoration: BoxDecoration(color: avatarColor, shape: BoxShape.circle),
+              alignment: Alignment.center,
+              child: Text(
+                aluno.nome.isNotEmpty ? aluno.nome[0].toUpperCase() : '?',
+                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-          ),
-        ],
-      ),
-      title: Row(children: [
-        Flexible(child: Text(aluno.nome, style: const TextStyle(fontWeight: FontWeight.w600))),
-        if (aluno.emRisco) ...[
-          const SizedBox(width: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: EagleTokens.warning.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: EagleTokens.warning.withValues(alpha: 0.5)),
+            const SizedBox(width: 12),
+            
+            // Middle Column
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(child: Text(aluno.nome, style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: ink), overflow: TextOverflow.ellipsis)),
+                      if (statusText != 'ATIVO') ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(color: statusBg, borderRadius: BorderRadius.circular(999)),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(width: 5, height: 5, decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle)),
+                              const SizedBox(width: 5),
+                              Text(statusText, style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text('${aluno.objetivo ?? 'Emagrecimento'} · ${aluno.email}', style: TextStyle(fontSize: 12, color: mute), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Container(width: 6, height: 6, decoration: BoxDecoration(color: aderColor, shape: BoxShape.circle)),
+                      const SizedBox(width: 4),
+                      Text('$aderenciaMock%', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: ink)),
+                      const SizedBox(width: 4),
+                      Text('aderência', style: TextStyle(fontSize: 11, color: mute)),
+                      
+                      const SizedBox(width: 10),
+                      Container(width: 1, height: 10, color: line),
+                      const SizedBox(width: 10),
+                      Text(diasSem == 0 ? 'Treinou hoje' : 'há ${diasSem}d', style: TextStyle(fontSize: 11, color: mute)),
+                    ],
+                  )
+                ],
+              ),
             ),
-            child: const Text('Risco CHURN', style: TextStyle(fontSize: 9, color: Color(0xFFD97706), fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ]),
-      subtitle: Text(aluno.objetivo ?? aluno.email, maxLines: 1, overflow: TextOverflow.ellipsis),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (_dados != null && _dados!.isNotEmpty)
-            SizedBox(
-              width: 50,
-              height: 24,
-              child: LineChart(
-                LineChartData(
-                  gridData: const FlGridData(show: false),
-                  titlesData: const FlTitlesData(show: false),
-                  borderData: FlBorderData(show: false),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: _dados!.asMap().entries.map((e) => FlSpot(e.key.toDouble(), (e.value['checkins'] as num).toDouble())).toList(),
-                      isCurved: true,
-                      color: Theme.of(context).colorScheme.primary,
-                      barWidth: 2,
-                      isStrokeCapRound: true,
-                      dotData: const FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+            
+            // Sparkline + Chevron
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (_dados != null && _dados!.isNotEmpty)
+                  SizedBox(
+                    width: 60, height: 24,
+                    child: LineChart(
+                      LineChartData(
+                        gridData: const FlGridData(show: false),
+                        titlesData: const FlTitlesData(show: false),
+                        borderData: FlBorderData(show: false),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: _dados!.asMap().entries.map((e) => FlSpot(e.key.toDouble(), (e.value['checkins'] as num).toDouble())).toList(),
+                            isCurved: true,
+                            color: aderColor,
+                            barWidth: 1.75,
+                            isStrokeCapRound: true,
+                            dotData: FlDotData(show: true, getDotPainter: (spot, percent, barData, index) => index == barData.spots.length - 1 ? FlDotCirclePainter(radius: 2.5, color: aderColor, strokeWidth: 0) : FlDotCirclePainter(radius: 0)),
+                            belowBarData: BarAreaData(show: false),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-          const SizedBox(width: 12),
-          const Icon(Icons.chevron_right, color: EagleTokens.textSecondary),
-        ],
+                  )
+                else
+                  const SizedBox(width: 60, height: 24),
+                  
+                const SizedBox(height: 6),
+                Icon(Icons.chevron_right, size: 16, color: mute),
+              ],
+            )
+          ],
+        ),
       ),
-      onTap: () => context.push('/alunos/${aluno.id}'),
     );
   }
 }

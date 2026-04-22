@@ -29,7 +29,7 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
     
     try {
       // Usando http puro aqui para o protótipo, mas idealmente usa o Dio do ApiClient
-      final url = Uri.parse('https://focux-backend-production.up.railway.app/api/v1/migracao/texto');
+      final url = Uri.parse('https://focux-backend.onrender.com/api/v1/migracao/texto');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -111,7 +111,7 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: EagleTokens.primary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusButton)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: _isLoading 
                   ? const CircularProgressIndicator(color: Colors.white)

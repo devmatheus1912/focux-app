@@ -22,7 +22,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool _loading = true;
   bool _sending = false;
 
-  static const _base = 'https://focux-backend.up.railway.app';
+  static const _base = 'https://focux-backend.onrender.com';
 
   @override
   void initState() {

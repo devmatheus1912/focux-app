@@ -4,7 +4,7 @@ import 'offline_sync_service.dart';
 import 'dart:io';
 
 class ApiClient {
-  static const _baseUrl = 'https://focux-backend-production.up.railway.app';
+  static const _baseUrl = 'https://focux-backend.onrender.com';
 
   late final Dio _dio;
 

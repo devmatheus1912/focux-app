@@ -15,6 +15,7 @@ class Aluno {
   final String? genero;
   final String? tipoConsultoria;
   final String statusFinanceiro;
+  final String? senhaProvisoria;
 
   Aluno({
     required this.id,
@@ -30,6 +31,7 @@ class Aluno {
     this.genero,
     this.tipoConsultoria,
     this.statusFinanceiro = 'ATIVO',
+    this.senhaProvisoria,
   });
 
   factory Aluno.fromJson(Map<String, dynamic> json) => Aluno(
@@ -46,6 +48,7 @@ class Aluno {
         genero: json['genero'] as String?,
         tipoConsultoria: json['tipoConsultoria'] as String?,
         statusFinanceiro: json['statusFinanceiro'] as String? ?? 'ATIVO',
+        senhaProvisoria: json['senhaProvisoria'] as String?,
       );
 }
 
@@ -102,6 +105,11 @@ class AlunoRepository {
   Future<List<Map<String, dynamic>>> aderenciaSemanal(int id) async {
     final response = await _dio.get('/api/alunos/$id/aderencia-semanal');
     return List<Map<String, dynamic>>.from(response.data);
+  }
+
+  Future<String> gerarSenhaProvisoria(int id) async {
+    final response = await _dio.post('/api/alunos/$id/gerar-senha-provisoria');
+    return response.data['senhaProvisoria'] as String;
   }
 
   // Telefone getter helper (não está no modelo ainda)
