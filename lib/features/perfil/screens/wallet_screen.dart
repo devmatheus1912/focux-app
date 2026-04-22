@@ -279,9 +279,9 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _Stat(label: 'Recebido', valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}', color: EagleTokens.success),
-                _Stat(label: 'Previsto', valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}', color: EagleTokens.primary),
-                _Stat(label: 'Inadimplentes', valor: '${_resumo!.inadimplentes}', color: EagleTokens.danger),
+                _Stat(label: 'Recebido', valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}', color: EagleTokens.good),
+                _Stat(label: 'Previsto', valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}', color: EagleTokens.brand),
+                _Stat(label: 'Inadimplentes', valor: '${_resumo!.inadimplentes}', color: EagleTokens.bad),
               ],
             ),
           ],
@@ -301,7 +301,7 @@ class _Stat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+        Text(label, style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
         Text(valor, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
       ],
     );

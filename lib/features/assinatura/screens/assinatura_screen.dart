@@ -134,10 +134,10 @@ class _Feature extends StatelessWidget {
           Icon(
             ativo ? Icons.check_circle : Icons.cancel,
             size: 16,
-            color: ativo ? EagleTokens.success : EagleTokens.textSecondary,
+            color: ativo ? EagleTokens.good : EagleTokens.inkMute,
           ),
           const SizedBox(width: 6),
-          Text(label, style: TextStyle(color: ativo ? null : EagleTokens.textSecondary)),
+          Text(label, style: TextStyle(color: ativo ? null : EagleTokens.inkMute)),
         ],
       ),
     );

@@ -82,7 +82,7 @@ class _BuscaGlobalWidgetState extends ConsumerState<BuscaGlobalWidget> {
         children: [
           Icon(Icons.search, size: 72, color: const Color(0xFFD1D5DB)),
           const SizedBox(height: 16),
-          Text('Digite pelo menos 2 caracteres', style: TextStyle(color: EagleTokens.textSecondary)),
+          Text('Digite pelo menos 2 caracteres', style: TextStyle(color: EagleTokens.inkMute)),
         ],
       ),
     );
@@ -101,7 +101,7 @@ class _BuscaGlobalWidgetState extends ConsumerState<BuscaGlobalWidget> {
           children: [
             Icon(Icons.find_in_page_outlined, size: 72, color: const Color(0xFFD1D5DB)),
             const SizedBox(height: 16),
-            Text('Nenhum resultado para "$_query"', style: TextStyle(color: EagleTokens.textSecondary)),
+            Text('Nenhum resultado para "$_query"', style: TextStyle(color: EagleTokens.inkMute)),
           ],
         ),
       );
@@ -112,17 +112,17 @@ class _BuscaGlobalWidgetState extends ConsumerState<BuscaGlobalWidget> {
       children: [
         if (alunos.isNotEmpty) ...[
           _sectionHeader('Alunos', Icons.person_outline),
-          ...alunos.map((a) => _resultTile(context, a, EagleTokens.primary)),
+          ...alunos.map((a) => _resultTile(context, a, EagleTokens.brand)),
           const SizedBox(height: 16),
         ],
         if (treinos.isNotEmpty) ...[
           _sectionHeader('Treinos', Icons.fitness_center),
-          ...treinos.map((t) => _resultTile(context, t, EagleTokens.success)),
+          ...treinos.map((t) => _resultTile(context, t, EagleTokens.good)),
           const SizedBox(height: 16),
         ],
         if (cobrancas.isNotEmpty) ...[
           _sectionHeader('Cobranças', Icons.receipt_long_outlined),
-          ...cobrancas.map((c) => _resultTile(context, c, EagleTokens.warning)),
+          ...cobrancas.map((c) => _resultTile(context, c, EagleTokens.warn)),
         ],
       ],
     );

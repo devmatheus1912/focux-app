@@ -213,8 +213,8 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                                 children: [
                                   CircleAvatar(
                                     radius: 20,
-                                    backgroundColor: EagleTokens.primary.withValues(alpha: 0.1),
-                                    child: Text(v.alunoNome.substring(0, 1).toUpperCase(), style: const TextStyle(color: EagleTokens.primary, fontWeight: FontWeight.bold)),
+                                    backgroundColor: EagleTokens.brand.withValues(alpha: 0.1),
+                                    child: Text(v.alunoNome.substring(0, 1).toUpperCase(), style: const TextStyle(color: EagleTokens.brand, fontWeight: FontWeight.bold)),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -222,14 +222,14 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(v.alunoNome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                                        const Text('Por inadimplência', style: TextStyle(color: EagleTokens.textSecondary, fontSize: 12)),
+                                        const Text('Por inadimplência', style: TextStyle(color: EagleTokens.inkMute, fontSize: 12)),
                                       ],
                                     ),
                                   ),
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      const Text('INADIMPLENTE', style: TextStyle(color: EagleTokens.danger, fontSize: 10, fontWeight: FontWeight.bold)),
+                                      const Text('INADIMPLENTE', style: TextStyle(color: EagleTokens.bad, fontSize: 10, fontWeight: FontWeight.bold)),
                                       Text('R\$ ${v.valor.toStringAsFixed(0)} pendente', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
                                     ],
                                   )
@@ -244,8 +244,8 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                                       icon: const Icon(Icons.whatsapp, size: 16),
                                       label: const Text('Lembrar via WhatsApp'),
                                       style: OutlinedButton.styleFrom(
-                                        foregroundColor: EagleTokens.primary,
-                                        side: const BorderSide(color: EagleTokens.primary),
+                                        foregroundColor: EagleTokens.brand,
+                                        side: const BorderSide(color: EagleTokens.brand),
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                       ),
                                     ),
@@ -378,7 +378,7 @@ class _CardMetrica extends StatelessWidget {
           const SizedBox(height: 4),
           Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
           const SizedBox(height: 2),
-          Text(subtitulo, style: const TextStyle(color: EagleTokens.textSecondary, fontSize: 11)),
+          Text(subtitulo, style: const TextStyle(color: EagleTokens.inkMute, fontSize: 11)),
         ],
       ),
     );
@@ -405,8 +405,8 @@ class _GridBtn extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(color: EagleTokens.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-              child: Icon(icon, size: 16, color: EagleTokens.primary),
+              decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+              child: Icon(icon, size: 16, color: EagleTokens.brand),
             ),
             const SizedBox(width: 8),
             Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),

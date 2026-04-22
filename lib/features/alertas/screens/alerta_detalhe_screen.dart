@@ -162,7 +162,7 @@ class _CardUltimoTreino extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            const Icon(Icons.fitness_center, color: EagleTokens.primary),
+            const Icon(Icons.fitness_center, color: EagleTokens.brand),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -173,14 +173,14 @@ class _CardUltimoTreino extends StatelessWidget {
                     style: Theme.of(context)
                         .textTheme
                         .titleSmall
-                        ?.copyWith(color: EagleTokens.textSecondary),
+                        ?.copyWith(color: EagleTokens.inkMute),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     ultimoTreino ?? 'Sem treinos recentes',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: ultimoTreino == null ? EagleTokens.textSecondary : null,
+                          color: ultimoTreino == null ? EagleTokens.inkMute : null,
                         ),
                   ),
                 ],
@@ -198,9 +198,9 @@ class _CardCheckIns extends StatelessWidget {
   const _CardCheckIns({required this.checkIns});
 
   Color get _cor {
-    if (checkIns > 10) return EagleTokens.success;
-    if (checkIns > 5) return EagleTokens.warning;
-    return EagleTokens.danger;
+    if (checkIns > 10) return EagleTokens.good;
+    if (checkIns > 5) return EagleTokens.warn;
+    return EagleTokens.bad;
   }
 
   @override
@@ -221,7 +221,7 @@ class _CardCheckIns extends StatelessWidget {
                   style: Theme.of(context)
                       .textTheme
                       .titleSmall
-                      ?.copyWith(color: EagleTokens.textSecondary),
+                      ?.copyWith(color: EagleTokens.inkMute),
                 ),
                 const Spacer(),
                 Text(
@@ -255,12 +255,12 @@ class _CardFinanceiro extends StatelessWidget {
   Color _cor(String s) {
     final lower = s.toLowerCase();
     if (lower.contains('em dia') || lower.contains('ok') || lower.contains('ativo')) {
-      return EagleTokens.success;
+      return EagleTokens.good;
     }
     if (lower.contains('atraso') || lower.contains('inadimplente') || lower.contains('cancelado')) {
-      return EagleTokens.danger;
+      return EagleTokens.bad;
     }
-    return EagleTokens.warning;
+    return EagleTokens.warn;
   }
 
   @override
@@ -281,7 +281,7 @@ class _CardFinanceiro extends StatelessWidget {
                   style: Theme.of(context)
                       .textTheme
                       .titleSmall
-                      ?.copyWith(color: EagleTokens.textSecondary),
+                      ?.copyWith(color: EagleTokens.inkMute),
                 ),
                 const SizedBox(height: 6),
                 Chip(

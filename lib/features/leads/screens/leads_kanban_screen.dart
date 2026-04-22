@@ -12,10 +12,10 @@ const _kLabels = {
   'CANCELADO': 'Cancelado',
 };
 const _kColors = {
-  'LEAD': EagleTokens.primary,
-  'TESTE': EagleTokens.warning,
-  'ATIVO': EagleTokens.success,
-  'CANCELADO': EagleTokens.textSecondary,
+  'LEAD': EagleTokens.brand,
+  'TESTE': EagleTokens.warn,
+  'ATIVO': EagleTokens.good,
+  'CANCELADO': EagleTokens.inkMute,
 };
 
 class LeadsKanbanScreen extends ConsumerStatefulWidget {
@@ -98,7 +98,7 @@ class _KanbanColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _kColors[status] ?? EagleTokens.textSecondary;
+    final color = _kColors[status] ?? EagleTokens.inkMute;
     return DragTarget<Lead>(
       onAcceptWithDetails: (details) => onAccept(details.data),
       builder: (context, candidates, rejected) => Container(
@@ -138,7 +138,7 @@ class _DraggableLeadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _kColors[lead.status] ?? EagleTokens.textSecondary;
+    final color = _kColors[lead.status] ?? EagleTokens.inkMute;
     final initial = lead.nome.isNotEmpty ? lead.nome[0].toUpperCase() : '?';
 
     return LongPressDraggable<Lead>(
@@ -191,7 +191,7 @@ class _CardContent extends StatelessWidget {
             Text(lead.nome, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                 maxLines: 1, overflow: TextOverflow.ellipsis),
             if (lead.telefone != null)
-              Text(lead.telefone!, style: const TextStyle(color: EagleTokens.textSecondary, fontSize: 11),
+              Text(lead.telefone!, style: const TextStyle(color: EagleTokens.inkMute, fontSize: 11),
                   maxLines: 1, overflow: TextOverflow.ellipsis),
           ],
         )),

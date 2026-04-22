@@ -100,7 +100,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
-                        leading: const Icon(Icons.video_library, size: 36, color: EagleTokens.primary),
+                        leading: const Icon(Icons.video_library, size: 36, color: EagleTokens.brand),
                         title: Text('Exercício ID: ${f.exercicioId}'),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,7 +108,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                             const SizedBox(height: 4),
                             Text('Comentário: ${f.comentario}'),
                             const SizedBox(height: 4),
-                            Text('Data: ${f.criadoEm.day}/${f.criadoEm.month}/${f.criadoEm.year}', style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+                            Text('Data: ${f.criadoEm.day}/${f.criadoEm.month}/${f.criadoEm.year}', style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
                           ],
                         ),
                         trailing: Row(
@@ -120,7 +120,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                               onPressed: () => _abrirVideo(f.videoUrl),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete, color: EagleTokens.danger),
+                              icon: const Icon(Icons.delete, color: EagleTokens.bad),
                               onPressed: () => _deletar(f.id),
                             ),
                           ],

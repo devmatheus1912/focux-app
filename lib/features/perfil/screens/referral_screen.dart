@@ -94,7 +94,7 @@ class ReferralScreen extends ConsumerWidget {
                           child: Column(
                             children: [
                               Text('$usos', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
-                              const Text('Indicações', style: TextStyle(color: EagleTokens.textSecondary)),
+                              const Text('Indicações', style: TextStyle(color: EagleTokens.inkMute)),
                             ],
                           ),
                         ),
@@ -103,7 +103,7 @@ class ReferralScreen extends ConsumerWidget {
                           child: Column(
                             children: [
                               Text('${usos * 30}', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: const Color(0xFF16A34A))),
-                              const Text('Dias grátis ganhos', style: TextStyle(color: EagleTokens.textSecondary)),
+                              const Text('Dias grátis ganhos', style: TextStyle(color: EagleTokens.inkMute)),
                             ],
                           ),
                         ),

@@ -92,13 +92,13 @@ class _WhiteLabelScreenState extends ConsumerState<WhiteLabelScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: EagleTokens.warning.withValues(alpha: 0.1),
-              border: Border.all(color: EagleTokens.warning),
+              color: EagleTokens.warn.withValues(alpha: 0.1),
+              border: Border.all(color: EagleTokens.warn),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                const Icon(Icons.workspace_premium, color: EagleTokens.warning),
+                const Icon(Icons.workspace_premium, color: EagleTokens.warn),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
@@ -145,7 +145,7 @@ class _WhiteLabelScreenState extends ConsumerState<WhiteLabelScreen> {
     if (mounted) {
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Identidade visual salva!'), backgroundColor: EagleTokens.success),
+        const SnackBar(content: Text('Identidade visual salva!'), backgroundColor: EagleTokens.good),
       );
     }
   }

@@ -90,7 +90,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text('Erro ao carregar resumo: $e',
-                    style: const TextStyle(color: EagleTokens.danger)),
+                    style: const TextStyle(color: EagleTokens.bad)),
               ),
             ),
             data: (resumo) => _CardResumoSemanal(resumo: resumo),
@@ -104,7 +104,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> {
           insightsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Text('Erro ao carregar insights: $e',
-                style: const TextStyle(color: EagleTokens.danger)),
+                style: const TextStyle(color: EagleTokens.bad)),
             data: (lista) {
               if (lista.isEmpty) {
                 return const Padding(
@@ -189,17 +189,17 @@ class _CardResumoSemanal extends StatelessWidget {
             _ChipInfo(
               label: 'Total Alunos',
               valor: totalAlunos.toString(),
-              cor: EagleTokens.primary,
+              cor: EagleTokens.brand,
             ),
             _ChipInfo(
               label: 'Em Risco',
               valor: emRisco.toString(),
-              cor: EagleTokens.danger,
+              cor: EagleTokens.bad,
             ),
             _ChipInfo(
               label: 'Treinos Semana',
               valor: treinosSemana.toString(),
-              cor: EagleTokens.success,
+              cor: EagleTokens.good,
             ),
           ]),
         ]),
@@ -216,10 +216,10 @@ class _CardInsight extends StatelessWidget {
 
   Color _cor(String tipo) {
     switch (tipo.toUpperCase()) {
-      case 'RISCO': return EagleTokens.danger;
-      case 'ENGAJAMENTO': return EagleTokens.primary;
-      case 'OPORTUNIDADE': return EagleTokens.success;
-      default: return EagleTokens.textSecondary;
+      case 'RISCO': return EagleTokens.bad;
+      case 'ENGAJAMENTO': return EagleTokens.brand;
+      case 'OPORTUNIDADE': return EagleTokens.good;
+      default: return EagleTokens.inkMute;
     }
   }
 
@@ -265,11 +265,11 @@ class _CardInsight extends StatelessWidget {
           if (recomendacao.isNotEmpty) ...[
             const SizedBox(height: 6),
             Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Icon(Icons.arrow_forward_ios, size: 12, color: EagleTokens.textSecondary),
+              const Icon(Icons.arrow_forward_ios, size: 12, color: EagleTokens.inkMute),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(recomendacao,
-                    style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+                    style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
               ),
             ]),
           ],
@@ -295,13 +295,13 @@ class _CardProximaAcao extends StatelessWidget {
       Text(nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
       const SizedBox(height: 6),
       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Icon(Icons.play_arrow, size: 18, color: EagleTokens.success),
+        const Icon(Icons.play_arrow, size: 18, color: EagleTokens.good),
         const SizedBox(width: 4),
         Expanded(child: Text(acao, style: const TextStyle(fontSize: 13))),
       ]),
       if (motivo.isNotEmpty) ...[
         const SizedBox(height: 4),
-        Text(motivo, style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+        Text(motivo, style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
       ],
     ]);
   }
@@ -326,7 +326,7 @@ class _ChipInfo extends StatelessWidget {
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Text(valor,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: cor)),
-        Text(label, style: const TextStyle(fontSize: 11, color: EagleTokens.textSecondary)),
+        Text(label, style: const TextStyle(fontSize: 11, color: EagleTokens.inkMute)),
       ]),
     );
   }

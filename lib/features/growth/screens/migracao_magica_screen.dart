@@ -109,7 +109,7 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
             ElevatedButton(
               onPressed: _isLoading ? null : _processarMigracao,
               style: ElevatedButton.styleFrom(
-                backgroundColor: EagleTokens.primary,
+                backgroundColor: EagleTokens.brand,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -132,7 +132,7 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
                   FeedbackHelper.showSuccess(context, 'Alunos importados e salvos no banco de dados!');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: EagleTokens.success,
+                  backgroundColor: EagleTokens.good,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: const Text('Confirmar e Salvar Todos', style: TextStyle(color: Colors.white)),

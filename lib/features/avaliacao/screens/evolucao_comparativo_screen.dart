@@ -77,10 +77,10 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.info_outline, size: 48, color: EagleTokens.textSecondary),
+                        const Icon(Icons.info_outline, size: 48, color: EagleTokens.inkMute),
                         const SizedBox(height: 12),
                         Text(_erro!, textAlign: TextAlign.center,
-                            style: const TextStyle(color: EagleTokens.textSecondary)),
+                            style: const TextStyle(color: EagleTokens.inkMute)),
                         const SizedBox(height: 16),
                         OutlinedButton.icon(
                           onPressed: _load,
@@ -112,18 +112,18 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
                 children: [
                   Expanded(
                     child: Column(children: [
-                      const Text('Primeira', style: TextStyle(fontWeight: FontWeight.bold, color: EagleTokens.textSecondary)),
+                      const Text('Primeira', style: TextStyle(fontWeight: FontWeight.bold, color: EagleTokens.inkMute)),
                       const SizedBox(height: 4),
                       Text(_fmtData(primeira.avaliadoEm),
                           style: const TextStyle(fontSize: 13)),
                     ]),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward, color: EagleTokens.textSecondary),
+                  const Icon(Icons.arrow_forward, color: EagleTokens.inkMute),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(children: [
-                      const Text('Atual', style: TextStyle(fontWeight: FontWeight.bold, color: EagleTokens.textSecondary)),
+                      const Text('Atual', style: TextStyle(fontWeight: FontWeight.bold, color: EagleTokens.inkMute)),
                       const SizedBox(height: 4),
                       Text(_fmtData(atual.avaliadoEm),
                           style: const TextStyle(fontSize: 13)),
@@ -203,17 +203,17 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
           const SizedBox(height: 16),
           const Row(
             children: [
-              Icon(Icons.circle, size: 10, color: EagleTokens.success),
+              Icon(Icons.circle, size: 10, color: EagleTokens.good),
               SizedBox(width: 4),
-              Text('Melhora', style: TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+              Text('Melhora', style: TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
               SizedBox(width: 12),
-              Icon(Icons.circle, size: 10, color: EagleTokens.danger),
+              Icon(Icons.circle, size: 10, color: EagleTokens.bad),
               SizedBox(width: 4),
-              Text('Piora', style: TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+              Text('Piora', style: TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
               SizedBox(width: 12),
-              Icon(Icons.circle, size: 10, color: EagleTokens.textSecondary),
+              Icon(Icons.circle, size: 10, color: EagleTokens.inkMute),
               SizedBox(width: 4),
-              Text('Sem alteração', style: TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+              Text('Sem alteração', style: TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
             ],
           ),
           const SizedBox(height: 32),
@@ -239,7 +239,7 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
   }
 
   Widget _headerRow() {
-    const style = TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: EagleTokens.textSecondary);
+    const style = TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: EagleTokens.inkMute);
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
@@ -260,7 +260,7 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
     required double? vAtual,
     required bool menorEMelhor,
   }) {
-    Color deltaColor = EagleTokens.textSecondary;
+    Color deltaColor = EagleTokens.inkMute;
     String deltaText = '—';
     IconData? deltaIcon;
 
@@ -269,7 +269,7 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
       deltaText = (diff >= 0 ? '+' : '') + diff.toStringAsFixed(1);
       if (diff != 0) {
         final melhorou = menorEMelhor ? diff < 0 : diff > 0;
-        deltaColor = melhorou ? EagleTokens.success : EagleTokens.danger;
+        deltaColor = melhorou ? EagleTokens.good : EagleTokens.bad;
         deltaIcon = melhorou ? Icons.trending_up : Icons.trending_down;
       }
     }

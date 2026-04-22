@@ -89,7 +89,7 @@ class _StepTile extends StatelessWidget {
           children: [
             Icon(
               isDone ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: isDone ? EagleTokens.success : EagleTokens.textSecondary,
+              color: isDone ? EagleTokens.good : EagleTokens.inkMute,
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -98,13 +98,13 @@ class _StepTile extends StatelessWidget {
                 title,
                 style: TextStyle(
                   decoration: isDone ? TextDecoration.lineThrough : null,
-                  color: isDone ? EagleTokens.textSecondary : Theme.of(context).textTheme.bodyLarge?.color,
+                  color: isDone ? EagleTokens.inkMute : Theme.of(context).textTheme.bodyLarge?.color,
                   fontWeight: isDone ? FontWeight.normal : FontWeight.w600,
                 ),
               ),
             ),
             if (!isDone)
-              const Icon(Icons.arrow_forward_ios, size: 14, color: EagleTokens.textSecondary),
+              const Icon(Icons.arrow_forward_ios, size: 14, color: EagleTokens.inkMute),
           ],
         ),
       ),

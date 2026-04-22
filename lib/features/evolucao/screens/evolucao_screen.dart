@@ -248,7 +248,7 @@ class _BannerVariacao extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPositivo = texto.startsWith('+');
-    final cor = isPositivo ? EagleTokens.danger : EagleTokens.success;
+    final cor = isPositivo ? EagleTokens.bad : EagleTokens.good;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
@@ -301,11 +301,11 @@ class _CardMedida extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            const Icon(Icons.calendar_today, size: 14, color: EagleTokens.textSecondary),
+            const Icon(Icons.calendar_today, size: 14, color: EagleTokens.inkMute),
             const SizedBox(width: 4),
             Text(
               medida.data.length >= 10 ? medida.data.substring(0, 10) : medida.data,
-              style: const TextStyle(color: EagleTokens.textSecondary, fontSize: 12),
+              style: const TextStyle(color: EagleTokens.inkMute, fontSize: 12),
             ),
           ]),
           const SizedBox(height: 10),
@@ -362,14 +362,14 @@ class _CardRecorde extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
         leading: const CircleAvatar(
-          backgroundColor: EagleTokens.warning,
+          backgroundColor: EagleTokens.warn,
           child: Icon(Icons.emoji_events, color: Colors.white),
         ),
         title: Text(recorde.exercicioNome,
             style: const TextStyle(fontWeight: FontWeight.w600)),
         subtitle: Text(
           recorde.data.length >= 10 ? recorde.data.substring(0, 10) : recorde.data,
-          style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary),
+          style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
         ),
         trailing: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           if (recorde.cargaKg != null)
@@ -377,7 +377,7 @@ class _CardRecorde extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
           if (recorde.repeticoes != null)
             Text('${recorde.repeticoes} reps',
-                style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+                style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
         ]),
       ),
     );
@@ -399,7 +399,7 @@ class _Chip extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(label, style: const TextStyle(fontSize: 10, color: EagleTokens.textSecondary)),
+        Text(label, style: const TextStyle(fontSize: 10, color: EagleTokens.inkMute)),
         Text(valor, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
       ]),
     );

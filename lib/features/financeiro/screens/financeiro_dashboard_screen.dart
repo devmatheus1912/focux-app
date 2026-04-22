@@ -91,14 +91,14 @@ class _SummaryGrid extends StatelessWidget {
       Expanded(child: _StatCard(
         label: 'Recebido (mês)',
         value: 'R\$ ${data.receitaMes.toStringAsFixed(2)}',
-        color: EagleTokens.success,
+        color: EagleTokens.good,
         icon: Icons.trending_up,
       )),
       const SizedBox(width: 12),
       Expanded(child: _StatCard(
         label: 'Previsão (mês)',
         value: 'R\$ ${data.previsaoReceita.toStringAsFixed(2)}',
-        color: EagleTokens.primary,
+        color: EagleTokens.brand,
         icon: Icons.schedule,
       )),
     ]),
@@ -114,7 +114,7 @@ class _SummaryGrid extends StatelessWidget {
       Expanded(child: _StatCard(
         label: 'Ticket médio',
         value: 'R\$ ${data.ticketMedio.toStringAsFixed(2)}',
-        color: EagleTokens.primary,
+        color: EagleTokens.brand,
         icon: Icons.receipt_long,
       )),
     ]),
@@ -122,7 +122,7 @@ class _SummaryGrid extends StatelessWidget {
     _StatCard(
       label: 'Inadimplentes',
       value: data.totalInadimplentes.toString(),
-      color: data.totalInadimplentes > 0 ? EagleTokens.danger : EagleTokens.success,
+      color: data.totalInadimplentes > 0 ? EagleTokens.bad : EagleTokens.good,
       icon: Icons.warning_amber_rounded,
       fullWidth: true,
     ),
@@ -156,7 +156,7 @@ class _StatCard extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.textSecondary)),
+          Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute)),
           const SizedBox(height: 2),
           Text(value, style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold, color: color)),
@@ -189,7 +189,7 @@ class _BarChart extends StatelessWidget {
                 drawVerticalLine: false,
                 horizontalInterval: chartMax / 4,
                 getDrawingHorizontalLine: (v) => FlLine(
-                  color: EagleTokens.textSecondary.withValues(alpha: 0.2), strokeWidth: 1),
+                  color: EagleTokens.inkMute.withValues(alpha: 0.2), strokeWidth: 1),
               ),
               borderData: FlBorderData(show: false),
               titlesData: FlTitlesData(
@@ -207,7 +207,7 @@ class _BarChart extends StatelessWidget {
                       final label = parts.length >= 2 ? '${parts[1]}/${parts[0].substring(2)}' : mes;
                       return Padding(
                         padding: const EdgeInsets.only(top: 4),
-                        child: Text(label, style: const TextStyle(fontSize: 10, color: EagleTokens.textSecondary)),
+                        child: Text(label, style: const TextStyle(fontSize: 10, color: EagleTokens.inkMute)),
                       );
                     },
                   ),
@@ -261,7 +261,7 @@ class _VencimentoTileState extends ConsumerState<_VencimentoTile> {
   @override
   Widget build(BuildContext context) {
     final isAtrasado = widget.item.status == 'ATRASADO';
-    final color = isAtrasado ? EagleTokens.danger : EagleTokens.warning;
+    final color = isAtrasado ? EagleTokens.bad : EagleTokens.warn;
     return Card(
       margin: const EdgeInsets.only(bottom: 6),
       child: ListTile(
@@ -287,7 +287,7 @@ class _VencimentoTileState extends ConsumerState<_VencimentoTile> {
                 onPressed: _cobrindo ? null : _cobrar,
                 icon: _cobrindo
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.notifications_active, color: EagleTokens.primary, size: 20),
+                    : const Icon(Icons.notifications_active, color: EagleTokens.brand, size: 20),
                 tooltip: 'Cobrar no chat',
               ),
           ],

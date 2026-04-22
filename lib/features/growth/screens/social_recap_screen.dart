@@ -81,7 +81,7 @@ class SocialRecapScreen extends StatelessWidget {
               icon: const Icon(Icons.share, color: Colors.white),
               label: const Text('Compartilhar no Instagram', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: EagleTokens.primary,
+                backgroundColor: EagleTokens.brand,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),

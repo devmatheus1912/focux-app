@@ -31,7 +31,7 @@ class PaywallScreen extends StatelessWidget {
               'CRM e Kanban de Leads',
               'Migração Mágica por IA'
             ],
-            color: EagleTokens.warning,
+            color: EagleTokens.warn,
           ),
           const SizedBox(height: 16),
           _buildPlanCard(
@@ -45,7 +45,7 @@ class PaywallScreen extends StatelessWidget {
               'Landing Page (Link na Bio)',
               'Motor Anti-Churn & Prova Social'
             ],
-            color: EagleTokens.primary,
+            color: EagleTokens.brand,
             isPopular: true,
           ),
         ],

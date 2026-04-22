@@ -5,12 +5,12 @@ import '../../../core/theme/design_tokens.dart';
 
 // Paleta Eagle Precision — cores de brand para identidade visual
 const _coresPredefinidas = [
-  EagleTokens.primary,          // Eagle Royal Blue (#2B4A9E) — padrão
+  EagleTokens.brand,          // Eagle Royal Blue (#2B4A9E) — padrão
   Color(0xFF1E3A8A),            // Eagle Deep Blue
   Color(0xFF0097A7),            // Ciano complementar
-  EagleTokens.success,          // Verde (#22C55E)
-  EagleTokens.warning,          // Âmbar (#F59E0B)
-  EagleTokens.danger,           // Vermelho (#EF4444)
+  EagleTokens.good,          // Verde (#22C55E)
+  EagleTokens.warn,          // Âmbar (#F59E0B)
+  EagleTokens.bad,           // Vermelho (#EF4444)
   Color(0xFF7C3AED),            // Violeta
   Color(0xFF6D28D9),            // Púrpura
   Color(0xFFDB2777),            // Rosa

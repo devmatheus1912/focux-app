@@ -100,7 +100,7 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.error_outline, size: 48, color: EagleTokens.danger),
+                            const Icon(Icons.error_outline, size: 48, color: EagleTokens.bad),
                             const SizedBox(height: 8),
                             Text('Erro ao carregar resumo', style: TextStyle(color: cs.error)),
                             const SizedBox(height: 4),
@@ -125,19 +125,19 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
                                 titulo: 'Total recebido',
                                 valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}',
                                 icone: Icons.check_circle,
-                                cor: EagleTokens.success,
+                                cor: EagleTokens.good,
                               ),
                               _ResumoCard(
                                 titulo: 'Total previsto',
                                 valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}',
                                 icone: Icons.trending_up,
-                                cor: EagleTokens.primary,
+                                cor: EagleTokens.brand,
                               ),
                               _ResumoCard(
                                 titulo: 'Inadimplentes',
                                 valor: '${_resumo!.inadimplentes}',
                                 icone: Icons.warning_amber,
-                                cor: EagleTokens.danger,
+                                cor: EagleTokens.bad,
                               ),
                               _ResumoCard(
                                 titulo: 'Ticket médio',
@@ -191,18 +191,18 @@ class _DonutChartCard extends StatelessWidget {
                       centerSpaceRadius: 60,
                       startDegreeOffset: -90,
                       sections: isEmpty
-                          ? [PieChartSectionData(value: 1, color: EagleTokens.textSecondary.withValues(alpha: 0.3), radius: 20, showTitle: false)]
+                          ? [PieChartSectionData(value: 1, color: EagleTokens.inkMute.withValues(alpha: 0.3), radius: 20, showTitle: false)]
                           : [
                               PieChartSectionData(
                                 value: recebido,
-                                color: EagleTokens.success,
+                                color: EagleTokens.good,
                                 radius: 24,
                                 showTitle: false,
                               ),
                               if (pendente > 0)
                                 PieChartSectionData(
                                   value: pendente,
-                                  color: EagleTokens.warning.withValues(alpha: 0.5),
+                                  color: EagleTokens.warn.withValues(alpha: 0.5),
                                   radius: 20,
                                   showTitle: false,
                                 ),
@@ -214,7 +214,7 @@ class _DonutChartCard extends StatelessWidget {
                     children: [
                       Text('${percentRecebido.toStringAsFixed(0)}%',
                           style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                      const Text('Recebido', style: TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+                      const Text('Recebido', style: TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
                     ],
                   ),
                 ],
@@ -225,9 +225,9 @@ class _DonutChartCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _LegendItem(color: EagleTokens.success, label: 'Recebido'),
+                  _LegendItem(color: EagleTokens.good, label: 'Recebido'),
                   const SizedBox(width: 16),
-                  _LegendItem(color: EagleTokens.warning.withValues(alpha: 0.5), label: 'Pendente'),
+                  _LegendItem(color: EagleTokens.warn.withValues(alpha: 0.5), label: 'Pendente'),
                 ],
               ),
             ],
@@ -250,7 +250,7 @@ class _LegendItem extends StatelessWidget {
       children: [
         Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+        Text(label, style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
       ],
     );
   }

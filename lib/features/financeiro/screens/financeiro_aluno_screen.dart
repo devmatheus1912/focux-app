@@ -40,9 +40,9 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
 
   Color _statusColor(String s) {
     switch (s) {
-      case 'PAGO': return EagleTokens.success;
-      case 'ATRASADO': return EagleTokens.danger;
-      default: return EagleTokens.warning;
+      case 'PAGO': return EagleTokens.good;
+      case 'ATRASADO': return EagleTokens.bad;
+      default: return EagleTokens.warn;
     }
   }
 
@@ -83,7 +83,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.error_outline, size: 48, color: EagleTokens.danger),
+                        const Icon(Icons.error_outline, size: 48, color: EagleTokens.bad),
                         const SizedBox(height: 8),
                         Text('Erro ao carregar mensalidades',
                             style: TextStyle(color: cs.error, fontWeight: FontWeight.bold)),
@@ -133,7 +133,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                         Text(
                                           'Pago em: ${m.pagoEm}',
                                           style: const TextStyle(
-                                              fontSize: 12, color: EagleTokens.success),
+                                              fontSize: 12, color: EagleTokens.good),
                                         ),
                                       ],
                                     ],

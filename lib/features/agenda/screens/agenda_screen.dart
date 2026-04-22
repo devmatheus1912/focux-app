@@ -42,7 +42,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
           padding: const EdgeInsets.all(4),
           child: Text('HOJE',
               style: TextStyle(
-                  color: EagleTokens.danger, fontSize: 10, fontWeight: FontWeight.bold)),
+                  color: EagleTokens.bad, fontSize: 10, fontWeight: FontWeight.bold)),
         ),
       );
     } else if (day == tomorrow) {
@@ -55,7 +55,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
           padding: const EdgeInsets.all(4),
           child: Text('AMANHÃ',
               style: TextStyle(
-                  color: EagleTokens.warning, fontSize: 10, fontWeight: FontWeight.bold)),
+                  color: EagleTokens.warn, fontSize: 10, fontWeight: FontWeight.bold)),
         ),
       );
     }
@@ -96,7 +96,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                   return Dismissible(
                     key: Key('ag_${ag.id}'),
                     direction: DismissDirection.endToStart,
-                    background: Container(color: EagleTokens.danger,
+                    background: Container(color: EagleTokens.bad,
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.only(right: 16),
                       child: const Icon(Icons.delete, color: Colors.white)),
@@ -135,7 +135,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
   Widget _statusChip(String s) => Chip(
     label: Text(s, style: const TextStyle(fontSize: 11)),
-    backgroundColor: (s == 'AGENDADO' ? EagleTokens.primary : s == 'CONCLUIDO' ? EagleTokens.success : EagleTokens.textSecondary)
+    backgroundColor: (s == 'AGENDADO' ? EagleTokens.brand : s == 'CONCLUIDO' ? EagleTokens.good : EagleTokens.inkMute)
         .withValues(alpha: 0.15),
   );
 }

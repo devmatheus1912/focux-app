@@ -45,7 +45,7 @@ class _ComunidadeScreenState extends State<ComunidadeScreen> {
                     title: Text(grupo.nome, style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(grupo.descricao),
                     trailing: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: EagleTokens.primary),
+                      style: ElevatedButton.styleFrom(backgroundColor: EagleTokens.brand),
                       onPressed: () {
                         provider.entrarGrupo(grupo.id).then((_) {
                           FeedbackHelper.showSuccess(context, 'Bem-vindo ao grupo!');

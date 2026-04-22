@@ -14,11 +14,11 @@ const _statusLabels = {
   'CANCELADO': 'Cancelado',
 };
 const _statusColors = {
-  'LEAD': EagleTokens.primary,
-  'TESTE': EagleTokens.warning,
-  'ATIVO': EagleTokens.success,
-  'INADIMPLENTE': EagleTokens.danger,
-  'CANCELADO': EagleTokens.textSecondary,
+  'LEAD': EagleTokens.brand,
+  'TESTE': EagleTokens.warn,
+  'ATIVO': EagleTokens.good,
+  'INADIMPLENTE': EagleTokens.bad,
+  'CANCELADO': EagleTokens.inkMute,
 };
 
 const _tiposInteracao = ['WHATSAPP', 'LIGACAO', 'EMAIL', 'PRESENCIAL', 'OUTRO'];
@@ -252,7 +252,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColors[_lead.status] ?? EagleTokens.textSecondary;
+    final color = _statusColors[_lead.status] ?? EagleTokens.inkMute;
     final podeConverter =
         _lead.status != 'CONVERTIDO' && _lead.status != 'ATIVO';
 
@@ -267,7 +267,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                       value: s,
                       child: Row(children: [
                         Icon(Icons.circle, size: 10,
-                            color: _statusColors[s] ?? EagleTokens.textSecondary),
+                            color: _statusColors[s] ?? EagleTokens.inkMute),
                         const SizedBox(width: 8),
                         Text(_statusLabels[s] ?? s),
                       ]),
@@ -330,7 +330,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text('Próximo Contato',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: EagleTokens.textSecondary,
+                              color: EagleTokens.inkMute,
                             )),
                     const SizedBox(height: 2),
                     Text(
@@ -339,7 +339,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                         fontWeight: FontWeight.w500,
                         color: _lead.proximoContato != null
                             ? const Color(0xFF6D28D9)
-                            : EagleTokens.textSecondary,
+                            : EagleTokens.inkMute,
                       ),
                     ),
                   ]),
@@ -360,7 +360,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('Observações',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(color: EagleTokens.textSecondary)),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(color: EagleTokens.inkMute)),
                   const SizedBox(height: 8),
                   Text(_lead.observacoes!),
                 ]),
@@ -388,7 +388,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                   onPressed: _whatsapp,
                   icon: const Icon(Icons.chat),
                   label: const Text('WhatsApp'),
-                  style: OutlinedButton.styleFrom(foregroundColor: EagleTokens.success),
+                  style: OutlinedButton.styleFrom(foregroundColor: EagleTokens.good),
                 ),
               ),
             ]),
@@ -414,7 +414,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             onPressed: _arquivar,
             icon: const Icon(Icons.archive),
             label: const Text('Arquivar Lead'),
-            style: OutlinedButton.styleFrom(foregroundColor: EagleTokens.textSecondary),
+            style: OutlinedButton.styleFrom(foregroundColor: EagleTokens.inkMute),
           ),
 
           // Interações
@@ -427,7 +427,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             const Spacer(),
             if (!_loadingInteracoes)
               Text('${_interacoes.length}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.textSecondary)),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute)),
           ]),
           const SizedBox(height: 8),
 
@@ -441,7 +441,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
               child: Padding(
                 padding: EdgeInsets.all(16),
                 child: Text('Nenhuma interação registrada.',
-                    style: TextStyle(color: EagleTokens.textSecondary)),
+                    style: TextStyle(color: EagleTokens.inkMute)),
               ),
             )
           else
@@ -498,7 +498,7 @@ class _InteracaoTile extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(dataStr,
                       style: const TextStyle(
-                          fontSize: 11, color: EagleTokens.textSecondary)),
+                          fontSize: 11, color: EagleTokens.inkMute)),
                 ],
               ]),
               const SizedBox(height: 2),
@@ -519,7 +519,7 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),
     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label, style: const TextStyle(color: EagleTokens.textSecondary)),
+      Text(label, style: const TextStyle(color: EagleTokens.inkMute)),
       Flexible(
         child: Text(value,
             textAlign: TextAlign.end,

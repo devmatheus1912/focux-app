@@ -91,7 +91,7 @@ class _PlanoAlimentarDetailScreenState
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, set) => AlertDialog(
           title: const Row(children: [
-            Icon(Icons.auto_awesome, color: EagleTokens.primary),
+            Icon(Icons.auto_awesome, color: EagleTokens.brand),
             SizedBox(width: 8),
             Text('Gerar Dieta com IA')
           ]),
@@ -148,7 +148,7 @@ class _PlanoAlimentarDetailScreenState
         title: Text(p.nome),
         actions: [
           IconButton(
-            icon: const Icon(Icons.auto_awesome, color: EagleTokens.primary),
+            icon: const Icon(Icons.auto_awesome, color: EagleTokens.brand),
             tooltip: 'Gerar Dieta IA',
             onPressed: _abrirGerarIa,
           ),
@@ -175,11 +175,11 @@ class _PlanoAlimentarDetailScreenState
                 runSpacing: 4,
                 children: [
                   if (p.caloriasDia != null)
-                    _MacroChip('${p.caloriasDia} kcal', EagleTokens.warning),
+                    _MacroChip('${p.caloriasDia} kcal', EagleTokens.warn),
                   if (p.proteinaG != null)
-                    _MacroChip('${p.proteinaG}g prot', EagleTokens.danger),
+                    _MacroChip('${p.proteinaG}g prot', EagleTokens.bad),
                   if (p.carboidratoG != null)
-                    _MacroChip('${p.carboidratoG}g carbo', EagleTokens.warning),
+                    _MacroChip('${p.carboidratoG}g carbo', EagleTokens.warn),
                   if (p.gorduraG != null)
                     _MacroChip('${p.gorduraG}g gord', Colors.yellow.shade700),
                 ],
@@ -258,10 +258,10 @@ class _RefeicaoCard extends StatelessWidget {
                   ),
                   if (r.horario != null)
                     Row(children: [
-                      const Icon(Icons.access_time, size: 14, color: EagleTokens.textSecondary),
+                      const Icon(Icons.access_time, size: 14, color: EagleTokens.inkMute),
                       const SizedBox(width: 4),
                       Text(r.horario!,
-                          style: const TextStyle(color: EagleTokens.textSecondary, fontSize: 13)),
+                          style: const TextStyle(color: EagleTokens.inkMute, fontSize: 13)),
                     ]),
                 ],
               ),
@@ -278,9 +278,9 @@ class _RefeicaoCard extends StatelessWidget {
                   spacing: 8,
                   children: [
                     if (r.proteinaG != null)
-                      _MacroChip('${r.proteinaG}g prot', EagleTokens.danger),
+                      _MacroChip('${r.proteinaG}g prot', EagleTokens.bad),
                     if (r.carboG != null)
-                      _MacroChip('${r.carboG}g carbo', EagleTokens.warning),
+                      _MacroChip('${r.carboG}g carbo', EagleTokens.warn),
                     if (r.gorduraG != null)
                       _MacroChip('${r.gorduraG}g gord', Colors.yellow.shade700),
                   ],

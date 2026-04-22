@@ -244,7 +244,7 @@ class _SeletorPeriodo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Período de análise',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: EagleTokens.textSecondary)),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: EagleTokens.inkMute)),
             const SizedBox(height: 8),
             Wrap(spacing: 8, children: [
               ChoiceChip(label: const Text('30d'), selected: !isCustom && diasSelecionado == 30,
@@ -281,9 +281,9 @@ class _CardAderencia extends StatelessWidget {
     final theme = Theme.of(context);
     final taxa = dados.taxaAderenciaPercent.clamp(0.0, 100.0);
     final cor = taxa >= 75
-        ? EagleTokens.success
+        ? EagleTokens.good
         : taxa >= 50
-            ? EagleTokens.warning
+            ? EagleTokens.warn
             : theme.colorScheme.error;
 
     return Card(
@@ -379,7 +379,7 @@ class _CardInfo extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               titulo,
-              style: theme.textTheme.bodySmall?.copyWith(color: EagleTokens.textSecondary),
+              style: theme.textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute),
               textAlign: TextAlign.center,
             ),
           ],
@@ -399,7 +399,7 @@ class _CardComparativo extends StatelessWidget {
     final theme = Theme.of(context);
     final delta = comparativo.deltaPercent;
     final isPositivo = delta >= 0;
-    final deltaColor = isPositivo ? EagleTokens.success : EagleTokens.danger;
+    final deltaColor = isPositivo ? EagleTokens.good : EagleTokens.bad;
     final deltaIcon = isPositivo ? Icons.arrow_upward : Icons.arrow_downward;
     final deltaText = isPositivo
         ? '+${delta.toStringAsFixed(1)}%'
@@ -426,7 +426,7 @@ class _CardComparativo extends StatelessWidget {
                     Text(
                       'Este período',
                       style: theme.textTheme.bodySmall
-                          ?.copyWith(color: EagleTokens.textSecondary),
+                          ?.copyWith(color: EagleTokens.inkMute),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -439,7 +439,7 @@ class _CardComparativo extends StatelessWidget {
                     Text(
                       '${comparativo.checkInsAtual} check-ins',
                       style: theme.textTheme.bodySmall
-                          ?.copyWith(color: EagleTokens.textSecondary),
+                          ?.copyWith(color: EagleTokens.inkMute),
                     ),
                   ],
                 ),
@@ -471,20 +471,20 @@ class _CardComparativo extends StatelessWidget {
                     Text(
                       'Anterior',
                       style: theme.textTheme.bodySmall
-                          ?.copyWith(color: EagleTokens.textSecondary),
+                          ?.copyWith(color: EagleTokens.inkMute),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${comparativo.aderenciaAnterior.toStringAsFixed(1)}%',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: EagleTokens.textSecondary,
+                        color: EagleTokens.inkMute,
                       ),
                     ),
                     Text(
                       '${comparativo.checkInsAnterior} check-ins',
                       style: theme.textTheme.bodySmall
-                          ?.copyWith(color: EagleTokens.textSecondary),
+                          ?.copyWith(color: EagleTokens.inkMute),
                     ),
                   ],
                 ),

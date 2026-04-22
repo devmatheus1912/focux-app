@@ -92,7 +92,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                           _SectionTitle(
                             icon: '🏆',
                             title: 'Mais comprometidos',
-                            color: EagleTokens.success,
+                            color: EagleTokens.good,
                           ),
                           const SizedBox(height: 8),
                           ..._dados!.maisComprometidos
@@ -109,7 +109,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                           _SectionTitle(
                             icon: '⚠️',
                             title: 'Precisam de atenção',
-                            color: EagleTokens.danger,
+                            color: EagleTokens.bad,
                           ),
                           const SizedBox(height: 8),
                           ..._dados!.menosComprometidos
@@ -219,7 +219,7 @@ class _AlunoRankCard extends StatelessWidget {
     if (tipo == _TipoRank.atencao) {
       return const CircleAvatar(
         backgroundColor: Color(0x1FF44336),
-        child: Icon(Icons.warning_amber_rounded, color: EagleTokens.danger, size: 20),
+        child: Icon(Icons.warning_amber_rounded, color: EagleTokens.bad, size: 20),
       );
     }
     switch (posicao) {
@@ -240,11 +240,11 @@ class _AlunoRankCard extends StatelessWidget {
         );
       default:
         return CircleAvatar(
-          backgroundColor: EagleTokens.success.withValues(alpha: 0.12),
+          backgroundColor: EagleTokens.good.withValues(alpha: 0.12),
           child: Text(
             '$posicao',
             style: const TextStyle(
-                color: EagleTokens.success, fontWeight: FontWeight.bold),
+                color: EagleTokens.good, fontWeight: FontWeight.bold),
           ),
         );
     }
@@ -268,14 +268,14 @@ class _AlunoRankCard extends StatelessWidget {
         ),
         subtitle: Text(
           '${aluno.treinosConcluidos} treinos concluídos',
-          style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary),
+          style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
         ),
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
             color: tipo == _TipoRank.top
-                ? EagleTokens.success.withValues(alpha: 0.12)
-                : EagleTokens.danger.withValues(alpha: 0.12),
+                ? EagleTokens.good.withValues(alpha: 0.12)
+                : EagleTokens.bad.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -283,7 +283,7 @@ class _AlunoRankCard extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
-              color: tipo == _TipoRank.top ? EagleTokens.success : EagleTokens.danger,
+              color: tipo == _TipoRank.top ? EagleTokens.good : EagleTokens.bad,
             ),
           ),
         ),

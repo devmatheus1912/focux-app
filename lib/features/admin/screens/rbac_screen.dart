@@ -73,7 +73,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                 children: [
                   Icon(Icons.shield_outlined, size: 64, color: const Color(0xFF9CA3AF)),
                   const SizedBox(height: 16),
-                  const Text('Nenhuma permissão especial concedida.', style: TextStyle(color: EagleTokens.textSecondary)),
+                  const Text('Nenhuma permissão especial concedida.', style: TextStyle(color: EagleTokens.inkMute)),
                 ],
               ),
             );
@@ -89,16 +89,16 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: p.nivelAcesso == 'ADMIN' ? EagleTokens.danger.withValues(alpha: 0.1) : EagleTokens.primary.withValues(alpha: 0.1),
+                    backgroundColor: p.nivelAcesso == 'ADMIN' ? EagleTokens.bad.withValues(alpha: 0.1) : EagleTokens.brand.withValues(alpha: 0.1),
                     child: Icon(
                       p.nivelAcesso == 'ADMIN' ? Icons.security : Icons.vpn_key,
-                      color: p.nivelAcesso == 'ADMIN' ? EagleTokens.danger : EagleTokens.primary,
+                      color: p.nivelAcesso == 'ADMIN' ? EagleTokens.bad : EagleTokens.brand,
                     ),
                   ),
                   title: Text('Recurso: ${p.recurso}', style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text('ID Assistente: ${p.usuarioConvidadoId} • Nível: ${p.nivelAcesso}'),
                   trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: EagleTokens.danger),
+                    icon: const Icon(Icons.delete, color: EagleTokens.bad),
                     onPressed: () => _revogarAcesso(ref, p.usuarioConvidadoId, p.recurso),
                   ),
                 ),

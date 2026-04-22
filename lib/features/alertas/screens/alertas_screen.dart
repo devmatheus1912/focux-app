@@ -167,7 +167,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                 child: _filtrados.isEmpty
                     ? Center(
                         child: Column(mainAxisSize: MainAxisSize.min, children: [
-                          const Icon(Icons.check_circle, size: 64, color: EagleTokens.success),
+                          const Icon(Icons.check_circle, size: 64, color: EagleTokens.good),
                           const SizedBox(height: 12),
                           Text(
                             _alertas.isEmpty
@@ -205,10 +205,10 @@ class _ConfigBar extends StatelessWidget {
     color: Theme.of(context).colorScheme.surfaceContainerHighest,
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     child: Row(children: [
-      const Icon(Icons.settings, size: 16, color: EagleTokens.textSecondary),
+      const Icon(Icons.settings, size: 16, color: EagleTokens.inkMute),
       const SizedBox(width: 6),
       Text('Sem treino > ${config.diasSemTreino} dias  ·  Aderência < ${config.aderenciaMinima}%',
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.textSecondary)),
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute)),
     ]),
   );
 }
@@ -232,14 +232,14 @@ class _FiltroBar extends StatelessWidget {
       FilterChip(
         label: const Text('Score ≥ 2 (alto)'),
         selected: selecionado == 2,
-        selectedColor: EagleTokens.danger.withValues(alpha: 0.2),
+        selectedColor: EagleTokens.bad.withValues(alpha: 0.2),
         onSelected: (_) => onChanged(selecionado == 2 ? null : 2),
       ),
       const SizedBox(width: 8),
       FilterChip(
         label: const Text('Score = 1 (médio)'),
         selected: selecionado == 1,
-        selectedColor: EagleTokens.warning.withValues(alpha: 0.2),
+        selectedColor: EagleTokens.warn.withValues(alpha: 0.2),
         onSelected: (_) => onChanged(selecionado == 1 ? null : 1),
       ),
     ]),
@@ -254,7 +254,7 @@ class _AlertaCard extends StatelessWidget {
 
   const _AlertaCard({required this.alerta, required this.onTap, required this.onResolver, required this.onMensagemChat});
 
-  Color get _cor => alerta.score >= 2 ? EagleTokens.danger : EagleTokens.warning;
+  Color get _cor => alerta.score >= 2 ? EagleTokens.bad : EagleTokens.warn;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -292,13 +292,13 @@ class _AlertaCard extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.bold, color: _cor)),
               if (alerta.aderenciaPercent != null)
                 Text('${alerta.aderenciaPercent!.toStringAsFixed(0)}%',
-                  style: const TextStyle(fontSize: 11, color: EagleTokens.textSecondary)),
+                  style: const TextStyle(fontSize: 11, color: EagleTokens.inkMute)),
             ]),
           ),
           const Divider(height: 1),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            color: EagleTokens.textSecondary.withValues(alpha: 0.05),
+            color: EagleTokens.inkMute.withValues(alpha: 0.05),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -309,8 +309,8 @@ class _AlertaCard extends StatelessWidget {
                 ),
                 TextButton.icon(
                   onPressed: onResolver,
-                  icon: const Icon(Icons.check_circle_outline, size: 16, color: EagleTokens.success),
-                  label: const Text('Resolvido', style: TextStyle(color: EagleTokens.success)),
+                  icon: const Icon(Icons.check_circle_outline, size: 16, color: EagleTokens.good),
+                  label: const Text('Resolvido', style: TextStyle(color: EagleTokens.good)),
                 ),
               ],
             ),
@@ -327,7 +327,7 @@ class _ScoreBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = score >= 2 ? EagleTokens.danger : EagleTokens.warning;
+    final color = score >= 2 ? EagleTokens.bad : EagleTokens.warn;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(

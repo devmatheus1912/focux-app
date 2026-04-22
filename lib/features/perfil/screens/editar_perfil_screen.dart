@@ -90,7 +90,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: const TextStyle(color: EagleTokens.danger)),
+                  Text(_error!, style: const TextStyle(color: EagleTokens.bad)),
                 ],
                 const SizedBox(height: 24),
                 FilledButton(

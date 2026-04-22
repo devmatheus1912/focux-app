@@ -73,7 +73,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
             content: Text(
               'Broadcast enviado para ${resultado.totalEnviados} aluno(s)!',
             ),
-            backgroundColor: EagleTokens.success,
+            backgroundColor: EagleTokens.good,
           ),
         );
       }
@@ -82,7 +82,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro ao enviar: $e'),
-            backgroundColor: EagleTokens.danger,
+            backgroundColor: EagleTokens.bad,
           ),
         );
       }
@@ -199,7 +199,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                     child: Center(
                       child: Text(
                         'Nenhum broadcast enviado ainda.',
-                        style: TextStyle(color: EagleTokens.textSecondary),
+                        style: TextStyle(color: EagleTokens.inkMute),
                       ),
                     ),
                   );
@@ -266,25 +266,25 @@ class _BroadcastCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               broadcast.mensagem,
-              style: const TextStyle(color: EagleTokens.textSecondary),
+              style: const TextStyle(color: EagleTokens.inkMute),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.people_outline, size: 14, color: EagleTokens.textSecondary),
+                const Icon(Icons.people_outline, size: 14, color: EagleTokens.inkMute),
                 const SizedBox(width: 4),
                 Text(
                   publico,
-                  style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary),
+                  style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
                 ),
                 const Spacer(),
-                const Icon(Icons.schedule, size: 14, color: EagleTokens.textSecondary),
+                const Icon(Icons.schedule, size: 14, color: EagleTokens.inkMute),
                 const SizedBox(width: 4),
                 Text(
                   dataFormatada,
-                  style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary),
+                  style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
                 ),
               ],
             ),

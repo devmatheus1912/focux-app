@@ -34,7 +34,7 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.error_outline, size: 48, color: EagleTokens.danger),
+            const Icon(Icons.error_outline, size: 48, color: EagleTokens.bad),
             const SizedBox(height: 12),
             Text('Erro ao carregar sugestões: $e',
                 textAlign: TextAlign.center),
@@ -50,7 +50,7 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
           if (lista.isEmpty) {
             return const Center(
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Icon(Icons.check_circle_outline, size: 64, color: EagleTokens.success),
+                Icon(Icons.check_circle_outline, size: 64, color: EagleTokens.good),
                 SizedBox(height: 12),
                 Text('Nenhuma sugestão pendente.',
                     style: TextStyle(fontSize: 16)),
@@ -96,7 +96,7 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
           content: Text(aceitar
               ? 'Sugestão aceita e aplicada!'
               : 'Sugestão rejeitada.'),
-          backgroundColor: aceitar ? EagleTokens.success : EagleTokens.warning,
+          backgroundColor: aceitar ? EagleTokens.good : EagleTokens.warn,
         ));
       }
     } catch (e) {
@@ -137,7 +137,7 @@ class _CardSugestao extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: EagleTokens.primary.withValues(alpha: 0.3)),
+        side: BorderSide(color: EagleTokens.brand.withValues(alpha: 0.3)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -146,7 +146,7 @@ class _CardSugestao extends StatelessWidget {
           Row(children: [
             const CircleAvatar(
               radius: 16,
-              backgroundColor: EagleTokens.primary,
+              backgroundColor: EagleTokens.brand,
               child: Icon(Icons.person, size: 16, color: Colors.white),
             ),
             const SizedBox(width: 8),
@@ -168,16 +168,16 @@ class _CardSugestao extends StatelessWidget {
             _CargaBox(
               label: 'Carga Atual',
               valor: cargaAtual != null ? '${cargaAtual}kg' : '—',
-              cor: EagleTokens.textSecondary,
+              cor: EagleTokens.inkMute,
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 12),
-              child: Icon(Icons.arrow_forward, color: EagleTokens.primary),
+              child: Icon(Icons.arrow_forward, color: EagleTokens.brand),
             ),
             _CargaBox(
               label: 'Sugerido',
               valor: cargaSugerida != null ? '${cargaSugerida}kg' : '—',
-              cor: EagleTokens.primary,
+              cor: EagleTokens.brand,
             ),
           ]),
 
@@ -187,15 +187,15 @@ class _CardSugestao extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: EagleTokens.textSecondary.withValues(alpha: 0.08),
+                color: EagleTokens.inkMute.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Icon(Icons.info_outline, size: 14, color: EagleTokens.textSecondary),
+                const Icon(Icons.info_outline, size: 14, color: EagleTokens.inkMute),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(motivo,
-                      style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+                      style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
                 ),
               ]),
             ),
@@ -210,7 +210,7 @@ class _CardSugestao extends StatelessWidget {
                 onPressed: onRejeitar,
                 icon: const Text('❌', style: TextStyle(fontSize: 14)),
                 label: const Text('Rejeitar'),
-                style: OutlinedButton.styleFrom(foregroundColor: EagleTokens.danger),
+                style: OutlinedButton.styleFrom(foregroundColor: EagleTokens.bad),
               ),
             ),
             const SizedBox(width: 12),
@@ -219,7 +219,7 @@ class _CardSugestao extends StatelessWidget {
                 onPressed: onAceitar,
                 icon: const Text('✅', style: TextStyle(fontSize: 14)),
                 label: const Text('Aceitar'),
-                style: FilledButton.styleFrom(backgroundColor: EagleTokens.success),
+                style: FilledButton.styleFrom(backgroundColor: EagleTokens.good),
               ),
             ),
           ]),
@@ -247,7 +247,7 @@ class _CargaBox extends StatelessWidget {
         Text(valor,
             style: TextStyle(
                 fontWeight: FontWeight.bold, fontSize: 16, color: cor)),
-        Text(label, style: const TextStyle(fontSize: 10, color: EagleTokens.textSecondary)),
+        Text(label, style: const TextStyle(fontSize: 10, color: EagleTokens.inkMute)),
       ]),
     );
   }

@@ -74,10 +74,10 @@ class _AgendaSemanalScreenState extends ConsumerState<AgendaSemanalScreen> {
 
   Color _corStatus(String? s) {
     switch (s) {
-      case 'PRESENTE': return EagleTokens.success;
-      case 'FALTA': return EagleTokens.danger;
-      case 'CANCELADO': return EagleTokens.textSecondary;
-      default: return EagleTokens.primary;
+      case 'PRESENTE': return EagleTokens.good;
+      case 'FALTA': return EagleTokens.bad;
+      case 'CANCELADO': return EagleTokens.inkMute;
+      default: return EagleTokens.brand;
     }
   }
 

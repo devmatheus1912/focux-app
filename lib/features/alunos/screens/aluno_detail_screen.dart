@@ -31,7 +31,7 @@ class AlunoDetailScreen extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: EagleTokens.danger),
+            style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Excluir'),
           ),

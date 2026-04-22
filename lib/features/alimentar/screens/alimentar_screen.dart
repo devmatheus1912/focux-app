@@ -66,14 +66,14 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
                             Row(children: [
                               Expanded(child: Text(p.nome,
                                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                              const Icon(Icons.chevron_right, color: EagleTokens.textSecondary),
+                              const Icon(Icons.chevron_right, color: EagleTokens.inkMute),
                             ]),
                             if (p.caloriasDia != null) Text('${p.caloriasDia} kcal/dia',
                                 style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                             const SizedBox(height: 8),
                             Wrap(spacing: 16, children: [
-                              if (p.proteinaG != null) _macro('Proteína', '${p.proteinaG}g', EagleTokens.danger),
-                              if (p.carboidratoG != null) _macro('Carbo', '${p.carboidratoG}g', EagleTokens.warning),
+                              if (p.proteinaG != null) _macro('Proteína', '${p.proteinaG}g', EagleTokens.bad),
+                              if (p.carboidratoG != null) _macro('Carbo', '${p.carboidratoG}g', EagleTokens.warn),
                               if (p.gorduraG != null) _macro('Gordura', '${p.gorduraG}g', Colors.yellow.shade700),
                             ]),
                           ],

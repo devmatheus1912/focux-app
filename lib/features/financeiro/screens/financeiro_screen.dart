@@ -118,9 +118,9 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
 
   Color _statusColor(String s) {
     switch (s) {
-      case 'PAGO': return EagleTokens.success;
-      case 'ATRASADO': return EagleTokens.danger;
-      default: return EagleTokens.warning;
+      case 'PAGO': return EagleTokens.good;
+      case 'ATRASADO': return EagleTokens.bad;
+      default: return EagleTokens.warn;
     }
   }
 
@@ -564,7 +564,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                   onPressed: () => _registrarContato(m),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.pix, color: EagleTokens.primary),
+                                  icon: const Icon(Icons.pix, color: EagleTokens.brand),
                                   onPressed: () => _mostrarPix(m.id),
                                   tooltip: 'Gerar PIX',
                                 ),

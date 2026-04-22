@@ -35,7 +35,7 @@ class PerfilScreen extends ConsumerWidget {
                 child: Text(perfil.nome, style: Theme.of(context).textTheme.headlineSmall),
               ),
               Center(
-                child: Text(perfil.email, style: const TextStyle(color: EagleTokens.textSecondary)),
+                child: Text(perfil.email, style: const TextStyle(color: EagleTokens.inkMute)),
               ),
               const SizedBox(height: 8),
               Center(
@@ -86,7 +86,7 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: EagleTokens.textSecondary)),
+          Text(label, style: const TextStyle(color: EagleTokens.inkMute)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
         ],
       ),

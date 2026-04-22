@@ -60,7 +60,7 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: EagleTokens.danger),
+            style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Excluir'),
           ),
@@ -136,7 +136,7 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
                                 Expanded(
                                   child: Text(
                                     _formatarData(a.avaliadoEm),
-                                    style: const TextStyle(color: EagleTokens.textSecondary),
+                                    style: const TextStyle(color: EagleTokens.inkMute),
                                   ),
                                 ),
                                 PopupMenuButton<String>(
@@ -154,9 +154,9 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
                                     )),
                                     PopupMenuItem(value: 'excluir', child: Row(
                                       children: [
-                                        Icon(Icons.delete, size: 18, color: EagleTokens.danger),
+                                        Icon(Icons.delete, size: 18, color: EagleTokens.bad),
                                         SizedBox(width: 8),
-                                        Text('Excluir', style: TextStyle(color: EagleTokens.danger)),
+                                        Text('Excluir', style: TextStyle(color: EagleTokens.bad)),
                                       ],
                                     )),
                                   ],
@@ -182,15 +182,15 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
                             if (a.observacoesAvaliacao != null && a.observacoesAvaliacao!.isNotEmpty) ...[
                               const SizedBox(height: 8),
                               Text(a.observacoesAvaliacao!,
-                                  style: const TextStyle(color: EagleTokens.textSecondary, fontSize: 12)),
+                                  style: const TextStyle(color: EagleTokens.inkMute, fontSize: 12)),
                             ],
                             if (a.enviadaAoAluno) ...[
                               const SizedBox(height: 4),
                               const Row(children: [
-                                Icon(Icons.check_circle, size: 14, color: EagleTokens.success),
+                                Icon(Icons.check_circle, size: 14, color: EagleTokens.good),
                                 SizedBox(width: 4),
                                 Text('Enviada ao aluno',
-                                    style: TextStyle(fontSize: 11, color: EagleTokens.success)),
+                                    style: TextStyle(fontSize: 11, color: EagleTokens.good)),
                               ]),
                             ],
                           ],
@@ -204,7 +204,7 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
 
   Widget _stat(String label, String value) => Column(children: [
     Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-    Text(label, style: const TextStyle(color: EagleTokens.textSecondary, fontSize: 12)),
+    Text(label, style: const TextStyle(color: EagleTokens.inkMute, fontSize: 12)),
   ]);
 }
 
@@ -341,7 +341,7 @@ class _EditarAvaliacaoSheetState extends ConsumerState<_EditarAvaliacaoSheet> {
 
   Widget _secao(String titulo) => Padding(
     padding: const EdgeInsets.only(top: 8, bottom: 4),
-    child: Text(titulo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: EagleTokens.textSecondary)),
+    child: Text(titulo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: EagleTokens.inkMute)),
   );
 
   Widget _num(TextEditingController c, String label) =>
@@ -445,7 +445,7 @@ class _NovaAvaliacaoScreenState extends ConsumerState<_NovaAvaliacaoScreen> {
 
   Widget _secao(String titulo) => Padding(
     padding: const EdgeInsets.only(top: 8, bottom: 4),
-    child: Text(titulo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: EagleTokens.textSecondary)),
+    child: Text(titulo, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: EagleTokens.inkMute)),
   );
 
   Widget _num(TextEditingController c, String label) =>

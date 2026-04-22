@@ -101,7 +101,7 @@ class TrilhasScreen extends ConsumerWidget {
       ),
       body: trilhasAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.danger))),
+        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad))),
         data: (trilhas) {
           if (trilhas.isEmpty) {
             return Center(
@@ -110,7 +110,7 @@ class TrilhasScreen extends ConsumerWidget {
                 children: [
                   Icon(Icons.route, size: 64, color: const Color(0xFFD1D5DB)),
                   const SizedBox(height: 16),
-                  const Text('Nenhuma trilha criada ainda', style: TextStyle(color: EagleTokens.textSecondary)),
+                  const Text('Nenhuma trilha criada ainda', style: TextStyle(color: EagleTokens.inkMute)),
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
                     onPressed: () => _showCriarTrilha(context, ref),
@@ -303,7 +303,7 @@ class _MarcoTile extends StatelessWidget {
       leading: IconButton(
         icon: Icon(
           marco.concluido ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: marco.concluido ? const Color(0xFF22C55E) : EagleTokens.textSecondary,
+          color: marco.concluido ? const Color(0xFF22C55E) : EagleTokens.inkMute,
         ),
         onPressed: marco.concluido
             ? null
@@ -318,7 +318,7 @@ class _MarcoTile extends StatelessWidget {
         style: TextStyle(
           fontSize: 13,
           decoration: marco.concluido ? TextDecoration.lineThrough : null,
-          color: marco.concluido ? EagleTokens.textSecondary : null,
+          color: marco.concluido ? EagleTokens.inkMute : null,
         ),
       ),
     );

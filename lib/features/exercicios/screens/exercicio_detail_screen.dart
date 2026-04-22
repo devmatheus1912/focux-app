@@ -38,7 +38,7 @@ class ExercicioDetailScreen extends ConsumerWidget {
             data: (ex) => IconButton(
               icon: Icon(
                 ex.favoritado ? Icons.star : Icons.star_border,
-                color: ex.favoritado ? EagleTokens.warning : null,
+                color: ex.favoritado ? EagleTokens.warn : null,
               ),
               tooltip: ex.favoritado ? 'Remover dos favoritos' : 'Adicionar aos favoritos',
               onPressed: () => _toggleFavorito(ref, context, ex.favoritado),

@@ -223,7 +223,7 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
       const SizedBox(height: 8),
       const Text(
         'Gere recomendações personalizadas de progressão de carga com base no seu histórico de treinos.',
-        style: TextStyle(color: EagleTokens.textSecondary),
+        style: TextStyle(color: EagleTokens.inkMute),
       ),
       const SizedBox(height: 20),
       FilledButton.icon(

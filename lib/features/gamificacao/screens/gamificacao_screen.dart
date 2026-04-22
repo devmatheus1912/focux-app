@@ -40,7 +40,7 @@ class GamificacaoScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 48, color: EagleTokens.danger),
+                const Icon(Icons.error_outline, size: 48, color: EagleTokens.bad),
                 const SizedBox(height: 12),
                 Text('Erro ao carregar dados: $e'),
                 const SizedBox(height: 12),
@@ -189,11 +189,11 @@ class _BadgesSection extends StatelessWidget {
   Color _corParaTipo(String tipo) {
     switch (tipo) {
       case 'STREAK_10':
-        return EagleTokens.warning;
+        return EagleTokens.warn;
       case 'PR_CARGA':
-        return EagleTokens.primary;
+        return EagleTokens.brand;
       case 'FREQUENCIA_100':
-        return EagleTokens.success;
+        return EagleTokens.good;
       default:
         return const Color(0xFF7C3AED);
     }
@@ -368,11 +368,11 @@ class _ReferralCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.check_circle, color: EagleTokens.success, size: 16),
+                  Icon(Icons.check_circle, color: EagleTokens.good, size: 16),
                   const SizedBox(width: 4),
                   Text(
                     'Cupom já utilizado',
-                    style: theme.textTheme.bodySmall?.copyWith(color: EagleTokens.success),
+                    style: theme.textTheme.bodySmall?.copyWith(color: EagleTokens.good),
                   ),
                 ],
               ),

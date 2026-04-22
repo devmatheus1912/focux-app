@@ -7,16 +7,16 @@ import '../data/suporte_repository.dart';
 const _severidades = ['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'];
 
 const _severidadeColors = {
-  'BAIXA': EagleTokens.success,
-  'MEDIA': EagleTokens.warning,
-  'ALTA': EagleTokens.warning,
-  'CRITICA': EagleTokens.danger,
+  'BAIXA': EagleTokens.good,
+  'MEDIA': EagleTokens.warn,
+  'ALTA': EagleTokens.warn,
+  'CRITICA': EagleTokens.bad,
 };
 
 const _statusColors = {
-  'ABERTO': EagleTokens.warning,
-  'EM_ANALISE': EagleTokens.primary,
-  'RESOLVIDO': EagleTokens.success,
+  'ABERTO': EagleTokens.warn,
+  'EM_ANALISE': EagleTokens.brand,
+  'RESOLVIDO': EagleTokens.good,
 };
 
 class SuporteScreen extends ConsumerStatefulWidget {
@@ -238,7 +238,7 @@ class _AbrirTicketTabState extends ConsumerState<_AbrirTicketTab> {
                             child: Row(children: [
                               Icon(Icons.circle,
                                   size: 10,
-                                  color: _severidadeColors[s] ?? EagleTokens.textSecondary),
+                                  color: _severidadeColors[s] ?? EagleTokens.inkMute),
                               const SizedBox(width: 8),
                               Text(s),
                             ]),
@@ -282,7 +282,7 @@ class _AbrirTicketTabState extends ConsumerState<_AbrirTicketTab> {
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(children: [
-                  const Icon(Icons.check_circle, color: EagleTokens.success),
+                  const Icon(Icons.check_circle, color: EagleTokens.good),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -478,8 +478,8 @@ class _TicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _statusColors[ticket.status] ?? EagleTokens.textSecondary;
-    final sevColor = _severidadeColors[ticket.severidade] ?? EagleTokens.textSecondary;
+    final statusColor = _statusColors[ticket.status] ?? EagleTokens.inkMute;
+    final sevColor = _severidadeColors[ticket.severidade] ?? EagleTokens.inkMute;
     final resolvido = ticket.status == 'RESOLVIDO';
     final temResposta = resolvido && ticket.respostaAdmin != null;
 
@@ -493,7 +493,7 @@ class _TicketCard extends StatelessWidget {
               children: [
                 const Divider(),
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Icon(Icons.support_agent, size: 18, color: EagleTokens.success),
+                  const Icon(Icons.support_agent, size: 18, color: EagleTokens.good),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -556,7 +556,7 @@ class _TicketTileContent extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           'Aberto em ${ticket.criadoEm!.length >= 10 ? ticket.criadoEm!.substring(0, 10) : ticket.criadoEm!}',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.textSecondary),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute),
         ),
       ],
     ]);

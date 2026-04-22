@@ -81,7 +81,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
         'ALUNO' => const Color(0xFF2B4A9E),
         'TREINO' => const Color(0xFF22C55E),
         'COBRANCA' => const Color(0xFFF59E0B),
-        _ => EagleTokens.textSecondary,
+        _ => EagleTokens.inkMute,
       };
 
   String _labelForTipo(String tipo) => switch (tipo) {
@@ -139,7 +139,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
       ),
       body: resultAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.danger))),
+        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad))),
         data: (result) {
           if (query.trim().length < 2) {
             return Center(
@@ -148,7 +148,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                 children: [
                   Icon(Icons.search, size: 64, color: const Color(0xFFD1D5DB)),
                   const SizedBox(height: 16),
-                  Text('Digite ao menos 2 caracteres', style: TextStyle(color: EagleTokens.textSecondary)),
+                  Text('Digite ao menos 2 caracteres', style: TextStyle(color: EagleTokens.inkMute)),
                 ],
               ),
             );
@@ -160,7 +160,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                 children: [
                   Icon(Icons.search_off, size: 64, color: const Color(0xFFD1D5DB)),
                   const SizedBox(height: 16),
-                  Text('Nenhum resultado para "$query"', style: TextStyle(color: EagleTokens.textSecondary)),
+                  Text('Nenhum resultado para "$query"', style: TextStyle(color: EagleTokens.inkMute)),
                 ],
               ),
             );
@@ -196,7 +196,7 @@ class _BuscaItemTile extends StatelessWidget {
         'ALUNO' => const Color(0xFF2B4A9E),
         'TREINO' => const Color(0xFF22C55E),
         'COBRANCA' => const Color(0xFFF59E0B),
-        _ => EagleTokens.textSecondary,
+        _ => EagleTokens.inkMute,
       };
 
   @override

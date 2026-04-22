@@ -108,7 +108,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                           subtitle: Text(e.tipo),
                           trailing: Text(
                             _formatarDataHora(e.dataHora),
-                            style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary),
+                            style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
                           ),
                         );
                       },

@@ -57,7 +57,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
           IconButton(
             icon: Icon(
               _apenasFavoritos ? Icons.star : Icons.star_border,
-              color: _apenasFavoritos ? EagleTokens.warning : null,
+              color: _apenasFavoritos ? EagleTokens.warn : null,
             ),
             tooltip: 'Apenas favoritos',
             onPressed: () => setState(() => _apenasFavoritos = !_apenasFavoritos),
@@ -217,7 +217,7 @@ class _ExercicioTile extends ConsumerWidget {
           IconButton(
             icon: Icon(
               exercicio.favoritado ? Icons.star : Icons.star_border,
-              color: exercicio.favoritado ? EagleTokens.warning : null,
+              color: exercicio.favoritado ? EagleTokens.warn : null,
             ),
             tooltip: exercicio.favoritado ? 'Remover dos favoritos' : 'Adicionar aos favoritos',
             onPressed: () => _toggleFavorito(ref, context),

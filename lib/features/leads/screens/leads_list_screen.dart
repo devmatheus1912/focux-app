@@ -16,11 +16,11 @@ const _statusLabels = {
 };
 
 const _statusColors = {
-  'LEAD': EagleTokens.primary,
-  'TESTE': EagleTokens.warning,
-  'ATIVO': EagleTokens.success,
-  'INADIMPLENTE': EagleTokens.danger,
-  'CANCELADO': EagleTokens.textSecondary,
+  'LEAD': EagleTokens.brand,
+  'TESTE': EagleTokens.warn,
+  'ATIVO': EagleTokens.good,
+  'INADIMPLENTE': EagleTokens.bad,
+  'CANCELADO': EagleTokens.inkMute,
 };
 
 class LeadsListScreen extends ConsumerStatefulWidget {
@@ -129,7 +129,7 @@ class _FiltroBar extends StatelessWidget {
         child: FilterChip(
           label: Text(e.value),
           selected: selecionado == e.key,
-          selectedColor: (_statusColors[e.key] ?? EagleTokens.textSecondary).withValues(alpha: 0.2),
+          selectedColor: (_statusColors[e.key] ?? EagleTokens.inkMute).withValues(alpha: 0.2),
           onSelected: (_) => onChanged(selecionado == e.key ? null : e.key),
         ),
       )),
@@ -144,7 +144,7 @@ class _LeadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColors[lead.status] ?? EagleTokens.textSecondary;
+    final color = _statusColors[lead.status] ?? EagleTokens.inkMute;
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(

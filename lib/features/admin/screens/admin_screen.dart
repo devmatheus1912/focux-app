@@ -167,12 +167,12 @@ class _AdminScreenState extends ConsumerState<AdminScreen>
             _DetailRow(
               label: 'Inadimplentes',
               value: '${p.alunosInadimplentes}',
-              valueColor: p.alunosInadimplentes > 0 ? EagleTokens.danger : null,
+              valueColor: p.alunosInadimplentes > 0 ? EagleTokens.bad : null,
             ),
             _DetailRow(
               label: 'Check-ins (30 dias)',
               value: '${p.checkInsUltimos30Dias}',
-              valueColor: p.checkInsUltimos30Dias < 5 ? EagleTokens.warning : null,
+              valueColor: p.checkInsUltimos30Dias < 5 ? EagleTokens.warn : null,
             ),
             const SizedBox(height: 16),
           ],
@@ -283,7 +283,7 @@ class _StatsTab extends StatelessWidget {
                 label: 'Total Alunos',
                 value: '${s.totalAlunos}',
                 icon: Icons.fitness_center,
-                color: EagleTokens.success,
+                color: EagleTokens.good,
               ),
               _MetricCard(
                 label: 'Admins',
@@ -349,7 +349,7 @@ class _StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = saudavel ? EagleTokens.success : EagleTokens.warning;
+    final color = saudavel ? EagleTokens.good : EagleTokens.warn;
     final icon = saudavel ? Icons.check_circle : Icons.warning_amber_rounded;
     final label = saudavel ? 'Plataforma Saudável' : 'Atenção Necessária';
 
@@ -405,15 +405,15 @@ class _MonitorTab extends StatelessWidget {
               children: [
                 _SummaryChip(
                   label: '${m.ticketsAbertos} Abertos',
-                  color: EagleTokens.primary,
+                  color: EagleTokens.brand,
                 ),
                 _SummaryChip(
                   label: '${m.ticketsCriticos} Críticos',
-                  color: EagleTokens.danger,
+                  color: EagleTokens.bad,
                 ),
                 _SummaryChip(
                   label: '${m.totalInadimplentes} Inadimplentes',
-                  color: EagleTokens.warning,
+                  color: EagleTokens.warn,
                 ),
               ],
             ),
@@ -472,13 +472,13 @@ class _TicketCard extends StatelessWidget {
   Color _severidadeColor(String sev) {
     switch (sev.toUpperCase()) {
       case 'CRITICA':
-        return EagleTokens.danger;
+        return EagleTokens.bad;
       case 'ALTA':
-        return EagleTokens.warning;
+        return EagleTokens.warn;
       case 'MEDIA':
         return const Color(0xFFF59E0B);
       default:
-        return EagleTokens.success;
+        return EagleTokens.good;
     }
   }
 
@@ -612,9 +612,9 @@ class _RiscoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color borderColor;
     if (personal.alunosInadimplentes > 0) {
-      borderColor = EagleTokens.danger;
+      borderColor = EagleTokens.bad;
     } else if (personal.checkInsUltimos30Dias < 5) {
-      borderColor = EagleTokens.warning;
+      borderColor = EagleTokens.warn;
     } else {
       borderColor = Colors.transparent;
     }
@@ -634,7 +634,7 @@ class _RiscoCard extends StatelessWidget {
                 width: 5,
                 decoration: BoxDecoration(
                   color: borderColor == Colors.transparent
-                      ? EagleTokens.success
+                      ? EagleTokens.good
                       : borderColor,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(16),
@@ -673,15 +673,15 @@ class _RiscoCard extends StatelessWidget {
                             _InfoBadge(
                               label: '${personal.alunosInadimplentes} inadimp.',
                               icon: Icons.warning_amber_rounded,
-                              color: EagleTokens.danger,
+                              color: EagleTokens.bad,
                             ),
                           const SizedBox(width: 8),
                           _InfoBadge(
                             label: '${personal.checkInsUltimos30Dias} check-ins',
                             icon: Icons.fitness_center,
                             color: personal.checkInsUltimos30Dias < 5
-                                ? EagleTokens.warning
-                                : EagleTokens.success,
+                                ? EagleTokens.warn
+                                : EagleTokens.good,
                           ),
                         ],
                       ),
@@ -691,7 +691,7 @@ class _RiscoCard extends StatelessWidget {
               ),
               const Padding(
                 padding: EdgeInsets.only(right: 12),
-                child: Icon(Icons.chevron_right, color: EagleTokens.textSecondary),
+                child: Icon(Icons.chevron_right, color: EagleTokens.inkMute),
               ),
             ],
           ),
@@ -903,10 +903,10 @@ class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
   }
 
   Color _acaoColor(String acao) {
-    if (acao.contains('DELETE') || acao.contains('EXCLUIR')) return EagleTokens.danger;
-    if (acao.contains('CREATE') || acao.contains('CRIAR')) return EagleTokens.success;
-    if (acao.contains('UPDATE') || acao.contains('EDITAR')) return EagleTokens.warning;
-    return EagleTokens.primary;
+    if (acao.contains('DELETE') || acao.contains('EXCLUIR')) return EagleTokens.bad;
+    if (acao.contains('CREATE') || acao.contains('CRIAR')) return EagleTokens.good;
+    if (acao.contains('UPDATE') || acao.contains('EDITAR')) return EagleTokens.warn;
+    return EagleTokens.brand;
   }
 
   @override
@@ -918,11 +918,11 @@ class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.history_toggle_off, size: 64, color: EagleTokens.textSecondary),
+            const Icon(Icons.history_toggle_off, size: 64, color: EagleTokens.inkMute),
             const SizedBox(height: 12),
-            Text('Sem dados de auditoria', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: EagleTokens.textSecondary)),
+            Text('Sem dados de auditoria', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: EagleTokens.inkMute)),
             const SizedBox(height: 8),
-            Text('Endpoint /api/admin/auditoria não disponível', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.textSecondary)),
+            Text('Endpoint /api/admin/auditoria não disponível', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute)),
             const SizedBox(height: 16),
             OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Tentar novamente')),
           ],
@@ -934,9 +934,9 @@ class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.history, size: 64, color: EagleTokens.textSecondary),
+            const Icon(Icons.history, size: 64, color: EagleTokens.inkMute),
             const SizedBox(height: 12),
-            const Text('Nenhuma ação auditada ainda.', style: TextStyle(color: EagleTokens.textSecondary)),
+            const Text('Nenhuma ação auditada ainda.', style: TextStyle(color: EagleTokens.inkMute)),
           ],
         ),
       );
@@ -963,8 +963,8 @@ class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
                   if (log.entidade != null)
                     Text('Entidade: ${log.entidade}', style: const TextStyle(fontSize: 12)),
                   if (log.detalhes != null)
-                    Text(log.detalhes!, style: const TextStyle(fontSize: 11, color: EagleTokens.textSecondary), maxLines: 2, overflow: TextOverflow.ellipsis),
-                  Text(_fmtDate(log.criadoEm), style: const TextStyle(fontSize: 11, color: EagleTokens.textSecondary)),
+                    Text(log.detalhes!, style: const TextStyle(fontSize: 11, color: EagleTokens.inkMute), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(_fmtDate(log.criadoEm), style: const TextStyle(fontSize: 11, color: EagleTokens.inkMute)),
                 ],
               ),
               isThreeLine: true,
@@ -1103,7 +1103,7 @@ class _FeatureFlagsTabState extends ConsumerState<_FeatureFlagsTab>
                   const SizedBox(height: 12),
                   Text(
                     _flags.isEmpty ? 'Nenhuma feature flag cadastrada.' : 'Sem dados disponíveis',
-                    style: const TextStyle(color: EagleTokens.textSecondary),
+                    style: const TextStyle(color: EagleTokens.inkMute),
                   ),
                   const SizedBox(height: 16),
                   OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Recarregar')),
@@ -1122,11 +1122,11 @@ class _FeatureFlagsTabState extends ConsumerState<_FeatureFlagsTab>
                     child: SwitchListTile(
                       secondary: CircleAvatar(
                         backgroundColor: flag.ativo
-                            ? EagleTokens.success.withValues(alpha: 0.12)
-                            : EagleTokens.textSecondary.withValues(alpha: 0.12),
+                            ? EagleTokens.good.withValues(alpha: 0.12)
+                            : EagleTokens.inkMute.withValues(alpha: 0.12),
                         child: Icon(
                           flag.ativo ? Icons.toggle_on : Icons.toggle_off,
-                          color: flag.ativo ? EagleTokens.success : EagleTokens.textSecondary,
+                          color: flag.ativo ? EagleTokens.good : EagleTokens.inkMute,
                         ),
                       ),
                       title: Text(flag.nome, style: const TextStyle(fontWeight: FontWeight.w700, fontFamily: 'monospace')),

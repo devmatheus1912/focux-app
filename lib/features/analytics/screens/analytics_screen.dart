@@ -93,7 +93,7 @@ class AnalyticsScreen extends ConsumerWidget {
       body: analyticsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
-          child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.danger)),
+          child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad)),
         ),
         data: (data) => _AnalyticsBody(data: data),
       ),
@@ -182,9 +182,9 @@ class _HeroHeader extends StatelessWidget {
   }
 
   Color _retColor(double v) {
-    if (v >= 70) return EagleTokens.success;
-    if (v >= 40) return EagleTokens.warning;
-    return EagleTokens.danger;
+    if (v >= 70) return EagleTokens.good;
+    if (v >= 40) return EagleTokens.warn;
+    return EagleTokens.bad;
   }
 }
 
@@ -239,11 +239,11 @@ class _TabVisaoGeral extends StatelessWidget {
           const SizedBox(height: 12),
           Row(children: [
             Expanded(child: _MetricCard('WAU', '${data.wau}', 'ativos essa semana',
-                Icons.people, EagleTokens.primary,
+                Icons.people, EagleTokens.brand,
                 data.totalAlunos > 0 ? data.wau / data.totalAlunos : 0)),
             const SizedBox(width: 12),
             Expanded(child: _MetricCard('MAU', '${data.mau}', 'ativos este mês',
-                Icons.calendar_month, EagleTokens.success,
+                Icons.calendar_month, EagleTokens.good,
                 data.totalAlunos > 0 ? data.mau / data.totalAlunos : 0)),
           ]),
           const SizedBox(height: 24),
@@ -259,7 +259,7 @@ class _TabVisaoGeral extends StatelessWidget {
           const SizedBox(height: 12),
           Row(children: [
             Expanded(child: _MetricCard('Inadimplentes', '${data.inadimplentes}', 'alunos em atraso',
-                Icons.warning_amber_rounded, EagleTokens.danger,
+                Icons.warning_amber_rounded, EagleTokens.bad,
                 data.totalAlunos > 0 ? data.inadimplentes / data.totalAlunos : 0)),
           ]),
           const SizedBox(height: 24),
@@ -289,13 +289,13 @@ class _TabFunil extends StatelessWidget {
         children: [
           const _SectionLabel('Funil de Ativação (90 dias)'),
           const SizedBox(height: 16),
-          _FunilStep('Cadastrados', f.cadastrados, f.cadastrados, EagleTokens.primary, isFirst: true),
+          _FunilStep('Cadastrados', f.cadastrados, f.cadastrados, EagleTokens.brand, isFirst: true),
           _FunilArrow(label: '${f.taxaAtivacao.toStringAsFixed(0)}% ativação'),
-          _FunilStep('1° Check-in', f.fizeram1Checkin, f.cadastrados, EagleTokens.primary),
+          _FunilStep('1° Check-in', f.fizeram1Checkin, f.cadastrados, EagleTokens.brand),
           _FunilArrow(label: '${f.taxaEngajamento.toStringAsFixed(0)}% engajamento'),
-          _FunilStep('3+ Check-ins', f.fizeram3Checkins, f.cadastrados, EagleTokens.warning),
+          _FunilStep('3+ Check-ins', f.fizeram3Checkins, f.cadastrados, EagleTokens.warn),
           _FunilArrow(label: '${f.taxaRetencao.toStringAsFixed(0)}% retenção'),
-          _FunilStep('Ativos 30d', f.ativos30Dias, f.cadastrados, EagleTokens.success),
+          _FunilStep('Ativos 30d', f.ativos30Dias, f.cadastrados, EagleTokens.good),
           const SizedBox(height: 24),
           if (evolucao.isNotEmpty) ...[
             const _SectionLabel('Evolução WAU (últimas 8 semanas)'),
@@ -363,9 +363,9 @@ class _FunilArrow extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 24),
     child: Row(children: [
-      const Icon(Icons.arrow_downward, size: 16, color: EagleTokens.textSecondary),
+      const Icon(Icons.arrow_downward, size: 16, color: EagleTokens.inkMute),
       const SizedBox(width: 6),
-      Text(label, style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
+      Text(label, style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
     ]),
   );
 }
@@ -379,11 +379,11 @@ class _WauBar extends StatelessWidget {
     final pct = max > 0 ? usuarios / max : 0.0;
     return Row(children: [
       SizedBox(width: 80, child: Text(semana.replaceFirst('W', ' W'),
-          style: const TextStyle(fontSize: 11, color: EagleTokens.textSecondary))),
+          style: const TextStyle(fontSize: 11, color: EagleTokens.inkMute))),
       Expanded(child: LinearProgressIndicator(
         value: pct.clamp(0.0, 1.0),
-        backgroundColor: EagleTokens.primary.withValues(alpha: 0.1),
-        color: EagleTokens.primary,
+        backgroundColor: EagleTokens.brand.withValues(alpha: 0.1),
+        color: EagleTokens.brand,
         minHeight: 12,
         borderRadius: BorderRadius.circular(4),
       )),
@@ -404,7 +404,7 @@ class _TabCohort extends StatelessWidget {
     if (cohort.isEmpty) {
       return const Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.grid_view, size: 48, color: EagleTokens.textSecondary),
+          Icon(Icons.grid_view, size: 48, color: EagleTokens.inkMute),
           SizedBox(height: 12),
           Text('Sem dados de cohort ainda.\nCadastre alunos e realize check-ins.',
               textAlign: TextAlign.center),
@@ -420,7 +420,7 @@ class _TabCohort extends StatelessWidget {
           const _SectionLabel('Cohort de Retenção por Mês de Cadastro'),
           const SizedBox(height: 4),
           const Text('D7 = alunos que fizeram check-in nos primeiros 7 dias.',
-              style: TextStyle(fontSize: 11, color: EagleTokens.textSecondary)),
+              style: TextStyle(fontSize: 11, color: EagleTokens.inkMute)),
           const SizedBox(height: 16),
           // Tabela de cohort
           Table(
@@ -434,7 +434,7 @@ class _TabCohort extends StatelessWidget {
               // Header
               TableRow(
                 decoration: BoxDecoration(
-                  color: EagleTokens.primary.withValues(alpha: 0.08),
+                  color: EagleTokens.brand.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 children: const [
@@ -501,10 +501,10 @@ class _TabCohort extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(children: [
               SizedBox(width: 70, child: Text(c.mesEntrada,
-                  style: const TextStyle(fontSize: 11, color: EagleTokens.textSecondary))),
+                  style: const TextStyle(fontSize: 11, color: EagleTokens.inkMute))),
               Expanded(child: LinearProgressIndicator(
                 value: (c.retencaoD30 / 100).clamp(0.0, 1.0),
-                backgroundColor: EagleTokens.primary.withValues(alpha: 0.08),
+                backgroundColor: EagleTokens.brand.withValues(alpha: 0.08),
                 color: _retColor(c.retencaoD30),
                 minHeight: 14,
                 borderRadius: BorderRadius.circular(4),
@@ -524,9 +524,9 @@ class _TabCohort extends StatelessWidget {
   }
 
   Color _retColor(double v) {
-    if (v >= 70) return EagleTokens.success;
-    if (v >= 40) return EagleTokens.warning;
-    return EagleTokens.danger;
+    if (v >= 70) return EagleTokens.good;
+    if (v >= 40) return EagleTokens.warn;
+    return EagleTokens.bad;
   }
 }
 
@@ -539,7 +539,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) => Text(text,
       style: const TextStyle(
         fontSize: 14, fontWeight: FontWeight.bold,
-        color: EagleTokens.textSecondary, letterSpacing: 0.5));
+        color: EagleTokens.inkMute, letterSpacing: 0.5));
 }
 
 class _MetricCard extends StatelessWidget {
@@ -568,7 +568,7 @@ class _MetricCard extends StatelessWidget {
           ]),
           const SizedBox(height: 12),
           Text(value, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-          Text(sublabel, style: const TextStyle(fontSize: 11, color: EagleTokens.textSecondary)),
+          Text(sublabel, style: const TextStyle(fontSize: 11, color: EagleTokens.inkMute)),
           const SizedBox(height: 10),
           LinearProgressIndicator(
             value: percent.clamp(0.0, 1.0),
@@ -579,7 +579,7 @@ class _MetricCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text('${(percent * 100).toStringAsFixed(0)}% do total',
-              style: const TextStyle(fontSize: 10, color: EagleTokens.textSecondary)),
+              style: const TextStyle(fontSize: 10, color: EagleTokens.inkMute)),
         ],
       ),
     );
@@ -594,13 +594,13 @@ class _RetencaoBar extends StatelessWidget {
 
   Color get _barColor {
     if (inversed) {
-      if (value <= 10) return EagleTokens.success;
-      if (value <= 25) return EagleTokens.warning;
-      return EagleTokens.danger;
+      if (value <= 10) return EagleTokens.good;
+      if (value <= 25) return EagleTokens.warn;
+      return EagleTokens.bad;
     }
-    if (value >= 70) return EagleTokens.success;
-    if (value >= 40) return EagleTokens.warning;
-    return EagleTokens.danger;
+    if (value >= 70) return EagleTokens.good;
+    if (value >= 40) return EagleTokens.warn;
+    return EagleTokens.bad;
   }
 
   @override

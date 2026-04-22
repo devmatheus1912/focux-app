@@ -93,18 +93,18 @@ class _AgCard extends StatelessWidget {
           ]),
           const SizedBox(height: 8),
           Row(children: [
-            const Icon(Icons.calendar_today, size: 14, color: EagleTokens.textSecondary),
+            const Icon(Icons.calendar_today, size: 14, color: EagleTokens.inkMute),
             const SizedBox(width: 4),
             Text(
               '${inicio.day.toString().padLeft(2, '0')}/${inicio.month.toString().padLeft(2, '0')}/${inicio.year}',
-              style: const TextStyle(color: EagleTokens.textSecondary, fontSize: 13),
+              style: const TextStyle(color: EagleTokens.inkMute, fontSize: 13),
             ),
             const SizedBox(width: 12),
-            const Icon(Icons.access_time, size: 14, color: EagleTokens.textSecondary),
+            const Icon(Icons.access_time, size: 14, color: EagleTokens.inkMute),
             const SizedBox(width: 4),
             Text(
               '${_hm(inicio)} – ${_hm(fim)}',
-              style: const TextStyle(color: EagleTokens.textSecondary, fontSize: 13),
+              style: const TextStyle(color: EagleTokens.inkMute, fontSize: 13),
             ),
           ]),
           if (ag.status == 'AGENDADO') ...[
@@ -127,11 +127,11 @@ class _AgCard extends StatelessWidget {
 
   Color _statusColor(String s) {
     switch (s) {
-      case 'AGENDADO': return EagleTokens.primary;
-      case 'CONFIRMADO': return EagleTokens.success;
-      case 'CONCLUIDO': return EagleTokens.primary;
-      case 'CANCELADO': return EagleTokens.textSecondary;
-      default: return EagleTokens.textSecondary;
+      case 'AGENDADO': return EagleTokens.brand;
+      case 'CONFIRMADO': return EagleTokens.good;
+      case 'CONCLUIDO': return EagleTokens.brand;
+      case 'CANCELADO': return EagleTokens.inkMute;
+      default: return EagleTokens.inkMute;
     }
   }
 }

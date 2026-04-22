@@ -32,14 +32,14 @@ class LandingPageConfigScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: EagleTokens.primary.withAlpha(50), width: 2),
+                border: Border.all(color: EagleTokens.brand.withAlpha(50), width: 2),
                 boxShadow: [
                   BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4))
                 ],
               ),
               child: Column(
                 children: [
-                  const Icon(Icons.public, size: 48, color: EagleTokens.primary),
+                  const Icon(Icons.public, size: 48, color: EagleTokens.brand),
                   const SizedBox(height: 16),
                   const Text(
                     'Sua Landing Page está Ativa!',
@@ -49,7 +49,7 @@ class LandingPageConfigScreen extends StatelessWidget {
                   const Text(
                     'Coloque este link no seu Instagram para vender consultorias no piloto automático. Os alunos pagam e caem direto no seu Kanban de Leads.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: EagleTokens.textSecondary),
+                    style: TextStyle(color: EagleTokens.inkMute),
                   ),
                   const SizedBox(height: 24),
                   Container(
@@ -63,7 +63,7 @@ class LandingPageConfigScreen extends StatelessWidget {
                       children: [
                         const Text(publicLink, style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w500)),
                         IconButton(
-                          icon: const Icon(Icons.copy, color: EagleTokens.primary),
+                          icon: const Icon(Icons.copy, color: EagleTokens.brand),
                           onPressed: () {
                             Clipboard.setData(const ClipboardData(text: publicLink));
                             FeedbackHelper.showSuccess(context, 'Link copiado para a área de transferência!');
@@ -79,7 +79,7 @@ class LandingPageConfigScreen extends StatelessWidget {
             const Text('Configurações de Conversão', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.attach_money, color: EagleTokens.success),
+              leading: const Icon(Icons.attach_money, color: EagleTokens.good),
               title: const Text('Link do MercadoPago'),
               subtitle: const Text('https://mpago.la/1a2b3c'),
               trailing: const Icon(Icons.edit),
@@ -88,7 +88,7 @@ class LandingPageConfigScreen extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.format_quote, color: EagleTokens.warning),
+              leading: const Icon(Icons.format_quote, color: EagleTokens.warn),
               title: const Text('Depoimentos em Destaque'),
               subtitle: const Text('2 depoimentos selecionados'),
               trailing: const Icon(Icons.edit),

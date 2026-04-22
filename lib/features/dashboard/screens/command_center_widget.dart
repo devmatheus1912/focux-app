@@ -18,7 +18,7 @@ class CommandCenterWidget extends ConsumerWidget {
       ),
       error: (e, _) => Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Text('Erro ao carregar Central: $e', style: const TextStyle(color: EagleTokens.danger)),
+        child: Text('Erro ao carregar Central: $e', style: const TextStyle(color: EagleTokens.bad)),
       ),
       data: (data) {
         if (data.agendaHoje.isEmpty && data.filaAcoes.isEmpty) {
@@ -45,7 +45,7 @@ class CommandCenterWidget extends ConsumerWidget {
                 child: ListTile(
                   leading: Icon(
                     acao.tipo == 'RISCO' ? Icons.warning : Icons.attach_money,
-                    color: acao.tipo == 'RISCO' ? EagleTokens.danger : EagleTokens.warning,
+                    color: acao.tipo == 'RISCO' ? EagleTokens.bad : EagleTokens.warn,
                   ),
                   title: Text(acao.descricao, style: const TextStyle(fontWeight: FontWeight.w600)),
                   trailing: const Icon(Icons.chevron_right),

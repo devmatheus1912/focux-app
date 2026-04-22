@@ -30,15 +30,15 @@ class HistoricoCheckinScreen extends ConsumerWidget {
                       child: ListTile(
                         leading: Icon(
                           concluido ? Icons.check_circle : Icons.pending,
-                          color: concluido ? EagleTokens.success : EagleTokens.warning,
+                          color: concluido ? EagleTokens.good : EagleTokens.warn,
                         ),
                         title: Text(e.treinoNome),
                         subtitle: Text(e.iniciadoEm ?? ''),
                         trailing: Chip(
                           label: Text(concluido ? 'Concluído' : 'Em andamento'),
                           backgroundColor: concluido
-                              ? EagleTokens.success.withValues(alpha: 0.12)
-                              : EagleTokens.warning.withValues(alpha: 0.12),
+                              ? EagleTokens.good.withValues(alpha: 0.12)
+                              : EagleTokens.warn.withValues(alpha: 0.12),
                         ),
                       ),
                     );
