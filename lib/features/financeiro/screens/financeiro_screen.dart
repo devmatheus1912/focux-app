@@ -32,27 +32,38 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('Financeiro'),
-      bottom: TabBar(
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        elevation: 0,
+        title: Text('Financeiro', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: EagleTokens.brand,
+          labelColor: EagleTokens.brand,
+          unselectedLabelColor: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          indicatorWeight: 2.5,
+          tabs: const [
+            Tab(icon: Icon(Icons.dashboard_outlined), text: 'Dashboard'),
+            Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Mensalidades'),
+            Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Resumo'),
+          ],
+        ),
+      ),
+      body: TabBarView(
         controller: _tabController,
-        tabs: const [
-          Tab(icon: Icon(Icons.dashboard), text: 'Dashboard'),
-          Tab(icon: Icon(Icons.list_alt), text: 'Mensalidades'),
-          Tab(icon: Icon(Icons.bar_chart), text: 'Resumo'),
+        children: const [
+          FinanceiroDashboardScreen(),
+          _MensalidadesTab(),
+          FinanceiroResumoScreen(),
         ],
       ),
-    ),
-    body: TabBarView(
-      controller: _tabController,
-      children: const [
-        FinanceiroDashboardScreen(),
-        _MensalidadesTab(),
-        FinanceiroResumoScreen(),
-      ],
-    ),
-  );
+    );
+  }
 }
 
 class _MensalidadesTab extends ConsumerStatefulWidget {
