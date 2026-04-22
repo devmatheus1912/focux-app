@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -165,10 +166,19 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
-        title: const Text('Anamnese'),
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        elevation: 0,
+        title: Text('Anamnese', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         bottom: TabBar(
+          indicatorColor: EagleTokens.brand,
+          labelColor: EagleTokens.brand,
+          unselectedLabelColor: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          indicatorWeight: 2.5,
           controller: _tabController,
           tabs: const [
             Tab(text: 'Básico'),

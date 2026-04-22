@@ -74,25 +74,29 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         title: Text(widget.alunoNome != null ? 'Feedbacks — ${widget.alunoNome}' : 'Todos os Feedbacks de Vídeo'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
             onPressed: _load,
           )
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _novoFeedback,
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.transparent, elevation: 0,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
           : _feedbacks.isEmpty
               ? const Center(child: Text('Nenhum feedback encontrado.'))
               : ListView.builder(

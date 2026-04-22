@@ -65,16 +65,19 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
-      title: const Text('Funil Kanban'),
-      actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: _load)],
+        title: Text('Funil Kanban', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
+        actions: [IconButton(icon: Icon(Icons.refresh, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), onPressed: _load)],
     ),
     body: _loading
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
         : Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: _kCols

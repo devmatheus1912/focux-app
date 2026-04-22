@@ -96,15 +96,17 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         title: const Text('Avaliações Físicas'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.compare_arrows),
+            icon: Icon(Icons.compare_arrows, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
             tooltip: 'Comparativo evolutivo',
             onPressed: _irParaComparativo,
           ),
@@ -116,10 +118,13 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
             builder: (_) => _NovaAvaliacaoScreen(alunoId: widget.alunoId)));
           _load();
         },
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
           : _avaliacoes.isEmpty
               ? const Center(child: Text('Nenhuma avaliação registrada.'))
               : ListView.builder(
@@ -421,11 +426,13 @@ class _NovaAvaliacaoScreenState extends ConsumerState<_NovaAvaliacaoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,title: const Text('Nova Avaliação')),
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        elevation: 0,
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),title: const Text('Nova Avaliação')),
       body: SingleChildScrollView(padding: const EdgeInsets.all(16), child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
