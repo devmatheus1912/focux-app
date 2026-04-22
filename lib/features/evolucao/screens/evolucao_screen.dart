@@ -57,6 +57,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final medidasAsync = ref.watch(medidasProvider(widget.alunoId));
     final recordesAsync = ref.watch(recordesProvider(widget.alunoId));
 
@@ -65,10 +66,18 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
     );
 
     return Scaffold(
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
-        title: Text('Evolução — ${widget.alunoNome}'),
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        elevation: 0,
+        title: Text('Evolução — ${widget.alunoNome}', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700, fontSize: 18)),
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         bottom: TabBar(
           controller: _tabController,
+          indicatorColor: EagleTokens.brand,
+          labelColor: EagleTokens.brand,
+          unselectedLabelColor: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          indicatorWeight: 2.5,
           tabs: const [
             Tab(text: 'Medidas Corporais'),
             Tab(text: 'Recordes Pessoais'),
@@ -90,15 +99,24 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_tabController.index == 0) {
-            _mostrarDialogMedida(context);
-          } else {
-            _mostrarDialogRecorde(context);
-          }
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+        ),
+        child: FloatingActionButton(
+          onPressed: () {
+            if (_tabController.index == 0) {
+              _mostrarDialogMedida(context);
+            } else {
+              _mostrarDialogRecorde(context);
+            }
+          },
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
     );
   }

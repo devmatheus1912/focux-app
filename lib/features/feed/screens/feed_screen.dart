@@ -211,18 +211,41 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text('Feed de Conteúdo')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _abrirFormulario,
-        tooltip: 'Nova Publicação',
-        child: const Icon(Icons.add),
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        elevation: 0,
+        title: Text('Feed de Conteúdo', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
+      ),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+        ),
+        child: FloatingActionButton(
+          onPressed: _abrirFormulario,
+          tooltip: 'Nova Publicação',
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
           : _posts.isEmpty
-              ? const Center(child: Text('Nenhuma publicação ainda. Crie a primeira!'))
+              ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Container(width: 64, height: 64, decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), shape: BoxShape.circle), child: const Icon(Icons.article_outlined, color: EagleTokens.brand, size: 28)),
+                  const SizedBox(height: 14),
+                  Text('Nenhuma publicação', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 17, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 6),
+                  Text('Crie a primeira publicação!', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 14)),
+                ]))
               : RefreshIndicator(
+                  color: EagleTokens.brand,
                   onRefresh: _load,
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
