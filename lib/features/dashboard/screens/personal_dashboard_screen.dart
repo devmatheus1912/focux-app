@@ -3,8 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/dashboard_provider.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../admin/screens/admin_screen.dart';
 import '../../financeiro/data/financeiro_repository.dart';
+import 'command_center_widget.dart';
+import 'busca_global_widget.dart';
+import '../../onboarding/screens/setup_onboarding_widget.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -41,6 +45,19 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
         title: const Text('Visão Geral'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: 'Busca rápida',
+            onPressed: () => showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              useSafeArea: true,
+              builder: (_) => const SizedBox(
+                height: double.infinity,
+                child: BuscaGlobalWidget(),
+              ),
+            ),
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await ref.read(authProvider.notifier).logout();
@@ -50,11 +67,12 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
         ],
       ),
       body: dashboardAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => _buildShimmerLoading(context),
         error: (e, _) => Center(child: Text('Erro ao carregar: $e')),
         data: (data) => RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(dashboardProvider);
+            ref.invalidate(commandCenterProvider);
             await _loadFin();
           },
           child: SingleChildScrollView(
@@ -148,6 +166,12 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                           ],
                         ),
                         const SizedBox(height: 24),
+                        
+                        // ONBOARDING 3 MINUTOS
+                        const SetupOnboardingWidget(),
+                        
+                        // CENTRAL DE COMANDO (Command Center)
+                        const CommandCenterWidget(),
                         
                         // Precisa de Atenção + WhatsApp CTA
                         if (_finData != null && _finData!.vencimentosProximos.isNotEmpty) ...[
@@ -244,6 +268,48 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
             ),
           ),
         ),
+      ),
+    );
+  }
+  Widget _buildShimmerLoading(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: Column(
+        children: [
+          Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              height: 200,
+              color: Colors.white,
+            ),
+          ),
+          Transform.translate(
+            offset: const Offset(0, -24),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                      const SizedBox(width: 12),
+                      Expanded(child: Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                      const SizedBox(width: 12),
+                      Expanded(child: Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

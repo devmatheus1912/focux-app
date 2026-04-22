@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import 'command_center_data.dart';
 
 class DashboardData {
   final int totalAlunos;
@@ -48,5 +49,10 @@ class DashboardRepository {
   Future<DashboardData> getDashboard() async {
     final response = await _dio.get('/api/dashboard/personal');
     return DashboardData.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<CommandCenterData> getCommandCenter() async {
+    final response = await _dio.get('/api/dashboard/command-center');
+    return CommandCenterData.fromJson(response.data as Map<String, dynamic>);
   }
 }

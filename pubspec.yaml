@@ -49,6 +49,7 @@ dependencies:
   printing: ^5.13.2
   fl_chart: ^0.69.0
   google_fonts: ^6.2.1
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

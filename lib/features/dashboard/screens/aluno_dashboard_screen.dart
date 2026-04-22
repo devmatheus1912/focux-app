@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'progresso_semanal_widget.dart';
 
 class AlunoDashboardScreen extends ConsumerWidget {
   const AlunoDashboardScreen({super.key});
@@ -21,11 +22,15 @@ class AlunoDashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const ProgressoSemanalWidget(),
+            const SizedBox(height: 24),
+            Text('Meus Atalhos', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
             _MenuButton(
               icon: Icons.fitness_center,
               label: 'Meus Treinos',
