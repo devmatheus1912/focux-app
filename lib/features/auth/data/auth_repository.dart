@@ -13,8 +13,10 @@ class AuthRepository {
       'senha': password,
     });
     final token = response.data['token'] as String;
+    final refreshToken = response.data['refreshToken'] as String?;
     final isAdmin = response.data['isAdmin'] as bool? ?? false;
     await SecureStorage.saveToken(token);
+    if (refreshToken != null) await SecureStorage.saveRefreshToken(refreshToken);
     await SecureStorage.saveRole('PERSONAL');
     await SecureStorage.saveIsAdmin(isAdmin);
     return token;
@@ -27,7 +29,9 @@ class AuthRepository {
       'senha': password,
     });
     final token = response.data['token'] as String;
+    final refreshToken = response.data['refreshToken'] as String?;
     await SecureStorage.saveToken(token);
+    if (refreshToken != null) await SecureStorage.saveRefreshToken(refreshToken);
     await SecureStorage.saveRole('PERSONAL');
     await SecureStorage.saveIsAdmin(false);
     return token;
@@ -39,7 +43,9 @@ class AuthRepository {
       'senha': password,
     });
     final token = response.data['token'] as String;
+    final refreshToken = response.data['refreshToken'] as String?;
     await SecureStorage.saveToken(token);
+    if (refreshToken != null) await SecureStorage.saveRefreshToken(refreshToken);
     await SecureStorage.saveRole('ALUNO');
     return token;
   }
@@ -52,14 +58,14 @@ class AuthRepository {
       'conviteToken': conviteToken,
     });
     final token = response.data['token'] as String;
+    final refreshToken = response.data['refreshToken'] as String?;
     await SecureStorage.saveToken(token);
+    if (refreshToken != null) await SecureStorage.saveRefreshToken(refreshToken);
     await SecureStorage.saveRole('ALUNO');
     return token;
   }
 
   Future<void> logout() async {
-    await SecureStorage.deleteToken();
-    await SecureStorage.deleteRole();
-    await SecureStorage.deleteIsAdmin();
+    await SecureStorage.clearAll();
   }
 }

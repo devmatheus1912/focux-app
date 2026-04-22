@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SecureStorage {
   static const _keyToken = 'jwt_token';
+  static const _keyRefreshToken = 'jwt_refresh_token';
   static const _keyRole = 'user_role';
   static const _storage = FlutterSecureStorage();
 
@@ -89,5 +90,40 @@ class SecureStorage {
     } else {
       await _storage.delete(key: _keyIsAdmin);
     }
+  }
+
+  // ── Refresh Token ─────────────────────────────────────
+
+  static Future<void> saveRefreshToken(String token) async {
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyRefreshToken, token);
+    } else {
+      await _storage.write(key: _keyRefreshToken, value: token);
+    }
+  }
+
+  static Future<String?> getRefreshToken() async {
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_keyRefreshToken);
+    }
+    return _storage.read(key: _keyRefreshToken);
+  }
+
+  static Future<void> deleteRefreshToken() async {
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_keyRefreshToken);
+    } else {
+      await _storage.delete(key: _keyRefreshToken);
+    }
+  }
+
+  static Future<void> clearAll() async {
+    await deleteToken();
+    await deleteRefreshToken();
+    await deleteRole();
+    await deleteIsAdmin();
   }
 }
