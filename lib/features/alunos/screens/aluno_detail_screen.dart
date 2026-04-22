@@ -31,7 +31,7 @@ class AlunoDetailScreen extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: EagleTokens.danger),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Excluir'),
           ),
@@ -220,7 +220,7 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),
     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label, style: const TextStyle(color: Colors.grey)),
+      Text(label, style: const TextStyle(color: EagleTokens.textSecondary)),
       Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
     ]),
   );
@@ -389,7 +389,7 @@ class _SecaoEngajamentoState extends ConsumerState<_SecaoEngajamento> {
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_erro != null) {
       return Text('Erro ao carregar engajamento: $_erro',
-          style: const TextStyle(color: Colors.red, fontSize: 12));
+          style: const TextStyle(color: EagleTokens.danger, fontSize: 12));
     }
     if (_dados == null) return const SizedBox.shrink();
 
@@ -430,7 +430,7 @@ class _StatEngajamento extends StatelessWidget {
     final c = cor ?? Theme.of(context).colorScheme.primary;
     return Column(mainAxisSize: MainAxisSize.min, children: [
       Text(valor, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: c)),
-      Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+      Text(label, style: const TextStyle(fontSize: 11, color: EagleTokens.textSecondary)),
     ]);
   }
 }

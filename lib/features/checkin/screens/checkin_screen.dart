@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../data/checkin_repository.dart';
@@ -120,7 +121,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
         title: Text(_execucao?.treinoNome ?? 'Treino em andamento'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4),
-          child: LinearProgressIndicator(value: progresso, color: Colors.greenAccent),
+          child: LinearProgressIndicator(value: progresso, color: EagleTokens.success),
         ),
       ),
       body: Column(
@@ -132,7 +133,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
             color: Theme.of(context).colorScheme.surface,
             child: Column(
               children: [
-                const Text('TEMPO DE TREINO', style: TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1.5)),
+                const Text('TEMPO DE TREINO', style: TextStyle(color: EagleTokens.textSecondary, fontSize: 12, letterSpacing: 1.5)),
                 const SizedBox(height: 8),
                 Text(
                   _formatDuration(_duration),
@@ -141,7 +142,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                 const SizedBox(height: 8),
                 Text(
                   '$concluidos de ${exercicios.length} exercícios concluídos',
-                  style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600),
+                  style: const TextStyle(color: EagleTokens.success, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -153,19 +154,19 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
+                color: EagleTokens.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                border: Border.all(color: EagleTokens.primary.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.psychology, color: Colors.blue, size: 28),
+                  const Icon(Icons.psychology, color: EagleTokens.primary, size: 28),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
-                        Text('Sugestão IA ao vivo', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+                        Text('Sugestão IA ao vivo', style: TextStyle(color: EagleTokens.primary, fontWeight: FontWeight.bold)),
                         SizedBox(height: 4),
                         Text('Baseado no seu último treino, tente aumentar 2kg no supino hoje.', style: TextStyle(fontSize: 13)),
                       ],
@@ -218,20 +219,20 @@ class _ExercicioCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: ee.concluido ? Colors.green : Colors.transparent, width: 2),
+        side: BorderSide(color: ee.concluido ? EagleTokens.success : Colors.transparent, width: 2),
       ),
       child: ExpansionTile(
         initiallyExpanded: !ee.concluido,
         shape: const Border(),
         leading: Icon(
           ee.concluido ? Icons.check_circle : Icons.fitness_center,
-          color: ee.concluido ? Colors.green : Theme.of(context).colorScheme.primary,
+          color: ee.concluido ? EagleTokens.success : Theme.of(context).colorScheme.primary,
         ),
         title: Text(
           ee.exercicioNome,
           style: TextStyle(fontWeight: FontWeight.bold, decoration: ee.concluido ? TextDecoration.lineThrough : null),
         ),
-        subtitle: Text('${ee.series ?? "-"} séries × ${ee.repeticoes ?? "-"} reps', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        subtitle: Text('${ee.series ?? "-"} séries × ${ee.repeticoes ?? "-"} reps', style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),

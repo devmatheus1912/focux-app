@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 
@@ -100,16 +101,16 @@ class TrilhasScreen extends ConsumerWidget {
       ),
       body: trilhasAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: Colors.red))),
+        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.danger))),
         data: (trilhas) {
           if (trilhas.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.route, size: 64, color: Colors.grey.shade300),
+                  Icon(Icons.route, size: 64, color: const Color(0xFFD1D5DB)),
                   const SizedBox(height: 16),
-                  const Text('Nenhuma trilha criada ainda', style: TextStyle(color: Colors.grey)),
+                  const Text('Nenhuma trilha criada ainda', style: TextStyle(color: EagleTokens.textSecondary)),
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
                     onPressed: () => _showCriarTrilha(context, ref),
@@ -253,7 +254,7 @@ class _TrilhaCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Progresso', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text('Progresso', style: TextStyle(fontSize: 12, color: const Color(0xFF4B5563))),
                 Text('${trilha.percentualConclusao.toStringAsFixed(0)}%',
                     style: TextStyle(fontWeight: FontWeight.bold, color: _progressColor, fontSize: 12)),
               ],
@@ -302,7 +303,7 @@ class _MarcoTile extends StatelessWidget {
       leading: IconButton(
         icon: Icon(
           marco.concluido ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: marco.concluido ? const Color(0xFF22C55E) : Colors.grey,
+          color: marco.concluido ? const Color(0xFF22C55E) : EagleTokens.textSecondary,
         ),
         onPressed: marco.concluido
             ? null
@@ -317,7 +318,7 @@ class _MarcoTile extends StatelessWidget {
         style: TextStyle(
           fontSize: 13,
           decoration: marco.concluido ? TextDecoration.lineThrough : null,
-          color: marco.concluido ? Colors.grey : null,
+          color: marco.concluido ? EagleTokens.textSecondary : null,
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feed_repository.dart';
@@ -233,7 +234,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                         margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: p.fixado ? const BorderSide(color: Colors.blue, width: 2) : BorderSide.none,
+                          side: p.fixado ? const BorderSide(color: EagleTokens.primary, width: 2) : BorderSide.none,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -243,10 +244,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               Row(
                                 children: [
                                   if (p.fixado) ...[
-                                    const Icon(Icons.push_pin, color: Colors.blue, size: 18),
+                                    const Icon(Icons.push_pin, color: EagleTokens.primary, size: 18),
                                     const SizedBox(width: 8),
                                   ],
-                                  Icon(_getIconForTipo(p.tipoPost), size: 20, color: Colors.grey[700]),
+                                  Icon(_getIconForTipo(p.tipoPost), size: 20, color: const Color(0xFF374151)),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
@@ -267,7 +268,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                               TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancelar')),
                                               TextButton(
                                                 onPressed: () { Navigator.of(ctx).pop(); _deletar(p.id); },
-                                                child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+                                                child: const Text('Excluir', style: TextStyle(color: EagleTokens.danger)),
                                               ),
                                             ],
                                           ),
@@ -286,9 +287,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                       const PopupMenuItem(
                                         value: 'excluir',
                                         child: Row(children: [
-                                          Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                                          Icon(Icons.delete_outline, color: EagleTokens.danger, size: 20),
                                           SizedBox(width: 8),
-                                          Text('Excluir', style: TextStyle(color: Colors.red)),
+                                          Text('Excluir', style: TextStyle(color: EagleTokens.danger)),
                                         ]),
                                       ),
                                     ],
@@ -300,12 +301,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue.withValues(alpha: 0.1),
+                                    color: EagleTokens.primary.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
                                     p.tipoPost!,
-                                    style: const TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(fontSize: 10, color: EagleTokens.primary, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
@@ -327,17 +328,17 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  Icon(Icons.thumb_up_alt_outlined, size: 16, color: Colors.grey[600]),
+                                  Icon(Icons.thumb_up_alt_outlined, size: 16, color: const Color(0xFF4B5563)),
                                   const SizedBox(width: 4),
-                                  Text('${p.totalCurtidas}', style: TextStyle(color: Colors.grey[600])),
+                                  Text('${p.totalCurtidas}', style: TextStyle(color: const Color(0xFF4B5563))),
                                   const SizedBox(width: 16),
-                                  Icon(Icons.comment_outlined, size: 16, color: Colors.grey[600]),
+                                  Icon(Icons.comment_outlined, size: 16, color: const Color(0xFF4B5563)),
                                   const SizedBox(width: 4),
-                                  Text('${p.totalComentarios}', style: TextStyle(color: Colors.grey[600])),
+                                  Text('${p.totalComentarios}', style: TextStyle(color: const Color(0xFF4B5563))),
                                   const Spacer(),
                                   Text(
                                     p.criadoEm.length >= 10 ? p.criadoEm.substring(0, 10) : p.criadoEm,
-                                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                    style: TextStyle(fontSize: 12, color: const Color(0xFF4B5563)),
                                   ),
                                 ],
                               ),

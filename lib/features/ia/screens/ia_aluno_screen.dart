@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -222,7 +223,7 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
       const SizedBox(height: 8),
       const Text(
         'Gere recomendações personalizadas de progressão de carga com base no seu histórico de treinos.',
-        style: TextStyle(color: Colors.grey),
+        style: TextStyle(color: EagleTokens.textSecondary),
       ),
       const SizedBox(height: 20),
       FilledButton.icon(

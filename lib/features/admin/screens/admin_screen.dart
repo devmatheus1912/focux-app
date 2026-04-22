@@ -167,12 +167,12 @@ class _AdminScreenState extends ConsumerState<AdminScreen>
             _DetailRow(
               label: 'Inadimplentes',
               value: '${p.alunosInadimplentes}',
-              valueColor: p.alunosInadimplentes > 0 ? Colors.red : null,
+              valueColor: p.alunosInadimplentes > 0 ? EagleTokens.danger : null,
             ),
             _DetailRow(
               label: 'Check-ins (30 dias)',
               value: '${p.checkInsUltimos30Dias}',
-              valueColor: p.checkInsUltimos30Dias < 5 ? Colors.orange : null,
+              valueColor: p.checkInsUltimos30Dias < 5 ? EagleTokens.warning : null,
             ),
             const SizedBox(height: 16),
           ],
@@ -691,7 +691,7 @@ class _RiscoCard extends StatelessWidget {
               ),
               const Padding(
                 padding: EdgeInsets.only(right: 12),
-                child: Icon(Icons.chevron_right, color: Colors.grey),
+                child: Icon(Icons.chevron_right, color: EagleTokens.textSecondary),
               ),
             ],
           ),
@@ -903,10 +903,10 @@ class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
   }
 
   Color _acaoColor(String acao) {
-    if (acao.contains('DELETE') || acao.contains('EXCLUIR')) return Colors.red;
-    if (acao.contains('CREATE') || acao.contains('CRIAR')) return Colors.green;
-    if (acao.contains('UPDATE') || acao.contains('EDITAR')) return Colors.orange;
-    return Colors.blue;
+    if (acao.contains('DELETE') || acao.contains('EXCLUIR')) return EagleTokens.danger;
+    if (acao.contains('CREATE') || acao.contains('CRIAR')) return EagleTokens.success;
+    if (acao.contains('UPDATE') || acao.contains('EDITAR')) return EagleTokens.warning;
+    return EagleTokens.primary;
   }
 
   @override
@@ -918,11 +918,11 @@ class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.history_toggle_off, size: 64, color: Colors.grey),
+            const Icon(Icons.history_toggle_off, size: 64, color: EagleTokens.textSecondary),
             const SizedBox(height: 12),
-            Text('Sem dados de auditoria', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey)),
+            Text('Sem dados de auditoria', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: EagleTokens.textSecondary)),
             const SizedBox(height: 8),
-            Text('Endpoint /api/admin/auditoria não disponível', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+            Text('Endpoint /api/admin/auditoria não disponível', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.textSecondary)),
             const SizedBox(height: 16),
             OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Tentar novamente')),
           ],
@@ -934,9 +934,9 @@ class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.history, size: 64, color: Colors.grey),
+            const Icon(Icons.history, size: 64, color: EagleTokens.textSecondary),
             const SizedBox(height: 12),
-            const Text('Nenhuma ação auditada ainda.', style: TextStyle(color: Colors.grey)),
+            const Text('Nenhuma ação auditada ainda.', style: TextStyle(color: EagleTokens.textSecondary)),
           ],
         ),
       );
@@ -963,8 +963,8 @@ class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
                   if (log.entidade != null)
                     Text('Entidade: ${log.entidade}', style: const TextStyle(fontSize: 12)),
                   if (log.detalhes != null)
-                    Text(log.detalhes!, style: const TextStyle(fontSize: 11, color: Colors.grey), maxLines: 2, overflow: TextOverflow.ellipsis),
-                  Text(_fmtDate(log.criadoEm), style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                    Text(log.detalhes!, style: const TextStyle(fontSize: 11, color: EagleTokens.textSecondary), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(_fmtDate(log.criadoEm), style: const TextStyle(fontSize: 11, color: EagleTokens.textSecondary)),
                 ],
               ),
               isThreeLine: true,
@@ -1099,11 +1099,11 @@ class _FeatureFlagsTabState extends ConsumerState<_FeatureFlagsTab>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.toggle_off, size: 64, color: Colors.grey.shade400),
+                  Icon(Icons.toggle_off, size: 64, color: const Color(0xFF9CA3AF)),
                   const SizedBox(height: 12),
                   Text(
                     _flags.isEmpty ? 'Nenhuma feature flag cadastrada.' : 'Sem dados disponíveis',
-                    style: const TextStyle(color: Colors.grey),
+                    style: const TextStyle(color: EagleTokens.textSecondary),
                   ),
                   const SizedBox(height: 16),
                   OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Recarregar')),
@@ -1122,11 +1122,11 @@ class _FeatureFlagsTabState extends ConsumerState<_FeatureFlagsTab>
                     child: SwitchListTile(
                       secondary: CircleAvatar(
                         backgroundColor: flag.ativo
-                            ? Colors.green.withValues(alpha: 0.12)
-                            : Colors.grey.withValues(alpha: 0.12),
+                            ? EagleTokens.success.withValues(alpha: 0.12)
+                            : EagleTokens.textSecondary.withValues(alpha: 0.12),
                         child: Icon(
                           flag.ativo ? Icons.toggle_on : Icons.toggle_off,
-                          color: flag.ativo ? Colors.green : Colors.grey,
+                          color: flag.ativo ? EagleTokens.success : EagleTokens.textSecondary,
                         ),
                       ),
                       title: Text(flag.nome, style: const TextStyle(fontWeight: FontWeight.w700, fontFamily: 'monospace')),

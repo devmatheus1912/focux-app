@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -34,27 +35,27 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     if (day == today) {
       return Container(
         decoration: BoxDecoration(
-          color: Colors.red.shade100,
+          color: const Color(0xFFFEE2E2),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Padding(
           padding: const EdgeInsets.all(4),
           child: Text('HOJE',
               style: TextStyle(
-                  color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
+                  color: EagleTokens.danger, fontSize: 10, fontWeight: FontWeight.bold)),
         ),
       );
     } else if (day == tomorrow) {
       return Container(
         decoration: BoxDecoration(
-          color: Colors.orange.shade100,
+          color: const Color(0xFFFEF3C7),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Padding(
           padding: const EdgeInsets.all(4),
           child: Text('AMANHÃ',
               style: TextStyle(
-                  color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)),
+                  color: EagleTokens.warning, fontSize: 10, fontWeight: FontWeight.bold)),
         ),
       );
     }
@@ -95,7 +96,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                   return Dismissible(
                     key: Key('ag_${ag.id}'),
                     direction: DismissDirection.endToStart,
-                    background: Container(color: Colors.red,
+                    background: Container(color: EagleTokens.danger,
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.only(right: 16),
                       child: const Icon(Icons.delete, color: Colors.white)),
@@ -134,7 +135,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
   Widget _statusChip(String s) => Chip(
     label: Text(s, style: const TextStyle(fontSize: 11)),
-    backgroundColor: (s == 'AGENDADO' ? Colors.blue : s == 'CONCLUIDO' ? Colors.green : Colors.grey)
+    backgroundColor: (s == 'AGENDADO' ? EagleTokens.primary : s == 'CONCLUIDO' ? EagleTokens.success : EagleTokens.textSecondary)
         .withValues(alpha: 0.15),
   );
 }

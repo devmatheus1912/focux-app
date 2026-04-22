@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 
@@ -54,7 +55,7 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
       ),
       body: asyncData.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: Colors.red))),
+        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.danger))),
         data: (data) => _QualidadeBody(data: data),
       ),
     );
@@ -142,7 +143,7 @@ class _QualidadeBody extends StatelessWidget {
           const SizedBox(height: 32),
           const Text(
             'Nota: O Mercado Focux é baseado na média de todos os personais da plataforma (dados anonimizados).',
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(fontSize: 12, color: EagleTokens.textSecondary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -183,27 +184,27 @@ class _ComparativoCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(labelSua, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(labelSua, style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Text(valorSua, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                       const SizedBox(width: 8),
                       if (acimaDoMercado)
-                        const Icon(Icons.arrow_upward, color: Colors.green, size: 20)
+                        const Icon(Icons.arrow_upward, color: EagleTokens.success, size: 20)
                       else
-                        const Icon(Icons.arrow_downward, color: Colors.orange, size: 20),
+                        const Icon(Icons.arrow_downward, color: EagleTokens.warning, size: 20),
                     ],
                   ),
                 ],
               ),
-              Container(width: 1, height: 40, color: Colors.grey.shade200),
+              Container(width: 1, height: 40, color: const Color(0xFFE5E7EB)),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(labelMercado, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(labelMercado, style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
                   const SizedBox(height: 4),
-                  Text(valorMercado, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  Text(valorMercado, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: EagleTokens.textSecondary)),
                 ],
               ),
             ],

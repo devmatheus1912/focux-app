@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -166,7 +167,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                 child: _filtrados.isEmpty
                     ? Center(
                         child: Column(mainAxisSize: MainAxisSize.min, children: [
-                          const Icon(Icons.check_circle, size: 64, color: Colors.green),
+                          const Icon(Icons.check_circle, size: 64, color: EagleTokens.success),
                           const SizedBox(height: 12),
                           Text(
                             _alertas.isEmpty
@@ -204,10 +205,10 @@ class _ConfigBar extends StatelessWidget {
     color: Theme.of(context).colorScheme.surfaceContainerHighest,
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     child: Row(children: [
-      const Icon(Icons.settings, size: 16, color: Colors.grey),
+      const Icon(Icons.settings, size: 16, color: EagleTokens.textSecondary),
       const SizedBox(width: 6),
       Text('Sem treino > ${config.diasSemTreino} dias  ·  Aderência < ${config.aderenciaMinima}%',
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.textSecondary)),
     ]),
   );
 }
@@ -231,14 +232,14 @@ class _FiltroBar extends StatelessWidget {
       FilterChip(
         label: const Text('Score ≥ 2 (alto)'),
         selected: selecionado == 2,
-        selectedColor: Colors.red.withValues(alpha: 0.2),
+        selectedColor: EagleTokens.danger.withValues(alpha: 0.2),
         onSelected: (_) => onChanged(selecionado == 2 ? null : 2),
       ),
       const SizedBox(width: 8),
       FilterChip(
         label: const Text('Score = 1 (médio)'),
         selected: selecionado == 1,
-        selectedColor: Colors.orange.withValues(alpha: 0.2),
+        selectedColor: EagleTokens.warning.withValues(alpha: 0.2),
         onSelected: (_) => onChanged(selecionado == 1 ? null : 1),
       ),
     ]),
@@ -253,7 +254,7 @@ class _AlertaCard extends StatelessWidget {
 
   const _AlertaCard({required this.alerta, required this.onTap, required this.onResolver, required this.onMensagemChat});
 
-  Color get _cor => alerta.score >= 2 ? Colors.red : Colors.orange;
+  Color get _cor => alerta.score >= 2 ? EagleTokens.danger : EagleTokens.warning;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -291,13 +292,13 @@ class _AlertaCard extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.bold, color: _cor)),
               if (alerta.aderenciaPercent != null)
                 Text('${alerta.aderenciaPercent!.toStringAsFixed(0)}%',
-                  style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                  style: const TextStyle(fontSize: 11, color: EagleTokens.textSecondary)),
             ]),
           ),
           const Divider(height: 1),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            color: Colors.grey.withValues(alpha: 0.05),
+            color: EagleTokens.textSecondary.withValues(alpha: 0.05),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -308,8 +309,8 @@ class _AlertaCard extends StatelessWidget {
                 ),
                 TextButton.icon(
                   onPressed: onResolver,
-                  icon: const Icon(Icons.check_circle_outline, size: 16, color: Colors.green),
-                  label: const Text('Resolvido', style: TextStyle(color: Colors.green)),
+                  icon: const Icon(Icons.check_circle_outline, size: 16, color: EagleTokens.success),
+                  label: const Text('Resolvido', style: TextStyle(color: EagleTokens.success)),
                 ),
               ],
             ),
@@ -326,7 +327,7 @@ class _ScoreBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = score >= 2 ? Colors.red : Colors.orange;
+    final color = score >= 2 ? EagleTokens.danger : EagleTokens.warning;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(

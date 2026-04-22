@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
@@ -278,9 +279,9 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _Stat(label: 'Recebido', valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}', color: Colors.green),
-                _Stat(label: 'Previsto', valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}', color: Colors.blue),
-                _Stat(label: 'Inadimplentes', valor: '${_resumo!.inadimplentes}', color: Colors.red),
+                _Stat(label: 'Recebido', valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}', color: EagleTokens.success),
+                _Stat(label: 'Previsto', valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}', color: EagleTokens.primary),
+                _Stat(label: 'Inadimplentes', valor: '${_resumo!.inadimplentes}', color: EagleTokens.danger),
               ],
             ),
           ],
@@ -300,7 +301,7 @@ class _Stat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(label, style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
         Text(valor, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
       ],
     );

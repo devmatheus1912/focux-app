@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../core/theme/design_tokens.dart';
 
 class ShimmerListLoading extends StatelessWidget {
   final int itemCount;
@@ -13,6 +14,14 @@ class ShimmerListLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark
+        ? EagleTokens.surfaceDark.withValues(alpha: 0.8)
+        : const Color(0xFFE0E0E0);
+    final highlightColor = isDark
+        ? const Color(0xFF252540)
+        : const Color(0xFFF5F5F5);
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -21,13 +30,13 @@ class ShimmerListLoading extends StatelessWidget {
       itemBuilder: (ctx, i) => Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
+          baseColor: baseColor,
+          highlightColor: highlightColor,
           child: Container(
             height: itemHeight,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              color: isDark ? EagleTokens.surfaceDark : Colors.white,
+              borderRadius: BorderRadius.circular(EagleTokens.radiusCard),
             ),
           ),
         ),
@@ -38,20 +47,28 @@ class ShimmerListLoading extends StatelessWidget {
 
 class ShimmerCardLoading extends StatelessWidget {
   final double height;
-  
+
   const ShimmerCardLoading({super.key, this.height = 120});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark
+        ? EagleTokens.surfaceDark.withValues(alpha: 0.8)
+        : const Color(0xFFE0E0E0);
+    final highlightColor = isDark
+        ? const Color(0xFF252540)
+        : const Color(0xFFF5F5F5);
+
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: baseColor,
+      highlightColor: highlightColor,
       child: Container(
         height: height,
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: isDark ? EagleTokens.surfaceDark : Colors.white,
+          borderRadius: BorderRadius.circular(EagleTokens.radiusCard),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -117,9 +118,9 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
 
   Color _statusColor(String s) {
     switch (s) {
-      case 'PAGO': return Colors.green;
-      case 'ATRASADO': return Colors.red;
-      default: return Colors.orange;
+      case 'PAGO': return EagleTokens.success;
+      case 'ATRASADO': return EagleTokens.danger;
+      default: return EagleTokens.warning;
     }
   }
 
@@ -563,7 +564,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                   onPressed: () => _registrarContato(m),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.pix, color: Colors.teal),
+                                  icon: const Icon(Icons.pix, color: EagleTokens.primary),
                                   onPressed: () => _mostrarPix(m.id),
                                   tooltip: 'Gerar PIX',
                                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 import '../providers/exercicios_provider.dart';
@@ -37,7 +38,7 @@ class ExercicioDetailScreen extends ConsumerWidget {
             data: (ex) => IconButton(
               icon: Icon(
                 ex.favoritado ? Icons.star : Icons.star_border,
-                color: ex.favoritado ? Colors.amber : null,
+                color: ex.favoritado ? EagleTokens.warning : null,
               ),
               tooltip: ex.favoritado ? 'Remover dos favoritos' : 'Adicionar aos favoritos',
               onPressed: () => _toggleFavorito(ref, context, ex.favoritado),

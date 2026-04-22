@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class WhiteLabelScreen extends ConsumerStatefulWidget {
@@ -91,13 +92,13 @@ class _WhiteLabelScreenState extends ConsumerState<WhiteLabelScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.amber.withValues(alpha: 0.1),
-              border: Border.all(color: Colors.amber),
+              color: EagleTokens.warning.withValues(alpha: 0.1),
+              border: Border.all(color: EagleTokens.warning),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                const Icon(Icons.workspace_premium, color: Colors.amber),
+                const Icon(Icons.workspace_premium, color: EagleTokens.warning),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
@@ -144,7 +145,7 @@ class _WhiteLabelScreenState extends ConsumerState<WhiteLabelScreen> {
     if (mounted) {
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Identidade visual salva!'), backgroundColor: Colors.green),
+        const SnackBar(content: Text('Identidade visual salva!'), backgroundColor: EagleTokens.success),
       );
     }
   }

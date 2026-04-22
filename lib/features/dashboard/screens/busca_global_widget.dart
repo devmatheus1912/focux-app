@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/api/api_client.dart';
@@ -79,9 +80,9 @@ class _BuscaGlobalWidgetState extends ConsumerState<BuscaGlobalWidget> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.search, size: 72, color: Colors.grey[300]),
+          Icon(Icons.search, size: 72, color: const Color(0xFFD1D5DB)),
           const SizedBox(height: 16),
-          Text('Digite pelo menos 2 caracteres', style: TextStyle(color: Colors.grey[500])),
+          Text('Digite pelo menos 2 caracteres', style: TextStyle(color: EagleTokens.textSecondary)),
         ],
       ),
     );
@@ -98,9 +99,9 @@ class _BuscaGlobalWidgetState extends ConsumerState<BuscaGlobalWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.find_in_page_outlined, size: 72, color: Colors.grey[300]),
+            Icon(Icons.find_in_page_outlined, size: 72, color: const Color(0xFFD1D5DB)),
             const SizedBox(height: 16),
-            Text('Nenhum resultado para "$_query"', style: TextStyle(color: Colors.grey[500])),
+            Text('Nenhum resultado para "$_query"', style: TextStyle(color: EagleTokens.textSecondary)),
           ],
         ),
       );
@@ -111,17 +112,17 @@ class _BuscaGlobalWidgetState extends ConsumerState<BuscaGlobalWidget> {
       children: [
         if (alunos.isNotEmpty) ...[
           _sectionHeader('Alunos', Icons.person_outline),
-          ...alunos.map((a) => _resultTile(context, a, Colors.blue)),
+          ...alunos.map((a) => _resultTile(context, a, EagleTokens.primary)),
           const SizedBox(height: 16),
         ],
         if (treinos.isNotEmpty) ...[
           _sectionHeader('Treinos', Icons.fitness_center),
-          ...treinos.map((t) => _resultTile(context, t, Colors.green)),
+          ...treinos.map((t) => _resultTile(context, t, EagleTokens.success)),
           const SizedBox(height: 16),
         ],
         if (cobrancas.isNotEmpty) ...[
           _sectionHeader('Cobranças', Icons.receipt_long_outlined),
-          ...cobrancas.map((c) => _resultTile(context, c, Colors.orange)),
+          ...cobrancas.map((c) => _resultTile(context, c, EagleTokens.warning)),
         ],
       ],
     );
@@ -132,9 +133,9 @@ class _BuscaGlobalWidgetState extends ConsumerState<BuscaGlobalWidget> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: Colors.grey[600]),
+          Icon(icon, size: 16, color: const Color(0xFF4B5563)),
           const SizedBox(width: 6),
-          Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700], fontSize: 12)),
+          Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: const Color(0xFF374151), fontSize: 12)),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
@@ -60,7 +61,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Configurações salvas com sucesso!'),
-            backgroundColor: Colors.green,
+            backgroundColor: EagleTokens.success,
           ),
         );
       }
@@ -119,7 +120,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                               Row(
                                 children: [
                                   const Icon(Icons.calendar_month_outlined,
-                                      color: Colors.blueAccent),
+                                      color: EagleTokens.primary),
                                   const SizedBox(width: 10),
                                   Text(
                                     'Dias sem treino',
@@ -131,7 +132,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: Colors.blueAccent
+                                      color: EagleTokens.primary
                                           .withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -140,7 +141,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                       style: theme.textTheme.bodyMedium
                                           ?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.blueAccent,
+                                        color: EagleTokens.primary,
                                       ),
                                     ),
                                   ),
@@ -150,7 +151,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                               Text(
                                 'Alerta quando o aluno não treina por X dias consecutivos',
                                 style: theme.textTheme.bodySmall
-                                    ?.copyWith(color: Colors.grey),
+                                    ?.copyWith(color: EagleTokens.textSecondary),
                               ),
                               Slider(
                                 value: _diasSemTreino.toDouble(),
@@ -167,10 +168,10 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                 children: [
                                   Text('1 dia',
                                       style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: Colors.grey)),
+                                          ?.copyWith(color: EagleTokens.textSecondary)),
                                   Text('30 dias',
                                       style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: Colors.grey)),
+                                          ?.copyWith(color: EagleTokens.textSecondary)),
                                 ],
                               ),
                             ],
@@ -187,7 +188,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                               Row(
                                 children: [
                                   const Icon(Icons.trending_down_outlined,
-                                      color: Colors.orange),
+                                      color: EagleTokens.warning),
                                   const SizedBox(width: 10),
                                   Text(
                                     'Aderência mínima (%)',
@@ -199,7 +200,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: Colors.orange
+                                      color: EagleTokens.warning
                                           .withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -208,7 +209,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                       style: theme.textTheme.bodyMedium
                                           ?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.orange,
+                                        color: EagleTokens.warning,
                                       ),
                                     ),
                                   ),
@@ -218,7 +219,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                               Text(
                                 'Alerta quando a taxa de aderência cair abaixo deste valor',
                                 style: theme.textTheme.bodySmall
-                                    ?.copyWith(color: Colors.grey),
+                                    ?.copyWith(color: EagleTokens.textSecondary),
                               ),
                               Slider(
                                 value: _aderenciaMinima.toDouble(),
@@ -226,7 +227,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                 max: 90,
                                 divisions: 16,
                                 label: '$_aderenciaMinima%',
-                                activeColor: Colors.orange,
+                                activeColor: EagleTokens.warning,
                                 onChanged: (v) =>
                                     setState(() => _aderenciaMinima = v.toInt()),
                               ),
@@ -236,10 +237,10 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                 children: [
                                   Text('10%',
                                       style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: Colors.grey)),
+                                          ?.copyWith(color: EagleTokens.textSecondary)),
                                   Text('90%',
                                       style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: Colors.grey)),
+                                          ?.copyWith(color: EagleTokens.textSecondary)),
                                 ],
                               ),
                             ],

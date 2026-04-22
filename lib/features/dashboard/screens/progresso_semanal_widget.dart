@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProgressoSemanalWidget extends ConsumerWidget {
@@ -31,7 +32,7 @@ class ProgressoSemanalWidget extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.orange,
+                  color: EagleTokens.warning,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
@@ -58,7 +59,7 @@ class ProgressoSemanalWidget extends ConsumerWidget {
                 height: 32,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isCompleted ? Colors.greenAccent : (isToday ? Colors.white30 : Colors.white10),
+                  color: isCompleted ? EagleTokens.success : (isToday ? Colors.white30 : Colors.white10),
                   border: isToday ? Border.all(color: Colors.white, width: 2) : null,
                 ),
                 child: Center(
@@ -79,7 +80,7 @@ class ProgressoSemanalWidget extends ConsumerWidget {
                 child: LinearProgressIndicator(
                   value: completedThisWeek / weeklyGoal,
                   backgroundColor: Colors.white24,
-                  color: Colors.greenAccent,
+                  color: EagleTokens.success,
                   minHeight: 8,
                   borderRadius: BorderRadius.circular(4),
                 ),

@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/theme/design_tokens.dart';
 
-// Paleta de cores predefinidas
+// Paleta Eagle Precision — cores de brand para identidade visual
 const _coresPredefinidas = [
-  Color(0xFF0288D1), // azul padrão Focux
-  Color(0xFF1565C0), // azul escuro
-  Color(0xFF00897B), // verde teal
-  Color(0xFF2E7D32), // verde escuro
-  Color(0xFFF57C00), // laranja
-  Color(0xFF6A1B9A), // roxo
-  Color(0xFF37474F), // cinza escuro
-  Color(0xFF212121), // preto
+  EagleTokens.primary,          // Eagle Royal Blue (#2B4A9E) — padrão
+  Color(0xFF1E3A8A),            // Eagle Deep Blue
+  Color(0xFF0097A7),            // Ciano complementar
+  EagleTokens.success,          // Verde (#22C55E)
+  EagleTokens.warning,          // Âmbar (#F59E0B)
+  EagleTokens.danger,           // Vermelho (#EF4444)
+  Color(0xFF7C3AED),            // Violeta
+  Color(0xFF6D28D9),            // Púrpura
+  Color(0xFFDB2777),            // Rosa
+  Color(0xFF0369A1),            // Azul petróleo
+  Color(0xFF374151),            // Cinza slate
+  Color(0xFF111827),            // Quase preto
 ];
 
 class IdentidadeVisualScreen extends ConsumerStatefulWidget {

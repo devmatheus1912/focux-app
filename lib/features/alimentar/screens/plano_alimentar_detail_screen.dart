@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alimentar_repository.dart';
@@ -90,7 +91,7 @@ class _PlanoAlimentarDetailScreenState
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, set) => AlertDialog(
           title: const Row(children: [
-            Icon(Icons.auto_awesome, color: Colors.blue),
+            Icon(Icons.auto_awesome, color: EagleTokens.primary),
             SizedBox(width: 8),
             Text('Gerar Dieta com IA')
           ]),
@@ -147,7 +148,7 @@ class _PlanoAlimentarDetailScreenState
         title: Text(p.nome),
         actions: [
           IconButton(
-            icon: const Icon(Icons.auto_awesome, color: Colors.blue),
+            icon: const Icon(Icons.auto_awesome, color: EagleTokens.primary),
             tooltip: 'Gerar Dieta IA',
             onPressed: _abrirGerarIa,
           ),
@@ -174,11 +175,11 @@ class _PlanoAlimentarDetailScreenState
                 runSpacing: 4,
                 children: [
                   if (p.caloriasDia != null)
-                    _MacroChip('${p.caloriasDia} kcal', Colors.deepOrange),
+                    _MacroChip('${p.caloriasDia} kcal', EagleTokens.warning),
                   if (p.proteinaG != null)
-                    _MacroChip('${p.proteinaG}g prot', Colors.red),
+                    _MacroChip('${p.proteinaG}g prot', EagleTokens.danger),
                   if (p.carboidratoG != null)
-                    _MacroChip('${p.carboidratoG}g carbo', Colors.orange),
+                    _MacroChip('${p.carboidratoG}g carbo', EagleTokens.warning),
                   if (p.gorduraG != null)
                     _MacroChip('${p.gorduraG}g gord', Colors.yellow.shade700),
                 ],
@@ -236,7 +237,7 @@ class _RefeicaoCard extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
-          color: Colors.red.shade400,
+          color: const Color(0xFFF87171),
           borderRadius: BorderRadius.circular(12),
         ),
         child: const Icon(Icons.delete, color: Colors.white),
@@ -257,10 +258,10 @@ class _RefeicaoCard extends StatelessWidget {
                   ),
                   if (r.horario != null)
                     Row(children: [
-                      const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                      const Icon(Icons.access_time, size: 14, color: EagleTokens.textSecondary),
                       const SizedBox(width: 4),
                       Text(r.horario!,
-                          style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                          style: const TextStyle(color: EagleTokens.textSecondary, fontSize: 13)),
                     ]),
                 ],
               ),
@@ -277,9 +278,9 @@ class _RefeicaoCard extends StatelessWidget {
                   spacing: 8,
                   children: [
                     if (r.proteinaG != null)
-                      _MacroChip('${r.proteinaG}g prot', Colors.red),
+                      _MacroChip('${r.proteinaG}g prot', EagleTokens.danger),
                     if (r.carboG != null)
-                      _MacroChip('${r.carboG}g carbo', Colors.orange),
+                      _MacroChip('${r.carboG}g carbo', EagleTokens.warning),
                     if (r.gorduraG != null)
                       _MacroChip('${r.gorduraG}g gord', Colors.yellow.shade700),
                   ],

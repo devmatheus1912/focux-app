@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -93,16 +94,16 @@ class ReferralScreen extends ConsumerWidget {
                           child: Column(
                             children: [
                               Text('$usos', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
-                              const Text('Indicações', style: TextStyle(color: Colors.grey)),
+                              const Text('Indicações', style: TextStyle(color: EagleTokens.textSecondary)),
                             ],
                           ),
                         ),
-                        Container(width: 1, height: 50, color: Colors.grey[200]),
+                        Container(width: 1, height: 50, color: const Color(0xFFE5E7EB)),
                         Expanded(
                           child: Column(
                             children: [
-                              Text('${usos * 30}', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.green[600])),
-                              const Text('Dias grátis ganhos', style: TextStyle(color: Colors.grey)),
+                              Text('${usos * 30}', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: const Color(0xFF16A34A))),
+                              const Text('Dias grátis ganhos', style: TextStyle(color: EagleTokens.textSecondary)),
                             ],
                           ),
                         ),

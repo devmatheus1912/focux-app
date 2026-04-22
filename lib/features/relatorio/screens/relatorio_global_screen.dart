@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
@@ -91,7 +92,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                           _SectionTitle(
                             icon: '🏆',
                             title: 'Mais comprometidos',
-                            color: Colors.green,
+                            color: EagleTokens.success,
                           ),
                           const SizedBox(height: 8),
                           ..._dados!.maisComprometidos
@@ -108,7 +109,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                           _SectionTitle(
                             icon: '⚠️',
                             title: 'Precisam de atenção',
-                            color: Colors.red,
+                            color: EagleTokens.danger,
                           ),
                           const SizedBox(height: 8),
                           ..._dados!.menosComprometidos
@@ -132,14 +133,11 @@ class _HeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final aderencia = dados.aderenciaMediaGeral;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1565C0), Color(0xFF42A5F5)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
+        gradient: EagleTokens.heroGradient(dark: isDark),
+        borderRadius: BorderRadius.circular(EagleTokens.radiusCard),
       ),
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -221,7 +219,7 @@ class _AlunoRankCard extends StatelessWidget {
     if (tipo == _TipoRank.atencao) {
       return const CircleAvatar(
         backgroundColor: Color(0x1FF44336),
-        child: Icon(Icons.warning_amber_rounded, color: Colors.red, size: 20),
+        child: Icon(Icons.warning_amber_rounded, color: EagleTokens.danger, size: 20),
       );
     }
     switch (posicao) {
@@ -242,11 +240,11 @@ class _AlunoRankCard extends StatelessWidget {
         );
       default:
         return CircleAvatar(
-          backgroundColor: Colors.green.withValues(alpha: 0.12),
+          backgroundColor: EagleTokens.success.withValues(alpha: 0.12),
           child: Text(
             '$posicao',
             style: const TextStyle(
-                color: Colors.green, fontWeight: FontWeight.bold),
+                color: EagleTokens.success, fontWeight: FontWeight.bold),
           ),
         );
     }
@@ -270,14 +268,14 @@ class _AlunoRankCard extends StatelessWidget {
         ),
         subtitle: Text(
           '${aluno.treinosConcluidos} treinos concluídos',
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
+          style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary),
         ),
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
             color: tipo == _TipoRank.top
-                ? Colors.green.withValues(alpha: 0.12)
-                : Colors.red.withValues(alpha: 0.12),
+                ? EagleTokens.success.withValues(alpha: 0.12)
+                : EagleTokens.danger.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -285,7 +283,7 @@ class _AlunoRankCard extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
-              color: tipo == _TipoRank.top ? Colors.green : Colors.red,
+              color: tipo == _TipoRank.top ? EagleTokens.success : EagleTokens.danger,
             ),
           ),
         ),

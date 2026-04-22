@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
@@ -73,10 +74,10 @@ class _AgendaSemanalScreenState extends ConsumerState<AgendaSemanalScreen> {
 
   Color _corStatus(String? s) {
     switch (s) {
-      case 'PRESENTE': return Colors.green;
-      case 'FALTA': return Colors.red;
-      case 'CANCELADO': return Colors.grey;
-      default: return Colors.blue;
+      case 'PRESENTE': return EagleTokens.success;
+      case 'FALTA': return EagleTokens.danger;
+      case 'CANCELADO': return EagleTokens.textSecondary;
+      default: return EagleTokens.primary;
     }
   }
 

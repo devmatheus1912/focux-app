@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/convite_repository.dart';
@@ -46,7 +47,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
           children: [
             const Text(
               'Gere um link de convite único para seu aluno criar a conta no app.',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: EagleTokens.textSecondary),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
@@ -60,7 +61,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
             ],
             if (_error != null) ...[
               const SizedBox(height: 16),
-              Text(_error!, style: const TextStyle(color: Colors.red)),
+              Text(_error!, style: const TextStyle(color: EagleTokens.danger)),
             ],
             if (_convite != null) ...[
               const SizedBox(height: 24),
@@ -92,7 +93,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
               const SizedBox(height: 12),
               Text(
                 'Compartilhe este link com o aluno. Ele expira em 24h e pode ser usado uma única vez.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.textSecondary),
               ),
             ],
           ],

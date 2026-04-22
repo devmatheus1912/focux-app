@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/design_tokens.dart';
 
 class EmptyStateWidget extends StatelessWidget {
   final IconData icon;
@@ -48,7 +49,7 @@ class EmptyStateWidget extends StatelessWidget {
             Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
+                color: const Color(0xFF4B5563),
               ),
               textAlign: TextAlign.center,
             ),

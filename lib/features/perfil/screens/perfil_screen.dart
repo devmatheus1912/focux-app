@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/perfil_provider.dart';
@@ -34,7 +35,7 @@ class PerfilScreen extends ConsumerWidget {
                 child: Text(perfil.nome, style: Theme.of(context).textTheme.headlineSmall),
               ),
               Center(
-                child: Text(perfil.email, style: const TextStyle(color: Colors.grey)),
+                child: Text(perfil.email, style: const TextStyle(color: EagleTokens.textSecondary)),
               ),
               const SizedBox(height: 8),
               Center(
@@ -85,7 +86,7 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
+          Text(label, style: const TextStyle(color: EagleTokens.textSecondary)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
         ],
       ),

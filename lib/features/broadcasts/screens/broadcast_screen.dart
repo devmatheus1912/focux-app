@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/broadcast_repository.dart';
@@ -72,7 +73,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
             content: Text(
               'Broadcast enviado para ${resultado.totalEnviados} aluno(s)!',
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: EagleTokens.success,
           ),
         );
       }
@@ -81,7 +82,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro ao enviar: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: EagleTokens.danger,
           ),
         );
       }
@@ -198,7 +199,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                     child: Center(
                       child: Text(
                         'Nenhum broadcast enviado ainda.',
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(color: EagleTokens.textSecondary),
                       ),
                     ),
                   );
@@ -265,25 +266,25 @@ class _BroadcastCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               broadcast.mensagem,
-              style: const TextStyle(color: Colors.grey),
+              style: const TextStyle(color: EagleTokens.textSecondary),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.people_outline, size: 14, color: Colors.grey),
+                const Icon(Icons.people_outline, size: 14, color: EagleTokens.textSecondary),
                 const SizedBox(width: 4),
                 Text(
                   publico,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary),
                 ),
                 const Spacer(),
-                const Icon(Icons.schedule, size: 14, color: Colors.grey),
+                const Icon(Icons.schedule, size: 14, color: EagleTokens.textSecondary),
                 const SizedBox(width: 4),
                 Text(
                   dataFormatada,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary),
                 ),
               ],
             ),

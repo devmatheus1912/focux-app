@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alimentar_repository.dart';
@@ -65,14 +66,14 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
                             Row(children: [
                               Expanded(child: Text(p.nome,
                                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                              const Icon(Icons.chevron_right, color: Colors.grey),
+                              const Icon(Icons.chevron_right, color: EagleTokens.textSecondary),
                             ]),
                             if (p.caloriasDia != null) Text('${p.caloriasDia} kcal/dia',
                                 style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                             const SizedBox(height: 8),
                             Wrap(spacing: 16, children: [
-                              if (p.proteinaG != null) _macro('Proteína', '${p.proteinaG}g', Colors.red),
-                              if (p.carboidratoG != null) _macro('Carbo', '${p.carboidratoG}g', Colors.orange),
+                              if (p.proteinaG != null) _macro('Proteína', '${p.proteinaG}g', EagleTokens.danger),
+                              if (p.carboidratoG != null) _macro('Carbo', '${p.carboidratoG}g', EagleTokens.warning),
                               if (p.gorduraG != null) _macro('Gordura', '${p.gorduraG}g', Colors.yellow.shade700),
                             ]),
                           ],

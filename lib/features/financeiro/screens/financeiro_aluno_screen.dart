@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
@@ -39,9 +40,9 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
 
   Color _statusColor(String s) {
     switch (s) {
-      case 'PAGO': return Colors.green;
-      case 'ATRASADO': return Colors.red;
-      default: return Colors.orange;
+      case 'PAGO': return EagleTokens.success;
+      case 'ATRASADO': return EagleTokens.danger;
+      default: return EagleTokens.warning;
     }
   }
 
@@ -82,7 +83,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const Icon(Icons.error_outline, size: 48, color: EagleTokens.danger),
                         const SizedBox(height: 8),
                         Text('Erro ao carregar mensalidades',
                             style: TextStyle(color: cs.error, fontWeight: FontWeight.bold)),
@@ -132,7 +133,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                         Text(
                                           'Pago em: ${m.pagoEm}',
                                           style: const TextStyle(
-                                              fontSize: 12, color: Colors.green),
+                                              fontSize: 12, color: EagleTokens.success),
                                         ),
                                       ],
                                     ],

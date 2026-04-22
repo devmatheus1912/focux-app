@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -39,7 +40,7 @@ class GamificacaoScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const Icon(Icons.error_outline, size: 48, color: EagleTokens.danger),
                 const SizedBox(height: 12),
                 Text('Erro ao carregar dados: $e'),
                 const SizedBox(height: 12),
@@ -188,13 +189,13 @@ class _BadgesSection extends StatelessWidget {
   Color _corParaTipo(String tipo) {
     switch (tipo) {
       case 'STREAK_10':
-        return Colors.orange;
+        return EagleTokens.warning;
       case 'PR_CARGA':
-        return Colors.blue;
+        return EagleTokens.primary;
       case 'FREQUENCIA_100':
-        return Colors.green;
+        return EagleTokens.success;
       default:
-        return Colors.purple;
+        return const Color(0xFF7C3AED);
     }
   }
 
@@ -367,11 +368,11 @@ class _ReferralCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.green, size: 16),
+                  Icon(Icons.check_circle, color: EagleTokens.success, size: 16),
                   const SizedBox(width: 4),
                   Text(
                     'Cupom já utilizado',
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.green),
+                    style: theme.textTheme.bodySmall?.copyWith(color: EagleTokens.success),
                   ),
                 ],
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 
@@ -63,7 +64,7 @@ class AnalyticsScreen extends ConsumerWidget {
       ),
       body: analyticsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: Colors.red))),
+        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.danger))),
         data: (data) => _AnalyticsBody(data: data),
       ),
     );

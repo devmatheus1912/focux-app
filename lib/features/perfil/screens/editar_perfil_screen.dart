@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../data/perfil_repository.dart';
@@ -89,7 +90,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: const TextStyle(color: Colors.red)),
+                  Text(_error!, style: const TextStyle(color: EagleTokens.danger)),
                 ],
                 const SizedBox(height: 24),
                 FilledButton(

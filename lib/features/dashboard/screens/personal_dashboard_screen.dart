@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -115,7 +116,7 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                             decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(16)),
                             child: Row(
                               children: [
-                                const Icon(Icons.trending_up, color: Colors.greenAccent, size: 16),
+                                const Icon(Icons.trending_up, color: EagleTokens.success, size: 16),
                                 const SizedBox(width: 4),
                                 Text('Previsão: R\$ ${_finData?.previsaoReceita.toStringAsFixed(2) ?? '0.00'}', 
                                   style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
@@ -142,14 +143,14 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                               titulo: 'Alunos Ativos',
                               valor: data.alunosAtivos.toString(),
                               icone: Icons.people,
-                              cor: Colors.blue,
+                              cor: EagleTokens.primary,
                             )),
                             const SizedBox(width: 12),
                             Expanded(child: _CardMetrica(
                               titulo: 'Inadimplentes',
                               valor: _finData?.totalInadimplentes.toString() ?? '0',
                               icone: Icons.warning_amber_rounded,
-                              cor: Colors.red,
+                              cor: EagleTokens.danger,
                             )),
                           ],
                         ),
@@ -160,14 +161,14 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                               titulo: 'Ticket Médio',
                               valor: 'R\$ ${_finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
                               icone: Icons.receipt_long,
-                              cor: Colors.teal,
+                              cor: EagleTokens.primary,
                             )),
                             const SizedBox(width: 12),
                             Expanded(child: _CardMetrica(
                               titulo: 'Plano atual',
                               valor: data.planoAtual,
                               icone: Icons.workspace_premium,
-                              cor: Colors.orange,
+                              cor: EagleTokens.warning,
                             )),
                           ],
                         ),
@@ -186,11 +187,11 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                           ..._finData!.vencimentosProximos.take(3).map((v) => Card(
                             margin: const EdgeInsets.only(bottom: 8),
                             child: ListTile(
-                              leading: const CircleAvatar(backgroundColor: Colors.redAccent, child: Icon(Icons.warning, color: Colors.white, size: 20)),
+                              leading: const CircleAvatar(backgroundColor: EagleTokens.danger, child: Icon(Icons.warning, color: Colors.white, size: 20)),
                               title: Text(v.alunoNome, style: const TextStyle(fontWeight: FontWeight.w600)),
-                              subtitle: Text('Atrasado: R\$ ${v.valor.toStringAsFixed(2)}', style: const TextStyle(color: Colors.redAccent)),
+                              subtitle: Text('Atrasado: R\$ ${v.valor.toStringAsFixed(2)}', style: const TextStyle(color: EagleTokens.danger)),
                               trailing: IconButton(
-                                icon: const Icon(Icons.message, color: Colors.green),
+                                icon: const Icon(Icons.message, color: EagleTokens.success),
                                 tooltip: 'Cobrar via WhatsApp',
                                 onPressed: () {
                                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Abrindo WhatsApp...')));
@@ -285,8 +286,8 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
       child: Column(
         children: [
           Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+            baseColor: const Color(0xFFD1D5DB)!,
+            highlightColor: const Color(0xFFF3F4F6)!,
             child: Container(
               height: 200,
               color: Colors.white,
@@ -300,17 +301,17 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                 children: [
                   Row(
                     children: [
-                      Expanded(child: Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB)!, highlightColor: const Color(0xFFF3F4F6)!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
                       const SizedBox(width: 12),
-                      Expanded(child: Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB)!, highlightColor: const Color(0xFFF3F4F6)!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB)!, highlightColor: const Color(0xFFF3F4F6)!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
                       const SizedBox(width: 12),
-                      Expanded(child: Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB)!, highlightColor: const Color(0xFFF3F4F6)!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
                     ],
                   ),
                 ],
@@ -342,7 +343,7 @@ class _CardMetrica extends StatelessWidget {
             Icon(icone, color: cor, size: 28),
             const SizedBox(height: 12),
             Text(valor, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Text(titulo, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            Text(titulo, style: const TextStyle(color: EagleTokens.textSecondary, fontSize: 12)),
           ],
         ),
       ),

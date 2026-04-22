@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -80,7 +81,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
         'ALUNO' => const Color(0xFF2B4A9E),
         'TREINO' => const Color(0xFF22C55E),
         'COBRANCA' => const Color(0xFFF59E0B),
-        _ => Colors.grey,
+        _ => EagleTokens.textSecondary,
       };
 
   String _labelForTipo(String tipo) => switch (tipo) {
@@ -138,16 +139,16 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
       ),
       body: resultAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: Colors.red))),
+        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.danger))),
         data: (result) {
           if (query.trim().length < 2) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.search, size: 64, color: Colors.grey.shade300),
+                  Icon(Icons.search, size: 64, color: const Color(0xFFD1D5DB)),
                   const SizedBox(height: 16),
-                  Text('Digite ao menos 2 caracteres', style: TextStyle(color: Colors.grey.shade500)),
+                  Text('Digite ao menos 2 caracteres', style: TextStyle(color: EagleTokens.textSecondary)),
                 ],
               ),
             );
@@ -157,9 +158,9 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.search_off, size: 64, color: Colors.grey.shade300),
+                  Icon(Icons.search_off, size: 64, color: const Color(0xFFD1D5DB)),
                   const SizedBox(height: 16),
-                  Text('Nenhum resultado para "$query"', style: TextStyle(color: Colors.grey.shade500)),
+                  Text('Nenhum resultado para "$query"', style: TextStyle(color: EagleTokens.textSecondary)),
                 ],
               ),
             );
@@ -195,7 +196,7 @@ class _BuscaItemTile extends StatelessWidget {
         'ALUNO' => const Color(0xFF2B4A9E),
         'TREINO' => const Color(0xFF22C55E),
         'COBRANCA' => const Color(0xFFF59E0B),
-        _ => Colors.grey,
+        _ => EagleTokens.textSecondary,
       };
 
   @override

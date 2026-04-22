@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../data/assinatura_repository.dart';
@@ -133,10 +134,10 @@ class _Feature extends StatelessWidget {
           Icon(
             ativo ? Icons.check_circle : Icons.cancel,
             size: 16,
-            color: ativo ? Colors.green : Colors.grey,
+            color: ativo ? EagleTokens.success : EagleTokens.textSecondary,
           ),
           const SizedBox(width: 6),
-          Text(label, style: TextStyle(color: ativo ? null : Colors.grey)),
+          Text(label, style: TextStyle(color: ativo ? null : EagleTokens.textSecondary)),
         ],
       ),
     );

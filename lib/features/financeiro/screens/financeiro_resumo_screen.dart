@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -99,7 +100,7 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                            const Icon(Icons.error_outline, size: 48, color: EagleTokens.danger),
                             const SizedBox(height: 8),
                             Text('Erro ao carregar resumo', style: TextStyle(color: cs.error)),
                             const SizedBox(height: 4),
@@ -124,19 +125,19 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
                                 titulo: 'Total recebido',
                                 valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}',
                                 icone: Icons.check_circle,
-                                cor: Colors.green,
+                                cor: EagleTokens.success,
                               ),
                               _ResumoCard(
                                 titulo: 'Total previsto',
                                 valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}',
                                 icone: Icons.trending_up,
-                                cor: Colors.blue,
+                                cor: EagleTokens.primary,
                               ),
                               _ResumoCard(
                                 titulo: 'Inadimplentes',
                                 valor: '${_resumo!.inadimplentes}',
                                 icone: Icons.warning_amber,
-                                cor: Colors.red,
+                                cor: EagleTokens.danger,
                               ),
                               _ResumoCard(
                                 titulo: 'Ticket médio',
@@ -148,7 +149,7 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
                                 titulo: 'Acumulado anual',
                                 valor: 'R\$ ${_resumo!.acumuladoAnual.toStringAsFixed(2)}',
                                 icone: Icons.savings,
-                                cor: Colors.purple,
+                                cor: const Color(0xFF7C3AED),
                               ),
                             ],
                           ),
@@ -190,18 +191,18 @@ class _DonutChartCard extends StatelessWidget {
                       centerSpaceRadius: 60,
                       startDegreeOffset: -90,
                       sections: isEmpty
-                          ? [PieChartSectionData(value: 1, color: Colors.grey.withValues(alpha: 0.3), radius: 20, showTitle: false)]
+                          ? [PieChartSectionData(value: 1, color: EagleTokens.textSecondary.withValues(alpha: 0.3), radius: 20, showTitle: false)]
                           : [
                               PieChartSectionData(
                                 value: recebido,
-                                color: Colors.green,
+                                color: EagleTokens.success,
                                 radius: 24,
                                 showTitle: false,
                               ),
                               if (pendente > 0)
                                 PieChartSectionData(
                                   value: pendente,
-                                  color: Colors.orange.withValues(alpha: 0.5),
+                                  color: EagleTokens.warning.withValues(alpha: 0.5),
                                   radius: 20,
                                   showTitle: false,
                                 ),
@@ -213,7 +214,7 @@ class _DonutChartCard extends StatelessWidget {
                     children: [
                       Text('${percentRecebido.toStringAsFixed(0)}%',
                           style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                      const Text('Recebido', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      const Text('Recebido', style: TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
                     ],
                   ),
                 ],
@@ -224,9 +225,9 @@ class _DonutChartCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _LegendItem(color: Colors.green, label: 'Recebido'),
+                  _LegendItem(color: EagleTokens.success, label: 'Recebido'),
                   const SizedBox(width: 16),
-                  _LegendItem(color: Colors.orange.withValues(alpha: 0.5), label: 'Pendente'),
+                  _LegendItem(color: EagleTokens.warning.withValues(alpha: 0.5), label: 'Pendente'),
                 ],
               ),
             ],
@@ -249,7 +250,7 @@ class _LegendItem extends StatelessWidget {
       children: [
         Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(label, style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary)),
       ],
     );
   }

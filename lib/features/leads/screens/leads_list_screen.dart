@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
@@ -15,11 +16,11 @@ const _statusLabels = {
 };
 
 const _statusColors = {
-  'LEAD': Colors.blue,
-  'TESTE': Colors.orange,
-  'ATIVO': Colors.green,
-  'INADIMPLENTE': Colors.red,
-  'CANCELADO': Colors.grey,
+  'LEAD': EagleTokens.primary,
+  'TESTE': EagleTokens.warning,
+  'ATIVO': EagleTokens.success,
+  'INADIMPLENTE': EagleTokens.danger,
+  'CANCELADO': EagleTokens.textSecondary,
 };
 
 class LeadsListScreen extends ConsumerStatefulWidget {
@@ -128,7 +129,7 @@ class _FiltroBar extends StatelessWidget {
         child: FilterChip(
           label: Text(e.value),
           selected: selecionado == e.key,
-          selectedColor: (_statusColors[e.key] ?? Colors.grey).withValues(alpha: 0.2),
+          selectedColor: (_statusColors[e.key] ?? EagleTokens.textSecondary).withValues(alpha: 0.2),
           onSelected: (_) => onChanged(selecionado == e.key ? null : e.key),
         ),
       )),
@@ -143,7 +144,7 @@ class _LeadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColors[lead.status] ?? Colors.grey;
+    final color = _statusColors[lead.status] ?? EagleTokens.textSecondary;
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(

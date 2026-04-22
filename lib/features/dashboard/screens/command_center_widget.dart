@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/dashboard_provider.dart';
@@ -17,7 +18,7 @@ class CommandCenterWidget extends ConsumerWidget {
       ),
       error: (e, _) => Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Text('Erro ao carregar Central: $e', style: const TextStyle(color: Colors.red)),
+        child: Text('Erro ao carregar Central: $e', style: const TextStyle(color: EagleTokens.danger)),
       ),
       data: (data) {
         if (data.agendaHoje.isEmpty && data.filaAcoes.isEmpty) {
@@ -34,17 +35,17 @@ class CommandCenterWidget extends ConsumerWidget {
             
             if (data.filaAcoes.isNotEmpty) ...[
               ...data.filaAcoes.map((acao) => Card(
-                color: acao.tipo == 'RISCO' ? Colors.red.shade50 : Colors.orange.shade50,
+                color: acao.tipo == 'RISCO' ? const Color(0xFFFEF2F2) : const Color(0xFFFFFBEB),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: acao.tipo == 'RISCO' ? Colors.red.shade200 : Colors.orange.shade200),
+                  side: BorderSide(color: acao.tipo == 'RISCO' ? const Color(0xFFFECACA) : const Color(0xFFFDE68A)),
                 ),
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   leading: Icon(
                     acao.tipo == 'RISCO' ? Icons.warning : Icons.attach_money,
-                    color: acao.tipo == 'RISCO' ? Colors.red : Colors.orange,
+                    color: acao.tipo == 'RISCO' ? EagleTokens.danger : EagleTokens.warning,
                   ),
                   title: Text(acao.descricao, style: const TextStyle(fontWeight: FontWeight.w600)),
                   trailing: const Icon(Icons.chevron_right),
@@ -67,13 +68,13 @@ class CommandCenterWidget extends ConsumerWidget {
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: ag.status == 'CONFIRMADO' ? Colors.green.shade100 : Colors.grey.shade200,
+                      color: ag.status == 'CONFIRMADO' ? const Color(0xFFDCFCE7) : const Color(0xFFE5E7EB),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(ag.status, style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: ag.status == 'CONFIRMADO' ? Colors.green.shade800 : Colors.grey.shade800,
+                      color: ag.status == 'CONFIRMADO' ? const Color(0xFF166534) : const Color(0xFF1F2937),
                     )),
                   ),
                 ),

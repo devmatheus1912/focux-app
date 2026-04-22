@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
@@ -11,10 +12,10 @@ const _kLabels = {
   'CANCELADO': 'Cancelado',
 };
 const _kColors = {
-  'LEAD': Colors.blue,
-  'TESTE': Colors.orange,
-  'ATIVO': Colors.green,
-  'CANCELADO': Colors.grey,
+  'LEAD': EagleTokens.primary,
+  'TESTE': EagleTokens.warning,
+  'ATIVO': EagleTokens.success,
+  'CANCELADO': EagleTokens.textSecondary,
 };
 
 class LeadsKanbanScreen extends ConsumerStatefulWidget {
@@ -97,7 +98,7 @@ class _KanbanColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _kColors[status] ?? Colors.grey;
+    final color = _kColors[status] ?? EagleTokens.textSecondary;
     return DragTarget<Lead>(
       onAcceptWithDetails: (details) => onAccept(details.data),
       builder: (context, candidates, rejected) => Container(
@@ -137,7 +138,7 @@ class _DraggableLeadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _kColors[lead.status] ?? Colors.grey;
+    final color = _kColors[lead.status] ?? EagleTokens.textSecondary;
     final initial = lead.nome.isNotEmpty ? lead.nome[0].toUpperCase() : '?';
 
     return LongPressDraggable<Lead>(
@@ -190,7 +191,7 @@ class _CardContent extends StatelessWidget {
             Text(lead.nome, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                 maxLines: 1, overflow: TextOverflow.ellipsis),
             if (lead.telefone != null)
-              Text(lead.telefone!, style: const TextStyle(color: Colors.grey, fontSize: 11),
+              Text(lead.telefone!, style: const TextStyle(color: EagleTokens.textSecondary, fontSize: 11),
                   maxLines: 1, overflow: TextOverflow.ellipsis),
           ],
         )),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -13,11 +14,11 @@ const _statusLabels = {
   'CANCELADO': 'Cancelado',
 };
 const _statusColors = {
-  'LEAD': Colors.blue,
-  'TESTE': Colors.orange,
-  'ATIVO': Colors.green,
-  'INADIMPLENTE': Colors.red,
-  'CANCELADO': Colors.grey,
+  'LEAD': EagleTokens.primary,
+  'TESTE': EagleTokens.warning,
+  'ATIVO': EagleTokens.success,
+  'INADIMPLENTE': EagleTokens.danger,
+  'CANCELADO': EagleTokens.textSecondary,
 };
 
 const _tiposInteracao = ['WHATSAPP', 'LIGACAO', 'EMAIL', 'PRESENCIAL', 'OUTRO'];
@@ -251,7 +252,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColors[_lead.status] ?? Colors.grey;
+    final color = _statusColors[_lead.status] ?? EagleTokens.textSecondary;
     final podeConverter =
         _lead.status != 'CONVERTIDO' && _lead.status != 'ATIVO';
 
@@ -266,7 +267,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                       value: s,
                       child: Row(children: [
                         Icon(Icons.circle, size: 10,
-                            color: _statusColors[s] ?? Colors.grey),
+                            color: _statusColors[s] ?? EagleTokens.textSecondary),
                         const SizedBox(width: 8),
                         Text(_statusLabels[s] ?? s),
                       ]),
@@ -323,13 +324,13 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(children: [
-                const Icon(Icons.event, color: Colors.deepPurple),
+                const Icon(Icons.event, color: const Color(0xFF6D28D9)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text('Próximo Contato',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: Colors.grey,
+                              color: EagleTokens.textSecondary,
                             )),
                     const SizedBox(height: 2),
                     Text(
@@ -337,8 +338,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         color: _lead.proximoContato != null
-                            ? Colors.deepPurple
-                            : Colors.grey,
+                            ? const Color(0xFF6D28D9)
+                            : EagleTokens.textSecondary,
                       ),
                     ),
                   ]),
@@ -359,7 +360,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('Observações',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.grey)),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(color: EagleTokens.textSecondary)),
                   const SizedBox(height: 8),
                   Text(_lead.observacoes!),
                 ]),
@@ -387,7 +388,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                   onPressed: _whatsapp,
                   icon: const Icon(Icons.chat),
                   label: const Text('WhatsApp'),
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.green),
+                  style: OutlinedButton.styleFrom(foregroundColor: EagleTokens.success),
                 ),
               ),
             ]),
@@ -413,7 +414,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             onPressed: _arquivar,
             icon: const Icon(Icons.archive),
             label: const Text('Arquivar Lead'),
-            style: OutlinedButton.styleFrom(foregroundColor: Colors.grey),
+            style: OutlinedButton.styleFrom(foregroundColor: EagleTokens.textSecondary),
           ),
 
           // Interações
@@ -426,7 +427,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             const Spacer(),
             if (!_loadingInteracoes)
               Text('${_interacoes.length}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.textSecondary)),
           ]),
           const SizedBox(height: 8),
 
@@ -440,7 +441,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
               child: Padding(
                 padding: EdgeInsets.all(16),
                 child: Text('Nenhuma interação registrada.',
-                    style: TextStyle(color: Colors.grey)),
+                    style: TextStyle(color: EagleTokens.textSecondary)),
               ),
             )
           else
@@ -497,7 +498,7 @@ class _InteracaoTile extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(dataStr,
                       style: const TextStyle(
-                          fontSize: 11, color: Colors.grey)),
+                          fontSize: 11, color: EagleTokens.textSecondary)),
                 ],
               ]),
               const SizedBox(height: 2),
@@ -518,7 +519,7 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),
     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label, style: const TextStyle(color: Colors.grey)),
+      Text(label, style: const TextStyle(color: EagleTokens.textSecondary)),
       Flexible(
         child: Text(value,
             textAlign: TextAlign.end,

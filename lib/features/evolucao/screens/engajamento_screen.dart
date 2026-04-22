@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
@@ -107,7 +108,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                           subtitle: Text(e.tipo),
                           trailing: Text(
                             _formatarDataHora(e.dataHora),
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            style: const TextStyle(fontSize: 12, color: EagleTokens.textSecondary),
                           ),
                         );
                       },

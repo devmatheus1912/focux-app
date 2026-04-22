@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
@@ -77,7 +78,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const Text(
                   'Plataforma para Personal Trainers',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: EagleTokens.textSecondary),
                 ),
                 const SizedBox(height: 24),
                 Center(
@@ -109,7 +110,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: const TextStyle(color: Colors.red)),
+                  Text(_error!, style: const TextStyle(color: EagleTokens.danger)),
                 ],
                 const SizedBox(height: 24),
                 FilledButton(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../data/treino_repository.dart';
@@ -33,8 +34,8 @@ class TreinoDetailScreen extends ConsumerWidget {
                 PopupMenuItem(
                   value: 'excluir',
                   child: ListTile(
-                    leading: Icon(Icons.delete_outline, color: Colors.red),
-                    title: Text('Excluir treino', style: TextStyle(color: Colors.red)),
+                    leading: Icon(Icons.delete_outline, color: EagleTokens.danger),
+                    title: Text('Excluir treino', style: TextStyle(color: EagleTokens.danger)),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
@@ -181,7 +182,7 @@ class TreinoDetailScreen extends ConsumerWidget {
                                     content: Text('Remover "${te.exercicio.nome}" do treino?'),
                                     actions: [
                                       TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-                                      FilledButton(style: FilledButton.styleFrom(backgroundColor: Colors.red), onPressed: () => Navigator.pop(ctx, true), child: const Text('Remover')),
+                                      FilledButton(style: FilledButton.styleFrom(backgroundColor: EagleTokens.danger), onPressed: () => Navigator.pop(ctx, true), child: const Text('Remover')),
                                     ],
                                   ),
                                 );
@@ -259,7 +260,7 @@ class TreinoDetailScreen extends ConsumerWidget {
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              style: FilledButton.styleFrom(backgroundColor: EagleTokens.danger),
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Excluir'),
             ),
@@ -412,9 +413,9 @@ class _ExercicioCard extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     children: [
-                      Text('${te.series}x${te.repeticoes}', style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
-                      if (te.cargaKg != null) Text('· ${te.cargaKg}kg', style: const TextStyle(color: Colors.grey)),
-                      if (te.descansoSegundos != null) Text('· ${te.descansoSegundos}s', style: const TextStyle(color: Colors.grey)),
+                      Text('${te.series}x${te.repeticoes}', style: const TextStyle(color: EagleTokens.textSecondary, fontWeight: FontWeight.w500)),
+                      if (te.cargaKg != null) Text('· ${te.cargaKg}kg', style: const TextStyle(color: EagleTokens.textSecondary)),
+                      if (te.descansoSegundos != null) Text('· ${te.descansoSegundos}s', style: const TextStyle(color: EagleTokens.textSecondary)),
                     ],
                   ),
                 ],
@@ -425,7 +426,7 @@ class _ExercicioCard extends StatelessWidget {
                 if (val == 'remove') onRemove();
               },
               itemBuilder: (_) => [
-                const PopupMenuItem(value: 'remove', child: Text('Remover', style: TextStyle(color: Colors.red))),
+                const PopupMenuItem(value: 'remove', child: Text('Remover', style: TextStyle(color: EagleTokens.danger))),
               ],
             ),
           ],

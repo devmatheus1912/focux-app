@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/checkin_provider.dart';
 
@@ -29,15 +30,15 @@ class HistoricoCheckinScreen extends ConsumerWidget {
                       child: ListTile(
                         leading: Icon(
                           concluido ? Icons.check_circle : Icons.pending,
-                          color: concluido ? Colors.green : Colors.orange,
+                          color: concluido ? EagleTokens.success : EagleTokens.warning,
                         ),
                         title: Text(e.treinoNome),
                         subtitle: Text(e.iniciadoEm ?? ''),
                         trailing: Chip(
                           label: Text(concluido ? 'Concluído' : 'Em andamento'),
                           backgroundColor: concluido
-                              ? Colors.green.withValues(alpha: 0.12)
-                              : Colors.orange.withValues(alpha: 0.12),
+                              ? EagleTokens.success.withValues(alpha: 0.12)
+                              : EagleTokens.warning.withValues(alpha: 0.12),
                         ),
                       ),
                     );

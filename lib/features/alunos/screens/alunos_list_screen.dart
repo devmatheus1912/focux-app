@@ -63,7 +63,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                     Text(
                       '$ativosCount ATIVOS · $inadCount INADIMPL.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
+                            color: const Color(0xFF4B5563),
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -236,7 +236,7 @@ class _AlunoTileState extends ConsumerState<_AlunoTile> {
               ),
             ),
           const SizedBox(width: 12),
-          const Icon(Icons.chevron_right, color: Colors.grey),
+          const Icon(Icons.chevron_right, color: EagleTokens.textSecondary),
         ],
       ),
       onTap: () => context.push('/alunos/${aluno.id}'),
