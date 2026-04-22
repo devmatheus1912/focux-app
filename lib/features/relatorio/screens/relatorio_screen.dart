@@ -139,13 +139,18 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
-        title: Text('Relatório — ${widget.alunoNome}'),
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        elevation: 0,
+        title: Text('Relatório — ${widget.alunoNome}', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700, fontSize: 18)),
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon: Icon(Icons.picture_as_pdf, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
             tooltip: 'Exportar PDF',
             onPressed: _dados != null ? _exportarPdf : null,
           ),

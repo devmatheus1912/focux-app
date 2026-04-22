@@ -53,59 +53,75 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('Funil de Leads'),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.view_column),
-          tooltip: 'Visão Kanban',
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        elevation: 0,
+        title: Text('Funil de Leads', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.view_column, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+            tooltip: 'Visão Kanban',
+            onPressed: () async {
+              await Navigator.push(context, MaterialPageRoute(builder: (_) => const LeadsKanbanScreen()));
+              _load();
+            },
+          ),
+          IconButton(icon: Icon(Icons.refresh, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), onPressed: _load),
+        ],
+      ),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+        ),
+        child: FloatingActionButton.extended(
           onPressed: () async {
-            await Navigator.push(context, MaterialPageRoute(builder: (_) => const LeadsKanbanScreen()));
+            await Navigator.push(context, MaterialPageRoute(builder: (_) => const AddLeadScreen()));
             _load();
           },
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          icon: const Icon(Icons.person_add, color: Colors.white),
+          label: const Text('Novo Lead', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
         ),
-        IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
-      ],
-    ),
-    floatingActionButton: FloatingActionButton.extended(
-      onPressed: () async {
-        await Navigator.push(context, MaterialPageRoute(builder: (_) => const AddLeadScreen()));
-        _load();
-      },
-      icon: const Icon(Icons.person_add),
-      label: const Text('Novo Lead'),
-    ),
-    body: Column(children: [
-      _FiltroBar(
-        selecionado: _filtroStatus,
-        onChanged: (s) { setState(() => _filtroStatus = s); _load(); },
       ),
-      Expanded(
-        child: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : _leads.isEmpty
-                ? Center(child: Text(
-                    _filtroStatus != null
-                        ? 'Nenhum lead com status "${_statusLabels[_filtroStatus]}".'
-                        : 'Nenhum lead cadastrado.',
-                  ))
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 80),
-                    itemCount: _leads.length,
-                    itemBuilder: (_, i) => _LeadCard(
-                      lead: _leads[i],
-                      onTap: () async {
-                        await Navigator.push(context, MaterialPageRoute(
-                          builder: (_) => LeadDetailScreen(lead: _leads[i]),
-                        ));
-                        _load();
-                      },
+      body: Column(children: [
+        _FiltroBar(
+          selecionado: _filtroStatus,
+          onChanged: (s) { setState(() => _filtroStatus = s); _load(); },
+        ),
+        Expanded(
+          child: _loading
+              ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
+              : _leads.isEmpty
+                  ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      Container(width: 56, height: 56, decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), shape: BoxShape.circle), child: const Icon(Icons.person_search, color: EagleTokens.brand, size: 28)),
+                      const SizedBox(height: 12),
+                      Text(_filtroStatus != null ? 'Nenhum lead "${_statusLabels[_filtroStatus]}"' : 'Nenhum lead cadastrado', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 14)),
+                    ]))
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(12, 4, 12, 80),
+                      itemCount: _leads.length,
+                      itemBuilder: (_, i) => _LeadCard(
+                        lead: _leads[i],
+                        onTap: () async {
+                          await Navigator.push(context, MaterialPageRoute(
+                            builder: (_) => LeadDetailScreen(lead: _leads[i]),
+                          ));
+                          _load();
+                        },
+                      ),
                     ),
-                  ),
-      ),
-    ]),
-  );
+        ),
+      ]),
+    );
+  }
 }
 
 class _FiltroBar extends StatelessWidget {
