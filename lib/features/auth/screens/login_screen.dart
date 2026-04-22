@@ -199,8 +199,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   ),
                                 ],
                               ),
-                              child: const Center(
-                                child: Text('F', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
+                              child: Center(
+                                child: ClipOval(child: Image.asset('assets/images/logo_focux.png', width: 40, height: 40, fit: BoxFit.cover)),
                               ),
                             ),
                             const SizedBox(width: 12),

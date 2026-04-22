@@ -166,14 +166,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                               ),
                             ],
                           ),
-                          child: const Center(
-                            child: Text(
-                              'F',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 40,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -1,
+                          child: Center(
+                            child: ClipOval(
+                              child: Image.asset(
+                                'assets/images/logo_focux.png',
+                                width: 72,
+                                height: 72,
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
