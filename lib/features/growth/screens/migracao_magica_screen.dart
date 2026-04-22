@@ -1,3 +1,5 @@
+import '../../../core/widgets/feature_gate.dart';
+import '../../subscription/models/subscription_plan.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -52,6 +54,14 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return FeatureGate(
+      featureName: "Migração Mágica IA",
+      requiredPlan: SubscriptionPlan.PRO,
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Migração Mágica IA ✨'),

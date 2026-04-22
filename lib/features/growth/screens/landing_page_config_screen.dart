@@ -1,3 +1,5 @@
+import '../../../core/widgets/feature_gate.dart';
+import '../../subscription/models/subscription_plan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -8,6 +10,14 @@ class LandingPageConfigScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return FeatureGate(
+      featureName: "Landing Page Automática",
+      requiredPlan: SubscriptionPlan.PREMIUM,
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     const String publicLink = 'https://focux.app/p/marcos-personal';
 
     return Scaffold(
