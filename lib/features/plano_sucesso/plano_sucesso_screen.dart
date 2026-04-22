@@ -54,7 +54,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: EagleTokens.primaryGradient,
+              gradient: EagleTokens.heroGradient(dark: Theme.of(context).brightness == Brightness.dark),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
