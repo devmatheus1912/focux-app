@@ -235,7 +235,7 @@ class _TrilhaCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF22C55E).withOpacity(0.1),
+                      color: const Color(0xFF22C55E).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text('✓ CONCLUÍDA',
@@ -261,7 +261,7 @@ class _TrilhaCard extends StatelessWidget {
             const SizedBox(height: 6),
             LinearProgressIndicator(
               value: (trilha.percentualConclusao / 100).clamp(0.0, 1.0),
-              backgroundColor: _progressColor.withOpacity(0.1),
+              backgroundColor: _progressColor.withValues(alpha: 0.1),
               color: _progressColor,
               minHeight: 6,
               borderRadius: BorderRadius.circular(4),

@@ -192,9 +192,9 @@ class _HeaderBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.2),
+          color: color.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.5)),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
         ),
         child: Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold)),
       );
@@ -224,7 +224,7 @@ class _MetricCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,7 +243,7 @@ class _MetricCard extends StatelessWidget {
           const SizedBox(height: 10),
           LinearProgressIndicator(
             value: percent.clamp(0.0, 1.0),
-            backgroundColor: color.withOpacity(0.1),
+            backgroundColor: color.withValues(alpha: 0.1),
             color: color,
             minHeight: 4,
             borderRadius: BorderRadius.circular(4),
@@ -282,7 +282,7 @@ class _RetencaoBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,7 +298,7 @@ class _RetencaoBar extends StatelessWidget {
           const SizedBox(height: 8),
           LinearProgressIndicator(
             value: (value / 100).clamp(0.0, 1.0),
-            backgroundColor: _barColor.withOpacity(0.1),
+            backgroundColor: _barColor.withValues(alpha: 0.1),
             color: _barColor,
             minHeight: 6,
             borderRadius: BorderRadius.circular(4),

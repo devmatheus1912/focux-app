@@ -29,7 +29,6 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
   Color _corPrimaria = _coresPredefinidas[0];
   Color _corSecundaria = _coresPredefinidas[2];
   bool _salvando = false;
-  int _passo = 0; // 0=cores, 1=perfil
 
   @override
   void dispose() {
@@ -44,8 +43,8 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
     try {
       final dio = ref.read(apiClientProvider).dio;
       await dio.put('/api/personal/identidade', data: {
-        'corPrimaria': '#${_corPrimaria.value.toRadixString(16).substring(2).toUpperCase()}',
-        'corSecundaria': '#${_corSecundaria.value.toRadixString(16).substring(2).toUpperCase()}',
+        'corPrimaria': '#${_corPrimaria.toARGB32().toRadixString(16).substring(2).toUpperCase()}',
+        'corSecundaria': '#${_corSecundaria.toARGB32().toRadixString(16).substring(2).toUpperCase()}',
         'descricaoProfissional': _descCtrl.text.trim(),
         'especialidades': _espCtrl.text.trim(),
         'instagram': _instaCtrl.text.trim(),
@@ -103,7 +102,7 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
             Wrap(
               spacing: 8,
               children: _coresPredefinidas.map((cor) {
-                final selecionada = cor.value == _corPrimaria.value;
+                final selecionada = cor == _corPrimaria;
                 return GestureDetector(
                   onTap: () => setState(() => _corPrimaria = cor),
                   child: Container(
@@ -131,7 +130,7 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
             Wrap(
               spacing: 8,
               children: _coresPredefinidas.map((cor) {
-                final selecionada = cor.value == _corSecundaria.value;
+                final selecionada = cor == _corSecundaria;
                 return GestureDetector(
                   onTap: () => setState(() => _corSecundaria = cor),
                   child: Container(

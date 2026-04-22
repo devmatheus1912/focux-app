@@ -88,7 +88,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: p.nivelAcesso == 'ADMIN' ? Colors.red.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
+                    backgroundColor: p.nivelAcesso == 'ADMIN' ? Colors.red.withValues(alpha: 0.1) : Colors.blue.withValues(alpha: 0.1),
                     child: Icon(
                       p.nivelAcesso == 'ADMIN' ? Icons.security : Icons.vpn_key,
                       color: p.nivelAcesso == 'ADMIN' ? Colors.red : Colors.blue,

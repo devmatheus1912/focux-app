@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../auth/providers/auth_provider.dart';
 
 class WhiteLabelScreen extends ConsumerStatefulWidget {
   const WhiteLabelScreen({super.key});
@@ -92,7 +91,7 @@ class _WhiteLabelScreenState extends ConsumerState<WhiteLabelScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.amber.withOpacity(0.1),
+              color: Colors.amber.withValues(alpha: 0.1),
               border: Border.all(color: Colors.amber),
               borderRadius: BorderRadius.circular(12),
             ),
@@ -119,7 +118,7 @@ class _WhiteLabelScreenState extends ConsumerState<WhiteLabelScreen> {
       spacing: 12,
       runSpacing: 12,
       children: _cores.map((c) {
-        final isSelected = c.value == selected.value;
+        final isSelected = c == selected;
         return GestureDetector(
           onTap: () => onSelect(c),
           child: AnimatedContainer(
@@ -130,7 +129,7 @@ class _WhiteLabelScreenState extends ConsumerState<WhiteLabelScreen> {
               color: c,
               shape: BoxShape.circle,
               border: isSelected ? Border.all(color: Colors.black, width: 3) : null,
-              boxShadow: isSelected ? [BoxShadow(color: c.withOpacity(0.5), blurRadius: 8, spreadRadius: 2)] : null,
+              boxShadow: isSelected ? [BoxShadow(color: c.withValues(alpha: 0.5), blurRadius: 8, spreadRadius: 2)] : null,
             ),
             child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
           ),

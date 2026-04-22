@@ -203,7 +203,7 @@ class _BuscaItemTile extends StatelessWidget {
     final cor = _colorForTipo(item.tipo);
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: cor.withOpacity(0.1),
+        backgroundColor: cor.withValues(alpha: 0.1),
         child: Icon(_iconForTipo(item.tipo), color: cor, size: 20),
       ),
       title: Text(item.titulo, style: const TextStyle(fontWeight: FontWeight.w600)),

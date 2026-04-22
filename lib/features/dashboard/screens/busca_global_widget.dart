@@ -145,7 +145,7 @@ class _BuscaGlobalWidgetState extends ConsumerState<BuscaGlobalWidget> {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.15),
+          backgroundColor: color.withValues(alpha: 0.15),
           child: Icon(Icons.arrow_forward_ios, size: 14, color: color),
         ),
         title: Text(item['titulo'] ?? '', style: const TextStyle(fontWeight: FontWeight.w600)),

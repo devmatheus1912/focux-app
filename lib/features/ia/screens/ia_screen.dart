@@ -148,14 +148,15 @@ class _GerarTreinoTabState extends ConsumerState<_GerarTreinoTab> {
         const SizedBox(height: 8),
         FilledButton.icon(
           onPressed: () async {
+            final messenger = ScaffoldMessenger.of(context);
             try {
               final repo = IaRepository(ref.read(apiClientProvider));
               final sucesso = await repo.confirmarPublicar(widget.alunoId);
               if (sucesso && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Plano de treino publicado no app do aluno com sucesso!')));
+                messenger.showSnackBar(const SnackBar(content: Text('Plano de treino publicado no app do aluno com sucesso!')));
               }
             } catch (e) {
-              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao publicar: $e')));
+              messenger.showSnackBar(SnackBar(content: Text('Erro ao publicar: $e')));
             }
           },
           icon: const Icon(Icons.check_circle),
@@ -274,14 +275,15 @@ class _GerarDietaTabState extends ConsumerState<_GerarDietaTab> {
         const SizedBox(height: 8),
         FilledButton.icon(
           onPressed: () async {
+            final messenger = ScaffoldMessenger.of(context);
             try {
               final repo = IaRepository(ref.read(apiClientProvider));
               final sucesso = await repo.confirmarPublicar(widget.alunoId);
               if (sucesso && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Plano alimentar publicado no app do aluno com sucesso!')));
+                messenger.showSnackBar(const SnackBar(content: Text('Plano alimentar publicado no app do aluno com sucesso!')));
               }
             } catch (e) {
-              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao publicar: $e')));
+              messenger.showSnackBar(SnackBar(content: Text('Erro ao publicar: $e')));
             }
           },
           icon: const Icon(Icons.check_circle),

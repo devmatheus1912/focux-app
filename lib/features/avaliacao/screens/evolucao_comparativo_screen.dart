@@ -218,14 +218,15 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
           const SizedBox(height: 32),
           FilledButton.icon(
             onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
               try {
                 final repo = EvolucaoRepository(ref.read(apiClientProvider));
                 await repo.compartilharEvolucao(widget.alunoId);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Evolução compartilhada via chat com sucesso!')));
+                if (mounted) {
+                  messenger.showSnackBar(const SnackBar(content: Text('Evolução compartilhada via chat com sucesso!')));
                 }
               } catch (e) {
-                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+                messenger.showSnackBar(SnackBar(content: Text('Erro: $e')));
               }
             },
             icon: const Icon(Icons.share),
