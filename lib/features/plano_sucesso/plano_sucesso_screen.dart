@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'plano_sucesso_provider.dart';
 import '../../core/theme/design_tokens.dart';
+import '../../core/widgets/skeleton_loader.dart';
+import '../../core/widgets/empty_state.dart';
+import '../../core/widgets/feedback_helper.dart';
 
 class PlanoSucessoScreen extends StatefulWidget {
   final int alunoId;
@@ -25,7 +28,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     if (provider.isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Plano de Sucesso')),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const SkeletonList(count: 3),
       );
     }
 
@@ -33,7 +36,11 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     if (plano == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Plano de Sucesso')),
-        body: const Center(child: Text('Nenhum plano ativo para este aluno.')),
+        body: const EmptyStateWidget(
+          icon: Icons.flag_outlined,
+          title: 'Nenhum Plano Ativo',
+          description: 'Este aluno ainda não possui um plano de sucesso definido pelo personal.',
+        ),
       );
     }
 
@@ -67,7 +74,11 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
             value: marco.atingido,
             onChanged: marco.atingido ? null : (val) {
               if (val == true) {
-                provider.atingirMarco(marco.id);
+                provider.atingirMarco(marco.id).then((_) {
+                  FeedbackHelper.showSuccess(context, 'Marco atingido! Bom trabalho.');
+                }).catchError((_) {
+                  FeedbackHelper.showError(context, 'Erro ao atualizar o marco.');
+                });
               }
             },
           )),

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'comunidade_provider.dart';
 import '../../core/theme/design_tokens.dart';
+import '../../core/widgets/skeleton_loader.dart';
+import '../../core/widgets/empty_state.dart';
+import '../../core/widgets/feedback_helper.dart';
 
 class ComunidadeScreen extends StatefulWidget {
   const ComunidadeScreen({super.key});
@@ -24,8 +27,14 @@ class _ComunidadeScreenState extends State<ComunidadeScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Comunidades')),
       body: provider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
+          ? const SkeletonList(count: 4)
+          : provider.grupos.isEmpty 
+              ? const EmptyStateWidget(
+                  icon: Icons.groups_outlined,
+                  title: 'Sem Comunidades',
+                  description: 'Nenhum grupo ativo foi encontrado.',
+                )
+              : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: provider.grupos.length,
               itemBuilder: (context, index) {
@@ -39,7 +48,9 @@ class _ComunidadeScreenState extends State<ComunidadeScreen> {
                       style: ElevatedButton.styleFrom(backgroundColor: EagleTokens.primary),
                       onPressed: () {
                         provider.entrarGrupo(grupo.id).then((_) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bem-vindo ao grupo!')));
+                          FeedbackHelper.showSuccess(context, 'Bem-vindo ao grupo!');
+                        }).catchError((_) {
+                          FeedbackHelper.showError(context, 'Erro ao entrar no grupo.');
                         });
                       },
                       child: const Text('Entrar', style: TextStyle(color: Colors.white)),
