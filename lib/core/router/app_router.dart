@@ -56,6 +56,7 @@ import '../../features/busca/screens/busca_global_screen.dart';
 import '../../features/analytics/screens/analytics_screen.dart';
 import '../../features/trilhas/screens/trilhas_screen.dart';
 import '../../features/dashboard/screens/qualidade_operacional_screen.dart';
+import '../../features/admin/screens/rbac_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -322,6 +323,10 @@ class AppRouter {
           alunoId: int.parse(state.pathParameters['id']!),
           alunoNome: state.extra as String? ?? 'Aluno',
         ),
+      ),
+      GoRoute(
+        path: '/admin/rbac',
+        builder: (context, state) => const RbacScreen(),
       ),
     ],
   );
