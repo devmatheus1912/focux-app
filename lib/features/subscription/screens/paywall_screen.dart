@@ -23,7 +23,7 @@ class PaywallScreen extends StatelessWidget {
           _buildPlanCard(
             context,
             title: 'Plano PRO',
-            price: 'R$ 79,90 / mês',
+            price: 'R\\\$ 79,90 / mês',
             plan: SubscriptionPlan.PRO,
             features: [
               'Até 20 alunos ativos',
@@ -37,7 +37,7 @@ class PaywallScreen extends StatelessWidget {
           _buildPlanCard(
             context,
             title: 'Plano PREMIUM',
-            price: 'R$ 149,90 / mês',
+            price: 'R\\\$ 149,90 / mês',
             plan: SubscriptionPlan.PREMIUM,
             features: [
               'Alunos Ilimitados',
