@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/theme/design_tokens.dart';
 
 enum AlunoFiltro { todos, ativos, inadimplentes, risco }
 
@@ -83,21 +84,21 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                     FilterChip(
                       label: const Text('Ativos'),
                       selected: _filtro == AlunoFiltro.ativos,
-                      selectedColor: Colors.green.withValues(alpha: 0.2),
+                      selectedColor: EagleTokens.success.withValues(alpha: 0.2),
                       onSelected: (_) => setState(() => _filtro = AlunoFiltro.ativos),
                     ),
                     const SizedBox(width: 8),
                     FilterChip(
                       label: const Text('Inadimplentes'),
                       selected: _filtro == AlunoFiltro.inadimplentes,
-                      selectedColor: Colors.red.withValues(alpha: 0.2),
+                      selectedColor: EagleTokens.danger.withValues(alpha: 0.2),
                       onSelected: (_) => setState(() => _filtro = AlunoFiltro.inadimplentes),
                     ),
                     const SizedBox(width: 8),
                     FilterChip(
                       label: const Text('Em risco'),
                       selected: _filtro == AlunoFiltro.risco,
-                      selectedColor: Colors.orange.withValues(alpha: 0.2),
+                      selectedColor: EagleTokens.warning.withValues(alpha: 0.2),
                       onSelected: (_) => setState(() => _filtro = AlunoFiltro.risco),
                     ),
                   ],
@@ -155,16 +156,16 @@ class _AlunoTileState extends ConsumerState<_AlunoTile> {
     final String chipLabel;
 
     if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
-      dotColor = const Color(0xFFE53935);
-      chipColor = const Color(0xFFE53935);
+      dotColor = EagleTokens.danger;
+      chipColor = EagleTokens.danger;
       chipLabel = 'Inadimplente';
     } else if (aluno.status == 'INATIVO') {
-      dotColor = const Color(0xFFFFA726);
-      chipColor = const Color(0xFFFFA726);
+      dotColor = EagleTokens.warning;
+      chipColor = EagleTokens.warning;
       chipLabel = 'Inativo';
     } else {
-      dotColor = const Color(0xFF43A047);
-      chipColor = const Color(0xFF43A047);
+      dotColor = EagleTokens.success;
+      chipColor = EagleTokens.success;
       chipLabel = 'Ativo';
     }
 
@@ -196,11 +197,11 @@ class _AlunoTileState extends ConsumerState<_AlunoTile> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.orange.withValues(alpha: 0.2),
+              color: EagleTokens.warning.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: Colors.orange.withValues(alpha: 0.5)),
+              border: Border.all(color: EagleTokens.warning.withValues(alpha: 0.5)),
             ),
-            child: const Text('Risco CHURN', style: TextStyle(fontSize: 9, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+            child: const Text('Risco CHURN', style: TextStyle(fontSize: 9, color: Color(0xFFD97706), fontWeight: FontWeight.bold)),
           ),
         ],
       ]),

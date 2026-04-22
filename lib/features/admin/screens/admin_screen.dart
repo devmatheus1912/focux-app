@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../data/admin_repository.dart';
 
 class AdminScreen extends ConsumerStatefulWidget {
@@ -276,19 +277,19 @@ class _StatsTab extends StatelessWidget {
                 label: 'Total Personais',
                 value: '${s.totalPersonais}',
                 icon: Icons.people,
-                color: const Color(0xFF0288D1),
+                color: const Color(0xFF2B4A9E),
               ),
               _MetricCard(
                 label: 'Total Alunos',
                 value: '${s.totalAlunos}',
                 icon: Icons.fitness_center,
-                color: const Color(0xFF00897B),
+                color: EagleTokens.success,
               ),
               _MetricCard(
                 label: 'Admins',
                 value: '${s.admins}',
                 icon: Icons.admin_panel_settings,
-                color: const Color(0xFF7B1FA2),
+                color: const Color(0xFF7C3AED),
               ),
               _StatusCard(saudavel: plataformaSaudavel),
             ],
@@ -348,7 +349,7 @@ class _StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = saudavel ? const Color(0xFF2E7D32) : const Color(0xFFF57F17);
+    final color = saudavel ? EagleTokens.success : EagleTokens.warning;
     final icon = saudavel ? Icons.check_circle : Icons.warning_amber_rounded;
     final label = saudavel ? 'Plataforma Saudável' : 'Atenção Necessária';
 
@@ -404,15 +405,15 @@ class _MonitorTab extends StatelessWidget {
               children: [
                 _SummaryChip(
                   label: '${m.ticketsAbertos} Abertos',
-                  color: const Color(0xFF1565C0),
+                  color: EagleTokens.primary,
                 ),
                 _SummaryChip(
                   label: '${m.ticketsCriticos} Críticos',
-                  color: const Color(0xFFC62828),
+                  color: EagleTokens.danger,
                 ),
                 _SummaryChip(
                   label: '${m.totalInadimplentes} Inadimplentes',
-                  color: const Color(0xFFE65100),
+                  color: EagleTokens.warning,
                 ),
               ],
             ),
@@ -471,13 +472,13 @@ class _TicketCard extends StatelessWidget {
   Color _severidadeColor(String sev) {
     switch (sev.toUpperCase()) {
       case 'CRITICA':
-        return const Color(0xFFC62828);
+        return EagleTokens.danger;
       case 'ALTA':
-        return const Color(0xFFE65100);
+        return EagleTokens.warning;
       case 'MEDIA':
-        return const Color(0xFFF9A825);
+        return const Color(0xFFF59E0B);
       default:
-        return const Color(0xFF2E7D32);
+        return EagleTokens.success;
     }
   }
 
@@ -611,9 +612,9 @@ class _RiscoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color borderColor;
     if (personal.alunosInadimplentes > 0) {
-      borderColor = const Color(0xFFC62828);
+      borderColor = EagleTokens.danger;
     } else if (personal.checkInsUltimos30Dias < 5) {
-      borderColor = const Color(0xFFE65100);
+      borderColor = EagleTokens.warning;
     } else {
       borderColor = Colors.transparent;
     }
@@ -633,7 +634,7 @@ class _RiscoCard extends StatelessWidget {
                 width: 5,
                 decoration: BoxDecoration(
                   color: borderColor == Colors.transparent
-                      ? const Color(0xFF2E7D32)
+                      ? EagleTokens.success
                       : borderColor,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(16),
@@ -665,22 +666,22 @@ class _RiscoCard extends StatelessWidget {
                           _InfoBadge(
                             label: '${personal.totalAlunos} alunos',
                             icon: Icons.people_outline,
-                            color: const Color(0xFF0288D1),
+                            color: const Color(0xFF2B4A9E),
                           ),
                           const SizedBox(width: 8),
                           if (personal.alunosInadimplentes > 0)
                             _InfoBadge(
                               label: '${personal.alunosInadimplentes} inadimp.',
                               icon: Icons.warning_amber_rounded,
-                              color: const Color(0xFFC62828),
+                              color: EagleTokens.danger,
                             ),
                           const SizedBox(width: 8),
                           _InfoBadge(
                             label: '${personal.checkInsUltimos30Dias} check-ins',
                             icon: Icons.fitness_center,
                             color: personal.checkInsUltimos30Dias < 5
-                                ? const Color(0xFFE65100)
-                                : const Color(0xFF2E7D32),
+                                ? EagleTokens.warning
+                                : EagleTokens.success,
                           ),
                         ],
                       ),
@@ -1143,4 +1144,5 @@ class _FeatureFlagsTabState extends ConsumerState<_FeatureFlagsTab>
     );
   }
 }
+
 

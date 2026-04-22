@@ -16,6 +16,7 @@ import '../../evolucao/screens/evolucao_screen.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../ia/data/ia_repository.dart';
 import '../../feedback/screens/feedback_video_screen.dart';
+import '../../../core/theme/design_tokens.dart';
 
 class AlunoDetailScreen extends ConsumerWidget {
   final int alunoId;
@@ -90,10 +91,8 @@ class AlunoDetailScreen extends ConsumerWidget {
             // Hero Gradient Header
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                gradient: EagleTokens.heroGradient(
+                  dark: Theme.of(context).brightness == Brightness.dark,
                 ),
               ),
               padding: const EdgeInsets.only(top: 24, bottom: 40, left: 16, right: 16),
@@ -138,13 +137,13 @@ class AlunoDetailScreen extends ConsumerWidget {
                       crossAxisSpacing: 12,
                       childAspectRatio: 2.5,
                       children: [
-                        _GridToolBtn(icon: Icons.monitor_weight, label: 'Avaliação Física', color: Colors.blue, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AvaliacaoScreen(alunoId: alunoId)))),
-                        _GridToolBtn(icon: Icons.assignment, label: 'Anamnese', color: Colors.orange, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AnamneseScreen(alunoId: alunoId)))),
-                        _GridToolBtn(icon: Icons.restaurant_menu, label: 'Dieta', color: Colors.green, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AlimentarScreen(alunoId: alunoId)))),
-                        _GridToolBtn(icon: Icons.show_chart, label: 'Evolução', color: Colors.purple, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EvolucaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
-                        _GridToolBtn(icon: Icons.bar_chart, label: 'Aderência', color: Colors.teal, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RelatorioScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
-                        _GridToolBtn(icon: Icons.receipt_long, label: 'Financeiro', color: Colors.redAccent, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _HistoricoMensalidadesScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
-                        _GridToolBtn(icon: Icons.video_camera_back, label: 'Feedback', color: Colors.indigo, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FeedbackVideoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                        _GridToolBtn(icon: Icons.monitor_weight,      label: 'Avaliação Física', color: EagleTokens.primary,           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AvaliacaoScreen(alunoId: alunoId)))),
+                        _GridToolBtn(icon: Icons.assignment,            label: 'Anamnese',         color: EagleTokens.warning,           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AnamneseScreen(alunoId: alunoId)))),
+                        _GridToolBtn(icon: Icons.restaurant_menu,       label: 'Dieta',            color: EagleTokens.success,           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AlimentarScreen(alunoId: alunoId)))),
+                        _GridToolBtn(icon: Icons.show_chart,            label: 'Evolução',         color: const Color(0xFF7C3AED),        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EvolucaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                        _GridToolBtn(icon: Icons.bar_chart,             label: 'Aderência',        color: const Color(0xFF0891B2),        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RelatorioScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                        _GridToolBtn(icon: Icons.receipt_long,          label: 'Financeiro',       color: EagleTokens.danger,            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _HistoricoMensalidadesScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                        _GridToolBtn(icon: Icons.video_camera_back,     label: 'Feedback',         color: EagleTokens.primary,           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FeedbackVideoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -186,15 +185,15 @@ class _StatusBadge extends StatelessWidget {
     IconData icone;
     String texto;
     if (statusFinanceiro == 'INADIMPLENTE') {
-      cor = const Color(0xFFE53935);
+      cor = EagleTokens.danger;
       icone = Icons.warning_amber_rounded;
       texto = 'Inadimplente';
     } else if (status == 'INATIVO') {
-      cor = const Color(0xFFFFA726);
+      cor = EagleTokens.warning;
       icone = Icons.pause_circle_outline;
       texto = 'Inativo';
     } else {
-      cor = const Color(0xFF43A047);
+      cor = EagleTokens.success;
       icone = Icons.check_circle_outline;
       texto = 'Ativo';
     }
@@ -266,9 +265,9 @@ class _HistoricoMensalidadesScreenState extends ConsumerState<_HistoricoMensalid
 
   Color _statusColor(String s) {
     switch (s) {
-      case 'PAGO': return Colors.green;
-      case 'ATRASADO': return Colors.red;
-      default: return Colors.orange;
+      case 'PAGO':     return EagleTokens.success;
+      case 'ATRASADO': return EagleTokens.danger;
+      default:         return EagleTokens.warning;
     }
   }
 
@@ -408,12 +407,12 @@ class _SecaoEngajamentoState extends ConsumerState<_SecaoEngajamento> {
           _StatEngajamento(
             label: 'Aderência',
             valor: '$aderencia%',
-            cor: aderencia >= 70 ? Colors.green : (aderencia >= 40 ? Colors.orange : Colors.red),
+            cor: EagleTokens.aderenciaColor(aderencia.toDouble()),
           ),
           _StatEngajamento(
             label: 'Dias sem treinar',
             valor: diasSemTreinar.toString(),
-            cor: diasSemTreinar > 7 ? Colors.red : Colors.green,
+            cor: diasSemTreinar > 7 ? EagleTokens.danger : EagleTokens.success,
           ),
         ]),
       ),
