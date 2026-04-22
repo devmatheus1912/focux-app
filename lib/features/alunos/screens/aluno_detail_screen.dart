@@ -175,8 +175,19 @@ class AlunoDetailScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Status and Copiloto Banner
-                      _CopilotoCard(alunoId: alunoId),
+                      // Status Banner
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: EagleTokens.brand.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(children: [
+                          const Icon(Icons.auto_awesome, color: EagleTokens.brand, size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(child: Text('Copiloto IA pronto para sugestões', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 13, fontWeight: FontWeight.w500))),
+                        ]),
+                      ),
                       const SizedBox(height: 24),
 
                       Text('Ferramentas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: ink, letterSpacing: -0.5)),
@@ -195,7 +206,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                           _ModuleTile(icon: Icons.auto_awesome, label: 'IA · Progressão', sub: 'Sugerir cargas', highlight: true, isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => IaProgressaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
                           _ModuleTile(icon: Icons.show_chart, label: 'Evolução', sub: 'Medidas e PRs', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EvolucaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
                           _ModuleTile(icon: Icons.people, label: 'Anamnese', sub: 'Completa ✓', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AnamneseScreen(alunoId: alunoId)))),
-                          _ModuleTile(icon: Icons.attach_money, label: 'Mensalidades', sub: aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Em atraso' : 'Em dia', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _HistoricoMensalidadesScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                          _ModuleTile(icon: Icons.attach_money, label: 'Mensalidades', sub: aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Em atraso' : 'Em dia', isDark: isDark, onTap: () => context.push('/financeiro/aluno')),
                           _ModuleTile(icon: Icons.chat, label: 'Chat', sub: 'Comunicação', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChatScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
                           _ModuleTile(icon: Icons.restaurant_menu, label: 'Dieta', sub: 'Plano atual', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AlimentarScreen(alunoId: alunoId)))),
                           _ModuleTile(icon: Icons.video_camera_back, label: 'Feedback', sub: 'Análise de vídeo', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FeedbackVideoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),

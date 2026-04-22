@@ -75,20 +75,21 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
         title: Text('Funil Kanban', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
         iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         actions: [IconButton(icon: Icon(Icons.refresh, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), onPressed: _load)],
-    ),
-    body: _loading
-        ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
-        : Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: _kCols
-                .map((col) => Expanded(child: _KanbanColumn(
-                      status: col,
-                      leads: _cols[col] ?? [],
-                      onAccept: (lead) => _moverPara(lead, col),
-                    )))
-                .toList(),
-          ),
-  );
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: _kCols
+                  .map((col) => Expanded(child: _KanbanColumn(
+                        status: col,
+                        leads: _cols[col] ?? [],
+                        onAccept: (lead) => _moverPara(lead, col),
+                      )))
+                  .toList(),
+            ),
+    );
+  }
 }
 
 class _KanbanColumn extends StatelessWidget {

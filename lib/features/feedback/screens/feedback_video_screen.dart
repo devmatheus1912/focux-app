@@ -89,9 +89,16 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           )
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _novoFeedback,
-        backgroundColor: Colors.transparent, elevation: 0,
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+        ),
+        child: FloatingActionButton(
+          onPressed: _novoFeedback,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           child: const Icon(Icons.add, color: Colors.white),
         ),
       ),

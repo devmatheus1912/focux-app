@@ -130,5 +130,4 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       ]),
     ),
   );
-  }
 }

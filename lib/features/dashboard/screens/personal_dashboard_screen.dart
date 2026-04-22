@@ -156,7 +156,7 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                           Expanded(child: _CardMetrica(
                             valor: data.alunosAtivos.toString(),
                             titulo: 'Alunos ativos',
-                            subtitulo: '${data.alunosInadimplentes} inadimplentes',
+                            subtitulo: '${data.totalAlunos - data.alunosAtivos} inativos',
                             isDark: isDark,
                           )),
                           const SizedBox(width: 16),
@@ -194,7 +194,7 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('Precisa de atenção', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                            TextButton(onPath: () {}, child: const Text('Ver tudo')),
+                            TextButton(onPressed: () {}, child: const Text('Ver tudo')),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -241,7 +241,7 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                                   Expanded(
                                     child: OutlinedButton.icon(
                                       onPressed: () {},
-                                      icon: const Icon(Icons.whatsapp, size: 16),
+                                      icon: const Icon(Icons.chat, size: 16),
                                       label: const Text('Lembrar via WhatsApp'),
                                       style: OutlinedButton.styleFrom(
                                         foregroundColor: EagleTokens.brand,
