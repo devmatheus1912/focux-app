@@ -50,7 +50,10 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
     final asyncData = ref.watch(qualidadeProvider);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Qualidade Operacional'),
       ),
       body: asyncData.when(

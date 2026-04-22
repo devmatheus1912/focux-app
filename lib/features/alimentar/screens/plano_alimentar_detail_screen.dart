@@ -144,7 +144,10 @@ class _PlanoAlimentarDetailScreenState
   Widget build(BuildContext context) {
     final p = widget.plano;
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text(p.nome),
         actions: [
           IconButton(

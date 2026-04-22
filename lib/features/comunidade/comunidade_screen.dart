@@ -25,7 +25,10 @@ class _ComunidadeScreenState extends State<ComunidadeScreen> {
     final provider = context.watch<ComunidadeProvider>();
     
     return Scaffold(
-      appBar: AppBar(title: const Text('Comunidades')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Comunidades')),
       body: provider.isLoading
           ? const SkeletonList(count: 4)
           : provider.grupos.isEmpty 

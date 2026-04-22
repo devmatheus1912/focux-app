@@ -39,7 +39,10 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Convidar Aluno')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Convidar Aluno')),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(

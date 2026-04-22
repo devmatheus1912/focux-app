@@ -21,7 +21,10 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
     final sugestoesAsync = ref.watch(sugestoesProgressaoProvider);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Progressão de Carga — Sugestões'),
         actions: [
           IconButton(

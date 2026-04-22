@@ -90,7 +90,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final perfilAsync = ref.watch(perfilProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Wallet / Pagamentos')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Wallet / Pagamentos')),
       body: perfilAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro ao carregar perfil: $e')),

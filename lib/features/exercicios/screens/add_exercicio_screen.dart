@@ -69,7 +69,10 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Novo Exercício')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Novo Exercício')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),

@@ -11,7 +11,10 @@ class HistoricoCheckinScreen extends ConsumerWidget {
     final historicoAsync = ref.watch(historicoCheckinProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Histórico de Treinos')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Histórico de Treinos')),
       body: historicoAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),

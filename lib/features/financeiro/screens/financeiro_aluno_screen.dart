@@ -64,7 +64,10 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Minhas Mensalidades'),
         actions: [
           IconButton(

@@ -12,7 +12,10 @@ class PerfilScreen extends ConsumerWidget {
     final perfilAsync = ref.watch(perfilProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Meu Perfil')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Meu Perfil')),
       body: perfilAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),

@@ -117,7 +117,10 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     final progresso = exercicios.isEmpty ? 0.0 : concluidos / exercicios.length;
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text(_execucao?.treinoNome ?? 'Treino em andamento'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4),

@@ -66,7 +66,10 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       title: const Text('Funil Kanban'),
       actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: _load)],
     ),

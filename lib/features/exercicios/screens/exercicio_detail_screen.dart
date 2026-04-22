@@ -31,7 +31,10 @@ class ExercicioDetailScreen extends ConsumerWidget {
     final exercicioAsync = ref.watch(exercicioProvider(exercicioId));
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Exercício'),
         actions: [
           exercicioAsync.when(

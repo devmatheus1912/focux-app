@@ -81,7 +81,10 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Configurar Alertas'),
       ),
       body: _loading

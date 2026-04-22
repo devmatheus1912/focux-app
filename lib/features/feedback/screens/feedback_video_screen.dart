@@ -75,7 +75,10 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text(widget.alunoNome != null ? 'Feedbacks — ${widget.alunoNome}' : 'Todos os Feedbacks de Vídeo'),
         actions: [
           IconButton(

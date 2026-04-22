@@ -61,7 +61,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> {
     final insightsAsync = ref.watch(insightsProvider);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Copiloto IA'),
         actions: [
           IconButton(

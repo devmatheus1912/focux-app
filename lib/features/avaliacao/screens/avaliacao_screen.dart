@@ -97,7 +97,10 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Avaliações Físicas'),
         actions: [
           IconButton(
@@ -419,7 +422,10 @@ class _NovaAvaliacaoScreenState extends ConsumerState<_NovaAvaliacaoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nova Avaliação')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Nova Avaliação')),
       body: SingleChildScrollView(padding: const EdgeInsets.all(16), child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

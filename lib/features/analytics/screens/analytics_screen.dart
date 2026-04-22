@@ -81,7 +81,10 @@ class AnalyticsScreen extends ConsumerWidget {
     final analyticsAsync = ref.watch(analyticsProvider);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Analytics Avançado'),
         actions: [
           IconButton(
@@ -151,7 +154,7 @@ class _HeroHeader extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: EagleTokens.heroGradient(dark: isDark),
-        borderRadius: BorderRadius.circular(EagleTokens.radiusCard),
+        borderRadius: BorderRadius.circular(20.0),
       ),
       child: Row(
         children: [
@@ -197,7 +200,7 @@ class _Badge extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.25),
-          borderRadius: BorderRadius.circular(EagleTokens.radiusChip),
+          borderRadius: BorderRadius.circular(8.0),
           border: Border.all(color: color.withValues(alpha: 0.5)),
         ),
         child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold)),
@@ -213,7 +216,7 @@ class _StatPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(EagleTokens.radiusSmall),
+          borderRadius: BorderRadius.circular(8.0),
         ),
         child: Column(children: [
           Text(label, style: const TextStyle(color: Colors.white70, fontSize: 10)),
@@ -327,7 +330,7 @@ class _FunilStep extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(EagleTokens.radiusSmall),
+        borderRadius: BorderRadius.circular(8.0),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(children: [
@@ -555,7 +558,7 @@ class _MetricCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(EagleTokens.radiusCard),
+        borderRadius: BorderRadius.circular(20.0),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
@@ -609,7 +612,7 @@ class _RetencaoBar extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(EagleTokens.radiusSmall),
+        borderRadius: BorderRadius.circular(8.0),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6)],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

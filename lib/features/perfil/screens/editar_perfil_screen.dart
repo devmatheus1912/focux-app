@@ -58,7 +58,10 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Editar Perfil')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Editar Perfil')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),

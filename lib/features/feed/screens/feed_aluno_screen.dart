@@ -79,7 +79,10 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Meu Feed')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Meu Feed')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _posts.isEmpty

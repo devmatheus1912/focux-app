@@ -36,7 +36,7 @@ class ShimmerListLoading extends StatelessWidget {
             height: itemHeight,
             decoration: BoxDecoration(
               color: isDark ? EagleTokens.surfaceDark : Colors.white,
-              borderRadius: BorderRadius.circular(EagleTokens.radiusCard),
+              borderRadius: BorderRadius.circular(20.0),
             ),
           ),
         ),
@@ -68,7 +68,7 @@ class ShimmerCardLoading extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: isDark ? EagleTokens.surfaceDark : Colors.white,
-          borderRadius: BorderRadius.circular(EagleTokens.radiusCard),
+          borderRadius: BorderRadius.circular(20.0),
         ),
       ),
     );

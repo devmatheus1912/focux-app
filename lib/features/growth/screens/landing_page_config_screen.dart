@@ -21,7 +21,10 @@ class LandingPageConfigScreen extends StatelessWidget {
     const String publicLink = 'https://focux.app/p/marcos-personal';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Seu Link na Bio 🚀')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Seu Link na Bio 🚀')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

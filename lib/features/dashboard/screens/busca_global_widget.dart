@@ -38,7 +38,10 @@ class _BuscaGlobalWidgetState extends ConsumerState<BuscaGlobalWidget> {
     final resultsAsync = ref.watch(buscaResultsProvider(_query));
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         titleSpacing: 0,
         title: TextField(
           controller: _ctrl,

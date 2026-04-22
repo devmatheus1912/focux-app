@@ -75,7 +75,10 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text(widget.isSetup ? 'Configurar meu app' : 'Identidade visual'),
         automaticallyImplyLeading: !widget.isSetup,
       ),

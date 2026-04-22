@@ -52,7 +52,10 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
     final permissoesAsync = ref.watch(permissoesProvider);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Controle de Acessos (RBAC)'),
         actions: [
           IconButton(

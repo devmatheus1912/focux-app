@@ -9,7 +9,10 @@ class SocialRecapScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // In a real app, fetch from GET /api/v1/social/recap/{alunoId}
     return Scaffold(
-      appBar: AppBar(title: const Text('Recapitulação Mensal 🏆')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Recapitulação Mensal 🏆')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

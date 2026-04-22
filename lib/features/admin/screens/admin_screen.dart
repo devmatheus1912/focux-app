@@ -185,7 +185,10 @@ class _AdminScreenState extends ConsumerState<AdminScreen>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Painel Admin'),
         bottom: TabBar(
           controller: _tabs,

@@ -46,7 +46,10 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Minha Agenda')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Minha Agenda')),
     body: RefreshIndicator(
       onRefresh: _load,
       child: _loading

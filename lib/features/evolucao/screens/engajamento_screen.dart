@@ -60,7 +60,10 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text('Engajamento — ${widget.alunoNome}'),
         actions: [
           Padding(

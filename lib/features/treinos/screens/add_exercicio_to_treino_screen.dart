@@ -59,7 +59,10 @@ class _AddExercicioToTreinoScreenState
     final exerciciosAsync = ref.watch(exerciciosProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Adicionar Exercício')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Adicionar Exercício')),
       body: exerciciosAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),

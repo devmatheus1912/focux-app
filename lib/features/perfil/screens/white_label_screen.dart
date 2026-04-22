@@ -29,7 +29,10 @@ class _WhiteLabelScreenState extends ConsumerState<WhiteLabelScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Identidade Visual'),
         actions: [
           TextButton(

@@ -96,7 +96,10 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     final historicoAsync = ref.watch(_broadcastHistoricoProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Central de Mensageria')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Central de Mensageria')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -59,7 +59,10 @@ class _AlrtaDetalheScreenState extends ConsumerState<AlrtaDetalheScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text('Análise — ${widget.alunoNome}'),
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _load),

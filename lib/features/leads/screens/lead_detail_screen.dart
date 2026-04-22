@@ -257,7 +257,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         _lead.status != 'CONVERTIDO' && _lead.status != 'ATIVO';
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text(_lead.nome),
         actions: [
           PopupMenuButton<String>(

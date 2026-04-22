@@ -13,7 +13,10 @@ class AssinaturaScreen extends ConsumerWidget {
     final planosAsync = ref.watch(planosProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Planos')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Planos')),
       body: planosAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),

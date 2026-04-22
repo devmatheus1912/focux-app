@@ -27,7 +27,10 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     
     if (provider.isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Plano de Sucesso')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Plano de Sucesso')),
         body: const SkeletonList(count: 3),
       );
     }
@@ -35,7 +38,10 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     final plano = provider.plano;
     if (plano == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Plano de Sucesso')),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,title: const Text('Plano de Sucesso')),
         body: const EmptyStateWidget(
           icon: Icons.flag_outlined,
           title: 'Nenhum Plano Ativo',
@@ -45,7 +51,10 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     }
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Plano de Sucesso'),
       ),
       body: ListView(

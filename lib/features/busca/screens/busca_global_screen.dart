@@ -112,7 +112,10 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
     final query = ref.watch(buscaQueryProvider);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: TextField(
           controller: _ctrl,
           autofocus: true,
