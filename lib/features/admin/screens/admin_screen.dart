@@ -23,7 +23,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 4, vsync: this);
+    _tabs = TabController(length: 6, vsync: this);
     _tabs.addListener(() {
       if (!_tabs.indexIsChanging) {
         final idx = _tabs.index;
@@ -195,6 +195,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen>
             Tab(icon: Icon(Icons.monitor_heart), text: 'Monitor'),
             Tab(icon: Icon(Icons.trending_down), text: 'Churn Watch'),
             Tab(icon: Icon(Icons.people), text: 'Personais'),
+            Tab(icon: Icon(Icons.history), text: 'Auditoria'),
+            Tab(icon: Icon(Icons.toggle_on), text: 'Feature Flags'),
           ],
         ),
         actions: [
@@ -229,6 +231,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen>
                   personais: _personais,
                   onToggleAdmin: _toggleAdmin,
                 ),
+                const _AuditoriaTab(),
+                const _FeatureFlagsTab(),
               ],
             ),
     );
@@ -827,3 +831,316 @@ class _DetailRow extends StatelessWidget {
     );
   }
 }
+
+// ─── Tab 5: Auditoria ────────────────────────────────────────────────────────
+
+class _AuditoriaLog {
+  final int id;
+  final String acao;
+  final String? entidade;
+  final String? detalhes;
+  final String criadoEm;
+
+  _AuditoriaLog({
+    required this.id,
+    required this.acao,
+    this.entidade,
+    this.detalhes,
+    required this.criadoEm,
+  });
+
+  factory _AuditoriaLog.fromJson(Map<String, dynamic> j) => _AuditoriaLog(
+        id: j['id'] as int,
+        acao: j['acao'] as String? ?? '',
+        entidade: j['entidade'] as String?,
+        detalhes: j['detalhes'] as String?,
+        criadoEm: j['criadoEm'] as String? ?? '',
+      );
+}
+
+class _AuditoriaTab extends ConsumerStatefulWidget {
+  const _AuditoriaTab();
+
+  @override
+  ConsumerState<_AuditoriaTab> createState() => _AuditoriaTabState();
+}
+
+class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
+    with AutomaticKeepAliveClientMixin {
+  List<_AuditoriaLog> _logs = [];
+  bool _loading = true;
+  String? _erro;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() { _loading = true; _erro = null; });
+    try {
+      final dio = ref.read(apiClientProvider).dio;
+      final res = await dio.get('/api/auditoria?limit=100');
+      final list = (res.data as List? ?? [])
+          .map((e) => _AuditoriaLog.fromJson(e as Map<String, dynamic>))
+          .toList();
+      if (mounted) setState(() { _logs = list; _loading = false; });
+    } catch (e) {
+      if (mounted) setState(() { _erro = e.toString(); _loading = false; });
+    }
+  }
+
+  String _fmtDate(String iso) {
+    try {
+      final dt = DateTime.parse(iso);
+      return '${dt.day.toString().padLeft(2,'0')}/${dt.month.toString().padLeft(2,'0')}/${dt.year} ${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}';
+    } catch (_) { return iso; }
+  }
+
+  Color _acaoColor(String acao) {
+    if (acao.contains('DELETE') || acao.contains('EXCLUIR')) return Colors.red;
+    if (acao.contains('CREATE') || acao.contains('CRIAR')) return Colors.green;
+    if (acao.contains('UPDATE') || acao.contains('EDITAR')) return Colors.orange;
+    return Colors.blue;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_erro != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.history_toggle_off, size: 64, color: Colors.grey),
+            const SizedBox(height: 12),
+            Text('Sem dados de auditoria', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey)),
+            const SizedBox(height: 8),
+            Text('Endpoint /api/admin/auditoria não disponível', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Tentar novamente')),
+          ],
+        ),
+      );
+    }
+    if (_logs.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.history, size: 64, color: Colors.grey),
+            const SizedBox(height: 12),
+            const Text('Nenhuma ação auditada ainda.', style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: _logs.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemBuilder: (ctx, i) {
+          final log = _logs[i];
+          final cor = _acaoColor(log.acao);
+          return Card(
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: cor.withValues(alpha: 0.12),
+                child: Icon(Icons.security, color: cor, size: 20),
+              ),
+              title: Text(log.acao, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (log.entidade != null)
+                    Text('Entidade: ${log.entidade}', style: const TextStyle(fontSize: 12)),
+                  if (log.detalhes != null)
+                    Text(log.detalhes!, style: const TextStyle(fontSize: 11, color: Colors.grey), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(_fmtDate(log.criadoEm), style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                ],
+              ),
+              isThreeLine: true,
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ─── Tab 6: Feature Flags ────────────────────────────────────────────────────
+
+class _FeatureFlag {
+  final String nome;
+  final bool ativo;
+  final bool temOverride;
+
+  _FeatureFlag({
+    required this.nome,
+    required this.ativo,
+    this.temOverride = false,
+  });
+
+  factory _FeatureFlag.fromJson(Map<String, dynamic> j) => _FeatureFlag(
+        nome: j['nome'] as String? ?? '',
+        ativo: j['ativo'] as bool? ?? false,
+        temOverride: j['temOverride'] as bool? ?? false,
+      );
+}
+
+class _FeatureFlagsTab extends ConsumerStatefulWidget {
+  const _FeatureFlagsTab();
+
+  @override
+  ConsumerState<_FeatureFlagsTab> createState() => _FeatureFlagsTabState();
+}
+
+class _FeatureFlagsTabState extends ConsumerState<_FeatureFlagsTab>
+    with AutomaticKeepAliveClientMixin {
+  List<_FeatureFlag> _flags = [];
+  bool _loading = true;
+  String? _erro;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() { _loading = true; _erro = null; });
+    try {
+      final dio = ref.read(apiClientProvider).dio;
+      final res = await dio.get('/api/flags');
+      final list = (res.data as List? ?? [])
+          .map((e) => _FeatureFlag.fromJson(e as Map<String, dynamic>))
+          .toList();
+      if (mounted) setState(() { _flags = list; _loading = false; });
+    } catch (e) {
+      if (mounted) setState(() { _erro = e.toString(); _loading = false; });
+    }
+  }
+
+  Future<void> _toggle(_FeatureFlag flag) async {
+    try {
+      final dio = ref.read(apiClientProvider).dio;
+      await dio.put('/api/flags/global/${flag.nome}?ativo=${!flag.ativo}');
+      _load();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
+    }
+  }
+
+  Future<void> _criarFlag() async {
+    final nomeCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('Nova Feature Flag', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            TextField(controller: nomeCtrl, decoration: const InputDecoration(labelText: 'Nome da flag (ex: NOVA_IA)', border: OutlineInputBorder())),
+            const SizedBox(height: 12),
+            TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Descrição', border: OutlineInputBorder())),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                if (nomeCtrl.text.trim().isEmpty) return;
+                try {
+                  final dio = ref.read(apiClientProvider).dio;
+                  await dio.put('/api/flags/global/${nomeCtrl.text.trim().toUpperCase()}?ativo=false');
+                  _load();
+                } catch (e) {
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+                }
+              },
+              child: const Text('Criar Flag'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    if (_loading) return const Center(child: CircularProgressIndicator());
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _criarFlag,
+        icon: const Icon(Icons.add),
+        label: const Text('Nova Flag'),
+      ),
+      body: _erro != null || _flags.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.toggle_off, size: 64, color: Colors.grey.shade400),
+                  const SizedBox(height: 12),
+                  Text(
+                    _flags.isEmpty ? 'Nenhuma feature flag cadastrada.' : 'Sem dados disponíveis',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Recarregar')),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _load,
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                itemCount: _flags.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (ctx, i) {
+                  final flag = _flags[i];
+                  return Card(
+                    child: SwitchListTile(
+                      secondary: CircleAvatar(
+                        backgroundColor: flag.ativo
+                            ? Colors.green.withValues(alpha: 0.12)
+                            : Colors.grey.withValues(alpha: 0.12),
+                        child: Icon(
+                          flag.ativo ? Icons.toggle_on : Icons.toggle_off,
+                          color: flag.ativo ? Colors.green : Colors.grey,
+                        ),
+                      ),
+                      title: Text(flag.nome, style: const TextStyle(fontWeight: FontWeight.w700, fontFamily: 'monospace')),
+                      subtitle: Text(
+                        flag.temOverride ? 'Override por tenant ativo' : 'Flag global',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      value: flag.ativo,
+                      onChanged: (_) => _toggle(flag),
+                    ),
+                  );
+                },
+              ),
+            ),
+    );
+  }
+}
+
