@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 
@@ -11,7 +13,8 @@ class EditarAlunoScreen extends ConsumerStatefulWidget {
   ConsumerState<EditarAlunoScreen> createState() => _EditarAlunoScreenState();
 }
 
-class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
+class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nome;
   late final TextEditingController _email;
@@ -21,6 +24,8 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
   String? _genero;
   String? _tipoConsultoria;
   bool _salvando = false;
+
+  late final AnimationController _entryCtrl;
 
   @override
   void initState() {
@@ -32,6 +37,8 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
     _objetivo = TextEditingController(text: widget.aluno.objetivo ?? '');
     _genero = widget.aluno.genero;
     _tipoConsultoria = widget.aluno.tipoConsultoria ?? 'ONLINE';
+
+    _entryCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500))..forward();
   }
 
   @override
@@ -41,12 +48,14 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
     _telefone.dispose();
     _whatsapp.dispose();
     _objetivo.dispose();
+    _entryCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _salvar() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _salvando = true);
+    HapticFeedback.mediumImpact();
     try {
       final repo = AlunoRepository(ref.read(apiClientProvider));
       await repo.atualizarAluno(widget.aluno.id, {
@@ -59,8 +68,9 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
         'tipoConsultoria': _tipoConsultoria,
       });
       if (mounted) {
+        HapticFeedback.heavyImpact();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Aluno atualizado com sucesso!')),
+          const SnackBar(content: Text('Aluno atualizado!')),
         );
         Navigator.of(context).pop(true);
       }
@@ -77,98 +87,175 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
-        title: const Text('Editar Aluno'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text('Editar Aluno', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         actions: [
-          if (_salvando)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-            )
-          else
-            TextButton(
-              onPressed: _salvar,
-              child: const Text('Salvar', style: TextStyle(fontWeight: FontWeight.w700)),
-            ),
+          _salvando
+              ? const Padding(padding: EdgeInsets.all(16), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+              : TextButton(
+                  onPressed: _salvar,
+                  child: Text('Salvar', style: TextStyle(color: EagleTokens.brand, fontWeight: FontWeight.w700, fontSize: 15)),
+                ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Informações básicas', style: theme.textTheme.titleMedium),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _nome,
-                decoration: const InputDecoration(labelText: 'Nome completo *'),
-                validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _email,
-                decoration: const InputDecoration(labelText: 'E-mail *'),
-                keyboardType: TextInputType.emailAddress,
-                validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _telefone,
-                decoration: const InputDecoration(labelText: 'Telefone'),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _whatsapp,
-                decoration: const InputDecoration(labelText: 'WhatsApp'),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 20),
-              Text('Perfil do aluno', style: theme.textTheme.titleMedium),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _objetivo,
-                decoration: const InputDecoration(labelText: 'Objetivo'),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: _genero,
-                decoration: const InputDecoration(labelText: 'Gênero'),
-                items: const [
-                  DropdownMenuItem(value: 'MASCULINO', child: Text('Masculino')),
-                  DropdownMenuItem(value: 'FEMININO', child: Text('Feminino')),
-                  DropdownMenuItem(value: 'OUTRO', child: Text('Outro')),
-                ],
-                onChanged: (v) => setState(() => _genero = v),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: _tipoConsultoria,
-                decoration: const InputDecoration(labelText: 'Tipo de consultoria'),
-                items: const [
-                  DropdownMenuItem(value: 'ONLINE', child: Text('Online')),
-                  DropdownMenuItem(value: 'PRESENCIAL', child: Text('Presencial')),
-                  DropdownMenuItem(value: 'HIBRIDO', child: Text('Híbrido')),
-                ],
-                onChanged: (v) => setState(() => _tipoConsultoria = v),
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _salvando ? null : _salvar,
-                  child: Text(_salvando ? 'Salvando...' : 'Salvar alterações'),
+      body: FadeTransition(
+        opacity: CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Avatar + name header
+                Center(
+                  child: Column(children: [
+                    CircleAvatar(
+                      radius: 36,
+                      backgroundColor: EagleTokens.brand.withValues(alpha: 0.12),
+                      child: Text(
+                        widget.aluno.nome.isNotEmpty ? widget.aluno.nome[0].toUpperCase() : '?',
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: EagleTokens.brand),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(widget.aluno.nome, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.darkInk : EagleTokens.ink)),
+                  ]),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 28),
+                _SectionHeader(label: 'INFORMAÇÕES BÁSICAS', icon: Icons.person_outline, isDark: isDark),
+                const SizedBox(height: 16),
+                _FxFormField(controller: _nome, label: 'Nome completo *', icon: Icons.person_outline, isDark: isDark, validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null, textCapitalization: TextCapitalization.words),
+                const SizedBox(height: 14),
+                _FxFormField(controller: _email, label: 'E-mail *', icon: Icons.alternate_email, isDark: isDark, keyboardType: TextInputType.emailAddress, validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null),
+                const SizedBox(height: 14),
+                _FxFormField(controller: _telefone, label: 'Telefone', icon: Icons.phone_outlined, isDark: isDark, keyboardType: TextInputType.phone),
+                const SizedBox(height: 14),
+                _FxFormField(controller: _whatsapp, label: 'WhatsApp', icon: Icons.chat_outlined, isDark: isDark, keyboardType: TextInputType.phone),
+
+                const SizedBox(height: 28),
+                _SectionHeader(label: 'PERFIL DO ALUNO', icon: Icons.tune, isDark: isDark),
+                const SizedBox(height: 16),
+                _FxFormField(controller: _objetivo, label: 'Objetivo', icon: Icons.flag_outlined, isDark: isDark, maxLines: 2),
+                const SizedBox(height: 14),
+
+                // Gender chips
+                Text('Gênero', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: ['MASCULINO', 'FEMININO', 'OUTRO'].map((g) {
+                    final sel = _genero == g;
+                    return ChoiceChip(
+                      label: Text(g[0] + g.substring(1).toLowerCase()),
+                      selected: sel,
+                      onSelected: (s) => setState(() => _genero = s ? g : null),
+                      selectedColor: EagleTokens.brand.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(color: sel ? EagleTokens.brand : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), fontWeight: sel ? FontWeight.w600 : FontWeight.w400),
+                      side: BorderSide(color: sel ? EagleTokens.brand.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    );
+                  }).toList(),
+                ),
+
+                const SizedBox(height: 14),
+                Text('Consultoria', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [('ONLINE', 'Online'), ('PRESENCIAL', 'Presencial'), ('HIBRIDO', 'Híbrido')].map((e) {
+                    final sel = _tipoConsultoria == e.$1;
+                    return ChoiceChip(
+                      label: Text(e.$2),
+                      selected: sel,
+                      onSelected: (s) => setState(() => _tipoConsultoria = s ? e.$1 : null),
+                      selectedColor: EagleTokens.brand.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(color: sel ? EagleTokens.brand : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), fontWeight: sel ? FontWeight.w600 : FontWeight.w400),
+                      side: BorderSide(color: sel ? EagleTokens.brand.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    );
+                  }).toList(),
+                ),
+
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity, height: 54,
+                  child: ElevatedButton(
+                    onPressed: _salvando ? null : _salvar,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: EagleTokens.brand,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                    child: Text(_salvando ? 'Salvando...' : 'Salvar alterações', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isDark;
+  const _SectionHeader({required this.label, required this.icon, required this.isDark});
+  @override
+  Widget build(BuildContext context) => Row(children: [
+    Icon(icon, size: 16, color: EagleTokens.brand),
+    const SizedBox(width: 8),
+    Text(label, style: TextStyle(color: EagleTokens.brand, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+  ]);
+}
+
+class _FxFormField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final IconData icon;
+  final bool isDark;
+  final String? hint;
+  final TextInputType? keyboardType;
+  final TextCapitalization textCapitalization;
+  final int maxLines;
+  final String? Function(String?)? validator;
+  const _FxFormField({required this.controller, required this.label, required this.icon, required this.isDark, this.hint, this.keyboardType, this.textCapitalization = TextCapitalization.none, this.maxLines = 1, this.validator});
+
+  @override
+  Widget build(BuildContext context) => TextFormField(
+    controller: controller,
+    keyboardType: keyboardType,
+    textCapitalization: textCapitalization,
+    maxLines: maxLines,
+    validator: validator,
+    style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 15),
+    cursorColor: EagleTokens.brand,
+    decoration: InputDecoration(
+      labelText: label,
+      hintText: hint,
+      prefixIcon: Icon(icon, size: 20, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+      filled: true,
+      fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+      labelStyle: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
+      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.bad)),
+      errorStyle: const TextStyle(color: EagleTokens.bad, fontSize: 11),
+    ),
+  );
 }
