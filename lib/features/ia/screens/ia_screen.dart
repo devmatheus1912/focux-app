@@ -22,19 +22,37 @@ class _IaScreenState extends ConsumerState<IaScreen> with SingleTickerProviderSt
   void dispose() { _tabs.dispose(); super.dispose(); }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('IA Focux'),
-      bottom: TabBar(controller: _tabs, tabs: const [
-        Tab(icon: Icon(Icons.fitness_center), text: 'Treino'),
-        Tab(icon: Icon(Icons.restaurant_menu), text: 'Dieta'),
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      appBar: AppBar(
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        elevation: 0,
+        title: Row(children: [
+          Container(width: 32, height: 32, decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.auto_awesome, color: EagleTokens.brand, size: 18)),
+          const SizedBox(width: 10),
+          Text('IA Focux', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
+        ]),
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
+        bottom: TabBar(
+          controller: _tabs,
+          indicatorColor: EagleTokens.brand,
+          labelColor: EagleTokens.brand,
+          unselectedLabelColor: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          indicatorWeight: 2.5,
+          tabs: const [
+            Tab(icon: Icon(Icons.fitness_center), text: 'Treino'),
+            Tab(icon: Icon(Icons.restaurant_menu), text: 'Dieta'),
+          ],
+        ),
+      ),
+      body: TabBarView(controller: _tabs, children: [
+        _GerarTreinoTab(alunoId: widget.alunoId),
+        _GerarDietaTab(alunoId: widget.alunoId),
       ]),
-    ),
-    body: TabBarView(controller: _tabs, children: [
-      _GerarTreinoTab(alunoId: widget.alunoId),
-      _GerarDietaTab(alunoId: widget.alunoId),
-    ]),
-  );
+    );
+  }
 }
 
 class _GerarTreinoTab extends ConsumerStatefulWidget {
