@@ -256,6 +256,7 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                             _GridBtn(icon: Icons.people_alt, label: 'Funil', onTap: () => context.push('/leads')),
                             _GridBtn(icon: Icons.warning_amber_rounded, label: 'Alertas', onTap: () => context.push('/alertas')),
                             _GridBtn(icon: Icons.psychology, label: 'Copiloto IA', onTap: () => context.push('/ia/copiloto')),
+                            _GridBtn(icon: Icons.speed, label: 'Qualidade', onTap: () => context.push('/dashboard/qualidade')),
                             if (ref.watch(isAdminProvider))
                               _GridBtn(icon: Icons.admin_panel_settings, label: 'Admin', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScreen()))),
                           ],

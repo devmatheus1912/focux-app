@@ -52,6 +52,10 @@ import '../../features/relatorio/screens/relatorio_global_screen.dart';
 import '../../features/avaliacao/screens/evolucao_comparativo_screen.dart';
 import '../../features/agenda/screens/agenda_aluno_screen.dart';
 import '../../features/feedback/screens/feedback_video_screen.dart';
+import '../../features/busca/screens/busca_global_screen.dart';
+import '../../features/analytics/screens/analytics_screen.dart';
+import '../../features/trilhas/screens/trilhas_screen.dart';
+import '../../features/dashboard/screens/qualidade_operacional_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -76,6 +80,10 @@ class AppRouter {
       GoRoute(
         path: '/dashboard/aluno',
         builder: (context, state) => const AlunoDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/dashboard/qualidade',
+        builder: (context, state) => const QualidadeOperacionalScreen(),
       ),
       GoRoute(
         path: '/alunos',
@@ -296,6 +304,21 @@ class AppRouter {
       GoRoute(
         path: '/alunos/:id/feedback-videos',
         builder: (context, state) => FeedbackVideoScreen(
+          alunoId: int.parse(state.pathParameters['id']!),
+          alunoNome: state.extra as String? ?? 'Aluno',
+        ),
+      ),
+      GoRoute(
+        path: '/busca',
+        builder: (context, state) => const BuscaGlobalScreen(),
+      ),
+      GoRoute(
+        path: '/analytics',
+        builder: (context, state) => const AnalyticsScreen(),
+      ),
+      GoRoute(
+        path: '/alunos/:id/trilhas',
+        builder: (context, state) => TrilhasScreen(
           alunoId: int.parse(state.pathParameters['id']!),
           alunoNome: state.extra as String? ?? 'Aluno',
         ),
