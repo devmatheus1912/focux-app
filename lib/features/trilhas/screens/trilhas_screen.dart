@@ -66,7 +66,7 @@ class TrilhaModel {
 
 final trilhasAlunoProvider = FutureProvider.family<List<TrilhaModel>, int>((ref, alunoId) async {
   final api = ref.read(apiClientProvider);
-  final res = await api.get('/api/trilhas/aluno/$alunoId');
+  final res = await api.dio.get('/api/trilhas/aluno/$alunoId');
   return (res.data as List).map((e) => TrilhaModel.fromJson(e as Map<String, dynamic>)).toList();
 });
 
@@ -177,7 +177,7 @@ class TrilhasScreen extends ConsumerWidget {
                   onPressed: () async {
                     if (tituloCtrl.text.trim().isEmpty) return;
                     final api = ref.read(apiClientProvider);
-                    await api.post('/api/trilhas', data: {
+                    await api.dio.post('/api/trilhas', data: {
                       'alunoId': alunoId,
                       'titulo': tituloCtrl.text.trim(),
                       'descricao': descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
@@ -308,7 +308,7 @@ class _MarcoTile extends StatelessWidget {
             ? null
             : () async {
                 final api = ref.read(apiClientProvider);
-                await api.post('/api/trilhas/$trilhaId/marcos/${marco.id}/concluir');
+                await api.dio.post('/api/trilhas/$trilhaId/marcos/${marco.id}/concluir');
                 ref.invalidate(trilhasAlunoProvider(alunoId));
               },
       ),

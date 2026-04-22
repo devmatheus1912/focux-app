@@ -42,7 +42,13 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Visão Geral'),
+        title: dashboardAsync.when(
+          data: (data) => data.logoUrl != null && data.logoUrl!.isNotEmpty
+              ? Image.network(data.logoUrl!, height: 32, errorBuilder: (_, __, ___) => Text(data.nomePersonal ?? 'Visão Geral'))
+              : Text(data.nomePersonal ?? 'Visão Geral'),
+          loading: () => const Text('Visão Geral'),
+          error: (_, __) => const Text('Visão Geral'),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),

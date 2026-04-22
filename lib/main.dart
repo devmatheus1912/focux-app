@@ -48,6 +48,10 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
         final hex = perfil.corPrimaria!.replaceFirst('#', '0xFF');
         ref.read(primaryColorProvider.notifier).state = Color(int.parse(hex));
       }
+      if (perfil.logoUrl != null && perfil.logoUrl!.isNotEmpty) {
+        ref.read(logoUrlProvider.notifier).state = perfil.logoUrl;
+      }
+      ref.read(personalNameProvider.notifier).state = perfil.nome;
     } catch (e) {
       // Ignora erro se não logado
     }

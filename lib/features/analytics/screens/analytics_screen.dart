@@ -38,7 +38,7 @@ class AnalyticsData {
 
 final analyticsProvider = FutureProvider<AnalyticsData>((ref) async {
   final api = ref.read(apiClientProvider);
-  final res = await api.get('/api/analytics');
+  final res = await api.dio.get('/api/analytics');
   return AnalyticsData.fromJson(res.data as Map<String, dynamic>);
 });
 

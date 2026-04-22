@@ -57,7 +57,9 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
       final results = await Future.wait([
         repo.aderencia(widget.alunoId, dias: _dias,
             inicio: _rangeCustom?.start, fim: _rangeCustom?.end),
-        repo.comparativo(widget.alunoId, dias: _dias).catchError((_) => null),
+        repo.comparativo(widget.alunoId, dias: _dias)
+            .then<ComparativoPeriodo?>((v) => v)
+            .catchError((_) => null as ComparativoPeriodo?),
       ]);
       if (mounted) {
         setState(() {

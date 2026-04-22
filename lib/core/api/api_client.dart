@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import '../storage/secure_storage.dart';
+import 'offline_sync_service.dart';
+import 'dart:io';
 
 class ApiClient {
   static const _baseUrl = 'https://focux-backend-production.up.railway.app';
@@ -22,6 +24,23 @@ class ApiClient {
         handler.next(options);
       },
       onError: (DioException e, handler) async {
+        if (e.type == DioExceptionType.connectionError ||
+            e.type == DioExceptionType.connectionTimeout ||
+            e.error is SocketException) {
+          
+          final method = e.requestOptions.method.toUpperCase();
+          if (method == 'POST' || method == 'PUT' || method == 'DELETE') {
+            await OfflineSyncService.enqueueRequest(e.requestOptions);
+            
+            // Simula um sucesso (202 Accepted) para a UI não quebrar e saber que foi pra fila
+            return handler.resolve(Response(
+              requestOptions: e.requestOptions,
+              statusCode: 202,
+              data: {'status': 'queued', 'message': 'Offline. Sincronizará quando houver rede.'},
+            ));
+          }
+        }
+
         if (e.requestOptions.path != '/api/suporte/analisar-erro' &&
             !e.requestOptions.path.contains('/auth/')) {
           try {
@@ -40,6 +59,9 @@ class ApiClient {
         handler.next(e);
       },
     ));
+
+    // Tenta sincronizar a fila quando a api client for instanciada
+    Future.microtask(() => OfflineSyncService.syncPendingRequests(_dio));
   }
 
   Dio get dio => _dio;

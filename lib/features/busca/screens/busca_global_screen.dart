@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dio/dio.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 
 // ─── Model ───────────────────────────────────────────────────────────────────
@@ -48,7 +47,7 @@ final buscaResultadoProvider = FutureProvider.autoDispose<BuscaGlobalResult?>((r
   final query = ref.watch(buscaQueryProvider);
   if (query.trim().length < 2) return null;
   final api = ref.read(apiClientProvider);
-  final res = await api.get('/api/busca?q=${Uri.encodeComponent(query)}');
+  final res = await api.dio.get('/api/busca?q=${Uri.encodeComponent(query)}');
   return BuscaGlobalResult.fromJson(res.data as Map<String, dynamic>);
 });
 

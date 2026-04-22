@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../auth/providers/auth_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -32,7 +32,7 @@ class PermissaoModel {
 
 final permissoesProvider = FutureProvider<List<PermissaoModel>>((ref) async {
   final api = ref.read(apiClientProvider);
-  final res = await api.get('/api/rbac/permissoes');
+  final res = await api.dio.get('/api/rbac/permissoes');
   return (res.data as List).map((e) => PermissaoModel.fromJson(e)).toList();
 });
 
@@ -159,7 +159,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                 onPressed: () async {
                   if (usuarioIdCtrl.text.isEmpty) return;
                   final api = ref.read(apiClientProvider);
-                  await api.post('/api/rbac/permissoes', data: {
+                  await api.dio.post('/api/rbac/permissoes', data: {
                     'usuarioConvidadoId': int.parse(usuarioIdCtrl.text),
                     'recurso': recursoSelecionado,
                     'nivelAcesso': nivelSelecionado,
@@ -178,7 +178,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
 
   void _revogarAcesso(WidgetRef ref, int usuarioId, String recurso) async {
     final api = ref.read(apiClientProvider);
-    await api.delete('/api/rbac/permissoes/$recurso?usuarioConvidadoId=$usuarioId');
+    await api.dio.delete('/api/rbac/permissoes/$recurso?usuarioConvidadoId=$usuarioId');
     ref.invalidate(permissoesProvider);
   }
 }

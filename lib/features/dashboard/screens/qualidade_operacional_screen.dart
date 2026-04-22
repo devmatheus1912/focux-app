@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../auth/providers/auth_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 // ─── Model ───────────────────────────────────────────────────────────────────
 
@@ -35,7 +35,7 @@ class QualidadeOperacionalData {
 
 final qualidadeProvider = FutureProvider<QualidadeOperacionalData>((ref) async {
   final api = ref.read(apiClientProvider);
-  final res = await api.get('/api/dashboard/qualidade');
+  final res = await api.dio.get('/api/dashboard/qualidade');
   return QualidadeOperacionalData.fromJson(res.data as Map<String, dynamic>);
 });
 

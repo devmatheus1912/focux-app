@@ -202,9 +202,9 @@ class AppTheme {
 
   static ThemeData buildDarkTheme(Color primary) {
     final cs = ColorScheme.fromSeed(
-      seedColor: _royalBlue,
+      seedColor: primary,
       brightness: Brightness.dark,
-      primary: _royalBlue,
+      primary: primary,
       secondary: const Color(0xFF0097A7),
       tertiary: const Color(0xFF00897B),
       error: const Color(0xFFEF5350),
@@ -267,7 +267,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _royalBlue, width: 1.5),
+          borderSide: BorderSide(color: primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -280,7 +280,7 @@ class AppTheme {
       // ── Botão primário ──
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: _royalBlue,
+          backgroundColor: primary,
           foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -292,10 +292,10 @@ class AppTheme {
       // ── Botão outlined ──
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: _royalBlue,
+          foregroundColor: primary,
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          side: const BorderSide(color: _royalBlue, width: 1.5),
+          side: BorderSide(color: primary, width: 1.5),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
@@ -303,7 +303,7 @@ class AppTheme {
       // ── Botão texto ──
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: _royalBlue,
+          foregroundColor: primary,
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
@@ -311,7 +311,7 @@ class AppTheme {
       // ── Chips ──
       chipTheme: ChipThemeData(
         backgroundColor: const Color(0xFF252540),
-        selectedColor: _royalBlue.withValues(alpha: 0.3),
+        selectedColor: primary.withValues(alpha: 0.3),
         labelStyle: const TextStyle(fontSize: 13, color: _darkOnSurface),
         side: const BorderSide(color: _darkOutline),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -354,7 +354,7 @@ class AppTheme {
 
       // ── FAB ──
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: _royalBlue,
+        backgroundColor: primary,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 2,
