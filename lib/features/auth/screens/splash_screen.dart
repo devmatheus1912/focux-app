@@ -123,37 +123,42 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Pulsating ring around logo
+                // Anel pulsante + ícone F grande
                 AnimatedBuilder(
                   animation: _pulseAnim,
                   builder: (context, child) {
-                    return Container(
-                      width: 150 * _pulseAnim.value,
-                      height: 150 * _pulseAnim.value,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: EagleTokens.brand.withValues(alpha: 0.25),
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: EagleTokens.brand.withValues(alpha: 0.15 * _pulseAnim.value),
-                            blurRadius: 40,
-                            spreadRadius: 10,
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Anel externo pulsante
+                        Container(
+                          width: 180 * _pulseAnim.value,
+                          height: 180 * _pulseAnim.value,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: EagleTokens.brand.withValues(alpha: 0.2),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: EagleTokens.brand.withValues(alpha: 0.12 * _pulseAnim.value),
+                                blurRadius: 60,
+                                spreadRadius: 20,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: Center(
-                        child: const FxLogo(iconSize: 110, showLabel: false),
-                      ),
+                        ),
+                        // Ícone F grande
+                        FxLogo(iconSize: 100, showLabel: false),
+                      ],
                     );
                   },
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 36),
 
-                // Nome da marca com fade
+                // Nome: "Focux Personal" grande com fade
                 FadeTransition(
                   opacity: _fadeAnim,
                   child: const Column(
@@ -165,18 +170,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                               text: 'Focux',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 36,
+                                fontSize: 38,
                                 fontWeight: FontWeight.w700,
-                                letterSpacing: -0.5,
+                                letterSpacing: -1,
                               ),
                             ),
                             TextSpan(
                               text: ' Personal',
                               style: TextStyle(
                                 color: Color(0xFF8A94AE),
-                                fontSize: 20,
+                                fontSize: 22,
                                 fontWeight: FontWeight.w400,
-                                letterSpacing: 0.5,
+                                letterSpacing: 0.3,
                               ),
                             ),
                           ],
@@ -186,7 +191,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       Text(
                         'Performance Intelligence',
                         style: TextStyle(
-                          color: Color(0xFF8A94AE),
+                          color: Color(0xFF4A5578),
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                           letterSpacing: 2,
