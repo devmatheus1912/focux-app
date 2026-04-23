@@ -67,9 +67,9 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/focuxlogopremium.png"
+  image_path: "assets/images/logo_icon.png"
   adaptive_icon_background: "#0A0F1E"
-  adaptive_icon_foreground: "assets/images/focuxlogopremium.png"
+  adaptive_icon_foreground: "assets/images/logo_icon.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -87,7 +87,10 @@ flutter:
     - assets/images/logo_focux_v2.png
     - assets/images/focuxlogopremium.png
     - assets/images/focux_logo_transparent.png
-
+    - assets/images/logo_icon_transparent.png
+    - assets/images/logo_horizontal_transparent.png
+    - assets/images/logo_icon.png
+    - assets/images/logo_full.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

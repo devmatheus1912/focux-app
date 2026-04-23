@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FOCUX PERSONAL — Logo Horizontal
+  Canvas: 3000×2000 px | Background: #05070D
+  Layout: F icon (0–1320px) | gap 180px | text block (1500–2900px)
+  Fonts: Inter ExtraBold / Bold / Regular — embed via @font-face or substitute Montserrat
+  Palette primary: #3B82F6 #60A5FA #22D3EE
+  Palette neutral: #05070D #0B1220 #E5E7EB #9CA3AF
+  Layers: background | icon-F | text-FOCUX | text-PERSONAL | slogan
+-->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 3000 2000" width="3000" height="2000">
+  <defs>
+    <style>
+      /* ── Color tokens ── */
+      :root {
+        --c-bg:      #05070D;
+        --c-dark2:   #0B1220;
+        --c-primary: #3B82F6;
+        --c-light:   #60A5FA;
+        --c-cyan:    #22D3EE;
+        --c-white:   #FFFFFF;
+        --c-soft:    #E5E7EB;
+        --c-mid:     #9CA3AF;
+        --c-muted:   #6B7280;
+        --c-dark3:   #374151;
+      }
+      /* ── Animated circuit dot pulse ── */
+      @keyframes pulse {
+        0%,100% { opacity: 0.6; }
+        50%      { opacity: 1.0; }
+      }
+      .dot-pulse { animation: pulse 2.4s ease-in-out infinite; }
+      .dot-pulse-b { animation: pulse 3.1s ease-in-out infinite 0.6s; }
+      .dot-pulse-c { animation: pulse 2.8s ease-in-out infinite 1.2s; }
+    </style>
+
+    <!-- ── Gradients ── -->
+    <linearGradient id="h-grad-body" x1="0%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%"   stop-color="#1C3FAA"/>
+      <stop offset="45%"  stop-color="#1A3ABF"/>
+      <stop offset="100%" stop-color="#080E2E"/>
+    </linearGradient>
+
+    <linearGradient id="h-grad-gloss-top" x1="5%" y1="0%" x2="95%" y2="100%">
+      <stop offset="0%"   stop-color="#EFF6FF"/>
+      <stop offset="28%"  stop-color="#BFDBFE"/>
+      <stop offset="72%"  stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.55"/>
+    </linearGradient>
+
+    <linearGradient id="h-grad-gloss-mid" x1="5%" y1="0%" x2="95%" y2="100%">
+      <stop offset="0%"   stop-color="#93C5FD"/>
+      <stop offset="55%"  stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.5"/>
+    </linearGradient>
+
+    <radialGradient id="h-ambient" cx="44%" cy="50%" r="42%">
+      <stop offset="0%"   stop-color="#1D4ED8" stop-opacity="0.38"/>
+      <stop offset="100%" stop-color="#05070D"  stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="h-rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#22D3EE"/>
+      <stop offset="55%"  stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+
+    <!-- X letter gradient overlay -->
+    <linearGradient id="x-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#22D3EE"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+
+    <!-- ── Filters ── -->
+    <filter id="h-neon" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="30" result="b2"/>
+      <feMerge>
+        <feMergeNode in="b2"/>
+        <feMergeNode in="b1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="h-dot-glow" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="h-soft" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="text-glow" x="-10%" y="-30%" width="120%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="cyan-glow" x="-15%" y="-40%" width="130%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- LAYER: background (transparent for export) -->
+  <rect id="background" width="3000" height="2000" fill="none"/>
+
+  <!-- Ambient glow centered on icon -->
+  <ellipse cx="660" cy="1000" rx="620" ry="580" fill="url(#h-ambient)"/>
+
+  <!-- Subtle grid texture -->
+  <g stroke="#0F1A35" stroke-width="1" opacity="0.35">
+    <line x1="0"    y1="500"  x2="3000" y2="500"/>
+    <line x1="0"    y1="1000" x2="3000" y2="1000"/>
+    <line x1="0"    y1="1500" x2="3000" y2="1500"/>
+    <line x1="500"  y1="0"    x2="500"  y2="2000"/>
+    <line x1="1000" y1="0"    x2="1000" y2="2000"/>
+    <line x1="1500" y1="0"    x2="1500" y2="2000"/>
+    <line x1="2000" y1="0"    x2="2000" y2="2000"/>
+    <line x1="2500" y1="0"    x2="2500" y2="2000"/>
+  </g>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- LAYER: icon-F (centered left, ~1300px wide)-->
+  <!-- F scaled ~1.3× from icon, centered 100–1380 -->
+  <!-- ══════════════════════════════════════════ -->
+  <g id="icon-F" transform="translate(60, 80) scale(1.30)">
+
+    <!-- F base shadow / 3D depth -->
+    <path fill="#020912" opacity="0.6" transform="translate(20,20)"
+      d="M 158,75 L 800,75 C 826,75 832,97 832,122 L 832,228 C 830,252 815,258 792,258
+         L 312,258 L 312,418 L 600,418 C 625,418 632,438 632,460
+         L 632,552 C 630,570 618,576 598,576 L 312,576 L 312,924
+         C 310,944 298,952 278,952 L 162,952 C 140,952 132,938 132,918
+         L 132,97 C 133,79 144,75 158,75 Z"/>
+
+    <!-- F main body -->
+    <path id="f-body-h"
+      d="M 158,75 L 800,75 C 826,75 832,97 832,122 L 832,228 C 830,252 815,258 792,258
+         L 312,258 L 312,418 L 600,418 C 625,418 632,438 632,460
+         L 632,552 C 630,570 618,576 598,576 L 312,576 L 312,924
+         C 310,944 298,952 278,952 L 162,952 C 140,952 132,938 132,918
+         L 132,97 C 133,79 144,75 158,75 Z"
+      fill="url(#h-grad-body)"/>
+
+    <!-- Gloss — top arm -->
+    <path id="gloss-top-h"
+      d="M 238,75 L 800,75 C 826,75 832,97 832,122 L 832,200
+         C 826,220 810,228 786,228 L 238,228 Z"
+      fill="url(#h-grad-gloss-top)" opacity="0.92"/>
+
+    <!-- Gloss shine streak -->
+    <path d="M 258,84 L 680,84 C 700,84 708,96 704,112 L 258,112 Z"
+      fill="white" opacity="0.18"/>
+
+    <!-- Gloss — middle arm -->
+    <path id="gloss-mid-h"
+      d="M 312,418 L 600,418 C 625,418 632,438 632,460 L 632,508
+         C 628,524 615,528 596,530 L 312,530 Z"
+      fill="url(#h-grad-gloss-mid)" opacity="0.88"/>
+
+    <!-- Neon rim -->
+    <path fill="none" stroke="url(#h-rim)" stroke-width="4"
+      filter="url(#h-neon)" opacity="0.82"
+      d="M 158,75 L 800,75 C 826,75 832,97 832,122 L 832,228 C 830,252 815,258 792,258
+         L 312,258 L 312,418 L 600,418 C 625,418 632,438 632,460
+         L 632,552 C 630,570 618,576 598,576 L 312,576 L 312,924
+         C 310,944 298,952 278,952 L 162,952 C 140,952 132,938 132,918
+         L 132,97 C 133,79 144,75 158,75 Z"/>
+
+    <!-- Circuit traces -->
+    <g stroke="#22D3EE" stroke-linecap="round" fill="none">
+      <line x1="132" y1="330" x2="230" y2="330" stroke-width="2"/>
+      <line x1="230" y1="330" x2="230" y2="375" stroke-width="2"/>
+      <line x1="230" y1="375" x2="282" y2="375" stroke-width="2"/>
+      <line x1="132" y1="460" x2="195" y2="460" stroke-width="1.8"/>
+      <line x1="195" y1="430" x2="195" y2="490" stroke-width="1.8"/>
+      <line x1="165" y1="280" x2="165" y2="400" stroke-width="1.6"/>
+      <line x1="165" y1="380" x2="215" y2="380" stroke-width="1.6"/>
+      <line x1="135" y1="640" x2="240" y2="640" stroke-width="1.5"/>
+      <line x1="240" y1="615" x2="240" y2="665" stroke-width="1.5"/>
+      <line x1="132" y1="710" x2="200" y2="710" stroke-width="1.4"/>
+      <line x1="200" y1="710" x2="200" y2="745" stroke-width="1.4"/>
+      <line x1="200" y1="745" x2="260" y2="745" stroke-width="1.4"/>
+    </g>
+
+    <!-- Circuit nodes -->
+    <g fill="#22D3EE" filter="url(#h-dot-glow)">
+      <circle cx="230" cy="330" r="5.5" class="dot-pulse"/>
+      <circle cx="230" cy="375" r="5"   class="dot-pulse-b"/>
+      <circle cx="195" cy="460" r="5.5" class="dot-pulse"/>
+      <circle cx="165" cy="380" r="4"   class="dot-pulse-c"/>
+      <circle cx="240" cy="640" r="5"   class="dot-pulse-b"/>
+      <circle cx="200" cy="745" r="4.5" class="dot-pulse"/>
+      <circle cx="260" cy="745" r="3.5" class="dot-pulse-c"/>
+    </g>
+
+    <!-- Ambient tiny dots -->
+    <g fill="#60A5FA" opacity="0.5">
+      <circle cx="155" cy="555" r="3.5"/>
+      <circle cx="178" cy="600" r="2.8"/>
+      <circle cx="155" cy="785" r="3"/>
+    </g>
+
+    <!-- Sun icon -->
+    <g transform="translate(728,132)" filter="url(#h-soft)">
+      <circle cx="0" cy="0" r="13" fill="#E5E7EB" opacity="0.92"/>
+      <g stroke="#E5E7EB" stroke-width="2.5" stroke-linecap="round" opacity="0.72">
+        <line x1="0" y1="-21" x2="0" y2="-27"/>
+        <line x1="0" y1="21"  x2="0" y2="27"/>
+        <line x1="-21" y1="0" x2="-27" y2="0"/>
+        <line x1="21"  y1="0" x2="27"  y2="0"/>
+        <line x1="-15" y1="-15" x2="-19" y2="-19"/>
+        <line x1="15"  y1="-15" x2="19"  y2="-19"/>
+        <line x1="-15" y1="15"  x2="-19" y2="19"/>
+        <line x1="15"  y1="15"  x2="19"  y2="19"/>
+      </g>
+    </g>
+
+    <!-- Moon icon -->
+    <g transform="translate(215,840)" filter="url(#h-dot-glow)">
+      <path d="M 0,-19 A 19,19 0 1,1 13.5,9.5 A 12.5,12.5 0 1,0 0,-19 Z"
+            fill="#22D3EE" opacity="0.9"/>
+    </g>
+
+    <!-- Heartbeat line -->
+    <polyline points="315,572 342,572 354,548 370,598 385,540 402,598 418,572 456,572"
+      stroke="#22D3EE" stroke-width="2.8" fill="none"
+      stroke-linecap="round" stroke-linejoin="round"
+      filter="url(#h-soft)" opacity="0.78"/>
+
+    <!-- Inner white rim -->
+    <path fill="none" stroke="white" stroke-width="1.5" opacity="0.10"
+      d="M 158,75 L 800,75 C 826,75 832,97 832,122 L 832,228 C 830,252 815,258 792,258
+         L 312,258 L 312,418 L 600,418 C 625,418 632,438 632,460
+         L 632,552 C 630,570 618,576 598,576 L 312,576 L 312,924
+         C 310,944 298,952 278,952 L 162,952 C 140,952 132,938 132,918
+         L 132,97 C 133,79 144,75 158,75 Z"/>
+  </g>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- LAYER: text block (x=1500, centered y)     -->
+  <!-- ══════════════════════════════════════════ -->
+  <g id="text-block" transform="translate(1500, 640)">
+
+    <!-- LAYER: text-FOCUX -->
+    <!-- "FOCUX" — white, ExtraBold, ~320px -->
+    <text id="text-FOCUX" x="0" y="0"
+      font-family="Inter, Montserrat, 'Arial Black', sans-serif"
+      font-size="310" font-weight="800"
+      letter-spacing="-4"
+      fill="#FFFFFF">FOCUX</text>
+
+    <!-- "X" gradient overlay — ciano to blue diagonal -->
+    <text x="0" y="0"
+      font-family="Inter, Montserrat, 'Arial Black', sans-serif"
+      font-size="310" font-weight="800"
+      letter-spacing="-4"
+      fill="url(#x-grad)"
+      opacity="0"
+      id="x-overlay">FOCUX</text>
+    <!-- Note: to apply gradient only on X, use clipPath in production.
+         Here we use a colored rect masked to the X column. -->
+    <rect x="1130" y="-310" width="360" height="320"
+      fill="url(#x-grad)" opacity="0.88"
+      style="mix-blend-mode:multiply">
+      <!-- Production: clip to text shape of X -->
+    </rect>
+
+    <!-- LAYER: text-PERSONAL -->
+    <!-- "PERSONAL" — blue, Bold, tracked -->
+    <text id="text-PERSONAL" x="0" y="100"
+      font-family="Inter, Montserrat, Arial, sans-serif"
+      font-size="118" font-weight="700"
+      letter-spacing="52"
+      fill="#60A5FA">PERSONAL</text>
+
+    <!-- Separator line -->
+    <line x1="0" y1="148" x2="1480" y2="148"
+      stroke="#1E3A8A" stroke-width="2" opacity="0.6"/>
+
+    <!-- LAYER: slogan -->
+    <!-- "PERFORMANCE GUIADA POR" white + "IA" cyan -->
+    <text id="slogan-main" x="0" y="218"
+      font-family="Inter, Montserrat, Arial, sans-serif"
+      font-size="110" font-weight="300"
+      letter-spacing="8"
+      fill="#E5E7EB">PERFORMANCE GUIADA POR </text>
+
+    <!-- "IA" in cyan with glow -->
+    <text id="slogan-ia" x="1262" y="218"
+      font-family="Inter, Montserrat, Arial, sans-serif"
+      font-size="110" font-weight="700"
+      letter-spacing="8"
+      fill="#22D3EE"
+      filter="url(#cyan-glow)">IA</text>
+  </g>
+
+  <!-- Vertical accent line between icon and text -->
+  <line x1="1440" y1="500" x2="1440" y2="1500"
+    stroke="#1E3A8A" stroke-width="2" opacity="0.45"/>
+
+</svg>

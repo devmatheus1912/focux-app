@@ -2,4 +2,5 @@
 <resources>
     <!-- Cor do ícone de notificação FCM -->
     <color name="notification_color">#FF5722</color>
+	<color name="ic_launcher_background">#0A0F1E</color>
 </resources>

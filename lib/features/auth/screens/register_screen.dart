@@ -1,11 +1,16 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/theme/design_tokens.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/widgets/fx_logo.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FOCUX PERSONAL — Premium Register Screen (Final Production)
+//
+// Aligned with login: same palette, glass, typography, grid
+// ─────────────────────────────────────────────────────────────────────────────
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -15,7 +20,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _nomeCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
@@ -24,32 +29,32 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   String? _error;
   bool _senhaVisivel = false;
 
-  // Password strength tracking
+  // Password strength
   double _senhaForca = 0;
 
-  late final AnimationController _bgCtrl;
-  late final AnimationController _formCtrl;
-  late final Animation<double> _formSlide;
-  late final Animation<double> _formFade;
+  late final AnimationController _entryCtrl;
+  late final Animation<double> _entrySlide;
+  late final Animation<double> _entryFade;
 
   @override
   void initState() {
     super.initState();
-
-    _bgCtrl = AnimationController(vsync: this, duration: const Duration(seconds: 12))..repeat();
-
-    _formCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
-    _formSlide = Tween<double>(begin: 50, end: 0).animate(
-      CurvedAnimation(parent: _formCtrl, curve: Curves.easeOutCubic),
+    _entryCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
     );
-    _formFade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _formCtrl, curve: const Interval(0.1, 1.0, curve: Curves.easeOut)),
+    _entrySlide = Tween<double>(begin: 32, end: 0).animate(
+      CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOutCubic),
     );
-
+    _entryFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _entryCtrl,
+        curve: const Interval(0.1, 1.0, curve: Curves.easeOut),
+      ),
+    );
     _senhaCtrl.addListener(_calcForca);
-
-    Future.delayed(const Duration(milliseconds: 200), () {
-      if (mounted) _formCtrl.forward();
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (mounted) _entryCtrl.forward();
     });
   }
 
@@ -65,7 +70,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   }
 
   Color get _forcaCor {
-    if (_senhaForca < 0.4) return const Color(0xFFFF8B8B);
+    if (_senhaForca < 0.4) return const Color(0xFFD4808F);
     if (_senhaForca < 0.7) return const Color(0xFFE2B46F);
     return const Color(0xFF6FE296);
   }
@@ -82,22 +87,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     _nomeCtrl.dispose();
     _emailCtrl.dispose();
     _senhaCtrl.dispose();
-    _bgCtrl.dispose();
-    _formCtrl.dispose();
+    _entryCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     HapticFeedback.mediumImpact();
 
     try {
       await ref.read(authProvider.notifier).register(
-        _nomeCtrl.text.trim(),
-        _emailCtrl.text.trim(),
-        _senhaCtrl.text,
-      );
+            _nomeCtrl.text.trim(),
+            _emailCtrl.text.trim(),
+            _senhaCtrl.text,
+          );
       if (mounted) {
         HapticFeedback.heavyImpact();
         context.go('/dashboard/personal');
@@ -110,15 +117,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
       } else if (e.toString().contains('DioException')) {
         msg = 'Falha na conexão com o servidor.';
       }
-      setState(() { _error = msg; });
+      setState(() => _error = msg);
     } finally {
-      if (mounted) setState(() { _loading = false; });
+      if (mounted) setState(() => _loading = false);
     }
   }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
+    final screenH = mq.size.height;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -126,139 +136,185 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // Animated gradient background
-            AnimatedBuilder(
-              animation: _bgCtrl,
-              builder: (context, _) {
-                final t = _bgCtrl.value;
-                return Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment(
-                        -1.0 + sin(t * 2 * pi) * 0.3,
-                        -1.0 + cos(t * 2 * pi) * 0.3,
-                      ),
-                      end: Alignment(
-                        1.0 + cos(t * 2 * pi) * 0.3,
-                        1.0 + sin(t * 2 * pi) * 0.3,
-                      ),
-                      colors: const [
-                        Color(0xFF0A0F1E),
-                        Color(0xFF0D1B5C),
-                        Color(0xFF1C3273),
-                        Color(0xFF0D1B5C),
-                        Color(0xFF0A0F1E),
-                      ],
-                    ),
-                  ),
-                );
-              },
+            // ── Layer 1: Deep gradient ──────────────────────────────────
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF020617),
+                    Color(0xFF040B1A),
+                    Color(0xFF0F172A),
+                  ],
+                  stops: [0.0, 0.45, 1.0],
+                ),
+              ),
             ),
 
-            // Grid overlay
-            CustomPaint(painter: _AuthGridPainter(), size: Size.infinite),
+            // ── Layer 2: Radial accent ──────────────────────────────────
+            Positioned(
+              top: -screenH * 0.12,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: screenH * 0.50,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 0.65,
+                    colors: [
+                      const Color(0xFF2F6BFF).withValues(alpha: 0.06),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
-            // Content
+            // ── Layer 3: Grid ───────────────────────────────────────────
+            CustomPaint(
+              painter: _PremiumGridPainter(),
+              size: Size.infinite,
+            ),
+
+            // ── Layer 4: Content ────────────────────────────────────────
             SafeArea(
               child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 padding: EdgeInsets.only(
-                  left: 28, right: 28,
-                  top: mq.size.height * 0.04,
+                  left: 28,
+                  right: 28,
+                  top: screenH * 0.035,
                   bottom: 32,
                 ),
                 child: AnimatedBuilder(
-                  animation: _formCtrl,
+                  animation: _entryCtrl,
                   builder: (context, child) => Transform.translate(
-                    offset: Offset(0, _formSlide.value),
-                    child: Opacity(opacity: _formFade.value, child: child),
+                    offset: Offset(0, _entrySlide.value),
+                    child:
+                        Opacity(opacity: _entryFade.value, child: child),
                   ),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Logo & Back button
+                        // ─── Header: Logo + Back ────────────────────
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
                           children: [
-                            const FxLogo(iconSize: 42, showLabel: true, horizontal: true, light: true),
+                            const FxLogo(
+                              iconSize: 42,
+                              showLabel: true,
+                              horizontal: true,
+                              light: true,
+                            ),
                             GestureDetector(
                               onTap: () => context.go('/login'),
                               child: Container(
-                                width: 42, height: 42,
+                                width: 42,
+                                height: 42,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.08),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                                  color: Colors.white
+                                      .withValues(alpha: 0.05),
+                                  borderRadius:
+                                      BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.white
+                                        .withValues(alpha: 0.08),
+                                  ),
                                 ),
-                                child: Icon(Icons.arrow_back, color: Colors.white.withValues(alpha: 0.7), size: 20),
+                                child: Icon(
+                                  Icons.arrow_back_rounded,
+                                  color: Colors.white
+                                      .withValues(alpha: 0.65),
+                                  size: 20,
+                                ),
                               ),
                             ),
                           ],
                         ),
 
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 28),
 
-                        // Title
-                        const Text(
+                        // ─── Title ──────────────────────────────────
+                        Text(
                           'Crie sua\nconta.',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 36,
-                            fontWeight: FontWeight.w600,
-                            height: 1.15,
-                            letterSpacing: -1,
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFFF0F4FF),
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                            height: 1.08,
+                            letterSpacing: -0.8,
                           ),
                         ),
+
                         const SizedBox(height: 10),
+
                         Text(
                           'Treine com dados. Evolua com inteligência.',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            fontSize: 15,
-                            height: 1.4,
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF8899B4),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
 
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 32),
 
-                        // Name field
-                        _FxTextField(
+                        // ─── Name ───────────────────────────────────
+                        _PremiumTextField(
                           controller: _nomeCtrl,
-                          label: 'Nome completo',
+                          label: 'NOME COMPLETO',
                           hint: 'Carlos Silva',
-                          icon: Icons.person_outline,
+                          icon: Icons.person_outline_rounded,
                           textCapitalization: TextCapitalization.words,
-                          validator: (v) => v == null || v.isEmpty ? 'Informe o nome' : null,
+                          textInputAction: TextInputAction.next,
+                          validator: (v) => v == null || v.isEmpty
+                              ? 'Informe o nome'
+                              : null,
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 16),
 
-                        // Email field
-                        _FxTextField(
+                        // ─── Email ──────────────────────────────────
+                        _PremiumTextField(
                           controller: _emailCtrl,
-                          label: 'E-mail profissional',
+                          label: 'E-MAIL PROFISSIONAL',
                           hint: 'personal@exemplo.com',
-                          icon: Icons.alternate_email,
+                          icon: Icons.alternate_email_rounded,
                           keyboardType: TextInputType.emailAddress,
-                          validator: (v) => v == null || v.isEmpty ? 'Informe o e-mail' : null,
+                          textInputAction: TextInputAction.next,
+                          validator: (v) => v == null || v.isEmpty
+                              ? 'Informe o e-mail'
+                              : null,
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 16),
 
-                        // Password field with strength meter
-                        _FxTextField(
+                        // ─── Password ───────────────────────────────
+                        _PremiumTextField(
                           controller: _senhaCtrl,
-                          label: 'Senha',
+                          label: 'SENHA',
                           hint: 'Mínimo 6 caracteres',
-                          icon: Icons.lock_outline,
+                          icon: Icons.lock_outline_rounded,
                           obscureText: !_senhaVisivel,
-                          validator: (v) => v != null && v.length < 6 ? 'Mínimo 6 caracteres' : null,
+                          textInputAction: TextInputAction.done,
+                          validator: (v) => v != null && v.length < 6
+                              ? 'Mínimo 6 caracteres'
+                              : null,
+                          onFieldSubmitted: (_) => _submit(),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _senhaVisivel ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                              color: Colors.white.withValues(alpha: 0.4),
+                              _senhaVisivel
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color:
+                                  Colors.white.withValues(alpha: 0.35),
                               size: 20,
                             ),
-                            onPressed: () => setState(() => _senhaVisivel = !_senhaVisivel),
+                            onPressed: () => setState(
+                                () => _senhaVisivel = !_senhaVisivel),
                           ),
                         ),
 
@@ -269,59 +325,96 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             children: [
                               Expanded(
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius:
+                                      BorderRadius.circular(4),
                                   child: LinearProgressIndicator(
                                     value: _senhaForca,
-                                    backgroundColor: Colors.white.withValues(alpha: 0.06),
+                                    backgroundColor: Colors.white
+                                        .withValues(alpha: 0.05),
                                     color: _forcaCor,
-                                    minHeight: 4,
+                                    minHeight: 3,
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Text(
                                 _forcaTexto,
-                                style: TextStyle(color: _forcaCor, fontSize: 11, fontWeight: FontWeight.w600),
+                                style: GoogleFonts.inter(
+                                  color: _forcaCor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ],
                           ),
                         ],
 
-                        // Error
+                        // ─── Error ──────────────────────────────────
                         if (_error != null) ...[
                           const SizedBox(height: 16),
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF9E2B2B).withValues(alpha: 0.15),
+                              color: const Color(0xFF3D1525)
+                                  .withValues(alpha: 0.40),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFF9E2B2B).withValues(alpha: 0.3)),
+                              border: Border.all(
+                                color: const Color(0xFF6B2F45)
+                                    .withValues(alpha: 0.25),
+                              ),
                             ),
-                            child: Row(children: [
-                              const Icon(Icons.error_outline, color: Color(0xFFFF8B8B), size: 18),
-                              const SizedBox(width: 10),
-                              Expanded(child: Text(_error!, style: const TextStyle(color: Color(0xFFFF8B8B), fontSize: 13))),
-                            ]),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.error_outline_rounded,
+                                  color: Color(0xFFD4808F),
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    _error!,
+                                    style: GoogleFonts.inter(
+                                      color: const Color(0xFFD4808F),
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
 
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
 
-                        // Terms
+                        // ─── Terms ──────────────────────────────────
                         Text.rich(
                           TextSpan(
-                            text: 'Ao criar sua conta, você concorda com os ',
-                            style: TextStyle(color: Colors.white.withValues(alpha: 0.35), fontSize: 12),
+                            text:
+                                'Ao criar sua conta, você concorda com os ',
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFF566580),
+                              fontSize: 12,
+                            ),
                             children: [
                               TextSpan(
                                 text: 'Termos de Uso',
-                                style: TextStyle(color: EagleTokens.brandAccent.withValues(alpha: 0.7), fontWeight: FontWeight.w500),
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF2F6BFF)
+                                      .withValues(alpha: 0.75),
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                               const TextSpan(text: ' e a '),
                               TextSpan(
                                 text: 'Política de Privacidade',
-                                style: TextStyle(color: EagleTokens.brandAccent.withValues(alpha: 0.7), fontWeight: FontWeight.w500),
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF2F6BFF)
+                                      .withValues(alpha: 0.75),
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                               const TextSpan(text: '.'),
                             ],
@@ -330,36 +423,69 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
                         const SizedBox(height: 20),
 
-                        // Submit button
+                        // ─── Submit ─────────────────────────────────
                         SizedBox(
                           width: double.infinity,
-                          height: 56,
+                          height: 54,
                           child: ElevatedButton(
                             onPressed: _loading ? null : _submit,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: EagleTokens.brand,
+                              backgroundColor:
+                                  const Color(0xFF2F6BFF),
                               foregroundColor: Colors.white,
-                              disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              disabledBackgroundColor:
+                                  const Color(0xFF2F6BFF)
+                                      .withValues(alpha: 0.45),
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(16),
+                              ),
                               elevation: 0,
                             ),
                             child: _loading
-                                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                                : const Text('Começar agora', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Text(
+                                    'Começar agora',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
                           ),
                         ),
 
                         const SizedBox(height: 20),
 
-                        // Link to login
+                        // ─── Login link ─────────────────────────────
                         Center(
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('Já tem conta? ', style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 14)),
+                              Text(
+                                'Já tem conta? ',
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF566580),
+                                  fontSize: 14,
+                                ),
+                              ),
                               GestureDetector(
                                 onTap: () => context.go('/login'),
-                                child: const Text('Entrar', style: TextStyle(color: EagleTokens.brandAccent, fontSize: 14, fontWeight: FontWeight.w600)),
+                                child: Text(
+                                  'Entrar',
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xFF2F6BFF),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -377,8 +503,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   }
 }
 
-// Reusable field (same as login)
-class _FxTextField extends StatelessWidget {
+// ═══════════════════════════════════════════════════════════════════════════════
+// SHARED PREMIUM COMPONENTS (identical to login_screen)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _PremiumTextField extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode? focusNode;
   final String label;
@@ -392,7 +521,7 @@ class _FxTextField extends StatelessWidget {
   final void Function(String)? onFieldSubmitted;
   final Widget? suffixIcon;
 
-  const _FxTextField({
+  const _PremiumTextField({
     required this.controller,
     this.focusNode,
     required this.label,
@@ -413,8 +542,13 @@ class _FxTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label.toUpperCase(),
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+          label,
+          style: GoogleFonts.inter(
+            color: Colors.white.withValues(alpha: 0.45),
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.2,
+          ),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -426,22 +560,57 @@ class _FxTextField extends StatelessWidget {
           textCapitalization: textCapitalization,
           validator: validator,
           onFieldSubmitted: onFieldSubmitted,
-          style: const TextStyle(color: Colors.white, fontSize: 15),
-          cursorColor: EagleTokens.brand,
+          style: GoogleFonts.inter(
+            color: const Color(0xFFF0F4FF),
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+          ),
+          cursorColor: const Color(0xFF2F6BFF),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.2)),
-            prefixIcon: Icon(icon, color: Colors.white.withValues(alpha: 0.35), size: 20),
+            hintStyle: GoogleFonts.inter(
+              color: Colors.white.withValues(alpha: 0.18),
+              fontSize: 15,
+            ),
+            prefixIcon: Icon(
+              icon,
+              color: Colors.white.withValues(alpha: 0.30),
+              size: 20,
+            ),
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.06),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08))),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08))),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
-            errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFFF8B8B))),
-            focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFFF8B8B), width: 1.5)),
-            errorStyle: const TextStyle(color: Color(0xFFFF8B8B), fontSize: 11),
+            fillColor: Colors.white.withValues(alpha: 0.05),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  const BorderSide(color: Color(0xFF2F6BFF), width: 1.0),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  const BorderSide(color: Color(0xFFD4808F), width: 0.5),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  const BorderSide(color: Color(0xFFD4808F), width: 1.0),
+            ),
+            errorStyle: GoogleFonts.inter(
+              color: const Color(0xFFD4808F),
+              fontSize: 11,
+            ),
           ),
         ),
       ],
@@ -449,14 +618,16 @@ class _FxTextField extends StatelessWidget {
   }
 }
 
-class _AuthGridPainter extends CustomPainter {
+class _PremiumGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.025)
+      ..color = Colors.white.withValues(alpha: 0.010)
       ..strokeWidth = 0.5
       ..style = PaintingStyle.stroke;
-    const spacing = 50.0;
+
+    const spacing = 48.0;
+
     for (double x = 0; x < size.width; x += spacing) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
     }

@@ -1,0 +1,41 @@
+FOCUX PERSONAL - BRAND STYLEGUIDE
+
+1. CORES
+────────────────────────────────────────────────────────────
+Fundo Primário:    #05070D (Navy/Black profundo)
+Fundo Secundário:  #0B1220 (Navy Dark)
+
+Primária/Destaque: #3B82F6 (Azul Royal)
+Secundária/Luz:    #60A5FA (Azul Claro)
+Neon/Circuitos:    #22D3EE (Ciano)
+
+Texto Principal:   #FFFFFF (Branco puro para 'FOCUX')
+Texto Secundário:  #E5E7EB (Soft White para slogan)
+Neutros:           #9CA3AF, #6B7280, #374151
+
+2. TIPOGRAFIA
+────────────────────────────────────────────────────────────
+Fonte Principal: Inter (substituta: Montserrat)
+
+Uso por elemento:
+- FOCUX: ExtraBold (800) / Cor: #FFFFFF / Tracking: -4
+- PERSONAL: Bold (700) / Cor: #60A5FA / Tracking: +150 a +220 (muito espaçado)
+- Slogan Base: Light (300) / Cor: #E5E7EB / Tracking: +80
+- Slogan "IA": Bold (700) / Cor: #22D3EE / Efeito: Glow sutil
+
+3. ESPAÇAMENTOS E PROPORÇÕES
+────────────────────────────────────────────────────────────
+- Proporção ícone/texto: O ícone 'F' ocupa ~44% da largura visual; O texto ocupa ~52%.
+- Gap: Margem entre o ícone e o texto é de ~6% da largura total do canvas.
+- Altura do texto: O bloco de texto corresponde a cerca de 60-80% da altura total do ícone.
+- Alinhamento: Tudo centralizado verticalmente em relação ao eixo (Y) do ícone F.
+
+4. EXPORTAÇÃO RASTER (INSTRUÇÕES)
+────────────────────────────────────────────────────────────
+Para gerar os PNGs exatos via linha de comando usando ImageMagick (se instalado):
+
+Logo Horizontal (3000x2000, 300 DPI):
+magick -density 300 -background none logo_horizontal.svg logo_horizontal.png
+
+App Icon 1024 (com cantos):
+magick -density 300 -background none app_icon_1024.svg app_icon_1024.png

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FOCUX PERSONAL — Logo Icon (F symbol)
+  ViewBox: 0 0 1000 1000 | Transparent background
+  Palette: #05070D #0D1B5C #1A3ABF #3B82F6 #60A5FA #22D3EE #DBEAFE
+  Layer order: ambient → f-shadow → f-body → gloss-top → gloss-mid → rim-glow → circuit-traces → details
+-->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 1000 1000" width="1000" height="1000">
+  <defs>
+    <!-- ── CSS Variables ── -->
+    <style>
+      :root {
+        --c-bg:      #05070D;
+        --c-dark2:   #0B1220;
+        --c-primary: #3B82F6;
+        --c-light:   #60A5FA;
+        --c-cyan:    #22D3EE;
+        --c-white:   #E5E7EB;
+        --c-mid:     #9CA3AF;
+        --c-muted:   #6B7280;
+        --c-dark3:   #374151;
+      }
+    </style>
+
+    <!-- ── Gradients ── -->
+    <linearGradient id="grad-body" x1="0%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%"   stop-color="#1C3FAA"/>
+      <stop offset="45%"  stop-color="#1A3ABF"/>
+      <stop offset="100%" stop-color="#080E2E"/>
+    </linearGradient>
+
+    <linearGradient id="grad-gloss-top" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%"   stop-color="#EFF6FF"/>
+      <stop offset="30%"  stop-color="#BFDBFE"/>
+      <stop offset="75%"  stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.55"/>
+    </linearGradient>
+
+    <linearGradient id="grad-gloss-mid" x1="5%" y1="0%" x2="95%" y2="100%">
+      <stop offset="0%"   stop-color="#93C5FD"/>
+      <stop offset="55%"  stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.5"/>
+    </linearGradient>
+
+    <radialGradient id="grad-ambient" cx="50%" cy="45%" r="52%">
+      <stop offset="0%"   stop-color="#1D4ED8" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#05070D"  stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="grad-rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#22D3EE"/>
+      <stop offset="60%"  stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+
+    <!-- ── Filters ── -->
+    <filter id="neon-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="b1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="22" result="b2"/>
+      <feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="dot-glow" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="soft-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="shadow-depth" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="14" dy="14" stdDeviation="18" flood-color="#000918" flood-opacity="0.8"/>
+    </filter>
+
+    <!-- ── Clip ── -->
+    <clipPath id="clip-gloss-top">
+      <path d="M 238,75 L 800,75 C 825,75 830,98 830,122 L 830,200 C 826,218 812,225 792,228 L 238,228 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── Ambient glow background ── -->
+  <ellipse cx="490" cy="490" rx="420" ry="400" fill="url(#grad-ambient)"/>
+
+  <!-- ── 3D depth shadow ── -->
+  <path filter="url(#shadow-depth)"
+    d="M 158,75 L 800,75 C 826,75 832,97 832,122 L 832,228 C 830,252 815,258 792,258
+       L 312,258 L 312,418 L 600,418 C 625,418 632,438 632,460
+       L 632,552 C 630,570 618,576 598,576 L 312,576 L 312,924
+       C 310,944 298,952 278,952 L 162,952 C 140,952 132,938 132,918
+       L 132,97 C 133,79 144,75 158,75 Z"
+    fill="#030814" opacity="0.7" transform="translate(16,16)"/>
+
+  <!-- ── F Body (dark gradient base) ── -->
+  <path id="f-body"
+    d="M 158,75 L 800,75 C 826,75 832,97 832,122 L 832,228 C 830,252 815,258 792,258
+       L 312,258 L 312,418 L 600,418 C 625,418 632,438 632,460
+       L 632,552 C 630,570 618,576 598,576 L 312,576 L 312,924
+       C 310,944 298,952 278,952 L 162,952 C 140,952 132,938 132,918
+       L 132,97 C 133,79 144,75 158,75 Z"
+    fill="url(#grad-body)"/>
+
+  <!-- ── Glossy plate — top arm ── -->
+  <path id="gloss-top"
+    d="M 238,75 L 800,75 C 826,75 832,97 832,122 L 832,200 C 826,220 810,228 786,228
+       L 238,228 Z"
+    fill="url(#grad-gloss-top)" opacity="0.92"/>
+
+  <!-- Glass shine streak on top gloss -->
+  <path d="M 260,85 L 680,85 C 700,85 708,95 705,110 L 260,110 Z"
+    fill="white" opacity="0.18"/>
+
+  <!-- ── Glossy plate — middle arm ── -->
+  <path id="gloss-mid"
+    d="M 312,418 L 600,418 C 625,418 632,438 632,460 L 632,508
+       C 628,524 615,528 596,530 L 312,530 Z"
+    fill="url(#grad-gloss-mid)" opacity="0.88"/>
+
+  <!-- ── Neon rim glow (outer edge) ── -->
+  <path id="rim-glow"
+    d="M 158,75 L 800,75 C 826,75 832,97 832,122 L 832,228 C 830,252 815,258 792,258
+       L 312,258 L 312,418 L 600,418 C 625,418 632,438 632,460
+       L 632,552 C 630,570 618,576 598,576 L 312,576 L 312,924
+       C 310,944 298,952 278,952 L 162,952 C 140,952 132,938 132,918
+       L 132,97 C 133,79 144,75 158,75 Z"
+    fill="none" stroke="url(#grad-rim)" stroke-width="3.5"
+    filter="url(#neon-glow)" opacity="0.85"/>
+
+  <!-- ── Circuit traces ── -->
+  <g id="circuit-traces" opacity="0.72" stroke="#22D3EE" stroke-linecap="round" fill="none">
+    <!-- Horizontal trace 1 -->
+    <line x1="132" y1="330" x2="230" y2="330" stroke-width="1.6"/>
+    <line x1="230" y1="330" x2="230" y2="375" stroke-width="1.6"/>
+    <line x1="230" y1="375" x2="282" y2="375" stroke-width="1.6"/>
+    <!-- Horizontal trace 2 -->
+    <line x1="132" y1="460" x2="195" y2="460" stroke-width="1.4"/>
+    <line x1="195" y1="430" x2="195" y2="490" stroke-width="1.4"/>
+    <!-- Vertical side trace -->
+    <line x1="165" y1="280" x2="165" y2="400" stroke-width="1.4"/>
+    <line x1="165" y1="380" x2="215" y2="380" stroke-width="1.4"/>
+    <!-- Long horizontal across stem -->
+    <line x1="135" y1="640" x2="240" y2="640" stroke-width="1.3"/>
+    <line x1="240" y1="620" x2="240" y2="660" stroke-width="1.3"/>
+    <!-- Short traces -->
+    <line x1="132" y1="710" x2="200" y2="710" stroke-width="1.2"/>
+    <line x1="200" y1="710" x2="200" y2="740" stroke-width="1.2"/>
+    <line x1="200" y1="740" x2="255" y2="740" stroke-width="1.2"/>
+  </g>
+
+  <!-- Circuit dots (connection nodes) -->
+  <g id="circuit-dots" fill="#22D3EE" filter="url(#dot-glow)">
+    <circle cx="230" cy="330" r="4.5"/>
+    <circle cx="230" cy="375" r="4"/>
+    <circle cx="195" cy="460" r="4.5"/>
+    <circle cx="165" cy="380" r="3.5"/>
+    <circle cx="240" cy="640" r="4"/>
+    <circle cx="200" cy="740" r="3.5"/>
+    <circle cx="255" cy="740" r="3"/>
+  </g>
+
+  <!-- Smaller ambient circuit dots -->
+  <g fill="#60A5FA" opacity="0.5">
+    <circle cx="155" cy="550" r="3"/>
+    <circle cx="175" cy="590" r="2.2"/>
+    <circle cx="155" cy="780" r="2.5"/>
+  </g>
+
+  <!-- ── Sun icon (top-right of top arm) ── -->
+  <g id="sun-icon" transform="translate(728, 130)" filter="url(#soft-glow)">
+    <circle cx="0" cy="0" r="11" fill="#E5E7EB" opacity="0.9"/>
+    <!-- Rays -->
+    <g stroke="#E5E7EB" stroke-width="2" stroke-linecap="round" opacity="0.75">
+      <line x1="0" y1="-18" x2="0" y2="-23"/>
+      <line x1="0" y1="18"  x2="0" y2="23"/>
+      <line x1="-18" y1="0" x2="-23" y2="0"/>
+      <line x1="18"  y1="0" x2="23"  y2="0"/>
+      <line x1="-13" y1="-13" x2="-17" y2="-17"/>
+      <line x1="13"  y1="-13" x2="17"  y2="-17"/>
+      <line x1="-13" y1="13"  x2="-17" y2="17"/>
+      <line x1="13"  y1="13"  x2="17"  y2="17"/>
+    </g>
+  </g>
+
+  <!-- ── Moon icon (lower stem) ── -->
+  <g id="moon-icon" transform="translate(215, 840)" filter="url(#dot-glow)">
+    <path d="M 0,-17 A 17,17 0 1,1 12,8.5 A 11,11 0 1,0 0,-17 Z"
+          fill="#22D3EE" opacity="0.88"/>
+  </g>
+
+  <!-- ── Heartbeat line (bottom of middle arm) ── -->
+  <g id="heartbeat-line" stroke="#22D3EE" stroke-width="2.2" fill="none"
+     stroke-linecap="round" stroke-linejoin="round" filter="url(#soft-glow)" opacity="0.75">
+    <polyline points="315,570 340,570 350,550 365,592 378,542 392,598 405,570 440,570"/>
+  </g>
+
+  <!-- ── Inner edge highlight (subtle inner rim) ── -->
+  <path d="M 158,75 L 800,75 C 826,75 832,97 832,122 L 832,228 C 830,252 815,258 792,258
+       L 312,258 L 312,418 L 600,418 C 625,418 632,438 632,460
+       L 632,552 C 630,570 618,576 598,576 L 312,576 L 312,924
+       C 310,944 298,952 278,952 L 162,952 C 140,952 132,938 132,918
+       L 132,97 C 133,79 144,75 158,75 Z"
+    fill="none" stroke="white" stroke-width="1.2" opacity="0.12"/>
+
+</svg>
