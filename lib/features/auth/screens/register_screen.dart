@@ -199,7 +199,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Comece a transformar a gestão dos seus alunos hoje.',
+                          'Treine com dados. Evolua com inteligência.',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.5),
                             fontSize: 15,

@@ -205,7 +205,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             ),
                             const SizedBox(width: 12),
                             const Text(
-                              'FOCUX',
+                              'FOCUX PERSONAL',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 24,
@@ -231,7 +231,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'A plataforma que transforma a gestão do seu negócio fitness.',
+                          'Treine com dados. Evolua com inteligência.',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.55),
                             fontSize: 15,
