@@ -144,36 +144,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         ],
                       ),
                       child: Center(
-                        child: Container(
-                          width: 88,
-                          height: 88,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                EagleTokens.brand,
-                                EagleTokens.brandInk,
-                              ],
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: EagleTokens.brand.withValues(alpha: 0.5),
-                                blurRadius: 30,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: ClipOval(
-                              child: Image.asset(
-                                'assets/images/logo_focux.png',
-                                width: 72,
-                                height: 72,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          child: Image.asset(
+                            'assets/images/logo_focux_v2.png',
+                            width: 88,
+                            height: 88,
+                            fit: BoxFit.cover,
                           ),
                         ),
                       ),
