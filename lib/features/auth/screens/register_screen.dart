@@ -103,7 +103,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
       }
     } catch (e) {
       HapticFeedback.heavyImpact();
-      setState(() { _error = 'Erro ao criar conta. Verifique os dados.'; });
+      String msg = 'Erro ao criar conta. Verifique os dados.';
+      if (e.toString().contains('409')) {
+        msg = 'Este e-mail já está em uso.';
+      } else if (e.toString().contains('DioException')) {
+        msg = 'Falha na conexão com o servidor.';
+      }
+      setState(() { _error = msg; });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }
@@ -278,6 +284,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                         if (_error != null) ...[
                           const SizedBox(height: 16),
                           Container(
+                            width: double.infinity,
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
                               color: const Color(0xFF9E2B2B).withValues(alpha: 0.15),
