@@ -70,27 +70,6 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
     super.dispose();
   }
 
-  IconData _iconForTipo(String tipo) => switch (tipo) {
-        'ALUNO' => Icons.person,
-        'TREINO' => Icons.fitness_center,
-        'COBRANCA' => Icons.attach_money,
-        _ => Icons.search,
-      };
-
-  Color _colorForTipo(String tipo) => switch (tipo) {
-        'ALUNO' => const Color(0xFF2B4A9E),
-        'TREINO' => const Color(0xFF22C55E),
-        'COBRANCA' => const Color(0xFFF59E0B),
-        _ => EagleTokens.inkMute,
-      };
-
-  String _labelForTipo(String tipo) => switch (tipo) {
-        'ALUNO' => 'Aluno',
-        'TREINO' => 'Treino',
-        'COBRANCA' => 'Cobrança',
-        _ => tipo,
-      };
-
   Widget _buildSection(String titulo, List<BuscaItem> items) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Column(
@@ -99,7 +78,11 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(titulo,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF717171), letterSpacing: 1)),
+              style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF717171),
+                  letterSpacing: 1)),
         ),
         ...items.map((item) => _BuscaItemTile(item: item, onTap: () => context.push(item.url))),
       ],
@@ -112,7 +95,9 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
     final query = ref.watch(buscaQueryProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? EagleTokens.darkBg
+          : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -142,16 +127,18 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
       ),
       body: resultAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad))),
+        error: (e, _) => Center(
+            child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad))),
         data: (result) {
           if (query.trim().length < 2) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.search, size: 64, color: const Color(0xFFD1D5DB)),
+                  const Icon(Icons.search, size: 64, color: Color(0xFFD1D5DB)),
                   const SizedBox(height: 16),
-                  Text('Digite ao menos 2 caracteres', style: TextStyle(color: EagleTokens.inkMute)),
+                  Text('Digite ao menos 2 caracteres',
+                      style: TextStyle(color: EagleTokens.inkMute)),
                 ],
               ),
             );
@@ -161,9 +148,10 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.search_off, size: 64, color: const Color(0xFFD1D5DB)),
+                  const Icon(Icons.search_off, size: 64, color: Color(0xFFD1D5DB)),
                   const SizedBox(height: 16),
-                  Text('Nenhum resultado para "$query"', style: TextStyle(color: EagleTokens.inkMute)),
+                  Text('Nenhum resultado para "$query"',
+                      style: TextStyle(color: EagleTokens.inkMute)),
                 ],
               ),
             );
@@ -211,7 +199,9 @@ class _BuscaItemTile extends StatelessWidget {
         child: Icon(_iconForTipo(item.tipo), color: cor, size: 20),
       ),
       title: Text(item.titulo, style: const TextStyle(fontWeight: FontWeight.w600)),
-      subtitle: item.subtitulo != null ? Text(item.subtitulo!, maxLines: 1, overflow: TextOverflow.ellipsis) : null,
+      subtitle: item.subtitulo != null
+          ? Text(item.subtitulo!, maxLines: 1, overflow: TextOverflow.ellipsis)
+          : null,
       trailing: const Icon(Icons.chevron_right, size: 20),
       onTap: onTap,
     );

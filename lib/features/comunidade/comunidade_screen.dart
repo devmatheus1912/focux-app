@@ -49,12 +49,15 @@ class _ComunidadeScreenState extends State<ComunidadeScreen> {
                     subtitle: Text(grupo.descricao),
                     trailing: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: EagleTokens.brand),
-                      onPressed: () {
-                        provider.entrarGrupo(grupo.id).then((_) {
+                      onPressed: () async {
+                        try {
+                          await provider.entrarGrupo(grupo.id);
+                          if (!context.mounted) return;
                           FeedbackHelper.showSuccess(context, 'Bem-vindo ao grupo!');
-                        }).catchError((_) {
+                        } catch (_) {
+                          if (!context.mounted) return;
                           FeedbackHelper.showError(context, 'Erro ao entrar no grupo.');
-                        });
+                        }
                       },
                       child: const Text('Entrar', style: TextStyle(color: Colors.white)),
                     ),

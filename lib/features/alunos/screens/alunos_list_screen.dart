@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -18,6 +19,67 @@ class AlunosListScreen extends ConsumerStatefulWidget {
 
 class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   AlunoFiltro _filtro = AlunoFiltro.todos;
+  bool _modoSelecao = false;
+  final Set<int> _selecionados = {};
+
+  void _toggleModoSelecao() {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _modoSelecao = !_modoSelecao;
+      _selecionados.clear();
+    });
+  }
+
+  void _toggleSelecionado(int id) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      if (_selecionados.contains(id)) {
+        _selecionados.remove(id);
+      } else {
+        _selecionados.add(id);
+      }
+    });
+  }
+
+  Future<void> _excluirSelecionados() async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir alunos?'),
+        content: Text('${_selecionados.length} aluno(s) serão excluídos permanentemente. Esta ação não pode ser desfeita.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+    if (confirmar != true) return;
+
+    final repo = AlunoRepository(ref.read(apiClientProvider));
+    int sucesso = 0;
+    for (final id in List<int>.from(_selecionados)) {
+      try {
+        await repo.excluirAluno(id);
+        sucesso++;
+      } catch (e) {
+        debugPrint('[Focux] Error excluir aluno $id: $e');
+      }
+    }
+    if (mounted) {
+      ref.invalidate(alunosProvider);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$sucesso aluno(s) excluído(s)')),
+      );
+      setState(() {
+        _modoSelecao = false;
+        _selecionados.clear();
+      });
+    }
+  }
 
   List<Aluno> _filtrarAlunos(List<Aluno> todos) {
     switch (_filtro) {
@@ -60,41 +122,83 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '$ativosCount ativos · $inadCount inadimpl.'.toUpperCase(),
-                            style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                      if (context.canPop()) ...[
+                        InkWell(
+                          onTap: () => context.pop(),
+                          borderRadius: BorderRadius.circular(24),
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 12, top: 4, bottom: 4),
+                            child: Icon(Icons.arrow_back_ios_new, size: 20, color: ink),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Alunos',
-                            style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
-                          ),
-                        ],
-                      ),
-                      InkWell(
-                        onTap: () async {
-                          final criado = await context.push<bool>('/alunos/novo');
-                          if (criado == true) ref.invalidate(alunosProvider);
-                        },
-                        borderRadius: BorderRadius.circular(44),
-                        child: Container(
-                          width: 44, height: 44,
-                          decoration: BoxDecoration(
-                            color: isDark ? Colors.white : EagleTokens.brand,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              if (!isDark) BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.5), blurRadius: 16, offset: const Offset(0, 6), spreadRadius: -6)
-                            ],
-                          ),
-                          child: Icon(Icons.add, size: 24, color: isDark ? EagleTokens.ink : Colors.white),
+                        ),
+                      ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _modoSelecao
+                                  ? (_selecionados.isEmpty ? 'SELECIONE OS ALUNOS' : '${_selecionados.length} SELECIONADO(S)')
+                                  : '$ativosCount ativos · $inadCount inadimpl.'.toUpperCase(),
+                              style: TextStyle(fontSize: 12, color: _modoSelecao ? EagleTokens.brand : mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Alunos',
+                              style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                            ),
+                          ],
                         ),
                       ),
+                      if (_modoSelecao) ...[
+                        InkWell(
+                          onTap: _toggleModoSelecao,
+                          borderRadius: BorderRadius.circular(44),
+                          child: Container(
+                            width: 44, height: 44,
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white.withValues(alpha: 0.1) : EagleTokens.line,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.close, size: 22, color: ink),
+                          ),
+                        ),
+                      ] else ...[
+                        InkWell(
+                          onTap: _toggleModoSelecao,
+                          borderRadius: BorderRadius.circular(44),
+                          child: Container(
+                            width: 44, height: 44,
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white.withValues(alpha: 0.08) : EagleTokens.card,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                            ),
+                            child: Icon(Icons.checklist_rounded, size: 22, color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        InkWell(
+                          onTap: () async {
+                            final criado = await context.push<bool>('/alunos/novo');
+                            if (criado == true) ref.invalidate(alunosProvider);
+                          },
+                          borderRadius: BorderRadius.circular(44),
+                          child: Container(
+                            width: 44, height: 44,
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white : EagleTokens.brand,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                if (!isDark) BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.5), blurRadius: 16, offset: const Offset(0, 6), spreadRadius: -6)
+                              ],
+                            ),
+                            child: Icon(Icons.add, size: 24, color: isDark ? EagleTokens.ink : Colors.white),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -146,9 +250,72 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                             padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 120),
                             itemCount: filtrados.length,
                             separatorBuilder: (_, __) => const SizedBox(height: 10),
-                            itemBuilder: (context, i) => _AlunoCardFX(aluno: filtrados[i]),
+                            itemBuilder: (context, i) {
+                              final a = filtrados[i];
+                              return _AlunoCardFX(
+                                aluno: a,
+                                modoSelecao: _modoSelecao,
+                                isSelected: _selecionados.contains(a.id),
+                                onToggle: () => _toggleSelecionado(a.id),
+                                onLongPress: _modoSelecao ? null : _toggleModoSelecao,
+                              );
+                            },
                           ),
                         ),
+                ),
+
+                // Bottom action bar (seleção)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: (_modoSelecao && _selecionados.isNotEmpty) ? null : 0,
+                  child: (_modoSelecao && _selecionados.isNotEmpty)
+                      ? SafeArea(
+                          top: false,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () {
+                                      setState(() {
+                                        if (_selecionados.length == filtrados.length) {
+                                          _selecionados.clear();
+                                        } else {
+                                          _selecionados.addAll(filtrados.map((a) => a.id));
+                                        }
+                                      });
+                                    },
+                                    icon: const Icon(Icons.select_all, size: 18),
+                                    label: Text(_selecionados.length == filtrados.length ? 'Desmarcar todos' : 'Selec. todos'),
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                                      foregroundColor: ink,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: _excluirSelecionados,
+                                    icon: const Icon(Icons.delete_outline, size: 18),
+                                    label: Text('Excluir (${_selecionados.length})'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: EagleTokens.bad,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      elevation: 0,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ],
             ),
@@ -203,7 +370,18 @@ class _FxChip extends StatelessWidget {
 
 class _AlunoCardFX extends ConsumerStatefulWidget {
   final Aluno aluno;
-  const _AlunoCardFX({required this.aluno});
+  final bool modoSelecao;
+  final bool isSelected;
+  final VoidCallback? onToggle;
+  final VoidCallback? onLongPress;
+
+  const _AlunoCardFX({
+    required this.aluno,
+    this.modoSelecao = false,
+    this.isSelected = false,
+    this.onToggle,
+    this.onLongPress,
+  });
 
   @override
   ConsumerState<_AlunoCardFX> createState() => _AlunoCardFXState();
@@ -270,18 +448,38 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
     final diasSem = 0;
     final aderColor = EagleTokens.aderenciaColor(aderenciaMock.toDouble(), isDark: isDark);
 
+    final isSelected = widget.isSelected;
+    final modoSelecao = widget.modoSelecao;
+
     return InkWell(
-      onTap: () => context.push('/alunos/${aluno.id}'),
+      onTap: modoSelecao ? widget.onToggle : () => context.push('/alunos/${aluno.id}'),
+      onLongPress: widget.onLongPress,
       borderRadius: BorderRadius.circular(20),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: cardBg,
+          color: isSelected ? EagleTokens.brand.withValues(alpha: isDark ? 0.18 : 0.08) : cardBg,
           borderRadius: BorderRadius.circular(20),
-          border: isDark ? null : Border.all(color: line),
+          border: isSelected
+              ? Border.all(color: EagleTokens.brand.withValues(alpha: 0.5), width: 1.5)
+              : (isDark ? null : Border.all(color: line)),
         ),
         child: Row(
           children: [
+            // Checkbox em modo seleção
+            if (modoSelecao) ...[
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 150),
+                child: Icon(
+                  isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                  key: ValueKey(isSelected),
+                  color: isSelected ? EagleTokens.brand : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
             // FxAvatar
             Container(
               width: 48, height: 48,

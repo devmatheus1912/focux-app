@@ -282,14 +282,6 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     );
   }
 
-  Future<void> _cobrarViaChat(Mensalidade m) async {
-    try {
-      final msg = await FinanceiroRepository(ref.read(apiClientProvider)).cobrarViaChat(m.id);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-    } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
-    }
-  }
 
   Future<void> _atualizarAtrasos() async {
     try {

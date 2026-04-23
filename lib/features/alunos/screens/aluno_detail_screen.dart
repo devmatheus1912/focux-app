@@ -5,16 +5,10 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../anamnese/screens/anamnese_screen.dart';
-import '../../avaliacao/screens/avaliacao_screen.dart';
 import '../../alimentar/screens/alimentar_screen.dart';
-import '../../ia/screens/ia_screen.dart';
 import '../../ia/screens/ia_progressao_screen.dart';
 import '../../chat/screens/chat_screen.dart';
-import '../../relatorio/screens/relatorio_screen.dart';
-import '../../financeiro/data/financeiro_repository.dart';
 import '../../evolucao/screens/evolucao_screen.dart';
-import '../../evolucao/data/evolucao_repository.dart';
-import '../../ia/data/ia_repository.dart';
 import '../../feedback/screens/feedback_video_screen.dart';
 import '../../../core/theme/design_tokens.dart';
 
@@ -60,10 +54,7 @@ class AlunoDetailScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
     return Scaffold(
       backgroundColor: bg,

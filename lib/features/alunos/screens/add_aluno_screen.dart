@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -136,20 +137,35 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
             SizedBox(
               width: double.infinity, height: 52,
               child: ElevatedButton.icon(
-                onPressed: () {
+                onPressed: () async {
                   final texto = 'Olá ${aluno.nome.split(' ').first}! Seu perfil no Focux foi criado.\n\nAcesse com seu e-mail: ${aluno.email}\nSenha provisória: ${aluno.senhaProvisoria}\n\nLembre-se de alterar a senha no primeiro acesso!';
-                  Clipboard.setData(ClipboardData(text: texto));
+                  final numero = (aluno.whatsapp as String? ?? '').replaceAll(RegExp(r'\D'), '');
                   HapticFeedback.mediumImpact();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Mensagem copiada!')),
-                  );
-                  Navigator.of(ctx).pop();
-                  if (mounted) context.pop(true);
+                  if (numero.isNotEmpty) {
+                    final uri = Uri.parse('https://wa.me/55$numero?text=${Uri.encodeComponent(texto)}');
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      if (ctx.mounted) Navigator.of(ctx).pop();
+                      if (mounted) context.pop(true);
+                      return;
+                    }
+                  }
+                  await Clipboard.setData(ClipboardData(text: texto));
+                  if (ctx.mounted) Navigator.of(ctx).pop();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Mensagem copiada! Abra o WhatsApp e cole para o aluno.'),
+                        duration: Duration(seconds: 4),
+                      ),
+                    );
+                    context.pop(true);
+                  }
                 },
-                icon: const Icon(Icons.copy, size: 18),
-                label: const Text('Copiar convite'),
+                icon: const Icon(Icons.send, size: 18),
+                label: const Text('Enviar no WhatsApp'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: EagleTokens.brand,
+                  backgroundColor: const Color(0xFF25D366),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   elevation: 0,
@@ -157,6 +173,33 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
               ),
             ),
             const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity, height: 48,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  final texto = 'Olá ${aluno.nome.split(' ').first}! Seu perfil no Focux foi criado.\n\nAcesse com seu e-mail: ${aluno.email}\nSenha provisória: ${aluno.senhaProvisoria}\n\nLembre-se de alterar a senha no primeiro acesso!';
+                  await Clipboard.setData(ClipboardData(text: texto));
+                  HapticFeedback.mediumImpact();
+                  if (ctx.mounted) Navigator.of(ctx).pop();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Mensagem copiada!'),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                    context.pop(true);
+                  }
+                },
+                icon: Icon(Icons.copy, size: 18, color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
+                label: Text('Copiar mensagem', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
             TextButton(
               onPressed: () { Navigator.of(ctx).pop(); if (mounted) context.pop(true); },
               child: Text('Fechar', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute)),

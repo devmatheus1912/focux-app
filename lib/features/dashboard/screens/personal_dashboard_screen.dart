@@ -381,8 +381,8 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
       child: Column(
         children: [
           Shimmer.fromColors(
-            baseColor: const Color(0xFFD1D5DB)!,
-            highlightColor: const Color(0xFFF3F4F6)!,
+            baseColor: const Color(0xFFD1D5DB),
+            highlightColor: const Color(0xFFF3F4F6),
             child: Container(
               height: 200,
               color: Colors.white,
@@ -396,17 +396,17 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                 children: [
                   Row(
                     children: [
-                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB)!, highlightColor: const Color(0xFFF3F4F6)!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB), highlightColor: const Color(0xFFF3F4F6), child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
                       const SizedBox(width: 12),
-                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB)!, highlightColor: const Color(0xFFF3F4F6)!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB), highlightColor: const Color(0xFFF3F4F6), child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB)!, highlightColor: const Color(0xFFF3F4F6)!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB), highlightColor: const Color(0xFFF3F4F6), child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
                       const SizedBox(width: 12),
-                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB)!, highlightColor: const Color(0xFFF3F4F6)!, child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
+                      Expanded(child: Shimmer.fromColors(baseColor: const Color(0xFFD1D5DB), highlightColor: const Color(0xFFF3F4F6), child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))))),
                     ],
                   ),
                 ],

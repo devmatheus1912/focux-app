@@ -1,11 +1,10 @@
-import '../../../core/widgets/feature_gate.dart';
-import '../../subscription/models/subscription_plan.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import 'package:http/http.dart' as http;
-import '../../../core/api/api_client.dart'; // Assume exists
+import '../../../core/widgets/feature_gate.dart';
+import '../../../core/api/api_client.dart';
+import '../../subscription/models/subscription_plan.dart';
 
 class MigracaoMagicaScreen extends StatefulWidget {
   const MigracaoMagicaScreen({super.key});
@@ -16,46 +15,77 @@ class MigracaoMagicaScreen extends StatefulWidget {
 
 class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
   final TextEditingController _controller = TextEditingController();
+  final ApiClient _api = ApiClient();
   bool _isLoading = false;
   String? _resultadoJson;
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   Future<void> _processarMigracao() async {
     if (_controller.text.isEmpty) {
-      FeedbackHelper.showError(context, 'Cole os dados do concorrente primeiro.');
+      if (mounted) FeedbackHelper.showError(context, 'Cole os dados do concorrente primeiro.');
       return;
     }
 
     setState(() => _isLoading = true);
-    
+
     try {
-      // Usando http puro aqui para o protótipo, mas idealmente usa o Dio do ApiClient
-      final url = Uri.parse('https://focux-backend.onrender.com/api/v1/migracao/texto');
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'conteudo': _controller.text}),
+      // Usa ApiClient (Dio) com JWT auto-injetado pelo interceptor
+      final response = await _api.dio.post(
+        '/api/v1/migracao/texto',
+        data: {'conteudo': _controller.text},
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _resultadoJson = data['resultadoEstruturado'];
-        });
-        if (mounted) FeedbackHelper.showSuccess(context, 'Alunos lidos com sucesso pela IA!');
-      } else {
-        if (mounted) FeedbackHelper.showError(context, 'Erro na IA. Tente novamente.');
+      if (mounted) {
+        final resultadoEstruturado = response.data['resultadoEstruturado'];
+        final parsed = _parsarResultado(resultadoEstruturado);
+        setState(() => _resultadoJson = parsed);
+        FeedbackHelper.showSuccess(context, 'Alunos lidos com sucesso pela IA!');
       }
     } catch (e) {
-      if (mounted) FeedbackHelper.showError(context, 'Falha de conexão.');
+      if (mounted) FeedbackHelper.showError(context, 'Falha na migração. Tente novamente.');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  /// Formata o resultado JSON em texto legível.
+  String _parsarResultado(dynamic data) {
+    if (data == null) return 'Nenhum aluno encontrado nos dados fornecidos.';
+    if (data is String) {
+      try {
+        final decoded = jsonDecode(data);
+        return _formatarResultado(decoded);
+      } catch (_) {
+        return data;
+      }
+    }
+    return _formatarResultado(data);
+  }
+
+  String _formatarResultado(dynamic data) {
+    if (data is List) {
+      final buffer = StringBuffer();
+      for (final item in data) {
+        buffer.writeln('• Nome: ${item['nome'] ?? '-'}');
+        if (item['email'] != null) buffer.writeln('  Email: ${item['email']}');
+        if (item['telefone'] != null) buffer.writeln('  Tel: ${item['telefone']}');
+        if (item['objetivo'] != null) buffer.writeln('  Objetivo: ${item['objetivo']}');
+        buffer.writeln();
+      }
+      return buffer.toString().trim();
+    }
+    return const JsonEncoder.withIndent('  ').convert(data);
+  }
+
   @override
   Widget build(BuildContext context) {
     return FeatureGate(
-      featureName: "Migração Mágica IA",
+      featureName: 'Migração Mágica IA',
       requiredPlan: SubscriptionPlan.PRO,
       child: _buildContent(context),
     );
@@ -113,31 +143,36 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: _isLoading 
+              child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Iniciar Migração via IA', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  : const Text('Iniciar Migração via IA',
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             ),
             if (_resultadoJson != null) ...[
               const SizedBox(height: 24),
               const Text('Alunos Encontrados:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.all(12),
-                color: Colors.grey.withAlpha(20),
-                child: Text(_resultadoJson!, style: const TextStyle(fontFamily: 'monospace')),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withAlpha(20),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.withAlpha(40)),
+                ),
+                child: Text(_resultadoJson!),
               ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  FeedbackHelper.showSuccess(context, 'Alunos importados e salvos no banco de dados!');
+                  if (mounted) FeedbackHelper.showSuccess(context, 'Alunos importados e salvos no banco de dados!');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: EagleTokens.good,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: const Text('Confirmar e Salvar Todos', style: TextStyle(color: Colors.white)),
-              )
-            ]
+              ),
+            ],
           ],
         ),
       ),

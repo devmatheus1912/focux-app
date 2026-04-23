@@ -54,8 +54,60 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
           Navigator.pop(context);
           _atualizarStatus(status);
         },
+        onExcluir: () {
+          Navigator.pop(context);
+          _confirmarExclusao(context);
+        },
       ),
     );
+  }
+
+  Future<void> _confirmarExclusao(BuildContext context) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir alunos?'),
+        content: Text('${_selecionados.length} aluno(s) serão excluídos permanentemente. Esta ação não pode ser desfeita.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+    if (confirmar == true) _excluirSelecionados();
+  }
+
+  Future<void> _excluirSelecionados() async {
+    setState(() => _processando = true);
+    final repo = AlunoRepository(ref.read(apiClientProvider));
+    int sucesso = 0;
+    int falha = 0;
+    for (final id in _selecionados) {
+      try {
+        await repo.excluirAluno(id);
+        sucesso++;
+      } catch (e) {
+        debugPrint('[Focux] Error: $e');
+        falha++;
+      }
+    }
+    if (mounted) {
+      ref.invalidate(alunosProvider);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$sucesso excluído(s)${falha > 0 ? ', $falha erro(s)' : ''}'),
+        ),
+      );
+      setState(() => _selecionados.clear());
+    }
+    if (mounted) setState(() => _processando = false);
   }
 
   Future<void> _marcarPagos() async {
@@ -172,11 +224,13 @@ class _BottomSheetAcoes extends StatefulWidget {
   final int qtd;
   final VoidCallback onMarcarPagos;
   final void Function(String) onAtualizarStatus;
+  final VoidCallback onExcluir;
 
   const _BottomSheetAcoes({
     required this.qtd,
     required this.onMarcarPagos,
     required this.onAtualizarStatus,
+    required this.onExcluir,
   });
 
   @override
@@ -222,6 +276,15 @@ class _BottomSheetAcoesState extends State<_BottomSheetAcoes> {
             onPressed: () => widget.onAtualizarStatus(_statusSelecionado),
             icon: const Icon(Icons.update),
             label: const Text('Aplicar status'),
+          ),
+          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: widget.onExcluir,
+            icon: const Icon(Icons.delete_outline, color: Colors.red),
+            label: const Text('Excluir selecionados', style: TextStyle(color: Colors.red)),
+            style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red)),
           ),
         ],
       ),

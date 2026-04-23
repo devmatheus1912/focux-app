@@ -81,13 +81,16 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
           ...plano.marcos.map((marco) => CheckboxListTile(
             title: Text(marco.titulo, style: TextStyle(decoration: marco.atingido ? TextDecoration.lineThrough : null)),
             value: marco.atingido,
-            onChanged: marco.atingido ? null : (val) {
+            onChanged: marco.atingido ? null : (val) async {
               if (val == true) {
-                provider.atingirMarco(marco.id).then((_) {
+                try {
+                  await provider.atingirMarco(marco.id);
+                  if (!context.mounted) return;
                   FeedbackHelper.showSuccess(context, 'Marco atingido! Bom trabalho.');
-                }).catchError((_) {
+                } catch (_) {
+                  if (!context.mounted) return;
                   FeedbackHelper.showError(context, 'Erro ao atualizar o marco.');
-                });
+                }
               }
             },
           )),

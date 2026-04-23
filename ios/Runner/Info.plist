@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Focux App</string>
+	<string>Focux Personal</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -28,18 +28,15 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<!-- Portrait only - app is not designed for landscape -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
@@ -50,17 +47,18 @@
 	<string>Usado para capturar fotos e vídeos de exercícios.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Usado para selecionar fotos e vídeos de exercícios.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Salvar imagens e vídeos gerados pelo app.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Usado para gravar vídeos de exercícios com áudio.</string>
+	<string>Usado para gravar vídeos de exercícios com áudio e para o Copiloto de IA reconhecer comandos de voz.</string>
+	<!-- Reconhecimento de voz para o Copiloto IA -->
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>O Copiloto IA usa reconhecimento de voz para que você possa ditar comandos e registrar treinos sem digitar.</string>
 	<!-- FCM background notifications -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
-	<!-- Deep link MercadoPago -->
+	<!-- Deep link / URL scheme -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

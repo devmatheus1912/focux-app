@@ -29,12 +29,15 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     try {
       final repo = AlertasRepository(ref.read(apiClientProvider));
       final results = await Future.wait([repo.listarRiscos(), repo.getConfiguracao()]);
-      if (mounted) setState(() {
-        _alertas = results[0] as List<AlertaRisco>;
-        _config = results[1] as AlertasConfiguracao;
-        _loading = false;
-      });
-    } catch (e) { debugPrint('[Focux] Error: $e');
+      if (mounted) {
+        setState(() {
+          _alertas = results[0] as List<AlertaRisco>;
+          _config = results[1] as AlertasConfiguracao;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -94,35 +97,34 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
   }
 
   Future<void> _enviarMensagemChat(AlertaRisco alerta) async {
-    final ctrl = TextEditingController(text: 'Olá ${alerta.alunoNome.split(' ').first}! Vi que faz um tempo que não treina. Que tal retomarmos hoje? Estou aqui para ajudar! 💪');
-    bool enviando = false;
+    final ctrl = TextEditingController(
+        text: 'Olá ${alerta.alunoNome.split(' ').first}! Vi que faz um tempo que não treina. Que tal retomarmos hoje? 💪');
 
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, set) => AlertDialog(
-          title: const Text('Enviar mensagem'),
-          content: TextField(
-            controller: ctrl,
-            maxLines: 3,
-            decoration: const InputDecoration(border: OutlineInputBorder()),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-            FilledButton.icon(
-              onPressed: enviando ? null : () => Navigator.pop(ctx, true),
-              icon: enviando ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.send),
-              label: Text(enviando ? 'Enviando...' : 'Enviar'),
-            ),
-          ],
+      builder: (ctx) => AlertDialog(
+        title: const Text('Enviar mensagem'),
+        content: TextField(
+          controller: ctrl,
+          maxLines: 3,
+          decoration: const InputDecoration(border: OutlineInputBorder()),
         ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(ctx, true),
+            icon: const Icon(Icons.send),
+            label: const Text('Enviar'),
+          ),
+        ],
       ),
     );
 
     if (confirm != true || ctrl.text.trim().isEmpty) return;
 
     try {
-      await AlertasRepository(ref.read(apiClientProvider)).enviarMensagemChat(alerta.alunoId, ctrl.text.trim());
+      await AlertasRepository(ref.read(apiClientProvider))
+          .enviarMensagemChat(alerta.alunoId, ctrl.text.trim());
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mensagem enviada!')));
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
