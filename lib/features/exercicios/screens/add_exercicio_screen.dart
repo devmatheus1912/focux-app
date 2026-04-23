@@ -60,6 +60,68 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       );
       if (mounted) context.pop(true);
     } catch (e) {
+import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../providers/exercicios_provider.dart';
+
+const _gruposMusculares = [
+  'PEITO', 'COSTAS', 'OMBROS', 'BICEPS',
+  'TRICEPS', 'PERNAS', 'ABDOMEN', 'CARDIO',
+];
+
+const _categoriasExercicio = [
+  'Musculação',
+  'Mobilidade',
+  'Lutas',
+  'Yoga',
+  'Funcional',
+  'Cardio',
+  'Outro',
+];
+
+class AddExercicioScreen extends ConsumerStatefulWidget {
+  const AddExercicioScreen({super.key});
+
+  @override
+  ConsumerState<AddExercicioScreen> createState() => _AddExercicioScreenState();
+}
+
+class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nomeCtrl = TextEditingController();
+  final _descricaoCtrl = TextEditingController();
+  final _tagsCtrl = TextEditingController();
+  final _obsCtrl = TextEditingController();
+  String? _musculoAlvo;
+  String? _categoria;
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _nomeCtrl.dispose();
+    _descricaoCtrl.dispose();
+    _tagsCtrl.dispose();
+    _obsCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() { _loading = true; _error = null; });
+    try {
+      await ref.read(exercicioRepositoryProvider).criar(
+        nome: _nomeCtrl.text.trim(),
+        descricao: _descricaoCtrl.text.trim(),
+        musculoAlvo: _musculoAlvo,
+        categoria: _categoria,
+        tags: _tagsCtrl.text.trim(),
+        observacoes: _obsCtrl.text.trim(),
+      );
+      if (mounted) context.pop(true);
+    } catch (e) {
       setState(() { _error = 'Erro ao cadastrar exercício.'; });
     } finally {
       if (mounted) setState(() { _loading = false; });
@@ -68,76 +130,173 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,title: const Text('Novo Exercício')),
+      backgroundColor: bg,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _nomeCtrl,
-                  decoration: const InputDecoration(labelText: 'Nome do exercício'),
-                  validator: (v) => v == null || v.isEmpty ? 'Informe o nome' : null,
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _musculoAlvo,
-                  decoration: const InputDecoration(labelText: 'Músculo alvo'),
-                  items: _gruposMusculares
-                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                      .toList(),
-                  onChanged: (v) => setState(() => _musculoAlvo = v),
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _categoria,
-                  decoration: const InputDecoration(labelText: 'Categoria'),
-                  items: _categoriasExercicio
-                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                      .toList(),
-                  onChanged: (v) => setState(() => _categoria = v),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _tagsCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Tags (opcional)',
-                    hintText: 'Ex: #EmCasa,#SemEquipamento',
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'NOVO ITEM',
+                        style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Novo Exercício',
+                        style: TextStyle(fontSize: 28, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close, color: mute),
+                    onPressed: () => context.pop(),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextFormField(
+                        controller: _nomeCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Nome do exercício',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                        ),
+                        style: TextStyle(color: ink),
+                        validator: (v) => v == null || v.isEmpty ? 'Informe o nome' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        value: _musculoAlvo,
+                        decoration: InputDecoration(
+                          labelText: 'Músculo alvo',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                        ),
+                        items: _gruposMusculares
+                            .map((c) => DropdownMenuItem(value: c, child: Text(c, style: TextStyle(color: ink))))
+                            .toList(),
+                        onChanged: (v) => setState(() => _musculoAlvo = v),
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        value: _categoria,
+                        decoration: InputDecoration(
+                          labelText: 'Categoria',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                        ),
+                        items: _categoriasExercicio
+                            .map((c) => DropdownMenuItem(value: c, child: Text(c, style: TextStyle(color: ink))))
+                            .toList(),
+                        onChanged: (v) => setState(() => _categoria = v),
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _tagsCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Tags (opcional)',
+                          hintText: 'Ex: #EmCasa,#SemEquipamento',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                        ),
+                        style: TextStyle(color: ink),
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _descricaoCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Descrição (opcional)',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                        ),
+                        style: TextStyle(color: ink),
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _obsCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Observações (opcional)',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                        ),
+                        style: TextStyle(color: ink),
+                        maxLines: 3,
+                      ),
+                      if (_error != null) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: EagleTokens.bad.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.25)),
+                          ),
+                          child: Row(children: [
+                            const Icon(Icons.error_outline, color: EagleTokens.bad, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(_error!, style: const TextStyle(color: EagleTokens.bad, fontSize: 13))),
+                          ]),
+                        ),
+                      ],
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: _loading ? null : _submit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: EagleTokens.brand,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            elevation: 0,
+                          ),
+                          child: _loading
+                              ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                              : const Text('Cadastrar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _descricaoCtrl,
-                  decoration: const InputDecoration(labelText: 'Descrição (opcional)'),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _obsCtrl,
-                  decoration: const InputDecoration(labelText: 'Observações (opcional)'),
-                  maxLines: 3,
-                ),
-                if (_error != null) ...[
-                  const SizedBox(height: 12),
-                  Text(_error!, style: const TextStyle(color: EagleTokens.bad)),
-                ],
-                const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: _loading ? null : _submit,
-                  child: _loading
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Cadastrar'),
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

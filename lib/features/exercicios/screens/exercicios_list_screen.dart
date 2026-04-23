@@ -50,32 +50,73 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       ),
     ));
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Exercícios'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              _apenasFavoritos ? Icons.star : Icons.star_border,
-              color: _apenasFavoritos ? EagleTokens.warn : null,
+      backgroundColor: bg,
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+        ),
+        child: FloatingActionButton(
+          onPressed: () async {
+            final criado = await context.push<bool>('/exercicios/novo');
+            if (criado == true) ref.invalidate(exerciciosFilteredProvider);
+          },
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
+      ),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'CATÁLOGO',
+                        style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Exercícios',
+                        style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          _apenasFavoritos ? Icons.star : Icons.star_border,
+                          color: _apenasFavoritos ? EagleTokens.warn : mute,
+                        ),
+                        tooltip: 'Apenas favoritos',
+                        onPressed: () => setState(() => _apenasFavoritos = !_apenasFavoritos),
+                      ),
+                      if (context.canPop())
+                        IconButton(
+                          icon: Icon(Icons.arrow_back, color: mute),
+                          onPressed: () => context.pop(),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            tooltip: 'Apenas favoritos',
-            onPressed: () => setState(() => _apenasFavoritos = !_apenasFavoritos),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final criado = await context.push<bool>('/exercicios/novo');
-          if (criado == true) ref.invalidate(exerciciosFilteredProvider);
-        },
-        child: const Icon(Icons.add),
-      ),
-      body: Column(
-        children: [
           // Busca por nome
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -169,9 +210,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   ),
                 );
               },
-            ),
           ),
         ],
+      ),
       ),
     );
   }

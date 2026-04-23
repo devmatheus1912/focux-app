@@ -184,16 +184,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         Row(
                           children: [
                             const FxLogo(size: 48),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'FOCUX PERSONAL',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 4,
-                              ),
-                            ),
                           ],
                         ),
 

@@ -62,24 +62,14 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     return null;
   }
 
-  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        elevation: 0,
-        title: Text('Agenda', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
-        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.calendar_view_week, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-            tooltip: 'Visão semanal',
-            onPressed: () => context.push('/agenda/semanal'),
-          ),
-        ],
-      ),
+      backgroundColor: bg,
       floatingActionButton: Container(
         decoration: BoxDecoration(
           gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
@@ -96,68 +86,106 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
           child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
-          : _ags.isEmpty
-              ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Container(width: 64, height: 64, decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), shape: BoxShape.circle), child: const Icon(Icons.calendar_today, color: EagleTokens.brand, size: 28)),
-                  const SizedBox(height: 14),
-                  Text('Nenhum agendamento', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 17, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 6),
-                  Text('Agende sessões com seus alunos.', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 14)),
-                ]))
-              : ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-                  itemCount: _ags.length,
-                  itemBuilder: (_, i) {
-                    final ag = _ags[i];
-                    final inicio = ag.inicio;
-                    final badge = _dateBadge(inicio);
-                    return Dismissible(
-                      key: Key('ag_${ag.id}'),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        decoration: BoxDecoration(color: EagleTokens.bad, borderRadius: BorderRadius.circular(14)),
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        child: const Icon(Icons.delete, color: Colors.white)),
-                      onDismissed: (_) async {
-                        await AgendaRepository(ref.read(apiClientProvider)).excluir(ag.id);
-                        setState(() => _ags.removeAt(i));
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft),
-                        ),
-                        child: Row(children: [
-                          Container(
-                            width: 48, height: 48,
-                            decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                              Text('${inicio.day}', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: isDark ? EagleTokens.darkInk : EagleTokens.ink)),
-                              Text(_monthAbbr(inicio.month), style: TextStyle(fontSize: 10, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute)),
-                            ]),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Row(children: [
-                              Expanded(child: Text(ag.titulo ?? ag.alunoNome, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: isDark ? EagleTokens.darkInk : EagleTokens.ink))),
-                              if (badge != null) badge,
-                            ]),
-                            const SizedBox(height: 4),
-                            Text('${ag.alunoNome} · ${_hm(inicio)} – ${_hm(ag.fim)}', style: TextStyle(fontSize: 12, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute)),
-                          ])),
-                          const SizedBox(width: 8),
-                          _statusChip(ag.status),
-                        ]),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${_ags.length} PRÓXIMOS',
+                        style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
                       ),
-                    );
-                  },
-                ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Agenda',
+                        style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.calendar_view_week, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+                    tooltip: 'Visão semanal',
+                    onPressed: () => context.push('/agenda/semanal'),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
+                  : _ags.isEmpty
+                      ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                          Container(width: 64, height: 64, decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), shape: BoxShape.circle), child: const Icon(Icons.calendar_today, color: EagleTokens.brand, size: 28)),
+                          const SizedBox(height: 14),
+                          Text('Nenhum agendamento', style: TextStyle(color: ink, fontSize: 17, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 6),
+                          Text('Agende sessões com seus alunos.', style: TextStyle(color: mute, fontSize: 14)),
+                        ]))
+                      : ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+                          itemCount: _ags.length,
+                          itemBuilder: (_, i) {
+                            final ag = _ags[i];
+                            final inicio = ag.inicio;
+                            final badge = _dateBadge(inicio);
+                            return Dismissible(
+                              key: Key('ag_${ag.id}'),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                decoration: BoxDecoration(color: EagleTokens.bad, borderRadius: BorderRadius.circular(14)),
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 20),
+                                child: const Icon(Icons.delete, color: Colors.white)),
+                              onDismissed: (_) async {
+                                await AgendaRepository(ref.read(apiClientProvider)).excluir(ag.id);
+                                setState(() => _ags.removeAt(i));
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft),
+                                ),
+                                child: Row(children: [
+                                  Container(
+                                    width: 48, height: 48,
+                                    decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                      Text('${inicio.day}', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: ink)),
+                                      Text(_monthAbbr(inicio.month), style: TextStyle(fontSize: 10, color: mute)),
+                                    ]),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                    Row(children: [
+                                      Expanded(child: Text(ag.titulo ?? ag.alunoNome, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: ink))),
+                                      if (badge != null) badge,
+                                    ]),
+                                    const SizedBox(height: 4),
+                                    Text('${ag.alunoNome} · ${_hm(inicio)} – ${_hm(ag.fim)}', style: TextStyle(fontSize: 12, color: mute)),
+                                  ])),
+                                  const SizedBox(width: 8),
+                                  _statusChip(ag.status),
+                                ]),
+                              ),
+                            );
+                          },
+                        ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

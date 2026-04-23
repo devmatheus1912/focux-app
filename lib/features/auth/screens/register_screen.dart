@@ -184,16 +184,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             Row(
                               children: [
                                 const FxLogo(size: 42),
-                                const SizedBox(width: 12),
-                                const Text(
-                                  'FOCUX',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 3,
-                                  ),
-                                ),
                               ],
                             ),
                             GestureDetector(

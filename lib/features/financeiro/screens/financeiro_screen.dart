@@ -34,33 +34,59 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        elevation: 0,
-        title: Text('Financeiro', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
-        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: EagleTokens.brand,
-          labelColor: EagleTokens.brand,
-          unselectedLabelColor: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-          indicatorWeight: 2.5,
-          tabs: const [
-            Tab(icon: Icon(Icons.dashboard_outlined), text: 'Dashboard'),
-            Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Mensalidades'),
-            Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Resumo'),
+      backgroundColor: bg,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'VISÃO GERAL',
+                    style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Financeiro',
+                    style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                  ),
+                ],
+              ),
+            ),
+            TabBar(
+              controller: _tabController,
+              indicatorColor: EagleTokens.brand,
+              labelColor: EagleTokens.brand,
+              unselectedLabelColor: mute,
+              indicatorWeight: 2.5,
+              dividerColor: Colors.transparent,
+              tabs: const [
+                Tab(icon: Icon(Icons.dashboard_outlined), text: 'Resumo'),
+                Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Mensalidades'),
+                Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Evolução'),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: const [
+                  FinanceiroDashboardScreen(),
+                  _MensalidadesTab(),
+                  FinanceiroResumoScreen(),
+                ],
+              ),
+            ),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          FinanceiroDashboardScreen(),
-          _MensalidadesTab(),
-          FinanceiroResumoScreen(),
-        ],
       ),
     );
   }

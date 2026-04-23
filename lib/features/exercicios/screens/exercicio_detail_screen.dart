@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/exercicios_provider.dart';
 
 class ExercicioDetailScreen extends ConsumerWidget {
@@ -30,32 +31,67 @@ class ExercicioDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final exercicioAsync = ref.watch(exercicioProvider(exercicioId));
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Exercício'),
-        actions: [
-          exercicioAsync.when(
-            data: (ex) => IconButton(
-              icon: Icon(
-                ex.favoritado ? Icons.star : Icons.star_border,
-                color: ex.favoritado ? EagleTokens.warn : null,
+      backgroundColor: bg,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'DETALHES',
+                        style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Exercício',
+                        style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      exercicioAsync.when(
+                        data: (ex) => IconButton(
+                          icon: Icon(
+                            ex.favoritado ? Icons.star : Icons.star_border,
+                            color: ex.favoritado ? EagleTokens.warn : mute,
+                          ),
+                          tooltip: ex.favoritado ? 'Remover dos favoritos' : 'Adicionar aos favoritos',
+                          onPressed: () => _toggleFavorito(ref, context, ex.favoritado),
+                        ),
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                      if (context.canPop())
+                        IconButton(
+                          icon: Icon(Icons.arrow_back, color: mute),
+                          onPressed: () => context.pop(),
+                        ),
+                    ],
+                  ),
+                ],
               ),
-              tooltip: ex.favoritado ? 'Remover dos favoritos' : 'Adicionar aos favoritos',
-              onPressed: () => _toggleFavorito(ref, context, ex.favoritado),
             ),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-        ],
-      ),
-      body: exercicioAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e')),
-        data: (ex) => SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+            Expanded(
+              child: exercicioAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator(color: EagleTokens.brand)),
+                error: (e, _) => Center(child: Text('Erro: $e')),
+                data: (ex) => SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -115,6 +151,9 @@ class ExercicioDetailScreen extends ConsumerWidget {
               ],
             ],
           ),
+        ),
+      ),
+          ],
         ),
       ),
     );

@@ -13,14 +13,12 @@ class TreinosListScreen extends ConsumerWidget {
     final treinosAsync = ref.watch(treinosProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text('Treinos', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700, fontSize: 22)),
-        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
-      ),
+      backgroundColor: bg,
       floatingActionButton: Container(
         decoration: BoxDecoration(
           gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
@@ -41,23 +39,61 @@ class TreinosListScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator(color: EagleTokens.brand)),
         error: (e, _) => Center(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Icon(Icons.error_outline, size: 48, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+            Icon(Icons.error_outline, size: 48, color: mute),
             const SizedBox(height: 12),
-            Text('Erro ao carregar', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute)),
+            Text('Erro ao carregar', style: TextStyle(color: mute)),
           ]),
         ),
-        data: (treinos) => treinos.isEmpty
-            ? _EmptyState(isDark: isDark)
-            : RefreshIndicator(
-                color: EagleTokens.brand,
-                onRefresh: () async => ref.invalidate(treinosProvider),
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-                  itemCount: treinos.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (context, i) => _TreinoCard(treino: treinos[i], isDark: isDark),
+        data: (treinos) => SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${treinos.length} ATIVOS',
+                          style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Treinos',
+                          style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                        ),
+                      ],
+                    ),
+                    if (context.canPop())
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: mute),
+                        onPressed: () => context.pop(),
+                      ),
+                  ],
                 ),
               ),
+              Expanded(
+                child: treinos.isEmpty
+                  ? _EmptyState(isDark: isDark)
+                  : RefreshIndicator(
+                      color: EagleTokens.brand,
+                      onRefresh: () async => ref.invalidate(treinosProvider),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+                        itemCount: treinos.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (context, i) => _TreinoCard(treino: treinos[i], isDark: isDark),
+                      ),
+                    ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

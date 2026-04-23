@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import 'progresso_semanal_widget.dart';
 
@@ -19,6 +20,17 @@ class AlunoDashboardScreen extends ConsumerWidget {
         title: Text('Meu Treino', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
         iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         actions: [
+          IconButton(
+            icon: Icon(
+              isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            ),
+            onPressed: () {
+              final currentMode = ref.read(themeModeProvider);
+              ref.read(themeModeProvider.notifier).state =
+                  currentMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+            },
+          ),
           IconButton(
             icon: Icon(Icons.logout, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
             onPressed: () async {

@@ -48,6 +48,7 @@ class _AddExercicioToTreinoScreenState
       );
       if (mounted) context.pop(true);
     } catch (e) {
+
       if (mounted) setState(() { _error = 'Erro ao adicionar exercício.'; });
     } finally {
       if (mounted) setState(() { _loading = false; });
@@ -57,69 +58,179 @@ class _AddExercicioToTreinoScreenState
   @override
   Widget build(BuildContext context) {
     final exerciciosAsync = ref.watch(exerciciosProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,title: const Text('Adicionar Exercício')),
-      body: exerciciosAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e')),
-        data: (exercicios) => Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              DropdownButtonFormField<Exercicio>(
-                value: _selecionado,
-                decoration: const InputDecoration(labelText: 'Exercício'),
-                items: exercicios.map((e) => DropdownMenuItem(
-                      value: e,
-                      child: Text(e.nome),
-                    )).toList(),
-                onChanged: (v) => setState(() => _selecionado = v),
-              ),
-              const SizedBox(height: 16),
-              Row(
+      backgroundColor: bg,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _seriesCtrl,
-                      decoration: const InputDecoration(labelText: 'Séries'),
-                      keyboardType: TextInputType.number,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'NOVO ITEM',
+                        style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Adicionar Exercício',
+                        style: TextStyle(fontSize: 28, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _repCtrl,
-                      decoration: const InputDecoration(labelText: 'Repetições'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _descansoCtrl,
-                      decoration: const InputDecoration(labelText: 'Descanso (s)'),
-                      keyboardType: TextInputType.number,
-                    ),
+                  IconButton(
+                    icon: Icon(Icons.close, color: mute),
+                    onPressed: () => context.pop(),
                   ),
                 ],
               ),
-              if (_error != null) ...[
-                const SizedBox(height: 12),
-                Text(_error!, style: const TextStyle(color: EagleTokens.bad)),
-              ],
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _loading ? null : _submit,
-                child: _loading
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Adicionar'),
+            ),
+            Expanded(
+              child: exerciciosAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator(color: EagleTokens.brand)),
+                error: (e, _) => Center(child: Text('Erro: $e', style: TextStyle(color: EagleTokens.bad))),
+                data: (exercicios) => SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<Exercicio>(
+                              value: _selecionado,
+                              decoration: InputDecoration(
+                                labelText: 'Exercício',
+                                filled: true,
+                                fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                              ),
+                              items: exercicios.map((e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(e.nome, style: TextStyle(color: ink)),
+                                  )).toList(),
+                              onChanged: (v) => setState(() => _selecionado = v),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Container(
+                            height: 56, // Match Dropdown height
+                            decoration: BoxDecoration(
+                              color: EagleTokens.brand.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.add, color: EagleTokens.brand),
+                              tooltip: 'Criar novo exercício',
+                              onPressed: () async {
+                                final criado = await context.push<bool>('/exercicios/novo');
+                                if (criado == true) {
+                                  ref.invalidate(exerciciosProvider);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _seriesCtrl,
+                              decoration: InputDecoration(
+                                labelText: 'Séries',
+                                filled: true,
+                                fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                              ),
+                              keyboardType: TextInputType.number,
+                              style: TextStyle(color: ink),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _repCtrl,
+                              decoration: InputDecoration(
+                                labelText: 'Repetições',
+                                filled: true,
+                                fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                              ),
+                              style: TextStyle(color: ink),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _descansoCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Descanso (segundos)',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                        ),
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(color: ink),
+                      ),
+                      if (_error != null) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: EagleTokens.bad.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.25)),
+                          ),
+                          child: Row(children: [
+                            const Icon(Icons.error_outline, color: EagleTokens.bad, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(_error!, style: const TextStyle(color: EagleTokens.bad, fontSize: 13))),
+                          ]),
+                        ),
+                      ],
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: _loading ? null : _submit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: EagleTokens.brand,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            elevation: 0,
+                          ),
+                          child: _loading
+                              ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                              : const Text('Adicionar ao Treino', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
