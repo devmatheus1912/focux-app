@@ -181,11 +181,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                const FxLogo(size: 42),
-                              ],
-                            ),
+                            const FxLogo(iconSize: 42, showLabel: true, horizontal: true, light: true),
                             GestureDetector(
                               onTap: () => context.go('/login'),
                               child: Container(

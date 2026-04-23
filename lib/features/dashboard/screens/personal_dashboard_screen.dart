@@ -68,33 +68,11 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                FxLogo(size: 24),
-                                const SizedBox(width: 8),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'FOCUX',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: -0.5,
-                                      ),
-                                    ),
-                                    Text(
-                                      'PERSONAL',
-                                      style: TextStyle(
-                                        fontSize: 8,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 2,
-                                        color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                            FxLogo(
+                              iconSize: 28,
+                              showLabel: true,
+                              horizontal: true,
+                              light: isDark,
                             ),
                             const SizedBox(height: 10),
                             Text.rich(

@@ -18,7 +18,8 @@ class ExercicioDetailScreen extends ConsumerWidget {
         await repo.favoritarExercicio(exercicioId);
       }
       ref.invalidate(exercicioProvider(exercicioId));
-    } catch (e) { debugPrint('[Focux] Error: $e');
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Erro ao atualizar favorito.')),
@@ -53,12 +54,22 @@ class ExercicioDetailScreen extends ConsumerWidget {
                     children: [
                       Text(
                         'DETALHES',
-                        style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: mute,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.2,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Exercício',
-                        style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                        style: TextStyle(
+                          fontSize: 32,
+                          color: ink,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                     ],
                   ),
@@ -92,67 +103,72 @@ class ExercicioDetailScreen extends ConsumerWidget {
                 error: (e, _) => Center(child: Text('Erro: $e')),
                 data: (ex) => SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (ex.gifUrl != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(ex.gifUrl!, height: 200, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (ex.gifUrl != null)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            ex.gifUrl!,
+                            height: 200,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+                      Text(ex.nome, style: Theme.of(context).textTheme.headlineSmall),
+                      const SizedBox(height: 8),
+                      // Chips de músculo alvo e categoria
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          if (ex.musculoAlvo != null && ex.musculoAlvo!.isNotEmpty)
+                            Chip(
+                              avatar: const Icon(Icons.fitness_center, size: 16),
+                              label: Text(ex.musculoAlvo!),
+                            ),
+                          if (ex.categoria != null && ex.categoria!.isNotEmpty)
+                            Chip(
+                              avatar: const Icon(Icons.category, size: 16),
+                              label: Text(ex.categoria!),
+                            ),
+                        ],
+                      ),
+                      // Tags
+                      if (ex.tags != null && ex.tags!.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          children: ex.tags!
+                              .split(',')
+                              .map((t) => t.trim())
+                              .where((t) => t.isNotEmpty)
+                              .map((t) => Chip(
+                                    label: Text(t, style: const TextStyle(fontSize: 12)),
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.secondaryContainer,
+                                    padding: EdgeInsets.zero,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ))
+                              .toList(),
+                        ),
+                      ],
+                      if (ex.videoUrl != null) ...[
+                        const SizedBox(height: 12),
+                        _VideoPlayer(url: ex.videoUrl!),
+                      ],
+                      if (ex.descricao != null && ex.descricao!.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        Text('Descrição', style: Theme.of(context).textTheme.titleSmall),
+                        const SizedBox(height: 4),
+                        Text(ex.descricao!),
+                      ],
+                    ],
+                  ),
                 ),
-              const SizedBox(height: 16),
-              Text(ex.nome, style: Theme.of(context).textTheme.headlineSmall),
-              const SizedBox(height: 8),
-              // Chips de músculo alvo e categoria
-              Wrap(
-                spacing: 8,
-                children: [
-                  if (ex.musculoAlvo != null && ex.musculoAlvo!.isNotEmpty)
-                    Chip(
-                      avatar: const Icon(Icons.fitness_center, size: 16),
-                      label: Text(ex.musculoAlvo!),
-                    ),
-                  if (ex.categoria != null && ex.categoria!.isNotEmpty)
-                    Chip(
-                      avatar: const Icon(Icons.category, size: 16),
-                      label: Text(ex.categoria!),
-                    ),
-                ],
               ),
-              // Tags
-              if (ex.tags != null && ex.tags!.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  children: ex.tags!
-                      .split(',')
-                      .map((t) => t.trim())
-                      .where((t) => t.isNotEmpty)
-                      .map((t) => Chip(
-                            label: Text(t, style: const TextStyle(fontSize: 12)),
-                            backgroundColor:
-                                Theme.of(context).colorScheme.secondaryContainer,
-                            padding: EdgeInsets.zero,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ))
-                      .toList(),
-                ),
-              ],
-              if (ex.videoUrl != null) ...[
-                const SizedBox(height: 12),
-                _VideoPlayer(url: ex.videoUrl!),
-              ],
-              if (ex.descricao != null && ex.descricao!.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text('Descrição', style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: 4),
-                Text(ex.descricao!),
-              ],
-            ],
-          ),
-        ),
-      ),
+            ),
           ],
         ),
       ),

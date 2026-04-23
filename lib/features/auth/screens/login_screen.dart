@@ -180,12 +180,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Logo
-                        Row(
-                          children: [
-                            const FxLogo(size: 48),
-                          ],
-                        ),
+                        // Logo com nome
+                        const FxLogo(iconSize: 52, showLabel: true, horizontal: true, light: true),
 
                         const SizedBox(height: 48),
 

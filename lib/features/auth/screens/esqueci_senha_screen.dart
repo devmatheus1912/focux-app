@@ -154,21 +154,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            const FxLogo(size: 42),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'FOCUX',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 3,
-                              ),
-                            ),
-                          ],
-                        ),
+                        const FxLogo(iconSize: 42, showLabel: true, horizontal: true, light: true),
                         GestureDetector(
                           onTap: () {
                             if (_step == 1) {

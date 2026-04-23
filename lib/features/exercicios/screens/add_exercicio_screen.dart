@@ -48,83 +48,26 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       await ref.read(exercicioRepositoryProvider).criar(
-        nome: _nomeCtrl.text.trim(),
-        descricao: _descricaoCtrl.text.trim(),
-        musculoAlvo: _musculoAlvo,
-        categoria: _categoria,
-        tags: _tagsCtrl.text.trim(),
-        observacoes: _obsCtrl.text.trim(),
-      );
+            nome: _nomeCtrl.text.trim(),
+            descricao: _descricaoCtrl.text.trim(),
+            musculoAlvo: _musculoAlvo,
+            categoria: _categoria,
+            tags: _tagsCtrl.text.trim(),
+            observacoes: _obsCtrl.text.trim(),
+          );
       if (mounted) context.pop(true);
     } catch (e) {
-import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../providers/exercicios_provider.dart';
-
-const _gruposMusculares = [
-  'PEITO', 'COSTAS', 'OMBROS', 'BICEPS',
-  'TRICEPS', 'PERNAS', 'ABDOMEN', 'CARDIO',
-];
-
-const _categoriasExercicio = [
-  'Musculação',
-  'Mobilidade',
-  'Lutas',
-  'Yoga',
-  'Funcional',
-  'Cardio',
-  'Outro',
-];
-
-class AddExercicioScreen extends ConsumerStatefulWidget {
-  const AddExercicioScreen({super.key});
-
-  @override
-  ConsumerState<AddExercicioScreen> createState() => _AddExercicioScreenState();
-}
-
-class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _nomeCtrl = TextEditingController();
-  final _descricaoCtrl = TextEditingController();
-  final _tagsCtrl = TextEditingController();
-  final _obsCtrl = TextEditingController();
-  String? _musculoAlvo;
-  String? _categoria;
-  bool _loading = false;
-  String? _error;
-
-  @override
-  void dispose() {
-    _nomeCtrl.dispose();
-    _descricaoCtrl.dispose();
-    _tagsCtrl.dispose();
-    _obsCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() { _loading = true; _error = null; });
-    try {
-      await ref.read(exercicioRepositoryProvider).criar(
-        nome: _nomeCtrl.text.trim(),
-        descricao: _descricaoCtrl.text.trim(),
-        musculoAlvo: _musculoAlvo,
-        categoria: _categoria,
-        tags: _tagsCtrl.text.trim(),
-        observacoes: _obsCtrl.text.trim(),
-      );
-      if (mounted) context.pop(true);
-    } catch (e) {
-      setState(() { _error = 'Erro ao cadastrar exercício.'; });
+      setState(() {
+        _error = 'Erro ao cadastrar exercício.';
+      });
     } finally {
-      if (mounted) setState(() { _loading = false; });
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -153,12 +96,22 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                     children: [
                       Text(
                         'NOVO ITEM',
-                        style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: mute,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.2,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Novo Exercício',
-                        style: TextStyle(fontSize: 28, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                        style: TextStyle(
+                          fontSize: 28,
+                          color: ink,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                     ],
                   ),
@@ -183,8 +136,14 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                           labelText: 'Nome do exercício',
                           filled: true,
                           fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
                         ),
                         style: TextStyle(color: ink),
                         validator: (v) => v == null || v.isEmpty ? 'Informe o nome' : null,
@@ -196,11 +155,20 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                           labelText: 'Músculo alvo',
                           filled: true,
                           fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
                         ),
                         items: _gruposMusculares
-                            .map((c) => DropdownMenuItem(value: c, child: Text(c, style: TextStyle(color: ink))))
+                            .map((c) => DropdownMenuItem(
+                                  value: c,
+                                  child: Text(c, style: TextStyle(color: ink)),
+                                ))
                             .toList(),
                         onChanged: (v) => setState(() => _musculoAlvo = v),
                       ),
@@ -211,11 +179,20 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                           labelText: 'Categoria',
                           filled: true,
                           fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
                         ),
                         items: _categoriasExercicio
-                            .map((c) => DropdownMenuItem(value: c, child: Text(c, style: TextStyle(color: ink))))
+                            .map((c) => DropdownMenuItem(
+                                  value: c,
+                                  child: Text(c, style: TextStyle(color: ink)),
+                                ))
                             .toList(),
                         onChanged: (v) => setState(() => _categoria = v),
                       ),
@@ -227,8 +204,14 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                           hintText: 'Ex: #EmCasa,#SemEquipamento',
                           filled: true,
                           fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
                         ),
                         style: TextStyle(color: ink),
                       ),
@@ -239,8 +222,14 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                           labelText: 'Descrição (opcional)',
                           filled: true,
                           fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
                         ),
                         style: TextStyle(color: ink),
                         maxLines: 3,
@@ -252,8 +241,14 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                           labelText: 'Observações (opcional)',
                           filled: true,
                           fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
                         ),
                         style: TextStyle(color: ink),
                         maxLines: 3,
@@ -267,11 +262,18 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.25)),
                           ),
-                          child: Row(children: [
-                            const Icon(Icons.error_outline, color: EagleTokens.bad, size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(child: Text(_error!, style: const TextStyle(color: EagleTokens.bad, fontSize: 13))),
-                          ]),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: EagleTokens.bad, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _error!,
+                                  style: const TextStyle(color: EagleTokens.bad, fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                       const SizedBox(height: 32),
@@ -287,7 +289,11 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                             elevation: 0,
                           ),
                           child: _loading
-                              ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                              ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                                )
                               : const Text('Cadastrar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                         ),
                       ),

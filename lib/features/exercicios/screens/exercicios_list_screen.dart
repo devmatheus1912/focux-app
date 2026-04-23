@@ -61,7 +61,13 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         decoration: BoxDecoration(
           gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [
+            BoxShadow(
+              color: EagleTokens.brand.withValues(alpha: 0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: FloatingActionButton(
           onPressed: () async {
@@ -88,12 +94,22 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                     children: [
                       Text(
                         'CATÁLOGO',
-                        style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: mute,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.2,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Exercícios',
-                        style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                        style: TextStyle(
+                          fontSize: 32,
+                          color: ink,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                     ],
                   ),
@@ -117,102 +133,103 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 ],
               ),
             ),
-          // Busca por nome
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-            child: TextField(
-              controller: _nomeCtrl,
-              decoration: InputDecoration(
-                hintText: 'Buscar por nome',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _nomeFiltro.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _nomeCtrl.clear();
-                          setState(() => _nomeFiltro = '');
-                        },
-                      )
-                    : null,
-                isDense: true,
-                border: const OutlineInputBorder(),
+            // Busca por nome
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: TextField(
+                controller: _nomeCtrl,
+                decoration: InputDecoration(
+                  hintText: 'Buscar por nome',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _nomeFiltro.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _nomeCtrl.clear();
+                            setState(() => _nomeFiltro = '');
+                          },
+                        )
+                      : null,
+                  isDense: true,
+                  border: const OutlineInputBorder(),
+                ),
+                onChanged: (v) => setState(() => _nomeFiltro = v.trim()),
               ),
-              onChanged: (v) => setState(() => _nomeFiltro = v.trim()),
             ),
-          ),
-          const SizedBox(height: 6),
-          // Filtro por tag
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-            child: TextField(
-              controller: _tagCtrl,
-              decoration: InputDecoration(
-                hintText: 'Buscar por tag (ex: #EmCasa)',
-                prefixIcon: const Icon(Icons.tag),
-                suffixIcon: _tagFiltro.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _tagCtrl.clear();
-                          setState(() => _tagFiltro = '');
-                        },
-                      )
-                    : null,
-                isDense: true,
-                border: const OutlineInputBorder(),
+            const SizedBox(height: 6),
+            // Filtro por tag
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+              child: TextField(
+                controller: _tagCtrl,
+                decoration: InputDecoration(
+                  hintText: 'Buscar por tag (ex: #EmCasa)',
+                  prefixIcon: const Icon(Icons.tag),
+                  suffixIcon: _tagFiltro.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _tagCtrl.clear();
+                            setState(() => _tagFiltro = '');
+                          },
+                        )
+                      : null,
+                  isDense: true,
+                  border: const OutlineInputBorder(),
+                ),
+                onChanged: (v) => setState(() => _tagFiltro = v.trim()),
               ),
-              onChanged: (v) => setState(() => _tagFiltro = v.trim()),
             ),
-          ),
-          // Chips de categoria
-          SizedBox(
-            height: 48,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              itemCount: _categoriasFiltro.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (_, i) {
-                final cat = _categoriasFiltro[i];
-                final selecionado = cat == _categoriaFiltro;
-                return FilterChip(
-                  label: Text(cat),
-                  selected: selecionado,
-                  onSelected: (_) => setState(() => _categoriaFiltro = cat),
-                );
-              },
+            // Chips de categoria
+            SizedBox(
+              height: 48,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                itemCount: _categoriasFiltro.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (_, i) {
+                  final cat = _categoriasFiltro[i];
+                  final selecionado = cat == _categoriaFiltro;
+                  return FilterChip(
+                    label: Text(cat),
+                    selected: selecionado,
+                    onSelected: (_) => setState(() => _categoriaFiltro = cat),
+                  );
+                },
+              ),
             ),
-          ),
-          // Lista de exercícios
-          Expanded(
-            child: exerciciosAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Erro: $e')),
-              data: (exercicios) {
-                final filtrados = _nomeFiltro.isEmpty
-                    ? exercicios
-                    : exercicios
-                        .where((e) => e.nome
-                            .toLowerCase()
-                            .contains(_nomeFiltro.toLowerCase()))
-                        .toList();
-                if (filtrados.isEmpty) {
-                  return const Center(child: Text('Nenhum exercício encontrado.'));
-                }
-                return RefreshIndicator(
-                  onRefresh: () async => ref.invalidate(exerciciosFilteredProvider),
-                  child: ListView.builder(
-                    itemCount: filtrados.length,
-                    itemBuilder: (context, i) => _ExercicioTile(
-                      exercicio: filtrados[i],
-                      onFavoritoToggle: () => ref.invalidate(exerciciosFilteredProvider),
+            // Lista de exercícios
+            Expanded(
+              child: exerciciosAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(child: Text('Erro: $e')),
+                data: (exercicios) {
+                  final filtrados = _nomeFiltro.isEmpty
+                      ? exercicios
+                      : exercicios
+                          .where((e) => e.nome
+                              .toLowerCase()
+                              .contains(_nomeFiltro.toLowerCase()))
+                          .toList();
+                  if (filtrados.isEmpty) {
+                    return const Center(child: Text('Nenhum exercício encontrado.'));
+                  }
+                  return RefreshIndicator(
+                    onRefresh: () async => ref.invalidate(exerciciosFilteredProvider),
+                    child: ListView.builder(
+                      itemCount: filtrados.length,
+                      itemBuilder: (context, i) => _ExercicioTile(
+                        exercicio: filtrados[i],
+                        onFavoritoToggle: () => ref.invalidate(exerciciosFilteredProvider),
+                      ),
                     ),
-                  ),
-                );
-              },
-          ),
-        ],
-      ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -232,7 +249,8 @@ class _ExercicioTile extends ConsumerWidget {
         await repo.favoritarExercicio(exercicio.id);
       }
       onFavoritoToggle();
-    } catch (e) { debugPrint('[Focux] Error: $e');
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Erro ao atualizar favorito.')),
@@ -246,15 +264,21 @@ class _ExercicioTile extends ConsumerWidget {
     return ListTile(
       leading: exercicio.gifUrl != null
           ? SizedBox(
-              width: 48, height: 48,
-              child: Image.network(exercicio.gifUrl!, fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.fitness_center)),
+              width: 48,
+              height: 48,
+              child: Image.network(
+                exercicio.gifUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Icon(Icons.fitness_center),
+              ),
             )
           : const CircleAvatar(child: Icon(Icons.fitness_center)),
       title: Text(exercicio.nome),
-      subtitle: Text([exercicio.musculoAlvo, exercicio.categoria]
-          .where((s) => s != null && s.isNotEmpty)
-          .join(' · ')),
+      subtitle: Text(
+        [exercicio.musculoAlvo, exercicio.categoria]
+            .where((s) => s != null && s.isNotEmpty)
+            .join(' · '),
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

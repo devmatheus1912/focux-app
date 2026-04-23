@@ -128,8 +128,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   animation: _pulseAnim,
                   builder: (context, child) {
                     return Container(
-                      width: 120 * _pulseAnim.value,
-                      height: 120 * _pulseAnim.value,
+                      width: 150 * _pulseAnim.value,
+                      height: 150 * _pulseAnim.value,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
@@ -145,7 +145,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         ],
                       ),
                       child: Center(
-                        child: const FxLogo(size: 88),
+                        child: const FxLogo(iconSize: 110, showLabel: false),
                       ),
                     );
                   },
@@ -153,18 +153,33 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
                 const SizedBox(height: 32),
 
-                // Brand name with fade
+                // Nome da marca com fade
                 FadeTransition(
                   opacity: _fadeAnim,
                   child: const Column(
                     children: [
-                      Text(
-                        'FOCUX',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 36,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 8,
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Focux',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' Personal',
+                              style: TextStyle(
+                                color: Color(0xFF8A94AE),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 8),
