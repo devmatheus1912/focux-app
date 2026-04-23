@@ -182,25 +182,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         // Logo
                         Row(
                           children: [
-                            Container(
-                              width: 48, height: 48,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [EagleTokens.brand, EagleTokens.brandInk],
-                                ),
-                                borderRadius: BorderRadius.circular(14),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: EagleTokens.brand.withValues(alpha: 0.4),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: ClipOval(child: Image.asset('assets/images/logo_focux.png', width: 40, height: 40, fit: BoxFit.cover)),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: Image.asset(
+                                'assets/images/logo_focux.png',
+                                width: 48,
+                                height: 48,
+                                fit: BoxFit.cover,
                               ),
                             ),
                             const SizedBox(width: 12),
