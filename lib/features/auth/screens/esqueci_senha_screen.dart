@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_logo.dart';
 
 class EsqueciSenhaScreen extends StatefulWidget {
   const EsqueciSenhaScreen({super.key});
@@ -149,24 +150,44 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Back button
-                    GestureDetector(
-                      onTap: () {
-                        if (_step == 1) {
-                          _animateStepForward(0);
-                        } else {
-                          context.pop();
-                        }
-                      },
-                      child: Container(
-                        width: 42, height: 42,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                    // Logo & Back button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const FxLogo(size: 42),
+                            const SizedBox(width: 12),
+                            const Text(
+                              'FOCUX',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 3,
+                              ),
+                            ),
+                          ],
                         ),
-                        child: Icon(Icons.arrow_back, color: Colors.white.withValues(alpha: 0.7), size: 20),
-                      ),
+                        GestureDetector(
+                          onTap: () {
+                            if (_step == 1) {
+                              _animateStepForward(0);
+                            } else {
+                              context.pop();
+                            }
+                          },
+                          child: Container(
+                            width: 42, height: 42,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                            ),
+                            child: Icon(Icons.arrow_back, color: Colors.white.withValues(alpha: 0.7), size: 20),
+                          ),
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 24),

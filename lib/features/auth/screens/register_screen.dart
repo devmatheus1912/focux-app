@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_logo.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
@@ -176,18 +177,38 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Back button
-                        GestureDetector(
-                          onTap: () => context.go('/login'),
-                          child: Container(
-                            width: 42, height: 42,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                        // Logo & Back button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const FxLogo(size: 42),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'FOCUX',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 3,
+                                  ),
+                                ),
+                              ],
                             ),
-                            child: Icon(Icons.arrow_back, color: Colors.white.withValues(alpha: 0.7), size: 20),
-                          ),
+                            GestureDetector(
+                              onTap: () => context.go('/login'),
+                              child: Container(
+                                width: 42, height: 42,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                                ),
+                                child: Icon(Icons.arrow_back, color: Colors.white.withValues(alpha: 0.7), size: 20),
+                              ),
+                            ),
+                          ],
                         ),
 
                         const SizedBox(height: 32),

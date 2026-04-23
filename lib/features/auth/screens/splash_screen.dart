@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_logo.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -144,15 +145,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         ],
                       ),
                       child: Center(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Image.asset(
-                            'assets/images/logo_focux_v2.png',
-                            width: 88,
-                            height: 88,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                        child: const FxLogo(size: 88),
                       ),
                     );
                   },

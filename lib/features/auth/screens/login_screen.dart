@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_logo.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
@@ -182,15 +183,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         // Logo
                         Row(
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
-                              child: Image.asset(
-                                'assets/images/logo_focux.png',
-                                width: 48,
-                                height: 48,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                            const FxLogo(size: 48),
                             const SizedBox(width: 12),
                             const Text(
                               'FOCUX PERSONAL',

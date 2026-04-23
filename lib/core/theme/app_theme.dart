@@ -4,21 +4,21 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// Paleta Focux — estilo Airbnb com azul suave no lugar do coral/vermelho.
 class AppTheme {
-  /// Azul Royal Blue Eagle Precision — cor principal da marca
-  static const Color defaultPrimary = Color(0xFF2B4A9E);
+  /// Azul Royal Electric (FX Brand) — cor principal da marca
+  static const Color defaultPrimary = Color(0xFF3B5FE2);
 
-  // Paleta neutra
-  static const Color _surface = Color(0xFFFFFFFF);
-  static const Color _background = Color(0xFFF9F9F9); // Eagle: #F9F9F9 Daylight
-  static const Color _onSurface = Color(0xFF222222);
-  static const Color _onSurfaceVariant = Color(0xFF717171);
-  static const Color _outline = Color(0xFFDDDDDD);
+  // Paleta neutra (Daylight)
+  static const Color _surface = Color(0xFFFFFFFF); // card
+  static const Color _background = Color(0xFFFAFAF8); // paper
+  static const Color _onSurface = Color(0xFF0B1220); // ink
+  static const Color _onSurfaceVariant = Color(0xFF6B7689); // inkMute
+  static const Color _outline = Color(0xFFE6E6E0); // line
 
-  // Paleta dark
-  static const Color _darkBg = Color(0xFF0D0D0D);       // Eagle: #0D0D0D Midnight
-  static const Color _darkSurface = Color(0xFF1A1A2E);  // Eagle: #1A1A2E Surface dark
-  static const Color _darkOnSurface = Color(0xFFF0F0F0); // Eagle: #F0F0F0
-  static const Color _darkOutline = Color(0xFF2A2A3E);
+  // Paleta dark (Midnight)
+  static const Color _darkBg = Color(0xFF0A0F1E);       
+  static const Color _darkSurface = Color(0xFF121A30);  
+  static const Color _darkOnSurface = Color(0xFFF3F4F8); 
+  static const Color _darkOutline = Color(0xFF1F2B4A);
 
   static ThemeData buildTheme(Color primary) {
     final cs = ColorScheme.fromSeed(

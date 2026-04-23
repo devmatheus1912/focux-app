@@ -20,28 +20,28 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   static const _pages = [
     _OnboardData(
       icon: Icons.fitness_center,
-      gradient: [Color(0xFF3B5FE2), Color(0xFF2440B8)],
+      gradient: [Color(0xFF3B5FE2), Color(0xFF0D1B5C)],
       title: 'Gestão inteligente\nde alunos.',
       subtitle: 'Cadastre, acompanhe a evolução e reduza o churn com dados em tempo real.',
       tag: 'GESTÃO',
     ),
     _OnboardData(
       icon: Icons.auto_awesome,
-      gradient: [Color(0xFF7C3AED), Color(0xFF5B21B6)],
+      gradient: [Color(0xFF3B5FE2), Color(0xFF0D1B5C)],
       title: 'IA que trabalha\npor você.',
       subtitle: 'Gere treinos, dietas e progressões de carga automaticamente com inteligência artificial.',
       tag: 'INTELIGÊNCIA',
     ),
     _OnboardData(
       icon: Icons.insights,
-      gradient: [Color(0xFF059669), Color(0xFF047857)],
+      gradient: [Color(0xFF3B5FE2), Color(0xFF0D1B5C)],
       title: 'Resultados\nmensuráveis.',
       subtitle: 'Monitore check-ins, aderência, evolução física e engajamento de cada aluno.',
       tag: 'ANALYTICS',
     ),
     _OnboardData(
       icon: Icons.rocket_launch,
-      gradient: [Color(0xFFD97706), Color(0xFFB45309)],
+      gradient: [Color(0xFF3B5FE2), Color(0xFF0D1B5C)],
       title: 'Seu negócio.\nSem limites.',
       subtitle: 'Controle financeiro, agenda, planos e automações — tudo em um só lugar.',
       tag: 'ESCALA',
@@ -206,21 +206,21 @@ class _OnboardPageWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon with gradient background
+          // Icon with white background and dark drawing
           Container(
             width: 80, height: 80,
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: data.gradient),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: data.gradient.first.withValues(alpha: 0.4),
+                  color: Colors.white.withValues(alpha: 0.15),
                   blurRadius: 24,
                   offset: const Offset(0, 10),
                 ),
               ],
             ),
-            child: Icon(data.icon, color: Colors.white, size: 36),
+            child: Icon(data.icon, color: const Color(0xFF0A0F1E), size: 36),
           ),
           const SizedBox(height: 10),
 
