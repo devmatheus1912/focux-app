@@ -34,7 +34,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
         _config = results[1] as AlertasConfiguracao;
         _loading = false;
       });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }

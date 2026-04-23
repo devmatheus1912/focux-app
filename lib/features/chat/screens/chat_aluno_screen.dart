@@ -42,7 +42,7 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
       }
       if (mounted) setState(() { _msgs.addAll(msgs); _loading = false; });
       _scrollToBottom();
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -77,7 +77,7 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
             setState(() => _msgs.add(msg));
             _scrollToBottom();
           }
-        } catch (_) {
+        } catch (e) { debugPrint('[Focux] Error: $e');
           _loadHistorico();
         }
       },

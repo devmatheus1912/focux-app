@@ -32,7 +32,7 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
     try {
       final data = await FinanceiroRepository(ref.read(apiClientProvider)).dashboard();
       if (mounted) setState(() { _finData = data; _loadingFin = false; });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loadingFin = false);
     }
   }

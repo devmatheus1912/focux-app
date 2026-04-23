@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../api/api_client.dart';
 import '../storage/secure_storage.dart';
@@ -33,7 +34,7 @@ class FcmService {
       final jwtToken = await SecureStorage.getToken();
       if (jwtToken == null) return; // usuário não autenticado
       await apiClient.dio.post('/api/fcm/token', data: {'token': token});
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       // silencioso — não quebrar o app por falha de FCM
     }
   }

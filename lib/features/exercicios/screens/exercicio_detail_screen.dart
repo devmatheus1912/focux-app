@@ -17,7 +17,7 @@ class ExercicioDetailScreen extends ConsumerWidget {
         await repo.favoritarExercicio(exercicioId);
       }
       ref.invalidate(exercicioProvider(exercicioId));
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Erro ao atualizar favorito.')),

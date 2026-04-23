@@ -33,7 +33,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           ? await repo.listarPorAluno(widget.alunoId!)
           : await repo.listar();
       if (mounted) setState(() { _feedbacks = r; _loading = false; });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }

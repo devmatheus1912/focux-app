@@ -902,7 +902,7 @@ class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
     try {
       final dt = DateTime.parse(iso);
       return '${dt.day.toString().padLeft(2,'0')}/${dt.month.toString().padLeft(2,'0')}/${dt.year} ${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}';
-    } catch (_) { return iso; }
+    } catch (e) { debugPrint('[Focux] Error: $e'); return iso; }
   }
 
   Color _acaoColor(String acao) {

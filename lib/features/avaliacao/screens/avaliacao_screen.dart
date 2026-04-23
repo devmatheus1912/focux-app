@@ -18,7 +18,7 @@ String _formatarData(String? iso) {
     final h = dt.hour.toString().padLeft(2, '0');
     final min = dt.minute.toString().padLeft(2, '0');
     return '$d/$m/$y $h:$min';
-  } catch (_) {
+  } catch (e) { debugPrint('[Focux] Error: $e');
     return iso.length >= 10 ? iso.substring(0, 10) : iso;
   }
 }
@@ -46,7 +46,7 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
     try {
       final r = await AvaliacaoRepository(ref.read(apiClientProvider)).listar(widget.alunoId);
       setState(() { _avaliacoes = r; _loading = false; });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       setState(() => _loading = false);
     }
   }

@@ -38,7 +38,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       final msgs = await ChatRepository(ref.read(apiClientProvider)).historico(widget.alunoId);
       setState(() { _msgs.addAll(msgs); _loading = false; });
       _scrollToBottom();
-    } catch (_) { setState(() => _loading = false); }
+    } catch (e) { debugPrint('[Focux] Error: $e'); setState(() => _loading = false); }
   }
 
   Future<void> _connectWs() async {
@@ -62,7 +62,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           final data = jsonDecode(f.body!) as Map<String, dynamic>;
           final msg = ChatMsg.fromJson(data);
           if (mounted) { setState(() => _msgs.add(msg)); _scrollToBottom(); }
-        } catch (_) { _loadHistorico(); }
+        } catch (e) { debugPrint('[Focux] Error: $e'); _loadHistorico(); }
       },
     );
   }

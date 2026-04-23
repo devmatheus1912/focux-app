@@ -44,7 +44,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
         cols[col]!.add(l);
       }
       if (mounted) setState(() { _cols = cols; _loading = false; });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }

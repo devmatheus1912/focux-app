@@ -22,7 +22,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     try {
       final r = await AgendaRepository(ref.read(apiClientProvider)).proximos();
       setState(() { _ags = r; _loading = false; });
-    } catch (_) { setState(() => _loading = false); }
+    } catch (e) { debugPrint('[Focux] Error: $e'); setState(() => _loading = false); }
   }
 
   // AG2 — retorna badge "HOJE", "AMANHÃ" ou null

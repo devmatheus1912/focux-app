@@ -56,7 +56,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       final repo = LeadRepository(ref.read(apiClientProvider));
       final lista = await repo.listarInteracoes(_lead.id);
       if (mounted) setState(() { _interacoes = lista; _loadingInteracoes = false; });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loadingInteracoes = false);
     }
   }
@@ -143,7 +143,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     if (_lead.proximoContato != null) {
       try {
         inicial = DateTime.parse(_lead.proximoContato!);
-      } catch (_) {}
+      } catch (e) { debugPrint('[Focux] Error: $e');}
     }
     final picked = await showDatePicker(
       context: context,

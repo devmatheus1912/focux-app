@@ -40,7 +40,7 @@ class _AgendaSemanalScreenState extends ConsumerState<AgendaSemanalScreen> {
       final repo = AgendaRepository(ref.read(apiClientProvider));
       final lista = await repo.listarSemana(_dataParam(_semanaBase));
       if (mounted) setState(() { _agendamentos = lista; _loading = false; });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -133,7 +133,7 @@ class _AgendaSemanalScreenState extends ConsumerState<AgendaSemanalScreen> {
                   await repo.registrarStatusAtendimento(
                       ag.id, statusSelecionado, obsController.text.isEmpty ? null : obsController.text);
                   await _carregar();
-                } catch (_) {
+                } catch (e) { debugPrint('[Focux] Error: $e');
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Erro ao registrar status.')));

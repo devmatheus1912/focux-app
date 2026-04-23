@@ -16,7 +16,7 @@ void main() async {
   try {
     await Firebase.initializeApp();
     await FcmService.init(ApiClient());
-  } catch (_) {
+  } catch (e) { debugPrint('[Focux] Error: $e');
     // Firebase não configurado (sem google-services.json / GoogleService-Info.plist)
     // O app continua funcionando normalmente sem FCM
   }

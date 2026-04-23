@@ -35,7 +35,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
         }
         _loading = false;
       });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       setState(() => _loading = false);
     }
   }
@@ -213,7 +213,7 @@ class _ComentariosBottomSheetState extends State<_ComentariosBottomSheet> {
         _comentarios = lista;
         _loading = false;
       });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       setState(() => _loading = false);
     }
   }

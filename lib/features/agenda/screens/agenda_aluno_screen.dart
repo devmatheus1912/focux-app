@@ -25,7 +25,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
     try {
       final r = await AgendaRepository(ref.read(apiClientProvider)).meusAgendamentos();
       if (mounted) setState(() { _ags = r; _loading = false; });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }

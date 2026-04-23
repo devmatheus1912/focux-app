@@ -27,7 +27,7 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
     try {
       final d = await FinanceiroRepository(ref.read(apiClientProvider)).dashboard();
       if (mounted) setState(() { _data = d; _loading = false; });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }

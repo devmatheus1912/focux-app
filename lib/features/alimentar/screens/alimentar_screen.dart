@@ -23,7 +23,7 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
     try {
       final r = await AlimentarRepository(ref.read(apiClientProvider)).listar(widget.alunoId);
       setState(() { _planos = r; _loading = false; });
-    } catch (_) { setState(() => _loading = false); }
+    } catch (e) { debugPrint('[Focux] Error: $e'); setState(() => _loading = false); }
   }
 
   @override

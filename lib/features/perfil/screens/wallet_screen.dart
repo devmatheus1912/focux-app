@@ -261,7 +261,7 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
       final repo = FinanceiroRepository(ref.read(apiClientProvider));
       final res = await repo.resumoMensal(now.year, now.month);
       if (mounted) setState(() { _resumo = res; _loading = false; });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }

@@ -90,7 +90,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
       try {
         await repo.atualizarAluno(id, {'status': novoStatus});
         sucesso++;
-      } catch (_) {
+      } catch (e) { debugPrint('[Focux] Error: $e');
         falha++;
       }
     }

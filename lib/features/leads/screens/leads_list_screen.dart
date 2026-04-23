@@ -47,7 +47,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       final repo = LeadRepository(ref.read(apiClientProvider));
       final leads = await repo.listar(status: _filtroStatus);
       if (mounted) setState(() { _leads = leads; _loading = false; });
-    } catch (_) {
+    } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }

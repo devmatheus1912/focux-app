@@ -12,7 +12,7 @@ String _fmtData(String? iso) {
     final d = dt.day.toString().padLeft(2, '0');
     final m = dt.month.toString().padLeft(2, '0');
     return '$d/${m}/${dt.year}';
-  } catch (_) {
+  } catch (e) { debugPrint('[Focux] Error: $e');
     return iso.length >= 10 ? iso.substring(0, 10) : iso;
   }
 }
