@@ -7,7 +7,6 @@ import '../providers/dashboard_provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../admin/screens/admin_screen.dart';
 import '../../financeiro/data/financeiro_repository.dart';
-import 'command_center_widget.dart';
 import 'busca_global_widget.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
 
