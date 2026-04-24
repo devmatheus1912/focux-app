@@ -179,6 +179,33 @@ class AlunoDetailScreen extends ConsumerWidget {
                           Expanded(child: Text('Copiloto IA pronto para sugestões', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 13, fontWeight: FontWeight.w500))),
                         ]),
                       ),
+                      const SizedBox(height: 16),
+
+                      // Biometrics Row
+                      Row(
+                        children: [
+                          _StatCard(
+                            label: 'Idade',
+                            value: '${aluno.idade ?? '--'}',
+                            unit: 'anos',
+                            isDark: isDark,
+                          ),
+                          const SizedBox(width: 10),
+                          _StatCard(
+                            label: 'Peso',
+                            value: aluno.peso?.toStringAsFixed(1) ?? '--',
+                            unit: 'kg',
+                            isDark: isDark,
+                          ),
+                          const SizedBox(width: 10),
+                          _StatCard(
+                            label: 'Altura',
+                            value: aluno.altura?.toStringAsFixed(2) ?? '--',
+                            unit: 'm',
+                            isDark: isDark,
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 24),
 
                       Text('Ferramentas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: ink, letterSpacing: -0.5)),
@@ -240,6 +267,63 @@ class _HeroStat extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final String unit;
+  final bool isDark;
+
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.unit,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: line),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label.toUpperCase(),
+              style: TextStyle(color: mute, fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 1.0),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(color: ink, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: -0.5),
+                ),
+                const SizedBox(width: 3),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 2),
+                  child: Text(unit, style: TextStyle(color: mute, fontSize: 11, fontWeight: FontWeight.w500)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

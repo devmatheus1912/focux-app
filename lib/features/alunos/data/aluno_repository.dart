@@ -16,6 +16,9 @@ class Aluno {
   final String? tipoConsultoria;
   final String statusFinanceiro;
   final String? senhaProvisoria;
+  final double? peso;
+  final double? altura;
+  final String? dataNascimento;
 
   Aluno({
     required this.id,
@@ -32,7 +35,20 @@ class Aluno {
     this.tipoConsultoria,
     this.statusFinanceiro = 'ATIVO',
     this.senhaProvisoria,
+    this.peso,
+    this.altura,
+    this.dataNascimento,
   });
+
+  int? get idade {
+    if (dataNascimento == null) return null;
+    final nasc = DateTime.tryParse(dataNascimento!);
+    if (nasc == null) return null;
+    final now = DateTime.now();
+    int age = now.year - nasc.year;
+    if (now.month < nasc.month || (now.month == nasc.month && now.day < nasc.day)) age--;
+    return age;
+  }
 
   factory Aluno.fromJson(Map<String, dynamic> json) => Aluno(
         id: json['id'] as int,
@@ -49,6 +65,9 @@ class Aluno {
         tipoConsultoria: json['tipoConsultoria'] as String?,
         statusFinanceiro: json['statusFinanceiro'] as String? ?? 'ATIVO',
         senhaProvisoria: json['senhaProvisoria'] as String?,
+        peso: json['peso']?.toDouble(),
+        altura: json['altura']?.toDouble(),
+        dataNascimento: json['dataNascimento'] as String?,
       );
 }
 

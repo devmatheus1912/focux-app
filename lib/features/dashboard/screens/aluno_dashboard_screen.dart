@@ -18,9 +18,19 @@ class AlunoDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      drawer: alunoAsync.whenOrNull(
+        data: (aluno) => _AlunoDrawer(aluno: aluno, isDark: isDark, ref: ref),
+      ),
       appBar: AppBar(
         backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: Icon(Icons.menu, color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+            tooltip: 'Menu',
+          ),
+        ),
         title: Text(
           'Meu Treino',
           style: TextStyle(
@@ -252,6 +262,12 @@ class _AlunoProfileCard extends StatelessWidget {
                     children: [
                       if (genderLabel != null)
                         _Chip(label: genderLabel, isDark: isDark),
+                      if (aluno.idade != null)
+                        _Chip(
+                          label: '${aluno.idade} anos',
+                          icon: Icons.cake_outlined,
+                          isDark: isDark,
+                        ),
                       if (telefone != null && telefone.isNotEmpty)
                         _Chip(
                           label: telefone,
@@ -366,6 +382,214 @@ class _ProfileCardSkeleton extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── Drawer ────────────────────────────────────────────────────────────────────
+
+class _AlunoDrawer extends ConsumerWidget {
+  final Aluno aluno;
+  final bool isDark;
+  final WidgetRef ref;
+
+  const _AlunoDrawer({
+    required this.aluno,
+    required this.isDark,
+    required this.ref,
+  });
+
+  String _initials(String nome) {
+    final parts = nome.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts[0][0].toUpperCase();
+    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final drawerBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final headerBg = isDark ? EagleTokens.darkCardHi : EagleTokens.brandSoft;
+    final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final dividerColor = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final hasFoto = aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty;
+
+    void nav(String route) {
+      Navigator.pop(context);
+      context.go(route);
+    }
+
+    return Drawer(
+      backgroundColor: drawerBg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ── Header ──────────────────────────────────────────────────────
+          Container(
+            color: headerBg,
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 20,
+              bottom: 20,
+              left: 20,
+              right: 20,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: EagleTokens.brand, width: 2.5),
+                  ),
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundColor: EagleTokens.brandSoft,
+                    backgroundImage: hasFoto ? NetworkImage(aluno.fotoUrl!) : null,
+                    child: hasFoto
+                        ? null
+                        : Text(
+                            _initials(aluno.nome),
+                            style: TextStyle(
+                              color: EagleTokens.brand,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        aluno.nome,
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (aluno.objetivo != null && aluno.objetivo!.isNotEmpty)
+                        Text(
+                          aluno.objetivo!,
+                          style: TextStyle(
+                            color: EagleTokens.brand,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // ── Nav links ───────────────────────────────────────────────────
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: [
+                _DrawerItem(
+                  icon: Icons.fitness_center,
+                  label: 'Meus Treinos',
+                  isDark: isDark,
+                  onTap: () => nav('/checkin/treinos'),
+                ),
+                _DrawerItem(
+                  icon: Icons.calendar_month,
+                  label: 'Agenda',
+                  isDark: isDark,
+                  onTap: () => nav('/agenda/aluno'),
+                ),
+                _DrawerItem(
+                  icon: Icons.history,
+                  label: 'Histórico',
+                  isDark: isDark,
+                  onTap: () => nav('/checkin/historico'),
+                ),
+                _DrawerItem(
+                  icon: Icons.dynamic_feed,
+                  label: 'Feed',
+                  isDark: isDark,
+                  onTap: () => nav('/feed/aluno'),
+                ),
+                _DrawerItem(
+                  icon: Icons.chat_bubble_outline,
+                  label: 'Chat com Personal',
+                  isDark: isDark,
+                  onTap: () => nav('/chat/aluno'),
+                ),
+                _DrawerItem(
+                  icon: Icons.smart_toy,
+                  label: 'IA',
+                  isDark: isDark,
+                  onTap: () => nav('/ia/aluno'),
+                ),
+                Divider(
+                  color: dividerColor,
+                  thickness: 1,
+                  height: 24,
+                  indent: 16,
+                  endIndent: 16,
+                ),
+                // ── Logout ────────────────────────────────────────────────
+                ListTile(
+                  leading: Icon(Icons.logout, color: EagleTokens.brand, size: 22),
+                  title: Text(
+                    'Sair',
+                    style: TextStyle(
+                      color: textColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await ref.read(authProvider.notifier).logout();
+                    if (context.mounted) context.go('/login');
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DrawerItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _DrawerItem({
+    required this.icon,
+    required this.label,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+
+    return ListTile(
+      leading: Icon(icon, color: EagleTokens.brand, size: 22),
+      title: Text(
+        label,
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+        ),
+      ),
+      onTap: onTap,
     );
   }
 }
