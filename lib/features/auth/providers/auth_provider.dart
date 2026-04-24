@@ -58,8 +58,8 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     state = AuthStatus.authenticated;
   }
 
-  Future<void> registerAluno(String nome, String email, String password, String conviteToken) async {
-    await _repo.registerAluno(nome, email, password, conviteToken);
+  Future<void> registerAluno(String nome, String email, String password, String conviteToken, {String? personalSlug}) async {
+    await _repo.registerAluno(nome, email, password, conviteToken, personalSlug: personalSlug);
     _currentRole = UserRole.aluno;
     _isAdmin = false;
     state = AuthStatus.authenticated;

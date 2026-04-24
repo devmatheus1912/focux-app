@@ -57,6 +57,7 @@ import '../../features/analytics/screens/analytics_screen.dart';
 import '../../features/trilhas/screens/trilhas_screen.dart';
 import '../../features/dashboard/screens/qualidade_operacional_screen.dart';
 import '../../features/admin/screens/rbac_screen.dart';
+import '../../features/landing/screens/personal_public_landing_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -65,6 +66,12 @@ class AppRouter {
       GoRoute(
         path: '/',
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/p/:slug',
+        builder: (context, state) => PersonalPublicLandingScreen(
+          slug: state.pathParameters['slug']!,
+        ),
       ),
       GoRoute(
         path: '/login',
@@ -197,7 +204,9 @@ class AppRouter {
       ),
       GoRoute(
         path: '/register/aluno',
-        builder: (context, state) => const RegisterAlunoScreen(),
+        builder: (context, state) => RegisterAlunoScreen(
+          personalSlug: state.uri.queryParameters['p'],
+        ),
       ),
       GoRoute(
         path: '/chat/aluno',

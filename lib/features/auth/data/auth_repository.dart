@@ -50,13 +50,15 @@ class AuthRepository {
     return token;
   }
 
-  Future<String> registerAluno(String nome, String email, String password, String conviteToken) async {
-    final response = await _dio.post('/api/auth/register/aluno', data: {
+  Future<String> registerAluno(String nome, String email, String password, String conviteToken, {String? personalSlug}) async {
+    final requestBody = <String, dynamic>{
       'nome': nome,
       'email': email,
       'senha': password,
       'conviteToken': conviteToken,
-    });
+    };
+    if (personalSlug != null) requestBody['personalSlug'] = personalSlug;
+    final response = await _dio.post('/api/auth/register/aluno', data: requestBody);
     final token = response.data['token'] as String;
     final refreshToken = response.data['refreshToken'] as String?;
     await SecureStorage.saveToken(token);

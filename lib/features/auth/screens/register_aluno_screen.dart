@@ -8,7 +8,8 @@ import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 
 class RegisterAlunoScreen extends ConsumerStatefulWidget {
-  const RegisterAlunoScreen({super.key});
+  final String? personalSlug;
+  const RegisterAlunoScreen({super.key, this.personalSlug});
 
   @override
   ConsumerState<RegisterAlunoScreen> createState() => _RegisterAlunoScreenState();
@@ -68,6 +69,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
         _emailCtrl.text.trim(),
         _senhaCtrl.text,
         _conviteCtrl.text.trim(),
+        personalSlug: widget.personalSlug,
       );
       if (mounted) {
         HapticFeedback.heavyImpact();
@@ -196,6 +198,37 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                         ),
 
                         const SizedBox(height: 36),
+
+                        // Personal trainer linking banner
+                        if (widget.personalSlug != null)
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF3B5FE2).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  color: const Color(0xFF3B5FE2)
+                                      .withValues(alpha: 0.3)),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.fitness_center,
+                                    color: Color(0xFF3B5FE2), size: 20),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'Você está se cadastrando no app de seu personal trainer',
+                                    style: TextStyle(
+                                      color: Color(0xFF3B5FE2),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
 
                         // Invite code field (special highlight)
                         Column(
