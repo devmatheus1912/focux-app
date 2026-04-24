@@ -285,22 +285,31 @@ class _OBPageWidget extends StatelessWidget {
                 width: 96,
                 height: 96,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.06),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF111A2E), Color(0xFF1A2540)],
+                  ),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.08),
+                    color: const Color(0xFFBED7FF).withValues(alpha: 0.22),
                     width: 0.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2F6BFF).withValues(alpha: 0.15),
+                      color: const Color(0xFFD2E6FF).withValues(alpha: 0.18),
                       blurRadius: 28,
                       offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: const Color(0xFF78A0FF).withValues(alpha: 0.18),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Icon(data.icon,
-                    color: const Color(0xFF7BA3FF), size: 42),
+                    color: const Color(0xFFEAF2FF), size: 42),
               ),
             ),
           ),
