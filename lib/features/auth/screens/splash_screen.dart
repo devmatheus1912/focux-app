@@ -94,7 +94,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           // Deep gradient background
           Container(
             decoration: BoxDecoration(
-              gradient: EagleTokens.heroGradient(dark: isDark),
+              gradient: EagleTokens.heroGradient(dark: true),
             ),
           ),
 
