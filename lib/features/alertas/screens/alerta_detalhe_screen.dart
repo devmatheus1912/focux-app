@@ -5,21 +5,21 @@ import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 
-class AlrtaDetalheScreen extends ConsumerStatefulWidget {
+class AlertaDetalheScreen extends ConsumerStatefulWidget {
   final int alunoId;
   final String alunoNome;
 
-  const AlrtaDetalheScreen({
+  const AlertaDetalheScreen({
     super.key,
     required this.alunoId,
     required this.alunoNome,
   });
 
   @override
-  ConsumerState<AlrtaDetalheScreen> createState() => _AlrtaDetalheScreenState();
+  ConsumerState<AlertaDetalheScreen> createState() => _AlertaDetalheScreenState();
 }
 
-class _AlrtaDetalheScreenState extends ConsumerState<AlrtaDetalheScreen> {
+class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
   AlertaDetalhe? _detalhe;
   bool _loading = true;
   String? _erro;

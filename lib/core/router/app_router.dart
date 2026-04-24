@@ -274,7 +274,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/alertas/aluno/:id',
-        builder: (context, state) => AlrtaDetalheScreen(
+        builder: (context, state) => AlertaDetalheScreen(
           alunoId: int.parse(state.pathParameters['id']!),
           alunoNome: state.extra as String? ?? 'Aluno',
         ),
