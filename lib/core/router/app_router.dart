@@ -261,6 +261,10 @@ class AppRouter {
         builder: (context, state) => const IdentidadeVisualScreen(),
       ),
       GoRoute(
+        path: '/white-label',
+        redirect: (context, state) => '/identidade-visual',
+      ),
+      GoRoute(
         path: '/setup/identidade',
         builder: (context, state) => const IdentidadeVisualScreen(isSetup: true),
       ),
