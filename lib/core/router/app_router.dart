@@ -39,6 +39,7 @@ import '../../features/ia/screens/progressao_aceitar_screen.dart';
 import '../../features/alunos/screens/editar_aluno_screen.dart';
 import '../../features/alunos/data/aluno_repository.dart';
 import '../../features/auth/screens/esqueci_senha_screen.dart';
+import '../../features/auth/screens/definir_senha_aluno_screen.dart';
 import '../../features/ranking/screens/ranking_screen.dart';
 import '../../features/perfil/screens/identidade_visual_screen.dart';
 import '../../features/evolucao/screens/engajamento_screen.dart';
@@ -88,6 +89,10 @@ class AppRouter {
       GoRoute(
         path: '/dashboard/aluno',
         builder: (context, state) => const AlunoDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/aluno/definir-senha',
+        builder: (context, state) => const DefinirSenhaAlunoScreen(),
       ),
       GoRoute(
         path: '/dashboard/qualidade',

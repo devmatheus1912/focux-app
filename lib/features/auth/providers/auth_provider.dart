@@ -17,9 +17,11 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
   final AuthRepository _repo;
   UserRole? _currentRole;
   bool _isAdmin = false;
+  bool _requiresPasswordChange = false;
 
   UserRole? get currentRole => _currentRole;
   bool get isAdmin => _isAdmin;
+  bool get requiresPasswordChange => _requiresPasswordChange;
 
   AuthNotifier(this._repo) : super(AuthStatus.unknown) {
     _checkToken();
@@ -31,6 +33,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
       final roleStr = await SecureStorage.getRole();
       _currentRole = roleStr == 'ALUNO' ? UserRole.aluno : UserRole.personal;
       _isAdmin = await SecureStorage.getIsAdmin();
+      _requiresPasswordChange = await SecureStorage.getRequiresPasswordChange();
       state = AuthStatus.authenticated;
     } else {
       state = AuthStatus.unauthenticated;
@@ -41,6 +44,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     await _repo.loginPersonal(email, password);
     _currentRole = UserRole.personal;
     _isAdmin = await SecureStorage.getIsAdmin();
+    _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
   }
 
@@ -48,11 +52,12 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     await _repo.registerPersonal(nome, email, password);
     _currentRole = UserRole.personal;
     _isAdmin = false;
+    _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
   }
 
   Future<void> loginAluno(String email, String password) async {
-    await _repo.loginAluno(email, password);
+    _requiresPasswordChange = await _repo.loginAluno(email, password);
     _currentRole = UserRole.aluno;
     _isAdmin = false;
     state = AuthStatus.authenticated;
@@ -62,6 +67,13 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     await _repo.registerAluno(nome, email, password, conviteToken, personalSlug: personalSlug);
     _currentRole = UserRole.aluno;
     _isAdmin = false;
+    _requiresPasswordChange = false;
+    state = AuthStatus.authenticated;
+  }
+
+  Future<void> definirSenhaDefinitivaAluno(String senhaAtual, String novaSenha) async {
+    await _repo.definirSenhaDefinitivaAluno(senhaAtual, novaSenha);
+    _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
   }
 
@@ -69,6 +81,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     await _repo.logout();
     _currentRole = null;
     _isAdmin = false;
+    _requiresPasswordChange = false;
     state = AuthStatus.unauthenticated;
   }
 }
@@ -84,4 +97,9 @@ final userRoleProvider = Provider<UserRole?>((ref) {
 final isAdminProvider = Provider<bool>((ref) {
   ref.watch(authProvider);
   return ref.read(authProvider.notifier).isAdmin;
+});
+
+final requiresPasswordChangeProvider = Provider<bool>((ref) {
+  ref.watch(authProvider);
+  return ref.read(authProvider.notifier).requiresPasswordChange;
 });

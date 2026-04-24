@@ -37,17 +37,20 @@ class AuthRepository {
     return token;
   }
 
-  Future<String> loginAluno(String email, String password) async {
+  Future<bool> loginAluno(String email, String password) async {
     final response = await _dio.post('/api/auth/login/aluno', data: {
       'email': email,
       'senha': password,
     });
     final token = response.data['token'] as String;
     final refreshToken = response.data['refreshToken'] as String?;
+    final requiresPasswordChange =
+        response.data['requiresPasswordChange'] as bool? ?? false;
     await SecureStorage.saveToken(token);
     if (refreshToken != null) await SecureStorage.saveRefreshToken(refreshToken);
     await SecureStorage.saveRole('ALUNO');
-    return token;
+    await SecureStorage.saveRequiresPasswordChange(requiresPasswordChange);
+    return requiresPasswordChange;
   }
 
   Future<String> registerAluno(String nome, String email, String password, String conviteToken, {String? personalSlug}) async {
@@ -64,7 +67,17 @@ class AuthRepository {
     await SecureStorage.saveToken(token);
     if (refreshToken != null) await SecureStorage.saveRefreshToken(refreshToken);
     await SecureStorage.saveRole('ALUNO');
+    await SecureStorage.saveRequiresPasswordChange(false);
     return token;
+  }
+
+  Future<void> definirSenhaDefinitivaAluno(
+      String senhaAtual, String novaSenha) async {
+    await _dio.post('/api/auth/aluno/definir-senha', data: {
+      'senhaAtual': senhaAtual,
+      'novaSenha': novaSenha,
+    });
+    await SecureStorage.saveRequiresPasswordChange(false);
   }
 
   Future<void> logout() async {

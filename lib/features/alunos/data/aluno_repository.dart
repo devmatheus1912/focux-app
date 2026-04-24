@@ -132,7 +132,7 @@ class AlunoRepository {
   }
 
   Future<Aluno> me() async {
-    final response = await _dio.get('/api/alunos/me');
+    final response = await _dio.get('/api/aluno/me');
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 

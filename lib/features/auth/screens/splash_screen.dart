@@ -76,7 +76,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       if (next == AuthStatus.authenticated) {
         final role = ref.read(userRoleProvider);
         if (role == UserRole.aluno) {
-          context.go('/dashboard/aluno');
+          final requiresPasswordChange =
+              ref.read(requiresPasswordChangeProvider);
+          context.go(
+            requiresPasswordChange
+                ? '/aluno/definir-senha'
+                : '/dashboard/aluno',
+          );
         } else {
           context.go('/dashboard/personal');
         }

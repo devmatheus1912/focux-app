@@ -19,8 +19,10 @@ class AlunoDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
-      drawer: alunoAsync.whenOrNull(
+      drawer: alunoAsync.when(
         data: (aluno) => _AlunoDrawer(aluno: aluno, isDark: isDark, ref: ref),
+        loading: () => _AlunoDrawerPlaceholder(isDark: isDark),
+        error: (_, __) => _AlunoDrawerPlaceholder(isDark: isDark),
       ),
       appBar: AppBar(
         backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
@@ -72,7 +74,6 @@ class AlunoDashboardScreen extends ConsumerWidget {
                 final brandAsync = ref.watch(personalBrandProvider);
                 return brandAsync.maybeWhen(
                   data: (brand) {
-                    if (!brand.isEnterprise) return const SizedBox.shrink();
                     return Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -109,6 +110,15 @@ class AlunoDashboardScreen extends ConsumerWidget {
                                     fontWeight: FontWeight.w700,
                                     fontSize: 13,
                                     color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                                  ),
+                                ),
+                                Text(
+                                  'Seu personal',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: isDark
+                                        ? EagleTokens.darkInkMute
+                                        : EagleTokens.inkMute,
                                   ),
                                 ),
                                 if (brand.slogan != null && brand.slogan!.isNotEmpty)
@@ -624,6 +634,44 @@ class _AlunoDrawer extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AlunoDrawerPlaceholder extends StatelessWidget {
+  final bool isDark;
+  const _AlunoDrawerPlaceholder({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    return Drawer(
+      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Menu do Aluno',
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Carregando dados do perfil...',
+                style: TextStyle(
+                  color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

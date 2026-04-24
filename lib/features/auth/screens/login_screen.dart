@@ -75,7 +75,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       if (_tipoLogin == 'aluno') {
         await ref.read(authProvider.notifier).loginAluno(
               _emailCtrl.text.trim(), _senhaCtrl.text);
-        if (mounted) context.go('/dashboard/aluno');
+        if (!mounted) return;
+        final requiresPasswordChange = ref.read(requiresPasswordChangeProvider);
+        context.go(
+          requiresPasswordChange
+              ? '/aluno/definir-senha'
+              : '/dashboard/aluno',
+        );
       } else {
         await ref.read(authProvider.notifier).login(
               _emailCtrl.text.trim(), _senhaCtrl.text);

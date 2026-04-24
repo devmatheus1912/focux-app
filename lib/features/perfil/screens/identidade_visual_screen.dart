@@ -162,6 +162,18 @@ class _IdentidadeVisualScreenState
         title: Text(
             widget.isSetup ? 'Configurar meu app' : 'Identidade Visual'),
         automaticallyImplyLeading: !widget.isSetup,
+        leading: widget.isSetup
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    context.go('/dashboard/personal');
+                  }
+                },
+              ),
         actions: [
           if (isPremiumOrAbove)
             TextButton(
