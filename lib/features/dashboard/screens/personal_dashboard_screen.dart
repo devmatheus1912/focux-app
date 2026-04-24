@@ -44,6 +44,10 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.backgroundDark : EagleTokens.paper,
+      drawer: dashboardAsync.maybeWhen(
+        data: (data) => _buildDrawer(context, isDark, data.nomePersonal, data.logoUrl),
+        orElse: () => _buildDrawer(context, isDark, null, null),
+      ),
       body: dashboardAsync.when(
         loading: () => _buildShimmerLoading(context),
         error: (e, _) => Center(child: Text('Erro ao carregar: $e')),
@@ -65,34 +69,59 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
                           children: [
-                            FxLogo(
-                              iconSize: 28,
-                              showLabel: true,
-                              horizontal: true,
-                              light: isDark,
-                            ),
-                            const SizedBox(height: 10),
-                            Text.rich(
-                              TextSpan(
-                                children: [
-                                  const TextSpan(text: 'Hoje · '),
-                                  TextSpan(
-                                    text: 'Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
-                                    style: TextStyle(
-                                      color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                            Builder(
+                              builder: (ctx) => InkWell(
+                                onTap: () => Scaffold.of(ctx).openDrawer(),
+                                borderRadius: BorderRadius.circular(18),
+                                child: Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                                    border: isDark ? null : Border.all(color: EagleTokens.line),
                                   ),
-                                ],
+                                  child: Icon(
+                                    Icons.menu,
+                                    size: 20,
+                                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                                  ),
+                                ),
                               ),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-                                fontWeight: FontWeight.w500,
-                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                FxLogo(
+                                  iconSize: 28,
+                                  showLabel: true,
+                                  horizontal: true,
+                                  light: isDark,
+                                ),
+                                const SizedBox(height: 10),
+                                Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      const TextSpan(text: 'Hoje · '),
+                                      TextSpan(
+                                        text: 'Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
+                                        style: TextStyle(
+                                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -414,6 +443,115 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context, bool isDark, String? nomePersonal, String? logoUrl) {
+    final drawerBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final headerBg = isDark ? EagleTokens.darkCardHi : EagleTokens.brandSoft;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final dividerColor = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    final navItems = [
+      (icon: Icons.calendar_month, label: 'Agenda', route: '/agenda'),
+      (icon: Icons.attach_money, label: 'Financeiro', route: '/financeiro'),
+      (icon: Icons.fitness_center, label: 'Exercícios', route: '/exercicios'),
+      (icon: Icons.list_alt, label: 'Treinos', route: '/treinos'),
+      (icon: Icons.people, label: 'Alunos', route: '/alunos'),
+    ];
+
+    return Drawer(
+      backgroundColor: drawerBg,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Container(
+              width: double.infinity,
+              color: headerBg,
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+              child: Row(
+                children: [
+                  logoUrl != null && logoUrl.isNotEmpty
+                      ? CircleAvatar(backgroundImage: NetworkImage(logoUrl), radius: 28)
+                      : CircleAvatar(
+                          radius: 28,
+                          backgroundColor: EagleTokens.brand,
+                          child: Text(
+                            nomePersonal?.substring(0, 1).toUpperCase() ?? 'F',
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22),
+                          ),
+                        ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          nomePersonal ?? '',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: ink,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        FxLogo(iconSize: 16, showLabel: true, horizontal: true, light: isDark),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Divider(height: 1, color: dividerColor),
+            // Nav links
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                children: navItems.map((item) {
+                  return ListTile(
+                    leading: Icon(item.icon, color: EagleTokens.brand, size: 22),
+                    title: Text(
+                      item.label,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: ink,
+                      ),
+                    ),
+                    horizontalTitleGap: 8,
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.go(item.route);
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+            Divider(height: 1, color: dividerColor),
+            // Logout
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.redAccent, size: 22),
+              title: const Text(
+                'Sair',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.redAccent,
+                ),
+              ),
+              horizontalTitleGap: 8,
+              onTap: () async {
+                Navigator.of(context).pop();
+                await ref.read(authProvider.notifier).logout();
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }

@@ -112,6 +112,11 @@ class AlunoRepository {
     return response.data['senhaProvisoria'] as String;
   }
 
+  Future<Aluno> me() async {
+    final response = await _dio.get('/api/alunos/me');
+    return Aluno.fromJson(response.data as Map<String, dynamic>);
+  }
+
   // Telefone getter helper (não está no modelo ainda)
   String? getTelefone(Aluno aluno) => null;
 }

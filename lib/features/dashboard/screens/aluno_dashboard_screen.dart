@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../alunos/data/aluno_repository.dart';
+import '../../alunos/providers/alunos_provider.dart';
 import 'progresso_semanal_widget.dart';
 
 class AlunoDashboardScreen extends ConsumerWidget {
@@ -12,12 +14,20 @@ class AlunoDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final alunoAsync = ref.watch(alunoMeProvider);
+
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
-        title: Text('Meu Treino', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
+        title: Text(
+          'Meu Treino',
+          style: TextStyle(
+            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         actions: [
           IconButton(
@@ -45,29 +55,322 @@ class AlunoDashboardScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            alunoAsync.when(
+              data: (aluno) => _AlunoProfileCard(aluno: aluno, isDark: isDark),
+              loading: () => _ProfileCardSkeleton(isDark: isDark),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: 16),
             const ProgressoSemanalWidget(),
             const SizedBox(height: 24),
-            Text('Meus Atalhos', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 17, fontWeight: FontWeight.w700)),
+            Text(
+              'Meus Atalhos',
+              style: TextStyle(
+                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             const SizedBox(height: 12),
-            _MenuButton(icon: Icons.fitness_center, label: 'Meus Treinos', subtitle: 'Ver e executar treinos atribuídos', onTap: () => context.push('/checkin/treinos'), isDark: isDark),
+            _MenuButton(
+              icon: Icons.fitness_center,
+              label: 'Meus Treinos',
+              subtitle: 'Ver e executar treinos atribuídos',
+              onTap: () => context.push('/checkin/treinos'),
+              isDark: isDark,
+            ),
             const SizedBox(height: 10),
-            _MenuButton(icon: Icons.history, label: 'Histórico', subtitle: 'Treinos realizados', onTap: () => context.push('/checkin/historico'), isDark: isDark),
+            _MenuButton(
+              icon: Icons.history,
+              label: 'Histórico',
+              subtitle: 'Treinos realizados',
+              onTap: () => context.push('/checkin/historico'),
+              isDark: isDark,
+            ),
             const SizedBox(height: 10),
-            _MenuButton(icon: Icons.dynamic_feed, label: 'Feed', subtitle: 'Publicações do seu personal', onTap: () => context.push('/feed/aluno'), isDark: isDark),
+            _MenuButton(
+              icon: Icons.dynamic_feed,
+              label: 'Feed',
+              subtitle: 'Publicações do seu personal',
+              onTap: () => context.push('/feed/aluno'),
+              isDark: isDark,
+            ),
             const SizedBox(height: 10),
-            _MenuButton(icon: Icons.chat_bubble_outline, label: 'Chat com Personal', subtitle: 'Envie mensagens ao seu personal', onTap: () => context.push('/chat/aluno'), isDark: isDark),
+            _MenuButton(
+              icon: Icons.chat_bubble_outline,
+              label: 'Chat com Personal',
+              subtitle: 'Envie mensagens ao seu personal',
+              onTap: () => context.push('/chat/aluno'),
+              isDark: isDark,
+            ),
             const SizedBox(height: 10),
-            _MenuButton(icon: Icons.smart_toy, label: 'Assistente IA', subtitle: 'Tire dúvidas com inteligência artificial', onTap: () => context.push('/ia/chat'), isDark: isDark),
+            _MenuButton(
+              icon: Icons.smart_toy,
+              label: 'Assistente IA',
+              subtitle: 'Tire dúvidas com inteligência artificial',
+              onTap: () => context.push('/ia/chat'),
+              isDark: isDark,
+            ),
             const SizedBox(height: 10),
-            _MenuButton(icon: Icons.payments, label: 'Financeiro', subtitle: 'Veja suas mensalidades', onTap: () => context.push('/financeiro/aluno'), isDark: isDark),
+            _MenuButton(
+              icon: Icons.payments,
+              label: 'Financeiro',
+              subtitle: 'Veja suas mensalidades',
+              onTap: () => context.push('/financeiro/aluno'),
+              isDark: isDark,
+            ),
             const SizedBox(height: 10),
-            _MenuButton(icon: Icons.calendar_month, label: 'Minha Agenda', subtitle: 'Veja e confirme seus agendamentos', onTap: () => context.push('/agenda/aluno'), isDark: isDark),
+            _MenuButton(
+              icon: Icons.calendar_month,
+              label: 'Minha Agenda',
+              subtitle: 'Veja e confirme seus agendamentos',
+              onTap: () => context.push('/agenda/aluno'),
+              isDark: isDark,
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+// ── Profile Card ──────────────────────────────────────────────────────────────
+
+class _AlunoProfileCard extends StatelessWidget {
+  final Aluno aluno;
+  final bool isDark;
+
+  const _AlunoProfileCard({required this.aluno, required this.isDark});
+
+  String _initials(String nome) {
+    final parts = nome.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts[0][0].toUpperCase();
+    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+  }
+
+  String? _genderLabel(String? genero) {
+    if (genero == null) return null;
+    switch (genero.toUpperCase()) {
+      case 'M':
+      case 'MASCULINO':
+        return 'Masculino';
+      case 'F':
+      case 'FEMININO':
+        return 'Feminino';
+      default:
+        return genero;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final muteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final cardColor = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final lineColor = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+
+    final hasFoto = aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty;
+    final genderLabel = _genderLabel(aluno.genero);
+    final telefone = aluno.telefone ?? aluno.whatsapp;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: lineColor),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Avatar
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: EagleTokens.brand, width: 2.5),
+              ),
+              child: CircleAvatar(
+                radius: 30,
+                backgroundColor: EagleTokens.brandSoft,
+                backgroundImage: hasFoto ? NetworkImage(aluno.fotoUrl!) : null,
+                child: hasFoto
+                    ? null
+                    : Text(
+                        _initials(aluno.nome),
+                        style: TextStyle(
+                          color: EagleTokens.brand,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            // Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    aluno.nome,
+                    style: TextStyle(
+                      color: textColor,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (aluno.objetivo != null && aluno.objetivo!.isNotEmpty) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      aluno.objetivo!,
+                      style: TextStyle(
+                        color: EagleTokens.brand,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      if (genderLabel != null)
+                        _Chip(label: genderLabel, isDark: isDark),
+                      if (telefone != null && telefone.isNotEmpty)
+                        _Chip(
+                          label: telefone,
+                          icon: Icons.phone_outlined,
+                          isDark: isDark,
+                        ),
+                      if (aluno.tipoConsultoria != null &&
+                          aluno.tipoConsultoria!.isNotEmpty)
+                        _Chip(label: aluno.tipoConsultoria!, isDark: isDark),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Status dot
+            const SizedBox(width: 8),
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: aluno.status == 'ATIVO' ? EagleTokens.good : muteColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String label;
+  final IconData? icon;
+  final bool isDark;
+
+  const _Chip({required this.label, this.icon, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = isDark
+        ? EagleTokens.darkCardHi
+        : EagleTokens.brandSofter;
+    final fg = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 11, color: fg),
+            const SizedBox(width: 3),
+          ],
+          Text(
+            label,
+            style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Skeleton while loading ────────────────────────────────────────────────────
+
+class _ProfileCardSkeleton extends StatelessWidget {
+  final bool isDark;
+
+  const _ProfileCardSkeleton({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final shimmer = isDark
+        ? EagleTokens.darkCardHi
+        : EagleTokens.lineSoft;
+
+    return Container(
+      height: 88,
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: shimmer),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(height: 14, width: 140, decoration: BoxDecoration(color: shimmer, borderRadius: BorderRadius.circular(6))),
+                  const SizedBox(height: 8),
+                  Container(height: 10, width: 90, decoration: BoxDecoration(color: shimmer, borderRadius: BorderRadius.circular(6))),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Menu Button ───────────────────────────────────────────────────────────────
 
 class _MenuButton extends StatelessWidget {
   final IconData icon;
@@ -76,7 +379,13 @@ class _MenuButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool isDark;
 
-  const _MenuButton({required this.icon, required this.label, required this.subtitle, required this.onTap, required this.isDark});
+  const _MenuButton({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.onTap,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -89,13 +398,32 @@ class _MenuButton extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
-          width: 44, height: 44,
-          decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: EagleTokens.brand.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Icon(icon, color: EagleTokens.brand, size: 22),
         ),
-        title: Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: isDark ? EagleTokens.darkInk : EagleTokens.ink)),
-        subtitle: Text(subtitle, style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 12)),
-        trailing: Icon(Icons.chevron_right, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+        title: Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            fontSize: 12,
+          ),
+        ),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+        ),
         onTap: onTap,
       ),
     );

@@ -58,4 +58,34 @@ class ChatRepository {
     final r = await _dio.post('/api/chat/aluno/enviar', data: {'conteudo': conteudo});
     return ChatMsg.fromJson(r.data);
   }
+
+  Future<ChatMsg> enviarMidiaComoAluno({
+    required String conteudo,
+    required String tipoMidia,
+    required String midiaUrl,
+  }) async {
+    final r = await _dio.post('/api/chat/aluno/enviar', data: {
+      'conteudo': conteudo,
+      'tipoMidia': tipoMidia,
+      'midiaUrl': midiaUrl,
+    });
+    return ChatMsg.fromJson(r.data);
+  }
+
+  Future<ChatMsg> enviarMidia({
+    required int alunoId,
+    required String conteudo,
+    required String remetente,
+    required String tipoMidia,
+    required String midiaUrl,
+  }) async {
+    final r = await _dio.post('/api/chat/enviar', data: {
+      'alunoId': alunoId,
+      'conteudo': conteudo,
+      'remetente': remetente,
+      'tipoMidia': tipoMidia,
+      'midiaUrl': midiaUrl,
+    });
+    return ChatMsg.fromJson(r.data);
+  }
 }

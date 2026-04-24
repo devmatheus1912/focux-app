@@ -13,3 +13,8 @@ final alunosProvider = FutureProvider<List<Aluno>>((ref) async {
 final alunoProvider = FutureProvider.family<Aluno, int>((ref, id) async {
   return ref.read(alunoRepositoryProvider).buscar(id);
 });
+
+/// Perfil do aluno autenticado (endpoint /api/alunos/me).
+final alunoMeProvider = FutureProvider<Aluno>((ref) async {
+  return ref.read(alunoRepositoryProvider).me();
+});

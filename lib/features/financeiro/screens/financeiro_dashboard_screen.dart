@@ -14,6 +14,7 @@ class FinanceiroDashboardScreen extends ConsumerStatefulWidget {
 
 class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardScreen> {
   FinanceiroDashboard? _data;
+  List<Mensalidade> _recentTransactions = [];
   bool _loading = true;
 
   @override
@@ -25,8 +26,22 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final d = await FinanceiroRepository(ref.read(apiClientProvider)).dashboard();
-      if (mounted) setState(() { _data = d; _loading = false; });
+      final repo = FinanceiroRepository(ref.read(apiClientProvider));
+      final results = await Future.wait([
+        repo.dashboard(),
+        repo.listar(),
+      ]);
+      if (mounted) {
+        final all = results[1] as List<Mensalidade>;
+        // Sort by id descending so newest records appear first, then take up to 8
+        final sorted = List<Mensalidade>.from(all)
+          ..sort((a, b) => b.id.compareTo(a.id));
+        setState(() {
+          _data = results[0] as FinanceiroDashboard;
+          _recentTransactions = sorted.take(8).toList();
+          _loading = false;
+        });
+      }
     } catch (e) { debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
@@ -66,6 +81,13 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
             _SectionTitle('Top alunos por receita'),
             const SizedBox(height: 8),
             ...d.topAlunos.asMap().entries.map((e) => _TopAlunoTile(rank: e.key + 1, item: e.value)),
+            const SizedBox(height: 20),
+          ],
+          if (_recentTransactions.isNotEmpty) ...[
+            _SectionTitle('Transações Recentes'),
+            const SizedBox(height: 8),
+            ..._recentTransactions.map((m) => _TransacaoTile(item: m)),
+            const SizedBox(height: 16),
           ],
         ],
       ),
@@ -77,8 +99,16 @@ class _SectionTitle extends StatelessWidget {
   final String text;
   const _SectionTitle(this.text);
   @override
-  Widget build(BuildContext context) => Text(text,
-    style: Theme.of(context).textTheme.titleSmall?.copyWith(color: const Color(0xFF4B5563)));
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
 }
 
 class _SummaryGrid extends StatelessWidget {
@@ -319,4 +349,119 @@ class _TopAlunoTile extends StatelessWidget {
         style: const TextStyle(fontWeight: FontWeight.bold)),
     ),
   );
+}
+
+class _TransacaoTile extends StatelessWidget {
+  final Mensalidade item;
+  const _TransacaoTile({required this.item});
+
+  IconData _icon(String status) {
+    switch (status) {
+      case 'PAGO': return Icons.check_circle;
+      case 'ATRASADO': return Icons.cancel;
+      default: return Icons.schedule;
+    }
+  }
+
+  Color _color(String status) {
+    switch (status) {
+      case 'PAGO': return EagleTokens.good;
+      case 'ATRASADO': return EagleTokens.bad;
+      default: return EagleTokens.warn;
+    }
+  }
+
+  String _dateLabel(Mensalidade m) {
+    if (m.status == 'PAGO' && m.pagoEm != null && m.pagoEm!.isNotEmpty) {
+      try {
+        final dt = DateTime.parse(m.pagoEm!);
+        final d = dt.day.toString().padLeft(2, '0');
+        final mo = dt.month.toString().padLeft(2, '0');
+        return 'Pago em $d/$mo/${dt.year}';
+      } catch (_) {}
+    }
+    final parts = m.mesReferencia.split('-');
+    if (parts.length >= 2) return 'Ref. ${parts[1]}/${parts[0]}';
+    return m.mesReferencia;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final statusColor = _color(item.status);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: statusColor.withValues(alpha: 0.15), width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            Icon(_icon(item.status), color: statusColor, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.alunoNome,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: ink,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _dateLabel(item),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'R\$ ${item.valor.toStringAsFixed(2).replaceAll('.', ',')}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: ink,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    item.status,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
