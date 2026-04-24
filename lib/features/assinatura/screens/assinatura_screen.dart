@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import '../data/assinatura_repository.dart';
 import '../providers/assinatura_provider.dart';
 
@@ -43,6 +43,12 @@ class _PlanoCard extends ConsumerStatefulWidget {
 class _PlanoCardState extends ConsumerState<_PlanoCard> {
   bool _loading = false;
 
+  // IDs dos produtos criados na App Store / Google Play (Placeholder)
+  String get _productId {
+    if (widget.plano.nome.toLowerCase().contains('premium')) return 'focux_premium_monthly';
+    return 'focux_pro_monthly';
+  }
+
   Future<void> _assinar() async {
     if (widget.plano.precoMensal == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -53,18 +59,38 @@ class _PlanoCardState extends ConsumerState<_PlanoCard> {
 
     setState(() { _loading = true; });
     try {
-      final url = await ref
-          .read(assinaturaRepositoryProvider)
-          .criarPreferencia(widget.plano.id);
-
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final bool available = await InAppPurchase.instance.isAvailable();
+      if (!available) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('A loja de aplicativos não está disponível neste dispositivo.')),
+          );
+        }
+        return;
       }
+
+      // Busca o produto na App Store / Google Play
+      final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails({_productId});
+      
+      if (response.notFoundIDs.isNotEmpty || response.productDetails.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Produto ainda não configurado na loja. (Aguardando lançamento oficial da conta Apple)')),
+          );
+        }
+        return;
+      }
+
+      final ProductDetails productDetails = response.productDetails.first;
+      final PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
+      
+      // Inicia o fluxo nativo da Apple / Google
+      await InAppPurchase.instance.buyNonConsumable(purchaseParam: purchaseParam);
+      
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao iniciar pagamento: $e')),
+          SnackBar(content: Text('Erro ao iniciar In-App Purchase: $e')),
         );
       }
     } finally {
