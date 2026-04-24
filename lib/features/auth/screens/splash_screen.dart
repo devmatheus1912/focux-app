@@ -85,8 +85,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       }
     });
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
