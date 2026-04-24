@@ -2,10 +2,10 @@ import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import '../../../core/theme/design_tokens.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOCUX PERSONAL — Glow Effect Premium Login
@@ -104,26 +104,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
     final h = mq.size.height;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
         body: Stack(
           fit: StackFit.expand,
           children: [
             // ── L1: Deep gradient (same as register) ────────────────
             Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF020617),
-                    Color(0xFF040B1A),
-                    Color(0xFF0F172A),
-                  ],
-                  stops: [0.0, 0.45, 1.0],
-                ),
+              decoration: BoxDecoration(
+                gradient: EagleTokens.heroGradient(dark: isDark),
               ),
             ),
 
@@ -139,7 +131,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     center: Alignment.center,
                     radius: 0.65,
                     colors: [
-                      const Color(0xFF2F6BFF).withValues(alpha: 0.06),
+                      EagleTokens.brand.withValues(alpha: 0.06),
                       Colors.transparent,
                     ],
                   ),
@@ -169,7 +161,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     child: Column(
                       children: [
                         // ═══ BRANDING HERO ═══
-                        _buildBrandHero(),
+                        _buildBrandHero(isDark),
 
                         const SizedBox(height: 28),
 
@@ -180,8 +172,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                 // Welcome
                                 Text(
                                   'Bem-vindo de volta.',
-                                  style: GoogleFonts.inter(
-                                    color: const Color(0xFFF0F4FF)
+                                  style: TextStyle(
+                                    color: (isDark ? EagleTokens.darkInk : EagleTokens.ink)
                                         .withValues(alpha: 0.92),
                                     fontSize: 26,
                                     fontWeight: FontWeight.w800,
@@ -235,12 +227,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     onPressed: () =>
                                         context.push('/esqueci-senha'),
                                     style: TextButton.styleFrom(
-                                      foregroundColor: const Color(0xFF5B8DEF),
+                                      foregroundColor: EagleTokens.brand,
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 4, vertical: 8),
                                     ),
                                     child: Text('Esqueceu a senha?',
-                                        style: GoogleFonts.inter(
+                                        style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w500)),
                                   ),
@@ -249,7 +241,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                 const SizedBox(height: 4),
                                 _buildGlowButton(),
                                 const SizedBox(height: 24),
-                                _buildCreateAccount(),
+                                _buildCreateAccount(isDark),
                                 const SizedBox(height: 28),
                                 _buildSocialProof(),
                               ],
@@ -268,7 +260,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
   // ── Brand Hero ─────────────────────────────────────────────────────
 
-  Widget _buildBrandHero() {
+  Widget _buildBrandHero(bool isDark) {
     return Column(
       children: [
         // F icon with glow
@@ -277,12 +269,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF2F6BFF).withValues(alpha: 0.30),
+                color: EagleTokens.brand.withValues(alpha: 0.30),
                 blurRadius: 56,
                 spreadRadius: 12,
               ),
               BoxShadow(
-                color: const Color(0xFF2F6BFF).withValues(alpha: 0.10),
+                color: EagleTokens.brand.withValues(alpha: 0.10),
                 blurRadius: 100,
                 spreadRadius: 28,
               ),
@@ -318,19 +310,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           text: TextSpan(children: [
             TextSpan(
               text: 'FOCUX ',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFFF0F4FF),
+                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
                 letterSpacing: 2.5,
               ),
             ),
             TextSpan(
               text: 'PERSONAL',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.w300,
-                color: const Color(0xFFF0F4FF).withValues(alpha: 0.78),
+                color: (isDark ? EagleTokens.darkInk : EagleTokens.ink)
+                    .withValues(alpha: 0.78),
                 letterSpacing: 1.0,
               ),
             ),
@@ -342,10 +335,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         Text(
           'Treine com dados. Evolua com inteligência.',
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 13.5,
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF8899B4),
+            color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
             letterSpacing: 0.15,
           ),
         ),
@@ -388,7 +381,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: sel
-                ? const Color(0xFF2F6BFF).withValues(alpha: 0.85)
+                ? EagleTokens.brand.withValues(alpha: 0.85)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: sel
@@ -396,7 +389,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 : null,
             boxShadow: sel
                 ? [BoxShadow(
-                    color: const Color(0xFF2F6BFF).withValues(alpha: 0.35),
+                    color: EagleTokens.brand.withValues(alpha: 0.35),
                     blurRadius: 16, offset: const Offset(0, 4))]
                 : [],
           ),
@@ -404,12 +397,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon,
-                  color: sel ? Colors.white : const Color(0xFF8899B4),
+                  color: sel ? Colors.white : EagleTokens.darkInkMute,
                   size: 18),
               const SizedBox(width: 8),
               Text(label,
-                  style: GoogleFonts.inter(
-                    color: sel ? Colors.white : const Color(0xFF8899B4),
+                  style: TextStyle(
+                    color: sel ? Colors.white : EagleTokens.darkInkMute,
                     fontWeight: sel ? FontWeight.w600 : FontWeight.w500,
                     fontSize: 14,
                   )),
@@ -427,19 +420,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF3D1525).withValues(alpha: 0.40),
+        color: EagleTokens.badSoft.withValues(alpha: 0.40),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-            color: const Color(0xFF6B2F45).withValues(alpha: 0.25)),
+            color: EagleTokens.bad.withValues(alpha: 0.25)),
       ),
       child: Row(children: [
-        const Icon(Icons.error_outline_rounded,
-            color: Color(0xFFD4808F), size: 18),
+        Icon(Icons.error_outline_rounded,
+            color: EagleTokens.bad, size: 18),
         const SizedBox(width: 10),
         Expanded(
             child: Text(msg,
-                style: GoogleFonts.inter(
-                    color: const Color(0xFFD4808F), fontSize: 13))),
+                style: TextStyle(
+                    color: EagleTokens.bad, fontSize: 13))),
       ]),
     );
   }
@@ -451,15 +444,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       width: double.infinity,
       height: 54,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+        gradient: LinearGradient(
+          colors: [EagleTokens.brand, EagleTokens.brandInk],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2F6BFF).withValues(alpha: 0.35),
+            color: EagleTokens.brand.withValues(alpha: 0.35),
             blurRadius: 24,
             spreadRadius: 2,
             offset: const Offset(0, 8),
@@ -478,7 +471,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     child: CircularProgressIndicator(
                         strokeWidth: 2.5, color: Colors.white))
                 : Text('Entrar',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -492,12 +485,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
   // ── Create Account ─────────────────────────────────────────────────
 
-  Widget _buildCreateAccount() {
+  Widget _buildCreateAccount(bool isDark) {
     return Center(
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Text('Primeiro acesso? ',
-            style: GoogleFonts.inter(
-                color: const Color(0xFF566580), fontSize: 14)),
+            style: TextStyle(
+                color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkSoft,
+                fontSize: 14)),
         GestureDetector(
           onTap: () {
             if (_tipoLogin == 'aluno') {
@@ -507,8 +501,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             }
           },
           child: Text('Criar conta',
-              style: GoogleFonts.inter(
-                  color: const Color(0xFF5B8DEF),
+              style: TextStyle(
+                  color: EagleTokens.brand,
                   fontSize: 14,
                   fontWeight: FontWeight.w600)),
         ),
@@ -533,7 +527,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         ),
         const SizedBox(height: 6),
         Text('Usado por +500 personal trainers no Brasil',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               color: Colors.white.withValues(alpha: 0.30),
               fontSize: 12,
               letterSpacing: 0.2,
@@ -580,7 +574,7 @@ class _GlassTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               color: Colors.white.withValues(alpha: 0.42),
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -599,14 +593,14 @@ class _GlassTextField extends StatelessWidget {
               textInputAction: textInputAction,
               validator: validator,
               onFieldSubmitted: onFieldSubmitted,
-              style: GoogleFonts.inter(
-                color: const Color(0xFFF0F4FF),
+              style: TextStyle(
+                color: EagleTokens.darkInk,
                 fontSize: 15,
               ),
-              cursorColor: const Color(0xFF5B8DEF),
+              cursorColor: EagleTokens.brand,
               decoration: InputDecoration(
                 hintText: hint,
-                hintStyle: GoogleFonts.inter(
+                hintStyle: TextStyle(
                   color: Colors.white.withValues(alpha: 0.16),
                   fontSize: 15,
                 ),
@@ -630,21 +624,21 @@ class _GlassTextField extends StatelessWidget {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
-                      color: const Color(0xFF5B8DEF).withValues(alpha: 0.70),
+                      color: EagleTokens.brand.withValues(alpha: 0.70),
                       width: 1.0),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(
-                      color: Color(0xFFD4808F), width: 0.5),
+                  borderSide: BorderSide(
+                      color: EagleTokens.bad, width: 0.5),
                 ),
                 focusedErrorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(
-                      color: Color(0xFFD4808F), width: 1.0),
+                  borderSide: BorderSide(
+                      color: EagleTokens.bad, width: 1.0),
                 ),
-                errorStyle: GoogleFonts.inter(
-                    color: const Color(0xFFD4808F), fontSize: 11),
+                errorStyle: TextStyle(
+                    color: EagleTokens.bad, fontSize: 11),
               ),
             ),
           ),

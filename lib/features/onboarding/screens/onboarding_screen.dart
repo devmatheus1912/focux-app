@@ -1,9 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/fx_logo.dart';
+import '../../../core/theme/design_tokens.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOCUX PERSONAL — Glow Effect Premium Onboarding
@@ -76,6 +76,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final h = MediaQuery.of(context).size.height;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -85,17 +86,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             // ── L1: Deep gradient (same as register) ────────────────
             Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF020617),
-                    Color(0xFF040B1A),
-                    Color(0xFF0F172A),
-                  ],
-                  stops: [0.0, 0.45, 1.0],
-                ),
+              decoration: BoxDecoration(
+                gradient: EagleTokens.heroGradient(dark: isDark),
               ),
             ),
 
@@ -111,7 +103,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     center: Alignment.center,
                     radius: 0.65,
                     colors: [
-                      const Color(0xFF2F6BFF).withValues(alpha: 0.06),
+                      EagleTokens.brand.withValues(alpha: 0.06),
                       Colors.transparent,
                     ],
                   ),
@@ -139,12 +131,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           onPressed: () => context.go('/login'),
                           style: TextButton.styleFrom(
                             foregroundColor:
-                                Colors.white.withValues(alpha: 0.45),
+                                EagleTokens.darkInk.withValues(alpha: 0.45),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),
                           ),
                           child: Text('Pular',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
                                   letterSpacing: 0.3)),
@@ -160,7 +152,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       itemCount: _pages.length,
                       onPageChanged: (i) => setState(() => _current = i),
                       itemBuilder: (_, i) =>
-                          _OBPageWidget(data: _pages[i]),
+                          _OBPageWidget(data: _pages[i], isDark: isDark),
                     ),
                   ),
 
@@ -183,11 +175,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(2),
                                 color: _current == i
-                                    ? const Color(0xFF3B82F6)
-                                    : Colors.white.withValues(alpha: 0.10),
+                                    ? EagleTokens.brand
+                                    : EagleTokens.darkInk.withValues(alpha: 0.10),
                                 boxShadow: _current == i
                                     ? [BoxShadow(
-                                        color: const Color(0xFF3B82F6)
+                                        color: EagleTokens.brand
                                             .withValues(alpha: 0.50),
                                         blurRadius: 8)]
                                     : [],
@@ -204,13 +196,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             width: _current == _pages.length - 1 ? 160 : 56,
                             height: 56,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+                              gradient: LinearGradient(
+                                colors: [EagleTokens.brand, EagleTokens.brandInk],
                               ),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF2F6BFF).withValues(alpha: 0.35),
+                                  color: EagleTokens.brand.withValues(alpha: 0.35),
                                   blurRadius: 24,
                                   offset: const Offset(0, 6),
                                 ),
@@ -219,15 +211,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             child: Center(
                               child: _current == _pages.length - 1
                                   ? Text('Começar',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
+                                      style: TextStyle(
+                                        color: EagleTokens.darkInk,
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                         letterSpacing: 0.3,
                                       ))
-                                  : const Icon(
+                                  : Icon(
                                       Icons.arrow_forward_rounded,
-                                      color: Colors.white,
+                                      color: EagleTokens.darkInk,
                                       size: 22),
                             ),
                           ),
@@ -266,7 +258,8 @@ class _OBData {
 
 class _OBPageWidget extends StatelessWidget {
   final _OBData data;
-  const _OBPageWidget({required this.data});
+  final bool isDark;
+  const _OBPageWidget({required this.data, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -285,31 +278,31 @@ class _OBPageWidget extends StatelessWidget {
                 width: 96,
                 height: 96,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFF111A2E), Color(0xFF1A2540)],
+                    colors: [EagleTokens.darkCard, EagleTokens.darkCardHi],
                   ),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: const Color(0xFFBED7FF).withValues(alpha: 0.22),
+                    color: EagleTokens.brandAccent.withValues(alpha: 0.22),
                     width: 0.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFD2E6FF).withValues(alpha: 0.18),
+                      color: EagleTokens.brandAccent.withValues(alpha: 0.18),
                       blurRadius: 28,
                       offset: const Offset(0, 8),
                     ),
                     BoxShadow(
-                      color: const Color(0xFF78A0FF).withValues(alpha: 0.18),
+                      color: EagleTokens.brandAccent.withValues(alpha: 0.18),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Icon(data.icon,
-                    color: const Color(0xFFEAF2FF), size: 42),
+                    color: EagleTokens.brandSoft, size: 42),
               ),
             ),
           ),
@@ -320,16 +313,16 @@ class _OBPageWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: const Color(0xFF2F6BFF).withValues(alpha: 0.08),
+              color: EagleTokens.brand.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
-                color: const Color(0xFF2F6BFF).withValues(alpha: 0.12),
+                color: EagleTokens.brand.withValues(alpha: 0.12),
                 width: 0.5,
               ),
             ),
             child: Text(data.tag,
-                style: GoogleFonts.inter(
-                  color: const Color(0xFF7BA3FF),
+                style: TextStyle(
+                  color: EagleTokens.brandAccent,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.8,
@@ -341,8 +334,8 @@ class _OBPageWidget extends StatelessWidget {
           // Title with glow
           Text(
             data.title,
-            style: GoogleFonts.inter(
-              color: const Color(0xFFF0F4FF),
+            style: TextStyle(
+              color: isDark ? EagleTokens.darkInk : EagleTokens.brandSoft,
               fontSize: 34,
               fontWeight: FontWeight.w700,
               height: 1.08,
@@ -355,8 +348,10 @@ class _OBPageWidget extends StatelessWidget {
           // Subtitle
           Text(
             data.subtitle,
-            style: GoogleFonts.inter(
-              color: Colors.white.withValues(alpha: 0.55),
+            style: TextStyle(
+              color: isDark
+                  ? EagleTokens.darkInkMute
+                  : EagleTokens.darkInk.withValues(alpha: 0.55),
               fontSize: 16,
               fontWeight: FontWeight.w400,
               height: 1.55,
@@ -377,7 +372,7 @@ class _PremiumGrid extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final p = Paint()
-      ..color = Colors.white.withValues(alpha: 0.008)
+      ..color = EagleTokens.darkInk.withValues(alpha: 0.008)
       ..strokeWidth = 0.5
       ..style = PaintingStyle.stroke;
     for (double x = 0; x < size.width; x += 48) {

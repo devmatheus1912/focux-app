@@ -5,6 +5,7 @@ import '../../../core/widgets/fx_logo.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import '../../../core/theme/design_tokens.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOCUX PERSONAL — Premium Register Screen (Final Production)
@@ -70,9 +71,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   }
 
   Color get _forcaCor {
-    if (_senhaForca < 0.4) return const Color(0xFFD4808F);
-    if (_senhaForca < 0.7) return const Color(0xFFE2B46F);
-    return const Color(0xFF6FE296);
+    if (_senhaForca < 0.4) return EagleTokens.bad;
+    if (_senhaForca < 0.7) return EagleTokens.warn;
+    return EagleTokens.good;
   }
 
   String get _forcaTexto {
@@ -129,6 +130,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
     final screenH = mq.size.height;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -138,16 +140,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
           children: [
             // ── Layer 1: Deep gradient ──────────────────────────────────
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF020617),
-                    Color(0xFF040B1A),
-                    Color(0xFF0F172A),
-                  ],
-                  stops: [0.0, 0.45, 1.0],
+                  colors: EagleTokens.heroGradient(dark: isDark),
+                  stops: const [0.0, 1.0],
                 ),
               ),
             ),
@@ -164,7 +162,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                     center: Alignment.center,
                     radius: 0.65,
                     colors: [
-                      const Color(0xFF2F6BFF).withValues(alpha: 0.06),
+                      EagleTokens.brand.withValues(alpha: 0.06),
                       Colors.transparent,
                     ],
                   ),
@@ -217,18 +215,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                                 width: 42,
                                 height: 42,
                                 decoration: BoxDecoration(
-                                  color: Colors.white
+                                  color: EagleTokens.darkInk
                                       .withValues(alpha: 0.05),
                                   borderRadius:
                                       BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: Colors.white
+                                    color: EagleTokens.darkInk
                                         .withValues(alpha: 0.08),
                                   ),
                                 ),
                                 child: Icon(
                                   Icons.arrow_back_rounded,
-                                  color: Colors.white
+                                  color: EagleTokens.darkInk
                                       .withValues(alpha: 0.65),
                                   size: 20,
                                 ),
@@ -242,8 +240,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                         // ─── Title ──────────────────────────────────
                         Text(
                           'Crie sua\nconta.',
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFFF0F4FF),
+                          style: TextStyle(
+                            color: EagleTokens.darkInk,
                             fontSize: 32,
                             fontWeight: FontWeight.w800,
                             height: 1.08,
@@ -255,8 +253,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
                         Text(
                           'Treine com dados. Evolua com inteligência.',
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFF8899B4),
+                          style: TextStyle(
+                            color: EagleTokens.darkInkMute,
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                           ),
@@ -310,7 +308,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                                   ? Icons.visibility_off_outlined
                                   : Icons.visibility_outlined,
                               color:
-                                  Colors.white.withValues(alpha: 0.35),
+                                  EagleTokens.darkInk.withValues(alpha: 0.35),
                               size: 20,
                             ),
                             onPressed: () => setState(
@@ -329,7 +327,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                                       BorderRadius.circular(4),
                                   child: LinearProgressIndicator(
                                     value: _senhaForca,
-                                    backgroundColor: Colors.white
+                                    backgroundColor: EagleTokens.darkInk
                                         .withValues(alpha: 0.05),
                                     color: _forcaCor,
                                     minHeight: 3,
@@ -339,7 +337,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                               const SizedBox(width: 10),
                               Text(
                                 _forcaTexto,
-                                style: GoogleFonts.inter(
+                                style: TextStyle(
                                   color: _forcaCor,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -357,27 +355,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF3D1525)
-                                  .withValues(alpha: 0.40),
+                              color: EagleTokens.bad
+                                  .withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: const Color(0xFF6B2F45)
+                                color: EagleTokens.bad
                                     .withValues(alpha: 0.25),
                               ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.error_outline_rounded,
-                                  color: Color(0xFFD4808F),
+                                  color: EagleTokens.bad,
                                   size: 18,
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     _error!,
-                                    style: GoogleFonts.inter(
-                                      color: const Color(0xFFD4808F),
+                                    style: TextStyle(
+                                      color: EagleTokens.bad,
                                       fontSize: 13,
                                     ),
                                   ),
@@ -394,15 +392,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                           TextSpan(
                             text:
                                 'Ao criar sua conta, você concorda com os ',
-                            style: GoogleFonts.inter(
-                              color: const Color(0xFF566580),
+                            style: TextStyle(
+                              color: EagleTokens.darkInkMute,
                               fontSize: 12,
                             ),
                             children: [
                               TextSpan(
                                 text: 'Termos de Uso',
-                                style: GoogleFonts.inter(
-                                  color: const Color(0xFF2F6BFF)
+                                style: TextStyle(
+                                  color: EagleTokens.brand
                                       .withValues(alpha: 0.75),
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -410,8 +408,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                               const TextSpan(text: ' e a '),
                               TextSpan(
                                 text: 'Política de Privacidade',
-                                style: GoogleFonts.inter(
-                                  color: const Color(0xFF2F6BFF)
+                                style: TextStyle(
+                                  color: EagleTokens.brand
                                       .withValues(alpha: 0.75),
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -430,11 +428,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                           child: ElevatedButton(
                             onPressed: _loading ? null : _submit,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color(0xFF2F6BFF),
-                              foregroundColor: Colors.white,
+                              backgroundColor: EagleTokens.brand,
+                              foregroundColor: EagleTokens.darkInk,
                               disabledBackgroundColor:
-                                  const Color(0xFF2F6BFF)
+                                  EagleTokens.brand
                                       .withValues(alpha: 0.45),
                               shape: RoundedRectangleBorder(
                                 borderRadius:
@@ -451,9 +448,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                                       color: Colors.white,
                                     ),
                                   )
-                                : Text(
+                                : const Text(
                                     'Começar agora',
-                                    style: GoogleFonts.inter(
+                                    style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                       letterSpacing: 0.3,
@@ -471,8 +468,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             children: [
                               Text(
                                 'Já tem conta? ',
-                                style: GoogleFonts.inter(
-                                  color: const Color(0xFF566580),
+                                style: TextStyle(
+                                  color: EagleTokens.darkInkMute,
                                   fontSize: 14,
                                 ),
                               ),
@@ -480,8 +477,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                                 onTap: () => context.go('/login'),
                                 child: Text(
                                   'Entrar',
-                                  style: GoogleFonts.inter(
-                                    color: const Color(0xFF2F6BFF),
+                                  style: TextStyle(
+                                    color: EagleTokens.brand,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -543,8 +540,8 @@ class _PremiumTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
-            color: Colors.white.withValues(alpha: 0.45),
+          style: TextStyle(
+            color: EagleTokens.darkInk.withValues(alpha: 0.45),
             fontSize: 11,
             fontWeight: FontWeight.w600,
             letterSpacing: 1.2,
@@ -560,55 +557,55 @@ class _PremiumTextField extends StatelessWidget {
           textCapitalization: textCapitalization,
           validator: validator,
           onFieldSubmitted: onFieldSubmitted,
-          style: GoogleFonts.inter(
-            color: const Color(0xFFF0F4FF),
+          style: TextStyle(
+            color: EagleTokens.darkInk,
             fontSize: 15,
             fontWeight: FontWeight.w400,
           ),
-          cursorColor: const Color(0xFF2F6BFF),
+          cursorColor: EagleTokens.brand,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.inter(
-              color: Colors.white.withValues(alpha: 0.18),
+            hintStyle: TextStyle(
+              color: EagleTokens.darkInk.withValues(alpha: 0.18),
               fontSize: 15,
             ),
             prefixIcon: Icon(
               icon,
-              color: Colors.white.withValues(alpha: 0.30),
+              color: EagleTokens.darkInk.withValues(alpha: 0.30),
               size: 20,
             ),
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.05),
+            fillColor: EagleTokens.darkInk.withValues(alpha: 0.05),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide:
-                  BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                  BorderSide(color: EagleTokens.darkInk.withValues(alpha: 0.08)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide:
-                  BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                  BorderSide(color: EagleTokens.darkInk.withValues(alpha: 0.08)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide:
-                  const BorderSide(color: Color(0xFF2F6BFF), width: 1.0),
+                  BorderSide(color: EagleTokens.brand, width: 1.0),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide:
-                  const BorderSide(color: Color(0xFFD4808F), width: 0.5),
+                  BorderSide(color: EagleTokens.bad, width: 0.5),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide:
-                  const BorderSide(color: Color(0xFFD4808F), width: 1.0),
+                  BorderSide(color: EagleTokens.bad, width: 1.0),
             ),
-            errorStyle: GoogleFonts.inter(
-              color: const Color(0xFFD4808F),
+            errorStyle: TextStyle(
+              color: EagleTokens.bad,
               fontSize: 11,
             ),
           ),
@@ -622,7 +619,7 @@ class _PremiumGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.010)
+      ..color = EagleTokens.darkInk.withValues(alpha: 0.010)
       ..strokeWidth = 0.5
       ..style = PaintingStyle.stroke;
 

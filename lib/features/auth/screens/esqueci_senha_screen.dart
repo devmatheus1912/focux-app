@@ -118,6 +118,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -130,12 +131,13 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
               animation: _bgCtrl,
               builder: (context, _) {
                 final t = _bgCtrl.value;
+                final gradientColors = EagleTokens.heroGradient(dark: isDark);
                 return Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment(-1.0 + sin(t * 2 * pi) * 0.3, -1.0 + cos(t * 2 * pi) * 0.3),
                       end: Alignment(1.0 + cos(t * 2 * pi) * 0.3, 1.0 + sin(t * 2 * pi) * 0.3),
-                      colors: const [Color(0xFF0A0F1E), Color(0xFF0D1B5C), Color(0xFF1C3273), Color(0xFF0D1B5C), Color(0xFF0A0F1E)],
+                      colors: [gradientColors[0], gradientColors[1], gradientColors[1], gradientColors[1], gradientColors[0]],
                     ),
                   ),
                 );
@@ -166,11 +168,11 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
                           child: Container(
                             width: 42, height: 42,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.08),
+                              color: EagleTokens.darkInk.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                              border: Border.all(color: EagleTokens.darkInk.withValues(alpha: 0.08)),
                             ),
-                            child: Icon(Icons.arrow_back, color: Colors.white.withValues(alpha: 0.7), size: 20),
+                            child: Icon(Icons.arrow_back, color: EagleTokens.darkInk.withValues(alpha: 0.7), size: 20),
                           ),
                         ),
                       ],
@@ -186,7 +188,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
                             height: 3,
                             margin: EdgeInsets.only(right: i < 1 ? 6 : 0),
                             decoration: BoxDecoration(
-                              color: i <= _step ? EagleTokens.brand : Colors.white.withValues(alpha: 0.08),
+                              color: i <= _step ? EagleTokens.brand : EagleTokens.darkInk.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -202,7 +204,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
                         offset: Offset(0, _stepSlide.value),
                         child: Opacity(opacity: _stepFade.value, child: child),
                       ),
-                      child: _buildStepContent(),
+                      child: _buildStepContent(isDark),
                     ),
                   ],
                 ),
@@ -214,20 +216,22 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
     );
   }
 
-  Widget _buildStepContent() {
+  Widget _buildStepContent(bool isDark) {
     switch (_step) {
       case 0:
-        return _buildStep0();
+        return _buildStep0(isDark);
       case 1:
-        return _buildStep1();
+        return _buildStep1(isDark);
       case 2:
-        return _buildStep2();
+        return _buildStep2(isDark);
       default:
         return const SizedBox.shrink();
     }
   }
 
-  Widget _buildStep0() {
+  Widget _buildStep0(bool isDark) {
+    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
+    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -242,14 +246,14 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
         ),
         const SizedBox(height: 20),
 
-        const Text(
+        Text(
           'Recuperar\nacesso.',
-          style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w600, height: 1.15, letterSpacing: -1),
+          style: TextStyle(color: inkColor, fontSize: 36, fontWeight: FontWeight.w600, height: 1.15, letterSpacing: -1),
         ),
         const SizedBox(height: 10),
         Text(
           'Informe seu e-mail e enviaremos um código de verificação.',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 15, height: 1.4),
+          style: TextStyle(color: inkMuteColor, fontSize: 15, height: 1.4),
         ),
         const SizedBox(height: 36),
 
@@ -257,9 +261,9 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.06),
+            color: EagleTokens.darkInk.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            border: Border.all(color: EagleTokens.darkInk.withValues(alpha: 0.08)),
           ),
           child: Row(
             children: [
@@ -280,13 +284,13 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
             onPressed: _loading ? null : _solicitarToken,
             style: ElevatedButton.styleFrom(
               backgroundColor: EagleTokens.brand,
-              foregroundColor: Colors.white,
+              foregroundColor: EagleTokens.card,
               disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 0,
             ),
             child: _loading
-                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: EagleTokens.card))
                 : const Text('Enviar código', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           ),
         ),
@@ -303,7 +307,9 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
     );
   }
 
-  Widget _buildStep1() {
+  Widget _buildStep1(bool isDark) {
+    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
+    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -317,15 +323,15 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
         ),
         const SizedBox(height: 20),
 
-        const Text(
+        Text(
           'Nova\nsenha.',
-          style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w600, height: 1.15, letterSpacing: -1),
+          style: TextStyle(color: inkColor, fontSize: 36, fontWeight: FontWeight.w600, height: 1.15, letterSpacing: -1),
         ),
         const SizedBox(height: 10),
         Text.rich(
           TextSpan(
             text: 'Enviamos um código para ',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 15),
+            style: TextStyle(color: inkMuteColor, fontSize: 15),
             children: [
               TextSpan(text: _emailCtrl.text.trim(), style: const TextStyle(color: EagleTokens.brandAccent, fontWeight: FontWeight.w600)),
             ],
@@ -342,12 +348,12 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
             TextFormField(
               controller: _tokenCtrl,
               textCapitalization: TextCapitalization.characters,
-              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 6),
+              style: TextStyle(color: inkColor, fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 6),
               textAlign: TextAlign.center,
               cursorColor: EagleTokens.brand,
               decoration: InputDecoration(
                 hintText: '• • • • • •',
-                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.15), letterSpacing: 6),
+                hintStyle: TextStyle(color: inkColor.withValues(alpha: 0.15), letterSpacing: 6),
                 filled: true,
                 fillColor: EagleTokens.brand.withValues(alpha: 0.08),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
@@ -367,7 +373,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
           icon: Icons.lock_outline,
           obscureText: !_senhaVisivel,
           suffixIcon: IconButton(
-            icon: Icon(_senhaVisivel ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.white.withValues(alpha: 0.4), size: 20),
+            icon: Icon(_senhaVisivel ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: inkColor.withValues(alpha: 0.4), size: 20),
             onPressed: () => setState(() => _senhaVisivel = !_senhaVisivel),
           ),
         ),
@@ -383,13 +389,13 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
             onPressed: _loading ? null : _redefinirSenha,
             style: ElevatedButton.styleFrom(
               backgroundColor: EagleTokens.brand,
-              foregroundColor: Colors.white,
+              foregroundColor: EagleTokens.card,
               disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 0,
             ),
             child: _loading
-                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: EagleTokens.card))
                 : const Text('Redefinir senha', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           ),
         ),
@@ -406,7 +412,9 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
     );
   }
 
-  Widget _buildStep2() {
+  Widget _buildStep2(bool isDark) {
+    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
+    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -416,22 +424,22 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
         Container(
           width: 88, height: 88,
           decoration: BoxDecoration(
-            color: const Color(0xFF6FE296).withValues(alpha: 0.12),
+            color: EagleTokens.goodSoft.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.check_rounded, color: Color(0xFF6FE296), size: 44),
+          child: Icon(Icons.check_rounded, color: EagleTokens.good, size: 44),
         ),
         const SizedBox(height: 28),
 
-        const Text(
+        Text(
           'Senha redefinida!',
-          style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+          style: TextStyle(color: inkColor, fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: -0.5),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
         Text(
           'Sua senha foi atualizada com sucesso.\nUse-a para fazer login.',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 15, height: 1.5),
+          style: TextStyle(color: inkMuteColor, fontSize: 15, height: 1.5),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 40),
@@ -443,7 +451,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
             onPressed: () => context.go('/login'),
             style: ElevatedButton.styleFrom(
               backgroundColor: EagleTokens.brand,
-              foregroundColor: Colors.white,
+              foregroundColor: EagleTokens.card,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 0,
             ),
@@ -465,6 +473,8 @@ class _RoleTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -477,7 +487,7 @@ class _RoleTab extends StatelessWidget {
             boxShadow: isSelected ? [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))] : [],
           ),
           child: Center(
-            child: Text(label, style: TextStyle(color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.4), fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400, fontSize: 14)),
+            child: Text(label, style: TextStyle(color: isSelected ? inkColor : inkColor.withValues(alpha: 0.4), fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400, fontSize: 14)),
           ),
         ),
       ),
@@ -498,30 +508,33 @@ class _FxTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
+    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2)),
+        Text(label.toUpperCase(), style: TextStyle(color: inkMuteColor, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2)),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
-          style: const TextStyle(color: Colors.white, fontSize: 15),
+          style: TextStyle(color: inkColor, fontSize: 15),
           cursorColor: EagleTokens.brand,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.2)),
-            prefixIcon: Icon(icon, color: Colors.white.withValues(alpha: 0.35), size: 20),
+            hintStyle: TextStyle(color: inkColor.withValues(alpha: 0.2)),
+            prefixIcon: Icon(icon, color: inkColor.withValues(alpha: 0.35), size: 20),
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.06),
+            fillColor: inkColor.withValues(alpha: 0.06),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08))),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08))),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08))),
             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
-            errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFFF8B8B))),
-            errorStyle: const TextStyle(color: Color(0xFFFF8B8B), fontSize: 11),
+            errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.bad)),
+            errorStyle: TextStyle(color: EagleTokens.bad, fontSize: 11),
           ),
         ),
       ],
@@ -532,7 +545,7 @@ class _FxTextField extends StatelessWidget {
 class _AuthGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.white.withValues(alpha: 0.025)..strokeWidth = 0.5..style = PaintingStyle.stroke;
+    final paint = Paint()..color = EagleTokens.darkInk.withValues(alpha: 0.025)..strokeWidth = 0.5..style = PaintingStyle.stroke;
     const spacing = 50.0;
     for (double x = 0; x < size.width; x += spacing) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);

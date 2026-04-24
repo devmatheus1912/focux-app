@@ -84,6 +84,9 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
+    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -96,17 +99,18 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
               animation: _bgCtrl,
               builder: (context, _) {
                 final t = _bgCtrl.value;
+                final gradientColors = EagleTokens.heroGradient(dark: isDark);
                 return Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment(-1.0 + sin(t * 2 * pi) * 0.3, -1.0 + cos(t * 2 * pi) * 0.3),
                       end: Alignment(1.0 + cos(t * 2 * pi) * 0.3, 1.0 + sin(t * 2 * pi) * 0.3),
-                      colors: const [
-                        Color(0xFF0A0F1E),
-                        Color(0xFF0D1B5C),
-                        Color(0xFF1C3273),
-                        Color(0xFF0D1B5C),
-                        Color(0xFF0A0F1E),
+                      colors: [
+                        gradientColors[0],
+                        gradientColors[1],
+                        gradientColors[1],
+                        gradientColors[1],
+                        gradientColors[0],
                       ],
                     ),
                   ),
@@ -140,11 +144,11 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                               child: Container(
                                 width: 42, height: 42,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.08),
+                                  color: EagleTokens.darkInk.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                                  border: Border.all(color: EagleTokens.darkInk.withValues(alpha: 0.08)),
                                 ),
-                                child: Icon(Icons.arrow_back, color: Colors.white.withValues(alpha: 0.7), size: 20),
+                                child: Icon(Icons.arrow_back, color: EagleTokens.darkInk.withValues(alpha: 0.7), size: 20),
                               ),
                             ),
                           ],
@@ -175,10 +179,10 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
 
                         const SizedBox(height: 20),
 
-                        const Text(
+                        Text(
                           'Bem-vindo\nao Focux.',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: inkColor,
                             fontSize: 36,
                             fontWeight: FontWeight.w600,
                             height: 1.15,
@@ -188,7 +192,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                         const SizedBox(height: 10),
                         Text(
                           'Insira o código que seu personal enviou e configure sua conta.',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 15, height: 1.4),
+                          style: TextStyle(color: inkMuteColor, fontSize: 15, height: 1.4),
                         ),
 
                         const SizedBox(height: 36),
@@ -205,21 +209,21 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                             TextFormField(
                               controller: _conviteCtrl,
                               textCapitalization: TextCapitalization.characters,
-                              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 4),
+                              style: TextStyle(color: inkColor, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 4),
                               textAlign: TextAlign.center,
                               cursorColor: EagleTokens.brand,
                               validator: (v) => v == null || v.isEmpty ? 'Informe o código' : null,
                               decoration: InputDecoration(
                                 hintText: '• • • • • •',
-                                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.15), letterSpacing: 6),
+                                hintStyle: TextStyle(color: inkColor.withValues(alpha: 0.15), letterSpacing: 6),
                                 filled: true,
                                 fillColor: EagleTokens.brand.withValues(alpha: 0.08),
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.brand.withValues(alpha: 0.25))),
                                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.brand.withValues(alpha: 0.25))),
                                 focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
-                                errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFFF8B8B))),
-                                errorStyle: const TextStyle(color: Color(0xFFFF8B8B), fontSize: 11),
+                                errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.bad)),
+                                errorStyle: TextStyle(color: EagleTokens.bad, fontSize: 11),
                               ),
                             ),
                           ],
@@ -246,7 +250,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                             return null;
                           },
                           suffixIcon: IconButton(
-                            icon: Icon(_senhaVisivel ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.white.withValues(alpha: 0.4), size: 20),
+                            icon: Icon(_senhaVisivel ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: inkColor.withValues(alpha: 0.4), size: 20),
                             onPressed: () => setState(() => _senhaVisivel = !_senhaVisivel),
                           ),
                         ),
@@ -257,14 +261,14 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF9E2B2B).withValues(alpha: 0.15),
+                              color: EagleTokens.badSoft.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFF9E2B2B).withValues(alpha: 0.3)),
+                              border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.3)),
                             ),
                             child: Row(children: [
-                              const Icon(Icons.error_outline, color: Color(0xFFFF8B8B), size: 18),
+                              Icon(Icons.error_outline, color: EagleTokens.bad, size: 18),
                               const SizedBox(width: 10),
-                              Expanded(child: Text(_error!, style: const TextStyle(color: Color(0xFFFF8B8B), fontSize: 13))),
+                              Expanded(child: Text(_error!, style: TextStyle(color: EagleTokens.bad, fontSize: 13))),
                             ]),
                           ),
                         ],
@@ -279,13 +283,13 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                             onPressed: _loading ? null : _submit,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: EagleTokens.brand,
-                              foregroundColor: Colors.white,
+                              foregroundColor: EagleTokens.card,
                               disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               elevation: 0,
                             ),
                             child: _loading
-                                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                                ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: EagleTokens.card))
                                 : const Text('Criar conta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                           ),
                         ),
@@ -296,7 +300,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('Já tem conta? ', style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 14)),
+                              Text('Já tem conta? ', style: TextStyle(color: inkColor.withValues(alpha: 0.45), fontSize: 14)),
                               GestureDetector(
                                 onTap: () => context.go('/login'),
                                 child: const Text('Entrar', style: TextStyle(color: EagleTokens.brandAccent, fontSize: 14, fontWeight: FontWeight.w600)),
@@ -343,10 +347,13 @@ class _FxTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
+    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2)),
+        Text(label.toUpperCase(), style: TextStyle(color: inkMuteColor, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2)),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -354,21 +361,21 @@ class _FxTextField extends StatelessWidget {
           keyboardType: keyboardType,
           textCapitalization: textCapitalization,
           validator: validator,
-          style: const TextStyle(color: Colors.white, fontSize: 15),
+          style: TextStyle(color: inkColor, fontSize: 15),
           cursorColor: EagleTokens.brand,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.2)),
-            prefixIcon: Icon(icon, color: Colors.white.withValues(alpha: 0.35), size: 20),
+            hintStyle: TextStyle(color: inkColor.withValues(alpha: 0.2)),
+            prefixIcon: Icon(icon, color: inkColor.withValues(alpha: 0.35), size: 20),
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.06),
+            fillColor: inkColor.withValues(alpha: 0.06),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08))),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08))),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08))),
             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
-            errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFFF8B8B))),
-            errorStyle: const TextStyle(color: Color(0xFFFF8B8B), fontSize: 11),
+            errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.bad)),
+            errorStyle: TextStyle(color: EagleTokens.bad, fontSize: 11),
           ),
         ),
       ],
@@ -380,7 +387,7 @@ class _AuthGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.025)
+      ..color = EagleTokens.darkInk.withValues(alpha: 0.025)
       ..strokeWidth = 0.5
       ..style = PaintingStyle.stroke;
     const spacing = 50.0;
