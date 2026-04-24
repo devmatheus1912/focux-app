@@ -52,6 +52,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
   }
 
   Future<void> _loadCustomTheme() async {
+    // Try PERSONAL role first
     try {
       final repo = PerfilRepository(ApiClient());
       final perfil = await repo.buscar();
@@ -63,9 +64,27 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
         ref.read(logoUrlProvider.notifier).state = perfil.logoUrl;
       }
       ref.read(personalNameProvider.notifier).state = perfil.nome;
-    } catch (e) {
-      // Ignora erro se não logado
-    }
+      return;
+    } catch (_) {}
+
+    // Try ALUNO role
+    try {
+      final dio = ApiClient().dio;
+      final r = await dio.get('/api/aluno/personal-brand');
+      final data = r.data as Map<String, dynamic>;
+      final plano = data['plano'] as String? ?? 'FREE';
+      if (plano == 'ENTERPRISE') {
+        final corPrimaria = data['corPrimaria'] as String?;
+        if (corPrimaria != null && corPrimaria.length == 7) {
+          final hex = corPrimaria.replaceFirst('#', '0xFF');
+          ref.read(primaryColorProvider.notifier).state = Color(int.parse(hex));
+        }
+        final logoUrl = data['logoUrl'] as String?;
+        if (logoUrl != null && logoUrl.isNotEmpty) {
+          ref.read(logoUrlProvider.notifier).state = logoUrl;
+        }
+      }
+    } catch (_) {}
   }
 
   @override

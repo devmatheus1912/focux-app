@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/providers/personal_brand_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -65,6 +66,72 @@ class AlunoDashboardScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Consumer(
+              builder: (context, ref, _) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                final brandAsync = ref.watch(personalBrandProvider);
+                return brandAsync.maybeWhen(
+                  data: (brand) {
+                    if (!brand.isEnterprise) return const SizedBox.shrink();
+                    return Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 18,
+                            backgroundColor: EagleTokens.brand,
+                            backgroundImage: brand.logoUrl != null ? NetworkImage(brand.logoUrl!) : null,
+                            child: brand.logoUrl == null
+                                ? Text(
+                                    brand.nomePersonal.isNotEmpty ? brand.nomePersonal[0].toUpperCase() : 'P',
+                                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  brand.nomePersonal,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                                  ),
+                                ),
+                                if (brand.slogan != null && brand.slogan!.isNotEmpty)
+                                  Text(
+                                    brand.slogan!,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  orElse: () => const SizedBox.shrink(),
+                );
+              },
+            ),
             alunoAsync.when(
               data: (aluno) => _AlunoProfileCard(aluno: aluno, isDark: isDark),
               loading: () => _ProfileCardSkeleton(isDark: isDark),

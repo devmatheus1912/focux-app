@@ -511,24 +511,64 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8),
-                children: navItems.map((item) {
-                  return ListTile(
-                    leading: Icon(item.icon, color: EagleTokens.brand, size: 22),
+                children: [
+                  ...navItems.take(3).map((item) {
+                    return ListTile(
+                      leading: Icon(item.icon, color: EagleTokens.brand, size: 22),
+                      title: Text(
+                        item.label,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: ink,
+                        ),
+                      ),
+                      horizontalTitleGap: 8,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        context.go(item.route);
+                      },
+                    );
+                  }),
+                  ListTile(
+                    leading: Icon(
+                      Icons.palette_outlined,
+                      size: 22,
+                      color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    ),
                     title: Text(
-                      item.label,
+                      'Identidade Visual',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
-                        color: ink,
+                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
                       ),
                     ),
                     horizontalTitleGap: 8,
                     onTap: () {
                       Navigator.of(context).pop();
-                      context.go(item.route);
+                      context.go('/identidade-visual');
                     },
-                  );
-                }).toList(),
+                  ),
+                  ...navItems.skip(3).map((item) {
+                    return ListTile(
+                      leading: Icon(item.icon, color: EagleTokens.brand, size: 22),
+                      title: Text(
+                        item.label,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: ink,
+                        ),
+                      ),
+                      horizontalTitleGap: 8,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        context.go(item.route);
+                      },
+                    );
+                  }),
+                ],
               ),
             ),
             Divider(height: 1, color: dividerColor),

@@ -9,6 +9,9 @@ class PerfilPersonal {
   final String? especialidade;
   final String? logoUrl;
   final String? corPrimaria;
+  final String? corSecundaria;
+  final String? slogan;
+  final String? slug;
   final String plano;
   final bool isAdmin;
   // Wallet
@@ -30,6 +33,9 @@ class PerfilPersonal {
     this.especialidade,
     this.logoUrl,
     this.corPrimaria,
+    this.corSecundaria,
+    this.slogan,
+    this.slug,
     required this.plano,
     this.isAdmin = false,
     this.chavePix,
@@ -50,6 +56,9 @@ class PerfilPersonal {
         especialidade: json['especialidade'] as String?,
         logoUrl: json['logoUrl'] as String?,
         corPrimaria: json['corPrimaria'] as String?,
+        corSecundaria: json['corSecundaria'] as String?,
+        slogan: json['slogan'] as String?,
+        slug: json['slug'] as String?,
         plano: json['plano'] as String,
         isAdmin: json['isAdmin'] as bool? ?? false,
         chavePix: json['chavePix'] as String?,
