@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/theme/design_tokens.dart';
 
 class RankingItem {
   final int personalId;
@@ -42,6 +43,7 @@ class RankingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rankingAsync = ref.watch(rankingProvider);
     final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -118,6 +120,7 @@ class _PodioCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -127,11 +130,11 @@ class _PodioCard extends StatelessWidget {
             const SizedBox(height: 4),
             CircleAvatar(
               radius: 28,
-              backgroundColor: theme.colorScheme.primaryContainer,
+              backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.brandSoft,
               backgroundImage: item.logoUrl != null ? NetworkImage(item.logoUrl!) : null,
               child: item.logoUrl == null
                   ? Text(item.nome.isNotEmpty ? item.nome[0].toUpperCase() : '?',
-                      style: TextStyle(color: theme.colorScheme.onPrimaryContainer, fontSize: 20))
+                      style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.brand, fontSize: 20))
                   : null,
             ),
             const SizedBox(height: 6),
@@ -144,12 +147,12 @@ class _PodioCard extends StatelessWidget {
             ),
             Text(
               '${item.totalAlunosAtivos} alunos',
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
+              style: theme.textTheme.bodySmall?.copyWith(color: EagleTokens.brand),
             ),
             Container(
               height: alturaBase,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                color: isDark ? EagleTokens.darkCard : EagleTokens.brandSoft,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
               ),
             ),
@@ -166,14 +169,14 @@ class _RankingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.brandSoft,
         child: Text(
           '${item.posicao}',
           style: TextStyle(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
             fontWeight: FontWeight.w700,
           ),
         ),

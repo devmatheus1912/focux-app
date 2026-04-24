@@ -85,23 +85,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       }
     });
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
           // Deep gradient background
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF0A0F1E), // darkBg
-                  Color(0xFF0D1B5C), // brandDeep
-                  Color(0xFF121A30), // darkCard
-                ],
-                stops: [0.0, 0.5, 1.0],
-              ),
+            decoration: BoxDecoration(
+              gradient: EagleTokens.heroGradient(dark: isDark),
             ),
           ),
 
@@ -161,7 +154,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 // Nome: "Focux Personal" grande com fade
                 FadeTransition(
                   opacity: _fadeAnim,
-                  child: const Column(
+                  child: Column(
                     children: [
                       Text.rich(
                         TextSpan(
@@ -169,7 +162,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             TextSpan(
                               text: 'Focux',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: EagleTokens.darkInk,
                                 fontSize: 38,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: -1,
@@ -178,7 +171,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             TextSpan(
                               text: ' Personal',
                               style: TextStyle(
-                                color: Color(0xFF8A94AE),
+                                color: EagleTokens.darkInkMute,
                                 fontSize: 22,
                                 fontWeight: FontWeight.w400,
                                 letterSpacing: 0.3,
@@ -187,11 +180,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           ],
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                         'Performance Intelligence',
                         style: TextStyle(
-                          color: Color(0xFF4A5578),
+                          color: EagleTokens.darkInkMute,
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                           letterSpacing: 2,
@@ -226,11 +219,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             right: 0,
             child: FadeTransition(
               opacity: _fadeAnim,
-              child: const Text(
+              child: Text(
                 'by Focux Labs',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF3A455C),
+                  color: EagleTokens.inkMute,
                   fontSize: 11,
                   letterSpacing: 1.5,
                 ),
@@ -250,7 +243,7 @@ class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.03)
+      ..color = EagleTokens.darkInk.withValues(alpha: 0.03)
       ..strokeWidth = 0.5
       ..style = PaintingStyle.stroke;
 

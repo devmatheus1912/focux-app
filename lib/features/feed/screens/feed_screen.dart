@@ -186,7 +186,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(strokeWidth: 2, color: EagleTokens.darkInk),
                         )
                       : const Icon(Icons.send),
                   label: Text(salvando ? 'Publicando...' : 'Publicar'),
@@ -231,7 +231,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           tooltip: 'Nova Publicação',
           backgroundColor: Colors.transparent,
           elevation: 0,
-          child: const Icon(Icons.add, color: Colors.white),
+          child: const Icon(Icons.add, color: EagleTokens.darkInk),
         ),
       ),
       body: _loading
@@ -270,7 +270,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                     const Icon(Icons.push_pin, color: EagleTokens.brand, size: 18),
                                     const SizedBox(width: 8),
                                   ],
-                                  Icon(_getIconForTipo(p.tipoPost), size: 20, color: const Color(0xFF374151)),
+                                  Icon(_getIconForTipo(p.tipoPost), size: 20, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
@@ -351,17 +351,17 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  Icon(Icons.thumb_up_alt_outlined, size: 16, color: const Color(0xFF4B5563)),
+                                  Icon(Icons.thumb_up_alt_outlined, size: 16, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
                                   const SizedBox(width: 4),
-                                  Text('${p.totalCurtidas}', style: TextStyle(color: const Color(0xFF4B5563))),
+                                  Text('${p.totalCurtidas}', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute)),
                                   const SizedBox(width: 16),
-                                  Icon(Icons.comment_outlined, size: 16, color: const Color(0xFF4B5563)),
+                                  Icon(Icons.comment_outlined, size: 16, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
                                   const SizedBox(width: 4),
-                                  Text('${p.totalComentarios}', style: TextStyle(color: const Color(0xFF4B5563))),
+                                  Text('${p.totalComentarios}', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute)),
                                   const Spacer(),
                                   Text(
                                     p.criadoEm.length >= 10 ? p.criadoEm.substring(0, 10) : p.criadoEm,
-                                    style: TextStyle(fontSize: 12, color: const Color(0xFF4B5563)),
+                                    style: TextStyle(fontSize: 12, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
                                   ),
                                 ],
                               ),
