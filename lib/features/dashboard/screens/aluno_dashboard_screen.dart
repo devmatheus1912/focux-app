@@ -388,7 +388,7 @@ class _ProfileCardSkeleton extends StatelessWidget {
 
 // ── Drawer ────────────────────────────────────────────────────────────────────
 
-class _AlunoDrawer extends ConsumerWidget {
+class _AlunoDrawer extends StatelessWidget {
   final Aluno aluno;
   final bool isDark;
   final WidgetRef ref;
