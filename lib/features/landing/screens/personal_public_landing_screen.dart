@@ -4,10 +4,23 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 // ---------------------------------------------------------------------------
 // Data model
 // ---------------------------------------------------------------------------
+
+class _DepoimentoItem {
+  final String nomeAluno;
+  final String texto;
+  final int nota;
+  const _DepoimentoItem({required this.nomeAluno, required this.texto, required this.nota});
+  factory _DepoimentoItem.fromJson(Map<String, dynamic> j) => _DepoimentoItem(
+    nomeAluno: j['nomeAluno'] as String? ?? '',
+    texto: j['texto'] as String? ?? '',
+    nota: j['nota'] as int? ?? 5,
+  );
+}
 
 class PublicPersonalData {
   final String nomePersonal;
@@ -22,6 +35,9 @@ class PublicPersonalData {
   final int totalAlunos;
   final int anoCriacao;
   final String plano;
+  final String? videoUrl;
+  final List<_DepoimentoItem> depoimentos;
+  final List<String> fotos;
 
   PublicPersonalData({
     required this.nomePersonal,
@@ -36,6 +52,9 @@ class PublicPersonalData {
     required this.totalAlunos,
     required this.anoCriacao,
     required this.plano,
+    this.videoUrl,
+    this.depoimentos = const [],
+    this.fotos = const [],
   });
 
   factory PublicPersonalData.fromJson(Map<String, dynamic> j) => PublicPersonalData(
@@ -51,6 +70,11 @@ class PublicPersonalData {
         totalAlunos: j['totalAlunos'] as int? ?? 0,
         anoCriacao: j['anoCriacao'] as int? ?? DateTime.now().year,
         plano: j['plano'] as String? ?? 'PREMIUM',
+        videoUrl: j['videoUrl'] as String?,
+        depoimentos: (j['depoimentos'] as List<dynamic>? ?? [])
+            .map((e) => _DepoimentoItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        fotos: (j['fotos'] as List<dynamic>? ?? []).cast<String>(),
       );
 
   bool get isEnterprise => plano == 'ENTERPRISE';
@@ -273,6 +297,18 @@ class _LandingContent extends StatelessWidget {
                           fontWeight: FontWeight.w700, fontSize: 15),
                     ),
                   ),
+                  if (data.isEnterprise && data.videoUrl != null && data.videoUrl!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    TextButton.icon(
+                      onPressed: () async {
+                        final uri = Uri.tryParse(data.videoUrl!);
+                        if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      },
+                      icon: const Icon(Icons.play_circle_outline, color: Colors.white70, size: 18),
+                      label: const Text('Ver vídeo de apresentação',
+                        style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -419,7 +455,72 @@ class _LandingContent extends StatelessWidget {
             ),
           ),
 
-        // SECTION 6 — CTA FINAL
+        // SECTION 6 — DEPOIMENTOS (ENTERPRISE only)
+        if (data.isEnterprise && data.depoimentos.isNotEmpty)
+          SliverToBoxAdapter(
+            child: _Section(
+              title: 'Depoimentos',
+              child: Column(
+                children: data.depoimentos.take(5).map((d) => Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF111827),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF1F2937)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        CircleAvatar(
+                          radius: 14,
+                          backgroundColor: primaryColor.withValues(alpha: 0.3),
+                          child: Text(d.nomeAluno.isNotEmpty ? d.nomeAluno[0].toUpperCase() : 'A',
+                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(d.nomeAluno,
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13))),
+                        Row(mainAxisSize: MainAxisSize.min, children: List.generate(5, (i) => Icon(
+                          i < d.nota ? Icons.star : Icons.star_border,
+                          size: 14,
+                          color: const Color(0xFFF59E0B),
+                        ))),
+                      ]),
+                      const SizedBox(height: 8),
+                      Text(d.texto,
+                        style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 13, height: 1.5)),
+                    ],
+                  ),
+                )).toList(),
+              ),
+            ),
+          ),
+
+        // SECTION 7 — GALERIA (ENTERPRISE only)
+        if (data.isEnterprise && data.fotos.isNotEmpty)
+          SliverToBoxAdapter(
+            child: _Section(
+              title: 'Galeria',
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 4,
+                  mainAxisSpacing: 4,
+                ),
+                itemCount: data.fotos.length,
+                itemBuilder: (_, i) => ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(data.fotos[i], fit: BoxFit.cover),
+                ),
+              ),
+            ),
+          ),
+
+        // SECTION 8 — CTA FINAL
         SliverToBoxAdapter(
           child: Container(
             margin:
@@ -472,7 +573,7 @@ class _LandingContent extends StatelessWidget {
           ),
         ),
 
-        // SECTION 7 — FOOTER (hide for enterprise)
+        // SECTION 9 — FOOTER (hide for enterprise)
         if (!data.isEnterprise)
           SliverToBoxAdapter(
             child: Padding(
