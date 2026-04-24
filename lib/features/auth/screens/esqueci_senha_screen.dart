@@ -131,7 +131,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
               animation: _bgCtrl,
               builder: (context, _) {
                 final t = _bgCtrl.value;
-                final gradientColors = EagleTokens.heroGradient(dark: isDark);
+                final gradientColors = isDark ? EagleTokens.heroGradientDark : EagleTokens.heroGradientLight;
                 return Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(

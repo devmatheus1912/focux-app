@@ -144,7 +144,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: EagleTokens.heroGradient(dark: isDark),
+                  colors: isDark ? EagleTokens.heroGradientDark : EagleTokens.heroGradientLight,
                   stops: const [0.0, 1.0],
                 ),
               ),
