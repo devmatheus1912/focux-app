@@ -10,12 +10,17 @@ class PerfilPersonal {
   final String? logoUrl;
   final String? corPrimaria;
   final String plano;
-  // Dados de wallet / pagamento
+  final bool isAdmin;
+  // Wallet
   final String? chavePix;
   final String? tipoChavePix;
   final String? banco;
   final String? agencia;
   final String? conta;
+  // Identidade / bio
+  final String? descricaoProfissional;
+  final String? especialidades;
+  final String? instagram;
 
   PerfilPersonal({
     required this.id,
@@ -26,11 +31,15 @@ class PerfilPersonal {
     this.logoUrl,
     this.corPrimaria,
     required this.plano,
+    this.isAdmin = false,
     this.chavePix,
     this.tipoChavePix,
     this.banco,
     this.agencia,
     this.conta,
+    this.descricaoProfissional,
+    this.especialidades,
+    this.instagram,
   });
 
   factory PerfilPersonal.fromJson(Map<String, dynamic> json) => PerfilPersonal(
@@ -42,11 +51,15 @@ class PerfilPersonal {
         logoUrl: json['logoUrl'] as String?,
         corPrimaria: json['corPrimaria'] as String?,
         plano: json['plano'] as String,
+        isAdmin: json['isAdmin'] as bool? ?? false,
         chavePix: json['chavePix'] as String?,
         tipoChavePix: json['tipoChavePix'] as String?,
         banco: json['banco'] as String?,
         agencia: json['agencia'] as String?,
         conta: json['conta'] as String?,
+        descricaoProfissional: json['descricaoProfissional'] as String?,
+        especialidades: json['especialidades'] as String?,
+        instagram: json['instagram'] as String?,
       );
 }
 
@@ -66,6 +79,9 @@ class PerfilRepository {
     String? especialidade,
     String? logoUrl,
     String? corPrimaria,
+    String? descricaoProfissional,
+    String? especialidades,
+    String? instagram,
   }) async {
     final response = await _dio.put('/api/personal/perfil', data: {
       if (nome != null) 'nome': nome,
@@ -73,6 +89,9 @@ class PerfilRepository {
       if (especialidade != null) 'especialidade': especialidade,
       if (logoUrl != null) 'logoUrl': logoUrl,
       if (corPrimaria != null) 'corPrimaria': corPrimaria,
+      if (descricaoProfissional != null) 'descricaoProfissional': descricaoProfissional,
+      if (especialidades != null) 'especialidades': especialidades,
+      if (instagram != null) 'instagram': instagram,
     });
     return PerfilPersonal.fromJson(response.data as Map<String, dynamic>);
   }

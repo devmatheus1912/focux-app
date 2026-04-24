@@ -115,7 +115,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             // ── L1: Deep gradient (same as register) ────────────────
             Container(
               decoration: BoxDecoration(
-                gradient: EagleTokens.heroGradient(dark: isDark),
+                gradient: EagleTokens.heroGradient(dark: true),
               ),
             ),
 

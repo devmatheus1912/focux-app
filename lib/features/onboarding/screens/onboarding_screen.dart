@@ -87,7 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             // ── L1: Deep gradient (same as register) ────────────────
             Container(
               decoration: BoxDecoration(
-                gradient: EagleTokens.heroGradient(dark: isDark),
+                gradient: EagleTokens.heroGradient(dark: true),
               ),
             ),
 

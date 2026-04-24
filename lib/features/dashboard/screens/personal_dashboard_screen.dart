@@ -547,6 +547,7 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
               onTap: () async {
                 Navigator.of(context).pop();
                 await ref.read(authProvider.notifier).logout();
+                if (context.mounted) context.go('/login');
               },
             ),
             const SizedBox(height: 8),
