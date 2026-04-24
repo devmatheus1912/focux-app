@@ -154,11 +154,15 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
         'preferenciasTreino': _prefTreinoCtrl.text,
         'restricoesAlimentares': _restricoesCtrl.text,
       });
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Anamnese salva!')));
+      }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro: $e')));
+      }
     }
     if (mounted) setState(() => _saving = false);
   }

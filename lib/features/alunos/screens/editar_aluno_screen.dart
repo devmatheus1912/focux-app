@@ -227,12 +227,11 @@ class _FxFormField extends StatelessWidget {
   final String label;
   final IconData icon;
   final bool isDark;
-  final String? hint;
   final TextInputType? keyboardType;
   final TextCapitalization textCapitalization;
   final int maxLines;
   final String? Function(String?)? validator;
-  const _FxFormField({required this.controller, required this.label, required this.icon, required this.isDark, this.hint, this.keyboardType, this.textCapitalization = TextCapitalization.none, this.maxLines = 1, this.validator});
+  const _FxFormField({required this.controller, required this.label, required this.icon, required this.isDark, this.keyboardType, this.textCapitalization = TextCapitalization.none, this.maxLines = 1, this.validator});
 
   @override
   Widget build(BuildContext context) => TextFormField(
@@ -245,7 +244,6 @@ class _FxFormField extends StatelessWidget {
     cursorColor: EagleTokens.brand,
     decoration: InputDecoration(
       labelText: label,
-      hintText: hint,
       prefixIcon: Icon(icon, size: 20, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
       filled: true,
       fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,

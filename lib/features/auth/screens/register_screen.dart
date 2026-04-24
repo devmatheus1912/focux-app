@@ -503,7 +503,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
 class _PremiumTextField extends StatelessWidget {
   final TextEditingController controller;
-  final FocusNode? focusNode;
   final String label;
   final String hint;
   final IconData icon;
@@ -517,7 +516,6 @@ class _PremiumTextField extends StatelessWidget {
 
   const _PremiumTextField({
     required this.controller,
-    this.focusNode,
     required this.label,
     required this.hint,
     required this.icon,
@@ -547,7 +545,6 @@ class _PremiumTextField extends StatelessWidget {
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          focusNode: focusNode,
           obscureText: obscureText,
           keyboardType: keyboardType,
           textInputAction: textInputAction,

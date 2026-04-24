@@ -4,9 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
 
-// ── Provider ──────────────────────────────────────────────────────────────────
-final _buscaQueryProvider = StateProvider<String>((ref) => '');
-
 final buscaResultsProvider = FutureProvider.autoDispose.family<Map<String, dynamic>, String>((ref, query) async {
   if (query.trim().length < 2) return {};
   final api = ref.read(apiClientProvider);

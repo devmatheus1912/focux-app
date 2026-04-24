@@ -84,7 +84,6 @@ class _PlanoAlimentarDetailScreenState
     final objetivoCtrl = TextEditingController(text: 'Hipertrofia');
     final calCtrl = TextEditingController(text: '2500');
     final refCtrl = TextEditingController(text: '4');
-    bool gerando = false;
 
     final confirm = await showDialog<bool>(
       context: context,
@@ -110,9 +109,9 @@ class _PlanoAlimentarDetailScreenState
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
             FilledButton.icon(
-              onPressed: gerando ? null : () => Navigator.pop(ctx, true),
-              icon: gerando ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.auto_awesome),
-              label: Text(gerando ? 'Gerando...' : 'Gerar'),
+              onPressed: () => Navigator.pop(ctx, true),
+              icon: const Icon(Icons.auto_awesome),
+              label: const Text('Gerar'),
             ),
           ],
         ),

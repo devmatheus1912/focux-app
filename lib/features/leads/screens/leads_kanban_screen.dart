@@ -59,8 +59,10 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
         _cols[novoStatus]?.add(lead);
       });
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao mover: $e')));
+      }
     }
   }
 

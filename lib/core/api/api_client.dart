@@ -58,7 +58,11 @@ class ApiClient {
                 'refreshToken': refreshToken,
               });
               final newToken = resp.data['token'] as String;
+              final newRefreshToken = resp.data['refreshToken'] as String?;
               await SecureStorage.saveToken(newToken);
+              if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
+                await SecureStorage.saveRefreshToken(newRefreshToken);
+              }
 
               // Retry original request with new token
               e.requestOptions.headers['Authorization'] = 'Bearer $newToken';

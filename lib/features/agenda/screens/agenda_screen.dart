@@ -62,6 +62,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     return null;
   }
 
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;

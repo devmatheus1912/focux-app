@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 enum SubscriptionPlan { FREE, PRO, PREMIUM }
 
 extension SubscriptionPlanExt on SubscriptionPlan {
@@ -10,6 +12,6 @@ extension SubscriptionPlanExt on SubscriptionPlan {
   }
 
   bool canAccess(SubscriptionPlan requiredPlan) {
-    return this.level >= requiredPlan.level;
+    return level >= requiredPlan.level;
   }
 }

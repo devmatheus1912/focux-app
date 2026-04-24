@@ -18,7 +18,10 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<PlanoSucessoProvider>().fetchPlano(widget.alunoId));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<PlanoSucessoProvider>().fetchPlano(widget.alunoId);
+    });
   }
 
   @override

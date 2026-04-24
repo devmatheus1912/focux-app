@@ -17,7 +17,10 @@ class _ComunidadeScreenState extends State<ComunidadeScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<ComunidadeProvider>().fetchGrupos());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<ComunidadeProvider>().fetchGrupos();
+    });
   }
 
   @override

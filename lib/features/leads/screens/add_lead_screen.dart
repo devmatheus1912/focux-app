@@ -43,8 +43,10 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context)
+      if (mounted) {
+        ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
     }
     if (mounted) setState(() => _saving = false);
   }

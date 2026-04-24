@@ -39,8 +39,10 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
         _load();
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro: $e')));
+      }
     }
   }
 

@@ -79,12 +79,16 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       final updated = await LeadRepository(ref.read(apiClientProvider))
           .atualizar(_lead.id, {'status': novoStatus});
       setState(() => _lead = updated);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Status atualizado para ${_statusLabels[novoStatus]}')),
       );
+      }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context)
+      if (mounted) {
+        ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
     }
   }
 
@@ -110,8 +114,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context)
+      if (mounted) {
+        ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
     }
   }
 
@@ -132,8 +138,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       await LeadRepository(ref.read(apiClientProvider)).arquivar(_lead.id);
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context)
+      if (mounted) {
+        ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
     }
   }
 
@@ -159,12 +167,16 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       final updated = await LeadRepository(ref.read(apiClientProvider))
           .atualizarProximoContato(_lead.id, dataStr);
       setState(() => _lead = updated);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Follow-up definido para $dataStr')),
       );
+      }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context)
+      if (mounted) {
+        ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
     }
   }
 
@@ -233,12 +245,16 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                     await LeadRepository(ref.read(apiClientProvider))
                         .adicionarInteracao(_lead.id, tipo, desc);
                     await _carregarInteracoes();
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Interação registrada!')),
                     );
+                    }
                   } catch (e) {
-                    if (mounted) ScaffoldMessenger.of(context)
+                    if (mounted) {
+                      ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text('Erro: $e')));
+                    }
                   }
                 },
               ),
@@ -327,7 +343,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(children: [
-                const Icon(Icons.event, color: const Color(0xFF6D28D9)),
+                const Icon(Icons.event, color: Color(0xFF6D28D9)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

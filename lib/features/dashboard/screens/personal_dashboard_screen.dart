@@ -758,14 +758,13 @@ class _AttentionCard extends StatelessWidget {
 }
 
 class _ShortcutBtn extends StatelessWidget {
-  final IconData icon; final String label; final String? sub; final VoidCallback onTap; final bool isDark;
-  const _ShortcutBtn({required this.icon, required this.label, this.sub, required this.onTap, required this.isDark});
+  final IconData icon; final String label; final VoidCallback onTap; final bool isDark;
+  const _ShortcutBtn({required this.icon, required this.label, required this.onTap, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return InkWell(
       onTap: onTap,
@@ -783,10 +782,6 @@ class _ShortcutBtn extends StatelessWidget {
             Icon(icon, size: 18, color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand),
             const Spacer(),
             Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: ink, height: 1.2)),
-            if (sub != null) ...[
-              const SizedBox(height: 2),
-              Text(sub!, style: TextStyle(fontSize: 10.5, color: mute)),
-            ]
           ],
         ),
       ),

@@ -260,12 +260,16 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                       );
                       if (ctx.mounted) Navigator.of(ctx).pop();
                       _load();
-                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Mensalidade atualizada!')));
+                      }
                     } catch (e) {
                       setModalState(() => salvando = false);
-                      if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
+                      if (ctx.mounted) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(content: Text('Erro ao salvar: $e')));
+                      }
                     }
                   },
                   icon: salvando
@@ -287,8 +291,10 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     try {
       await FinanceiroRepository(ref.read(apiClientProvider)).atualizarAtrasos();
       _load();
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Mensalidades atualizadas!')));
+      }
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
     }
@@ -329,8 +335,10 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     try {
       await FinanceiroRepository(ref.read(apiClientProvider))
           .registrarContato(m.id, tipoSelecionado!, obsCtrl.text.trim());
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Contato registrado!')));
+      }
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
     }
@@ -495,12 +503,16 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                           .criar(alunoId, valor, mesReferencia);
                       if (ctx.mounted) Navigator.of(ctx).pop();
                       _load();
-                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Mensalidade lançada com sucesso!')));
+                      }
                     } catch (e) {
                       setModalState(() => salvando = false);
-                      if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
+                      if (ctx.mounted) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
                         SnackBar(content: Text('Erro ao lançar mensalidade: $e')));
+                      }
                     }
                   },
                   icon: salvando

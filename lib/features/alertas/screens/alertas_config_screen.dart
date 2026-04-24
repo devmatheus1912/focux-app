@@ -12,7 +12,6 @@ class AlertasConfigScreen extends ConsumerStatefulWidget {
 }
 
 class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
-  AlertasConfiguracao? _config;
   bool _loading = true;
   bool _salvando = false;
   String? _erro;
@@ -36,7 +35,6 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
       final config = await repo.getConfiguracao();
       if (mounted) {
         setState(() {
-          _config = config;
           _diasSemTreino = config.diasSemTreino;
           _aderenciaMinima = config.aderenciaMinima;
           _loading = false;
