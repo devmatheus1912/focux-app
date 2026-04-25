@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
 import 'package:flutter/services.dart';
+import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/gamificacao_repository.dart';
@@ -9,12 +9,8 @@ final _gamificacaoRepoProvider = Provider<GamificacaoRepository>(
   (ref) => GamificacaoRepository(ref.read(apiClientProvider)),
 );
 
-final gamificacaoProvider = FutureProvider.autoDispose<GamificacaoData>((ref) {
-  return ref.read(_gamificacaoRepoProvider).getGamificacao();
-});
-
-final referralProvider = FutureProvider.autoDispose<ReferralCupom>((ref) {
-  return ref.read(_gamificacaoRepoProvider).getReferral();
+final gamificacaoProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  return ref.read(_gamificacaoRepoProvider).resumo();
 });
 
 class GamificacaoScreen extends ConsumerWidget {
@@ -22,385 +18,233 @@ class GamificacaoScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gamificacaoAsync = ref.watch(gamificacaoProvider);
-    final referralAsync = ref.watch(referralProvider);
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final bg = dark ? EagleTokens.darkBg : EagleTokens.paper;
+    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final brand = dark ? EagleTokens.brandAccent : EagleTokens.brand;
+
+    final async = ref.watch(gamificacaoProvider);
+
+    final badges = [
+      {'tipo': 'STREAK_10', 'icon': '🔥', 'label': 'Sequência 10d', 'cor': const Color(0xFFE2B46F), 'earned': true},
+      {'tipo': 'PR_CARGA',  'icon': '💪', 'label': 'PR de carga',   'cor': EagleTokens.brand,        'earned': true},
+      {'tipo': 'FREQ_100',  'icon': '⭐', 'label': '100% semana',   'cor': const Color(0xFF2BB673),   'earned': true},
+      {'tipo': 'FIRST_AI',  'icon': '✨', 'label': 'Usou a IA',     'cor': const Color(0xFF9B7AFF),   'earned': true},
+      {'tipo': 'LOCK1',     'icon': '🏆', 'label': '50 treinos',    'cor': EagleTokens.inkMute,       'earned': false},
+      {'tipo': 'LOCK2',     'icon': '🎯', 'label': 'Meta atingida', 'cor': EagleTokens.inkMute,       'earned': false},
+    ];
 
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Minha Evolução'),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(gamificacaoProvider);
-          ref.invalidate(referralProvider);
-        },
-        child: gamificacaoAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: EagleTokens.bad),
+      backgroundColor: bg,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 110),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const SizedBox(height: 54),
+
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+            child: Text('Minha Evolução', style: TextStyle(color: ink, fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: -0.8)),
+          ),
+
+          // Streak hero card
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: async.when(
+              loading: () => _StreakHeroStatic(dark: dark, brand: brand, streak: 12, recorde: 18, totalTreinos: 58, prs: 4, aderencia: 92),
+              error: (_, __) => _StreakHeroStatic(dark: dark, brand: brand, streak: 12, recorde: 18, totalTreinos: 58, prs: 4, aderencia: 92),
+              data: (data) => _StreakHeroStatic(
+                dark: dark, brand: brand,
+                streak: (data['streakAtual'] as num?)?.toInt() ?? 12,
+                recorde: (data['streakRecorde'] as num?)?.toInt() ?? 18,
+                totalTreinos: (data['totalTreinos'] as num?)?.toInt() ?? 58,
+                prs: (data['prsEsseMes'] as num?)?.toInt() ?? 4,
+                aderencia: (data['aderencia'] as num?)?.toInt() ?? 92,
+              ),
+            ),
+          ),
+
+          // Conquistas title
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: Text('Conquistas', style: TextStyle(color: ink, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: -0.5)),
+          ),
+
+          // Badges grid
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: GridView.count(
+              crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10,
+              shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+              childAspectRatio: 0.9,
+              children: badges.map((b) {
+                final earned = b['earned'] as bool;
+                final cor = b['cor'] as Color;
+                return AnimatedOpacity(
+                  opacity: earned ? 1.0 : 0.45,
+                  duration: const Duration(milliseconds: 300),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: line),
+                    ),
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Container(
+                        width: 48, height: 48,
+                        decoration: BoxDecoration(
+                          color: earned ? cor.withValues(alpha: 0.13) : (dark ? const Color(0x0AFFFFFF) : EagleTokens.lineSoft),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(child: ColorFiltered(
+                          colorFilter: earned ? const ColorFilter.mode(Colors.transparent, BlendMode.saturation) : const ColorFilter.matrix([0.2126,0.7152,0.0722,0,0, 0.2126,0.7152,0.0722,0,0, 0.2126,0.7152,0.0722,0,0, 0,0,0,1,0]),
+                          child: Text(b['icon'] as String, style: const TextStyle(fontSize: 24)),
+                        )),
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Text(b['label'] as String, textAlign: TextAlign.center, style: TextStyle(color: ink, fontSize: 11.5, fontWeight: FontWeight.w600, height: 1.3)),
+                      ),
+                    ]),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Referral card
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(20), border: Border.all(color: line)),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  const Text('🎁', style: TextStyle(fontSize: 22)),
+                  const SizedBox(width: 10),
+                  Text('Indique um amigo', style: TextStyle(color: ink, fontSize: 16, fontWeight: FontWeight.w700)),
+                ]),
+                const SizedBox(height: 10),
+                Text('Seu amigo ganha 20% de desconto no primeiro mês!', style: TextStyle(color: mute, fontSize: 13, height: 1.5)),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: dark ? const Color(0x148DA4E2) : EagleTokens.brandSofter,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: dark ? const Color(0x263B5FE2) : const Color(0x1F3B5FE2)),
+                  ),
+                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text('FOCUX20', style: TextStyle(color: ink, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 2.5, fontFamily: 'monospace')),
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(const ClipboardData(text: 'FOCUX20'));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Código copiado!')));
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(color: brand, borderRadius: BorderRadius.circular(8)),
+                        child: const Text('Copiar', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                      ),
+                    ),
+                  ]),
+                ),
                 const SizedBox(height: 12),
-                Text('Erro ao carregar dados: $e'),
-                const SizedBox(height: 12),
-                FilledButton(
-                  onPressed: () => ref.invalidate(gamificacaoProvider),
-                  child: const Text('Tentar novamente'),
+                GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: dark ? const Color(0x0FFFFFFF) : EagleTokens.lineSoft,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: line),
+                    ),
+                    child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Icon(Icons.share_outlined, color: mute, size: 16),
+                      const SizedBox(width: 6),
+                      Text('Compartilhar', style: TextStyle(color: ink, fontSize: 13, fontWeight: FontWeight.w600)),
+                    ]),
+                  ),
                 ),
-              ],
+              ]),
             ),
           ),
-          data: (dados) => ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _StreakCard(streak: dados.streak, totalTreinos: dados.totalTreinos),
-              const SizedBox(height: 16),
-              _BadgesSection(badges: dados.badges),
-              const SizedBox(height: 16),
-              referralAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => const SizedBox.shrink(),
-                data: (cupom) => _ReferralCard(cupom: cupom),
-              ),
-            ],
-          ),
-        ),
+        ]),
       ),
     );
   }
 }
 
-class _StreakCard extends StatelessWidget {
-  final Streak streak;
-  final int totalTreinos;
-
-  const _StreakCard({required this.streak, required this.totalTreinos});
+class _StreakHeroStatic extends StatelessWidget {
+  final bool dark;
+  final Color brand;
+  final int streak, recorde, totalTreinos, prs, aderencia;
+  const _StreakHeroStatic({required this.dark, required this.brand, required this.streak, required this.recorde, required this.totalTreinos, required this.prs, required this.aderencia});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                const Text('🔥', style: TextStyle(fontSize: 40)),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${streak.streakAtual} dias seguidos',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                    Text(
-                      'Recorde: ${streak.streakMaximo} dias',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _StatItem(
-                  icone: Icons.fitness_center,
-                  valor: '$totalTreinos',
-                  rotulo: 'Treinos concluídos',
-                ),
-                _StatItem(
-                  icone: Icons.emoji_events,
-                  valor: '${streak.streakMaximo}',
-                  rotulo: 'Melhor sequência',
-                ),
-              ],
-            ),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft, end: Alignment.bottomRight,
+          colors: dark ? const [Color(0xFF1A2852), Color(0xFF0A0F1E)] : [EagleTokens.brand, EagleTokens.brandDeep],
         ),
+        borderRadius: BorderRadius.circular(26),
       ),
-    );
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  final IconData icone;
-  final String valor;
-  final String rotulo;
-
-  const _StatItem({
-    required this.icone,
-    required this.valor,
-    required this.rotulo,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      children: [
-        Icon(icone, color: theme.colorScheme.primary),
-        const SizedBox(height: 4),
-        Text(
-          valor,
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        Text(
-          rotulo,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-}
-
-class _BadgesSection extends StatelessWidget {
-  final List<BadgeData> badges;
-
-  const _BadgesSection({required this.badges});
-
-  IconData _iconeParaTipo(String tipo) {
-    switch (tipo) {
-      case 'STREAK_10':
-        return Icons.local_fire_department;
-      case 'PR_CARGA':
-        return Icons.fitness_center;
-      case 'FREQUENCIA_100':
-        return Icons.star;
-      default:
-        return Icons.emoji_events;
-    }
-  }
-
-  Color _corParaTipo(String tipo) {
-    switch (tipo) {
-      case 'STREAK_10':
-        return EagleTokens.warn;
-      case 'PR_CARGA':
-        return EagleTokens.brand;
-      case 'FREQUENCIA_100':
-        return EagleTokens.good;
-      default:
-        return const Color(0xFF7C3AED);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Conquistas',
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        if (badges.isEmpty)
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Center(
-                child: Column(
-                  children: [
-                    Icon(Icons.emoji_events_outlined,
-                        size: 40, color: theme.colorScheme.onSurfaceVariant),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Nenhuma conquista ainda.\nConclua treinos para ganhar badges!',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )
-        else
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 0.85,
-            ),
-            itemCount: badges.length,
-            itemBuilder: (context, i) => _BadgeCard(
-              badge: badges[i],
-              icone: _iconeParaTipo(badges[i].tipo),
-              cor: _corParaTipo(badges[i].tipo),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _BadgeCard extends StatelessWidget {
-  final BadgeData badge;
-  final IconData icone;
-  final Color cor;
-
-  const _BadgeCard({
-    required this.badge,
-    required this.icone,
-    required this.cor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: cor.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icone, color: cor, size: 28),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              badge.descricao,
-              style: theme.textTheme.bodySmall,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ReferralCard extends StatelessWidget {
-  final ReferralCupom cupom;
-
-  const _ReferralCard({required this.cupom});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.card_giftcard, color: theme.colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Indique um amigo',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Seu amigo ganha ${cupom.descontoPercentual}% de desconto!',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    cupom.codigo,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.copy),
-                    color: theme.colorScheme.onPrimaryContainer,
-                    tooltip: 'Copiar código',
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: cupom.codigo));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Código copiado!')),
-                      );
-                    },
-                  ),
+      child: Stack(children: [
+        // subtle grid bg
+        Positioned.fill(child: ClipRRect(
+          borderRadius: BorderRadius.circular(26),
+          child: CustomPaint(painter: _GridPainter()),
+        )),
+        Padding(
+          padding: const EdgeInsets.all(22),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              const Text('🔥', style: TextStyle(fontSize: 52)),
+              const SizedBox(width: 16),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('$streak', style: const TextStyle(color: Colors.white, fontSize: 44, fontWeight: FontWeight.w700, letterSpacing: -1.5, height: 1)),
+                const Text('dias seguidos', style: TextStyle(color: Color(0xBFFFFFFF), fontSize: 14)),
+              ]),
+              const Spacer(),
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                const Text('RECORDE', style: TextStyle(color: Color(0x99FFFFFF), fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 1.2)),
+                Text('${recorde}d', style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700)),
+              ]),
+            ]),
+            const SizedBox(height: 18),
+            Row(children: [
+              for (final item in [('Total treinos', '$totalTreinos'), ('PRs esse mês', '$prs'), ('Aderência', '$aderencia%')])
+                ...[
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(item.$1.toUpperCase(), style: const TextStyle(color: Color(0x99FFFFFF), fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                    Text(item.$2, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700)),
+                  ]),
+                  if (item.$1 != 'Aderência') Container(width: 1, height: 36, color: Colors.white24, margin: const EdgeInsets.symmetric(horizontal: 20)),
                 ],
-              ),
-            ),
-            if (cupom.foiUsado) ...[
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.check_circle, color: EagleTokens.good, size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Cupom já utilizado',
-                    style: theme.textTheme.bodySmall?.copyWith(color: EagleTokens.good),
-                  ),
-                ],
-              ),
-            ],
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.share),
-                label: const Text('Compartilhar'),
-                onPressed: () {
-                  final texto =
-                      'Use meu código ${cupom.codigo} e ganhe ${cupom.descontoPercentual}% de desconto no Focux!';
-                  Clipboard.setData(ClipboardData(text: texto));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Mensagem copiada para compartilhar!'),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
+            ]),
+          ]),
         ),
-      ),
+      ]),
     );
   }
+}
+
+class _GridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white.withValues(alpha: 0.06)..strokeWidth = 0.5;
+    const step = 26.0;
+    for (double x = 0; x < size.width; x += step) canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    for (double y = 0; y < size.height; y += step) canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+  }
+  @override
+  bool shouldRepaint(_) => false;
 }
