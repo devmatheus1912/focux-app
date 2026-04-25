@@ -159,60 +159,57 @@ class AlunoDashboardScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-            _MenuButton(
-              icon: Icons.fitness_center,
-              label: 'Meus Treinos',
-              subtitle: 'Ver e executar treinos atribuídos',
-              onTap: () => context.push('/checkin/treinos'),
-              isDark: isDark,
-            ),
-            const SizedBox(height: 10),
-            _MenuButton(
-              icon: Icons.history,
-              label: 'Histórico',
-              subtitle: 'Treinos realizados',
-              onTap: () => context.push('/checkin/historico'),
-              isDark: isDark,
-            ),
-            const SizedBox(height: 10),
-            _MenuButton(
-              icon: Icons.dynamic_feed,
-              label: 'Feed',
-              subtitle: 'Publicações do seu personal',
-              onTap: () => context.push('/feed/aluno'),
-              isDark: isDark,
-            ),
-            const SizedBox(height: 10),
-            _MenuButton(
-              icon: Icons.chat_bubble_outline,
-              label: 'Chat com Personal',
-              subtitle: 'Envie mensagens ao seu personal',
-              onTap: () => context.push('/chat/aluno'),
-              isDark: isDark,
-            ),
-            const SizedBox(height: 10),
-            _MenuButton(
-              icon: Icons.smart_toy,
-              label: 'Assistente IA',
-              subtitle: 'Tire dúvidas com inteligência artificial',
-              onTap: () => context.push('/ia/chat'),
-              isDark: isDark,
-            ),
-            const SizedBox(height: 10),
-            _MenuButton(
-              icon: Icons.payments,
-              label: 'Financeiro',
-              subtitle: 'Veja suas mensalidades',
-              onTap: () => context.push('/financeiro/aluno'),
-              isDark: isDark,
-            ),
-            const SizedBox(height: 10),
-            _MenuButton(
-              icon: Icons.calendar_month,
-              label: 'Minha Agenda',
-              subtitle: 'Veja e confirme seus agendamentos',
-              onTap: () => context.push('/agenda/aluno'),
-              isDark: isDark,
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 3,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 0.9,
+              children: [
+                _ShortcutBtn(
+                  icon: Icons.fitness_center,
+                  label: 'Meus\nTreinos',
+                  onTap: () => context.push('/checkin/treinos'),
+                  isDark: isDark,
+                ),
+                _ShortcutBtn(
+                  icon: Icons.history,
+                  label: 'Meu\nHistórico',
+                  onTap: () => context.push('/checkin/historico'),
+                  isDark: isDark,
+                ),
+                _ShortcutBtn(
+                  icon: Icons.dynamic_feed,
+                  label: 'Feed\ndo Personal',
+                  onTap: () => context.push('/feed/aluno'),
+                  isDark: isDark,
+                ),
+                _ShortcutBtn(
+                  icon: Icons.chat_bubble_outline,
+                  label: 'Falar\ncom Personal',
+                  onTap: () => context.push('/chat/aluno'),
+                  isDark: isDark,
+                ),
+                _ShortcutBtn(
+                  icon: Icons.smart_toy,
+                  label: 'IA\nAssistente',
+                  onTap: () => context.push('/ia/chat'),
+                  isDark: isDark,
+                ),
+                _ShortcutBtn(
+                  icon: Icons.payments,
+                  label: 'Meu\nFinanceiro',
+                  onTap: () => context.push('/financeiro/aluno'),
+                  isDark: isDark,
+                ),
+                _ShortcutBtn(
+                  icon: Icons.calendar_month,
+                  label: 'Minha\nAgenda',
+                  onTap: () => context.push('/agenda/aluno'),
+                  isDark: isDark,
+                ),
+              ],
             ),
           ],
         ),
@@ -717,61 +714,64 @@ class _DrawerItem extends StatelessWidget {
   }
 }
 
-// ── Menu Button ───────────────────────────────────────────────────────────────
+// ── Shortcut Button ─────────────────────────────────────────────────────────────
 
-class _MenuButton extends StatelessWidget {
+class _ShortcutBtn extends StatelessWidget {
   final IconData icon;
   final String label;
-  final String subtitle;
   final VoidCallback onTap;
   final bool isDark;
 
-  const _MenuButton({
+  const _ShortcutBtn({
     required this.icon,
     required this.label,
-    required this.subtitle,
     required this.onTap,
     required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: EagleTokens.brand.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: EagleTokens.brand, size: 22),
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: EagleTokens.line,
+                    blurRadius: 0,
+                    spreadRadius: 0.5,
+                  )
+                ],
         ),
-        title: Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+            ),
+            const Spacer(),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: ink,
+                height: 1.2,
+              ),
+            ),
+          ],
         ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(
-            color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-            fontSize: 12,
-          ),
-        ),
-        trailing: Icon(
-          Icons.chevron_right,
-          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-        ),
-        onTap: onTap,
       ),
     );
   }

@@ -2,12 +2,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/widgets/fx_logo.dart';
 import '../../../core/theme/design_tokens.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FOCUX PERSONAL — Glow Effect Premium Onboarding
-// Same visual language as login: dramatic glow, glass, breathing animations
+// FOCUX PERSONAL — FxIntroSlides (Onboarding)
+// Aligned exactly with screen-auth.jsx V3 handoff
 // ─────────────────────────────────────────────────────────────────────────────
 
 class OnboardingScreen extends StatefulWidget {
@@ -23,38 +22,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const _pages = [
     _OBData(
       icon: Icons.fitness_center_rounded,
-      title: 'Gestão inteligente\nde alunos.',
-      subtitle:
-          'Cadastre, acompanhe a evolução e reduza o churn com dados em tempo real.',
-      tag: 'GESTÃO',
+      title: 'Seus alunos,\nsua gestão.',
+      subtitle: 'Cadastre alunos, monte treinos e acompanhe a evolução de cada um em tempo real.',
+      accent: Color(0xFF7CC0FF),
     ),
     _OBData(
       icon: Icons.auto_awesome_rounded,
-      title: 'IA que trabalha\npor você.',
-      subtitle:
-          'Gere treinos, dietas e progressões de carga automaticamente com inteligência artificial.',
-      tag: 'INTELIGÊNCIA',
+      title: 'IA que\nentende treino.',
+      subtitle: 'Gere treinos e dietas personalizados em segundos. A IA aprende com o histórico de cada aluno.',
+      accent: Color(0xFFA0CCFF),
     ),
     _OBData(
-      icon: Icons.insights_rounded,
-      title: 'Resultados\nmensuráveis.',
-      subtitle:
-          'Monitore check-ins, aderência, evolução física e engajamento de cada aluno.',
-      tag: 'ANALYTICS',
-    ),
-    _OBData(
-      icon: Icons.rocket_launch_rounded,
-      title: 'Seu negócio.\nSem limites.',
-      subtitle:
-          'Controle financeiro, agenda, planos e automações — tudo em um só lugar.',
-      tag: 'ESCALA',
+      icon: Icons.attach_money_rounded,
+      title: 'Financeiro\nsem complicação.',
+      subtitle: 'Cobranças, inadimplências e relatórios automatizados. Você foca no que importa: resultados.',
+      accent: Color(0xFFB8D9FF),
     ),
   ];
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -66,8 +50,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     HapticFeedback.selectionClick();
     if (_current < _pages.length - 1) {
       _page.nextPage(
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut);
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut);
     } else {
       context.go('/login');
     }
@@ -75,9 +59,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final h = MediaQuery.of(context).size.height;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -88,62 +69,56 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // ── L1: Deep gradient (same as register) ────────────────
+            // ── Background ──────────────────────────────────────────────
             Container(
               decoration: BoxDecoration(
                 gradient: EagleTokens.heroGradient(dark: true),
               ),
             ),
 
-            // ── L2: Radial accent ───────────────────────────────────
+            // Grid pattern
+            CustomPaint(painter: _AuthGridPainter(), size: Size.infinite),
+
+            // Ambient glow
             Positioned(
-              top: -h * 0.12,
-              left: 0,
-              right: 0,
+              top: -80,
+              right: -80,
               child: Container(
-                height: h * 0.50,
+                width: 300,
+                height: 300,
                 decoration: BoxDecoration(
+                  shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    center: Alignment.center,
-                    radius: 0.65,
                     colors: [
-                      EagleTokens.brand.withValues(alpha: 0.06),
+                      const Color(0xFF7CC0FF).withValues(alpha: 0.18),
                       Colors.transparent,
                     ],
+                    stops: const [0.0, 0.7],
                   ),
                 ),
               ),
             ),
 
-            // ── L3: Grid ────────────────────────────────────────────
-            CustomPaint(painter: _PremiumGrid(), size: Size.infinite),
-
-            // ── L5: Content ─────────────────────────────────────────
+            // ── Content ─────────────────────────────────────────────────
             SafeArea(
               child: Column(
                 children: [
-                  // Header: Logo + Skip
+                  // Skip Header
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        const FxLogo(
-                            iconSize: 42, showLabel: true, light: true),
                         TextButton(
                           onPressed: () => context.go('/login'),
                           style: TextButton.styleFrom(
-                            foregroundColor:
-                                EagleTokens.darkInk.withValues(alpha: 0.45),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
+                            foregroundColor: EagleTokens.darkInk.withValues(alpha: 0.5),
                           ),
-                          child: Text('Pular',
+                          child: const Text('Pular',
                               style: TextStyle(
                                   fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: 0.3)),
+                                  fontWeight: FontWeight.w600,
+                              )),
                         ),
                       ],
                     ),
@@ -155,83 +130,84 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       controller: _page,
                       itemCount: _pages.length,
                       onPageChanged: (i) => setState(() => _current = i),
-                      itemBuilder: (_, i) =>
-                          _OBPageWidget(data: _pages[i], isDark: isDark),
+                      itemBuilder: (_, i) => _OBPageWidget(data: _pages[i]),
                     ),
                   ),
 
-                  // Bottom: indicators + glow action button
+                  // Dots
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 28, vertical: 20),
+                    padding: const EdgeInsets.only(top: 32, bottom: 28),
                     child: Row(
-                      children: [
-                        // Page dots
-                        Row(
-                          children: List.generate(
-                            _pages.length,
-                            (i) => AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOutCubic,
-                              margin: const EdgeInsets.only(right: 6),
-                              width: _current == i ? 28 : 8,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(2),
-                                color: _current == i
-                                    ? EagleTokens.brand
-                                    : EagleTokens.darkInk.withValues(alpha: 0.10),
-                                boxShadow: _current == i
-                                    ? [BoxShadow(
-                                        color: EagleTokens.brand
-                                            .withValues(alpha: 0.50),
-                                        blurRadius: 8)]
-                                    : [],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        // Action button
-                        GestureDetector(
-                          onTap: _next,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        _pages.length,
+                        (i) => GestureDetector(
+                          onTap: () => _page.animateToPage(i, duration: const Duration(milliseconds: 300), curve: Curves.ease),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
-                            width: _current == _pages.length - 1 ? 160 : 56,
-                            height: 56,
+                            curve: Curves.ease,
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            width: _current == i ? 28 : 7,
+                            height: 7,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [EagleTokens.brand, EagleTokens.brandInk],
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: EagleTokens.brand.withValues(alpha: 0.35),
-                                  blurRadius: 24,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: _current == _pages.length - 1
-                                  ? Text('Começar',
-                                      style: TextStyle(
-                                        color: EagleTokens.darkInk,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.3,
-                                      ))
-                                  : Icon(
-                                      Icons.arrow_forward_rounded,
-                                      color: EagleTokens.darkInk,
-                                      size: 22),
+                              borderRadius: BorderRadius.circular(7),
+                              color: _current == i
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.3),
                             ),
                           ),
                         ),
+                      ),
+                    ),
+                  ),
+
+                  // CTA
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: _next,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: EagleTokens.brand,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shadowColor: const Color(0xFF3B5FE2).withValues(alpha: 0.6),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(_current < 2 ? 'Próximo →' : 'Começar agora',
+                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                                if (_current == 2) ...[
+                                  const SizedBox(width: 8),
+                                  const Icon(Icons.chevron_right_rounded, size: 20),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        GestureDetector(
+                          onTap: () => context.go('/login'),
+                          child: RichText(
+                            text: const TextSpan(
+                              style: TextStyle(color: Colors.white45, fontSize: 13),
+                              children: [
+                                TextSpan(text: 'Já tenho uma conta · '),
+                                TextSpan(text: 'Entrar', style: TextStyle(color: EagleTokens.brandAccent, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -248,12 +224,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 class _OBData {
   final IconData icon;
-  final String title, subtitle, tag;
-  const _OBData(
-      {required this.icon,
-      required this.title,
-      required this.subtitle,
-      required this.tag});
+  final String title, subtitle;
+  final Color accent;
+  const _OBData({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.accent,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -262,104 +240,84 @@ class _OBData {
 
 class _OBPageWidget extends StatelessWidget {
   final _OBData data;
-  final bool isDark;
-  const _OBPageWidget({required this.data, required this.isDark});
+  const _OBPageWidget({required this.data});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.only(left: 32, right: 32, top: 20),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Icon card — glass with glow
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [EagleTokens.darkCard, EagleTokens.darkCardHi],
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: EagleTokens.brandAccent.withValues(alpha: 0.22),
-                    width: 0.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: EagleTokens.brandAccent.withValues(alpha: 0.18),
-                      blurRadius: 28,
-                      offset: const Offset(0, 8),
+          // Icon Illustration
+          Container(
+            width: 120,
+            height: 120,
+            margin: const EdgeInsets.only(bottom: 32, top: 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.07),
+              borderRadius: BorderRadius.circular(36),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              boxShadow: [
+                BoxShadow(
+                  color: data.accent.withValues(alpha: 0.20),
+                  blurRadius: 60,
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(36),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Inner radial glow behind icon
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          colors: [
+                            data.accent.withValues(alpha: 0.14),
+                            Colors.transparent,
+                          ],
+                          stops: const [0.0, 0.7],
+                        ),
+                      ),
                     ),
-                    BoxShadow(
-                      color: EagleTokens.brandAccent.withValues(alpha: 0.18),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
+                    Icon(data.icon, color: data.accent, size: 52),
                   ],
                 ),
-                child: Icon(data.icon,
-                    color: EagleTokens.brandSoft, size: 42),
               ),
             ),
           ),
 
-          const SizedBox(height: 14),
-
-          // Tag badge — glass + glow
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: EagleTokens.brand.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: EagleTokens.brand.withValues(alpha: 0.12),
-                width: 0.5,
-              ),
-            ),
-            child: Text(data.tag,
-                style: TextStyle(
-                  color: EagleTokens.brandAccent,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.8,
-                )),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Title with glow
+          // Title
           Text(
             data.title,
-            style: TextStyle(
-              color: isDark ? EagleTokens.darkInk : EagleTokens.brandSoft,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
               fontSize: 34,
               fontWeight: FontWeight.w700,
-              height: 1.08,
-              letterSpacing: -0.8,
+              letterSpacing: -0.85,
+              height: 1.15,
             ),
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
 
           // Subtitle
-          Text(
-            data.subtitle,
-            style: TextStyle(
-              color: isDark
-                  ? EagleTokens.darkInkMute
-                  : EagleTokens.darkInk.withValues(alpha: 0.55),
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              height: 1.55,
-              letterSpacing: 0.1,
+          SizedBox(
+            width: 300,
+            child: Text(
+              data.subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.65),
+                fontSize: 15.5,
+                fontWeight: FontWeight.w400,
+                height: 1.6,
+              ),
             ),
           ),
         ],
@@ -372,17 +330,17 @@ class _OBPageWidget extends StatelessWidget {
 // GRID
 // ═══════════════════════════════════════════════════════════════════════════
 
-class _PremiumGrid extends CustomPainter {
+class _AuthGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final p = Paint()
-      ..color = EagleTokens.darkInk.withValues(alpha: 0.008)
+      ..color = Colors.white.withValues(alpha: 0.05)
       ..strokeWidth = 0.5
       ..style = PaintingStyle.stroke;
-    for (double x = 0; x < size.width; x += 48) {
+    for (double x = 0; x < size.width; x += 30) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), p);
     }
-    for (double y = 0; y < size.height; y += 48) {
+    for (double y = 0; y < size.height; y += 30) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), p);
     }
   }

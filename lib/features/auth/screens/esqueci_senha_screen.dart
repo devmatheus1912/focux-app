@@ -7,6 +7,12 @@ import '../../../core/api/api_client.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_logo.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// FOCUX PERSONAL — Premium Esqueci Senha (Final Production)
+//
+// Aligned with login/register: same palette, typography, grid, performance-optimized
+// ─────────────────────────────────────────────────────────────────────────────
+
 class EsqueciSenhaScreen extends StatefulWidget {
   const EsqueciSenhaScreen({super.key});
 
@@ -25,7 +31,6 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
   bool _loading = false;
   bool _senhaVisivel = false;
 
-  late final AnimationController _bgCtrl;
   late final AnimationController _stepCtrl;
   late final Animation<double> _stepSlide;
   late final Animation<double> _stepFade;
@@ -33,11 +38,13 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
   @override
   void initState() {
     super.initState();
-    _bgCtrl = AnimationController(vsync: this, duration: const Duration(seconds: 12))..repeat();
-    _stepCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
-    _stepSlide = Tween<double>(begin: 30, end: 0).animate(CurvedAnimation(parent: _stepCtrl, curve: Curves.easeOutCubic));
-    _stepFade = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _stepCtrl, curve: const Interval(0.15, 1.0, curve: Curves.easeOut)));
-    Future.delayed(const Duration(milliseconds: 200), () {
+    _stepCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 600));
+    _stepSlide = Tween<double>(begin: 30, end: 0).animate(
+        CurvedAnimation(parent: _stepCtrl, curve: Curves.easeOutCubic));
+    _stepFade = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
+        parent: _stepCtrl, curve: const Interval(0.15, 1.0, curve: Curves.easeOut)));
+    Future.delayed(const Duration(milliseconds: 150), () {
       if (mounted) _stepCtrl.forward();
     });
   }
@@ -48,7 +55,6 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
     _tokenCtrl.dispose();
     _senhaCtrl.dispose();
     _confirmarCtrl.dispose();
-    _bgCtrl.dispose();
     _stepCtrl.dispose();
     super.dispose();
   }
@@ -64,11 +70,14 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
     final email = _emailCtrl.text.trim();
     if (email.isEmpty) return;
     setState(() => _loading = true);
+    HapticFeedback.mediumImpact();
     try {
       final dio = ApiClient().dio;
-      await dio.post('/api/auth/esqueci-senha', data: {'email': email, 'tipo': _tipo});
+      await dio.post('/api/auth/esqueci-senha',
+          data: {'email': email, 'tipo': _tipo});
       _animateStepForward(1);
     } catch (e) {
+      HapticFeedback.heavyImpact();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro: ${_extrairMensagem(e)}')),
@@ -85,19 +94,24 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
     final confirmar = _confirmarCtrl.text;
     if (token.isEmpty || nova.isEmpty) return;
     if (nova != confirmar) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('As senhas não coincidem')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('As senhas não coincidem')));
       return;
     }
     if (nova.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Senha deve ter pelo menos 6 caracteres')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Senha deve ter pelo menos 6 caracteres')));
       return;
     }
     setState(() => _loading = true);
+    HapticFeedback.mediumImpact();
     try {
       final dio = ApiClient().dio;
-      await dio.post('/api/auth/resetar-senha', data: {'token': token, 'novaSenha': nova});
+      await dio.post('/api/auth/resetar-senha',
+          data: {'token': token, 'novaSenha': nova});
       _animateStepForward(2);
     } catch (e) {
+      HapticFeedback.heavyImpact();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro: ${_extrairMensagem(e)}')),
@@ -118,7 +132,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenH = mq.size.height;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -130,29 +144,46 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // Background
-            AnimatedBuilder(
-              animation: _bgCtrl,
-              builder: (context, _) {
-                final t = _bgCtrl.value;
-                final gradientColors = EagleTokens.heroGradientDark;
-                return Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment(-1.0 + sin(t * 2 * pi) * 0.3, -1.0 + cos(t * 2 * pi) * 0.3),
-                      end: Alignment(1.0 + cos(t * 2 * pi) * 0.3, 1.0 + sin(t * 2 * pi) * 0.3),
-                      colors: [gradientColors[0], gradientColors[1], gradientColors[1], gradientColors[1], gradientColors[0]],
-                    ),
-                  ),
-                );
-              },
+            // ── Layer 1: Deep gradient ──────────────────────────────────
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: EagleTokens.heroGradientDark,
+                  stops: const [0.0, 1.0],
+                ),
+              ),
             ),
 
-            CustomPaint(painter: _AuthGridPainter(), size: Size.infinite),
+            // ── Layer 2: Radial accent ──────────────────────────────────
+            Positioned(
+              top: -screenH * 0.12,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: screenH * 0.50,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 0.65,
+                    colors: [
+                      EagleTokens.brand.withValues(alpha: 0.06),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
+            // ── Layer 3: Grid ───────────────────────────────────────────
+            CustomPaint(painter: _PremiumGridPainter(), size: Size.infinite),
+
+            // ── Layer 4: Content ────────────────────────────────────────
             SafeArea(
               child: SingleChildScrollView(
-                padding: EdgeInsets.only(left: 28, right: 28, top: mq.size.height * 0.04, bottom: 32),
+                padding: EdgeInsets.only(
+                    left: 28, right: 28, top: screenH * 0.035, bottom: 32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -160,7 +191,11 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const FxLogo(iconSize: 42, showLabel: true, horizontal: true, light: true),
+                        const FxLogo(
+                            iconSize: 42,
+                            showLabel: true,
+                            horizontal: true,
+                            light: true),
                         GestureDetector(
                           onTap: () {
                             if (_step == 1) {
@@ -170,13 +205,19 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
                             }
                           },
                           child: Container(
-                            width: 42, height: 42,
+                            width: 42,
+                            height: 42,
                             decoration: BoxDecoration(
-                              color: EagleTokens.darkInk.withValues(alpha: 0.08),
+                              color: EagleTokens.darkInk.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: EagleTokens.darkInk.withValues(alpha: 0.08)),
+                              border: Border.all(
+                                  color: EagleTokens.darkInk
+                                      .withValues(alpha: 0.08)),
                             ),
-                            child: Icon(Icons.arrow_back, color: EagleTokens.darkInk.withValues(alpha: 0.7), size: 20),
+                            child: Icon(Icons.arrow_back_rounded,
+                                color: EagleTokens.darkInk
+                                    .withValues(alpha: 0.65),
+                                size: 20),
                           ),
                         ),
                       ],
@@ -187,16 +228,21 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
                     // Step indicator
                     if (_step < 2)
                       Row(
-                        children: List.generate(2, (i) => Expanded(
-                          child: Container(
-                            height: 3,
-                            margin: EdgeInsets.only(right: i < 1 ? 6 : 0),
-                            decoration: BoxDecoration(
-                              color: i <= _step ? EagleTokens.brand : EagleTokens.darkInk.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        )),
+                        children: List.generate(
+                            2,
+                            (i) => Expanded(
+                                  child: Container(
+                                    height: 3,
+                                    margin: EdgeInsets.only(right: i < 1 ? 6 : 0),
+                                    decoration: BoxDecoration(
+                                      color: i <= _step
+                                          ? EagleTokens.brand
+                                          : EagleTokens.darkInk
+                                              .withValues(alpha: 0.08),
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                )),
                       ),
 
                     const SizedBox(height: 32),
@@ -208,7 +254,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
                         offset: Offset(0, _stepSlide.value),
                         child: Opacity(opacity: _stepFade.value, child: child),
                       ),
-                      child: _buildStepContent(isDark),
+                      child: _buildStepContent(),
                     ),
                   ],
                 ),
@@ -220,82 +266,91 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
     );
   }
 
-  Widget _buildStepContent(bool isDark) {
+  Widget _buildStepContent() {
     switch (_step) {
       case 0:
-        return _buildStep0(isDark);
+        return _buildStep0();
       case 1:
-        return _buildStep1(isDark);
+        return _buildStep1();
       case 2:
-        return _buildStep2(isDark);
+        return _buildStep2();
       default:
         return const SizedBox.shrink();
     }
   }
 
-  Widget _buildStep0(bool isDark) {
-    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
-    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+  Widget _buildStep0() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Shield icon
         Container(
-          width: 56, height: 56,
+          width: 56,
+          height: 56,
           decoration: BoxDecoration(
             color: EagleTokens.brand.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Icon(Icons.shield_outlined, color: EagleTokens.brandAccent, size: 28),
+          child: const Icon(Icons.shield_outlined,
+              color: EagleTokens.brandAccent, size: 28),
         ),
         const SizedBox(height: 20),
 
         Text(
           'Recuperar\nacesso.',
-          style: TextStyle(color: inkColor, fontSize: 36, fontWeight: FontWeight.w600, height: 1.15, letterSpacing: -1),
+          style: TextStyle(
+              color: EagleTokens.darkInk,
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              height: 1.08,
+              letterSpacing: -0.8),
         ),
         const SizedBox(height: 10),
         Text(
           'Informe seu e-mail e enviaremos um código de verificação.',
-          style: TextStyle(color: inkMuteColor, fontSize: 15, height: 1.4),
+          style: TextStyle(
+              color: EagleTokens.darkInkMute,
+              fontSize: 14,
+              fontWeight: FontWeight.w400),
         ),
         const SizedBox(height: 36),
 
         // Account type toggle
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: EagleTokens.darkInk.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: EagleTokens.darkInk.withValues(alpha: 0.08)),
-          ),
-          child: Row(
-            children: [
-              _RoleTab(label: 'Personal', isSelected: _tipo == 'PERSONAL', onTap: () => setState(() => _tipo = 'PERSONAL')),
-              _RoleTab(label: 'Aluno', isSelected: _tipo == 'ALUNO', onTap: () => setState(() => _tipo = 'ALUNO')),
-            ],
-          ),
-        ),
+        _buildRoleToggle(),
         const SizedBox(height: 24),
 
-        _FxTextField(controller: _emailCtrl, label: 'E-mail cadastrado', hint: 'seu@email.com', icon: Icons.alternate_email, keyboardType: TextInputType.emailAddress),
+        _PremiumTextField(
+            controller: _emailCtrl,
+            label: 'E-MAIL CADASTRADO',
+            hint: 'seu@email.com',
+            icon: Icons.alternate_email_rounded,
+            keyboardType: TextInputType.emailAddress),
         const SizedBox(height: 32),
 
         SizedBox(
           width: double.infinity,
-          height: 56,
+          height: 54,
           child: ElevatedButton(
             onPressed: _loading ? null : _solicitarToken,
             style: ElevatedButton.styleFrom(
               backgroundColor: EagleTokens.brand,
-              foregroundColor: EagleTokens.card,
-              disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              foregroundColor: EagleTokens.darkInk,
+              disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.45),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               elevation: 0,
             ),
             child: _loading
-                ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: EagleTokens.card))
-                : const Text('Enviar código', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2.5, color: Colors.white))
+                : const Text('Enviar código',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3)),
           ),
         ),
         const SizedBox(height: 16),
@@ -303,41 +358,55 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
         Center(
           child: TextButton(
             onPressed: () => _animateStepForward(1),
-            style: TextButton.styleFrom(foregroundColor: EagleTokens.brandAccent),
-            child: const Text('Já tenho um código', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+            style: TextButton.styleFrom(
+                foregroundColor: EagleTokens.brandAccent),
+            child: const Text('Já tenho um código',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildStep1(bool isDark) {
-    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
-    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+  Widget _buildStep1() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 56, height: 56,
+          width: 56,
+          height: 56,
           decoration: BoxDecoration(
             color: EagleTokens.brand.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Icon(Icons.vpn_key_outlined, color: EagleTokens.brandAccent, size: 28),
+          child: const Icon(Icons.vpn_key_outlined,
+              color: EagleTokens.brandAccent, size: 28),
         ),
         const SizedBox(height: 20),
 
         Text(
           'Nova\nsenha.',
-          style: TextStyle(color: inkColor, fontSize: 36, fontWeight: FontWeight.w600, height: 1.15, letterSpacing: -1),
+          style: TextStyle(
+              color: EagleTokens.darkInk,
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              height: 1.08,
+              letterSpacing: -0.8),
         ),
         const SizedBox(height: 10),
         Text.rich(
           TextSpan(
             text: 'Enviamos um código para ',
-            style: TextStyle(color: inkMuteColor, fontSize: 15),
+            style: TextStyle(
+                color: EagleTokens.darkInkMute,
+                fontSize: 14,
+                fontWeight: FontWeight.w400),
             children: [
-              TextSpan(text: _emailCtrl.text.trim(), style: const TextStyle(color: EagleTokens.brandAccent, fontWeight: FontWeight.w600)),
+              TextSpan(
+                  text: _emailCtrl.text.trim(),
+                  style: const TextStyle(
+                      color: EagleTokens.brandAccent,
+                      fontWeight: FontWeight.w600)),
             ],
           ),
         ),
@@ -347,60 +416,100 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('CÓDIGO DE VERIFICAÇÃO', style: TextStyle(color: EagleTokens.brandAccent.withValues(alpha: 0.8), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2)),
+            Text('CÓDIGO DE VERIFICAÇÃO',
+                style: TextStyle(
+                    color: EagleTokens.darkInk.withValues(alpha: 0.45),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2)),
             const SizedBox(height: 8),
             TextFormField(
               controller: _tokenCtrl,
               textCapitalization: TextCapitalization.characters,
-              style: TextStyle(color: inkColor, fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 6),
+              style: TextStyle(
+                  color: EagleTokens.darkInk,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 6),
               textAlign: TextAlign.center,
               cursorColor: EagleTokens.brand,
               decoration: InputDecoration(
                 hintText: '• • • • • •',
-                hintStyle: TextStyle(color: inkColor.withValues(alpha: 0.15), letterSpacing: 6),
+                hintStyle: TextStyle(
+                    color: EagleTokens.darkInk.withValues(alpha: 0.15),
+                    letterSpacing: 6),
                 filled: true,
-                fillColor: EagleTokens.brand.withValues(alpha: 0.08),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.brand.withValues(alpha: 0.25))),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.brand.withValues(alpha: 0.25))),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
+                fillColor: EagleTokens.darkInk.withValues(alpha: 0.05),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                        color: EagleTokens.darkInk.withValues(alpha: 0.08))),
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                        color: EagleTokens.darkInk.withValues(alpha: 0.08))),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                        color: EagleTokens.brand, width: 1.0)),
               ),
             ),
           ],
         ),
         const SizedBox(height: 20),
 
-        _FxTextField(
+        _PremiumTextField(
           controller: _senhaCtrl,
-          label: 'Nova senha',
+          label: 'NOVA SENHA',
           hint: 'Mínimo 6 caracteres',
-          icon: Icons.lock_outline,
+          icon: Icons.lock_outline_rounded,
           obscureText: !_senhaVisivel,
           suffixIcon: IconButton(
-            icon: Icon(_senhaVisivel ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: inkColor.withValues(alpha: 0.4), size: 20),
+            icon: Icon(
+                _senhaVisivel
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                color: EagleTokens.darkInk.withValues(alpha: 0.35),
+                size: 20),
             onPressed: () => setState(() => _senhaVisivel = !_senhaVisivel),
           ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 16),
 
-        _FxTextField(controller: _confirmarCtrl, label: 'Confirmar senha', hint: 'Repita a nova senha', icon: Icons.lock_outline, obscureText: true),
+        _PremiumTextField(
+            controller: _confirmarCtrl,
+            label: 'CONFIRMAR SENHA',
+            hint: 'Repita a nova senha',
+            icon: Icons.lock_outline_rounded,
+            obscureText: true),
         const SizedBox(height: 32),
 
         SizedBox(
           width: double.infinity,
-          height: 56,
+          height: 54,
           child: ElevatedButton(
             onPressed: _loading ? null : _redefinirSenha,
             style: ElevatedButton.styleFrom(
               backgroundColor: EagleTokens.brand,
-              foregroundColor: EagleTokens.card,
-              disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              foregroundColor: EagleTokens.darkInk,
+              disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.45),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               elevation: 0,
             ),
             child: _loading
-                ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: EagleTokens.card))
-                : const Text('Redefinir senha', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2.5, color: Colors.white))
+                : const Text('Redefinir senha',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3)),
           ),
         ),
         const SizedBox(height: 16),
@@ -408,17 +517,17 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
         Center(
           child: TextButton(
             onPressed: () => _animateStepForward(0),
-            style: TextButton.styleFrom(foregroundColor: EagleTokens.brandAccent),
-            child: const Text('Solicitar novo código', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+            style: TextButton.styleFrom(
+                foregroundColor: EagleTokens.brandAccent),
+            child: const Text('Solicitar novo código',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildStep2(bool isDark) {
-    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
-    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+  Widget _buildStep2() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -426,7 +535,8 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
 
         // Success animation
         Container(
-          width: 88, height: 88,
+          width: 88,
+          height: 88,
           decoration: BoxDecoration(
             color: EagleTokens.goodSoft.withValues(alpha: 0.12),
             shape: BoxShape.circle,
@@ -437,61 +547,92 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
 
         Text(
           'Senha redefinida!',
-          style: TextStyle(color: inkColor, fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+          style: TextStyle(
+              color: EagleTokens.darkInk,
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
         Text(
           'Sua senha foi atualizada com sucesso.\nUse-a para fazer login.',
-          style: TextStyle(color: inkMuteColor, fontSize: 15, height: 1.5),
+          style: TextStyle(
+              color: EagleTokens.darkInkMute,
+              fontSize: 14,
+              height: 1.5,
+              fontWeight: FontWeight.w400),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 40),
 
         SizedBox(
           width: double.infinity,
-          height: 56,
+          height: 54,
           child: ElevatedButton(
             onPressed: () => context.go('/login'),
             style: ElevatedButton.styleFrom(
               backgroundColor: EagleTokens.brand,
-              foregroundColor: EagleTokens.card,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              foregroundColor: EagleTokens.darkInk,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               elevation: 0,
             ),
-            child: const Text('Ir para o Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            child: const Text('Ir para o Login',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3)),
           ),
         ),
       ],
     );
   }
-}
 
-// ── Shared widgets ──────────────────────────────────────────────────────────
+  Widget _buildRoleToggle() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: EagleTokens.darkInk.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: EagleTokens.darkInk.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Row(children: [
+        _roleTab('Personal', Icons.sports_gymnastics_rounded, 'PERSONAL'),
+        _roleTab('Aluno', Icons.person_rounded, 'ALUNO'),
+      ]),
+    );
+  }
 
-class _RoleTab extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-  const _RoleTab({required this.label, required this.isSelected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
+  Widget _roleTab(String label, IconData icon, String value) {
+    final sel = _tipo == value;
     return Expanded(
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () => setState(() => _tipo = value),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? EagleTokens.brand : Colors.transparent,
-            borderRadius: BorderRadius.circular(11),
-            boxShadow: isSelected ? [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))] : [],
+            color: sel ? EagleTokens.brand : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: Center(
-            child: Text(label, style: TextStyle(color: isSelected ? inkColor : inkColor.withValues(alpha: 0.4), fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400, fontSize: 14)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon,
+                  color: sel ? Colors.white : EagleTokens.darkInkMute,
+                  size: 18),
+              const SizedBox(width: 8),
+              Text(label,
+                  style: TextStyle(
+                    color: sel ? Colors.white : EagleTokens.darkInkMute,
+                    fontWeight: sel ? FontWeight.w600 : FontWeight.w500,
+                    fontSize: 14,
+                  )),
+            ],
           ),
         ),
       ),
@@ -499,7 +640,11 @@ class _RoleTab extends StatelessWidget {
   }
 }
 
-class _FxTextField extends StatelessWidget {
+// ═══════════════════════════════════════════════════════════════════════════
+// SHARED PREMIUM COMPONENTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _PremiumTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String hint;
@@ -508,37 +653,86 @@ class _FxTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final Widget? suffixIcon;
 
-  const _FxTextField({required this.controller, required this.label, required this.hint, required this.icon, this.obscureText = false, this.keyboardType, this.suffixIcon});
+  const _PremiumTextField({
+    required this.controller,
+    required this.label,
+    required this.hint,
+    required this.icon,
+    this.obscureText = false,
+    this.keyboardType,
+    this.suffixIcon,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
-    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: TextStyle(color: inkMuteColor, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2)),
+        Text(
+          label,
+          style: TextStyle(
+            color: EagleTokens.darkInk.withValues(alpha: 0.45),
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.2,
+          ),
+        ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
-          style: TextStyle(color: inkColor, fontSize: 15),
+          style: TextStyle(
+            color: EagleTokens.darkInk,
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+          ),
           cursorColor: EagleTokens.brand,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: inkColor.withValues(alpha: 0.2)),
-            prefixIcon: Icon(icon, color: inkColor.withValues(alpha: 0.35), size: 20),
+            hintStyle: TextStyle(
+              color: EagleTokens.darkInk.withValues(alpha: 0.18),
+              fontSize: 15,
+            ),
+            prefixIcon: Icon(
+              icon,
+              color: EagleTokens.darkInk.withValues(alpha: 0.30),
+              size: 20,
+            ),
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: inkColor.withValues(alpha: 0.06),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08))),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08))),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
-            errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.bad)),
-            errorStyle: TextStyle(color: EagleTokens.bad, fontSize: 11),
+            fillColor: EagleTokens.darkInk.withValues(alpha: 0.05),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  BorderSide(color: EagleTokens.darkInk.withValues(alpha: 0.08)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  BorderSide(color: EagleTokens.darkInk.withValues(alpha: 0.08)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  BorderSide(color: EagleTokens.brand, width: 1.0),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  BorderSide(color: EagleTokens.bad, width: 0.5),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  BorderSide(color: EagleTokens.bad, width: 1.0),
+            ),
+            errorStyle: TextStyle(
+              color: EagleTokens.bad,
+              fontSize: 11,
+            ),
           ),
         ),
       ],
@@ -546,11 +740,16 @@ class _FxTextField extends StatelessWidget {
   }
 }
 
-class _AuthGridPainter extends CustomPainter {
+class _PremiumGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = EagleTokens.darkInk.withValues(alpha: 0.025)..strokeWidth = 0.5..style = PaintingStyle.stroke;
-    const spacing = 50.0;
+    final paint = Paint()
+      ..color = EagleTokens.darkInk.withValues(alpha: 0.010)
+      ..strokeWidth = 0.5
+      ..style = PaintingStyle.stroke;
+
+    const spacing = 48.0;
+
     for (double x = 0; x < size.width; x += spacing) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
     }

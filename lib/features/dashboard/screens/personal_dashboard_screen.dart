@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_logo.dart';
+import '../../../core/widgets/fx_sparkline.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -368,6 +369,18 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                   ),
                 ),
               ],
+
+              // SEUS ALUNOS (ADERÊNCIA DA SEMANA)
+              const SliverToBoxAdapter(child: SizedBox(height: 28)),
+              SliverToBoxAdapter(
+                child: _SectionTitle(title: 'Aderência da semana', action: 'Relatório', isDark: isDark),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _AderenciaSemanaWidget(isDark: isDark),
+                ),
+              ),
 
               // ATALHOS / FERRAMENTAS
               const SliverToBoxAdapter(child: SizedBox(height: 28)),
@@ -808,6 +821,109 @@ class _ShortcutBtn extends StatelessWidget {
             Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: ink, height: 1.2)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AderenciaSemanaWidget extends StatelessWidget {
+  final bool isDark;
+  const _AderenciaSemanaWidget({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    // Fake data to represent the 3 top active students
+    final alunos = [
+      {'nome': 'Marcos Silva', 'obj': 'Hipertrofia', 'treinos': '4', 'ad': '92', 'spark': [0.2, 0.4, 0.3, 0.8, 1.0]},
+      {'nome': 'Juliana Costa', 'obj': 'Emagrecimento', 'treinos': '3', 'ad': '85', 'spark': [0.5, 0.6, 0.8, 0.7, 0.9]},
+      {'nome': 'Roberto Carlos', 'obj': 'Força', 'treinos': '5', 'ad': '78', 'spark': [1.0, 0.7, 0.5, 0.6, 0.8]},
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: isDark ? null : [BoxShadow(color: EagleTokens.line, blurRadius: 0, spreadRadius: 0.5)],
+      ),
+      child: Column(
+        children: List.generate(alunos.length, (index) {
+          final a = alunos[index];
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              border: index < alunos.length - 1
+                  ? Border(bottom: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line, width: 0.5))
+                  : null,
+            ),
+            child: Row(
+              children: [
+                // Avatar
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: isDark ? const Color(0xFF8DA4E2).withValues(alpha: 0.15) : EagleTokens.brandSoft,
+                  child: Text(
+                    (a['nome'] as String).substring(0, 1),
+                    style: TextStyle(
+                      color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Text
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        a['nome'] as String,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: ink,
+                          letterSpacing: -0.1,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${a['obj']} · ${a['treinos']} treinos',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: mute,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Sparkline
+                FxSparkline(
+                  data: a['spark'] as List<double>,
+                  width: 56,
+                  height: 22,
+                  color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+                ),
+                const SizedBox(width: 14),
+                // Percentage
+                SizedBox(
+                  width: 40,
+                  child: Text(
+                    '${a['ad']}%',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: ink,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }

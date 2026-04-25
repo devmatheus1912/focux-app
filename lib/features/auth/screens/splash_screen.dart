@@ -178,38 +178,33 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   opacity: _fadeAnim,
                   child: Column(
                     children: [
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'Focux',
-                              style: TextStyle(
-                                color: EagleTokens.darkInk,
-                                fontSize: 38,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -1,
-                              ),
-                            ),
-                            TextSpan(
-                              text: ' Personal',
-                              style: TextStyle(
-                                color: EagleTokens.darkInkMute,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w400,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                          ],
+                      Text(
+                        'FOCUX',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 42,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -1.2,
+                          height: 1.0,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
-                        'Performance Intelligence',
+                        'PERSONAL',
                         style: TextStyle(
-                          color: EagleTokens.darkInkMute,
-                          fontSize: 13,
+                          color: Colors.white.withValues(alpha: 0.55),
+                          fontSize: 15,
                           fontWeight: FontWeight.w500,
-                          letterSpacing: 2,
+                          letterSpacing: 4.2, // ~0.28em for 15px
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        'Treine com dados. Evolua com inteligência.',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.4),
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                     ],
