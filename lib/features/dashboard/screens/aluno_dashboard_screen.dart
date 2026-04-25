@@ -742,15 +742,7 @@ class _ShortcutBtn extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: isDark
-              ? null
-              : [
-                  BoxShadow(
-                    color: EagleTokens.line,
-                    blurRadius: 0,
-                    spreadRadius: 0.5,
-                  )
-                ],
+          border: isDark ? null : Border.all(color: EagleTokens.line, width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
