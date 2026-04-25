@@ -136,211 +136,309 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     return _alertas.where((a) => a.score >= _filtroScoreMin!).toList();
   }
 
+  Color _scoreColor(int s, bool isDark) => s >= 2
+      ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
+      : (isDark ? const Color(0xFFE2B46F) : EagleTokens.warn);
+      
+  Color _scoreBg(int s, bool isDark) => s >= 2
+      ? (isDark ? const Color(0x1FFF8B8B) : EagleTokens.badSoft)
+      : (isDark ? const Color(0x1FE2B46F) : EagleTokens.warnSoft);
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final brand = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
+
+    final altos = _alertas.where((a) => a.score >= 2).length;
+    final medios = _alertas.where((a) => a.score == 1).length;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Alertas de Risco'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Configurações',
-            onPressed: () => context.push('/alertas/config'),
-          ),
-          if (_config != null)
-            IconButton(
-              icon: const Icon(Icons.tune),
-              tooltip: 'Configurar',
-              onPressed: _editarConfiguracao,
-            ),
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
-        ],
-      ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(children: [
-              if (_config != null)
-                _ConfigBar(config: _config!),
-              _FiltroBar(
-                selecionado: _filtroScoreMin,
-                onChanged: (v) => setState(() => _filtroScoreMin = v),
+      backgroundColor: bg,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (context.canPop()) ...[
+                        InkWell(
+                          onTap: () => context.pop(),
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Icon(Icons.arrow_back_ios_new, size: 24, color: ink),
+                          ),
+                        ),
+                      ],
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('MOTOR ANTI-CHURN', style: TextStyle(fontSize: 12, color: isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
+                          const SizedBox(height: 2),
+                          Text('Alertas de Risco', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: ink, letterSpacing: -0.5)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  InkWell(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (_) => SafeArea(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(title: const Text('Todos'), onTap: () { setState(() => _filtroScoreMin = null); Navigator.pop(context); }),
+                              ListTile(title: const Text('Score ≥ 2 (alto)'), onTap: () { setState(() => _filtroScoreMin = 2); Navigator.pop(context); }),
+                              ListTile(title: const Text('Score = 1 (médio)'), onTap: () { setState(() => _filtroScoreMin = 1); Navigator.pop(context); }),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: isDark ? null : Border.all(color: line),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.filter_list, size: 14, color: mute),
+                          const SizedBox(width: 6),
+                          Text('Filtrar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: mute)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: _filtrados.isEmpty
-                    ? Center(
-                        child: Column(mainAxisSize: MainAxisSize.min, children: [
-                          const Icon(Icons.check_circle, size: 64, color: EagleTokens.good),
-                          const SizedBox(height: 12),
-                          Text(
-                            _alertas.isEmpty
-                                ? 'Nenhum aluno em risco!'
-                                : 'Nenhum aluno com score ≥ ${_filtroScoreMin ?? 1}.',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ]),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(12),
-                        itemCount: _filtrados.length,
-                        itemBuilder: (_, i) => _AlertaCard(
-                          alerta: _filtrados[i],
-                          onTap: () => context.push(
-                            '/alertas/aluno/${_filtrados[i].alunoId}',
-                            extra: _filtrados[i].alunoNome,
-                          ),
-                          onResolver: () => _resolverAlerta(_filtrados[i]),
-                          onMensagemChat: () => _enviarMensagemChat(_filtrados[i]),
+            ),
+
+            if (_loading)
+              const Expanded(child: Center(child: CircularProgressIndicator()))
+            else ...[
+              // Config strip
+              if (_config != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withValues(alpha: 0.04) : EagleTokens.brand.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: isDark ? line : EagleTokens.brand.withValues(alpha: 0.12)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.access_time, size: 16, color: mute),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text.rich(TextSpan(children: [
+                            TextSpan(text: 'Dispara se: ', style: TextStyle(fontSize: 12, color: mute)),
+                            TextSpan(text: 'sem treino > ${_config!.diasSemTreino} dias ', style: TextStyle(fontSize: 12, color: ink, fontWeight: FontWeight.w600)),
+                            TextSpan(text: 'ou ', style: TextStyle(fontSize: 12, color: mute)),
+                            TextSpan(text: 'aderência < ${_config!.aderenciaMinima}%', style: TextStyle(fontSize: 12, color: ink, fontWeight: FontWeight.w600)),
+                          ])),
+                        ),
+                        InkWell(
+                          onTap: _editarConfiguracao,
+                          child: Text('Editar', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: brand)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // Summary chips
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0x1AFF8B8B) : EagleTokens.badSoft,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: isDark ? const Color(0x33FF8B8B) : const Color(0x269E2B2B)),
+                        ),
+                        child: Column(
+                          children: [
+                            Text('$altos', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)),
+                            Text('Score alto', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)),
+                          ],
                         ),
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0x1AE2B46F) : EagleTokens.warnSoft,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: isDark ? const Color(0x33E2B46F) : const Color(0x268A5A12)),
+                        ),
+                        child: Column(
+                          children: [
+                            Text('$medios', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: isDark ? const Color(0xFFE2B46F) : EagleTokens.warn)),
+                            Text('Score médio', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFFE2B46F) : EagleTokens.warn)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0x146FE296) : EagleTokens.goodSoft,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: isDark ? const Color(0x266FE296) : const Color(0x262B6A3F)),
+                        ),
+                        child: Column(
+                          children: [
+                            Text('+', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: isDark ? const Color(0xFF6FE296) : EagleTokens.good)),
+                            Text('Saudáveis', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFF6FE296) : EagleTokens.good)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ]),
-    );
-  }
-}
 
-class _ConfigBar extends StatelessWidget {
-  final AlertasConfiguracao config;
-  const _ConfigBar({required this.config});
+              // Alert List
+              Expanded(
+                child: _filtrados.isEmpty
+                    ? const Center(child: Text('Nenhum alerta encontrado', style: TextStyle(fontSize: 16)))
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                        itemCount: _filtrados.length,
+                        itemBuilder: (_, i) {
+                          final a = _filtrados[i];
+                          final sColor = _scoreColor(a.score, isDark);
+                          final sBg = _scoreBg(a.score, isDark);
 
-  @override
-  Widget build(BuildContext context) => Container(
-    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    child: Row(children: [
-      const Icon(Icons.settings, size: 16, color: EagleTokens.inkMute),
-      const SizedBox(width: 6),
-      Text('Sem treino > ${config.diasSemTreino} dias  ·  Aderência < ${config.aderenciaMinima}%',
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute)),
-    ]),
-  );
-}
-
-class _FiltroBar extends StatelessWidget {
-  final int? selecionado;
-  final ValueChanged<int?> onChanged;
-  const _FiltroBar({required this.selecionado, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    child: Row(children: [
-      FilterChip(
-        label: const Text('Todos'),
-        selected: selecionado == null,
-        onSelected: (_) => onChanged(null),
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            decoration: BoxDecoration(
+                              color: cardBg,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: a.score >= 2 ? (isDark ? const Color(0x40FF8B8B) : const Color(0x339E2B2B)) : line),
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: 44, height: 44,
+                                        decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
+                                        alignment: Alignment.center,
+                                        child: Text(a.alunoNome.isNotEmpty ? a.alunoNome[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Flexible(child: Text(a.alunoNome, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ink), overflow: TextOverflow.ellipsis)),
+                                                const SizedBox(width: 8),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                                  decoration: BoxDecoration(color: sBg, borderRadius: BorderRadius.circular(999)),
+                                                  child: Text('Score ${a.score}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: sColor, fontFamily: 'monospace')),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            ...a.motivos.map((m) => Padding(
+                                              padding: const EdgeInsets.only(bottom: 2),
+                                              child: Row(
+                                                children: [
+                                                  Container(width: 4, height: 4, decoration: BoxDecoration(color: sColor, shape: BoxShape.circle)),
+                                                  const SizedBox(width: 6),
+                                                  Flexible(child: Text(m, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: sColor))),
+                                                ],
+                                              ),
+                                            )),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Text('${a.diasSemTreino ?? a.dias ?? 0}d', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: sColor)),
+                                          Text('${a.aderenciaPercent?.toStringAsFixed(0) ?? a.aderencia ?? 0}% ader.', style: TextStyle(fontSize: 10.5, color: mute)),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    border: Border(top: BorderSide(color: line)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: InkWell(
+                                          onTap: () => _enviarMensagemChat(a),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(vertical: 10),
+                                            decoration: BoxDecoration(
+                                              border: Border(right: BorderSide(color: line)),
+                                            ),
+                                            alignment: Alignment.center,
+                                            child: Text('💬 Mensagem', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: brand)),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: InkWell(
+                                          onTap: () => _resolverAlerta(a),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(vertical: 10),
+                                            alignment: Alignment.center,
+                                            child: Text('✓ Resolvido', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFF6FE296) : EagleTokens.good)),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ],
+        ),
       ),
-      const SizedBox(width: 8),
-      FilterChip(
-        label: const Text('Score ≥ 2 (alto)'),
-        selected: selecionado == 2,
-        selectedColor: EagleTokens.bad.withValues(alpha: 0.2),
-        onSelected: (_) => onChanged(selecionado == 2 ? null : 2),
-      ),
-      const SizedBox(width: 8),
-      FilterChip(
-        label: const Text('Score = 1 (médio)'),
-        selected: selecionado == 1,
-        selectedColor: EagleTokens.warn.withValues(alpha: 0.2),
-        onSelected: (_) => onChanged(selecionado == 1 ? null : 1),
-      ),
-    ]),
-  );
-}
-
-class _AlertaCard extends StatelessWidget {
-  final AlertaRisco alerta;
-  final VoidCallback onTap;
-  final VoidCallback onResolver;
-  final VoidCallback onMensagemChat;
-
-  const _AlertaCard({required this.alerta, required this.onTap, required this.onResolver, required this.onMensagemChat});
-
-  Color get _cor => alerta.score >= 2 ? EagleTokens.bad : EagleTokens.warn;
-
-  @override
-  Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.only(bottom: 8),
-    clipBehavior: Clip.antiAlias,
-    child: InkWell(
-      onTap: onTap,
-      child: Column(
-        children: [
-          ListTile(
-            leading: CircleAvatar(
-              backgroundColor: _cor.withValues(alpha: 0.15),
-              child: Icon(Icons.warning_amber_rounded, color: _cor),
-            ),
-            title: Row(children: [
-              Flexible(child: Text(alerta.alunoNome,
-                style: const TextStyle(fontWeight: FontWeight.w600))),
-              const SizedBox(width: 8),
-              _ScoreBadge(score: alerta.score),
-            ]),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: alerta.motivos.map((m) => Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Row(children: [
-                  Icon(Icons.circle, size: 6, color: _cor),
-                  const SizedBox(width: 6),
-                  Flexible(child: Text(m, style: TextStyle(color: _cor, fontSize: 12))),
-                ]),
-              )).toList(),
-            ),
-            trailing: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              if (alerta.diasSemTreino != null)
-                Text('${alerta.diasSemTreino}d',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: _cor)),
-              if (alerta.aderenciaPercent != null)
-                Text('${alerta.aderenciaPercent!.toStringAsFixed(0)}%',
-                  style: const TextStyle(fontSize: 11, color: EagleTokens.inkMute)),
-            ]),
-          ),
-          const Divider(height: 1),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            color: EagleTokens.inkMute.withValues(alpha: 0.05),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton.icon(
-                  onPressed: onMensagemChat,
-                  icon: const Icon(Icons.chat_bubble_outline, size: 16),
-                  label: const Text('Mensagem'),
-                ),
-                TextButton.icon(
-                  onPressed: onResolver,
-                  icon: const Icon(Icons.check_circle_outline, size: 16, color: EagleTokens.good),
-                  label: const Text('Resolvido', style: TextStyle(color: EagleTokens.good)),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _ScoreBadge extends StatelessWidget {
-  final int score;
-  const _ScoreBadge({required this.score});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = score >= 2 ? EagleTokens.bad : EagleTokens.warn;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text('$score',
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
     );
   }
 }

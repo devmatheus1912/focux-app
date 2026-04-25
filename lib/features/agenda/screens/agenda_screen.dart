@@ -14,68 +14,74 @@ class AgendaScreen extends ConsumerStatefulWidget {
 class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   List<Agendamento> _ags = [];
   bool _loading = true;
+  int _hojeIdx = 0;
+  int _selectedIdx = 0;
+  late DateTime _weekStart;
 
   @override
-  void initState() { super.initState(); _load(); }
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _hojeIdx = now.weekday - 1; // 0 = Monday, 6 = Sunday
+    _selectedIdx = _hojeIdx;
+    _weekStart = now.subtract(Duration(days: _hojeIdx));
+    _load();
+  }
 
   Future<void> _load() async {
     try {
       final r = await AgendaRepository(ref.read(apiClientProvider)).proximos();
       setState(() { _ags = r; _loading = false; });
-    } catch (e) { debugPrint('[Focux] Error: $e'); setState(() => _loading = false); }
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
-  // AG2 — retorna badge "HOJE", "AMANHÃ" ou null
-  Widget? _dateBadge(DateTime inicio) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final tomorrow = today.add(const Duration(days: 1));
-    final day = DateTime(inicio.year, inicio.month, inicio.day);
-
-    if (day == today) {
-      return Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFFEE2E2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: Text('HOJE',
-              style: TextStyle(
-                  color: EagleTokens.bad, fontSize: 10, fontWeight: FontWeight.bold)),
-        ),
-      );
-    } else if (day == tomorrow) {
-      return Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFFEF3C7),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: Text('AMANHÃ',
-              style: TextStyle(
-                  color: EagleTokens.warn, fontSize: 10, fontWeight: FontWeight.bold)),
-        ),
-      );
-    }
-    return null;
+  Color _statusColor(String s, bool isDark) {
+    if (s == 'PRESENTE' || s == 'CONCLUIDO') return isDark ? const Color(0xFF6FE296) : EagleTokens.good;
+    if (s == 'FALTA' || s == 'CANCELADO') return isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad;
+    return isDark ? EagleTokens.brandAccent : EagleTokens.brand; // AGENDADO
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final brand = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
 
+    final diasSemanaStr = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+
+    // Map events to their weekday index (0-6)
+    final eventosMap = <int, List<Agendamento>>{};
+    for (var i = 0; i < 7; i++) eventosMap[i] = [];
+    
+    for (final ag in _ags) {
+      // we only consider events in the current week view to match the UI
+      final diff = ag.inicio.difference(_weekStart).inDays;
+      if (diff >= 0 && diff < 7) {
+        eventosMap[ag.inicio.weekday - 1]?.add(ag);
+      }
+    }
+
+    final dailyEvents = eventosMap[_selectedIdx] ?? [];
+    final selectedDate = _weekStart.add(Duration(days: _selectedIdx));
+
+    final monthNames = ['', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    
     return Scaffold(
       backgroundColor: bg,
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandDeep]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [
+            if (!isDark) BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))
+          ],
         ),
         child: FloatingActionButton(
           onPressed: () async {
@@ -92,113 +98,219 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        '${_ags.length} PRÓXIMOS',
-                        style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Agenda',
-                        style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
-                      ),
+                      if (context.canPop()) ...[
+                        InkWell(
+                          onTap: () => context.pop(),
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Icon(Icons.arrow_back_ios_new, size: 24, color: ink),
+                          ),
+                        ),
+                      ],
+                      Text('Agenda', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: ink, letterSpacing: -0.5)),
                     ],
                   ),
-                  IconButton(
-                    icon: Icon(Icons.calendar_view_week, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-                    tooltip: 'Visão semanal',
-                    onPressed: () => context.push('/agenda/semanal'),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(12),
+                      border: isDark ? null : Border.all(color: line),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.chevron_left, size: 16, color: mute),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${_weekStart.day}–${_weekStart.add(const Duration(days: 6)).day} ${monthNames[_weekStart.month]}',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: ink),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.chevron_right, size: 16, color: mute),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
+
+            // Day tabs
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: List.generate(7, (i) {
+                  final isSelected = i == _selectedIdx;
+                  final dayDate = _weekStart.add(Duration(days: i));
+                  final count = (eventosMap[i] ?? []).length;
+                  
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedIdx = i),
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                      constraints: const BoxConstraints(minWidth: 46),
+                      decoration: BoxDecoration(
+                        color: isSelected ? brand : cardBg,
+                        borderRadius: BorderRadius.circular(14),
+                        border: isSelected ? null : Border.all(color: isDark ? Colors.transparent : line),
+                        boxShadow: isSelected && !isDark ? [BoxShadow(color: brand.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))] : null,
+                      ),
+                      child: Column(
+                        children: [
+                          Text(diasSemanaStr[i], style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : mute)),
+                          const SizedBox(height: 2),
+                          Text('${dayDate.day}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isSelected ? Colors.white : ink, height: 1.2)),
+                          if (count > 0) ...[
+                            const SizedBox(height: 4),
+                            Container(
+                              width: 16, height: 16,
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.white.withValues(alpha: 0.3) : brand,
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: Text('$count', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white)),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+
+            // Today's info
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+              child: Text.rich(TextSpan(
+                children: [
+                  TextSpan(text: '${diasSemanaStr[_selectedIdx]} · ${selectedDate.day} ${monthNames[selectedDate.month]} · ', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: ink, letterSpacing: -0.2)),
+                  TextSpan(text: '${dailyEvents.length} atendimentos', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: brand, letterSpacing: -0.2)),
+                ],
+              )),
+            ),
+
+            // Events List
             Expanded(
               child: _loading
-                  ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
-                  : _ags.isEmpty
-                      ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                          Container(width: 64, height: 64, decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), shape: BoxShape.circle), child: const Icon(Icons.calendar_today, color: EagleTokens.brand, size: 28)),
-                          const SizedBox(height: 14),
-                          Text('Nenhum agendamento', style: TextStyle(color: ink, fontSize: 17, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 6),
-                          Text('Agende sessões com seus alunos.', style: TextStyle(color: mute, fontSize: 14)),
-                        ]))
-                      : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-                          itemCount: _ags.length,
-                          itemBuilder: (_, i) {
-                            final ag = _ags[i];
-                            final inicio = ag.inicio;
-                            final badge = _dateBadge(inicio);
-                            return Dismissible(
-                              key: Key('ag_${ag.id}'),
-                              direction: DismissDirection.endToStart,
-                              background: Container(
-                                decoration: BoxDecoration(color: EagleTokens.bad, borderRadius: BorderRadius.circular(14)),
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.only(right: 20),
-                                child: const Icon(Icons.delete, color: Colors.white)),
-                              onDismissed: (_) async {
-                                await AgendaRepository(ref.read(apiClientProvider)).excluir(ag.id);
-                                setState(() => _ags.removeAt(i));
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                padding: const EdgeInsets.all(14),
-                                decoration: BoxDecoration(
-                                  color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft),
-                                ),
-                                child: Row(children: [
-                                  Container(
-                                    width: 48, height: 48,
-                                    decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                      Text('${inicio.day}', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: ink)),
-                                      Text(_monthAbbr(inicio.month), style: TextStyle(fontSize: 10, color: mute)),
-                                    ]),
-                                  ),
-                                  const SizedBox(width: 14),
-                                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Row(children: [
-                                      Expanded(child: Text(ag.titulo ?? ag.alunoNome, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: ink))),
-                                      if (badge != null) badge,
-                                    ]),
-                                    const SizedBox(height: 4),
-                                    Text('${ag.alunoNome} · ${_hm(inicio)} – ${_hm(ag.fim)}', style: TextStyle(fontSize: 12, color: mute)),
-                                  ])),
-                                  const SizedBox(width: 8),
-                                  _statusChip(ag.status),
-                                ]),
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                      itemCount: dailyEvents.length + 1, // +1 for the Add Slot button
+                      itemBuilder: (_, i) {
+                        if (i == dailyEvents.length) {
+                          // Add slot button
+                          return GestureDetector(
+                            onTap: () async {
+                              await Navigator.push(context, MaterialPageRoute(builder: (_) => const _NovoAgendamentoScreen()));
+                              _load();
+                            },
+                            child: Container(
+                              height: 52,
+                              margin: const EdgeInsets.only(top: 8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: mute.withValues(alpha: 0.3), width: 1.5),
                               ),
-                            );
-                          },
-                        ),
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.add, size: 18, color: mute),
+                                  const SizedBox(width: 6),
+                                  Text('Novo agendamento', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: mute)),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
+                        final e = dailyEvents[i];
+                        final sColor = _statusColor(e.status, isDark);
+                        
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            borderRadius: BorderRadius.circular(18),
+                            border: isDark ? null : Border.all(color: line),
+                          ),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 52,
+                                child: Column(
+                                  children: [
+                                    Text('${e.inicio.hour.toString().padLeft(2, '0')}:${e.inicio.minute.toString().padLeft(2, '0')}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: brand, fontFamily: 'monospace')),
+                                    Container(
+                                      width: 2, height: 20,
+                                      margin: const EdgeInsets.only(top: 4),
+                                      decoration: BoxDecoration(
+                                        color: brand.withValues(alpha: 0.3),
+                                        borderRadius: BorderRadius.circular(2),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                width: 40, height: 40,
+                                margin: const EdgeInsets.only(right: 12),
+                                decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
+                                alignment: Alignment.center,
+                                child: Text(e.alunoNome.isNotEmpty ? e.alunoNome[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(e.titulo ?? e.alunoNome, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ink), overflow: TextOverflow.ellipsis),
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      children: [
+                                        Container(width: 5, height: 5, decoration: BoxDecoration(color: sColor, shape: BoxShape.circle)),
+                                        const SizedBox(width: 5),
+                                        Text(e.status, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: sColor)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                width: 34, height: 34,
+                                decoration: BoxDecoration(
+                                  color: isDark ? Colors.white.withValues(alpha: 0.06) : EagleTokens.brandSoft,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                alignment: Alignment.center,
+                                child: Icon(Icons.chevron_right, size: 18, color: brand),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
       ),
     );
   }
-
-  String _monthAbbr(int m) => ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][m];
-  String _hm(DateTime d) => '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-
-  Widget _statusChip(String s) => Chip(
-    label: Text(s, style: const TextStyle(fontSize: 11)),
-    backgroundColor: (s == 'AGENDADO' ? EagleTokens.brand : s == 'CONCLUIDO' ? EagleTokens.good : EagleTokens.inkMute)
-        .withValues(alpha: 0.15),
-  );
 }
 
 class _NovoAgendamentoScreen extends ConsumerStatefulWidget {
@@ -214,7 +326,6 @@ class _NovoAgendamentoScreenState extends ConsumerState<_NovoAgendamentoScreen> 
   DateTime? _fim;
   bool _saving = false;
 
-  // AG1 — date picker livre: sem restrição de dia da semana, range amplo
   Future<void> _pickDateTime(bool isInicio) async {
     final date = await showDatePicker(
       context: context,

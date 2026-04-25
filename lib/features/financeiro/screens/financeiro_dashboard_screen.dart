@@ -1,4 +1,4 @@
-import 'package:fl_chart/fl_chart.dart';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,16 +33,15 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
       ]);
       if (mounted) {
         final all = results[1] as List<Mensalidade>;
-        // Sort by id descending so newest records appear first, then take up to 8
-        final sorted = List<Mensalidade>.from(all)
-          ..sort((a, b) => b.id.compareTo(a.id));
+        final sorted = List<Mensalidade>.from(all)..sort((a, b) => b.id.compareTo(a.id));
         setState(() {
           _data = results[0] as FinanceiroDashboard;
           _recentTransactions = sorted.take(8).toList();
           _loading = false;
         });
       }
-    } catch (e) { debugPrint('[Focux] Error: $e');
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -59,35 +58,98 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
         ]),
       );
     }
+
     final d = _data!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(bottom: 110),
         children: [
-          _SummaryGrid(data: d),
-          const SizedBox(height: 20),
-          _SectionTitle('Evolução dos últimos 6 meses'),
-          const SizedBox(height: 8),
-          _BarChart(items: d.evolucaoMensal),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+          // Hero — ring with received amount
+          _HeroRing(data: d, isDark: isDark),
+          
+          // Tri-grid metrics
+          _TriGrid(data: d, isDark: isDark),
+          
+          // Evolução — bar chart
+          _EvolucaoChart(items: d.evolucaoMensal, isDark: isDark),
+          
+          // Vencimentos próximos
           if (d.vencimentosProximos.isNotEmpty) ...[
-            _SectionTitle('Vencimentos próximos'),
-            const SizedBox(height: 8),
-            ...d.vencimentosProximos.map((v) => _VencimentoTile(item: v)),
-            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Vencimentos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.darkInk : EagleTokens.ink, letterSpacing: -0.2)),
+                  Text('Cobrar todos →', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.brandAccent : EagleTokens.brand)),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: d.vencimentosProximos.map((v) => _VencimentoRow(item: v, isDark: isDark)).toList(),
+              ),
+            ),
           ],
+          
+          // Top alunos
           if (d.topAlunos.isNotEmpty) ...[
-            _SectionTitle('Top alunos por receita'),
-            const SizedBox(height: 8),
-            ...d.topAlunos.asMap().entries.map((e) => _TopAlunoTile(rank: e.key + 1, item: e.value)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 10),
+              child: Text('Top alunos · acumulado', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.darkInk : EagleTokens.ink, letterSpacing: -0.2)),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                  borderRadius: BorderRadius.circular(20),
+                  border: isDark ? null : Border.all(color: EagleTokens.line),
+                ),
+                child: Column(
+                  children: d.topAlunos.asMap().entries.map((e) {
+                    final rank = e.key + 1;
+                    final t = e.value;
+                    final isLast = rank == d.topAlunos.length;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        border: isLast ? null : Border(bottom: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line, width: 0.5)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 26, height: 26,
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white.withValues(alpha: 0.15) : EagleTokens.brandSoft,
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text('$rank', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isDark ? EagleTokens.brandAccent : EagleTokens.brand)),
+                          ),
+                          const SizedBox(width: 10),
+                          Container(
+                            width: 32, height: 32,
+                            decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
+                            alignment: Alignment.center,
+                            child: Text(t.alunoNome.isNotEmpty ? t.alunoNome[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(child: Text(t.alunoNome, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500, color: isDark ? EagleTokens.darkInk : EagleTokens.ink), overflow: TextOverflow.ellipsis)),
+                          Text('R\$ ${(t.totalPago / 1000).toStringAsFixed(1)}k', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.darkInk : EagleTokens.ink)),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
             const SizedBox(height: 20),
-          ],
-          if (_recentTransactions.isNotEmpty) ...[
-            _SectionTitle('Transações Recentes'),
-            const SizedBox(height: 8),
-            ..._recentTransactions.map((m) => _TransacaoTile(item: m)),
-            const SizedBox(height: 16),
           ],
         ],
       ),
@@ -95,372 +157,332 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  const _SectionTitle(this.text);
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-}
-
-class _SummaryGrid extends StatelessWidget {
+class _HeroRing extends StatelessWidget {
   final FinanceiroDashboard data;
-  const _SummaryGrid({required this.data});
-
-  @override
-  Widget build(BuildContext context) => Column(children: [
-    Row(children: [
-      Expanded(child: _StatCard(
-        label: 'Recebido (mês)',
-        value: 'R\$ ${data.receitaMes.toStringAsFixed(2)}',
-        color: EagleTokens.good,
-        icon: Icons.trending_up,
-      )),
-      const SizedBox(width: 12),
-      Expanded(child: _StatCard(
-        label: 'Previsão (mês)',
-        value: 'R\$ ${data.previsaoReceita.toStringAsFixed(2)}',
-        color: EagleTokens.brand,
-        icon: Icons.schedule,
-      )),
-    ]),
-    const SizedBox(height: 12),
-    Row(children: [
-      Expanded(child: _StatCard(
-        label: 'Acumulado',
-        value: 'R\$ ${data.receitaAcumulada.toStringAsFixed(2)}',
-        color: const Color(0xFF7C3AED),
-        icon: Icons.account_balance_wallet,
-      )),
-      const SizedBox(width: 12),
-      Expanded(child: _StatCard(
-        label: 'Ticket médio',
-        value: 'R\$ ${data.ticketMedio.toStringAsFixed(2)}',
-        color: EagleTokens.brand,
-        icon: Icons.receipt_long,
-      )),
-    ]),
-    const SizedBox(height: 12),
-    _StatCard(
-      label: 'Inadimplentes',
-      value: data.totalInadimplentes.toString(),
-      color: data.totalInadimplentes > 0 ? EagleTokens.bad : EagleTokens.good,
-      icon: Icons.warning_amber_rounded,
-      fullWidth: true,
-    ),
-  ]);
-}
-
-class _StatCard extends StatelessWidget {
-  final String label, value;
-  final Color color;
-  final IconData icon;
-  final bool fullWidth;
-
-  const _StatCard({
-    required this.label, required this.value,
-    required this.color, required this.icon,
-    this.fullWidth = false,
-  });
-
-  @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        const SizedBox(width: 12),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute)),
-          const SizedBox(height: 2),
-          Text(value, style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold, color: color)),
-        ])),
-      ]),
-    ),
-  );
-}
-
-class _BarChart extends StatelessWidget {
-  final List<EvolucaoMensalItem> items;
-  const _BarChart({required this.items});
+  final bool isDark;
+  
+  const _HeroRing({required this.data, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) return const SizedBox.shrink();
-    final maxY = items.map((e) => e.recebido).reduce((a, b) => a > b ? a : b);
-    final chartMax = maxY <= 0 ? 100.0 : maxY * 1.2;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-        child: SizedBox(
-          height: 180,
-          child: BarChart(
-            BarChartData(
-              maxY: chartMax,
-              gridData: FlGridData(
-                drawVerticalLine: false,
-                horizontalInterval: chartMax / 4,
-                getDrawingHorizontalLine: (v) => FlLine(
-                  color: EagleTokens.inkMute.withValues(alpha: 0.2), strokeWidth: 1),
-              ),
-              borderData: FlBorderData(show: false),
-              titlesData: FlTitlesData(
-                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      final idx = value.toInt();
-                      if (idx < 0 || idx >= items.length) return const SizedBox.shrink();
-                      final mes = items[idx].mes; // "2026-04"
-                      final parts = mes.split('-');
-                      final label = parts.length >= 2 ? '${parts[1]}/${parts[0].substring(2)}' : mes;
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(label, style: const TextStyle(fontSize: 10, color: EagleTokens.inkMute)),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              barGroups: items.asMap().entries.map((e) => BarChartGroupData(
-                x: e.key,
-                barRods: [BarChartRodData(
-                  toY: e.value.recebido,
-                  color: colorScheme.primary,
-                  width: 20,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-                )],
-              )).toList(),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _VencimentoTile extends ConsumerStatefulWidget {
-  final VencimentoItem item;
-  const _VencimentoTile({required this.item});
-
-  @override
-  ConsumerState<_VencimentoTile> createState() => _VencimentoTileState();
-}
-
-class _VencimentoTileState extends ConsumerState<_VencimentoTile> {
-  bool _cobrindo = false;
-
-  Future<void> _cobrar() async {
-    setState(() => _cobrindo = true);
-    try {
-      final msg = await FinanceiroRepository(ref.read(apiClientProvider))
-          .cobrarViaChat(widget.item.mensalidadeId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
-      }
-    } finally {
-      if (mounted) setState(() => _cobrindo = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isAtrasado = widget.item.status == 'ATRASADO';
-    final color = isAtrasado ? EagleTokens.bad : EagleTokens.warn;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 6),
-      child: ListTile(
-        dense: true,
-        leading: Icon(isAtrasado ? Icons.warning : Icons.schedule, color: color, size: 20),
-        title: Text(widget.item.alunoNome),
-        subtitle: Text(widget.item.mesReferencia.substring(0, 7)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text('R\$ ${widget.item.valor.toStringAsFixed(2)}',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: color)),
-                Text(widget.item.status, style: TextStyle(fontSize: 10, color: color)),
-              ],
-            ),
-            const SizedBox(width: 12),
-            if (isAtrasado)
-              IconButton(
-                onPressed: _cobrindo ? null : _cobrar,
-                icon: _cobrindo
-                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.notifications_active, color: EagleTokens.brand, size: 20),
-                tooltip: 'Cobrar no chat',
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TopAlunoTile extends StatelessWidget {
-  final int rank;
-  final TopAlunoItem item;
-  const _TopAlunoTile({required this.rank, required this.item});
-
-  @override
-  Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.only(bottom: 6),
-    child: ListTile(
-      dense: true,
-      leading: CircleAvatar(
-        radius: 16,
-        backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
-        child: Text('$rank', style: TextStyle(
-          fontSize: 12, fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary)),
-      ),
-      title: Text(item.alunoNome),
-      trailing: Text('R\$ ${item.totalPago.toStringAsFixed(2)}',
-        style: const TextStyle(fontWeight: FontWeight.bold)),
-    ),
-  );
-}
-
-class _TransacaoTile extends StatelessWidget {
-  final Mensalidade item;
-  const _TransacaoTile({required this.item});
-
-  IconData _icon(String status) {
-    switch (status) {
-      case 'PAGO': return Icons.check_circle;
-      case 'ATRASADO': return Icons.cancel;
-      default: return Icons.schedule;
-    }
-  }
-
-  Color _color(String status) {
-    switch (status) {
-      case 'PAGO': return EagleTokens.good;
-      case 'ATRASADO': return EagleTokens.bad;
-      default: return EagleTokens.warn;
-    }
-  }
-
-  String _dateLabel(Mensalidade m) {
-    if (m.status == 'PAGO' && m.pagoEm != null && m.pagoEm!.isNotEmpty) {
-      try {
-        final dt = DateTime.parse(m.pagoEm!);
-        final d = dt.day.toString().padLeft(2, '0');
-        final mo = dt.month.toString().padLeft(2, '0');
-        return 'Pago em $d/$mo/${dt.year}';
-      } catch (_) {}
-    }
-    final parts = m.mesReferencia.split('-');
-    if (parts.length >= 2) return 'Ref. ${parts[1]}/${parts[0]}';
-    return m.mesReferencia;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final statusColor = _color(item.status);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: statusColor.withValues(alpha: 0.15), width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    
+    final perc = data.previsaoReceita > 0 ? (data.receitaMes / data.previsaoReceita) : 0.0;
+    
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(28),
+          border: isDark ? null : Border.all(color: line),
+        ),
         child: Row(
           children: [
-            Icon(_icon(item.status), color: statusColor, size: 24),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            // Ring
+            SizedBox(
+              width: 96, height: 96,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Text(
-                    item.alunoNome,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: ink,
+                  SizedBox(
+                    width: 96, height: 96,
+                    child: CircularProgressIndicator(
+                      value: 1.0,
+                      strokeWidth: 8,
+                      color: isDark ? Colors.white.withValues(alpha: 0.08) : EagleTokens.brandSoft,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _dateLabel(item),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                  SizedBox(
+                    width: 96, height: 96,
+                    child: CircularProgressIndicator(
+                      value: perc.clamp(0.0, 1.0),
+                      strokeWidth: 8,
+                      strokeCap: StrokeCap.round,
+                      color: isDark ? EagleTokens.brandAccent : EagleTokens.brand,
                     ),
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('RECEBIDO', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 1.0, color: ink)),
+                      Text('${(perc * 100).round()}%', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5, color: ink)),
+                    ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'R\$ ${item.valor.toStringAsFixed(2).replaceAll('.', ',')}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: ink,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    item.status,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: statusColor,
+            const SizedBox(width: 22),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('RECEBIDO NESTE MÊS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 0.8, color: mute)),
+                  const SizedBox(height: 3),
+                  Text('R\$ ${data.receitaMes.toStringAsFixed(2).replaceAll('.', ',')}', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: -0.5, color: ink, height: 1.1)),
+                  const SizedBox(height: 6),
+                  Text.rich(TextSpan(children: [
+                    TextSpan(text: 'Previsto ', style: TextStyle(fontSize: 12.5, color: mute)),
+                    TextSpan(text: 'R\$ ${data.previsaoReceita.toStringAsFixed(2).replaceAll('.', ',')}', style: TextStyle(fontSize: 12.5, color: ink, fontWeight: FontWeight.w600)),
+                  ])),
+                  const SizedBox(height: 10),
+                  if (data.totalInadimplentes > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0x1FFF8B8B) : EagleTokens.badSoft,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.warning_amber_rounded, size: 12, color: isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad),
+                          const SizedBox(width: 6),
+                          Text('${data.totalInadimplentes} inadimpl.', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _TriGrid extends StatelessWidget {
+  final FinanceiroDashboard data;
+  final bool isDark;
+  const _TriGrid({required this.data, required this.isDark});
+
+  String _formatK(double v) {
+    if (v >= 1000) return '${(v / 1000).toStringAsFixed(1)}k';
+    return v.toStringAsFixed(0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Pendente = Previsão - Recebido (approx)
+    final pendente = math.max(0.0, data.previsaoReceita - data.receitaMes);
+    
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 22),
+      child: Row(
+        children: [
+          Expanded(child: _MiniMetric(label: 'Pendente', value: 'R\$ ${_formatK(pendente)}', isDark: isDark)),
+          const SizedBox(width: 8),
+          Expanded(child: _MiniMetric(label: 'Ticket', value: 'R\$ ${data.ticketMedio.toStringAsFixed(0)}', isDark: isDark)),
+          const SizedBox(width: 8),
+          Expanded(child: _MiniMetric(label: 'Acumul.', value: 'R\$ ${_formatK(data.receitaAcumulada)}', isDark: isDark)),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniMetric extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool isDark;
+  const _MiniMetric({required this.label, required this.value, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: isDark ? null : Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.6, color: mute, textTransform: TextTransform.uppercase)),
+          const SizedBox(height: 4),
+          Text(value, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, letterSpacing: -0.5, color: ink)),
+        ],
+      ),
+    );
+  }
+}
+
+class _EvolucaoChart extends StatelessWidget {
+  final List<EvolucaoMensalItem> items;
+  final bool isDark;
+  const _EvolucaoChart({required this.items, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    
+    final maxV = items.map((e) => e.recebido).reduce(math.max);
+    final chartMax = maxV <= 0 ? 100.0 : maxV;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(22),
+          border: isDark ? null : Border.all(color: line),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text('Evolução · 6 meses', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2, color: ink)),
+                if (items.length > 1)
+                  Builder(builder: (_) {
+                    final prev = items[items.length - 2].recebido;
+                    final curr = items.last.recebido;
+                    if (prev > 0) {
+                      final diff = ((curr - prev) / prev * 100).round();
+                      final sign = diff > 0 ? '+' : '';
+                      return Text('$sign$diff% vs ${items[items.length - 2].mes.substring(5)}', style: TextStyle(fontSize: 11, color: mute));
+                    }
+                    return const SizedBox.shrink();
+                  }),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 130,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: items.asMap().entries.map((e) {
+                  final isLast = e.key == items.length - 1;
+                  final h = (e.value.recebido / chartMax).clamp(0.05, 1.0);
+                  
+                  final mes = e.value.mes;
+                  final label = mes.length >= 7 ? mes.substring(5) : mes; // get just month number or string
+                  
+                  return Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text('${(e.value.recebido / 1000).toStringAsFixed(1)}k', style: TextStyle(fontSize: 9.5, color: isLast ? ink : mute, fontWeight: isLast ? FontWeight.w600 : FontWeight.w400)),
+                        const SizedBox(height: 6),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: FractionallySizedBox(
+                              heightFactor: h,
+                              widthFactor: 0.7,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6), bottom: Radius.circular(2)),
+                                  gradient: isLast
+                                      ? LinearGradient(
+                                          begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                                          colors: isDark ? [EagleTokens.brandAccent, EagleTokens.brand] : [EagleTokens.brand, EagleTokens.brandDeep],
+                                        )
+                                      : null,
+                                  color: !isLast ? (isDark ? Colors.white.withValues(alpha: 0.08) : EagleTokens.brandSoft) : null,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(label, style: TextStyle(fontSize: 10, color: isLast ? ink : mute, fontWeight: isLast ? FontWeight.w600 : FontWeight.w500, letterSpacing: 0.4)),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VencimentoRow extends StatelessWidget {
+  final VencimentoItem item;
+  final bool isDark;
+  const _VencimentoRow({required this.item, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    
+    final isAtrasado = item.status == 'ATRASADO';
+    final color = isAtrasado ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad) : (isDark ? const Color(0xFFE2B46F) : EagleTokens.warn);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: isDark ? null : Border.all(color: line),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38, height: 38,
+            decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
+            alignment: Alignment.center,
+            child: Text(item.alunoNome.isNotEmpty ? item.alunoNome[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item.alunoNome, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: ink)),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Container(width: 5, height: 5, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                    const SizedBox(width: 5),
+                    Text(isAtrasado ? 'Atrasado' : 'Vencendo', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: color)),
+                    Text(' · ${item.mesReferencia.substring(0, 7)}', style: TextStyle(fontSize: 11.5, color: mute)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text('R\$ ${item.valor.toStringAsFixed(0)}', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: ink, letterSpacing: -0.2)),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.1) : EagleTokens.brandSoft,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text('Cobrar', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.brandAccent : EagleTokens.brand)),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

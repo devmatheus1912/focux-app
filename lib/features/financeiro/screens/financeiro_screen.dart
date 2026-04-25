@@ -39,6 +39,8 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
@@ -46,35 +48,56 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // V3 Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 16, 20, 10),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      } else {
-                        GoRouter.of(context).go('/dashboard/personal');
-                      }
-                    },
-                  ),
-                  const SizedBox(width: 4),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        'VISÃO GERAL',
-                        style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Financeiro',
-                        style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                      if (context.canPop()) ...[
+                        InkWell(
+                          onTap: () => context.pop(),
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 12, bottom: 4),
+                            child: Icon(Icons.arrow_back_ios_new, size: 20, color: ink),
+                          ),
+                        ),
+                      ],
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'ESTE MÊS',
+                            style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Financeiro',
+                            style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                          ),
+                        ],
                       ),
                     ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                      borderRadius: BorderRadius.circular(999),
+                      border: isDark ? null : Border.all(color: line),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('agora', style: TextStyle(fontSize: 12, color: ink, fontWeight: FontWeight.w600)),
+                        const SizedBox(width: 6),
+                        Icon(Icons.keyboard_arrow_down, size: 16, color: mute),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -89,7 +112,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
               tabs: const [
                 Tab(icon: Icon(Icons.dashboard_outlined), text: 'Resumo'),
                 Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Mensalidades'),
-                Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Evolução'),
+                Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Métricas'),
               ],
             ),
             Expanded(

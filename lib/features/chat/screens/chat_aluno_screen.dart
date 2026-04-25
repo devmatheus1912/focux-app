@@ -312,55 +312,72 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
                     ),
         ),
         const Divider(height: 1),
-        Padding(
-          padding: EdgeInsets.only(
-            left: 12, right: 8, top: 8,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+        // Input
+        Container(
+          padding: EdgeInsets.fromLTRB(16, 10, 16, 10 + MediaQuery.of(context).viewInsets.bottom),
+          decoration: BoxDecoration(
+            color: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+            border: Border(top: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft)),
           ),
-          child: Row(children: [
-            // Attachment button
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              color: EagleTokens.brand,
-              tooltip: 'Anexar mídia',
-              onPressed: (_uploading || _sending) ? null : _showAttachmentSheet,
-            ),
-            const SizedBox(width: 4),
-            Expanded(child: TextField(
-              controller: _ctrl,
-              decoration: InputDecoration(
-                hintText: 'Mensagem...',
-                filled: true,
-                fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.paper,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.add_circle),
+                color: EagleTokens.inkMute,
+                iconSize: 26,
+                padding: const EdgeInsets.only(bottom: 6),
+                tooltip: 'Anexar mídia',
+                onPressed: (_uploading || _sending) ? null : _showAttachmentSheet,
+              ),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                    borderRadius: BorderRadius.circular(20),
+                    border: isDark ? Border.all(color: EagleTokens.darkLine) : Border.all(color: EagleTokens.line),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _ctrl,
+                          style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 15),
+                          cursorColor: EagleTokens.brand,
+                          decoration: InputDecoration(
+                            hintText: 'iMessage',
+                            hintStyle: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            border: InputBorder.none,
+                          ),
+                          maxLines: 5,
+                          minLines: 1,
+                          textInputAction: TextInputAction.send,
+                          onSubmitted: (_) => _send(),
+                        ),
+                      ),
+                      if (_ctrl.text.isNotEmpty || _sending)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6, bottom: 6),
+                          child: Container(
+                            width: 30, height: 30,
+                            decoration: const BoxDecoration(color: EagleTokens.brand, shape: BoxShape.circle),
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              icon: _sending || _uploading
+                                  ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                  : const Icon(Icons.arrow_upward, color: Colors.white, size: 18),
+                              onPressed: (_sending || _uploading) ? null : _send,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-              maxLines: null,
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => _send(),
-            )),
-            const SizedBox(width: 8),
-            Container(
-              width: 44, height: 44,
-              decoration: BoxDecoration(
-                color: EagleTokens.brand,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(
-                  color: EagleTokens.brand.withValues(alpha: 0.3),
-                  blurRadius: 8, offset: const Offset(0, 3),
-                )],
-              ),
-              child: IconButton(
-                icon: _sending
-                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Icon(Icons.send, color: Colors.white, size: 20),
-                onPressed: (_sending || _uploading) ? null : _send,
-              ),
-            ),
-          ]),
+            ],
+          ),
         ),
       ]),
     );
@@ -434,18 +451,18 @@ class _BubbleAluno extends StatelessWidget {
     return Align(
       alignment: isAluno ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        margin: const EdgeInsets.symmetric(vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
           color: isAluno
               ? EagleTokens.brand
               : (isDark ? EagleTokens.darkCardHi : EagleTokens.card),
           borderRadius: BorderRadius.only(
-            topLeft:     const Radius.circular(16),
-            topRight:    const Radius.circular(16),
-            bottomLeft:  Radius.circular(isAluno ? 16 : 4),
-            bottomRight: Radius.circular(isAluno ? 4 : 16),
+            topLeft:     const Radius.circular(20),
+            topRight:    const Radius.circular(20),
+            bottomLeft:  Radius.circular(isAluno ? 20 : 6),
+            bottomRight: Radius.circular(isAluno ? 6 : 20),
           ),
           border: isAluno
               ? null
