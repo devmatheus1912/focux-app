@@ -92,6 +92,16 @@ class _SparklinePainter extends CustomPainter {
 
     canvas.drawPath(path, paint);
 
+    // End dot — matches design (r=2.5 circle at last data point)
+    final lastNorm = (data.last - minVal) / (maxVal - minVal);
+    final lastX = padding + w;
+    final lastY = padding + (h - (lastNorm * h));
+    canvas.drawCircle(
+      Offset(lastX, lastY),
+      2.5,
+      Paint()..color = color..style = PaintingStyle.fill,
+    );
+
     if (!fill) return;
 
     // Optional: add a subtle gradient fill under the line
