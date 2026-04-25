@@ -22,13 +22,7 @@ class IaCopilotoScreen extends ConsumerStatefulWidget {
   ConsumerState<IaCopilotoScreen> createState() => _IaCopilotoScreenState();
 }
 
-class _IaCopilotoScreenState extends ConsumerStatefulWidget {
-  @override
-  ConsumerState<IaCopilotoScreen> createState() => _IaCopilotoScreenState();
-}
-
-// ignore dup — real state:
-class _State extends ConsumerState<IaCopilotoScreen> with SingleTickerProviderStateMixin {
+class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with SingleTickerProviderStateMixin {
   int _modeIdx = 0; // 0=Treino 1=Dieta 2=Progressão
   bool _gerando = false;
   bool _gerado = false;
@@ -124,7 +118,7 @@ class _State extends ConsumerState<IaCopilotoScreen> with SingleTickerProviderSt
                     child: Center(child: Text(e.value, style: TextStyle(color: sel ? Colors.white : mute, fontSize: 13, fontWeight: FontWeight.w600))),
                   ),
                 ));
-              }).toList(),
+              }).toList()),
             ),
           ),
 
@@ -149,7 +143,7 @@ class _State extends ConsumerState<IaCopilotoScreen> with SingleTickerProviderSt
                 const SizedBox(width: 5),
                 Text(c['label']!, style: TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.w500)),
               ]),
-            )).toList(),
+            )).toList()),
           ),
 
           // Generate button / progress

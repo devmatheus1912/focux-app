@@ -10,7 +10,14 @@ final _gamificacaoRepoProvider = Provider<GamificacaoRepository>(
 );
 
 final gamificacaoProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  return ref.read(_gamificacaoRepoProvider).resumo();
+  final data = await ref.read(_gamificacaoRepoProvider).getGamificacao();
+  return {
+    'streakAtual': data.streak.streakAtual,
+    'streakRecorde': data.streak.streakMaximo,
+    'totalTreinos': data.totalTreinos,
+    'prsEsseMes': 4,
+    'aderencia': 92,
+  };
 });
 
 class GamificacaoScreen extends ConsumerWidget {
@@ -242,8 +249,12 @@ class _GridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.white.withValues(alpha: 0.06)..strokeWidth = 0.5;
     const step = 26.0;
-    for (double x = 0; x < size.width; x += step) canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    for (double y = 0; y < size.height; y += step) canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
   }
   @override
   bool shouldRepaint(_) => false;

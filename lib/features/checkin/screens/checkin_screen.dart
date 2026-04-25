@@ -76,7 +76,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     setState(() { _showRestTimer = true; _restSeconds = 60; });
     _restTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (_restSeconds <= 0) { _restTimer?.cancel(); setState(() { _showRestTimer = false; }); }
-      else setState(() { _restSeconds--; });
+      else { setState(() { _restSeconds--; }); }
     });
   }
 
@@ -274,7 +274,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  Text('${e.value.toStringAsFixed(0)}', style: const TextStyle(color: Color(0xB3FFFFFF), fontSize: 9, fontWeight: FontWeight.w600)),
+                                  Text(e.value.toStringAsFixed(0), style: const TextStyle(color: Color(0xB3FFFFFF), fontSize: 9, fontWeight: FontWeight.w600)),
                                 ]),
                               ));
                             }).toList(),
