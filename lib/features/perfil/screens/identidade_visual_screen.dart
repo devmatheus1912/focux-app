@@ -271,10 +271,9 @@ class _IdentidadeVisualScreenState
                 ),
               ),
               const SizedBox(height: 8),
-              if (slug != null && isPremiumOrAbove)
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
                     icon: const Icon(Icons.open_in_new, size: 16),
                     label: const Text('Ver minha landing page'),
                     onPressed: () => context.go('/p/$slug'),
