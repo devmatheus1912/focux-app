@@ -53,6 +53,14 @@ abstract class EagleTokens {
   static const Color outlineLight = line;
   static const Color outlineDark  = darkLine;
 
+  // ── Radius ────────────────────────────────────────────────────────────
+  static const double radiusXs  = 8;
+  static const double radiusSm  = 12;
+  static const double radiusMd  = 16;
+  static const double radiusLg  = 20;
+  static const double radiusXl  = 24;
+  static const double radius2xl = 28;
+
   // ── Hero Gradients ────────────────────────────────────────────────────
   static const List<Color> heroGradientLight = [
     Color(0xFF3B5FE2), // brand
