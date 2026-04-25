@@ -11,6 +11,7 @@ import '../../chat/screens/chat_screen.dart';
 import '../../evolucao/screens/evolucao_screen.dart';
 import '../../feedback/screens/feedback_video_screen.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_sparkline.dart';
 
 class AlunoDetailScreen extends ConsumerWidget {
   final int alunoId;
@@ -181,29 +182,82 @@ class AlunoDetailScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
 
-                      // Biometrics Row
-                      Row(
+                      // Weight evolution card
+                      Container(
+                        decoration: BoxDecoration(
+                          color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                          borderRadius: BorderRadius.circular(22),
+                          border: isDark ? null : Border.all(color: EagleTokens.line),
+                        ),
+                        padding: const EdgeInsets.all(18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('PESO · ÚLTIMAS 7 SEMANAS', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 11.5, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                                      textBaseline: TextBaseline.alphabetic,
+                                      children: [
+                                        Text('${aluno.peso?.toStringAsFixed(1) ?? '0.0'}', style: TextStyle(color: ink, fontSize: 32, fontWeight: FontWeight.w600, letterSpacing: -0.5)),
+                                        const SizedBox(width: 3),
+                                        Text('kg', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 14, fontWeight: FontWeight.w400)),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? const Color(0x1F6FE296) : EagleTokens.goodSoft,
+                                            borderRadius: BorderRadius.circular(999),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.arrow_downward, size: 10, color: isDark ? const Color(0xFF6FE296) : EagleTokens.good),
+                                              const SizedBox(width: 3),
+                                              Text('3.9 kg', style: TextStyle(color: isDark ? const Color(0xFF6FE296) : EagleTokens.good, fontSize: 12, fontWeight: FontWeight.w600)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Text('Meta · 62 kg', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 11.5, fontWeight: FontWeight.w500)),
+                              ],
+                            ),
+                            const SizedBox(height: 14),
+                            SizedBox(
+                              height: 72,
+                              child: FxSparkline(
+                                data: const [68, 67.5, 66.8, 66.0, 65.2, 64.8, 64.1],
+                                color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+                                fill: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Measurements Grid
+                      GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 4,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        childAspectRatio: 1.1,
                         children: [
-                          _StatCard(
-                            label: 'Idade',
-                            value: '${aluno.idade ?? '--'}',
-                            unit: 'anos',
-                            isDark: isDark,
-                          ),
-                          const SizedBox(width: 10),
-                          _StatCard(
-                            label: 'Peso',
-                            value: aluno.peso?.toStringAsFixed(1) ?? '--',
-                            unit: 'kg',
-                            isDark: isDark,
-                          ),
-                          const SizedBox(width: 10),
-                          _StatCard(
-                            label: 'Altura',
-                            value: aluno.altura?.toStringAsFixed(2) ?? '--',
-                            unit: 'm',
-                            isDark: isDark,
-                          ),
+                          _MeasurementCard(label: 'Idade', value: '${aluno.idade ?? '--'}', unit: 'anos', isDark: isDark),
+                          _MeasurementCard(label: 'Altura', value: '${aluno.altura?.toStringAsFixed(2) ?? '--'}', unit: 'm', isDark: isDark),
+                          _MeasurementCard(label: 'BF', value: '14', unit: '%', isDark: isDark),
+                          _MeasurementCard(label: 'M. Magra', value: '45', unit: 'kg', isDark: isDark),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -271,13 +325,13 @@ class _HeroStat extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
+class _MeasurementCard extends StatelessWidget {
   final String label;
   final String value;
   final String unit;
   final bool isDark;
 
-  const _StatCard({
+  const _MeasurementCard({
     required this.label,
     required this.value,
     required this.unit,
@@ -291,38 +345,36 @@ class _StatCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: line),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label.toUpperCase(),
-              style: TextStyle(color: mute, fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 1.0),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(color: ink, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: -0.5),
-                ),
-                const SizedBox(width: 3),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 2),
-                  child: Text(unit, style: TextStyle(color: mute, fontSize: 11, fontWeight: FontWeight.w500)),
-                ),
-              ],
-            ),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: isDark ? null : Border.all(color: line),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(color: mute, fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 1.0),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                value,
+                style: TextStyle(color: ink, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5),
+              ),
+              const SizedBox(width: 2),
+              Text(unit, style: TextStyle(color: mute, fontSize: 10, fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ],
       ),
     );
   }

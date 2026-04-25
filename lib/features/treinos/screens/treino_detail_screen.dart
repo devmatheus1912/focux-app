@@ -48,135 +48,251 @@ class _TreinoDetailBody extends StatelessWidget {
       slivers: [
         // Hero AppBar
         SliverAppBar(
-          expandedHeight: 200,
+          expandedHeight: 320,
           pinned: true,
-          backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.brand,
+          backgroundColor: isDark ? const Color(0xFF0A0F1E) : EagleTokens.brandDeep,
           iconTheme: const IconThemeData(color: Colors.white),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              tooltip: 'Adicionar exercício',
-              onPressed: () async {
-                final adicionado = await context.push<bool>('/treinos/$treinoId/exercicios/add');
-                if (adicionado == true) ref.invalidate(treinoProvider(treinoId));
-              },
-            ),
-            PopupMenuButton<String>(
-              iconColor: Colors.white,
-              onSelected: (value) => _handleMenu(context, ref, value, treino),
-              itemBuilder: (_) => const [
-                PopupMenuItem(value: 'template', child: ListTile(leading: Icon(Icons.bookmark_add_outlined), title: Text('Salvar como template'), contentPadding: EdgeInsets.zero)),
-                PopupMenuItem(value: 'duplicar', child: ListTile(leading: Icon(Icons.copy_outlined), title: Text('Duplicar treino'), contentPadding: EdgeInsets.zero)),
-                PopupMenuItem(value: 'clonar', child: ListTile(leading: Icon(Icons.person_add_outlined), title: Text('Clonar para aluno'), contentPadding: EdgeInsets.zero)),
-                PopupMenuItem(value: 'excluir', child: ListTile(leading: Icon(Icons.delete_outline, color: EagleTokens.bad), title: Text('Excluir treino', style: TextStyle(color: EagleTokens.bad)), contentPadding: EdgeInsets.zero)),
-              ],
+            Container(
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.auto_awesome, size: 12, color: Colors.white),
+                  SizedBox(width: 4),
+                  Text('Sugestão IA', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                ],
+              ),
             ),
           ],
           flexibleSpace: FlexibleSpaceBar(
             background: Container(
-              decoration: BoxDecoration(gradient: EagleTokens.heroGradient(dark: isDark)),
-              padding: const EdgeInsets.fromLTRB(24, 80, 24, 24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isDark 
+                      ? [const Color(0xFF1C3273), const Color(0xFF0A0F1E)]
+                      : [EagleTokens.brand, EagleTokens.brandDeep],
+                  stops: const [0.0, 0.85],
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(22, 100, 22, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Row(children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
-                      child: const Icon(Icons.fitness_center, color: Colors.white, size: 28),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(treino.nome, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
-                        if (treino.objetivo?.isNotEmpty == true)
-                          Text(treino.objetivo!, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13)),
-                      ],
-                    )),
-                  ]),
-                  const SizedBox(height: 16),
-                  // Stats strip
-                  Row(children: [
-                    _StatChip(icon: Icons.list_alt, label: '${treino.exercicios.length}', sublabel: 'exercícios'),
-                    const SizedBox(width: 8),
-                    if (treino.nivel != null) _StatChip(icon: Icons.speed, label: treino.nivel!, sublabel: 'nível'),
-                    if (treino.isTemplate) ...[const SizedBox(width: 8), const _StatChip(icon: Icons.bookmark, label: '✓', sublabel: 'template')],
-                  ]),
+                  // Cover tile & Info
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        width: 108, height: 108,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 30, offset: Offset(0, 12))],
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Icon(Icons.fitness_center, size: 56, color: Colors.white.withValues(alpha: 0.9)),
+                            Positioned(
+                              bottom: 8, left: 10,
+                              child: Text('TREINO', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.0)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('ALUNO FOCO', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
+                              const SizedBox(height: 2),
+                              Text(treino.nome, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: -0.5, height: 1.1)),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.timer_outlined, size: 13, color: Colors.white70),
+                                  const SizedBox(width: 4),
+                                  Text('45min', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
+                                  const SizedBox(width: 8),
+                                  Text('·', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
+                                  const SizedBox(width: 8),
+                                  Text('${treino.exercicios.length} ex.', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  
+                  // Action row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => HapticFeedback.mediumImpact(),
+                          borderRadius: BorderRadius.circular(14),
+                          child: Container(
+                            height: 48,
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.play_arrow_rounded, color: EagleTokens.brand, size: 20),
+                                const SizedBox(width: 6),
+                                Text('Iniciar treino', style: TextStyle(color: EagleTokens.brand, fontSize: 14, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        width: 48, height: 48,
+                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
+                        child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                      ),
+                      const SizedBox(width: 10),
+                      InkWell(
+                        onTap: () {
+                          // TODO: Show bottom sheet for menu options
+                        },
+                        borderRadius: BorderRadius.circular(14),
+                        child: Container(
+                          width: 48, height: 48,
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
+                          child: const Icon(Icons.more_horiz, color: Colors.white, size: 20),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 26),
                 ],
               ),
             ),
           ),
         ),
 
-        // Start workout button
+        // Stats Ribbon
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: SizedBox(
-              height: 52,
-              child: ElevatedButton.icon(
-                onPressed: () => HapticFeedback.mediumImpact(),
-                icon: const Icon(Icons.play_arrow_rounded, size: 24),
-                label: const Text('Iniciar Treino', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: EagleTokens.brand,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-              ),
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+            child: Row(
+              children: [
+                _MiniMetric(label: 'Nível', value: treino.nivel ?? 'Interm.', isDark: isDark),
+                const SizedBox(width: 8),
+                _MiniMetric(label: 'Grupos', value: '${grouped.keys.length}', isDark: isDark),
+                const SizedBox(width: 8),
+                _MiniMetric(label: 'Última', value: 'Qua 15/4', isDark: isDark),
+              ],
             ),
           ),
         ),
 
         // Exercise list grouped
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Exercícios', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.darkInk : EagleTokens.ink, letterSpacing: -0.5)),
+                InkWell(
+                  onTap: () async {
+                    final adicionado = await context.push<bool>('/treinos/$treinoId/exercicios/add');
+                    if (adicionado == true) ref.invalidate(treinoProvider(treinoId));
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.add, size: 14, color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand),
+                      const SizedBox(width: 4),
+                      Text('Adicionar', style: TextStyle(color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
         if (treino.exercicios.isEmpty)
           const SliverFillRemaining(child: Center(child: Text('Nenhum exercício no treino.')))
         else
-          ...grouped.entries.map((entry) => SliverMainAxisGroup(slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-                child: Row(children: [
-                  Container(width: 4, height: 16, decoration: BoxDecoration(color: EagleTokens.brand, borderRadius: BorderRadius.circular(2))),
-                  const SizedBox(width: 8),
-                  Text(entry.key.toUpperCase(), style: TextStyle(color: EagleTokens.brand, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1)),
-                ]),
-              ),
-            ),
-            SliverList(delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final te = entry.value[index];
-                return _ExercicioCard(
-                  te: te, isDark: isDark,
-                  onRemove: () async {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text('Remover exercício'),
-                        content: Text('Remover "${te.exercicio.nome}" do treino?'),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-                          FilledButton(style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad), onPressed: () => Navigator.pop(ctx, true), child: const Text('Remover')),
-                        ],
+          ...grouped.entries.map((entry) => SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 4, 4, 10),
+                        child: Row(
+                          children: [
+                            Text(entry.key.toUpperCase(), style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                            const SizedBox(width: 8),
+                            Expanded(child: Container(height: 0.5, color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                            const SizedBox(width: 8),
+                            Text('${entry.value.length} ex.', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 11, fontWeight: FontWeight.w500)),
+                          ],
+                        ),
                       ),
-                    );
-                    if (confirm == true && context.mounted) {
-                      try {
-                        await repo.removerExercicio(treinoId, te.id);
-                        ref.invalidate(treinoProvider(treinoId));
-                      } catch (e) {
-                        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
-                      }
-                    }
-                  },
-                );
-              },
-              childCount: entry.value.length,
-            )),
-          ])),
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 14),
+                        decoration: BoxDecoration(
+                          color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                          borderRadius: BorderRadius.circular(20),
+                          border: isDark ? null : Border.all(color: EagleTokens.line),
+                        ),
+                        child: Column(
+                          children: entry.value.asMap().entries.map((e) {
+                            final i = e.key;
+                            final te = e.value;
+                            return _ExercicioRow(
+                              te: te,
+                              index: i + 1,
+                              isDark: isDark,
+                              isLast: i == entry.value.length - 1,
+                              onRemove: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Remover exercício'),
+                                    content: Text('Remover "${te.exercicio.nome}" do treino?'),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+                                      FilledButton(style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad), onPressed: () => Navigator.pop(ctx, true), child: const Text('Remover')),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true && context.mounted) {
+                                  try {
+                                    await repo.removerExercicio(treinoId, te.id);
+                                    ref.invalidate(treinoProvider(treinoId));
+                                  } catch (e) {
+                                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+                                  }
+                                }
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
         const SliverToBoxAdapter(child: SizedBox(height: 80)),
       ],
     );
@@ -252,78 +368,105 @@ class _TreinoDetailBody extends StatelessWidget {
   }
 }
 
-class _StatChip extends StatelessWidget {
-  final IconData icon;
+class _MiniMetric extends StatelessWidget {
   final String label;
-  final String sublabel;
-  const _StatChip({required this.icon, required this.label, required this.sublabel});
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
-    child: Row(mainAxisSize: MainAxisSize.min, children: [
-      Icon(icon, color: Colors.white, size: 14),
-      const SizedBox(width: 5),
-      Text('$label ', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
-      Text(sublabel, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11)),
-    ]),
-  );
-}
-
-class _ExercicioCard extends StatelessWidget {
-  final TreinoExercicioItem te;
+  final String value;
   final bool isDark;
-  final VoidCallback onRemove;
-  const _ExercicioCard({required this.te, required this.isDark, required this.onRemove});
+
+  const _MiniMetric({required this.label, required this.value, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft),
-      ),
-      child: Row(children: [
-        Container(
-          width: 44, height: 44,
-          decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-          child: const Icon(Icons.fitness_center, color: EagleTokens.brand, size: 20),
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+          borderRadius: BorderRadius.circular(14),
+          border: isDark ? null : Border.all(color: EagleTokens.line),
         ),
-        const SizedBox(width: 12),
-        Expanded(child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
           children: [
-            Text(te.exercicio.nome, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: isDark ? EagleTokens.darkInk : EagleTokens.ink)),
-            const SizedBox(height: 4),
-            Wrap(spacing: 8, children: [
-              _MiniTag(label: '${te.series}x${te.repeticoes}', color: EagleTokens.brand),
-              if (te.cargaKg != null) _MiniTag(label: '${te.cargaKg}kg', color: EagleTokens.warn),
-              if (te.descansoSegundos != null) _MiniTag(label: '${te.descansoSegundos}s', color: EagleTokens.good),
-            ]),
+            Text(label, style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 11, fontWeight: FontWeight.w500)),
+            const SizedBox(height: 2),
+            Text(value, style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: -0.2)),
           ],
-        )),
-        PopupMenuButton<String>(
-          iconColor: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-          iconSize: 20,
-          onSelected: (val) { if (val == 'remove') onRemove(); },
-          itemBuilder: (_) => [const PopupMenuItem(value: 'remove', child: Text('Remover', style: TextStyle(color: EagleTokens.bad)))],
         ),
-      ]),
+      ),
     );
   }
 }
 
-class _MiniTag extends StatelessWidget {
-  final String label;
-  final Color color;
-  const _MiniTag({required this.label, required this.color});
+class _ExercicioRow extends StatelessWidget {
+  final TreinoExercicioItem te;
+  final int index;
+  final bool isDark;
+  final bool isLast;
+  final VoidCallback onRemove;
+
+  const _ExercicioRow({
+    required this.te,
+    required this.index,
+    required this.isDark,
+    required this.isLast,
+    required this.onRemove,
+  });
+
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-    decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-    child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
-  );
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+      decoration: BoxDecoration(
+        border: isLast ? null : Border(bottom: BorderSide(color: line, width: 0.5)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36, height: 36,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0x1F8DA4E2) : EagleTokens.brandSoft,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Text('$index', style: TextStyle(color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand, fontSize: 14, fontWeight: FontWeight.w600)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(te.exercicio.nome, style: TextStyle(color: ink, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: -0.2)),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text('${te.series}×${te.repeticoes}', style: TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 8),
+                    Container(width: 3, height: 3, decoration: BoxDecoration(color: mute, shape: BoxShape.circle)),
+                    const SizedBox(width: 8),
+                    Text('${te.cargaKg ?? 0}kg', style: TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 8),
+                    Container(width: 3, height: 3, decoration: BoxDecoration(color: mute, shape: BoxShape.circle)),
+                    const SizedBox(width: 8),
+                    Icon(Icons.timer_outlined, size: 11, color: mute),
+                    const SizedBox(width: 3),
+                    Text('${te.descansoSegundos ?? 60}s', style: TextStyle(color: mute, fontSize: 11.5)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          PopupMenuButton<String>(
+            iconColor: mute,
+            iconSize: 20,
+            onSelected: (val) { if (val == 'remove') onRemove(); },
+            itemBuilder: (_) => [const PopupMenuItem(value: 'remove', child: Text('Remover', style: TextStyle(color: EagleTokens.bad)))],
+          ),
+        ],
+      ),
+    );
+  }
 }

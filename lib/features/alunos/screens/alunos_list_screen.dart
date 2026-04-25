@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fl_chart/fl_chart.dart';
+import '../../../core/widgets/fx_sparkline.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -546,23 +546,9 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                 if (_dados != null && _dados!.isNotEmpty)
                   SizedBox(
                     width: 60, height: 24,
-                    child: LineChart(
-                      LineChartData(
-                        gridData: const FlGridData(show: false),
-                        titlesData: const FlTitlesData(show: false),
-                        borderData: FlBorderData(show: false),
-                        lineBarsData: [
-                          LineChartBarData(
-                            spots: _dados!.asMap().entries.map((e) => FlSpot(e.key.toDouble(), (e.value['checkins'] as num).toDouble())).toList(),
-                            isCurved: true,
-                            color: aderColor,
-                            barWidth: 1.75,
-                            isStrokeCapRound: true,
-                            dotData: FlDotData(show: true, getDotPainter: (spot, percent, barData, index) => index == barData.spots.length - 1 ? FlDotCirclePainter(radius: 2.5, color: aderColor, strokeWidth: 0) : FlDotCirclePainter(radius: 0)),
-                            belowBarData: BarAreaData(show: false),
-                          ),
-                        ],
-                      ),
+                    child: FxSparkline(
+                      data: _dados!.map((e) => (e['checkins'] as num).toDouble()).toList(),
+                      color: aderColor,
                     ),
                   )
                 else
