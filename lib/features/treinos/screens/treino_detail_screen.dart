@@ -33,6 +33,115 @@ class _TreinoDetailBody extends StatelessWidget {
   final WidgetRef ref;
   const _TreinoDetailBody({required this.treino, required this.treinoId, required this.isDark, required this.ref});
 
+  Future<void> _openMenu(BuildContext context) async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+        final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: mute.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Opcoes do treino',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _MenuActionTile(
+                  icon: Icons.add_circle_outline,
+                  label: 'Adicionar exercicio',
+                  onTap: () => Navigator.pop(sheetContext, 'add'),
+                ),
+                _MenuActionTile(
+                  icon: Icons.copy_outlined,
+                  label: 'Duplicar treino',
+                  onTap: () => Navigator.pop(sheetContext, 'duplicate'),
+                ),
+                _MenuActionTile(
+                  icon: Icons.bookmark_border,
+                  label: 'Salvar como template',
+                  onTap: () => Navigator.pop(sheetContext, 'template'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!context.mounted || action == null) {
+      return;
+    }
+
+    final repo = ref.read(treinoRepositoryProvider);
+
+    switch (action) {
+      case 'add':
+        final added = await context.push<bool>('/treinos/$treinoId/exercicios/add');
+        if (added == true) {
+          ref.invalidate(treinoProvider(treinoId));
+        }
+        break;
+      case 'duplicate':
+        try {
+          await repo.duplicar(treinoId);
+          ref.invalidate(treinosProvider);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Treino duplicado com sucesso.')),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Erro ao duplicar treino: $e')),
+            );
+          }
+        }
+        break;
+      case 'template':
+        try {
+          await repo.salvarComoTemplate(treinoId);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Treino salvo como template.'),
+              ),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Erro ao salvar template: $e')),
+            );
+          }
+        }
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final repo = ref.read(treinoRepositoryProvider);
@@ -167,9 +276,7 @@ class _TreinoDetailBody extends StatelessWidget {
                       ),
                       const SizedBox(width: 10),
                       InkWell(
-                        onTap: () {
-                          // TODO: Show bottom sheet for menu options
-                        },
+                        onTap: () => _openMenu(context),
                         borderRadius: BorderRadius.circular(14),
                         child: Container(
                           width: 48, height: 48,
@@ -298,6 +405,46 @@ class _TreinoDetailBody extends StatelessWidget {
     );
   }
 
+}
+
+class _MenuActionTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _MenuActionTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      leading: Icon(icon, color: ink),
+      title: Text(
+        label,
+        style: TextStyle(
+          color: ink,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      trailing: Icon(Icons.chevron_right, color: ink),
+      tileColor: Colors.transparent,
+      onTap: onTap,
+      horizontalTitleGap: 10,
+      minLeadingWidth: 24,
+      dense: false,
+      visualDensity: VisualDensity.compact,
+    );
+  }
 }
 
 class _MiniMetric extends StatelessWidget {
