@@ -10,8 +10,8 @@ import '../../features/alunos/screens/aluno_detail_screen.dart';
 import '../../features/perfil/data/perfil_repository.dart';
 import '../../features/perfil/screens/perfil_screen.dart';
 import '../../features/perfil/screens/editar_perfil_screen.dart';
-import '../../features/convites/screens/convites_screen.dart';
 import '../../features/assinatura/screens/assinatura_screen.dart';
+import '../../features/convites/screens/convites_screen.dart';
 import '../../features/checkin/screens/meus_treinos_screen.dart';
 import '../../features/checkin/screens/checkin_screen.dart';
 import '../../features/checkin/screens/historico_screen.dart';
@@ -59,6 +59,11 @@ import '../../features/trilhas/screens/trilhas_screen.dart';
 import '../../features/dashboard/screens/qualidade_operacional_screen.dart';
 import '../../features/admin/screens/rbac_screen.dart';
 import '../../features/landing/screens/personal_public_landing_screen.dart';
+import '../../features/depoimentos/screens/depoimento_aluno_screen.dart';
+import '../../features/depoimentos/screens/depoimentos_personal_screen.dart';
+import '../../features/galeria/screens/galeria_screen.dart';
+import '../../features/planos/screens/planos_screen.dart';
+import '../../features/planos/screens/enterprise_promo_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -132,6 +137,26 @@ class AppRouter {
       ),
       GoRoute(
         path: '/planos',
+        builder: (context, state) => const PlanosScreen(),
+      ),
+      GoRoute(
+        path: '/promo-enterprise',
+        builder: (context, state) => const EnterprisePromoScreen(),
+      ),
+      GoRoute(
+        path: '/depoimentos-aluno',
+        builder: (context, state) => const DepoimentoAlunoScreen(),
+      ),
+      GoRoute(
+        path: '/depoimentos',
+        builder: (context, state) => const DepoimentosPersonalScreen(),
+      ),
+      GoRoute(
+        path: '/galeria',
+        builder: (context, state) => const GaleriaScreen(),
+      ),
+      GoRoute(
+        path: '/assinatura',
         builder: (context, state) => const AssinaturaScreen(),
       ),
       GoRoute(

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_logo.dart';
+import '../../perfil/providers/perfil_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -59,6 +60,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.dispose();
   }
 
+  Future<void> _handlePersonalLogin(BuildContext context) async {
+    try {
+      final perfil = await ref.read(perfilProvider.future);
+      final prefs = await SharedPreferences.getInstance();
+      final promoShown = prefs.getBool('promo_shown_${perfil.id}') ?? false;
+      final trialUsed = perfil.trialUsed ?? false;
+      final plano = perfil.plano.toUpperCase();
+      if (!promoShown && !trialUsed && plano == 'FREE') {
+        if (context.mounted) context.go('/promo-enterprise');
+      } else {
+        if (context.mounted) context.go('/dashboard/personal');
+      }
+    } catch (_) {
+      if (context.mounted) context.go('/dashboard/personal');
+    }
+  }
+
   Future<void> _handleUnauthenticated(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     final vistoPrimeiroAcesso = prefs.getBool('onboarding_done') ?? false;
@@ -84,7 +102,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 : '/dashboard/aluno',
           );
         } else {
-          context.go('/dashboard/personal');
+          _handlePersonalLogin(context);
         }
       } else if (next == AuthStatus.unauthenticated) {
         _handleUnauthenticated(context);
