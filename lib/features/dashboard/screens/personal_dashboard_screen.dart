@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -21,14 +22,37 @@ class PersonalDashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _PersonalDashboardScreenState
-    extends ConsumerState<PersonalDashboardScreen> {
+    extends ConsumerState<PersonalDashboardScreen>
+    with TickerProviderStateMixin {
   FinanceiroDashboard? _finData;
   bool _loadingFin = true;
+
+  late AnimationController _gradientCtrl;
+  late AnimationController _counterCtrl;
+  late Animation<double> _counterAnim;
 
   @override
   void initState() {
     super.initState();
+    _gradientCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    )..repeat();
+    _counterCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    _counterAnim = Tween<double>(begin: 0, end: 0).animate(
+      CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut),
+    );
     _loadFin();
+  }
+
+  @override
+  void dispose() {
+    _gradientCtrl.dispose();
+    _counterCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _loadFin() async {
@@ -40,6 +64,11 @@ class _PersonalDashboardScreenState
           _finData = data;
           _loadingFin = false;
         });
+        _counterAnim = Tween<double>(
+          begin: 0,
+          end: _finData!.receitaMes,
+        ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
+        _counterCtrl.forward(from: 0);
       }
     } catch (e) {
       debugPrint('[Focux] Error: $e');
@@ -79,6 +108,11 @@ class _PersonalDashboardScreenState
           );
           _loadingFin = false;
         });
+        _counterAnim = Tween<double>(
+          begin: 0,
+          end: _finData!.receitaMes,
+        ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
+        _counterCtrl.forward(from: 0);
       }
     }
   }
@@ -342,27 +376,36 @@ class _PersonalDashboardScreenState
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Container(
+                      child: AnimatedBuilder(
+                        animation: _gradientCtrl,
+                        builder: (ctx, _) {
+                          final angle =
+                              _gradientCtrl.value * 2 * math.pi;
+                          final begin = Alignment(
+                            -math.cos(angle),
+                            -math.sin(angle),
+                          );
+                          final end = Alignment(
+                            math.cos(angle),
+                            math.sin(angle),
+                          );
+                          return Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(28),
-                          gradient:
-                              isDark
-                                  ? const LinearGradient(
-                                    colors: [
+                          gradient: LinearGradient(
+                            colors:
+                                isDark
+                                    ? const [
                                       Color(0xFF1C3273),
                                       Color(0xFF0F1E4A),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  )
-                                  : const LinearGradient(
-                                    colors: [
+                                    ]
+                                    : const [
                                       EagleTokens.brand,
                                       EagleTokens.brandDeep,
                                     ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
+                            begin: begin,
+                            end: end,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: const Color(
@@ -401,15 +444,19 @@ class _PersonalDashboardScreenState
                                         strokeWidth: 2,
                                       ),
                                     )
-                                    : Text(
-                                      'R\$ ${_finData?.receitaMes.toStringAsFixed(0) ?? '0'}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 44,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: -1,
-                                        height: 1,
-                                      ),
+                                    : AnimatedBuilder(
+                                      animation: _counterAnim,
+                                      builder:
+                                          (ctx, _) => Text(
+                                            'R\$ ${_counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 44,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: -1,
+                                              height: 1,
+                                            ),
+                                          ),
                                     ),
                                 const SizedBox(width: 6),
                                 const Text(
@@ -473,6 +520,8 @@ class _PersonalDashboardScreenState
                             ),
                           ],
                         ),
+                          );
+                        },
                       ),
                     ),
                   ),
