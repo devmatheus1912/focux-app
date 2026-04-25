@@ -1,42 +1,47 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'core/api/api_client.dart';
+import 'core/fcm/fcm_service.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
-import 'core/api/api_client.dart';
-import 'core/fcm/fcm_service.dart';
-
 import 'features/perfil/data/perfil_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+    ),
+  );
 
   try {
-    await Firebase.initializeApp();
-    await FcmService.init(ApiClient());
-    
-    // Configura o Crashlytics para capturar erros do Flutter
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-    
-    // Captura erros assíncronos não tratados (Isolates/Promises)
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
-  } catch (e) { 
-    debugPrint('[Focux] Error: $e');
-    // Firebase não configurado
+    if (!kIsWeb) {
+      await Firebase.initializeApp();
+      await FcmService.init(ApiClient());
+
+      FlutterError.onError =
+          FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+    }
+  } catch (error) {
+    debugPrint('[Focux] Error: $error');
+    // Firebase ainda não está configurado em todos os ambientes.
   }
 
   runApp(const ProviderScope(child: FocuxApp()));
@@ -59,7 +64,6 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
   }
 
   Future<void> _loadCustomTheme() async {
-    // Try PERSONAL role first
     try {
       final repo = PerfilRepository(ApiClient());
       final perfil = await repo.buscar();
@@ -74,11 +78,10 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       return;
     } catch (_) {}
 
-    // Try ALUNO role
     try {
       final dio = ApiClient().dio;
-      final r = await dio.get('/api/aluno/personal-brand');
-      final data = r.data as Map<String, dynamic>;
+      final response = await dio.get('/api/aluno/personal-brand');
+      final data = response.data as Map<String, dynamic>;
       final plano = data['plano'] as String? ?? 'FREE';
       if (plano == 'ENTERPRISE') {
         final corPrimaria = data['corPrimaria'] as String?;
@@ -109,10 +112,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
       locale: const Locale('pt', 'BR'),
-      supportedLocales: const [
-        Locale('pt', 'BR'),
-        Locale('en', 'US'),
-      ],
+      supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
