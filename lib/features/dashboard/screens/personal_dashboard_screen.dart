@@ -550,6 +550,30 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                       context.go('/identidade-visual');
                     },
                   ),
+                  ListTile(
+                    leading: const Icon(Icons.star_outline),
+                    title: const Text('Depoimentos'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.go('/depoimentos');
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.photo_library_outlined),
+                    title: const Text('Galeria'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.go('/galeria');
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.workspace_premium_outlined),
+                    title: const Text('Planos'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.go('/planos');
+                    },
+                  ),
                   ...navItems.skip(3).map((item) {
                     return ListTile(
                       leading: Icon(item.icon, color: EagleTokens.brand, size: 22),

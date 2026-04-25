@@ -91,7 +91,11 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
     final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
       child: Scaffold(
         body: Stack(
           fit: StackFit.expand,

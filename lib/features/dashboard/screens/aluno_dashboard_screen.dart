@@ -606,6 +606,14 @@ class _AlunoDrawer extends StatelessWidget {
                   isDark: isDark,
                   onTap: () => nav('/ia/aluno'),
                 ),
+                ListTile(
+                  leading: const Icon(Icons.star_outline),
+                  title: const Text('Deixar Depoimento'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    context.go('/depoimentos-aluno');
+                  },
+                ),
                 Divider(
                   color: dividerColor,
                   thickness: 1,

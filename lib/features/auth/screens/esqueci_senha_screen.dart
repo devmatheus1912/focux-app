@@ -121,7 +121,11 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
       child: Scaffold(
         body: Stack(
           fit: StackFit.expand,

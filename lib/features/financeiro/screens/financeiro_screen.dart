@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,18 +47,34 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(8, 16, 20, 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    'VISÃO GERAL',
-                    style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      if (Navigator.canPop(context)) {
+                        Navigator.pop(context);
+                      } else {
+                        GoRouter.of(context).go('/dashboard/personal');
+                      }
+                    },
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Financeiro',
-                    style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                  const SizedBox(width: 4),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'VISÃO GERAL',
+                        style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Financeiro',
+                        style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -569,6 +586,18 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                   : null,
               border: const OutlineInputBorder(),
               isDense: true,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Text(
+            'HISTÓRICO DE TRANSAÇÕES',
+            style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? EagleTokens.darkInkMute
+                  : EagleTokens.inkMute,
             ),
           ),
         ),

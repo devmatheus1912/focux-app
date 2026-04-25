@@ -39,6 +39,8 @@ class _IdentidadeVisualScreenState
   final _espCtrl = TextEditingController();
   final _instaCtrl = TextEditingController();
   final _sloganCtrl = TextEditingController();
+  final _domCtrl = TextEditingController();
+  final _videoCtrl = TextEditingController();
   Color _corPrimaria = const Color(0xFF3B5FE2);
   Color _corSecundaria = const Color(0xFF0097A7);
   bool _salvando = false;
@@ -49,12 +51,15 @@ class _IdentidadeVisualScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(perfilProvider);
       final perfil = ref.read(perfilProvider).value;
       if (perfil != null) {
         _descCtrl.text = perfil.descricaoProfissional ?? '';
         _espCtrl.text = perfil.especialidades ?? '';
         _instaCtrl.text = perfil.instagram ?? '';
         _sloganCtrl.text = perfil.slogan ?? '';
+        _domCtrl.text = perfil.dominioCustomizado ?? '';
+        _videoCtrl.text = perfil.videoUrl ?? '';
         _logoUrl = perfil.logoUrl;
         if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
           final hex =
@@ -77,6 +82,8 @@ class _IdentidadeVisualScreenState
     _espCtrl.dispose();
     _instaCtrl.dispose();
     _sloganCtrl.dispose();
+    _domCtrl.dispose();
+    _videoCtrl.dispose();
     super.dispose();
   }
 
@@ -108,7 +115,7 @@ class _IdentidadeVisualScreenState
   }
 
   Future<void> _salvar(String plano) async {
-    if (plano == 'FREE') return;
+    if (plano.toUpperCase() == 'FREE') return;
     setState(() => _salvando = true);
     try {
       final dio = ref.read(apiClientProvider).dio;
@@ -117,13 +124,15 @@ class _IdentidadeVisualScreenState
         'especialidades': _espCtrl.text.trim(),
         'instagram': _instaCtrl.text.trim(),
       };
-      if (plano == 'ENTERPRISE') {
+      if (plano.toUpperCase() == 'ENTERPRISE') {
         body['corPrimaria'] =
             '#${_corPrimaria.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
         body['corSecundaria'] =
             '#${_corSecundaria.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
         body['slogan'] = _sloganCtrl.text.trim();
         if (_logoUrl != null) body['logoUrl'] = _logoUrl;
+        if (_domCtrl.text.trim().isNotEmpty) body['dominioCustomizado'] = _domCtrl.text.trim();
+        if (_videoCtrl.text.trim().isNotEmpty) body['videoUrl'] = _videoCtrl.text.trim();
       }
       await dio.put('/api/personal/identidade', data: body);
       ref.invalidate(perfilProvider);
@@ -148,8 +157,8 @@ class _IdentidadeVisualScreenState
     final perfilAsync = ref.watch(perfilProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final plano = perfilAsync.value?.plano ?? 'FREE';
-    final isEnterprise = plano == 'ENTERPRISE';
-    final isPremiumOrAbove = plano == 'PREMIUM' || plano == 'ENTERPRISE';
+    final isEnterprise = plano.toUpperCase() == 'ENTERPRISE';
+    final isPremiumOrAbove = ['PREMIUM', 'ENTERPRISE'].contains(plano.toUpperCase());
 
     final slug = perfilAsync.value?.slug;
     final nomePersonal = perfilAsync.value?.nome ?? '';
@@ -261,6 +270,16 @@ class _IdentidadeVisualScreenState
                   ],
                 ),
               ),
+              const SizedBox(height: 8),
+              if (slug != null && isPremiumOrAbove)
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.open_in_new, size: 16),
+                    label: const Text('Ver minha landing page'),
+                    onPressed: () => context.go('/p/$slug'),
+                  ),
+                ),
               const SizedBox(height: 16),
             ],
 
@@ -423,6 +442,27 @@ class _IdentidadeVisualScreenState
                       onSelect: isEnterprise
                           ? (c) => setState(() => _corSecundaria = c)
                           : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _domCtrl,
+                      enabled: isEnterprise,
+                      decoration: const InputDecoration(
+                        labelText: 'Domínio customizado',
+                        hintText: 'Ex: treino.seudominio.com.br',
+                        helperText: 'Configure um CNAME apontando para focux.app',
+                        helperMaxLines: 2,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _videoCtrl,
+                      enabled: isEnterprise,
+                      decoration: const InputDecoration(
+                        labelText: 'URL do vídeo de apresentação',
+                        hintText: 'https://youtube.com/watch?v=...',
+                        helperText: 'Aparece na sua landing page. YouTube, Vimeo ou qualquer link.',
+                      ),
                     ),
                     const SizedBox(height: 20),
 

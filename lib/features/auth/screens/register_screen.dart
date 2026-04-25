@@ -130,7 +130,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     final mq = MediaQuery.of(context);
     final screenH = mq.size.height;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
       child: Scaffold(
         body: Stack(
           fit: StackFit.expand,

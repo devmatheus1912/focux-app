@@ -12,6 +12,10 @@ class PerfilPersonal {
   final String? corSecundaria;
   final String? slogan;
   final String? slug;
+  final String? dominioCustomizado;
+  final String? videoUrl;
+  final bool? trialUsed;
+  final DateTime? trialEndsAt;
   final String plano;
   final bool isAdmin;
   // Wallet
@@ -36,6 +40,10 @@ class PerfilPersonal {
     this.corSecundaria,
     this.slogan,
     this.slug,
+    this.dominioCustomizado,
+    this.videoUrl,
+    this.trialUsed,
+    this.trialEndsAt,
     required this.plano,
     this.isAdmin = false,
     this.chavePix,
@@ -59,6 +67,10 @@ class PerfilPersonal {
         corSecundaria: json['corSecundaria'] as String?,
         slogan: json['slogan'] as String?,
         slug: json['slug'] as String?,
+        dominioCustomizado: json['dominioCustomizado'] as String?,
+        videoUrl: json['videoUrl'] as String?,
+        trialUsed: json['trialUsed'] as bool?,
+        trialEndsAt: json['trialEndsAt'] != null ? DateTime.tryParse(json['trialEndsAt'].toString()) : null,
         plano: json['plano'] as String,
         isAdmin: json['isAdmin'] as bool? ?? false,
         chavePix: json['chavePix'] as String?,
