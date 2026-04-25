@@ -3,12 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// Focux Personal — Brand Logo Component
 ///
-/// Design System: Dark Premium / Glassmorphism
-/// Consistente em todas as telas: login, onboarding, dashboard, etc.
+/// Design System: Dark Premium / Eagle Tokens
+/// FxMark = rounded-square tile, dark blue radial gradient, F-eagle image
+/// Consistent across all screens: login, onboarding, dashboard, etc.
 ///
-/// [iconSize] — base size unit (default 56)
-/// [showLabel] — horizontal lockup com wordmark + tagline
-/// [light]     — true = white text (dark bg), false = dark text (light bg)
+/// [iconSize] — tile size in pixels (default 40)
+/// [showLabel] — horizontal lockup: tile + wordmark
+/// [light]     — true = white wordmark text (dark bg), false = dark text (light bg)
 class FxLogo extends StatelessWidget {
   final double iconSize;
   final bool showLabel;
@@ -17,7 +18,7 @@ class FxLogo extends StatelessWidget {
 
   const FxLogo({
     super.key,
-    this.iconSize = 56,
+    this.iconSize = 40,
     this.showLabel = true,
     this.horizontal = true,
     this.light = true,
@@ -25,129 +26,117 @@ class FxLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (showLabel) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // F Icon with subtle brand glow
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF2F6BFF).withValues(alpha: 0.18),
-                  blurRadius: iconSize * 0.4,
-                  spreadRadius: iconSize * 0.04,
-                ),
-              ],
-            ),
-            child: ShaderMask(
-              shaderCallback: (bounds) => RadialGradient(
-                center: Alignment.center,
-                radius: 0.70,
-                colors: [
-                  Colors.white,
-                  Colors.white,
-                  Colors.white.withValues(alpha: 0.0),
+    final mark = _FxMarkTile(size: iconSize);
+
+    if (!showLabel) return mark;
+
+    final wordmarkColor = light ? Colors.white : const Color(0xFF0A0F1E);
+    final muteColor =
+        light
+            ? Colors.white.withValues(alpha: 0.60)
+            : const Color(0xFF0A0F1E).withValues(alpha: 0.50);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        mark,
+        SizedBox(width: iconSize * 0.30),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'FOCUX',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: iconSize * 0.55,
+                      fontWeight: FontWeight.w700,
+                      color: wordmarkColor,
+                      letterSpacing: -0.2,
+                      height: 1,
+                    ),
+                  ),
+                  WidgetSpan(child: SizedBox(width: iconSize * 0.14)),
+                  TextSpan(
+                    text: 'PERSONAL',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: iconSize * 0.55,
+                      fontWeight: FontWeight.w400,
+                      color: muteColor,
+                      letterSpacing: 0.3,
+                      height: 1,
+                    ),
+                  ),
                 ],
-                stops: const [0.0, 0.88, 1.0],
-              ).createShader(bounds),
-              blendMode: BlendMode.dstIn,
-              child: Image.asset(
-                'assets/images/logo_icon.png',
-                height: iconSize * 1.3,
-                width: iconSize * 1.3,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
-                isAntiAlias: true,
               ),
             ),
-          ),
-          SizedBox(width: iconSize * 0.16),
-          // Wordmark + Tagline
-          Flexible(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'FOCUX ',
-                        style: GoogleFonts.inter(
-                          fontSize: iconSize * 0.36,
-                          fontWeight: FontWeight.w800,
-                          color: light
-                              ? const Color(0xFFF0F4FF)
-                              : const Color(0xFF0A0F1E),
-                          letterSpacing: 2.0,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'PERSONAL',
-                        style: GoogleFonts.inter(
-                          fontSize: iconSize * 0.36,
-                          fontWeight: FontWeight.w300,
-                          color: light
-                              ? const Color(0xFFF0F4FF).withValues(alpha: 0.80)
-                              : const Color(0xFF0A0F1E).withValues(alpha: 0.65),
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: iconSize * 0.04),
-                Text(
-                  'Treine com dados. Evolua com inteligência.',
-                  style: GoogleFonts.inter(
-                    fontSize: iconSize * 0.16,
-                    fontWeight: FontWeight.w400,
-                    color: light
-                        ? const Color(0xFF8899B4)
-                        : const Color(0xFF64748B),
-                    letterSpacing: 0.15,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-    }
+          ],
+        ),
+      ],
+    );
+  }
+}
 
-    // Icon-only variant
-    return ShaderMask(
-      shaderCallback: (bounds) => RadialGradient(
-        center: Alignment.center,
-        radius: 0.70,
-        colors: [
-          Colors.white,
-          Colors.white,
-          Colors.white.withValues(alpha: 0.0),
+/// Rounded-square brand tile — matches design FxMark "official" variant.
+///
+/// Dark blue radial gradient background + F-eagle image.
+/// Inset border + drop shadow matching design spec.
+class _FxMarkTile extends StatelessWidget {
+  const _FxMarkTile({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = size * 0.26;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        gradient: const RadialGradient(
+          center: Alignment(-0.3, -0.5),
+          radius: 1.0,
+          colors: [Color(0xFF1A3A7A), Color(0xFF070E2A)],
+          stops: [0.0, 1.0],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF3B5FE2).withValues(alpha: 0.28),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
         ],
-        stops: const [0.0, 0.88, 1.0],
-      ).createShader(bounds),
-      blendMode: BlendMode.dstIn,
-      child: Image.asset(
-        'assets/images/logo_icon.png',
-        width: iconSize,
-        height: iconSize,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-        isAntiAlias: true,
+        border: Border.all(
+          color: const Color.fromRGBO(124, 192, 255, 0.12),
+          width: 1,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: OverflowBox(
+        maxWidth: size * 1.3,
+        maxHeight: size * 1.3,
+        child: Image.asset(
+          'assets/images/logo_icon.png',
+          width: size * 1.3,
+          height: size * 1.3,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.high,
+          isAntiAlias: true,
+        ),
       ),
     );
   }
 }
 
-/// Shorthand — icon only, for AppBars, avatars, etc.
+/// Shorthand — tile only, for AppBars, list items, etc.
 class FxLogoIcon extends StatelessWidget {
   final double size;
   const FxLogoIcon({super.key, this.size = 40});
 
   @override
-  Widget build(BuildContext context) => FxLogo(iconSize: size, showLabel: false);
+  Widget build(BuildContext context) => _FxMarkTile(size: size);
 }

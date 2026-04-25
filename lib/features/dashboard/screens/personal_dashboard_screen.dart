@@ -1107,16 +1107,10 @@ class _QuickTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(18),
-        boxShadow:
+        border:
             isDark
                 ? null
-                : [
-                  BoxShadow(
-                    color: EagleTokens.line,
-                    blurRadius: 0,
-                    spreadRadius: 0.5,
-                  ),
-                ],
+                : Border.all(color: EagleTokens.line, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1229,16 +1223,10 @@ class _AttentionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
-        boxShadow:
+        border:
             isDark
                 ? null
-                : [
-                  BoxShadow(
-                    color: EagleTokens.line,
-                    blurRadius: 0,
-                    spreadRadius: 0.5,
-                  ),
-                ],
+                : Border.all(color: EagleTokens.line, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1357,16 +1345,8 @@ class _ShortcutBtn extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(16),
-          boxShadow:
-              isDark
-                  ? null
-                  : [
-                    BoxShadow(
-                      color: EagleTokens.line,
-                      blurRadius: 0,
-                      spreadRadius: 0.5,
-                    ),
-                  ],
+          border:
+              isDark ? null : Border.all(color: EagleTokens.line, width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1432,16 +1412,8 @@ class _AderenciaSemanaWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(22),
-        boxShadow:
-            isDark
-                ? null
-                : [
-                  BoxShadow(
-                    color: EagleTokens.line,
-                    blurRadius: 0,
-                    spreadRadius: 0.5,
-                  ),
-                ],
+        border:
+            isDark ? null : Border.all(color: EagleTokens.line, width: 1),
       ),
       child: Column(
         children: List.generate(alunos.length, (index) {

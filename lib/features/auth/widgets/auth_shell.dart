@@ -70,36 +70,41 @@ class AuthLogoMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = size * 0.26;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size * 0.28),
+        borderRadius: BorderRadius.circular(radius),
+        gradient: const RadialGradient(
+          center: Alignment(-0.3, -0.5),
+          radius: 1.0,
+          colors: [Color(0xFF1A3A7A), Color(0xFF070E2A)],
+          stops: [0.0, 1.0],
+        ),
         boxShadow: [
           BoxShadow(
-            color: EagleTokens.brandAccent.withValues(alpha: 0.12),
-            blurRadius: size * 0.32,
-            spreadRadius: size * 0.02,
+            color: const Color(0xFF3B5FE2).withValues(alpha: 0.28),
+            blurRadius: 24,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(
+          color: const Color.fromRGBO(124, 192, 255, 0.12),
+          width: 1,
+        ),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(size * 0.28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(size * 0.28),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-            ),
-            padding: EdgeInsets.all(size * 0.12),
-            child: Image.asset(
-              'assets/images/logo_icon.png',
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-            ),
-          ),
+      clipBehavior: Clip.antiAlias,
+      child: OverflowBox(
+        maxWidth: size * 1.3,
+        maxHeight: size * 1.3,
+        child: Image.asset(
+          'assets/images/logo_icon.png',
+          width: size * 1.3,
+          height: size * 1.3,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.high,
+          isAntiAlias: true,
         ),
       ),
     );
