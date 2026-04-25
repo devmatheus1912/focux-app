@@ -18,7 +18,7 @@ Estado geral: 🟢 Front-end validado nesta rodada
 - `flutter analyze`: 🟢
 - `flutter test`: 🟢
 - `flutter build web`: 🟢
-- Commit e push desta rodada: 🔴
+- Commit e push desta rodada: 🟢
 
 ## Entregas concluídas
 
@@ -112,6 +112,11 @@ Estas pendências não são de implementação do front. São checkpoints manuai
    - `/perfil`
    - `/migracao-magica`
 5. **Restaurar Segurança (CORS):** 🔴 **MUITO IMPORTANTE:** `localhost` está temporariamente liberado no backend para testes Flutter Web. Remover antes de submeter às Lojas.
+
+## Git
+
+- Commit principal desta rodada: `33c63b1`
+- Push em `origin/main`: 🟢
 
 ## Resumo final
 
