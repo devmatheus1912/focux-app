@@ -404,6 +404,8 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                       _ShortcutBtn(icon: Icons.attach_money, label: 'Financeiro', isDark: isDark, onTap: () => context.push('/financeiro')),
                       _ShortcutBtn(icon: Icons.calendar_month, label: 'Agenda', isDark: isDark, onTap: () => context.push('/agenda')),
                       _ShortcutBtn(icon: Icons.dynamic_feed, label: 'Feed', isDark: isDark, onTap: () => context.push('/feed')),
+                      _ShortcutBtn(icon: Icons.workspace_premium_outlined, label: 'Planos', isDark: isDark, onTap: () => context.push('/planos')),
+                      _ShortcutBtn(icon: Icons.bolt_outlined, label: 'Migracao', isDark: isDark, onTap: () => context.push('/migracao-magica')),
                       _ShortcutBtn(icon: Icons.security, label: 'Acessos', isDark: isDark, onTap: () => context.push('/admin/rbac')),
                       if (ref.watch(isAdminProvider))
                         _ShortcutBtn(icon: Icons.admin_panel_settings, label: 'Admin', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScreen()))),
@@ -585,6 +587,14 @@ class _PersonalDashboardScreenState extends ConsumerState<PersonalDashboardScree
                     onTap: () {
                       Navigator.of(context).pop();
                       context.go('/planos');
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.bolt_outlined),
+                    title: const Text('Migracao Magica'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.go('/migracao-magica');
                     },
                   ),
                   ...navItems.skip(3).map((item) {

@@ -390,8 +390,21 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.end,
                                         children: [
-                                          Text('${a.diasSemTreino ?? a.dias ?? 0}d', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: sColor)),
-                                          Text('${a.aderenciaPercent?.toStringAsFixed(0) ?? a.aderencia ?? 0}% ader.', style: TextStyle(fontSize: 10.5, color: mute)),
+                                          Text(
+                                            '${a.diasSemTreino ?? 0}d',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w700,
+                                              color: sColor,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${a.aderenciaPercent?.toStringAsFixed(0) ?? 0}% ader.',
+                                            style: TextStyle(
+                                              fontSize: 10.5,
+                                              color: mute,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ],

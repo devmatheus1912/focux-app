@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class FxSparkline extends StatelessWidget {
@@ -7,6 +6,7 @@ class FxSparkline extends StatelessWidget {
   final double width;
   final double height;
   final double strokeWidth;
+  final bool fill;
 
   const FxSparkline({
     super.key,
@@ -15,6 +15,7 @@ class FxSparkline extends StatelessWidget {
     this.width = 56,
     this.height = 22,
     this.strokeWidth = 2.0,
+    this.fill = true,
   });
 
   @override
@@ -29,6 +30,7 @@ class FxSparkline extends StatelessWidget {
           data: data,
           color: color,
           strokeWidth: strokeWidth,
+          fill: fill,
         ),
       ),
     );
@@ -39,11 +41,13 @@ class _SparklinePainter extends CustomPainter {
   final List<double> data;
   final Color color;
   final double strokeWidth;
+  final bool fill;
 
   _SparklinePainter({
     required this.data,
     required this.color,
     required this.strokeWidth,
+    required this.fill,
   });
 
   @override
@@ -88,6 +92,8 @@ class _SparklinePainter extends CustomPainter {
 
     canvas.drawPath(path, paint);
 
+    if (!fill) return;
+
     // Optional: add a subtle gradient fill under the line
     final fillPaint = Paint()
       ..style = PaintingStyle.fill
@@ -112,6 +118,7 @@ class _SparklinePainter extends CustomPainter {
   bool shouldRepaint(covariant _SparklinePainter oldDelegate) {
     return oldDelegate.data != data ||
            oldDelegate.color != color ||
-           oldDelegate.strokeWidth != strokeWidth;
+           oldDelegate.strokeWidth != strokeWidth ||
+           oldDelegate.fill != fill;
   }
 }

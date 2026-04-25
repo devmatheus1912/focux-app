@@ -58,7 +58,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
     // Map events to their weekday index (0-6)
     final eventosMap = <int, List<Agendamento>>{};
-    for (var i = 0; i < 7; i++) eventosMap[i] = [];
+    for (var i = 0; i < 7; i++) {
+      eventosMap[i] = [];
+    }
     
     for (final ag in _ags) {
       // we only consider events in the current week view to match the UI

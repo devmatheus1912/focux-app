@@ -7,6 +7,7 @@ class SubscriptionProvider extends ChangeNotifier {
   SubscriptionPlan get currentPlan => _currentPlan;
 
   void upgradePlan(SubscriptionPlan newPlan) {
+    if (_currentPlan == newPlan) return;
     _currentPlan = newPlan;
     notifyListeners();
   }

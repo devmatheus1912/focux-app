@@ -75,8 +75,16 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     _restTimer?.cancel();
     setState(() { _showRestTimer = true; _restSeconds = 60; });
     _restTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (_restSeconds <= 0) { _restTimer?.cancel(); setState(() { _showRestTimer = false; }); }
-      else { setState(() { _restSeconds--; }); }
+      if (_restSeconds <= 0) {
+        _restTimer?.cancel();
+        setState(() {
+          _showRestTimer = false;
+        });
+      } else {
+        setState(() {
+          _restSeconds--;
+        });
+      }
     });
   }
 
@@ -463,7 +471,7 @@ class _SerieCard extends StatelessWidget {
                   ),
                   child: Row(children: [
                     IconButton(icon: const Icon(Icons.remove, size: 18), onPressed: ee.seriesFeitas > 0 ? () => onMarcar(ee.seriesFeitas - 1) : null),
-                    SizedBox(width: 28, child: Text('${ee.seriesFeitas}', textAlign: TextAlign.center, style: TextStyle(color: ink, fontSize: 18, fontWeight: FontWeight.bold, fontFeatures: const [FontFeature.tabularFigures()]))),
+                    SizedBox(width: 28, child: Text(ee.seriesFeitas.toString(), textAlign: TextAlign.center, style: TextStyle(color: ink, fontSize: 18, fontWeight: FontWeight.bold, fontFeatures: const [FontFeature.tabularFigures()]))),
                     IconButton(icon: const Icon(Icons.add, size: 18), onPressed: () => onMarcar(ee.seriesFeitas + 1)),
                   ]),
                 ),

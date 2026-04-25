@@ -17,7 +17,7 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
   final TextEditingController _controller = TextEditingController();
   final ApiClient _api = ApiClient();
   bool _isLoading = false;
-  String? _resultadoJson;
+  List<dynamic>? _alunosEncontrados;
 
   @override
   void dispose() {
@@ -34,7 +34,6 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Usa ApiClient (Dio) com JWT auto-injetado pelo interceptor
       final response = await _api.dio.post(
         '/api/v1/migracao/texto',
         data: {'conteudo': _controller.text},
@@ -42,9 +41,14 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
 
       if (mounted) {
         final resultadoEstruturado = response.data['resultadoEstruturado'];
-        final parsed = _parsarResultado(resultadoEstruturado);
-        setState(() => _resultadoJson = parsed);
-        FeedbackHelper.showSuccess(context, 'Alunos lidos com sucesso pela IA!');
+        setState(() {
+          _alunosEncontrados = _parsarResultado(resultadoEstruturado);
+        });
+        if (_alunosEncontrados != null && _alunosEncontrados!.isNotEmpty) {
+          FeedbackHelper.showSuccess(context, 'Alunos lidos com sucesso pela IA!');
+        } else {
+          FeedbackHelper.showError(context, 'A IA não encontrou alunos. Revise o texto.');
+        }
       }
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, 'Falha na migração. Tente novamente.');
@@ -53,124 +57,260 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
     }
   }
 
-  /// Formata o resultado JSON em texto legível.
-  String _parsarResultado(dynamic data) {
-    if (data == null) return 'Nenhum aluno encontrado nos dados fornecidos.';
+  List<dynamic>? _parsarResultado(dynamic data) {
+    if (data == null) return null;
     if (data is String) {
       try {
         final decoded = jsonDecode(data);
-        return _formatarResultado(decoded);
+        if (decoded is List) return decoded;
       } catch (_) {
-        return data;
+        return null;
       }
     }
-    return _formatarResultado(data);
-  }
-
-  String _formatarResultado(dynamic data) {
-    if (data is List) {
-      final buffer = StringBuffer();
-      for (final item in data) {
-        buffer.writeln('• Nome: ${item['nome'] ?? '-'}');
-        if (item['email'] != null) buffer.writeln('  Email: ${item['email']}');
-        if (item['telefone'] != null) buffer.writeln('  Tel: ${item['telefone']}');
-        if (item['objetivo'] != null) buffer.writeln('  Objetivo: ${item['objetivo']}');
-        buffer.writeln();
-      }
-      return buffer.toString().trim();
-    }
-    return const JsonEncoder.withIndent('  ').convert(data);
+    if (data is List) return data;
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return FeatureGate(
       featureName: 'Migração Mágica IA',
-      requiredPlan: SubscriptionPlan.PRO,
+      requiredPlan: SubscriptionPlan.PREMIUM,
       child: _buildContent(context),
     );
   }
 
   Widget _buildContent(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final brand = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
+
     return Scaffold(
+      backgroundColor: bg,
       appBar: AppBar(
-        title: const Text('Migração Mágica IA ✨'),
+        backgroundColor: bg,
         elevation: 0,
+        iconTheme: IconThemeData(color: ink),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(bottom: 110),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: EagleTokens.heroGradient(dark: Theme.of(context).brightness == Brightness.dark),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Column(
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.auto_awesome, color: Colors.white, size: 40),
-                  SizedBox(height: 12),
-                  Text(
-                    'Traga seus alunos de qualquer app',
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
+                  Row(
+                    children: [
+                      Container(
+                        width: 32, height: 32,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withValues(alpha: 0.15) : EagleTokens.brandSoft,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        alignment: Alignment.center,
+                        child: Icon(Icons.auto_awesome, size: 16, color: brand),
+                      ),
+                      const SizedBox(width: 8),
+                      Text('IA FOCUX', style: TextStyle(fontSize: 12, color: brand, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
+                    ],
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Cole abaixo o texto de PDFs, Excel ou prints de outros apps. Nossa IA extrai tudo e cria os perfis no Focux automaticamente.',
-                    style: TextStyle(color: Colors.white70),
-                    textAlign: TextAlign.center,
-                  ),
+                  const SizedBox(height: 8),
+                  Text('Migração Mágica ✨', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: ink, letterSpacing: -0.5, height: 1.1)),
+                  const SizedBox(height: 6),
+                  Text('Traga seus alunos de qualquer app. Cole o texto e a IA extrai tudo automaticamente.', style: TextStyle(fontSize: 14, color: mute, height: 1.55)),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _controller,
-              maxLines: 8,
-              decoration: const InputDecoration(
-                hintText: 'Cole os dados bagunçados aqui...',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _processarMigracao,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: EagleTokens.brand,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Iniciar Migração via IA',
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-            ),
-            if (_resultadoJson != null) ...[
-              const SizedBox(height: 24),
-              const Text('Alunos Encontrados:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(16),
+
+            // Hero Card
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withAlpha(20),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.withAlpha(40)),
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: isDark ? const LinearGradient(colors: [Color(0xFF1A2852), Color(0xFF0A0F1E)]) : LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandDeep]),
                 ),
-                child: Text(_resultadoJson!),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Como funciona', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                    const SizedBox(height: 10),
+                    ...['Cole PDF, Excel ou print de outro app', 'A IA lê e extrai nome, email, telefone e objetivo', 'Confirme e todos os alunos são salvos no Focux'].asMap().entries.map((entry) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 22, height: 22,
+                              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+                              alignment: Alignment.center,
+                              child: Text('${entry.key + 1}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white, fontFamily: 'monospace')),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(child: Text(entry.value, style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.82), height: 1.4))),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  if (mounted) FeedbackHelper.showSuccess(context, 'Alunos importados e salvos no banco de dados!');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: EagleTokens.good,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+
+            // Text paste area
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: line),
                 ),
-                child: const Text('Confirmar e Salvar Todos', style: TextStyle(color: Colors.white)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('DADOS BAGUNÇADOS', style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 0.6)),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withValues(alpha: 0.04) : EagleTokens.brandSofter,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.brand.withValues(alpha: 0.12)),
+                      ),
+                      child: TextField(
+                        controller: _controller,
+                        maxLines: 8,
+                        minLines: 4,
+                        style: TextStyle(fontFamily: 'monospace', fontSize: 12, color: mute, height: 1.6),
+                        decoration: InputDecoration.collapsed(
+                          hintText: 'Beatriz Carvalho — 28 anos — (11)99999-1111 — bia@gmail.com — objetivo: hipertrofia\nLucas Andrade, 34, lucas@gmail.com, emagrecimento\n...',
+                          hintStyle: TextStyle(color: mute.withValues(alpha: 0.5)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    InkWell(
+                      onTap: _isLoading ? null : _processarMigracao,
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: brand,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [BoxShadow(color: brand.withValues(alpha: 0.35), blurRadius: 14, offset: const Offset(0, 4))],
+                        ),
+                        alignment: Alignment.center,
+                        child: _isLoading
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.auto_awesome, color: Colors.white, size: 15),
+                                  const SizedBox(width: 6),
+                                  const Text('Iniciar migração', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Results
+            if (_alunosEncontrados != null && _alunosEncontrados!.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Text('${_alunosEncontrados!.length} alunos encontrados', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: ink, letterSpacing: -0.5)),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: _alunosEncontrados!.map((a) {
+                    final nome = a['nome'] ?? 'Desconhecido';
+                    final email = a['email'] ?? '';
+                    final obj = a['objetivo'] ?? '';
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: line),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42, height: 42,
+                            decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
+                            alignment: Alignment.center,
+                            child: Text(nome.toString().isNotEmpty ? nome.toString()[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(nome, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ink), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                const SizedBox(height: 1),
+                                Text('$email ${obj.isNotEmpty ? '· $obj' : ''}'.trim(), style: TextStyle(fontSize: 11.5, color: mute), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            width: 28, height: 28,
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0x266FE296) : EagleTokens.goodSoft,
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Icon(Icons.check, size: 16, color: isDark ? const Color(0xFF6FE296) : EagleTokens.good),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: InkWell(
+                  onTap: () {
+                    FeedbackHelper.showSuccess(context, 'Alunos importados com sucesso!');
+                    setState(() {
+                      _alunosEncontrados = null;
+                      _controller.clear();
+                    });
+                  },
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1A3A1A) : EagleTokens.goodSoft,
+                      border: Border.all(color: isDark ? const Color(0xFF2BB673) : EagleTokens.good, width: 1.5),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check, size: 16, color: isDark ? const Color(0xFF6FE296) : EagleTokens.good),
+                        const SizedBox(width: 8),
+                        Text('Confirmar e salvar ${_alunosEncontrados!.length} alunos', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: isDark ? const Color(0xFF6FE296) : EagleTokens.good)),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           ],

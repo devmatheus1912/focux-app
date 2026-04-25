@@ -195,11 +195,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         GestureDetector(
                           onTap: () => context.go('/login'),
                           child: RichText(
-                            text: const TextSpan(
-                              style: TextStyle(color: Colors.white45, fontSize: 13),
+                            text: TextSpan(
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 13,
+                              ),
                               children: [
-                                TextSpan(text: 'Já tenho uma conta · '),
-                                TextSpan(text: 'Entrar', style: TextStyle(color: EagleTokens.brandAccent, fontWeight: FontWeight.w600)),
+                                const TextSpan(text: 'Já tenho uma conta · '),
+                                const TextSpan(
+                                  text: 'Entrar',
+                                  style: TextStyle(
+                                    color: EagleTokens.brandAccent,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ],
                             ),
                           ),

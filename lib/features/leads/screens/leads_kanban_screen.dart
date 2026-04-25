@@ -106,7 +106,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('CRM', style: TextStyle(fontSize: 12, color: brand, fontWeight: 700, letterSpacing: 0.6)),
+                          Text('CRM', style: TextStyle(fontSize: 12, color: brand, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
                           const SizedBox(height: 2),
                           Text('Funil de Leads', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: ink, letterSpacing: -0.5)),
                         ],
@@ -274,7 +274,12 @@ class _LeadCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: isDark ? Border(left: BorderSide(color: cColor, width: 3)) : Border.all(color: line).copyWith(left: BorderSide(color: cColor, width: 3)),
+        border: Border(
+          left: BorderSide(color: cColor, width: 3),
+          top: BorderSide(color: isDark ? Colors.transparent : line),
+          right: BorderSide(color: isDark ? Colors.transparent : line),
+          bottom: BorderSide(color: isDark ? Colors.transparent : line),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

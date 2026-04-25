@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../features/subscription/providers/subscription_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../../features/subscription/screens/paywall_screen.dart';
+import '../../features/perfil/providers/perfil_provider.dart';
 
-class FeatureGate extends StatelessWidget {
+class FeatureGate extends ConsumerWidget {
   final SubscriptionPlan requiredPlan;
   final Widget child;
   final Widget? lockedBuilder;
@@ -19,8 +19,16 @@ class FeatureGate extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final currentPlan = context.watch<SubscriptionProvider>().currentPlan;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final perfilAsync = ref.watch(perfilProvider);
+    final currentPlan = perfilAsync.maybeWhen(
+      data: (perfil) => subscriptionPlanFromApi(perfil.plano),
+      orElse: () => SubscriptionPlan.FREE,
+    );
+
+    if (perfilAsync.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     if (currentPlan.canAccess(requiredPlan)) {
       return child;

@@ -206,7 +206,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                       crossAxisAlignment: CrossAxisAlignment.baseline,
                                       textBaseline: TextBaseline.alphabetic,
                                       children: [
-                                        Text('${aluno.peso?.toStringAsFixed(1) ?? '0.0'}', style: TextStyle(color: ink, fontSize: 32, fontWeight: FontWeight.w600, letterSpacing: -0.5)),
+                                        Text(aluno.peso?.toStringAsFixed(1) ?? '0.0', style: TextStyle(color: ink, fontSize: 32, fontWeight: FontWeight.w600, letterSpacing: -0.5)),
                                         const SizedBox(width: 3),
                                         Text('kg', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 14, fontWeight: FontWeight.w400)),
                                         const SizedBox(width: 8),
@@ -254,8 +254,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                         crossAxisSpacing: 8,
                         childAspectRatio: 1.1,
                         children: [
-                          _MeasurementCard(label: 'Idade', value: '${aluno.idade ?? '--'}', unit: 'anos', isDark: isDark),
-                          _MeasurementCard(label: 'Altura', value: '${aluno.altura?.toStringAsFixed(2) ?? '--'}', unit: 'm', isDark: isDark),
+                          _MeasurementCard(label: 'Idade', value: (aluno.idade ?? '--').toString(), unit: 'anos', isDark: isDark),
+                          _MeasurementCard(label: 'Altura', value: aluno.altura?.toStringAsFixed(2) ?? '--', unit: 'm', isDark: isDark),
                           _MeasurementCard(label: 'BF', value: '14', unit: '%', isDark: isDark),
                           _MeasurementCard(label: 'M. Magra', value: '45', unit: 'kg', isDark: isDark),
                         ],

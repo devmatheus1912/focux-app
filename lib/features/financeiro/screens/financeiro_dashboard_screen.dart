@@ -14,7 +14,6 @@ class FinanceiroDashboardScreen extends ConsumerStatefulWidget {
 
 class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardScreen> {
   FinanceiroDashboard? _data;
-  List<Mensalidade> _recentTransactions = [];
   bool _loading = true;
 
   @override
@@ -27,16 +26,10 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
     setState(() => _loading = true);
     try {
       final repo = FinanceiroRepository(ref.read(apiClientProvider));
-      final results = await Future.wait([
-        repo.dashboard(),
-        repo.listar(),
-      ]);
+      final dashboard = await repo.dashboard();
       if (mounted) {
-        final all = results[1] as List<Mensalidade>;
-        final sorted = List<Mensalidade>.from(all)..sort((a, b) => b.id.compareTo(a.id));
         setState(() {
-          _data = results[0] as FinanceiroDashboard;
-          _recentTransactions = sorted.take(8).toList();
+          _data = dashboard;
           _loading = false;
         });
       }
@@ -308,7 +301,15 @@ class _MiniMetric extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.6, color: mute, textTransform: TextTransform.uppercase)),
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.6,
+              color: mute,
+            ),
+          ),
           const SizedBox(height: 4),
           Text(value, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, letterSpacing: -0.5, color: ink)),
         ],
