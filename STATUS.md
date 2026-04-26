@@ -183,7 +183,7 @@ O design usa separadores de 0.5px entre itens de lista (alunos, exercícios, tre
 
 ---
 
-## O QUE FOI FEITO NESTA RODADA (commits anteriores)
+## O QUE FOI FEITO NESTA RODADA (commits anteriores + novos)
 
 - Design tokens de raio adicionados ao EagleTokens
 - AppTheme reescrito com ColorScheme explícito e textTheme completo com Space Grotesk e Inter
@@ -191,20 +191,25 @@ O design usa separadores de 0.5px entre itens de lista (alunos, exercícios, tre
 - FxSparkline com end-dot de 2.5px no último ponto
 - Hero do dashboard com gradiente animado (8s) e counter animado de receita
 - Cards do dashboard corrigidos de BoxShadow spread para border.all
-- flutter analyze limpo
+- **[NOVO] FxDock: floating glass pill, BackdropFilter blur 24px, 5 tabs (Hoje/Alunos/Treinos/Finance/IA), ShaderMask screen active pill** — commit 0ba5790
+- **[NOVO] MainShell + StatefulShellRoute.indexedStack: dock flutua sobre as 5 telas principais; sub-rotas continuam flat e push sobre o shell** — commit 0ba5790
+- **[NOVO] Dashboard: drawer/hamburger removido; seção Ferramentas→Atalhos com 6 ações do design; hero label lowercase 'Receita · {mes}' letterSpacing 0.12; subtítulo mostra previsão real; PREVISÃO→PENDENTE; QuickTile Spacer→SizedBox(10)** — commit 0ba5790
+- **[NOVO] AuthPrimaryButton: LinearGradient 135° brand→brandInk + boxShadow brand 60%** — commit 0ba5790
+- **[NOVO] Logo BlendMode.screen via ShaderMask — F-eagle luminoso via screen blend matemático sobre gradiente tile** — commit 5f704f8
+- flutter analyze: limpo em todos os commits
 
 ---
 
 ## PRIORIDADE DE IMPLEMENTAÇÃO SUGERIDA
 
-Alta urgência, máximo impacto visual:
+✅ Alta urgência implementada:
 
-1. Floating glass dock (navegação completa)
-2. Logo com blend mode screen (brilho correto do F-eagle)
-3. Auth primary button com gradiente e sombra
-4. Hero card: corrigir label lowercase e subtítulo para previsão
-5. Dashboard shortcuts: renomear seção e mudar conteúdo para 6 ações
-6. QuickTile: remover Spacer, valor logo abaixo do ícone
+1. ✅ Floating glass dock (navegação completa)
+2. ✅ Logo com blend mode screen (brilho correto do F-eagle)
+3. ✅ Auth primary button com gradiente e sombra
+4. ✅ Hero card: corrigir label lowercase e subtítulo para previsão
+5. ✅ Dashboard shortcuts: renomear seção e mudar conteúdo para 6 ações
+6. ✅ QuickTile: remover Spacer, valor logo abaixo do ícone
 
 Sequência após esses 6 críticos:
 
@@ -224,5 +229,5 @@ Sequência após esses 6 críticos:
 
 - flutter analyze: 🟢 sem issues
 - flutter build web: 🟢
-- Commits desta análise: 5b17eb1, 792e540
+- Commits desta análise: 5b17eb1, 792e540, 0ba5790, 5f704f8
 - Push em origin/main: 🟢
