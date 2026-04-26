@@ -320,46 +320,72 @@ class AuthPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Design spec: LinearGradient 135° brand→brandInk + shadow 8px -8px brand 60%
     return SizedBox(
       width: double.infinity,
       height: 54,
-      child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: EagleTokens.brand,
-          disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.45),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              EagleTokens.brand,
+              isLoading
+                  ? EagleTokens.brand.withValues(alpha: 0.45)
+                  : EagleTokens.brandInk,
+            ],
           ),
+          boxShadow: [
+            if (!isLoading)
+              BoxShadow(
+                color: EagleTokens.brand.withValues(alpha: 0.6),
+                blurRadius: 8,
+                offset: const Offset(0, -8),
+                spreadRadius: 0,
+              ),
+          ],
         ),
-        child:
-            isLoading
-                ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-                : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (icon != null) ...[
-                      Icon(icon, size: 16, color: Colors.white),
-                      const SizedBox(width: 8),
-                    ],
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
+        child: ElevatedButton(
+          onPressed: isLoading ? null : onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            disabledBackgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          child:
+              isLoading
+                  ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
                     ),
-                  ],
-                ),
+                  )
+                  : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon, size: 16, color: Colors.white),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        label,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+        ),
       ),
     );
   }

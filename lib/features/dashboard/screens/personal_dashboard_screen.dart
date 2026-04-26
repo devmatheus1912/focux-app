@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../admin/screens/admin_screen.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
 
@@ -124,17 +123,22 @@ class _PersonalDashboardScreenState
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.backgroundDark : EagleTokens.paper,
-      drawer: dashboardAsync.maybeWhen(
-        data:
-            (data) =>
-                _buildDrawer(context, isDark, data.nomePersonal, data.logoUrl),
-        orElse: () => _buildDrawer(context, isDark, null, null),
-      ),
       body: dashboardAsync.when(
         loading: () => _buildShimmerLoading(context),
         error: (e, _) => Center(child: Text('Erro ao carregar: $e')),
         data:
-            (data) => RefreshIndicator(
+            (data) {
+              // Computed values for hero card
+              final monthNames = [
+                'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+                'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+              ];
+              final mes = monthNames[DateTime.now().month - 1];
+              final pendente = ((_finData?.previsaoReceita ?? 0) -
+                      (_finData?.receitaMes ?? 0))
+                  .clamp(0.0, double.infinity);
+
+              return RefreshIndicator(
               onRefresh: () async {
                 ref.invalidate(dashboardProvider);
                 ref.invalidate(commandCenterProvider);
@@ -152,81 +156,42 @@ class _PersonalDashboardScreenState
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Row(
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Builder(
-                                  builder:
-                                      (ctx) => InkWell(
-                                        onTap:
-                                            () => Scaffold.of(ctx).openDrawer(),
-                                        borderRadius: BorderRadius.circular(18),
-                                        child: Container(
-                                          width: 36,
-                                          height: 36,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color:
-                                                isDark
-                                                    ? Colors.white.withValues(
-                                                      alpha: 0.05,
-                                                    )
-                                                    : Colors.white,
-                                            border:
-                                                isDark
-                                                    ? null
-                                                    : Border.all(
-                                                      color: EagleTokens.line,
-                                                    ),
-                                          ),
-                                          child: Icon(
-                                            Icons.menu,
-                                            size: 20,
-                                            color:
-                                                isDark
-                                                    ? EagleTokens.darkInk
-                                                    : EagleTokens.ink,
-                                          ),
+                                FxLogo(
+                                  iconSize: 28,
+                                  showLabel: true,
+                                  horizontal: true,
+                                  light: isDark,
+                                ),
+                                const SizedBox(height: 10),
+                                Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      const TextSpan(text: 'Hoje · '),
+                                      TextSpan(
+                                        text:
+                                            'Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
+                                        style: TextStyle(
+                                          color:
+                                              isDark
+                                                  ? EagleTokens.darkInk
+                                                  : EagleTokens.ink,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                ),
-                                const SizedBox(width: 10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    FxLogo(
-                                      iconSize: 28,
-                                      showLabel: true,
-                                      horizontal: true,
-                                      light: isDark,
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text.rich(
-                                      TextSpan(
-                                        children: [
-                                          const TextSpan(text: 'Hoje · '),
-                                          TextSpan(
-                                            text:
-                                                'Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
-                                            style: TextStyle(
-                                              color:
-                                                  isDark
-                                                      ? EagleTokens.darkInk
-                                                      : EagleTokens.ink,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color:
-                                            isDark
-                                                ? EagleTokens.darkInkMute
-                                                : EagleTokens.inkMute,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkInkMute
+                                            : EagleTokens.inkMute,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ],
                             ),
@@ -421,13 +386,13 @@ class _PersonalDashboardScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'RECEITA · ABRIL',
-                              style: TextStyle(
+                            Text(
+                              'Receita · $mes',
+                              style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                letterSpacing: 1.5,
+                                letterSpacing: 0.12,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -459,9 +424,9 @@ class _PersonalDashboardScreenState
                                           ),
                                     ),
                                 const SizedBox(width: 6),
-                                const Text(
-                                  '/ mês',
-                                  style: TextStyle(
+                                Text(
+                                  '/ R\$ ${_finData?.previsaoReceita.toStringAsFixed(0) ?? '--'}',
+                                  style: const TextStyle(
                                     color: Colors.white54,
                                     fontSize: 13,
                                   ),
@@ -492,9 +457,9 @@ class _PersonalDashboardScreenState
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _HeroMiniStat(
-                                  label: 'PREVISÃO',
+                                  label: 'PENDENTE',
                                   value:
-                                      'R\$ ${_finData?.previsaoReceita.toStringAsFixed(0) ?? '0'}',
+                                      'R\$ ${pendente.toInt()}',
                                 ),
                                 Container(
                                   width: 1,
@@ -638,14 +603,19 @@ class _PersonalDashboardScreenState
                     ),
                   ),
 
-                  // ATALHOS / FERRAMENTAS
+                  // ATALHOS — 6 quick action shortcuts (design spec)
                   const SliverToBoxAdapter(child: SizedBox(height: 28)),
                   SliverToBoxAdapter(
-                    child: _SectionTitle(title: 'Ferramentas', isDark: isDark),
+                    child: _SectionTitle(title: 'Atalhos', isDark: isDark),
                   ),
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        0,
+                        16,
+                        MediaQuery.of(context).padding.bottom + 90,
+                      ),
                       child: GridView.count(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -655,28 +625,16 @@ class _PersonalDashboardScreenState
                         childAspectRatio: 0.9,
                         children: [
                           _ShortcutBtn(
-                            icon: Icons.people,
-                            label: 'Alunos',
+                            icon: Icons.auto_awesome,
+                            label: 'Gerar treino',
                             isDark: isDark,
-                            onTap: () => context.push('/alunos'),
+                            onTap: () => context.go('/ia/copiloto'),
                           ),
                           _ShortcutBtn(
-                            icon: Icons.fitness_center,
-                            label: 'Exercícios',
+                            icon: Icons.person_add_outlined,
+                            label: 'Novo aluno',
                             isDark: isDark,
-                            onTap: () => context.push('/exercicios'),
-                          ),
-                          _ShortcutBtn(
-                            icon: Icons.list_alt,
-                            label: 'Treinos',
-                            isDark: isDark,
-                            onTap: () => context.push('/treinos'),
-                          ),
-                          _ShortcutBtn(
-                            icon: Icons.attach_money,
-                            label: 'Financeiro',
-                            isDark: isDark,
-                            onTap: () => context.push('/financeiro'),
+                            onTap: () => context.push('/alunos/novo'),
                           ),
                           _ShortcutBtn(
                             icon: Icons.calendar_month,
@@ -685,49 +643,31 @@ class _PersonalDashboardScreenState
                             onTap: () => context.push('/agenda'),
                           ),
                           _ShortcutBtn(
-                            icon: Icons.dynamic_feed,
-                            label: 'Feed',
+                            icon: Icons.chat_bubble_outline,
+                            label: 'Mensagens',
                             isDark: isDark,
-                            onTap: () => context.push('/feed'),
+                            onTap: () => context.push('/chat/aluno'),
                           ),
                           _ShortcutBtn(
-                            icon: Icons.workspace_premium_outlined,
-                            label: 'Planos',
+                            icon: Icons.pix,
+                            label: 'Cobrar PIX',
                             isDark: isDark,
-                            onTap: () => context.push('/planos'),
+                            onTap: () => context.go('/financeiro'),
                           ),
                           _ShortcutBtn(
-                            icon: Icons.bolt_outlined,
-                            label: 'Migracao',
+                            icon: Icons.people_outline,
+                            label: 'Leads',
                             isDark: isDark,
-                            onTap: () => context.push('/migracao-magica'),
+                            onTap: () => context.push('/leads'),
                           ),
-                          _ShortcutBtn(
-                            icon: Icons.security,
-                            label: 'Acessos',
-                            isDark: isDark,
-                            onTap: () => context.push('/admin/rbac'),
-                          ),
-                          if (ref.watch(isAdminProvider))
-                            _ShortcutBtn(
-                              icon: Icons.admin_panel_settings,
-                              label: 'Admin',
-                              isDark: isDark,
-                              onTap:
-                                  () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const AdminScreen(),
-                                    ),
-                                  ),
-                            ),
                         ],
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
+            );
+            },
       ),
     );
   }
@@ -820,219 +760,6 @@ class _PersonalDashboardScreenState
     );
   }
 
-  Widget _buildDrawer(
-    BuildContext context,
-    bool isDark,
-    String? nomePersonal,
-    String? logoUrl,
-  ) {
-    final drawerBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final headerBg = isDark ? EagleTokens.darkCardHi : EagleTokens.brandSoft;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final dividerColor = isDark ? EagleTokens.darkLine : EagleTokens.line;
-
-    final navItems = [
-      (icon: Icons.calendar_month, label: 'Agenda', route: '/agenda'),
-      (icon: Icons.attach_money, label: 'Financeiro', route: '/financeiro'),
-      (icon: Icons.fitness_center, label: 'Exercícios', route: '/exercicios'),
-      (icon: Icons.list_alt, label: 'Treinos', route: '/treinos'),
-      (icon: Icons.people, label: 'Alunos', route: '/alunos'),
-    ];
-
-    return Drawer(
-      backgroundColor: drawerBg,
-      child: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Container(
-              width: double.infinity,
-              color: headerBg,
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-              child: Row(
-                children: [
-                  logoUrl != null && logoUrl.isNotEmpty
-                      ? CircleAvatar(
-                        backgroundImage: NetworkImage(logoUrl),
-                        radius: 28,
-                      )
-                      : CircleAvatar(
-                        radius: 28,
-                        backgroundColor: EagleTokens.brand,
-                        child: Text(
-                          nomePersonal?.substring(0, 1).toUpperCase() ?? 'F',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22,
-                          ),
-                        ),
-                      ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          nomePersonal ?? '',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: ink,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        FxLogo(
-                          iconSize: 16,
-                          showLabel: true,
-                          horizontal: true,
-                          light: isDark,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Divider(height: 1, color: dividerColor),
-            // Nav links
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                children: [
-                  ...navItems.take(3).map((item) {
-                    return ListTile(
-                      leading: Icon(
-                        item.icon,
-                        color: EagleTokens.brand,
-                        size: 22,
-                      ),
-                      title: Text(
-                        item.label,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: ink,
-                        ),
-                      ),
-                      horizontalTitleGap: 8,
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        context.go(item.route);
-                      },
-                    );
-                  }),
-                  ListTile(
-                    leading: Icon(
-                      Icons.palette_outlined,
-                      size: 22,
-                      color:
-                          isDark
-                              ? EagleTokens.darkInkMute
-                              : EagleTokens.inkMute,
-                    ),
-                    title: Text(
-                      'Identidade Visual',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                      ),
-                    ),
-                    horizontalTitleGap: 8,
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      context.go('/identidade-visual');
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.star_outline),
-                    title: const Text('Depoimentos'),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      context.go('/depoimentos');
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.photo_library_outlined),
-                    title: const Text('Galeria'),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      context.go('/galeria');
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.workspace_premium_outlined),
-                    title: const Text('Planos'),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      context.go('/planos');
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.bolt_outlined),
-                    title: const Text('Migracao Magica'),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      context.go('/migracao-magica');
-                    },
-                  ),
-                  ...navItems.skip(3).map((item) {
-                    return ListTile(
-                      leading: Icon(
-                        item.icon,
-                        color: EagleTokens.brand,
-                        size: 22,
-                      ),
-                      title: Text(
-                        item.label,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: ink,
-                        ),
-                      ),
-                      horizontalTitleGap: 8,
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        context.go(item.route);
-                      },
-                    );
-                  }),
-                ],
-              ),
-            ),
-            Divider(height: 1, color: dividerColor),
-            // Logout
-            ListTile(
-              leading: const Icon(
-                Icons.logout,
-                color: Colors.redAccent,
-                size: 22,
-              ),
-              title: const Text(
-                'Sair',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.redAccent,
-                ),
-              ),
-              horizontalTitleGap: 8,
-              onTap: () async {
-                Navigator.of(context).pop();
-                await ref.read(authProvider.notifier).logout();
-                if (context.mounted) context.go('/login');
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _HeroMiniStat extends StatelessWidget {
@@ -1131,7 +858,7 @@ class _QuickTile extends StatelessWidget {
               color: isDark ? const Color(0xFF8DA4E2) : accent,
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 10),
           Text(
             value,
             style: TextStyle(
