@@ -116,16 +116,28 @@ class _FxMarkTile extends StatelessWidget {
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: OverflowBox(
-        maxWidth: size * 1.3,
-        maxHeight: size * 1.3,
-        child: Image.asset(
-          'assets/images/logo_icon.png',
-          width: size * 1.3,
-          height: size * 1.3,
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.high,
-          isAntiAlias: true,
+      // ShaderMask with BlendMode.screen simulates CSS mix-blend-mode:screen —
+      // mathematically equivalent (screen is commutative). The gradient shader
+      // matches the tile background so eagle pixels are brightened/luminous.
+      child: ShaderMask(
+        shaderCallback: (Rect bounds) => const RadialGradient(
+          center: Alignment(-0.3, -0.5),
+          radius: 1.0,
+          colors: [Color(0xFF1A3A7A), Color(0xFF070E2A)],
+          stops: [0.0, 1.0],
+        ).createShader(bounds),
+        blendMode: BlendMode.screen,
+        child: OverflowBox(
+          maxWidth: size * 1.3,
+          maxHeight: size * 1.3,
+          child: Image.asset(
+            'assets/images/logo_icon.png',
+            width: size * 1.3,
+            height: size * 1.3,
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.high,
+            isAntiAlias: true,
+          ),
         ),
       ),
     );
