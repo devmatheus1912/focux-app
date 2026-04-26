@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_logo.dart';
 import '../../../core/widgets/fx_sparkline.dart';
@@ -317,10 +318,7 @@ class _PersonalDashboardScreenState
                                             radius: 18,
                                             backgroundColor: EagleTokens.brand,
                                             child: Text(
-                                              data.nomePersonal
-                                                      ?.substring(0, 1)
-                                                      .toUpperCase() ??
-                                                  'F',
+                                              fxInitials(data.nomePersonal ?? 'F'),
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
@@ -964,8 +962,8 @@ class _AttentionCard extends StatelessWidget {
                 radius: 18,
                 backgroundColor: EagleTokens.brand,
                 child: Text(
-                  nome.substring(0, 1).toUpperCase(),
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  fxInitials(nome),
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
               ),
               const SizedBox(width: 10),
@@ -1169,7 +1167,7 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                           ? const Color(0xFF8DA4E2).withValues(alpha: 0.15)
                           : EagleTokens.brandSoft,
                   child: Text(
-                    (a['nome'] as String).substring(0, 1),
+                    fxInitials(a['nome'] as String),
                     style: TextStyle(
                       color:
                           isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,

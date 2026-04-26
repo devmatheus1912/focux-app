@@ -7,8 +7,9 @@ import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/fx_utils.dart';
 
-enum AlunoFiltro { todos, ativos, inadimplentes, risco }
+enum AlunoFiltro { todos, ativos, inadimplentes, risco, novos }
 
 class AlunosListScreen extends ConsumerStatefulWidget {
   const AlunosListScreen({super.key});
@@ -91,6 +92,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         return todos.where((a) => a.statusFinanceiro == 'INADIMPLENTE' || a.inadimplente).toList();
       case AlunoFiltro.risco:
         return todos.where((a) => a.emRisco).toList();
+      case AlunoFiltro.novos:
+        // "Novos" = invited students who haven't set their password yet
+        return todos.where((a) => a.senhaProvisoria != null).toList();
     }
   }
 
@@ -236,6 +240,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                       _FxChip(label: 'Ativos', isSelected: _filtro == AlunoFiltro.ativos, isDark: isDark, onTap: () => setState(() => _filtro = AlunoFiltro.ativos)),
                       _FxChip(label: 'Inadimplentes', isSelected: _filtro == AlunoFiltro.inadimplentes, isDark: isDark, onTap: () => setState(() => _filtro = AlunoFiltro.inadimplentes)),
                       _FxChip(label: 'Risco alto', isSelected: _filtro == AlunoFiltro.risco, isDark: isDark, onTap: () => setState(() => _filtro = AlunoFiltro.risco)),
+                      _FxChip(label: 'Novos', isSelected: _filtro == AlunoFiltro.novos, isDark: isDark, onTap: () => setState(() => _filtro = AlunoFiltro.novos)),
                     ],
                   ),
                 ),
@@ -486,7 +491,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
               decoration: BoxDecoration(color: avatarColor, shape: BoxShape.circle),
               alignment: Alignment.center,
               child: Text(
-                aluno.nome.isNotEmpty ? aluno.nome[0].toUpperCase() : '?',
+                fxInitials(aluno.nome),
                 style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),

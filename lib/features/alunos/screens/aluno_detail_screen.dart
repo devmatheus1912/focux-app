@@ -11,6 +11,7 @@ import '../../chat/screens/chat_screen.dart';
 import '../../evolucao/screens/evolucao_screen.dart';
 import '../../feedback/screens/feedback_video_screen.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 
 class AlunoDetailScreen extends ConsumerWidget {
@@ -106,8 +107,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    aluno.nome.isNotEmpty ? aluno.nome.substring(0, 1).toUpperCase() : 'A',
-                                    style: const TextStyle(color: EagleTokens.brand, fontSize: 32, fontWeight: FontWeight.bold),
+                                    fxInitials(aluno.nome),
+                                    style: const TextStyle(color: EagleTokens.brand, fontSize: 28, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 const SizedBox(width: 16),

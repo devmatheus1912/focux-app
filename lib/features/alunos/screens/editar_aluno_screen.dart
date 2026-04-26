@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 
@@ -121,7 +122,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                       radius: 36,
                       backgroundColor: EagleTokens.brand.withValues(alpha: 0.12),
                       child: Text(
-                        widget.aluno.nome.isNotEmpty ? widget.aluno.nome[0].toUpperCase() : '?',
+                        fxInitials(widget.aluno.nome),
                         style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: EagleTokens.brand),
                       ),
                     ),

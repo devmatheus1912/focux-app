@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -354,7 +355,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                         width: 44, height: 44,
                                         decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
                                         alignment: Alignment.center,
-                                        child: Text(a.alunoNome.isNotEmpty ? a.alunoNome[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                                        child: Text(fxInitials(a.alunoNome), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
                                       ),
                                       const SizedBox(width: 12),
                                       Expanded(
