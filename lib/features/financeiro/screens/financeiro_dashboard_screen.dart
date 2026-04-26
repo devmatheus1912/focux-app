@@ -178,12 +178,12 @@ class _HeroRing extends StatelessWidget {
           children: [
             // Ring
             SizedBox(
-              width: 96, height: 96,
+              width: 120, height: 120,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   SizedBox(
-                    width: 96, height: 96,
+                    width: 120, height: 120,
                     child: CircularProgressIndicator(
                       value: 1.0,
                       strokeWidth: 8,
@@ -191,7 +191,7 @@ class _HeroRing extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                    width: 96, height: 96,
+                    width: 120, height: 120,
                     child: CircularProgressIndicator(
                       value: perc.clamp(0.0, 1.0),
                       strokeWidth: 8,

@@ -179,17 +179,26 @@ class _TreinoDetailBody extends StatelessWidget {
             ),
           ],
           flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isDark 
-                      ? [const Color(0xFF1C3273), const Color(0xFF0A0F1E)]
-                      : [EagleTokens.brand, EagleTokens.brandDeep],
-                  stops: const [0.0, 0.85],
+            background: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Gradient base
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDark
+                          ? [const Color(0xFF1C3273), const Color(0xFF0A0F1E)]
+                          : [EagleTokens.brand, EagleTokens.brandDeep],
+                      stops: const [0.0, 0.85],
+                    ),
+                  ),
                 ),
-              ),
+                // Grid texture — white 6% opacity, 26×26px cells
+                CustomPaint(painter: const _GridTexturePainter()),
+                // Content
+                Container(
               padding: const EdgeInsets.fromLTRB(22, 100, 22, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,22 +299,41 @@ class _TreinoDetailBody extends StatelessWidget {
                 ],
               ),
             ),
+              ],
+            ),
           ),
         ),
 
-        // Stats Ribbon
+        // Stats Ribbon — design: Duração / Exercícios / Volume
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
-            child: Row(
-              children: [
-                _MiniMetric(label: 'Nível', value: treino.nivel ?? 'Interm.', isDark: isDark),
-                const SizedBox(width: 8),
-                _MiniMetric(label: 'Grupos', value: '${grouped.keys.length}', isDark: isDark),
-                const SizedBox(width: 8),
-                _MiniMetric(label: 'Última', value: 'Qua 15/4', isDark: isDark),
-              ],
-            ),
+            child: Builder(builder: (context) {
+              // Estimated duration: 3–4 min per exercise (rough)
+              final durMin = (treino.exercicios.length * 3.5).round();
+              // Volume: sum of series × (int from repeticoes) × cargaKg
+              double vol = 0;
+              for (final te in treino.exercicios) {
+                final reps = int.tryParse(
+                        te.repeticoes.split('x').last.trim()) ??
+                    int.tryParse(te.repeticoes) ??
+                    0;
+                vol += te.series * reps * (te.cargaKg ?? 0);
+              }
+              return Row(
+                children: [
+                  _MiniMetric(label: 'Duração', value: '~${durMin}min', isDark: isDark),
+                  const SizedBox(width: 8),
+                  _MiniMetric(label: 'Exercícios', value: '${treino.exercicios.length}', isDark: isDark),
+                  const SizedBox(width: 8),
+                  _MiniMetric(
+                    label: 'Volume',
+                    value: vol > 0 ? '${(vol / 1000).toStringAsFixed(1)}t' : '${grouped.keys.length} gr.',
+                    isDark: isDark,
+                  ),
+                ],
+              );
+            }),
           ),
         ),
 
@@ -548,4 +576,28 @@ class _ExercicioRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Grid texture painter — white lines 6% opacity, 26×26px cells.
+/// Matches auth_shell.dart _AuthGridPainter; reused on hero surfaces.
+class _GridTexturePainter extends CustomPainter {
+  const _GridTexturePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.06)
+      ..strokeWidth = 0.5
+      ..style = PaintingStyle.stroke;
+
+    for (double x = 0; x <= size.width; x += 26) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y <= size.height; y += 26) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

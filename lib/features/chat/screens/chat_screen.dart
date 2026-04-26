@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/chat_repository.dart';
@@ -106,7 +107,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           CircleAvatar(
             radius: 18,
             backgroundColor: EagleTokens.brand.withValues(alpha: 0.12),
-            child: Text(widget.alunoNome.isNotEmpty ? widget.alunoNome[0].toUpperCase() : '?', style: const TextStyle(color: EagleTokens.brand, fontWeight: FontWeight.w700, fontSize: 16)),
+            child: Text(fxInitials(widget.alunoNome), style: const TextStyle(color: EagleTokens.brand, fontWeight: FontWeight.w700, fontSize: 14)),
           ),
           const SizedBox(width: 10),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -118,6 +119,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ]),
           ]),
         ]),
+        actions: [
+          // IA button
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: EagleTokens.brand.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.auto_awesome, size: 13, color: EagleTokens.brand),
+                  SizedBox(width: 4),
+                  Text('IA', style: TextStyle(color: EagleTokens.brand, fontSize: 12, fontWeight: FontWeight.w700)),
+                ],
+              ),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.more_vert, color: isDark ? EagleTokens.darkInk : EagleTokens.ink, size: 22),
+            onPressed: () {},
+          ),
+        ],
         bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Container(height: 1, color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft)),
       ),
       body: Column(children: [
@@ -222,9 +248,18 @@ class _Bubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
-          color: isPersonal ? EagleTokens.brand : (isDark ? EagleTokens.darkCardHi : EagleTokens.card),
+          // Design spec: personal bubbles use gradient 135° brand→brandInk
+          gradient: isPersonal
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [EagleTokens.brand, EagleTokens.brandInk],
+                )
+              : null,
+          color: isPersonal ? null : (isDark ? EagleTokens.darkCardHi : EagleTokens.card),
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(20), topRight: const Radius.circular(20),
+            topLeft: const Radius.circular(20),
+            topRight: const Radius.circular(20),
             bottomLeft: Radius.circular(isPersonal ? 20 : 6),
             bottomRight: Radius.circular(isPersonal ? 6 : 20),
           ),
