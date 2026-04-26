@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 
 // ─── Model ───────────────────────────────────────────────────────────────────
@@ -84,9 +85,83 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                   color: Color(0xFF717171),
                   letterSpacing: 1)),
         ),
-        ...items.map((item) => _BuscaItemTile(item: item, onTap: () => context.push(item.url))),
+        ...items.map((item) => _BuscaItemTile(item: item, onTap: () => _abrirItem(item))),
       ],
     );
+  }
+
+  /// Whitelist of internal route prefixes the app is allowed to deep-link to from
+  /// search results. Anything coming from the backend that does NOT match one of
+  /// these prefixes is treated as untrusted and routed via [url_launcher] (with
+  /// confirmation) instead of being navigated into the app shell.
+  static const _allowedInternalPrefixes = <String>[
+    '/alunos/',
+    '/treinos/',
+    '/financeiro/',
+    '/agenda/',
+    '/checkin/',
+    '/chat/',
+    '/leads/',
+    '/perfil/',
+  ];
+
+  Future<void> _abrirItem(BuscaItem item) async {
+    final raw = item.url.trim();
+    if (raw.isEmpty) {
+      _showError('Item sem destino válido.');
+      return;
+    }
+
+    // Internal deep link: must start with a whitelisted prefix to avoid arbitrary
+    // route injection (e.g. backend returning '/admin/system' or 'https://evil/...').
+    if (raw.startsWith('/')) {
+      final normalized = _normalizePath(raw);
+      final isAllowed = _allowedInternalPrefixes.any(normalized.startsWith);
+      if (!isAllowed) {
+        _showError('Destino não permitido.');
+        return;
+      }
+      if (!mounted) return;
+      context.push(normalized);
+      return;
+    }
+
+    // Absolute URL: only http(s), and only after explicit user confirmation.
+    Uri? uri;
+    try { uri = Uri.parse(raw); } catch (_) { uri = null; }
+    if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) {
+      _showError('Destino não suportado.');
+      return;
+    }
+
+    if (!mounted) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Abrir link externo?'),
+        content: Text(uri.toString()),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogCtx, false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(dialogCtx, true), child: const Text('Abrir')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) _showError('Não foi possível abrir este link.');
+  }
+
+  String _normalizePath(String path) {
+    var p = path;
+    while (p.contains('//')) {
+      p = p.replaceAll('//', '/');
+    }
+    return p;
+  }
+
+  void _showError(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   @override

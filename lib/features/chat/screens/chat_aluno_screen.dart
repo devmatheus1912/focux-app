@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
+import '../../../core/config/env.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -32,7 +33,7 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
   bool _uploading     = false;
   int? _alunoId;
 
-  static const _base = 'https://focux-backend.onrender.com';
+  String get _base => Env.apiUrl;
 
   @override
   void initState() {
@@ -60,7 +61,7 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
 
   Future<void> _connectWs(int alunoId) async {
     final token = await SecureStorage.getToken();
-    final url   = '${_base.replaceFirst('https', 'wss')}/ws/websocket';
+    final url   = '${Env.wsUrl}/ws/websocket';
 
     _stomp = StompClient(
       config: StompConfig(

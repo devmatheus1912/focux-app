@@ -3,6 +3,7 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/onboarding_provider.dart';
+import '../../perfil/providers/perfil_provider.dart';
 
 class SetupOnboardingWidget extends ConsumerWidget {
   const SetupOnboardingWidget({super.key});
@@ -46,7 +47,16 @@ class SetupOnboardingWidget extends ConsumerWidget {
                 _StepTile(
                   title: 'Configure seu Perfil',
                   isDone: data.perfilCompleto,
-                  onTap: () => context.push('/perfil/editar'),
+                  onTap: () async {
+                    try {
+                      final perfil = await ref.read(perfilProvider.future);
+                      if (context.mounted) {
+                        context.push('/perfil/editar', extra: perfil);
+                      }
+                    } catch (_) {
+                      if (context.mounted) context.push('/perfil');
+                    }
+                  },
                 ),
                 _StepTile(
                   title: 'Adicione o primeiro Aluno',

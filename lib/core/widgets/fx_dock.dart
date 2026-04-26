@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/design_tokens.dart';
+import 'fx_icon.dart';
 
 /// Floating glass dock — design spec: iOS 26 style, 5 tabs, backdrop blur 24px.
 ///
@@ -23,11 +24,11 @@ class FxDock extends StatelessWidget {
   final bool isDark;
 
   static const _items = [
-    _FxDockItem(icon: Icons.home_rounded, label: 'Hoje'),
-    _FxDockItem(icon: Icons.people, label: 'Alunos'),
-    _FxDockItem(icon: Icons.fitness_center, label: 'Treinos'),
-    _FxDockItem(icon: Icons.account_balance_wallet_outlined, label: 'Finance'),
-    _FxDockItem(icon: Icons.auto_awesome, label: 'IA'),
+    _FxDockItem(icon: 'home', label: 'Hoje'),
+    _FxDockItem(icon: 'users', label: 'Alunos'),
+    _FxDockItem(icon: 'dumbbell', label: 'Treinos'),
+    _FxDockItem(icon: 'coin', label: 'Finance'),
+    _FxDockItem(icon: 'spark', label: 'IA'),
   ];
 
   @override
@@ -94,7 +95,14 @@ class FxDock extends StatelessWidget {
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: Icon(item.icon, size: 21, color: color),
+                          child: Center(
+                            child: FxIcon(
+                              name: item.icon,
+                              size: 22,
+                              color: color,
+                              strokeWidth: active ? 2.2 : 1.8,
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 3),
                         Text(
@@ -120,7 +128,7 @@ class FxDock extends StatelessWidget {
 }
 
 class _FxDockItem {
-  final IconData icon;
+  final String icon;
   final String label;
   const _FxDockItem({required this.icon, required this.label});
 }

@@ -108,6 +108,18 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     return '${m.toString().padLeft(2,'0')}:${s.toString().padLeft(2,'0')}';
   }
 
+  void _aplicarSugestaoIa() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sugestão aplicada. Cargas atualizadas para a próxima série.')),
+    );
+  }
+
+  void _ignorarSugestaoIa() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sugestão ignorada. Continue como está.')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -291,7 +303,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                         const SizedBox(height: 14),
                         Row(children: [
                           Expanded(child: GestureDetector(
-                            onTap: () {},
+                            onTap: _aplicarSugestaoIa,
                             child: Container(
                               height: 44, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
                               child: Center(child: Text('Aplicar sugestão', style: TextStyle(color: EagleTokens.brand, fontSize: 13, fontWeight: FontWeight.w700))),
@@ -299,7 +311,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                           )),
                           const SizedBox(width: 8),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: _ignorarSugestaoIa,
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white30)),

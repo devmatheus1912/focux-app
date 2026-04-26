@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../features/subscription/models/subscription_plan.dart';
-import '../../features/subscription/screens/paywall_screen.dart';
-import '../../features/perfil/providers/perfil_provider.dart';
+import '../../features/planos/providers/plano_features_provider.dart';
 
 class FeatureGate extends ConsumerWidget {
   final SubscriptionPlan requiredPlan;
@@ -10,27 +10,37 @@ class FeatureGate extends ConsumerWidget {
   final Widget? lockedBuilder;
   final String featureName;
 
+  /// Capability flag específica (ex.: "iaCopiloto", "whiteLabel"). Quando
+  /// passado, o gate consulta a flag no backend (via `/api/planos/me`)
+  /// e ignora `requiredPlan`. Use isto para evitar inferir features a
+  /// partir do nome do plano.
+  final String? capability;
+
   const FeatureGate({
     super.key,
     required this.requiredPlan,
     required this.child,
     this.lockedBuilder,
     required this.featureName,
+    this.capability,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final perfilAsync = ref.watch(perfilProvider);
-    final currentPlan = perfilAsync.maybeWhen(
-      data: (perfil) => subscriptionPlanFromApi(perfil.plano),
-      orElse: () => SubscriptionPlan.FREE,
-    );
+    final featuresAsync = ref.watch(planoFeaturesProvider);
 
-    if (perfilAsync.isLoading) {
+    if (featuresAsync.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (currentPlan.canAccess(requiredPlan)) {
+    final features = featuresAsync.valueOrNull;
+    final currentPlan = features?.plano ?? SubscriptionPlan.FREE;
+
+    final hasAccess = capability != null && features != null
+        ? _resolveCapability(features, capability!)
+        : currentPlan.canAccess(requiredPlan);
+
+    if (hasAccess) {
       return child;
     }
 
@@ -59,9 +69,7 @@ class FeatureGate extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const PaywallScreen()));
-              },
+              onPressed: () => context.push('/paywall'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2B4A9E),
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
@@ -73,5 +81,17 @@ class FeatureGate extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  bool _resolveCapability(PlanoFeatures f, String cap) {
+    switch (cap) {
+      case 'financeiro': return f.financeiro;
+      case 'agenda': return f.agenda;
+      case 'relatorios': return f.relatorios;
+      case 'whiteLabel': return f.whiteLabel;
+      case 'iaCopiloto': return f.iaCopiloto;
+      case 'iaIlimitada': return f.iaIlimitada;
+      default: return false;
+    }
   }
 }

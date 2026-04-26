@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
@@ -23,6 +24,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.track(ProductEvents.paywallOpened);
     _planos = [
       {
         'id': 0,
@@ -93,6 +95,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         _submitting) {
       return;
     }
+
+    AnalyticsService.instance.track(ProductEvents.paywallCtaTapped, props: {
+      'plan': selectedPlan.apiName,
+      'trialUsed': trialUsed,
+    });
 
     if (selectedPlan == SubscriptionPlan.PREMIUM) {
       if (!mounted) return;

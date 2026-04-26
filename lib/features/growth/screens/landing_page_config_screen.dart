@@ -167,7 +167,12 @@ class LandingPageConfigScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
             child: GestureDetector(
-              onTap: () {},
+              onTap: () {
+                Clipboard.setData(const ClipboardData(text: 'https://focux.app/p/seu-perfil'));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Link da sua landing copiado para a área de transferência.')),
+                );
+              },
               child: Container(
                 height: 50,
                 decoration: BoxDecoration(

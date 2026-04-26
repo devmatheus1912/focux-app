@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/config/env.dart';
 import '../models/public_personal_data.dart';
 import '../widgets/hero_section.dart';
 import '../widgets/social_proof_section.dart';
@@ -21,7 +23,7 @@ import '../widgets/powered_by_footer.dart';
 final _publicPersonalProvider =
     FutureProvider.autoDispose.family<PublicPersonalData, String>((ref, slug) async {
   // Public endpoint — no auth needed. Use raw http.
-  const baseUrl = 'https://focux-backend.onrender.com';
+  final baseUrl = Env.apiUrl;
   final response = await http.get(Uri.parse('$baseUrl/api/public/personal/$slug'));
   if (response.statusCode == 403 || response.statusCode == 404) {
     throw Exception('NOT_AVAILABLE');
@@ -33,6 +35,34 @@ final _publicPersonalProvider =
     jsonDecode(response.body) as Map<String, dynamic>,
   );
 });
+
+// ---------------------------------------------------------------------------
+// Store launcher
+// ---------------------------------------------------------------------------
+
+const String _kAndroidStoreUrl = 'https://play.google.com/store/apps/details?id=com.focux.personal';
+const String _kIosStoreUrl = 'https://apps.apple.com/app/focux-personal/id0000000000';
+const String _kFallbackUrl = 'https://focux.app/baixar';
+
+Future<void> _abrirStore(BuildContext context) async {
+  final platform = Theme.of(context).platform;
+  final url = platform == TargetPlatform.iOS ? _kIosStoreUrl : _kAndroidStoreUrl;
+  final uri = Uri.parse(url);
+  bool ok = false;
+  try {
+    ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+  } catch (_) {}
+  if (!ok) {
+    try {
+      ok = await launchUrl(Uri.parse(_kFallbackUrl), mode: LaunchMode.externalApplication);
+    } catch (_) {}
+  }
+  if (!ok && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Não foi possível abrir a loja. Tente novamente.')),
+    );
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Color helper
@@ -107,7 +137,7 @@ class _NotAvailableView extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () => _abrirStore(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3B5FE2),
                   foregroundColor: Colors.white,

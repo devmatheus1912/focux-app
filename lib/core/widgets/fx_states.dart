@@ -117,3 +117,74 @@ class FxLoading extends StatelessWidget {
     child: CircularProgressIndicator(color: EagleTokens.brand),
   );
 }
+
+/// Skeleton (shimmer) placeholder. Usar como `child:` enquanto dados carregam.
+/// Mantém footprint visual da lista para evitar layout shift.
+class FxSkeleton extends StatefulWidget {
+  final double height;
+  final double? width;
+  final BorderRadius borderRadius;
+  final EdgeInsetsGeometry margin;
+
+  const FxSkeleton({
+    super.key,
+    this.height = 16,
+    this.width,
+    this.borderRadius = const BorderRadius.all(Radius.circular(8)),
+    this.margin = EdgeInsets.zero,
+  });
+
+  /// Helper para uma linha de lista com avatar circular + 2 linhas de texto.
+  static Widget listTile({EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 10)}) {
+    return Padding(
+      padding: padding,
+      child: Row(children: [
+        const FxSkeleton(height: 40, width: 40, borderRadius: BorderRadius.all(Radius.circular(20))),
+        const SizedBox(width: 12),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
+          FxSkeleton(height: 14, width: 160),
+          SizedBox(height: 8),
+          FxSkeleton(height: 12, width: 100),
+        ])),
+      ]),
+    );
+  }
+
+  @override
+  State<FxSkeleton> createState() => _FxSkeletonState();
+}
+
+class _FxSkeletonState extends State<FxSkeleton> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final base = isDark ? EagleTokens.darkLine : const Color(0xFFE6E8EE);
+    final highlight = isDark ? const Color(0xFF1F2A44) : const Color(0xFFF2F4F8);
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (context, _) {
+        final t = _ctrl.value;
+        return Container(
+          height: widget.height,
+          width: widget.width ?? double.infinity,
+          margin: widget.margin,
+          decoration: BoxDecoration(
+            borderRadius: widget.borderRadius,
+            color: Color.lerp(base, highlight, t),
+          ),
+        );
+      },
+    );
+  }
+}

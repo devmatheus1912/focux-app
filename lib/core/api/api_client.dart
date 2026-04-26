@@ -1,14 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import '../config/env.dart';
 import '../storage/secure_storage.dart';
 import 'offline_sync_service.dart';
 import 'dart:io';
 
 class ApiClient {
-  static const _baseUrl = String.fromEnvironment(
-    'API_URL',
-    defaultValue: 'https://focux-backend.onrender.com',
-  );
+  static String get _baseUrl => Env.apiUrl;
 
   late final Dio _dio;
   bool _isRefreshing = false;
@@ -28,6 +26,16 @@ class ApiClient {
         }
         handler.next(options);
       },
+      onResponse: (response, handler) {
+        final method = response.requestOptions.method.toUpperCase();
+        if (method == 'GET' && response.statusCode == 200) {
+          final path = response.requestOptions.path;
+          if (_shouldCachePath(path)) {
+            LocalCache.put(path, response.data);
+          }
+        }
+        handler.next(response);
+      },
       onError: (DioException e, handler) async {
         // ── Offline Queue ───────────────────────────────────────
         if (e.type == DioExceptionType.connectionError ||
@@ -42,6 +50,18 @@ class ApiClient {
               statusCode: 202,
               data: {'status': 'queued', 'message': 'Offline. Sincronizará quando houver rede.'},
             ));
+          }
+
+          if (method == 'GET' && _shouldCachePath(e.requestOptions.path)) {
+            final cached = await LocalCache.get(e.requestOptions.path);
+            if (cached != null) {
+              return handler.resolve(Response(
+                requestOptions: e.requestOptions,
+                statusCode: 200,
+                data: cached,
+                headers: Headers.fromMap({'x-fx-from-cache': ['true']}),
+              ));
+            }
           }
         }
 
@@ -104,4 +124,24 @@ class ApiClient {
   }
 
   Dio get dio => _dio;
+
+  /// Lista de prefixos de rota cuja resposta GET deve ser cacheada
+  /// localmente para uso offline. Mantemos o conjunto pequeno e
+  /// dirigido aos fluxos críticos do dia-a-dia (Hoje, Alunos, Treinos).
+  static bool _shouldCachePath(String path) {
+    const cacheable = [
+      '/api/personal/perfil',
+      '/api/planos/me',
+      '/api/alunos',
+      '/api/treinos',
+      '/api/dashboard',
+      '/api/hoje',
+    ];
+    for (final prefix in cacheable) {
+      if (path == prefix || path.startsWith('$prefix?') || path.startsWith('$prefix/')) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

@@ -118,6 +118,20 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      // Acessibilidade: respeita escala do sistema, mas evita explosões
+      // de layout em escalas absurdas (>1.6) — mantém WCAG AA sem
+      // quebrar telas densas como dashboard/treinos.
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        final scaler = mq.textScaler.clamp(
+          minScaleFactor: 0.85,
+          maxScaleFactor: 1.6,
+        );
+        return MediaQuery(
+          data: mq.copyWith(textScaler: scaler),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
   }
 }

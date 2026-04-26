@@ -4,10 +4,14 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_logo.dart';
+import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../providers/aderencia_provider.dart';
+import '../../alunos/providers/alunos_provider.dart';
+import '../../checkin/providers/checkin_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../financeiro/data/financeiro_repository.dart';
@@ -26,6 +30,7 @@ class _PersonalDashboardScreenState
     with TickerProviderStateMixin {
   FinanceiroDashboard? _finData;
   bool _loadingFin = true;
+  Object? _finError;
 
   late AnimationController _gradientCtrl;
   late AnimationController _counterCtrl;
@@ -56,12 +61,19 @@ class _PersonalDashboardScreenState
   }
 
   Future<void> _loadFin() async {
+    if (mounted) {
+      setState(() {
+        _loadingFin = true;
+        _finError = null;
+      });
+    }
     try {
       final data =
           await FinanceiroRepository(ref.read(apiClientProvider)).dashboard();
       if (mounted) {
         setState(() {
           _finData = data;
+          _finError = null;
           _loadingFin = false;
         });
         _counterAnim = Tween<double>(
@@ -70,49 +82,13 @@ class _PersonalDashboardScreenState
         ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
         _counterCtrl.forward(from: 0);
       }
-    } catch (e) {
-      debugPrint('[Focux] Error: $e');
+    } catch (e, st) {
+      debugPrint('[Focux] Error loading financeiro dashboard: $e\n$st');
       if (mounted) {
         setState(() {
-          _finData = FinanceiroDashboard(
-            receitaMes: 8420,
-            receitaAcumulada: 39000,
-            ticketMedio: 349,
-            totalInadimplentes: 2,
-            previsaoReceita: 11750,
-            vencimentosProximos: [
-              VencimentoItem(
-                mensalidadeId: 1,
-                alunoNome: 'Rafael Medeiros',
-                valor: 450,
-                mesReferencia: 'abr/26',
-                status: 'ATRASADO',
-              ),
-              VencimentoItem(
-                mensalidadeId: 2,
-                alunoNome: 'Juliana Torres',
-                valor: 380,
-                mesReferencia: 'abr/26',
-                status: 'ATRASADO',
-              ),
-              VencimentoItem(
-                mensalidadeId: 3,
-                alunoNome: 'Lucas Andrade',
-                valor: 280,
-                mesReferencia: 'mai/26',
-                status: 'PENDENTE',
-              ),
-            ],
-            topAlunos: const [],
-            evolucaoMensal: const [],
-          );
+          _finError = e;
           _loadingFin = false;
         });
-        _counterAnim = Tween<double>(
-          begin: 0,
-          end: _finData!.receitaMes,
-        ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
-        _counterCtrl.forward(from: 0);
       }
     }
   }
@@ -121,6 +97,8 @@ class _PersonalDashboardScreenState
   Widget build(BuildContext context) {
     final dashboardAsync = ref.watch(dashboardProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final alunosAsync = ref.watch(alunosProvider);
+    final historicoCheckinsAsync = ref.watch(historicoCheckinProvider);
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.backgroundDark : EagleTokens.paper,
@@ -139,10 +117,35 @@ class _PersonalDashboardScreenState
                       (_finData?.receitaMes ?? 0))
                   .clamp(0.0, double.infinity);
 
+              final alunosAtivos = alunosAsync.maybeWhen(
+                data: (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
+                orElse: () => data.alunosAtivos,
+              );
+              final riscoAlto = alunosAsync.maybeWhen(
+                data: (alunos) => alunos.where((a) => a.emRisco).length,
+                orElse: () => 0,
+              );
+
+              final hoje = DateTime.now();
+              final checkinsHoje = historicoCheckinsAsync.maybeWhen(
+                data: (items) {
+                  bool sameDay(DateTime a, DateTime b) =>
+                      a.year == b.year && a.month == b.month && a.day == b.day;
+                  return items.where((e) {
+                    final concluded = DateTime.tryParse(e.concluidoEm ?? '');
+                    if (concluded == null) return false;
+                    return sameDay(concluded.toLocal(), hoje);
+                  }).length;
+                },
+                orElse: () => 0,
+              );
+
               return RefreshIndicator(
               onRefresh: () async {
                 ref.invalidate(dashboardProvider);
                 ref.invalidate(commandCenterProvider);
+                ref.invalidate(alunosProvider);
+                ref.invalidate(historicoCheckinProvider);
                 await _loadFin();
               },
               child: CustomScrollView(
@@ -267,13 +270,14 @@ class _PersonalDashboardScreenState
                                     child: Stack(
                                       alignment: Alignment.center,
                                       children: [
-                                        Icon(
-                                          Icons.notifications_none,
+                                        FxIcon(
+                                          name: 'bell',
                                           size: 20,
                                           color:
                                               isDark
                                                   ? EagleTokens.darkInk
                                                   : EagleTokens.ink,
+                                          strokeWidth: 1.9,
                                         ),
                                         Positioned(
                                           top: 8,
@@ -504,7 +508,7 @@ class _PersonalDashboardScreenState
                           _QuickTile(
                             icon: Icons.people,
                             label: 'Alunos ativos',
-                            value: data.alunosAtivos.toString(),
+                            value: alunosAtivos.toString(),
                             sub:
                                 '${data.totalAlunos - data.alunosAtivos} inativos',
                             accent: EagleTokens.brand,
@@ -513,24 +517,24 @@ class _PersonalDashboardScreenState
                           _QuickTile(
                             icon: Icons.check_circle_outline,
                             label: 'Check-ins hoje',
-                            value: '0',
-                            sub: '0 no mês',
+                            value: checkinsHoje.toString(),
+                            sub: 'histórico de treinos',
                             accent: EagleTokens.good,
                             isDark: isDark,
                           ),
                           _QuickTile(
                             icon: Icons.warning_amber_rounded,
                             label: 'Risco alto',
-                            value: '0',
-                            sub: '0 renovações próx.',
+                            value: riscoAlto.toString(),
+                            sub: 'precisam atenção',
                             accent: EagleTokens.warn,
                             isDark: isDark,
                           ),
                           _QuickTile(
                             icon: Icons.local_fire_department_outlined,
                             label: 'Aderência média',
-                            value: '0%',
-                            sub: 'últimos 30 dias',
+                            value: '—',
+                            sub: 'últimos 7 dias',
                             accent: EagleTokens.brand,
                             isDark: isDark,
                           ),
@@ -623,37 +627,37 @@ class _PersonalDashboardScreenState
                         childAspectRatio: 0.9,
                         children: [
                           _ShortcutBtn(
-                            icon: Icons.auto_awesome,
+                            icon: 'spark',
                             label: 'Gerar treino',
                             isDark: isDark,
                             onTap: () => context.go('/ia/copiloto'),
                           ),
                           _ShortcutBtn(
-                            icon: Icons.person_add_outlined,
+                            icon: 'plus',
                             label: 'Novo aluno',
                             isDark: isDark,
                             onTap: () => context.push('/alunos/novo'),
                           ),
                           _ShortcutBtn(
-                            icon: Icons.calendar_month,
+                            icon: 'calendar',
                             label: 'Agenda',
                             isDark: isDark,
                             onTap: () => context.push('/agenda'),
                           ),
                           _ShortcutBtn(
-                            icon: Icons.chat_bubble_outline,
+                            icon: 'chat',
                             label: 'Mensagens',
                             isDark: isDark,
                             onTap: () => context.push('/chat/aluno'),
                           ),
                           _ShortcutBtn(
-                            icon: Icons.pix,
+                            icon: 'pix',
                             label: 'Cobrar PIX',
                             isDark: isDark,
                             onTap: () => context.go('/financeiro'),
                           ),
                           _ShortcutBtn(
-                            icon: Icons.people_outline,
+                            icon: 'trend',
                             label: 'Leads',
                             isDark: isDark,
                             onTap: () => context.push('/leads'),
@@ -1046,7 +1050,7 @@ class _AttentionCard extends StatelessWidget {
 }
 
 class _ShortcutBtn extends StatelessWidget {
-  final IconData icon;
+  final String icon;
   final String label;
   final VoidCallback onTap;
   final bool isDark;
@@ -1076,10 +1080,11 @@ class _ShortcutBtn extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
+            FxIcon(
+              name: icon,
               size: 18,
               color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+              strokeWidth: 1.9,
             ),
             const Spacer(),
             Text(
@@ -1108,121 +1113,144 @@ class _AderenciaSemanaWidget extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
-    // Fake data to represent the 3 top active students
-    final alunos = [
-      {
-        'nome': 'Marcos Silva',
-        'obj': 'Hipertrofia',
-        'treinos': '4',
-        'ad': '92',
-        'spark': [0.2, 0.4, 0.3, 0.8, 1.0],
-      },
-      {
-        'nome': 'Juliana Costa',
-        'obj': 'Emagrecimento',
-        'treinos': '3',
-        'ad': '85',
-        'spark': [0.5, 0.6, 0.8, 0.7, 0.9],
-      },
-      {
-        'nome': 'Roberto Carlos',
-        'obj': 'Força',
-        'treinos': '5',
-        'ad': '78',
-        'spark': [1.0, 0.7, 0.5, 0.6, 0.8],
-      },
-    ];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line, width: 1),
-      ),
-      child: Column(
-        children: List.generate(alunos.length, (index) {
-          final a = alunos[index];
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    return Consumer(
+      builder: (context, ref, _) {
+        final async = ref.watch(aderenciaTop3Provider);
+        return async.when(
+          loading: () => Container(
+            height: 180,
             decoration: BoxDecoration(
-              border:
-                  index < alunos.length - 1
-                      ? Border(
-                        bottom: BorderSide(
-                          color:
-                              isDark ? EagleTokens.darkLine : EagleTokens.line,
-                          width: 0.5,
-                        ),
-                      )
-                      : null,
+              color: cardBg,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                width: 1,
+              ),
             ),
-            child: Row(
-              children: [
-                // Avatar
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor:
-                      isDark
-                          ? const Color(0xFF8DA4E2).withValues(alpha: 0.15)
-                          : EagleTokens.brandSoft,
-                  child: Text(
-                    fxInitials(a['nome'] as String),
-                    style: TextStyle(
-                      color:
-                          isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Text
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        a['nome'] as String,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: ink,
-                          letterSpacing: -0.1,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${a['obj']} · ${a['treinos']} treinos',
-                        style: TextStyle(fontSize: 12, color: mute),
-                      ),
-                    ],
-                  ),
-                ),
-                // Sparkline
-                FxSparkline(
-                  data: a['spark'] as List<double>,
-                  width: 56,
-                  height: 22,
-                  color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
-                ),
-                const SizedBox(width: 14),
-                // Percentage
-                SizedBox(
-                  width: 40,
-                  child: Text(
-                    '${a['ad']}%',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: ink,
-                    ),
-                  ),
-                ),
-              ],
+            alignment: Alignment.center,
+            child: const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
-          );
-        }),
-      ),
+          ),
+          error: (e, _) => Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                width: 1,
+              ),
+            ),
+            child: Text('Erro ao carregar aderência: $e', style: TextStyle(color: mute)),
+          ),
+          data: (items) {
+            if (items.isEmpty) {
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                    width: 1,
+                  ),
+                ),
+                child: Text('Sem dados de check-in na semana.', style: TextStyle(color: mute)),
+              );
+            }
+
+            return Container(
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                children: List.generate(items.length, (index) {
+                  final a = items[index];
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      border: index < items.length - 1
+                          ? Border(
+                              bottom: BorderSide(
+                                color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                                width: 0.5,
+                              ),
+                            )
+                          : null,
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: isDark
+                              ? const Color(0xFF8DA4E2).withValues(alpha: 0.15)
+                              : EagleTokens.brandSoft,
+                          child: Text(
+                            fxInitials(a.nome),
+                            style: TextStyle(
+                              color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                a.nome,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: ink,
+                                  letterSpacing: -0.1,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${a.objetivo ?? 'Objetivo'} · ${a.totalCheckinsSemana} check-ins',
+                                style: TextStyle(fontSize: 12, color: mute),
+                              ),
+                            ],
+                          ),
+                        ),
+                        FxSparkline(
+                          data: a.sparkline,
+                          width: 56,
+                          height: 22,
+                          color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+                        ),
+                        const SizedBox(width: 14),
+                        SizedBox(
+                          width: 40,
+                          child: Text(
+                            '${a.aderenciaPercent}%',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: ink,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

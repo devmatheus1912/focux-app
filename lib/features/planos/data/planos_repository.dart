@@ -170,6 +170,64 @@ class SubscriptionMetadata {
       );
 }
 
+/// Snapshot autoritativo do plano atual conforme retornado pelo backend
+/// em `/api/planos/me`. Use isto para gating do app — não inferir features
+/// a partir do nome do plano em string.
+class PlanoFeatures {
+  final SubscriptionPlan plano;
+  final String? planoNomeOriginal;
+  final int? limiteAlunos;
+  final int? limiteIaMensal;
+  final DateTime? validoAte;
+  final bool financeiro;
+  final bool agenda;
+  final bool relatorios;
+  final bool whiteLabel;
+  final bool iaCopiloto;
+  final bool iaIlimitada;
+
+  const PlanoFeatures({
+    required this.plano,
+    this.planoNomeOriginal,
+    this.limiteAlunos,
+    this.limiteIaMensal,
+    this.validoAte,
+    required this.financeiro,
+    required this.agenda,
+    required this.relatorios,
+    required this.whiteLabel,
+    required this.iaCopiloto,
+    required this.iaIlimitada,
+  });
+
+  factory PlanoFeatures.fromJson(Map<String, dynamic> j) {
+    final f = (j['features'] as Map?)?.cast<String, dynamic>() ?? const {};
+    return PlanoFeatures(
+      plano: subscriptionPlanFromApi(j['plano'] as String?),
+      planoNomeOriginal: j['planoNomeOriginal'] as String?,
+      limiteAlunos: (j['limiteAlunos'] as num?)?.toInt(),
+      limiteIaMensal: (j['limiteIaMensal'] as num?)?.toInt(),
+      validoAte: _parseDateTime(j['validoAte']),
+      financeiro: f['financeiro'] as bool? ?? false,
+      agenda: f['agenda'] as bool? ?? false,
+      relatorios: f['relatorios'] as bool? ?? false,
+      whiteLabel: f['whiteLabel'] as bool? ?? false,
+      iaCopiloto: f['iaCopiloto'] as bool? ?? false,
+      iaIlimitada: f['iaIlimitada'] as bool? ?? false,
+    );
+  }
+
+  static const free = PlanoFeatures(
+    plano: SubscriptionPlan.FREE,
+    financeiro: false,
+    agenda: false,
+    relatorios: false,
+    whiteLabel: false,
+    iaCopiloto: false,
+    iaIlimitada: false,
+  );
+}
+
 class PlanosRepository {
   final Dio _dio;
 
@@ -178,6 +236,11 @@ class PlanosRepository {
   Future<TrialStatus> getTrialStatus() async {
     final r = await _dio.get('/api/personal/trial/status');
     return TrialStatus.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<PlanoFeatures> getPlanoFeatures() async {
+    final r = await _dio.get('/api/planos/me');
+    return PlanoFeatures.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<TrialStatus> startTrial({TrialStartPayload? payload}) async {

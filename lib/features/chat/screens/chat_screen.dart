@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
+import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/storage/secure_storage.dart';
@@ -25,7 +26,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool _loading = true;
   bool _sending = false;
 
-  static const _base = 'https://focux-backend.onrender.com';
+  String get _base => Env.apiUrl;
 
   @override
   void initState() {
@@ -44,7 +45,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Future<void> _connectWs() async {
     final token = await SecureStorage.getToken();
-    final url = '${_base.replaceFirst('https', 'wss')}/ws/websocket';
+    final url = '${Env.wsUrl}/ws/websocket';
     _stomp = StompClient(config: StompConfig(
       url: url, onConnect: _onConnect, beforeConnect: () async {},
       onStompError: (_) {}, onDisconnect: (_) {},
@@ -141,7 +142,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
           IconButton(
             icon: Icon(Icons.more_vert, color: isDark ? EagleTokens.darkInk : EagleTokens.ink, size: 22),
-            onPressed: () {},
+            onPressed: _showChatMenu,
           ),
         ],
         bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Container(height: 1, color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft)),
@@ -178,7 +179,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 color: EagleTokens.inkMute,
                 iconSize: 26,
                 padding: const EdgeInsets.only(bottom: 6),
-                onPressed: () {}, // Attach placeholder
+                onPressed: _showAttachMenu,
               ),
               Expanded(
                 child: Container(
@@ -230,6 +231,99 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
         ),
       ]),
+    );
+  }
+
+  void _showChatMenu() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetCtx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.person_outline, color: EagleTokens.brand),
+              title: const Text('Ver perfil do aluno'),
+              onTap: () {
+                Navigator.pop(sheetCtx);
+                Navigator.of(context).pushNamed('/alunos/${widget.alunoId}');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.search, color: EagleTokens.brand),
+              title: const Text('Buscar na conversa'),
+              onTap: () {
+                Navigator.pop(sheetCtx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Busca na conversa em breve.')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications_off_outlined, color: EagleTokens.warn),
+              title: const Text('Silenciar notificações'),
+              onTap: () {
+                Navigator.pop(sheetCtx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Notificações silenciadas.')),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAttachMenu() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetCtx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image_outlined, color: EagleTokens.brand),
+              title: const Text('Enviar foto da galeria'),
+              subtitle: const Text('Upload via Cloudinary (em breve)'),
+              onTap: () {
+                Navigator.pop(sheetCtx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Anexo de imagem em breve.')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.fitness_center, color: EagleTokens.brand),
+              title: const Text('Compartilhar treino'),
+              onTap: () {
+                Navigator.pop(sheetCtx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Compartilhamento em breve.')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.event_available_outlined, color: EagleTokens.brand),
+              title: const Text('Agendar treino'),
+              onTap: () {
+                Navigator.pop(sheetCtx);
+                Navigator.of(context).pushNamed('/agenda');
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,0 +1,269 @@
+import 'package:flutter/material.dart';
+
+/// FxIcon — stroke-based monoline icon set (ported from design `tokens.jsx`).
+///
+/// This intentionally avoids Material icons so the app matches the Handoff spec.
+class FxIcon extends StatelessWidget {
+  final String name;
+  final double size;
+  final Color color;
+  final double strokeWidth;
+
+  const FxIcon({
+    super.key,
+    required this.name,
+    required this.color,
+    this.size = 20,
+    this.strokeWidth = 1.8,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _FxIconPainter(
+          name: name,
+          color: color,
+          strokeWidth: strokeWidth,
+        ),
+      ),
+    );
+  }
+}
+
+class _FxIconPainter extends CustomPainter {
+  final String name;
+  final Color color;
+  final double strokeWidth;
+
+  const _FxIconPainter({
+    required this.name,
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    // 24x24 coordinate system like the original SVGs
+    final s = size.shortestSide;
+    final scale = s / 24.0;
+    canvas.save();
+    canvas.translate((size.width - s) / 2, (size.height - s) / 2);
+    canvas.scale(scale, scale);
+
+    switch (name) {
+      case 'home':
+        canvas.drawPath(
+          Path()
+            ..moveTo(3, 11)
+            ..lineTo(12, 4)
+            ..lineTo(21, 11)
+            ..lineTo(21, 20)
+            ..cubicTo(21, 21.1046, 20.1046, 22, 19, 22)
+            ..lineTo(15, 22)
+            ..lineTo(15, 16)
+            ..lineTo(9, 16)
+            ..lineTo(9, 22)
+            ..lineTo(5, 22)
+            ..cubicTo(3.8954, 22, 3, 21.1046, 3, 20)
+            ..close(),
+          paint,
+        );
+        break;
+
+      case 'users':
+        canvas.drawPath(Path()..addOval(Rect.fromCircle(center: const Offset(9, 8), radius: 4)), paint);
+        canvas.drawPath(
+          Path()
+            ..moveTo(2, 21)
+            ..lineTo(2, 20)
+            ..cubicTo(2, 16.6863, 4.6863, 14, 8, 14)
+            ..lineTo(10, 14)
+            ..cubicTo(13.3137, 14, 16, 16.6863, 16, 20)
+            ..lineTo(16, 21),
+          paint,
+        );
+        canvas.drawPath(Path()..addOval(Rect.fromCircle(center: const Offset(17, 6), radius: 3)), paint);
+        canvas.drawPath(
+          Path()
+            ..moveTo(22, 16)
+            ..lineTo(22, 15)
+            ..cubicTo(22, 12.7909, 20.2091, 11, 18, 11)
+            ..lineTo(17, 11),
+          paint,
+        );
+        break;
+
+      case 'dumbbell':
+        canvas.drawLine(const Offset(4, 9), const Offset(4, 15), paint);
+        canvas.drawLine(const Offset(2, 11), const Offset(2, 13), paint);
+        canvas.drawLine(const Offset(20, 9), const Offset(20, 15), paint);
+        canvas.drawLine(const Offset(22, 11), const Offset(22, 13), paint);
+        canvas.drawPath(Path()..addRect(const Rect.fromLTWH(6, 8, 3, 8)), paint);
+        canvas.drawPath(Path()..addRect(const Rect.fromLTWH(15, 8, 3, 8)), paint);
+        canvas.drawLine(const Offset(9, 12), const Offset(15, 12), paint);
+        break;
+
+      case 'coin':
+        canvas.drawPath(Path()..addOval(const Rect.fromLTWH(4, 3, 16, 6)), paint);
+        canvas.drawPath(
+          Path()
+            ..moveTo(4, 6)
+            ..lineTo(4, 12)
+            ..cubicTo(4, 13.7, 7.6, 15, 12, 15)
+            ..cubicTo(16.4, 15, 20, 13.7, 20, 12)
+            ..lineTo(20, 6),
+          paint,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(4, 12)
+            ..lineTo(4, 18)
+            ..cubicTo(4, 19.7, 7.6, 21, 12, 21)
+            ..cubicTo(16.4, 21, 20, 19.7, 20, 18)
+            ..lineTo(20, 12),
+          paint,
+        );
+        break;
+
+      case 'spark':
+        canvas.drawPath(
+          Path()
+            ..moveTo(12, 3)
+            ..lineTo(13.9, 8.1)
+            ..lineTo(19, 10)
+            ..lineTo(13.9, 11.9)
+            ..lineTo(12, 17)
+            ..lineTo(10.1, 11.9)
+            ..lineTo(5, 10)
+            ..lineTo(10.1, 8.1)
+            ..close(),
+          paint,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(19, 3)
+            ..lineTo(19.9, 5.1)
+            ..lineTo(22, 6)
+            ..lineTo(19.9, 6.9)
+            ..lineTo(19, 9)
+            ..lineTo(18.1, 6.9)
+            ..lineTo(16, 6)
+            ..lineTo(18.1, 5.1)
+            ..close(),
+          paint,
+        );
+        break;
+
+      case 'bell':
+        canvas.drawPath(
+          Path()
+            ..moveTo(6, 8)
+            ..cubicTo(6, 4.6863, 8.6863, 2, 12, 2)
+            ..cubicTo(15.3137, 2, 18, 4.6863, 18, 8)
+            ..cubicTo(18, 15, 21, 15, 21, 17)
+            ..lineTo(3, 17)
+            ..cubicTo(3, 15, 6, 15, 6, 8),
+          paint,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(10, 21)
+            ..cubicTo(10, 22.1046, 10.8954, 23, 12, 23)
+            ..cubicTo(13.1046, 23, 14, 22.1046, 14, 21),
+          paint,
+        );
+        break;
+
+      case 'plus':
+        canvas.drawLine(const Offset(12, 5), const Offset(12, 19), paint);
+        canvas.drawLine(const Offset(5, 12), const Offset(19, 12), paint);
+        break;
+
+      case 'calendar':
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(const Rect.fromLTWH(3, 5, 18, 16), const Radius.circular(2)),
+          paint,
+        );
+        canvas.drawLine(const Offset(3, 9), const Offset(21, 9), paint);
+        canvas.drawLine(const Offset(8, 3), const Offset(8, 7), paint);
+        canvas.drawLine(const Offset(16, 3), const Offset(16, 7), paint);
+        break;
+
+      case 'chat':
+        canvas.drawPath(
+          Path()
+            ..moveTo(21, 12)
+            ..cubicTo(21, 7.5817, 17.4183, 4, 13, 4)
+            ..cubicTo(8.5817, 4, 5, 7.5817, 5, 12)
+            ..cubicTo(5, 13.3687, 5.343, 14.658, 5.948, 15.791)
+            ..lineTo(3, 21)
+            ..lineTo(8.209, 18.052)
+            ..cubicTo(9.342, 18.657, 10.6313, 19, 12, 19)
+            ..cubicTo(16.4183, 19, 20, 15.4183, 20, 11)
+            ..close(),
+          paint,
+        );
+        break;
+
+      case 'trend':
+        canvas.drawPath(
+          Path()
+            ..moveTo(3, 17)
+            ..lineTo(9, 11)
+            ..lineTo(13, 15)
+            ..lineTo(21, 7),
+          paint,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(14, 7)
+            ..lineTo(21, 7)
+            ..lineTo(21, 14),
+          paint,
+        );
+        break;
+
+      case 'pix':
+        canvas.drawPath(
+          Path()
+            ..moveTo(5, 5)
+            ..lineTo(12, 12)
+            ..lineTo(19, 5),
+          paint,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(5, 19)
+            ..lineTo(12, 12)
+            ..lineTo(19, 19),
+          paint,
+        );
+        break;
+
+      default:
+        // fallback circle
+        canvas.drawCircle(const Offset(12, 12), 9, paint);
+        break;
+    }
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _FxIconPainter oldDelegate) {
+    return oldDelegate.name != name ||
+        oldDelegate.color != color ||
+        oldDelegate.strokeWidth != strokeWidth;
+  }
+}
+

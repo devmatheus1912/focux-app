@@ -4,12 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
-import '../../anamnese/screens/anamnese_screen.dart';
-import '../../alimentar/screens/alimentar_screen.dart';
-import '../../ia/screens/ia_progressao_screen.dart';
-import '../../chat/screens/chat_screen.dart';
-import '../../evolucao/screens/evolucao_screen.dart';
-import '../../feedback/screens/feedback_video_screen.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_sparkline.dart';
@@ -257,8 +251,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                         children: [
                           _MeasurementCard(label: 'Idade', value: (aluno.idade ?? '--').toString(), unit: 'anos', isDark: isDark),
                           _MeasurementCard(label: 'Altura', value: aluno.altura?.toStringAsFixed(2) ?? '--', unit: 'm', isDark: isDark),
-                          _MeasurementCard(label: 'BF', value: '14', unit: '%', isDark: isDark),
-                          _MeasurementCard(label: 'M. Magra', value: '45', unit: 'kg', isDark: isDark),
+                          _MeasurementCard(label: 'BF', value: '--', unit: '%', isDark: isDark),
+                          _MeasurementCard(label: 'M. Magra', value: '--', unit: 'kg', isDark: isDark),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -275,14 +269,14 @@ class AlunoDetailScreen extends ConsumerWidget {
                         crossAxisSpacing: 10,
                         childAspectRatio: 1.4,
                         children: [
-                          _ModuleTile(icon: Icons.fitness_center, label: 'Treinos', sub: 'Push A ativo', isDark: isDark, onTap: () {}),
-                          _ModuleTile(icon: Icons.auto_awesome, label: 'IA · Progressão', sub: 'Sugerir cargas', highlight: true, isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => IaProgressaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
-                          _ModuleTile(icon: Icons.show_chart, label: 'Evolução', sub: 'Medidas e PRs', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EvolucaoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
-                          _ModuleTile(icon: Icons.people, label: 'Anamnese', sub: 'Completa ✓', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AnamneseScreen(alunoId: alunoId)))),
+                          _ModuleTile(icon: Icons.fitness_center, label: 'Treinos', sub: 'Push A ativo', isDark: isDark, onTap: () => context.push('/treinos?alunoId=$alunoId')),
+                          _ModuleTile(icon: Icons.auto_awesome, label: 'IA · Progressão', sub: 'Sugerir cargas', highlight: true, isDark: isDark, onTap: () => context.push('/alunos/$alunoId/ia/progressao', extra: aluno.nome)),
+                          _ModuleTile(icon: Icons.show_chart, label: 'Evolução', sub: 'Medidas e PRs', isDark: isDark, onTap: () => context.push('/alunos/$alunoId/evolucao', extra: aluno.nome)),
+                          _ModuleTile(icon: Icons.people, label: 'Anamnese', sub: 'Completa ✓', isDark: isDark, onTap: () => context.push('/alunos/$alunoId/anamnese')),
                           _ModuleTile(icon: Icons.attach_money, label: 'Mensalidades', sub: aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Em atraso' : 'Em dia', isDark: isDark, onTap: () => context.push('/financeiro/aluno')),
-                          _ModuleTile(icon: Icons.chat, label: 'Chat', sub: 'Comunicação', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChatScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
-                          _ModuleTile(icon: Icons.restaurant_menu, label: 'Dieta', sub: 'Plano atual', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AlimentarScreen(alunoId: alunoId)))),
-                          _ModuleTile(icon: Icons.video_camera_back, label: 'Feedback', sub: 'Análise de vídeo', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FeedbackVideoScreen(alunoId: alunoId, alunoNome: aluno.nome)))),
+                          _ModuleTile(icon: Icons.chat, label: 'Chat', sub: 'Comunicação', isDark: isDark, onTap: () => context.push('/alunos/$alunoId/chat', extra: aluno.nome)),
+                          _ModuleTile(icon: Icons.restaurant_menu, label: 'Dieta', sub: 'Plano atual', isDark: isDark, onTap: () => context.push('/alunos/$alunoId/alimentar')),
+                          _ModuleTile(icon: Icons.video_camera_back, label: 'Feedback', sub: 'Análise de vídeo', isDark: isDark, onTap: () => context.push('/alunos/$alunoId/feedback-video', extra: aluno.nome)),
                         ],
                       ),
                     ],

@@ -164,7 +164,14 @@ class GamificacaoScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Clipboard.setData(const ClipboardData(
+                      text: 'Use meu código FOCUX20 e ganhe 20% de desconto no primeiro mês do Focux Personal! https://focux.app',
+                    ));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Convite copiado! Cole em qualquer app pra compartilhar.')),
+                    );
+                  },
                   child: Container(
                     height: 44,
                     decoration: BoxDecoration(
