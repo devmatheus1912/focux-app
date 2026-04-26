@@ -30,7 +30,6 @@ class _PersonalDashboardScreenState
     with TickerProviderStateMixin {
   FinanceiroDashboard? _finData;
   bool _loadingFin = true;
-  Object? _finError;
 
   late AnimationController _gradientCtrl;
   late AnimationController _counterCtrl;
@@ -64,7 +63,6 @@ class _PersonalDashboardScreenState
     if (mounted) {
       setState(() {
         _loadingFin = true;
-        _finError = null;
       });
     }
     try {
@@ -73,7 +71,6 @@ class _PersonalDashboardScreenState
       if (mounted) {
         setState(() {
           _finData = data;
-          _finError = null;
           _loadingFin = false;
         });
         _counterAnim = Tween<double>(
@@ -86,7 +83,6 @@ class _PersonalDashboardScreenState
       debugPrint('[Focux] Error loading financeiro dashboard: $e\n$st');
       if (mounted) {
         setState(() {
-          _finError = e;
           _loadingFin = false;
         });
       }

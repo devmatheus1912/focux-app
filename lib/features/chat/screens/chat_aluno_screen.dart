@@ -33,7 +33,6 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
   bool _uploading     = false;
   int? _alunoId;
 
-  String get _base => Env.apiUrl;
 
   @override
   void initState() {

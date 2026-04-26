@@ -66,7 +66,7 @@ class QueuedRequest {
 
   static int pow3(int n) {
     var r = 1;
-    for (var i = 0; i < n; i++) r *= 3;
+    for (var i = 0; i < n; i++) { r *= 3; }
     return r;
   }
 }

@@ -26,7 +26,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool _loading = true;
   bool _sending = false;
 
-  String get _base => Env.apiUrl;
 
   @override
   void initState() {

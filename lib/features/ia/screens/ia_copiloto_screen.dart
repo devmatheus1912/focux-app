@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../alunos/providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
 
@@ -12,6 +13,10 @@ final resumoSemanalProvider = FutureProvider<Map<String, dynamic>>((ref) async {
 
 final insightsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   return IaRepository(ref.read(apiClientProvider)).insights();
+});
+
+final proximaAcaoProvider = FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
+  return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
 });
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
@@ -27,17 +32,138 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
   bool _gerando = false;
   bool _gerado = false;
   Object? _erro;
+  int? _selectedAlunoId;
+  String? _selectedAlunoNome;
+  Map<String, dynamic>? _proximaAcao;
   final _modes = ['Treino', 'Dieta', 'Progressão'];
 
+  Future<void> _selecionarAluno() async {
+    final alunos = await ref.read(alunosProvider.future);
+    if (!mounted) return;
+    if (alunos.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Você ainda não possui alunos cadastrados.')),
+      );
+      return;
+    }
+    final escolhido = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: alunos
+              .map(
+                (a) => ListTile(
+                  leading: const Icon(Icons.person_outline),
+                  title: Text(a.nome),
+                  subtitle: Text(a.objetivo ?? 'Sem objetivo definido'),
+                  trailing: _selectedAlunoId == a.id
+                      ? const Icon(Icons.check_circle, color: Color(0xFF2BB673))
+                      : null,
+                  onTap: () => Navigator.of(ctx).pop(a.id),
+                ),
+              )
+              .toList(),
+        ),
+      ),
+    );
+    if (escolhido == null) return;
+    final aluno = alunos.firstWhere((a) => a.id == escolhido);
+    setState(() {
+      _selectedAlunoId = aluno.id;
+      _selectedAlunoNome = aluno.nome;
+      _gerado = false;
+      _erro = null;
+      _proximaAcao = null;
+    });
+  }
+
   Future<void> _gerar() async {
+    if (_selectedAlunoId == null) {
+      await _selecionarAluno();
+      if (_selectedAlunoId == null) return;
+    }
     setState(() { _gerando = true; _gerado = false; _erro = null; });
     try {
       ref.invalidate(insightsProvider);
       ref.invalidate(resumoSemanalProvider);
       await ref.read(insightsProvider.future);
+      _proximaAcao = await ref.read(proximaAcaoProvider(_selectedAlunoId!).future);
       if (mounted) setState(() { _gerando = false; _gerado = true; });
     } catch (e) {
       if (mounted) setState(() { _gerando = false; _erro = e; });
+    }
+  }
+
+  Future<void> _atribuir() async {
+    if (_selectedAlunoId == null) {
+      await _selecionarAluno();
+      if (_selectedAlunoId == null) return;
+    }
+    try {
+      final repo = IaRepository(ref.read(apiClientProvider));
+      final acao = await repo.proximaAcao(_selectedAlunoId!);
+      if (!mounted) return;
+      setState(() => _proximaAcao = acao);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Ação atribuída para ${_selectedAlunoNome ?? "aluno"}: ${(acao['acao'] ?? acao['titulo'] ?? 'Próxima ação').toString()}',
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível atribuir agora.')),
+      );
+    }
+  }
+
+  Future<void> _abrirMenu() async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.person_search),
+              title: const Text('Trocar aluno'),
+              onTap: () => Navigator.of(ctx).pop('trocar'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.refresh),
+              title: const Text('Atualizar insights'),
+              onTap: () => Navigator.of(ctx).pop('atualizar'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.cleaning_services_outlined),
+              title: const Text('Limpar resultado'),
+              onTap: () => Navigator.of(ctx).pop('limpar'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (!mounted || action == null) return;
+    switch (action) {
+      case 'trocar':
+        await _selecionarAluno();
+        break;
+      case 'atualizar':
+        await _gerar();
+        break;
+      case 'limpar':
+        setState(() {
+          _gerado = false;
+          _proximaAcao = null;
+          _erro = null;
+        });
+        break;
     }
   }
 
@@ -62,7 +188,13 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                IconButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                  icon: Icon(Icons.arrow_back_ios_new, color: ink, size: 18),
+                ),
+                const SizedBox(width: 6),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
                   Container(
                     width: 30, height: 30,
@@ -77,6 +209,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                 ]),
                 const SizedBox(height: 6),
                 Text('Copiloto', style: TextStyle(color: ink, fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: -1.2, height: 1)),
+                ]),
               ]),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -92,6 +225,36 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                 ]),
               ),
             ]),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+            child: GestureDetector(
+              onTap: _selecionarAluno,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: line),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.group_outlined, color: brand, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _selectedAlunoNome == null
+                            ? 'Selecionar aluno'
+                            : 'Aluno selecionado: $_selectedAlunoNome',
+                        style: TextStyle(color: ink, fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    Icon(Icons.keyboard_arrow_down, color: mute),
+                  ],
+                ),
+              ),
+            ),
           ),
 
           // Mode selector
@@ -184,7 +347,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                     ),
                     if (_gerado) ...[
                       const SizedBox(height: 12),
-                      Wrap(spacing: 14, children: ['Analisando histórico…', 'Calibrando carga…', 'Gerando treino…'].map((s) =>
+                      Wrap(spacing: 14, children: ['Analisando histórico…', 'Calibrando carga…', 'Gerando ${_modes[_modeIdx].toLowerCase()}…'].map((s) =>
                         Row(mainAxisSize: MainAxisSize.min, children: [
                           const Icon(Icons.check, color: Color(0xFF2BB673), size: 12),
                           const SizedBox(width: 4),
@@ -321,13 +484,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
               child: Row(children: [
                 Expanded(child: GestureDetector(
-                  onTap: () {
-                    ref.invalidate(insightsProvider);
-                    ref.invalidate(resumoSemanalProvider);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Insights atualizados.')),
-                    );
-                  },
+                  onTap: _atribuir,
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
@@ -336,14 +493,44 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                       boxShadow: [BoxShadow(color: brand.withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 6))],
                     ),
                     child: Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
-                      Icon(Icons.refresh, color: Colors.white, size: 16),
+                      Icon(Icons.assignment_turned_in_outlined, color: Colors.white, size: 16),
                       SizedBox(width: 8),
-                      Text('Atualizar insights', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                      Text('Atribuir ação', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
                     ]),
                   ),
                 )),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: _abrirMenu,
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: line),
+                    ),
+                    child: Icon(Icons.more_vert, color: ink),
+                  ),
+                ),
               ]),
             ),
+            if (_proximaAcao != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: line),
+                  ),
+                  child: Text(
+                    'Próxima ação: ${(_proximaAcao!['acao'] ?? _proximaAcao!['titulo'] ?? _proximaAcao!['mensagem'] ?? 'Sem detalhe').toString()}',
+                    style: TextStyle(color: ink, fontSize: 12.5),
+                  ),
+                ),
+              ),
           ],
         ]),
       ),

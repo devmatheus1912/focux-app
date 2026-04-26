@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
+import '../../features/planos/data/planos_repository.dart';
 
 class FeatureGate extends ConsumerWidget {
   final SubscriptionPlan requiredPlan;
