@@ -65,6 +65,7 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
+      fontFamily: GoogleFonts.spaceGrotesk().fontFamily,
       colorScheme: cs,
       scaffoldBackgroundColor: scaffold,
       textTheme: textTheme,

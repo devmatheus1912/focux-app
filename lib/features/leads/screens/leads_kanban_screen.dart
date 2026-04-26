@@ -145,7 +145,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                         decoration: BoxDecoration(
                           color: cardBg,
                           borderRadius: BorderRadius.circular(14),
-                          border: isDark ? null : Border.all(color: line),
+                          border: Border.all(color: line),
                         ),
                         child: Column(
                           children: [

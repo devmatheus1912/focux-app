@@ -215,7 +215,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                       decoration: BoxDecoration(
                         color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: isDark ? null : Border.all(color: line),
+                        border: Border.all(color: line),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

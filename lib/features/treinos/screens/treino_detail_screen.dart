@@ -388,7 +388,7 @@ class _TreinoDetailBody extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: isDark ? EagleTokens.darkCard : EagleTokens.card,
                           borderRadius: BorderRadius.circular(20),
-                          border: isDark ? null : Border.all(color: EagleTokens.line),
+                          border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
                         ),
                         child: Column(
                           children: entry.value.asMap().entries.map((e) {
@@ -490,7 +490,7 @@ class _MiniMetric extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDark ? EagleTokens.darkCard : EagleTokens.card,
           borderRadius: BorderRadius.circular(14),
-          border: isDark ? null : Border.all(color: EagleTokens.line),
+          border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
         ),
         child: Column(
           children: [

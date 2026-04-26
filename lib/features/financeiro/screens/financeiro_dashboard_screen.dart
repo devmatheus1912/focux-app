@@ -102,7 +102,7 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
                 decoration: BoxDecoration(
                   color: isDark ? EagleTokens.darkCard : EagleTokens.card,
                   borderRadius: BorderRadius.circular(20),
-                  border: isDark ? null : Border.all(color: EagleTokens.line),
+                  border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
                 ),
                 child: Column(
                   children: d.topAlunos.asMap().entries.map((e) {
@@ -172,7 +172,7 @@ class _HeroRing extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(28),
-          border: isDark ? null : Border.all(color: line),
+          border: Border.all(color: line),
         ),
         child: Row(
           children: [
@@ -296,7 +296,7 @@ class _MiniMetric extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(14),
-        border: isDark ? null : Border.all(color: line),
+        border: Border.all(color: line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +342,7 @@ class _EvolucaoChart extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(22),
-          border: isDark ? null : Border.all(color: line),
+          border: Border.all(color: line),
         ),
         child: Column(
           children: [
@@ -440,7 +440,7 @@ class _VencimentoRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: isDark ? null : Border.all(color: line),
+        border: Border.all(color: line),
       ),
       child: Row(
         children: [

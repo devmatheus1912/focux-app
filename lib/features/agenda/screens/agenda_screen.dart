@@ -126,7 +126,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                     decoration: BoxDecoration(
                       color: cardBg,
                       borderRadius: BorderRadius.circular(12),
-                      border: isDark ? null : Border.all(color: line),
+                      border: Border.all(color: line),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -250,7 +250,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                           decoration: BoxDecoration(
                             color: cardBg,
                             borderRadius: BorderRadius.circular(18),
-                            border: isDark ? null : Border.all(color: line),
+                            border: Border.all(color: line),
                           ),
                           child: Row(
                             children: [

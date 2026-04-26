@@ -215,7 +215,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                     decoration: BoxDecoration(
                       color: isDark ? EagleTokens.darkCard : EagleTokens.card,
                       borderRadius: BorderRadius.circular(14),
-                      border: isDark ? null : Border.all(color: EagleTokens.line),
+                      border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
                     ),
                     child: Row(
                       children: [
@@ -468,7 +468,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
           borderRadius: BorderRadius.circular(20),
           border: isSelected
               ? Border.all(color: EagleTokens.brand.withValues(alpha: 0.5), width: 1.5)
-              : (isDark ? null : Border.all(color: line)),
+              : Border.all(color: line),
         ),
         child: Row(
           children: [

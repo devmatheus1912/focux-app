@@ -188,7 +188,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: isDark ? EagleTokens.darkCard : EagleTokens.card,
                           borderRadius: BorderRadius.circular(22),
-                          border: isDark ? null : Border.all(color: EagleTokens.line),
+                          border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
                         ),
                         padding: const EdgeInsets.all(18),
                         child: Column(
@@ -351,7 +351,7 @@ class _MeasurementCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(14),
-        border: isDark ? null : Border.all(color: line),
+        border: Border.all(color: line),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -403,7 +403,7 @@ class _ModuleTile extends StatelessWidget {
     final accent = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
 
     final bg = highlight ? (isDark ? const Color(0xFF1C3273) : EagleTokens.brandSoft) : cardBg;
-    final border = isDark ? null : Border.all(color: highlight ? Colors.transparent : line);
+    final border = Border.all(color: highlight ? Colors.transparent : line);
 
     return InkWell(
       onTap: onTap,
