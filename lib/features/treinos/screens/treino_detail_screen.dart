@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +19,11 @@ class TreinoDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       body: treinoAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: EagleTokens.brand)),
+        loading: () => Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (treino) => _TreinoDetailBody(treino: treino, treinoId: treinoId, isDark: isDark, ref: ref),
       ),
@@ -145,6 +150,9 @@ class _TreinoDetailBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repo = ref.read(treinoRepositoryProvider);
+    final primary = Theme.of(context).colorScheme.primary;
+    final primaryDeep = BrandPalette.deep(primary);
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
 
     // Group by muscle
     final grouped = <String, List<TreinoExercicioItem>>{};
@@ -159,7 +167,7 @@ class _TreinoDetailBody extends StatelessWidget {
         SliverAppBar(
           expandedHeight: 320,
           pinned: true,
-          backgroundColor: isDark ? const Color(0xFF0A0F1E) : EagleTokens.brandDeep,
+          backgroundColor: isDark ? const Color(0xFF0A0F1E) : primaryDeep,
           iconTheme: const IconThemeData(color: Colors.white),
           actions: [
             Container(
@@ -189,8 +197,8 @@ class _TreinoDetailBody extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: isDark
-                          ? [const Color(0xFF1C3273), const Color(0xFF0A0F1E)]
-                          : [EagleTokens.brand, EagleTokens.brandDeep],
+                          ? [primaryDeep, const Color(0xFF0A0F1E)]
+                          : [primary, primaryDeep],
                       stops: const [0.0, 0.85],
                     ),
                   ),
@@ -261,7 +269,10 @@ class _TreinoDetailBody extends StatelessWidget {
                     children: [
                       Expanded(
                         child: InkWell(
-                          onTap: () => HapticFeedback.mediumImpact(),
+                          onTap: () {
+                            HapticFeedback.mediumImpact();
+                            context.push('/checkin/executar', extra: treinoId);
+                          },
                           borderRadius: BorderRadius.circular(14),
                           child: Container(
                             height: 48,
@@ -269,9 +280,9 @@ class _TreinoDetailBody extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.play_arrow_rounded, color: EagleTokens.brand, size: 20),
+                                Icon(Icons.play_arrow_rounded, color: primary, size: 20),
                                 const SizedBox(width: 6),
-                                Text('Iniciar treino', style: TextStyle(color: EagleTokens.brand, fontSize: 14, fontWeight: FontWeight.bold)),
+                                Text('Iniciar treino', style: TextStyle(color: primary, fontSize: 14, fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -354,9 +365,9 @@ class _TreinoDetailBody extends StatelessWidget {
                   },
                   child: Row(
                     children: [
-                      Icon(Icons.add, size: 14, color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand),
+                      Icon(Icons.add, size: 14, color: primary),
                       const SizedBox(width: 4),
-                      Text('Adicionar', style: TextStyle(color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                      Text('Adicionar', style: TextStyle(color: primary, fontSize: 12.5, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
@@ -400,6 +411,8 @@ class _TreinoDetailBody extends StatelessWidget {
                               te: te,
                               index: i + 1,
                               isDark: isDark,
+                              primary: primary,
+                              primarySoft: primarySoft,
                               isLast: i == entry.value.length - 1,
                               onRemove: () async {
                                 final confirm = await showDialog<bool>(
@@ -510,6 +523,8 @@ class _ExercicioRow extends StatelessWidget {
   final TreinoExercicioItem te;
   final int index;
   final bool isDark;
+  final Color primary;
+  final Color primarySoft;
   final bool isLast;
   final VoidCallback onRemove;
 
@@ -517,6 +532,8 @@ class _ExercicioRow extends StatelessWidget {
     required this.te,
     required this.index,
     required this.isDark,
+    required this.primary,
+    required this.primarySoft,
     required this.isLast,
     required this.onRemove,
   });
@@ -526,6 +543,8 @@ class _ExercicioRow extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final hasMedia = (te.exercicio.videoUrl?.isNotEmpty == true) ||
+        (te.exercicio.gifUrl?.isNotEmpty == true);
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
@@ -537,11 +556,11 @@ class _ExercicioRow extends StatelessWidget {
           Container(
             width: 36, height: 36,
             decoration: BoxDecoration(
-              color: isDark ? const Color(0x1F8DA4E2) : EagleTokens.brandSoft,
+              color: primarySoft,
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
-            child: Text('$index', style: TextStyle(color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand, fontSize: 14, fontWeight: FontWeight.w600)),
+            child: Text('$index', style: TextStyle(color: primary, fontSize: 14, fontWeight: FontWeight.w700)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -565,6 +584,27 @@ class _ExercicioRow extends StatelessWidget {
                     Text('${te.descansoSegundos ?? 60}s', style: TextStyle(color: mute, fontSize: 11.5)),
                   ],
                 ),
+                if (hasMedia || te.observacoes?.trim().isNotEmpty == true) ...[
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      if (hasMedia)
+                        _ExerciseMeta(
+                          icon: Icons.play_circle_outline_rounded,
+                          text: 'video disponivel',
+                          color: primary,
+                        ),
+                      if (te.observacoes?.trim().isNotEmpty == true)
+                        _ExerciseMeta(
+                          icon: Icons.notes_rounded,
+                          text: te.observacoes!.trim(),
+                          color: mute,
+                        ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -582,6 +622,44 @@ class _ExercicioRow extends StatelessWidget {
 
 /// Grid texture painter — white lines 6% opacity, 26×26px cells.
 /// Matches auth_shell.dart _AuthGridPainter; reused on hero surfaces.
+class _ExerciseMeta extends StatelessWidget {
+  final IconData? icon;
+  final String text;
+  final Color color;
+
+  const _ExerciseMeta({
+    this.icon,
+    required this.text,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon != null) ...[
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 3),
+        ],
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 180),
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: color,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _GridTexturePainter extends CustomPainter {
   const _GridTexturePainter();
 
