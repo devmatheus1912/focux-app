@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../../financeiro/data/financeiro_repository.dart';
@@ -72,7 +73,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Dados de pagamento salvos com sucesso!')),
         );
-        Navigator.of(context).pop(true);
+        context.pop(true);
       }
     } catch (e) {
       if (mounted) {

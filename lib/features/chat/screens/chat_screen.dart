@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -102,7 +103,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       appBar: AppBar(
         backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
-        leading: IconButton(icon: Icon(Icons.arrow_back, color: isDark ? EagleTokens.darkInk : EagleTokens.ink), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(icon: Icon(Icons.arrow_back, color: isDark ? EagleTokens.darkInk : EagleTokens.ink), onPressed: () => context.pop()),
         title: Row(children: [
           CircleAvatar(
             radius: 18,
@@ -250,7 +251,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               title: const Text('Ver perfil do aluno'),
               onTap: () {
                 Navigator.pop(sheetCtx);
-                Navigator.of(context).pushNamed('/alunos/${widget.alunoId}');
+                context.push('/alunos/${widget.alunoId}');
               },
             ),
             ListTile(
@@ -317,7 +318,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               title: const Text('Agendar treino'),
               onTap: () {
                 Navigator.pop(sheetCtx);
-                Navigator.of(context).pushNamed('/agenda');
+                context.push('/agenda');
               },
             ),
           ],

@@ -140,7 +140,7 @@ class _IdentidadeVisualScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Identidade visual salva!')),
         );
-        if (widget.isSetup) Navigator.of(context).pop(true);
+        if (widget.isSetup) context.pop(true);
       }
     } catch (e) {
       if (mounted) {
@@ -176,8 +176,8 @@ class _IdentidadeVisualScreenState
             : IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
+                  if (context.canPop()) {
+                    context.pop();
                   } else {
                     context.go('/dashboard/personal');
                   }
