@@ -14,7 +14,7 @@ class Env {
   /// HTTP base URL for the Focux backend (no trailing slash).
   static const String apiUrl = String.fromEnvironment(
     'API_URL',
-    defaultValue: 'https://focux-backend.onrender.com',
+    defaultValue: 'https://focux-backend-production.up.railway.app',
   );
 
   /// WebSocket base URL. Derived from [apiUrl] but overridable via `WS_URL`.
@@ -32,5 +32,6 @@ class Env {
   /// Whether we are running against a non-prod backend (used to gate debug
   /// affordances like staging banners and dev-only buttons).
   static bool get isProd => apiUrl.contains('focux-backend.onrender.com')
+      || apiUrl.contains('up.railway.app')
       || apiUrl.contains('api.focux.app');
 }
