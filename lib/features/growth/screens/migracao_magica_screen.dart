@@ -1,22 +1,25 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
-import '../../../core/api/api_client.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 
-class MigracaoMagicaScreen extends StatefulWidget {
+// BUG-03: ConumerStatefulWidget para acesso ao ref (apiClientProvider autenticado)
+class MigracaoMagicaScreen extends ConsumerStatefulWidget {
   const MigracaoMagicaScreen({super.key});
 
   @override
-  State<MigracaoMagicaScreen> createState() => _MigracaoMagicaScreenState();
+  ConsumerState<MigracaoMagicaScreen> createState() =>
+      _MigracaoMagicaScreenState();
 }
 
-class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
+class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   final TextEditingController _controller = TextEditingController();
-  final ApiClient _api = ApiClient();
   bool _isLoading = false;
+  bool _isSaving = false;
   List<dynamic>? _alunosEncontrados;
 
   @override
@@ -34,7 +37,9 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final response = await _api.dio.post(
+      // BUG-03: usa cliente autenticado via ref
+      final api = ref.read(apiClientProvider);
+      final response = await api.dio.post(
         '/api/v1/migracao/texto',
         data: {'conteudo': _controller.text},
       );
@@ -57,15 +62,54 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
     }
   }
 
+  // BUG-04: chama /confirmar para realmente salvar no DB
+  Future<void> _salvarAlunos() async {
+    if (_alunosEncontrados == null || _alunosEncontrados!.isEmpty) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      final api = ref.read(apiClientProvider);
+      final response = await api.dio.post(
+        '/api/v1/migracao/confirmar',
+        data: {'alunos': _alunosEncontrados},
+      );
+
+      if (mounted) {
+        final importados = response.data['importados'] ?? _alunosEncontrados!.length;
+        FeedbackHelper.showSuccess(
+          context,
+          '$importados aluno(s) importado(s) com sucesso!',
+        );
+        setState(() {
+          _alunosEncontrados = null;
+          _controller.clear();
+        });
+      }
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, 'Erro ao salvar alunos. Tente novamente.');
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
   List<dynamic>? _parsarResultado(dynamic data) {
     if (data == null) return null;
     if (data is String) {
       try {
         final decoded = jsonDecode(data);
+        if (decoded is Map && decoded.containsKey('alunos')) {
+          final lista = decoded['alunos'];
+          if (lista is List) return lista;
+        }
         if (decoded is List) return decoded;
       } catch (_) {
         return null;
       }
+    }
+    if (data is Map && data.containsKey('alunos')) {
+      final lista = data['alunos'];
+      if (lista is List) return lista;
     }
     if (data is List) return data;
     return null;
@@ -286,13 +330,8 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: InkWell(
-                  onTap: () {
-                    FeedbackHelper.showSuccess(context, 'Alunos importados com sucesso!');
-                    setState(() {
-                      _alunosEncontrados = null;
-                      _controller.clear();
-                    });
-                  },
+                  // BUG-04: chama API real
+                  onTap: _isSaving ? null : _salvarAlunos,
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
@@ -301,14 +340,16 @@ class _MigracaoMagicaScreenState extends State<MigracaoMagicaScreen> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                     alignment: Alignment.center,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.check, size: 16, color: isDark ? const Color(0xFF6FE296) : EagleTokens.good),
-                        const SizedBox(width: 8),
-                        Text('Confirmar e salvar ${_alunosEncontrados!.length} alunos', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: isDark ? const Color(0xFF6FE296) : EagleTokens.good)),
-                      ],
-                    ),
+                    child: _isSaving
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.check, size: 16, color: isDark ? const Color(0xFF6FE296) : EagleTokens.good),
+                              const SizedBox(width: 8),
+                              Text('Confirmar e salvar ${_alunosEncontrados!.length} alunos', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: isDark ? const Color(0xFF6FE296) : EagleTokens.good)),
+                            ],
+                          ),
                   ),
                 ),
               ),
