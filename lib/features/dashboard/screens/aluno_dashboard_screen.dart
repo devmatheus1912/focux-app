@@ -7,6 +7,7 @@ import '../../../core/providers/personal_brand_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../../chat/data/chat_repository.dart';
 import '../../checkin/providers/checkin_provider.dart';
 import '../../checkin/data/checkin_repository.dart';
 import '../../evolucao/data/evolucao_repository.dart';
@@ -16,6 +17,11 @@ final minhasMedidasDashboardProvider =
     FutureProvider<List<MedidaCorporal>>((ref) async {
   final repo = EvolucaoRepository(ref.read(apiClientProvider));
   return repo.listarMinhasMedidas();
+});
+
+final chatAlunoDashboardProvider = FutureProvider<List<ChatMsg>>((ref) async {
+  final repo = ChatRepository(ref.read(apiClientProvider));
+  return repo.historicoAluno();
 });
 
 class AlunoDashboardScreen extends ConsumerWidget {
@@ -28,6 +34,8 @@ class AlunoDashboardScreen extends ConsumerWidget {
     final brandAsync = ref.watch(personalBrandProvider);
     final treinosAsync = ref.watch(meusTreinosProvider);
     final medidasAsync = ref.watch(minhasMedidasDashboardProvider);
+    final historicoAsync = ref.watch(historicoCheckinProvider);
+    final chatAsync = ref.watch(chatAlunoDashboardProvider);
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -124,6 +132,18 @@ class AlunoDashboardScreen extends ConsumerWidget {
               data: (aluno) => _ProgressCheckpointCard(
                 aluno: aluno,
                 medidasAsync: medidasAsync,
+                isDark: isDark,
+              ),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: 16),
+            alunoAsync.when(
+              data: (aluno) => _StudentJourneyCard(
+                aluno: aluno,
+                medidasAsync: medidasAsync,
+                historicoAsync: historicoAsync,
+                chatAsync: chatAsync,
                 isDark: isDark,
               ),
               loading: () => const SizedBox.shrink(),
@@ -739,6 +759,343 @@ class _ProgressCheckpointCard extends StatelessWidget {
               );
             },
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StudentJourneyCard extends StatelessWidget {
+  final Aluno aluno;
+  final AsyncValue<List<MedidaCorporal>> medidasAsync;
+  final AsyncValue<List<ExecucaoTreino>> historicoAsync;
+  final AsyncValue<List<ChatMsg>> chatAsync;
+  final bool isDark;
+
+  const _StudentJourneyCard({
+    required this.aluno,
+    required this.medidasAsync,
+    required this.historicoAsync,
+    required this.chatAsync,
+    required this.isDark,
+  });
+
+  int _profileCompletion() {
+    final filled = [
+      aluno.telefone,
+      aluno.whatsapp,
+      aluno.objetivo,
+      aluno.genero,
+      aluno.peso?.toString(),
+      aluno.altura?.toString(),
+      aluno.dataNascimento,
+      aluno.fotoUrl,
+    ].where((value) => value != null && value.toString().trim().isNotEmpty).length;
+    return (filled / 8 * 100).round();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    final medidas = medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
+    final historico = historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
+    final mensagens = chatAsync.valueOrNull ?? const <ChatMsg>[];
+
+    final steps = <_JourneyStep>[
+      _JourneyStep(
+        title: 'Completar perfil base',
+        subtitle: 'Foto, objetivo, contato e dados corporais deixam o plano mais preciso.',
+        done: _profileCompletion() >= 80,
+        cta: 'Abrir perfil',
+        icon: Icons.person_outline,
+        onTap: () => context.push('/aluno/perfil'),
+      ),
+      _JourneyStep(
+        title: 'Registrar primeira medida',
+        subtitle: 'Seu progresso corporal precisa de um ponto de partida visivel.',
+        done: medidas.isNotEmpty,
+        cta: 'Registrar medida',
+        icon: Icons.straighten_outlined,
+        onTap: () => context.push('/aluno/perfil'),
+      ),
+      _JourneyStep(
+        title: 'Concluir primeiro treino',
+        subtitle: 'Executar o treino libera historico real para o personal ajustar carga e aderencia.',
+        done: historico.any((item) => item.status.toUpperCase() == 'CONCLUIDO'),
+        cta: 'Treinar agora',
+        icon: Icons.play_circle_outline,
+        onTap: () => context.push('/checkin/treinos'),
+      ),
+      _JourneyStep(
+        title: 'Abrir conversa com o personal',
+        subtitle: 'Seu acompanhamento fica melhor quando voce usa o chat para alinhar duvidas e feedback.',
+        done: mensagens.isNotEmpty,
+        cta: 'Ir para o chat',
+        icon: Icons.chat_bubble_outline,
+        onTap: () => context.push('/chat/aluno'),
+      ),
+    ];
+
+    final concluidos = steps.where((item) => item.done).length;
+    final percent = (concluidos / steps.length * 100).round();
+    final nextStep = steps.firstWhere(
+      (item) => !item.done,
+      orElse: () => steps.last,
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Jornada de ativacao',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Passos simples para voce aproveitar melhor o app e dar contexto real para o personal.',
+                      style: TextStyle(color: mute, height: 1.45),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: EagleTokens.brand.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  '$percent%',
+                  style: const TextStyle(
+                    color: EagleTokens.brand,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: concluidos / steps.length,
+              minHeight: 9,
+              backgroundColor: EagleTokens.brand.withValues(alpha: 0.12),
+              valueColor: const AlwaysStoppedAnimation(EagleTokens.brand),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$concluidos de ${steps.length} marcos concluidos.',
+            style: TextStyle(
+              color: mute,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.04)
+                  : EagleTokens.brand.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: EagleTokens.brand.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(nextStep.icon, color: EagleTokens.brand),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        concluidos == steps.length
+                            ? 'Base do aluno pronta'
+                            : 'Proximo melhor passo',
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        concluidos == steps.length
+                            ? 'Voce ja fechou os marcos iniciais. Agora o app tem contexto melhor para acompanhar sua rotina.'
+                            : nextStep.title,
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (concluidos != steps.length) ...[
+                  const SizedBox(width: 12),
+                  FilledButton.tonal(
+                    onPressed: nextStep.onTap,
+                    child: const Text('Fazer'),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          for (var i = 0; i < steps.length; i++) ...[
+            _JourneyStepTile(
+              step: steps[i],
+              isDark: isDark,
+            ),
+            if (i != steps.length - 1) const SizedBox(height: 10),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _JourneyStep {
+  final String title;
+  final String subtitle;
+  final bool done;
+  final String cta;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _JourneyStep({
+    required this.title,
+    required this.subtitle,
+    required this.done,
+    required this.cta,
+    required this.icon,
+    required this.onTap,
+  });
+}
+
+class _JourneyStepTile extends StatelessWidget {
+  final _JourneyStep step;
+  final bool isDark;
+
+  const _JourneyStepTile({
+    required this.step,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkBg : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: step.done
+                  ? EagleTokens.good.withValues(alpha: 0.14)
+                  : EagleTokens.brand.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              step.done ? Icons.check_rounded : step.icon,
+              color: step.done ? EagleTokens.good : EagleTokens.brand,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  step.title,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  step.subtitle,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 12.5,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          step.done
+              ? Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: EagleTokens.good.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: const Text(
+                    'Feito',
+                    style: TextStyle(
+                      color: EagleTokens.good,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                )
+              : TextButton(
+                  onPressed: step.onTap,
+                  child: Text(step.cta),
+                ),
         ],
       ),
     );
