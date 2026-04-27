@@ -181,6 +181,26 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                               avatar: const Icon(Icons.category, size: 16),
                               label: Text(ex.categoria!),
                             ),
+                          if (ex.equipamento != null && ex.equipamento!.isNotEmpty)
+                            Chip(
+                              avatar: const Icon(Icons.construction_rounded, size: 16),
+                              label: Text(ex.equipamento!),
+                            ),
+                          if (ex.nivel != null && ex.nivel!.isNotEmpty)
+                            Chip(
+                              avatar: const Icon(Icons.trending_up_rounded, size: 16),
+                              label: Text(ex.nivel!),
+                            ),
+                          if (ex.mecanica != null && ex.mecanica!.isNotEmpty)
+                            Chip(
+                              avatar: const Icon(Icons.account_tree_rounded, size: 16),
+                              label: Text(ex.mecanica!),
+                            ),
+                          if (ex.objetivo != null && ex.objetivo!.isNotEmpty)
+                            Chip(
+                              avatar: const Icon(Icons.flag_rounded, size: 16),
+                              label: Text(ex.objetivo!),
+                            ),
                         ],
                       ),
                       // Tags

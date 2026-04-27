@@ -19,6 +19,31 @@ const _categoriasExercicio = [
   'Outro',
 ];
 
+const _equipamentosExercicio = [
+  'Peso corporal',
+  'Halteres',
+  'Barra',
+  'Maquina',
+  'Cabo',
+  'Elastico',
+  'Kettlebell',
+  'Cardio',
+  'Outro',
+];
+
+const _niveisExercicio = ['Iniciante', 'Intermediario', 'Avancado'];
+
+const _mecanicasExercicio = ['Composto', 'Isolado', 'Mobilidade', 'Cardio'];
+
+const _objetivosExercicio = [
+  'Forca',
+  'Hipertrofia',
+  'Emagrecimento',
+  'Condicionamento',
+  'Mobilidade',
+  'Reabilitacao',
+];
+
 class AddExercicioScreen extends ConsumerStatefulWidget {
   const AddExercicioScreen({super.key});
 
@@ -34,6 +59,10 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   final _obsCtrl = TextEditingController();
   String? _musculoAlvo;
   String? _categoria;
+  String? _equipamento;
+  String? _nivel;
+  String? _mecanica;
+  String? _objetivo;
   bool _loading = false;
   String? _error;
 
@@ -58,6 +87,10 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
             descricao: _descricaoCtrl.text.trim(),
             musculoAlvo: _musculoAlvo,
             categoria: _categoria,
+            equipamento: _equipamento,
+            nivel: _nivel,
+            mecanica: _mecanica,
+            objetivo: _objetivo,
             tags: _tagsCtrl.text.trim(),
             observacoes: _obsCtrl.text.trim(),
           );
@@ -195,6 +228,110 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                 ))
                             .toList(),
                         onChanged: (v) => setState(() => _categoria = v),
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        value: _equipamento,
+                        decoration: InputDecoration(
+                          labelText: 'Equipamento',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                        ),
+                        items: _equipamentosExercicio
+                            .map((c) => DropdownMenuItem(
+                                  value: c,
+                                  child: Text(c, style: TextStyle(color: ink)),
+                                ))
+                            .toList(),
+                        onChanged: (v) => setState(() => _equipamento = v),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _nivel,
+                              decoration: InputDecoration(
+                                labelText: 'Nivel',
+                                filled: true,
+                                fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                                ),
+                              ),
+                              items: _niveisExercicio
+                                  .map((c) => DropdownMenuItem(
+                                        value: c,
+                                        child: Text(c, style: TextStyle(color: ink)),
+                                      ))
+                                  .toList(),
+                              onChanged: (v) => setState(() => _nivel = v),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _mecanica,
+                              decoration: InputDecoration(
+                                labelText: 'Mecanica',
+                                filled: true,
+                                fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                                ),
+                              ),
+                              items: _mecanicasExercicio
+                                  .map((c) => DropdownMenuItem(
+                                        value: c,
+                                        child: Text(c, style: TextStyle(color: ink)),
+                                      ))
+                                  .toList(),
+                              onChanged: (v) => setState(() => _mecanica = v),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        value: _objetivo,
+                        decoration: InputDecoration(
+                          labelText: 'Objetivo principal',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                        ),
+                        items: _objetivosExercicio
+                            .map((c) => DropdownMenuItem(
+                                  value: c,
+                                  child: Text(c, style: TextStyle(color: ink)),
+                                ))
+                            .toList(),
+                        onChanged: (v) => setState(() => _objetivo = v),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(

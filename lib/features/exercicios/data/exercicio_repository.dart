@@ -8,6 +8,10 @@ class Exercicio {
   final String? musculoAlvo;
   final String? gifUrl;
   final String? categoria;
+  final String? equipamento;
+  final String? nivel;
+  final String? mecanica;
+  final String? objetivo;
   final String? videoUrl;
   final String? tags;
   final bool favoritado;
@@ -19,6 +23,10 @@ class Exercicio {
     this.musculoAlvo,
     this.gifUrl,
     this.categoria,
+    this.equipamento,
+    this.nivel,
+    this.mecanica,
+    this.objetivo,
     this.videoUrl,
     this.tags,
     this.favoritado = false,
@@ -31,6 +39,10 @@ class Exercicio {
         musculoAlvo: json['musculoAlvo'] as String?,
         gifUrl: json['gifUrl'] as String?,
         categoria: json['categoria'] as String?,
+        equipamento: json['equipamento'] as String?,
+        nivel: json['nivel'] as String?,
+        mecanica: json['mecanica'] as String?,
+        objetivo: json['objetivo'] as String?,
         videoUrl: json['videoUrl'] as String?,
         tags: json['tags'] as String?,
         favoritado: json['favoritado'] as bool? ?? false,
@@ -68,6 +80,10 @@ class ExercicioRepository {
     String? descricao,
     String? musculoAlvo,
     String? categoria,
+    String? equipamento,
+    String? nivel,
+    String? mecanica,
+    String? objetivo,
     String? tags,
     String? observacoes,
   }) async {
@@ -76,6 +92,10 @@ class ExercicioRepository {
       if (descricao != null && descricao.isNotEmpty) 'descricao': descricao,
       if (musculoAlvo != null && musculoAlvo.isNotEmpty) 'musculoAlvo': musculoAlvo,
       if (categoria != null && categoria.isNotEmpty) 'categoria': categoria,
+      if (equipamento != null && equipamento.isNotEmpty) 'equipamento': equipamento,
+      if (nivel != null && nivel.isNotEmpty) 'nivel': nivel,
+      if (mecanica != null && mecanica.isNotEmpty) 'mecanica': mecanica,
+      if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
       if (tags != null && tags.isNotEmpty) 'tags': tags,
       if (observacoes != null && observacoes.isNotEmpty) 'observacoes': observacoes,
     });
