@@ -7,6 +7,8 @@ import '../../../core/providers/personal_brand_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../../checkin/providers/checkin_provider.dart';
+import '../../checkin/data/checkin_repository.dart';
 import 'progresso_semanal_widget.dart';
 
 class AlunoDashboardScreen extends ConsumerWidget {
@@ -16,6 +18,8 @@ class AlunoDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final alunoAsync = ref.watch(alunoMeProvider);
+    final brandAsync = ref.watch(personalBrandProvider);
+    final treinosAsync = ref.watch(meusTreinosProvider);
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -68,87 +72,56 @@ class AlunoDashboardScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Consumer(
-              builder: (context, ref, _) {
-                final isDark = Theme.of(context).brightness == Brightness.dark;
-                final brandAsync = ref.watch(personalBrandProvider);
-                return brandAsync.maybeWhen(
-                  data: (brand) {
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 18,
-                            backgroundColor: EagleTokens.brand,
-                            backgroundImage: brand.logoUrl != null ? NetworkImage(brand.logoUrl!) : null,
-                            child: brand.logoUrl == null
-                                ? Text(
-                                    brand.nomePersonal.isNotEmpty ? brand.nomePersonal[0].toUpperCase() : 'P',
-                                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
-                                  )
-                                : null,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  brand.nomePersonal,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13,
-                                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                                  ),
-                                ),
-                                Text(
-                                  'Seu personal',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: isDark
-                                        ? EagleTokens.darkInkMute
-                                        : EagleTokens.inkMute,
-                                  ),
-                                ),
-                                if (brand.slogan != null && brand.slogan!.isNotEmpty)
-                                  Text(
-                                    brand.slogan!,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  orElse: () => const SizedBox.shrink(),
-                );
-              },
+            brandAsync.when(
+              data: (brand) => alunoAsync.when(
+                data: (aluno) => _AlunoHeroCard(
+                  aluno: aluno,
+                  brand: brand,
+                  isDark: isDark,
+                ),
+                loading: () => _HeroCardSkeleton(isDark: isDark),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
+              loading: () => _HeroCardSkeleton(isDark: isDark),
+              error: (_, __) => const SizedBox.shrink(),
             ),
+            const SizedBox(height: 16),
+            treinosAsync.when(
+              data: (treinos) => alunoAsync.when(
+                data: (aluno) => _TodayFocusCard(
+                  aluno: aluno,
+                  treinos: treinos,
+                  isDark: isDark,
+                ),
+                loading: () => _FocusCardSkeleton(isDark: isDark),
+                error: (_, __) => _FocusCardSkeleton(isDark: isDark),
+              ),
+              loading: () => _FocusCardSkeleton(isDark: isDark),
+              error: (_, __) => _FocusCardSkeleton(isDark: isDark),
+            ),
+            const SizedBox(height: 16),
             alunoAsync.when(
-              data: (aluno) => _AlunoProfileCard(aluno: aluno, isDark: isDark),
-              loading: () => _ProfileCardSkeleton(isDark: isDark),
+              data: (aluno) => _StudentStatsRow(
+                aluno: aluno,
+                treinos: treinosAsync.valueOrNull ?? const [],
+                isDark: isDark,
+              ),
+              loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 16),
             const ProgressoSemanalWidget(),
+            const SizedBox(height: 24),
+            Text(
+              'Acoes rapidas',
+              style: TextStyle(
+                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _QuickActionStrip(isDark: isDark),
             const SizedBox(height: 24),
             Text(
               'Meus Atalhos',
@@ -211,6 +184,12 @@ class AlunoDashboardScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 20),
+            alunoAsync.when(
+              data: (aluno) => _AlunoProfileCard(aluno: aluno, isDark: isDark),
+              loading: () => _ProfileCardSkeleton(isDark: isDark),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
           ],
         ),
       ),
@@ -219,6 +198,496 @@ class AlunoDashboardScreen extends ConsumerWidget {
 }
 
 // ── Profile Card ──────────────────────────────────────────────────────────────
+
+class _AlunoHeroCard extends StatelessWidget {
+  final Aluno aluno;
+  final PersonalBrand brand;
+  final bool isDark;
+
+  const _AlunoHeroCard({
+    required this.aluno,
+    required this.brand,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final firstName = aluno.nome.split(' ').first;
+    final slogan = brand.slogan?.trim().isNotEmpty == true
+        ? brand.slogan!
+        : 'Seu treino organizado para hoje.';
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.tertiary,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: Colors.white.withValues(alpha: 0.16),
+                backgroundImage:
+                    brand.logoUrl != null ? NetworkImage(brand.logoUrl!) : null,
+                child: brand.logoUrl == null
+                    ? Text(
+                        brand.nomePersonal.isNotEmpty
+                            ? brand.nomePersonal[0].toUpperCase()
+                            : 'P',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ola, $firstName',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      slogan,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        height: 1.45,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _HeroPill(
+                icon: Icons.person_outline,
+                label: 'Seu personal',
+                value: brand.nomePersonal,
+              ),
+              if (aluno.objetivo?.trim().isNotEmpty == true)
+                _HeroPill(
+                  icon: Icons.flag_outlined,
+                  label: 'Foco atual',
+                  value: aluno.objetivo!,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _HeroPill({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 14),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 11,
+                ),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TodayFocusCard extends StatelessWidget {
+  final Aluno aluno;
+  final List<ExecucaoTreino> treinos;
+  final bool isDark;
+
+  const _TodayFocusCard({
+    required this.aluno,
+    required this.treinos,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final next = treinos.isEmpty ? null : treinos.first;
+    final completedFields = [
+      aluno.telefone,
+      aluno.whatsapp,
+      aluno.objetivo,
+      aluno.genero,
+      aluno.peso?.toString(),
+      aluno.altura?.toString(),
+      aluno.dataNascimento,
+      aluno.fotoUrl,
+    ].where((e) => e != null && e.toString().trim().isNotEmpty).length;
+    final profileCompletion = (completedFields / 8 * 100).round();
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Hoje',
+            style: TextStyle(
+              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            next != null
+                ? 'Seu proximo passo esta pronto: ${next.treinoNome}.'
+                : 'Seu personal ainda nao liberou um treino para hoje.',
+            style: TextStyle(color: mute, height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          if (next != null)
+            _PrimaryActionCard(
+              title: next.treinoNome,
+              subtitle:
+                  '${next.exercicios.length} exercicios para seguir seu plano com clareza.',
+              cta: 'Treinar agora',
+              onTap: () => context.push('/checkin/executar', extra: next.treinoId),
+            )
+          else
+            _PrimaryActionCard(
+              title: 'Perfil e acompanhamento',
+              subtitle:
+                  'Enquanto o treino nao chega, deixe seu perfil completo para melhorar os proximos ajustes.',
+              cta: 'Completar perfil',
+              onTap: () => context.push('/aluno/perfil'),
+            ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: _MiniMetricCard(
+                  label: 'Perfil',
+                  value: '$profileCompletion%',
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MiniMetricCard(
+                  label: 'Treinos ativos',
+                  value: '${treinos.length}',
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrimaryActionCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String cta;
+  final VoidCallback onTap;
+
+  const _PrimaryActionCard({
+    required this.title,
+    required this.subtitle,
+    required this.cta,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: EagleTokens.brand.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(subtitle, style: const TextStyle(height: 1.45)),
+          const SizedBox(height: 12),
+          FilledButton(onPressed: onTap, child: Text(cta)),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniMetricCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool isDark;
+
+  const _MiniMetricCard({
+    required this.label,
+    required this.value,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.brandSofter,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(label, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
+  }
+}
+
+class _StudentStatsRow extends StatelessWidget {
+  final Aluno aluno;
+  final List<ExecucaoTreino> treinos;
+  final bool isDark;
+
+  const _StudentStatsRow({
+    required this.aluno,
+    required this.treinos,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cards = [
+      ('Objetivo', aluno.objetivo?.trim().isNotEmpty == true ? aluno.objetivo! : 'Definir'),
+      ('Consultoria', aluno.tipoConsultoria?.trim().isNotEmpty == true ? aluno.tipoConsultoria! : 'Padrao'),
+      ('Proximos', '${treinos.length}'),
+    ];
+
+    return Row(
+      children: [
+        for (var i = 0; i < cards.length; i++) ...[
+          Expanded(
+            child: _MiniMetricCard(
+              label: cards[i].$1,
+              value: cards[i].$2,
+              isDark: isDark,
+            ),
+          ),
+          if (i != cards.length - 1) const SizedBox(width: 10),
+        ],
+      ],
+    );
+  }
+}
+
+class _QuickActionStrip extends StatelessWidget {
+  final bool isDark;
+
+  const _QuickActionStrip({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _InlineActionButton(
+            icon: Icons.chat_bubble_outline,
+            label: 'Chat',
+            onTap: () => context.push('/chat/aluno'),
+            isDark: isDark,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _InlineActionButton(
+            icon: Icons.person_outline,
+            label: 'Perfil',
+            onTap: () => context.push('/aluno/perfil'),
+            isDark: isDark,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _InlineActionButton(
+            icon: Icons.smart_toy_outlined,
+            label: 'IA',
+            onTap: () => context.push('/ia/aluno'),
+            isDark: isDark,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InlineActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isDark;
+
+  const _InlineActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: EagleTokens.brand, size: 18),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroCardSkeleton extends StatelessWidget {
+  final bool isDark;
+
+  const _HeroCardSkeleton({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final shimmer = isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft;
+    return Container(
+      height: 170,
+      decoration: BoxDecoration(
+        color: shimmer,
+        borderRadius: BorderRadius.circular(24),
+      ),
+    );
+  }
+}
+
+class _FocusCardSkeleton extends StatelessWidget {
+  final bool isDark;
+
+  const _FocusCardSkeleton({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final shimmer = isDark ? EagleTokens.darkCard : EagleTokens.lineSoft;
+    return Container(
+      height: 220,
+      decoration: BoxDecoration(
+        color: shimmer,
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+  }
+}
 
 class _AlunoProfileCard extends StatelessWidget {
   final Aluno aluno;
