@@ -10,6 +10,42 @@ class PublicDepoimentoItem {
   );
 }
 
+class PublicLandingServiceItem {
+  final String titulo;
+  final String descricao;
+  const PublicLandingServiceItem({
+    required this.titulo,
+    required this.descricao,
+  });
+
+  factory PublicLandingServiceItem.fromJson(Map<String, dynamic> j) =>
+      PublicLandingServiceItem(
+        titulo: j['titulo'] as String? ?? '',
+        descricao: j['descricao'] as String? ?? '',
+      );
+}
+
+class PublicLandingPackageItem {
+  final String nome;
+  final String descricao;
+  final String preco;
+  final String cta;
+  const PublicLandingPackageItem({
+    required this.nome,
+    required this.descricao,
+    required this.preco,
+    required this.cta,
+  });
+
+  factory PublicLandingPackageItem.fromJson(Map<String, dynamic> j) =>
+      PublicLandingPackageItem(
+        nome: j['nome'] as String? ?? '',
+        descricao: j['descricao'] as String? ?? '',
+        preco: j['preco'] as String? ?? '',
+        cta: j['cta'] as String? ?? 'Quero saber mais',
+      );
+}
+
 class PublicPersonalData {
   final String nomePersonal;
   final String? slogan;
@@ -24,6 +60,8 @@ class PublicPersonalData {
   final int anoCriacao;
   final String plano;
   final String? videoUrl;
+  final List<PublicLandingServiceItem> servicos;
+  final List<PublicLandingPackageItem> pacotes;
   final List<PublicDepoimentoItem> depoimentos;
   final List<String> fotos;
 
@@ -41,6 +79,8 @@ class PublicPersonalData {
     required this.anoCriacao,
     required this.plano,
     this.videoUrl,
+    this.servicos = const [],
+    this.pacotes = const [],
     this.depoimentos = const [],
     this.fotos = const [],
   });
@@ -59,6 +99,12 @@ class PublicPersonalData {
         anoCriacao: j['anoCriacao'] as int? ?? DateTime.now().year,
         plano: j['plano'] as String? ?? 'PREMIUM',
         videoUrl: j['videoUrl'] as String?,
+        servicos: (j['servicos'] as List<dynamic>? ?? [])
+            .map((e) => PublicLandingServiceItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        pacotes: (j['pacotes'] as List<dynamic>? ?? [])
+            .map((e) => PublicLandingPackageItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
         depoimentos: (j['depoimentos'] as List<dynamic>? ?? [])
             .map((e) => PublicDepoimentoItem.fromJson(e as Map<String, dynamic>))
             .toList(),

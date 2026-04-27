@@ -1,6 +1,56 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 
+class LandingServiceItem {
+  final String titulo;
+  final String descricao;
+
+  const LandingServiceItem({
+    required this.titulo,
+    required this.descricao,
+  });
+
+  factory LandingServiceItem.fromJson(Map<String, dynamic> json) =>
+      LandingServiceItem(
+        titulo: json['titulo'] as String? ?? '',
+        descricao: json['descricao'] as String? ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {
+        'titulo': titulo,
+        'descricao': descricao,
+      };
+}
+
+class LandingPackageItem {
+  final String nome;
+  final String descricao;
+  final String preco;
+  final String cta;
+
+  const LandingPackageItem({
+    required this.nome,
+    required this.descricao,
+    required this.preco,
+    required this.cta,
+  });
+
+  factory LandingPackageItem.fromJson(Map<String, dynamic> json) =>
+      LandingPackageItem(
+        nome: json['nome'] as String? ?? '',
+        descricao: json['descricao'] as String? ?? '',
+        preco: json['preco'] as String? ?? '',
+        cta: json['cta'] as String? ?? 'Quero saber mais',
+      );
+
+  Map<String, dynamic> toJson() => {
+        'nome': nome,
+        'descricao': descricao,
+        'preco': preco,
+        'cta': cta,
+      };
+}
+
 class PerfilPersonal {
   final int id;
   final String nome;
@@ -28,6 +78,8 @@ class PerfilPersonal {
   final String? descricaoProfissional;
   final String? especialidades;
   final String? instagram;
+  final List<LandingServiceItem> servicos;
+  final List<LandingPackageItem> pacotes;
 
   PerfilPersonal({
     required this.id,
@@ -54,6 +106,8 @@ class PerfilPersonal {
     this.descricaoProfissional,
     this.especialidades,
     this.instagram,
+    this.servicos = const [],
+    this.pacotes = const [],
   });
 
   factory PerfilPersonal.fromJson(Map<String, dynamic> json) => PerfilPersonal(
@@ -81,6 +135,12 @@ class PerfilPersonal {
         descricaoProfissional: json['descricaoProfissional'] as String?,
         especialidades: json['especialidades'] as String?,
         instagram: json['instagram'] as String?,
+        servicos: (json['servicos'] as List<dynamic>? ?? [])
+            .map((e) => LandingServiceItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        pacotes: (json['pacotes'] as List<dynamic>? ?? [])
+            .map((e) => LandingPackageItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
 }
 

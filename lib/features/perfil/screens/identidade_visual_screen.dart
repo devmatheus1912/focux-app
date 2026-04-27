@@ -7,6 +7,7 @@ import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 
 const _coresPredefinidas = [
@@ -41,10 +42,21 @@ class _IdentidadeVisualScreenState
   final _sloganCtrl = TextEditingController();
   final _domCtrl = TextEditingController();
   final _videoCtrl = TextEditingController();
+  final _serviceTitleCtrls =
+      List.generate(3, (_) => TextEditingController());
+  final _serviceDescCtrls =
+      List.generate(3, (_) => TextEditingController());
+  final _packageNameCtrls =
+      List.generate(3, (_) => TextEditingController());
+  final _packagePriceCtrls =
+      List.generate(3, (_) => TextEditingController());
+  final _packageDescCtrls =
+      List.generate(3, (_) => TextEditingController());
   Color _corPrimaria = const Color(0xFF3B5FE2);
   Color _corSecundaria = const Color(0xFF0097A7);
   bool _salvando = false;
   bool _uploadingLogo = false;
+  bool _perfilLoaded = false;
   String? _logoUrl;
 
   @override
@@ -52,28 +64,68 @@ class _IdentidadeVisualScreenState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(perfilProvider);
-      final perfil = ref.read(perfilProvider).value;
-      if (perfil != null) {
-        _descCtrl.text = perfil.descricaoProfissional ?? '';
-        _espCtrl.text = perfil.especialidades ?? '';
-        _instaCtrl.text = perfil.instagram ?? '';
-        _sloganCtrl.text = perfil.slogan ?? '';
-        _domCtrl.text = perfil.dominioCustomizado ?? '';
-        _videoCtrl.text = perfil.videoUrl ?? '';
-        _logoUrl = perfil.logoUrl;
-        if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
-          final hex =
-              int.tryParse(perfil.corPrimaria!.replaceFirst('#', '0xFF'));
-          if (hex != null) setState(() => _corPrimaria = Color(hex));
-        }
-        if (perfil.corSecundaria != null && perfil.corSecundaria!.length == 7) {
-          final hex =
-              int.tryParse(perfil.corSecundaria!.replaceFirst('#', '0xFF'));
-          if (hex != null) setState(() => _corSecundaria = Color(hex));
-        }
-        setState(() {});
-      }
     });
+  }
+
+  void _applyPerfil(PerfilPersonal perfil) {
+    _descCtrl.text = perfil.descricaoProfissional ?? '';
+    _espCtrl.text = perfil.especialidades ?? '';
+    _instaCtrl.text = perfil.instagram ?? '';
+    _sloganCtrl.text = perfil.slogan ?? '';
+    _domCtrl.text = perfil.dominioCustomizado ?? '';
+    _videoCtrl.text = perfil.videoUrl ?? '';
+    _logoUrl = perfil.logoUrl;
+    if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
+      final hex = int.tryParse(perfil.corPrimaria!.replaceFirst('#', '0xFF'));
+      if (hex != null) _corPrimaria = Color(hex);
+    }
+    if (perfil.corSecundaria != null && perfil.corSecundaria!.length == 7) {
+      final hex =
+          int.tryParse(perfil.corSecundaria!.replaceFirst('#', '0xFF'));
+      if (hex != null) _corSecundaria = Color(hex);
+    }
+    for (var i = 0; i < 3; i++) {
+      final servico = i < perfil.servicos.length ? perfil.servicos[i] : null;
+      _serviceTitleCtrls[i].text = servico?.titulo ?? '';
+      _serviceDescCtrls[i].text = servico?.descricao ?? '';
+
+      final pacote = i < perfil.pacotes.length ? perfil.pacotes[i] : null;
+      _packageNameCtrls[i].text = pacote?.nome ?? '';
+      _packagePriceCtrls[i].text = pacote?.preco ?? '';
+      _packageDescCtrls[i].text = pacote?.descricao ?? '';
+    }
+    _perfilLoaded = true;
+  }
+
+  List<Map<String, dynamic>> _buildServicosPayload() {
+    final items = <Map<String, dynamic>>[];
+    for (var i = 0; i < _serviceTitleCtrls.length; i++) {
+      final titulo = _serviceTitleCtrls[i].text.trim();
+      final descricao = _serviceDescCtrls[i].text.trim();
+      if (titulo.isEmpty && descricao.isEmpty) continue;
+      items.add({
+        'titulo': titulo,
+        'descricao': descricao,
+      });
+    }
+    return items;
+  }
+
+  List<Map<String, dynamic>> _buildPacotesPayload() {
+    final items = <Map<String, dynamic>>[];
+    for (var i = 0; i < _packageNameCtrls.length; i++) {
+      final nome = _packageNameCtrls[i].text.trim();
+      final preco = _packagePriceCtrls[i].text.trim();
+      final descricao = _packageDescCtrls[i].text.trim();
+      if (nome.isEmpty && preco.isEmpty && descricao.isEmpty) continue;
+      items.add({
+        'nome': nome,
+        'preco': preco,
+        'descricao': descricao,
+        'cta': 'Quero saber mais',
+      });
+    }
+    return items;
   }
 
   @override
@@ -84,6 +136,21 @@ class _IdentidadeVisualScreenState
     _sloganCtrl.dispose();
     _domCtrl.dispose();
     _videoCtrl.dispose();
+    for (final controller in _serviceTitleCtrls) {
+      controller.dispose();
+    }
+    for (final controller in _serviceDescCtrls) {
+      controller.dispose();
+    }
+    for (final controller in _packageNameCtrls) {
+      controller.dispose();
+    }
+    for (final controller in _packagePriceCtrls) {
+      controller.dispose();
+    }
+    for (final controller in _packageDescCtrls) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -120,6 +187,8 @@ class _IdentidadeVisualScreenState
         'descricaoProfissional': _descCtrl.text.trim(),
         'especialidades': _espCtrl.text.trim(),
         'instagram': _instaCtrl.text.trim(),
+        'servicos': _buildServicosPayload(),
+        'pacotes': _buildPacotesPayload(),
       };
       if (plano.toUpperCase() == 'ENTERPRISE') {
         body['corPrimaria'] =
@@ -158,13 +227,17 @@ class _IdentidadeVisualScreenState
   @override
   Widget build(BuildContext context) {
     final perfilAsync = ref.watch(perfilProvider);
+    final perfil = perfilAsync.value;
+    if (perfil != null && !_perfilLoaded) {
+      _applyPerfil(perfil);
+    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final plano = perfilAsync.value?.plano ?? 'FREE';
+    final plano = perfil?.plano ?? 'FREE';
     final isEnterprise = plano.toUpperCase() == 'ENTERPRISE';
     final isPremiumOrAbove = ['PREMIUM', 'ENTERPRISE'].contains(plano.toUpperCase());
 
-    final slug = perfilAsync.value?.slug;
-    final nomePersonal = perfilAsync.value?.nome ?? '';
+    final slug = perfil?.slug;
+    final nomePersonal = perfil?.nome ?? '';
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -321,6 +394,94 @@ class _IdentidadeVisualScreenState
                         labelText: 'Instagram',
                         prefixText: '@',
                         hintText: 'seuperfil',
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _LandingEditorCard(
+                      isDark: isDark,
+                      title: 'Servicos em destaque',
+                      subtitle:
+                          'Mostre o que voce entrega na pratica. Isso alimenta a secao publica da landing.',
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < _serviceTitleCtrls.length; i++) ...[
+                            TextFormField(
+                              controller: _serviceTitleCtrls[i],
+                              enabled: isPremiumOrAbove,
+                              decoration: InputDecoration(
+                                labelText: 'Servico ${i + 1}',
+                                hintText: 'Ex: Consultoria online',
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            TextFormField(
+                              controller: _serviceDescCtrls[i],
+                              enabled: isPremiumOrAbove,
+                              maxLines: 2,
+                              decoration: const InputDecoration(
+                                labelText: 'Descricao',
+                                hintText:
+                                    'Explique o formato, frequencia e para quem esse servico faz sentido.',
+                                alignLabelWithHint: true,
+                              ),
+                            ),
+                            if (i != _serviceTitleCtrls.length - 1)
+                              const SizedBox(height: 16),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _LandingEditorCard(
+                      isDark: isDark,
+                      title: 'Pacotes e valores',
+                      subtitle:
+                          'Cadastre ate 3 opcoes de entrada para o aluno entender seu ticket.',
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < _packageNameCtrls.length; i++) ...[
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _packageNameCtrls[i],
+                                    enabled: isPremiumOrAbove,
+                                    decoration: InputDecoration(
+                                      labelText: 'Pacote ${i + 1}',
+                                      hintText: 'Ex: Plano mensal',
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                SizedBox(
+                                  width: 132,
+                                  child: TextFormField(
+                                    controller: _packagePriceCtrls[i],
+                                    enabled: isPremiumOrAbove,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Preco',
+                                      hintText: 'R\$ 297',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            TextFormField(
+                              controller: _packageDescCtrls[i],
+                              enabled: isPremiumOrAbove,
+                              maxLines: 2,
+                              decoration: const InputDecoration(
+                                labelText: 'Descricao do pacote',
+                                hintText:
+                                    'Ex: Treino personalizado, ajustes semanais e suporte no chat.',
+                                alignLabelWithHint: true,
+                              ),
+                            ),
+                            if (i != _packageNameCtrls.length - 1)
+                              const SizedBox(height: 16),
+                          ],
+                        ],
                       ),
                     ),
                   ],
@@ -638,6 +799,57 @@ class _SectionHeader extends StatelessWidget {
         fontWeight: FontWeight.w700,
         color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
         letterSpacing: 1.0,
+      ),
+    );
+  }
+}
+
+class _LandingEditorCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final Widget child;
+  final bool isDark;
+
+  const _LandingEditorCard({
+    required this.title,
+    required this.subtitle,
+    required this.child,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 16),
+          child,
+        ],
       ),
     );
   }

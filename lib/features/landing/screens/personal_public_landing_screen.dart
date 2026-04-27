@@ -14,6 +14,7 @@ import '../widgets/depoimentos_section.dart';
 import '../widgets/galeria_section.dart';
 import '../widgets/contato_section.dart';
 import '../widgets/cta_final_section.dart';
+import '../widgets/ofertas_section.dart';
 import '../widgets/powered_by_footer.dart';
 
 // ---------------------------------------------------------------------------
@@ -176,6 +177,7 @@ class _LandingContent extends StatelessWidget {
         SliverToBoxAdapter(child: SocialProofSection(data: data)),
         SliverToBoxAdapter(child: SobreSection(data: data)),
         SliverToBoxAdapter(child: EspecialidadesSection(data: data, primaryColor: primaryColor)),
+        SliverToBoxAdapter(child: OfertasSection(data: data, slug: slug, primaryColor: primaryColor)),
         SliverToBoxAdapter(child: ContatoSection(data: data)),
         SliverToBoxAdapter(child: DepoimentosSection(data: data, primaryColor: primaryColor)),
         SliverToBoxAdapter(child: GaleriaSection(data: data)),
@@ -185,4 +187,3 @@ class _LandingContent extends StatelessWidget {
     );
   }
 }
-
