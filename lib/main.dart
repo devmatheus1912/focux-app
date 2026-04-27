@@ -13,6 +13,7 @@ import 'core/fcm/fcm_service.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
+import 'features/auth/providers/auth_provider.dart';
 import 'features/perfil/data/perfil_repository.dart';
 
 void main() async {
@@ -99,6 +100,12 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AuthStatus>(authProvider, (previous, next) {
+      if (next == AuthStatus.authenticated && previous != AuthStatus.authenticated) {
+        _loadCustomTheme();
+      }
+    });
+
     final themeMode = ref.watch(themeModeProvider);
     final primaryColor = ref.watch(primaryColorProvider);
 

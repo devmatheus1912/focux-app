@@ -5,6 +5,7 @@ import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/dashboard/screens/personal_dashboard_screen.dart';
 import '../../features/dashboard/screens/aluno_dashboard_screen.dart';
+import '../../features/dashboard/screens/perfil_aluno_screen.dart';
 import '../../features/alunos/screens/alunos_list_screen.dart';
 import '../../features/alunos/screens/add_aluno_screen.dart';
 import '../../features/alunos/screens/aluno_detail_screen.dart';
@@ -42,6 +43,7 @@ import '../../features/alunos/screens/editar_aluno_screen.dart';
 import '../../features/alunos/data/aluno_repository.dart';
 import '../../features/auth/screens/esqueci_senha_screen.dart';
 import '../../features/auth/screens/definir_senha_aluno_screen.dart';
+import '../../features/auth/screens/resetar_senha_screen.dart';
 import '../../features/ranking/screens/ranking_screen.dart';
 import '../../features/perfil/screens/identidade_visual_screen.dart';
 import '../../features/evolucao/screens/engajamento_screen.dart';
@@ -75,6 +77,7 @@ import '../../features/alimentar/screens/alimentar_screen.dart';
 import '../../features/ia/screens/ia_progressao_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../../features/perfil/screens/wallet_screen.dart';
+import 'role_home.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -84,6 +87,10 @@ class AppRouter {
       GoRoute(
         path: '/',
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) => const HomeRedirectScreen(),
       ),
       GoRoute(
         path: '/p/:slug',
@@ -114,6 +121,12 @@ class AppRouter {
         builder: (context, state) => const EsqueciSenhaScreen(),
       ),
       GoRoute(
+        path: '/resetar-senha',
+        builder: (context, state) => ResetarSenhaScreen(
+          token: state.uri.queryParameters['token'],
+        ),
+      ),
+      GoRoute(
         path: '/aluno/definir-senha',
         builder: (context, state) => const DefinirSenhaAlunoScreen(),
       ),
@@ -122,6 +135,10 @@ class AppRouter {
       GoRoute(
         path: '/dashboard/aluno',
         builder: (context, state) => const AlunoDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/aluno/perfil',
+        builder: (context, state) => const PerfilAlunoScreen(),
       ),
 
       // ── Personal trainer main shell — 5 tabs with FxDock ─────────────────────

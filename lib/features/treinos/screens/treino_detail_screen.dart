@@ -328,7 +328,9 @@ class _TreinoDetailBody extends StatelessWidget {
                   const SizedBox(width: 8),
                   _MiniMetric(
                     label: 'Volume',
-                    value: vol > 0 ? '${(vol / 1000).toStringAsFixed(1)}t' : '${grouped.keys.length} gr.',
+                    value: vol > 0
+                        ? '${(vol / 1000).toStringAsFixed(1)}t'
+                        : '${grouped.keys.length} ${grouped.keys.length == 1 ? 'grupo' : 'grupos'}',
                     isDark: isDark,
                   ),
                 ],

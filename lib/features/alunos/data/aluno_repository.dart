@@ -136,6 +136,11 @@ class AlunoRepository {
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<Aluno> atualizarMe(Map<String, dynamic> data) async {
+    final response = await _dio.put('/api/aluno/me', data: data);
+    return Aluno.fromJson(response.data as Map<String, dynamic>);
+  }
+
   // Telefone getter helper (não está no modelo ainda)
   String? getTelefone(Aluno aluno) => null;
 }

@@ -9,6 +9,7 @@ class ChatMsg {
   final DateTime enviadoEm;
   final String? tipoMidia;
   final String? midiaUrl;
+  final String? clientMessageId;
 
   ChatMsg({
     this.id, 
@@ -18,6 +19,7 @@ class ChatMsg {
     required this.enviadoEm,
     this.tipoMidia,
     this.midiaUrl,
+    this.clientMessageId,
   });
 
   factory ChatMsg.fromJson(Map<String, dynamic> j) => ChatMsg(
@@ -28,6 +30,7 @@ class ChatMsg {
     enviadoEm: DateTime.parse(j['enviadoEm'] as String),
     tipoMidia: j['tipoMidia'] as String?,
     midiaUrl: j['midiaUrl'] as String?,
+    clientMessageId: j['clientMessageId'] as String?,
   );
 }
 
@@ -82,6 +85,7 @@ class ChatRepository {
       'alunoId': alunoId,
       'conteudo': conteudo,
       'remetente': remetente,
+      'clientMessageId': _clientMessageId(),
     });
     return ChatMsg.fromJson(r.data);
   }
@@ -92,7 +96,10 @@ class ChatRepository {
   }
 
   Future<ChatMsg> enviarComoAluno(String conteudo) async {
-    final r = await _dio.post('/api/chat/aluno/enviar', data: {'conteudo': conteudo});
+    final r = await _dio.post('/api/chat/aluno/enviar', data: {
+      'conteudo': conteudo,
+      'clientMessageId': _clientMessageId(),
+    });
     return ChatMsg.fromJson(r.data);
   }
 
@@ -105,6 +112,7 @@ class ChatRepository {
       'conteudo': conteudo,
       'tipoMidia': tipoMidia,
       'midiaUrl': midiaUrl,
+      'clientMessageId': _clientMessageId(),
     });
     return ChatMsg.fromJson(r.data);
   }
@@ -122,7 +130,13 @@ class ChatRepository {
       'remetente': remetente,
       'tipoMidia': tipoMidia,
       'midiaUrl': midiaUrl,
+      'clientMessageId': _clientMessageId(),
     });
     return ChatMsg.fromJson(r.data);
+  }
+
+  String _clientMessageId() {
+    final now = DateTime.now().microsecondsSinceEpoch;
+    return 'app-$now-${identityHashCode(this)}';
   }
 }

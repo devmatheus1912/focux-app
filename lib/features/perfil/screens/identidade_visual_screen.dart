@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../providers/perfil_provider.dart';
 
@@ -131,6 +132,12 @@ class _IdentidadeVisualScreenState
         if (_videoCtrl.text.trim().isNotEmpty) body['videoUrl'] = _videoCtrl.text.trim();
       }
       await dio.put('/api/personal/identidade', data: body);
+      if (plano.toUpperCase() == 'ENTERPRISE') {
+        ref.read(primaryColorProvider.notifier).state = _corPrimaria;
+        if (_logoUrl != null && _logoUrl!.isNotEmpty) {
+          ref.read(logoUrlProvider.notifier).state = _logoUrl;
+        }
+      }
       ref.invalidate(perfilProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

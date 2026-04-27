@@ -568,6 +568,12 @@ class _AlunoDrawer extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
                 _DrawerItem(
+                  icon: Icons.person_outline,
+                  label: 'Meu Perfil',
+                  isDark: isDark,
+                  onTap: () => nav('/aluno/perfil'),
+                ),
+                _DrawerItem(
                   icon: Icons.fitness_center,
                   label: 'Meus Treinos',
                   isDark: isDark,

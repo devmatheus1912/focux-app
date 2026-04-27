@@ -71,16 +71,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return 'Não foi possível entrar agora.';
   }
 
-  void _showGoogleInfo() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Login com Google ainda não está disponível neste build.',
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -241,41 +231,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             label: 'Entrar',
                             onPressed: _submit,
                             isLoading: _loading,
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Divider(
-                                  color: Colors.white.withValues(alpha: 0.15),
-                                  height: 1,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                                child: Text(
-                                  'ou continue com',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.4),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Divider(
-                                  color: Colors.white.withValues(alpha: 0.15),
-                                  height: 1,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          AuthSecondaryButton(
-                            label: 'Google',
-                            icon: Icons.search_rounded,
-                            onPressed: _showGoogleInfo,
                           ),
                         ],
                       ),

@@ -4,6 +4,7 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/router/role_home.dart';
 import '../data/ia_repository.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
@@ -201,7 +202,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                     if (context.canPop()) {
                       context.pop();
                     } else {
-                      context.go('/home');
+                      goToRoleHome(context, ref);
                     }
                   },
                   icon: Icon(Icons.arrow_back_ios_new, color: ink, size: 18),

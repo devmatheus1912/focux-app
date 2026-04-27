@@ -48,7 +48,14 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
           _connectWs(id);
         }
       }
-      if (mounted) setState(() { _msgs.addAll(msgs); _loading = false; });
+      if (mounted) {
+        setState(() {
+          _msgs
+            ..clear()
+            ..addAll(msgs);
+          _loading = false;
+        });
+      }
       _scrollToBottom();
     } catch (e) {
       debugPrint('[Focux] Error: $e');
@@ -83,7 +90,7 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
           final data = jsonDecode(f.body!) as Map<String, dynamic>;
           final msg  = ChatMsg.fromJson(data);
           if (mounted) {
-            setState(() => _msgs.add(msg));
+            setState(() => _upsertMessage(msg));
             _scrollToBottom();
           }
         } catch (e) {
@@ -115,7 +122,7 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
         _alunoId = msg.alunoId;
         _connectWs(msg.alunoId!);
       }
-      if (mounted) setState(() => _msgs.add(msg));
+      if (mounted) setState(() => _upsertMessage(msg));
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
@@ -216,7 +223,7 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
         _alunoId = msg.alunoId;
         _connectWs(msg.alunoId!);
       }
-      if (mounted) setState(() => _msgs.add(msg));
+      if (mounted) setState(() => _upsertMessage(msg));
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
@@ -257,6 +264,18 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
     });
+  }
+
+  void _upsertMessage(ChatMsg msg) {
+    final id = msg.id;
+    if (id != null) {
+      final idx = _msgs.indexWhere((m) => m.id == id);
+      if (idx >= 0) {
+        _msgs[idx] = msg;
+        return;
+      }
+    }
+    _msgs.add(msg);
   }
 
   // ── Build ──────────────────────────────────────────────────────────────────

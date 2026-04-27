@@ -19,6 +19,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
   bool _loading = false;
   String? _message;
   String? _error;
+  bool _isAluno = false;
 
   @override
   void dispose() {
@@ -42,7 +43,10 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
     try {
       await ApiClient().dio.post(
         '/api/auth/esqueci-senha',
-        data: {'email': _emailController.text.trim(), 'tipo': 'PERSONAL'},
+        data: {
+          'email': _emailController.text.trim(),
+          'tipo': _isAluno ? 'ALUNO' : 'PERSONAL',
+        },
       );
 
       if (!mounted) {
@@ -142,6 +146,65 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                       ),
                     ),
                     const SizedBox(height: 32),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _isAluno = false),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 180),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: !_isAluno
+                                      ? Colors.white.withValues(alpha: 0.18)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  'Personal',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: !_isAluno ? 1 : 0.55),
+                                    fontWeight: !_isAluno ? FontWeight.w700 : FontWeight.w500,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _isAluno = true),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 180),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: _isAluno
+                                      ? Colors.white.withValues(alpha: 0.18)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  'Aluno',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: _isAluno ? 1 : 0.55),
+                                    fontWeight: _isAluno ? FontWeight.w700 : FontWeight.w500,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 18),
                     AuthField(
                       label: 'E-mail cadastrado',
                       controller: _emailController,

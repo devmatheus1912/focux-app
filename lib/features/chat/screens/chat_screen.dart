@@ -38,7 +38,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _loadHistorico() async {
     try {
       final msgs = await ChatRepository(ref.read(apiClientProvider)).historico(widget.alunoId);
-      setState(() { _msgs.addAll(msgs); _loading = false; });
+      setState(() {
+        _msgs
+          ..clear()
+          ..addAll(msgs);
+        _loading = false;
+      });
       _scrollToBottom();
     } catch (e) { debugPrint('[Focux] Error: $e'); setState(() => _loading = false); }
   }
@@ -63,7 +68,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         try {
           final data = jsonDecode(f.body!) as Map<String, dynamic>;
           final msg = ChatMsg.fromJson(data);
-          if (mounted) { setState(() => _msgs.add(msg)); _scrollToBottom(); }
+          if (mounted) { setState(() => _upsertMessage(msg)); _scrollToBottom(); }
         } catch (e) { debugPrint('[Focux] Error: $e'); _loadHistorico(); }
       },
     );
@@ -80,7 +85,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     setState(() => _sending = true);
     try {
       final msg = await ChatRepository(ref.read(apiClientProvider)).enviar(widget.alunoId, text, 'PERSONAL');
-      setState(() => _msgs.add(msg));
+      setState(() => _upsertMessage(msg));
       _scrollToBottom();
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
@@ -92,6 +97,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scroll.hasClients) _scroll.animateTo(_scroll.position.maxScrollExtent, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
     });
+  }
+
+  void _upsertMessage(ChatMsg msg) {
+    final id = msg.id;
+    if (id != null) {
+      final idx = _msgs.indexWhere((m) => m.id == id);
+      if (idx >= 0) {
+        _msgs[idx] = msg;
+        return;
+      }
+    }
+    _msgs.add(msg);
   }
 
   @override
@@ -368,4 +385,3 @@ class _Bubble extends StatelessWidget {
     );
   }
 }
-

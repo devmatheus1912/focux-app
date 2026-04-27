@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -217,6 +220,22 @@ class PlanoFeatures {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'plano': plano.name,
+        if (planoNomeOriginal != null) 'planoNomeOriginal': planoNomeOriginal,
+        if (limiteAlunos != null) 'limiteAlunos': limiteAlunos,
+        if (limiteIaMensal != null) 'limiteIaMensal': limiteIaMensal,
+        if (validoAte != null) 'validoAte': validoAte!.toIso8601String(),
+        'features': {
+          'financeiro': financeiro,
+          'agenda': agenda,
+          'relatorios': relatorios,
+          'whiteLabel': whiteLabel,
+          'iaCopiloto': iaCopiloto,
+          'iaIlimitada': iaIlimitada,
+        },
+      };
+
   static const free = PlanoFeatures(
     plano: SubscriptionPlan.FREE,
     financeiro: false,
@@ -230,6 +249,7 @@ class PlanoFeatures {
 
 class PlanosRepository {
   final Dio _dio;
+  static const _cacheKey = 'focux_plano_features_cache_v1';
 
   PlanosRepository(ApiClient client) : _dio = client.dio;
 
@@ -239,8 +259,33 @@ class PlanosRepository {
   }
 
   Future<PlanoFeatures> getPlanoFeatures() async {
-    final r = await _dio.get('/api/planos/me');
-    return PlanoFeatures.fromJson(r.data as Map<String, dynamic>);
+    try {
+      final r = await _dio.get('/api/planos/me');
+      final features = PlanoFeatures.fromJson(r.data as Map<String, dynamic>);
+      await _savePlanoFeaturesCache(features);
+      return features;
+    } catch (_) {
+      final cached = await _loadPlanoFeaturesCache();
+      if (cached != null) return cached;
+      rethrow;
+    }
+  }
+
+  Future<void> _savePlanoFeaturesCache(PlanoFeatures features) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_cacheKey, jsonEncode(features.toJson()));
+  }
+
+  Future<PlanoFeatures?> _loadPlanoFeaturesCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_cacheKey);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      return PlanoFeatures.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      await prefs.remove(_cacheKey);
+      return null;
+    }
   }
 
   Future<TrialStatus> startTrial({TrialStartPayload? payload}) async {

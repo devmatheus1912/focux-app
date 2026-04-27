@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import '../../features/planos/data/planos_repository.dart';
+import '../router/role_home.dart';
 
 class FeatureGate extends ConsumerWidget {
   final SubscriptionPlan requiredPlan;
@@ -141,7 +142,7 @@ class _ErrorRetryScreen extends StatelessWidget {
 
 // ── Tela de acesso restrito ─────────────────────────────────────────────────
 
-class _LockedScreen extends StatelessWidget {
+class _LockedScreen extends ConsumerWidget {
   final String featureName;
   final SubscriptionPlan requiredPlan;
 
@@ -151,7 +152,7 @@ class _LockedScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final planLabel = requiredPlan == SubscriptionPlan.ENTERPRISE
         ? 'Enterprise'
         : 'Premium';
@@ -166,7 +167,7 @@ class _LockedScreen extends StatelessWidget {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go('/home');
+              goToRoleHome(context, ref);
             }
           },
         ),
@@ -216,7 +217,7 @@ class _LockedScreen extends StatelessWidget {
                     if (context.canPop()) {
                       context.pop();
                     } else {
-                      context.go('/home');
+                      goToRoleHome(context, ref);
                     }
                   },
                   child: const Text('Voltar'),
