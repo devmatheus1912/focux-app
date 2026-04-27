@@ -440,8 +440,12 @@ class _PersonalDashboardScreenState
                               ),
                               alignment: Alignment.centerLeft,
                               child: FractionallySizedBox(
-                                widthFactor:
-                                    0.71, // Simulando a progressão para demo
+                                widthFactor: (_finData == null ||
+                                        (_finData!.previsaoReceita) == 0)
+                                    ? 0.0
+                                    : (_finData!.receitaMes /
+                                            _finData!.previsaoReceita)
+                                        .clamp(0.0, 1.0),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     color: Colors.white,
@@ -832,10 +836,10 @@ class _QuickTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(18),
-        border:
-            isDark
-                ? null
-                : Border.all(color: EagleTokens.line, width: 1),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -948,10 +952,10 @@ class _AttentionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
-        border:
-            isDark
-                ? null
-                : Border.all(color: EagleTokens.line, width: 1),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1075,6 +1079,7 @@ class _ShortcutBtn extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             FxIcon(
               name: icon,
@@ -1082,7 +1087,7 @@ class _ShortcutBtn extends StatelessWidget {
               color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
               strokeWidth: 1.9,
             ),
-            const Spacer(),
+            const SizedBox(height: 10),
             Text(
               label,
               style: TextStyle(
