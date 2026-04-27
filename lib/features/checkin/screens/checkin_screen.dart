@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -731,14 +732,13 @@ class _SerieCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (hasMedia) ...[
+                if (hasVideo) ...[
+                  const SizedBox(height: 4),
+                  _ExerciseVideoPreview(url: ee.videoUrl!, brand: brand, dark: dark),
+                  const SizedBox(height: 14),
+                ] else if (hasMedia) ...[
                   const SizedBox(height: 4),
                   _ExerciseMediaPreview(url: ee.gifUrl!, brand: brand, dark: dark),
-                  const SizedBox(height: 14),
-                ],
-                if (!hasMedia && hasVideo) ...[
-                  const SizedBox(height: 4),
-                  _ExerciseVideoAvailable(brand: brand, dark: dark),
                   const SizedBox(height: 14),
                 ],
                 if (loadText != null || restText != null) ...[
@@ -1199,11 +1199,132 @@ class _ExerciseMediaPreview extends StatelessWidget {
   }
 }
 
-class _ExerciseVideoAvailable extends StatelessWidget {
+class _ExerciseVideoPreview extends StatefulWidget {
+  final String url;
   final Color brand;
   final bool dark;
 
-  const _ExerciseVideoAvailable({
+  const _ExerciseVideoPreview({
+    required this.url,
+    required this.brand,
+    required this.dark,
+  });
+
+  @override
+  State<_ExerciseVideoPreview> createState() => _ExerciseVideoPreviewState();
+}
+
+class _ExerciseVideoPreviewState extends State<_ExerciseVideoPreview> {
+  late final VideoPlayerController _controller;
+  bool _ready = false;
+  bool _failed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+      ..initialize().then((_) {
+        if (!mounted) return;
+        _controller.setLooping(true);
+        setState(() => _ready = true);
+      }).catchError((_) {
+        if (mounted) setState(() => _failed = true);
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_failed) {
+      return _VideoFallback(brand: widget.brand, dark: widget.dark);
+    }
+    if (!_ready) {
+      return Container(
+        height: 168,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: widget.dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: widget.brand.withValues(alpha: 0.22)),
+        ),
+        alignment: Alignment.center,
+        child: CircularProgressIndicator(color: widget.brand, strokeWidth: 2.5),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AspectRatio(
+            aspectRatio: _controller.value.aspectRatio == 0 ? 16 / 9 : _controller.value.aspectRatio,
+            child: VideoPlayer(_controller),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.10),
+                    Colors.black.withValues(alpha: 0.46),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          IconButton.filled(
+            onPressed: () {
+              setState(() {
+                _controller.value.isPlaying ? _controller.pause() : _controller.play();
+              });
+            },
+            icon: Icon(_controller.value.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.black.withValues(alpha: 0.46),
+              foregroundColor: Colors.white,
+            ),
+          ),
+          Positioned(
+            left: 12,
+            bottom: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.48),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.verified_rounded, color: Colors.white, size: 15),
+                  SizedBox(width: 5),
+                  Text(
+                    'Video do personal',
+                    style: TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VideoFallback extends StatelessWidget {
+  final Color brand;
+  final bool dark;
+
+  const _VideoFallback({
     required this.brand,
     required this.dark,
   });
@@ -1218,18 +1339,17 @@ class _ExerciseVideoAvailable extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: brand.withValues(alpha: 0.26)),
       ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.play_circle_fill_rounded, color: brand, size: 34),
-            const SizedBox(height: 6),
-            Text(
-              'Video proprio do personal disponivel',
-              style: TextStyle(color: brand, fontSize: 12.5, fontWeight: FontWeight.w900),
-            ),
-          ],
-        ),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.play_circle_fill_rounded, color: brand, size: 34),
+          const SizedBox(height: 6),
+          Text(
+            'Video proprio do personal disponivel',
+            style: TextStyle(color: brand, fontSize: 12.5, fontWeight: FontWeight.w900),
+          ),
+        ],
       ),
     );
   }
