@@ -57,11 +57,21 @@ class ExercicioRepository {
   Future<List<Exercicio>> listar({
     String? categoria,
     String? tag,
+    String? musculoAlvo,
+    String? equipamento,
+    String? nivel,
+    String? mecanica,
+    String? objetivo,
     bool? favoritos,
   }) async {
     final queryParams = <String, dynamic>{};
     if (categoria != null && categoria.isNotEmpty) queryParams['categoria'] = categoria;
     if (tag != null && tag.isNotEmpty) queryParams['tag'] = tag;
+    if (musculoAlvo != null && musculoAlvo.isNotEmpty) queryParams['musculoAlvo'] = musculoAlvo;
+    if (equipamento != null && equipamento.isNotEmpty) queryParams['equipamento'] = equipamento;
+    if (nivel != null && nivel.isNotEmpty) queryParams['nivel'] = nivel;
+    if (mecanica != null && mecanica.isNotEmpty) queryParams['mecanica'] = mecanica;
+    if (objetivo != null && objetivo.isNotEmpty) queryParams['objetivo'] = objetivo;
     if (favoritos == true) queryParams['favoritos'] = 'true';
 
     final response = await _dio.get('/api/exercicios',

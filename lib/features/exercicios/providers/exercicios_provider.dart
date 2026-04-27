@@ -10,19 +10,47 @@ final exercicioRepositoryProvider = Provider<ExercicioRepository>(
 class ExercicioFilter {
   final String? categoria;
   final String? tag;
+  final String? musculoAlvo;
+  final String? equipamento;
+  final String? nivel;
+  final String? mecanica;
+  final String? objetivo;
   final bool? favoritos;
 
-  const ExercicioFilter({this.categoria, this.tag, this.favoritos});
+  const ExercicioFilter({
+    this.categoria,
+    this.tag,
+    this.musculoAlvo,
+    this.equipamento,
+    this.nivel,
+    this.mecanica,
+    this.objetivo,
+    this.favoritos,
+  });
 
   @override
   bool operator ==(Object other) =>
       other is ExercicioFilter &&
       other.categoria == categoria &&
       other.tag == tag &&
+      other.musculoAlvo == musculoAlvo &&
+      other.equipamento == equipamento &&
+      other.nivel == nivel &&
+      other.mecanica == mecanica &&
+      other.objetivo == objetivo &&
       other.favoritos == favoritos;
 
   @override
-  int get hashCode => Object.hash(categoria, tag, favoritos);
+  int get hashCode => Object.hash(
+        categoria,
+        tag,
+        musculoAlvo,
+        equipamento,
+        nivel,
+        mecanica,
+        objetivo,
+        favoritos,
+      );
 }
 
 // Provider com filtros
@@ -31,6 +59,11 @@ final exerciciosFilteredProvider =
   return ref.read(exercicioRepositoryProvider).listar(
         categoria: filter.categoria,
         tag: filter.tag,
+        musculoAlvo: filter.musculoAlvo,
+        equipamento: filter.equipamento,
+        nivel: filter.nivel,
+        mecanica: filter.mecanica,
+        objetivo: filter.objetivo,
         favoritos: filter.favoritos,
       );
 });
