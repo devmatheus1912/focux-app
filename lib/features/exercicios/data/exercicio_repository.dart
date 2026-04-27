@@ -82,6 +82,18 @@ class ExercicioRepository {
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<Exercicio> uploadVideo({
+    required int id,
+    required List<int> bytes,
+    required String filename,
+  }) async {
+    final form = FormData.fromMap({
+      'file': MultipartFile.fromBytes(bytes, filename: filename),
+    });
+    final response = await _dio.post('/api/exercicios/$id/video', data: form);
+    return Exercicio.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<void> favoritarExercicio(int id) async {
     await _dio.post('/api/exercicios/$id/favoritar');
   }

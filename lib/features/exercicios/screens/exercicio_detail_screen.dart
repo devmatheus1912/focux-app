@@ -3,21 +3,30 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../providers/exercicios_provider.dart';
 
-class ExercicioDetailScreen extends ConsumerWidget {
+class ExercicioDetailScreen extends ConsumerStatefulWidget {
   final int exercicioId;
   const ExercicioDetailScreen({super.key, required this.exercicioId});
 
-  Future<void> _toggleFavorito(WidgetRef ref, BuildContext context, bool favoritado) async {
+  @override
+  ConsumerState<ExercicioDetailScreen> createState() => _ExercicioDetailScreenState();
+}
+
+class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
+  final _picker = ImagePicker();
+  bool _uploadingVideo = false;
+
+  Future<void> _toggleFavorito(BuildContext context, bool favoritado) async {
     final repo = ref.read(exercicioRepositoryProvider);
     try {
       if (favoritado) {
-        await repo.desfavoritarExercicio(exercicioId);
+        await repo.desfavoritarExercicio(widget.exercicioId);
       } else {
-        await repo.favoritarExercicio(exercicioId);
+        await repo.favoritarExercicio(widget.exercicioId);
       }
-      ref.invalidate(exercicioProvider(exercicioId));
+      ref.invalidate(exercicioProvider(widget.exercicioId));
     } catch (e) {
       debugPrint('[Focux] Error: $e');
       if (context.mounted) {
@@ -28,9 +37,48 @@ class ExercicioDetailScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _pickAndUploadVideo(BuildContext context) async {
+    XFile? file;
+    try {
+      file = await _picker.pickVideo(source: ImageSource.gallery);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Nao foi possivel selecionar o video: $e')),
+        );
+      }
+      return;
+    }
+    if (file == null) return;
+
+    setState(() => _uploadingVideo = true);
+    try {
+      await ref.read(exercicioRepositoryProvider).uploadVideo(
+            id: widget.exercicioId,
+            bytes: await file.readAsBytes(),
+            filename: file.name,
+          );
+      ref.invalidate(exercicioProvider(widget.exercicioId));
+      ref.invalidate(exerciciosFilteredProvider);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Video proprio adicionado ao exercicio.')),
+      );
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao enviar video: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingVideo = false);
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final exercicioAsync = ref.watch(exercicioProvider(exercicioId));
+  Widget build(BuildContext context) {
+    final exercicioAsync = ref.watch(exercicioProvider(widget.exercicioId));
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
@@ -82,7 +130,7 @@ class ExercicioDetailScreen extends ConsumerWidget {
                             color: ex.favoritado ? EagleTokens.warn : mute,
                           ),
                           tooltip: ex.favoritado ? 'Remover dos favoritos' : 'Adicionar aos favoritos',
-                          onPressed: () => _toggleFavorito(ref, context, ex.favoritado),
+                          onPressed: () => _toggleFavorito(context, ex.favoritado),
                         ),
                         loading: () => const SizedBox.shrink(),
                         error: (_, __) => const SizedBox.shrink(),
@@ -154,6 +202,12 @@ class ExercicioDetailScreen extends ConsumerWidget {
                               .toList(),
                         ),
                       ],
+                      const SizedBox(height: 14),
+                      _OwnVideoPanel(
+                        hasVideo: ex.videoUrl != null && ex.videoUrl!.isNotEmpty,
+                        uploading: _uploadingVideo,
+                        onUpload: () => _pickAndUploadVideo(context),
+                      ),
                       if (ex.videoUrl != null) ...[
                         const SizedBox(height: 12),
                         _VideoPlayer(url: ex.videoUrl!),
@@ -234,6 +288,90 @@ class _VideoPlayerState extends State<_VideoPlayer> {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _OwnVideoPanel extends StatelessWidget {
+  final bool hasVideo;
+  final bool uploading;
+  final VoidCallback onUpload;
+
+  const _OwnVideoPanel({
+    required this.hasVideo,
+    required this.uploading,
+    required this.onUpload,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              hasVideo ? Icons.verified_rounded : Icons.video_call_rounded,
+              color: primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  hasVideo ? 'Video proprio ativo' : 'Adicionar video proprio',
+                  style: TextStyle(color: ink, fontSize: 14, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  hasVideo
+                      ? 'Use sua demonstracao para gerar mais confianca no aluno.'
+                      : 'Suba uma demonstracao sua para diferenciar este exercicio.',
+                  style: TextStyle(color: mute, fontSize: 12.2, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          FilledButton.icon(
+            onPressed: uploading ? null : onUpload,
+            icon: uploading
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : Icon(hasVideo ? Icons.sync_rounded : Icons.upload_rounded, size: 17),
+            label: Text(hasVideo ? 'Trocar' : 'Enviar'),
+            style: FilledButton.styleFrom(
+              backgroundColor: primary,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(92, 42),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
