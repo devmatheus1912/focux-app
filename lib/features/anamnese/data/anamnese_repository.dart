@@ -59,4 +59,10 @@ class AnamneseRepository {
 
   Future<Anamnese> salvar(int alunoId, Map<String, dynamic> data) async =>
       Anamnese.fromJson((await _dio.put('/api/alunos/$alunoId/anamnese', data: data)).data);
+
+  Future<Anamnese> buscarMinha() async =>
+      Anamnese.fromJson((await _dio.get('/api/aluno/anamnese')).data);
+
+  Future<Anamnese> salvarMinha(Map<String, dynamic> data) async =>
+      Anamnese.fromJson((await _dio.put('/api/aluno/anamnese', data: data)).data);
 }
