@@ -227,7 +227,9 @@ class _PerfilBody extends StatelessWidget {
                             children: [
                               _HeroAction(
                                 icon: Icons.arrow_back_ios_new,
-                                onTap: () => Navigator.of(context).maybePop(),
+                                onTap: () {
+                                  if (context.canPop()) context.pop();
+                                },
                               ),
                               Text(
                                 'Perfil',

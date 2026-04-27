@@ -66,7 +66,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
                 _StepTile(
                   title: 'Crie um Treino',
                   isDone: data.primeiroTreinoCriado,
-                  onTap: () => context.push('/treinos'),
+                  onTap: () => context.push('/treinos/novo'),
                 ),
                 _StepTile(
                   title: 'Configure Pagamentos',

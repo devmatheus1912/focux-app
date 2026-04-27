@@ -628,9 +628,9 @@ class _PersonalDashboardScreenState
                         children: [
                           _ShortcutBtn(
                             icon: 'spark',
-                            label: 'Gerar treino',
+                            label: 'IA Copiloto',
                             isDark: isDark,
-                            onTap: () => context.go('/ia/copiloto'),
+                            onTap: () => context.push('/ia/copiloto'),
                           ),
                           _ShortcutBtn(
                             icon: 'plus',

@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/widgets/feature_gate.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/financeiro_repository.dart';
 import 'financeiro_dashboard_screen.dart';
 import 'financeiro_resumo_screen.dart';
@@ -34,6 +36,16 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
 
   @override
   Widget build(BuildContext context) {
+    // BUG-18: Financeiro requer plano PREMIUM ou superior
+    return FeatureGate(
+      featureName: 'Financeiro',
+      requiredPlan: SubscriptionPlan.PREMIUM,
+      capability: 'financeiro',
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
