@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -41,12 +43,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   void initState() {
     super.initState();
     _selectedPlanName = widget.initialPlan?.trim().toUpperCase();
-    _purchaseSubscription = InAppPurchase.instance.purchaseStream.listen(
-      _handlePurchaseUpdates,
-      onError: (Object error) {
-        _finishPurchaseFlowWithError('Erro ao acompanhar a compra: $error');
-      },
-    );
+    if (!kIsWeb) {
+      _purchaseSubscription = InAppPurchase.instance.purchaseStream.listen(
+        _handlePurchaseUpdates,
+        onError: (Object error) {
+          _finishPurchaseFlowWithError('Erro ao acompanhar a compra: $error');
+        },
+      );
+    }
     _initializeStore();
   }
 
@@ -57,6 +61,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   }
 
   Future<void> _initializeStore() async {
+    if (kIsWeb) {
+      if (mounted) setState(() => _storeAvailable = false);
+      return;
+    }
+    
     final available = await InAppPurchase.instance.isAvailable();
     if (!mounted) return;
 
@@ -256,8 +265,20 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
   }
 
-  Future<void> _startCheckout(SubscriptionPlan plan) async {
+  Future<void> _startCheckout(SubscriptionPlan plan, int planId) async {
     if (_loadingCheckout || _syncingPurchase) {
+      return;
+    }
+
+    if (kIsWeb) {
+      setState(() => _loadingCheckout = true);
+      try {
+        final checkoutUrl = await AssinaturaRepository(ref.read(apiClientProvider)).criarPreferencia(planId);
+        final uri = Uri.parse(checkoutUrl);
+        await launchUrl(uri, webOnlyWindowName: '_self');
+      } catch (error) {
+        _finishPurchaseFlowWithError('Erro ao gerar checkout web: $error');
+      }
       return;
     }
 
@@ -494,7 +515,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 height: 52,
                 child: FilledButton(
                   onPressed: ctaEnabled
-                      ? () => _startCheckout(selectedPlan)
+                      ? () => _startCheckout(selectedPlan, selectedBackendPlan.id)
                       : null,
                   child: _loadingCheckout || _syncingPurchase
                       ? const SizedBox(
