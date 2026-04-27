@@ -31,6 +31,7 @@ import '../../features/feed/screens/feed_screen.dart';
 import '../../features/feed/screens/feed_aluno_screen.dart';
 import '../../features/auth/screens/register_aluno_screen.dart';
 import '../../features/chat/screens/chat_aluno_screen.dart';
+import '../../features/chat/screens/chat_inbox_screen.dart';
 import '../../features/ia/screens/ia_chat_screen.dart';
 import '../../features/leads/screens/leads_list_screen.dart';
 import '../../features/alertas/screens/alertas_screen.dart';
@@ -220,6 +221,13 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/alunos/:id/treinos-list',
+        builder: (context, state) => TreinosListScreen(
+          alunoId: int.parse(state.pathParameters['id']!),
+          alunoNome: state.extra as String?,
+        ),
+      ),
+      GoRoute(
         path: '/alunos/:id/ia/progressao',
         builder: (context, state) => IaProgressaoScreen(
           alunoId: int.parse(state.pathParameters['id']!),
@@ -375,6 +383,10 @@ class AppRouter {
       ),
 
       // Chat
+      GoRoute(
+        path: '/chat/inbox',
+        builder: (context, state) => const ChatInboxScreen(),
+      ),
       GoRoute(
         path: '/chat/aluno',
         builder: (context, state) => const ChatAlunoScreen(),

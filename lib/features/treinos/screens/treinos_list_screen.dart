@@ -6,11 +6,15 @@ import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
 
 class TreinosListScreen extends ConsumerWidget {
-  const TreinosListScreen({super.key});
+  final int? alunoId;
+  final String? alunoNome;
+  const TreinosListScreen({super.key, this.alunoId, this.alunoNome});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final treinosAsync = ref.watch(treinosProvider);
+    final treinosAsync = alunoId == null
+        ? ref.watch(treinosProvider)
+        : ref.watch(treinosDoAlunoProvider(alunoId!));
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
@@ -67,7 +71,7 @@ class TreinosListScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Treinos',
+                          alunoId == null ? 'Treinos' : 'Treinos de ${alunoNome ?? 'Aluno'}',
                           style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
                         ),
                       ],

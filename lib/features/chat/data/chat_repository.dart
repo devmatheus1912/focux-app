@@ -31,6 +31,36 @@ class ChatMsg {
   );
 }
 
+class ChatInboxItem {
+  final int alunoId;
+  final String alunoNome;
+  final String? fotoUrl;
+  final String ultimaMensagem;
+  final String ultimoRemetente;
+  final DateTime enviadoEm;
+  final int naoLidas;
+
+  ChatInboxItem({
+    required this.alunoId,
+    required this.alunoNome,
+    this.fotoUrl,
+    required this.ultimaMensagem,
+    required this.ultimoRemetente,
+    required this.enviadoEm,
+    required this.naoLidas,
+  });
+
+  factory ChatInboxItem.fromJson(Map<String, dynamic> j) => ChatInboxItem(
+    alunoId: j['alunoId'] as int,
+    alunoNome: j['alunoNome'] as String,
+    fotoUrl: j['fotoUrl'] as String?,
+    ultimaMensagem: j['ultimaMensagem'] as String? ?? '',
+    ultimoRemetente: j['ultimoRemetente'] as String? ?? '',
+    enviadoEm: DateTime.parse(j['enviadoEm'] as String),
+    naoLidas: j['naoLidas'] as int? ?? 0,
+  );
+}
+
 class ChatRepository {
   final Dio _dio;
   ChatRepository(ApiClient c) : _dio = c.dio;
@@ -38,6 +68,13 @@ class ChatRepository {
   Future<List<ChatMsg>> historico(int alunoId) async {
     final r = await _dio.get('/api/chat/historico/$alunoId');
     return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
+  }
+
+  Future<List<ChatInboxItem>> inbox() async {
+    final r = await _dio.get('/api/chat/inbox');
+    return (r.data as List)
+        .map((e) => ChatInboxItem.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<ChatMsg> enviar(int alunoId, String conteudo, String remetente) async {

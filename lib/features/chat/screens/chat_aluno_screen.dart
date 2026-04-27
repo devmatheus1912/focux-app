@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
+import '../../../core/api/media_upload_service.dart';
 import '../../../core/config/env.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -11,8 +11,6 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/chat_repository.dart';
 
 // ─── Cloudinary config ───────────────────────────────────────────────────────
-const _kCloudName    = 'focux';
-const _kUploadPreset = 'focux_unsigned';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class ChatAlunoScreen extends ConsumerStatefulWidget {
@@ -231,21 +229,12 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
   }
 
   Future<String> _uploadToCloudinary(XFile file, MediaType type) async {
-    final uri = Uri.parse(
-      'https://api.cloudinary.com/v1_1/$_kCloudName/auto/upload',
+    return MediaUploadService(ref.read(apiClientProvider)).uploadBytes(
+      bytes: await file.readAsBytes(),
+      filename: file.name,
+      folder: 'chat',
+      resourceType: type == MediaType.foto ? 'image' : 'auto',
     );
-    final request = http.MultipartRequest('POST', uri)
-      ..fields['upload_preset'] = _kUploadPreset
-      ..files.add(http.MultipartFile.fromBytes(
-          'file', await file.readAsBytes(), filename: file.name));
-
-    final streamed = await request.send();
-    final body     = await streamed.stream.bytesToString();
-    if (streamed.statusCode != 200) {
-      throw Exception('Cloudinary ${streamed.statusCode}: $body');
-    }
-    final json = jsonDecode(body) as Map<String, dynamic>;
-    return json['secure_url'] as String;
   }
 
   String _tipoMidiaString(MediaType type) {

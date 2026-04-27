@@ -21,6 +21,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   final _historico = TextEditingController();
   bool _loading = false;
   String? _resultado;
+  String? _erro;
 
   Future<void> _exportarPdf(String conteudo) async {
     final doc = pw.Document();
@@ -51,14 +52,16 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   }
 
   Future<void> _gerar() async {
-    setState(() { _loading = true; _resultado = null; });
+    setState(() { _loading = true; _resultado = null; _erro = null; });
     try {
       final repo = IaRepository(ref.read(apiClientProvider));
       final r = await repo.progressaoCarga(widget.alunoId,
           objetivo: _objetivo.text, historicoTreinos: _historico.text);
       setState(() => _resultado = r);
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      if (mounted) {
+        setState(() => _erro = 'Nao consegui falar com a IA agora. O servidor pode estar iniciando; tente novamente em alguns segundos.');
+      }
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -114,6 +117,34 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
               : const Icon(Icons.trending_up),
           label: Text(_loading ? 'Analisando...' : 'Gerar Progressão com IA'),
         ),
+        if (_erro != null) ...[
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.wifi_off_rounded, size: 18),
+                      SizedBox(width: 8),
+                      Text('IA indisponivel', style: TextStyle(fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(_erro!),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _loading ? null : _gerar,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Tentar novamente'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
         if (_resultado != null) ...[
           const SizedBox(height: 20),
           const Divider(),

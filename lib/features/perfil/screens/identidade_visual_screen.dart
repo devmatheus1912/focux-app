@@ -1,10 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
+import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../providers/perfil_provider.dart';
@@ -93,17 +92,13 @@ class _IdentidadeVisualScreenState
     if (file == null || !mounted) return;
     setState(() => _uploadingLogo = true);
     try {
-      final uri =
-          Uri.parse('https://api.cloudinary.com/v1_1/focux/image/upload');
-      final request = http.MultipartRequest('POST', uri)
-        ..fields['upload_preset'] = 'focux_unsigned'
-        ..files.add(http.MultipartFile.fromBytes(
-            'file', await file.readAsBytes(), filename: file.name));
-      final streamed = await request.send();
-      final body = await streamed.stream.bytesToString();
-      if (streamed.statusCode != 200) throw Exception('Upload failed: $body');
-      final url = (jsonDecode(body) as Map<String, dynamic>)['secure_url']
-          as String;
+      final url = await MediaUploadService(ref.read(apiClientProvider))
+          .uploadBytes(
+            bytes: await file.readAsBytes(),
+            filename: file.name,
+            folder: 'identidade',
+            resourceType: 'image',
+          );
       if (mounted) setState(() => _logoUrl = url);
     } catch (e) {
       if (mounted) {

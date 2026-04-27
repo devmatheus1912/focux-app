@@ -269,7 +269,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                         crossAxisSpacing: 10,
                         childAspectRatio: 1.4,
                         children: [
-                          _ModuleTile(icon: Icons.fitness_center, label: 'Treinos', sub: 'Push A ativo', isDark: isDark, onTap: () => context.go('/treinos')),
+                          _ModuleTile(icon: Icons.fitness_center, label: 'Treinos', sub: 'Treinos vinculados', isDark: isDark, onTap: () => context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome)),
                           _ModuleTile(icon: Icons.auto_awesome, label: 'IA · Progressão', sub: 'Sugerir cargas', highlight: true, isDark: isDark, onTap: () => context.push('/alunos/$alunoId/ia/progressao', extra: aluno.nome)),
                           _ModuleTile(icon: Icons.show_chart, label: 'Evolução', sub: 'Medidas e PRs', isDark: isDark, onTap: () => context.push('/alunos/$alunoId/evolucao', extra: aluno.nome)),
                           _ModuleTile(icon: Icons.people, label: 'Anamnese', sub: 'Completa ✓', isDark: isDark, onTap: () => context.push('/alunos/$alunoId/anamnese')),

@@ -1,20 +1,15 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
-
-const _kCloudName = 'focux';
-const _kUploadPreset = 'focux_unsigned';
 
 class PerfilScreen extends ConsumerStatefulWidget {
   const PerfilScreen({super.key});
@@ -37,24 +32,13 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
 
     setState(() => _uploadingPhoto = true);
     try {
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse(
-          'https://api.cloudinary.com/v1_1/$_kCloudName/image/upload',
-        ),
-      )
-        ..fields['upload_preset'] = _kUploadPreset
-        ..files.add(http.MultipartFile.fromBytes(
-            'file', await file.readAsBytes(), filename: file.name));
-
-      final response = await request.send();
-      final body = await response.stream.bytesToString();
-      if (response.statusCode != 200) {
-        throw Exception('Cloudinary error ${response.statusCode}: $body');
-      }
-
-      final logoUrl =
-          (jsonDecode(body) as Map<String, dynamic>)['secure_url'] as String;
+      final logoUrl = await MediaUploadService(ref.read(apiClientProvider))
+          .uploadBytes(
+            bytes: await file.readAsBytes(),
+            filename: file.name,
+            folder: 'perfil',
+            resourceType: 'image',
+          );
 
       await ref.read(perfilRepositoryProvider).atualizar(logoUrl: logoUrl);
       ref.invalidate(perfilProvider);

@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import '../config/env.dart';
 import '../storage/secure_storage.dart';
 import 'offline_sync_service.dart';
-import 'dart:io';
 
 class ApiClient {
   static String get _baseUrl => Env.apiUrl;
@@ -14,8 +13,9 @@ class ApiClient {
   ApiClient() {
     _dio = Dio(BaseOptions(
       baseUrl: _baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 15),
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+      sendTimeout: const Duration(seconds: 30),
     ));
 
     _dio.interceptors.add(InterceptorsWrapper(
@@ -37,10 +37,23 @@ class ApiClient {
         handler.next(response);
       },
       onError: (DioException e, handler) async {
+        if (_shouldRetry(e)) {
+          final attempt = (e.requestOptions.extra['fxRetryAttempt'] as int?) ?? 0;
+          if (attempt < 2) {
+            e.requestOptions.extra['fxRetryAttempt'] = attempt + 1;
+            await Future.delayed(Duration(milliseconds: 700 * (attempt + 1)));
+            try {
+              final retryResp = await _dio.fetch(e.requestOptions);
+              return handler.resolve(retryResp);
+            } catch (_) {
+              // Keep the original error path so cache/offline/refresh logic still applies.
+            }
+          }
+        }
+
         // ── Offline Queue ───────────────────────────────────────
         if (e.type == DioExceptionType.connectionError ||
-            e.type == DioExceptionType.connectionTimeout ||
-            e.error is SocketException) {
+            e.type == DioExceptionType.connectionTimeout) {
           
           final method = e.requestOptions.method.toUpperCase();
           if (method == 'POST' || method == 'PUT' || method == 'DELETE') {
@@ -143,5 +156,20 @@ class ApiClient {
       }
     }
     return false;
+  }
+
+  static bool _shouldRetry(DioException e) {
+    if (e.requestOptions.extra['fxNoRetry'] == true) return false;
+    if (e.requestOptions.path.contains('/auth/')) return false;
+    if (e.requestOptions.path == '/api/suporte/analisar-erro') return false;
+    if (e.response != null) {
+      final status = e.response?.statusCode ?? 0;
+      return status == 408 || status == 429 || status >= 500;
+    }
+    return e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        e.type == DioExceptionType.unknown;
   }
 }

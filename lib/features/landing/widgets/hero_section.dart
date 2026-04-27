@@ -8,111 +8,180 @@ class HeroSection extends StatelessWidget {
   final String slug;
   final Color primaryColor;
   final Color secondaryColor;
-  
-  const HeroSection({super.key, required this.data, required this.slug, required this.primaryColor, required this.secondaryColor});
+
+  const HeroSection({
+    super.key,
+    required this.data,
+    required this.slug,
+    required this.primaryColor,
+    required this.secondaryColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     final firstName = data.nomePersonal.split(' ').first;
-    final heroGradient = data.isEnterprise
-        ? LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [primaryColor, secondaryColor],
-          )
-        : const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF0D1B3E), Color(0xFF1a2a5e)],
-          );
+    final heroImage = data.fotos.isNotEmpty
+        ? data.fotos.first
+        : (data.logoUrl != null && data.logoUrl!.isNotEmpty ? data.logoUrl : null);
+    final compact = MediaQuery.of(context).size.width < 640;
+    final minHeight = (MediaQuery.of(context).size.height * 0.86).clamp(620.0, 820.0);
 
     return Container(
-      height: 380,
-      decoration: BoxDecoration(gradient: heroGradient),
-      child: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 52,
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
-              backgroundImage: (data.isEnterprise && data.logoUrl != null)
-                  ? NetworkImage(data.logoUrl!) as ImageProvider
-                  : null,
-              child: (data.isEnterprise && data.logoUrl != null)
-                  ? null
-                  : Text(
-                      data.nomePersonal.isNotEmpty
-                          ? data.nomePersonal[0].toUpperCase()
-                          : 'P',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 40,
-                          fontWeight: FontWeight.w700),
-                    ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              data.nomePersonal,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800),
-              textAlign: TextAlign.center,
-            ),
-            if (data.isEnterprise &&
-                data.slogan != null &&
-                data.slogan!.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Text(
-                  data.slogan!,
-                  style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.75),
-                      fontSize: 15),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+      constraints: BoxConstraints(minHeight: minHeight),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0F1E),
+        image: heroImage == null
+            ? null
+            : DecorationImage(
+                image: NetworkImage(heroImage),
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+              ),
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.40),
+                    primaryColor.withValues(alpha: 0.38),
+                    const Color(0xFF050814).withValues(alpha: 0.96),
+                  ],
                 ),
               ),
-            ],
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                context.go('/register/aluno?p=$slug');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: data.isEnterprise
-                    ? primaryColor
-                    : const Color(0xFF3B5FE2),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 28, vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50)),
-                elevation: 0,
-              ),
-              child: Text(
-                'Quero treinar com $firstName →',
-                style: const TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 15),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(compact ? 24 : 72, 28, compact ? 24 : 72, 42),
+              child: Column(
+                crossAxisAlignment: compact ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  CircleAvatar(
+                    radius: 42,
+                    backgroundColor: Colors.white.withValues(alpha: 0.18),
+                    backgroundImage: data.logoUrl != null && data.logoUrl!.isNotEmpty
+                        ? NetworkImage(data.logoUrl!) as ImageProvider
+                        : null,
+                    child: data.logoUrl != null && data.logoUrl!.isNotEmpty
+                        ? null
+                        : Text(
+                            data.nomePersonal.isNotEmpty ? data.nomePersonal[0].toUpperCase() : 'P',
+                            style: const TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.w800),
+                          ),
+                  ),
+                  const SizedBox(height: 18),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 760),
+                    child: Text(
+                      data.nomePersonal,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: compact ? 42 : 64,
+                        height: 0.98,
+                        fontWeight: FontWeight.w900,
+                      ),
+                      textAlign: compact ? TextAlign.center : TextAlign.left,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 620),
+                    child: Text(
+                      (data.slogan != null && data.slogan!.trim().isNotEmpty)
+                          ? data.slogan!
+                          : (data.descricaoProfissional?.trim().isNotEmpty == true
+                              ? data.descricaoProfissional!
+                              : 'Treinamento personalizado, acompanhamento proximo e plano feito para sua rotina.'),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.84), fontSize: compact ? 16 : 19, height: 1.45),
+                      textAlign: compact ? TextAlign.center : TextAlign.left,
+                      maxLines: compact ? 4 : 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(height: 26),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: compact ? WrapAlignment.center : WrapAlignment.start,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => context.go('/register/aluno?p=$slug'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: primaryColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                          elevation: 0,
+                        ),
+                        child: Text('Quero treinar com $firstName', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                      ),
+                      if (data.videoUrl != null && data.videoUrl!.isNotEmpty)
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            final uri = Uri.tryParse(data.videoUrl!);
+                            if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: BorderSide(color: Colors.white.withValues(alpha: 0.42)),
+                            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                          ),
+                          icon: const Icon(Icons.play_circle_outline, size: 18),
+                          label: const Text('Ver apresentacao'),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    alignment: compact ? WrapAlignment.center : WrapAlignment.start,
+                    children: [
+                      _HeroPill(value: '${data.totalAlunos}+', label: 'alunos'),
+                      _HeroPill(value: 'Desde ${data.anoCriacao}', label: 'experiencia'),
+                      if (data.especialidades?.trim().isNotEmpty == true)
+                        _HeroPill(value: data.especialidades!.split(',').first.trim(), label: 'foco'),
+                    ],
+                  ),
+                ],
               ),
             ),
-            if (data.isEnterprise && data.videoUrl != null && data.videoUrl!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              TextButton.icon(
-                onPressed: () async {
-                  final uri = Uri.tryParse(data.videoUrl!);
-                  if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
-                },
-                icon: const Icon(Icons.play_circle_outline, color: Colors.white70, size: 18),
-                label: const Text('Ver vídeo de apresentação',
-                  style: TextStyle(color: Colors.white70, fontSize: 13)),
-              ),
-            ],
-          ],
-        ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroPill extends StatelessWidget {
+  final String value;
+  final String label;
+
+  const _HeroPill({required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13)),
+          const SizedBox(width: 6),
+          Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.70), fontSize: 12)),
+        ],
       ),
     );
   }

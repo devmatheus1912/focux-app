@@ -256,7 +256,14 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         ),
                         alignment: Alignment.center,
                         child: _isLoading
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            ? const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
+                                  SizedBox(width: 10),
+                                  Text('Conectando ao servidor IA...', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
+                                ],
+                              )
                             : Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [

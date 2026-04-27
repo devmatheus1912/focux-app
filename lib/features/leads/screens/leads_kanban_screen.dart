@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 
-const _kCols = ['LEAD', 'TESTE', 'ATIVO', 'CANCELADO'];
+const _kCols = ['LEAD', 'TESTE', 'ATIVO', 'INADIMPLENTE', 'CANCELADO'];
 const _kLabels = {
   'LEAD': 'Lead',
   'TESTE': 'Teste',
   'ATIVO': 'Ativo',
+  'INADIMPLENTE': 'Inadimplente',
   'CANCELADO': 'Cancelado',
+};
+const _kHints = {
+  'LEAD': 'Contato novo que ainda precisa de abordagem.',
+  'TESTE': 'Pessoa em aula experimental ou periodo de teste.',
+  'ATIVO': 'Aluno convertido e em acompanhamento.',
+  'INADIMPLENTE': 'Aluno com pendencia financeira para recuperar.',
+  'CANCELADO': 'Lead ou aluno perdido, sem acao ativa.',
 };
 
 class LeadsKanbanScreen extends ConsumerStatefulWidget {
@@ -21,11 +30,26 @@ class LeadsKanbanScreen extends ConsumerStatefulWidget {
 class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
   Map<String, List<Lead>> _cols = {for (final c in _kCols) c: []};
   bool _loading = true;
+  bool _showIntro = false;
 
   @override
   void initState() {
     super.initState();
+    _loadIntro();
     _load();
+  }
+
+  Future<void> _loadIntro() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() => _showIntro = !(prefs.getBool('leads_kanban_intro_seen') ?? false));
+    }
+  }
+
+  Future<void> _dismissIntro() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('leads_kanban_intro_seen', true);
+    if (mounted) setState(() => _showIntro = false);
   }
 
   Future<void> _load() async {
@@ -63,8 +87,52 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
   Color _colColor(String status, bool isDark) {
     if (status == 'TESTE') return isDark ? const Color(0xFFE2B46F) : EagleTokens.warn;
     if (status == 'ATIVO') return isDark ? const Color(0xFF6FE296) : EagleTokens.good;
+    if (status == 'INADIMPLENTE') return EagleTokens.bad;
     if (status == 'CANCELADO') return isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return isDark ? EagleTokens.brandAccent : EagleTokens.brand; // LEAD
+  }
+
+  Future<void> _novoLeadRapido() async {
+    final nomeCtrl = TextEditingController();
+    final telefoneCtrl = TextEditingController();
+    final created = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Novo lead'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: nomeCtrl, decoration: const InputDecoration(labelText: 'Nome')),
+            const SizedBox(height: 8),
+            TextField(controller: telefoneCtrl, decoration: const InputDecoration(labelText: 'Telefone')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          FilledButton(
+            onPressed: () async {
+              if (nomeCtrl.text.trim().isEmpty) return;
+              try {
+                await LeadRepository(ref.read(apiClientProvider)).criar(
+                  nome: nomeCtrl.text.trim(),
+                  telefone: telefoneCtrl.text.trim(),
+                  origem: 'Kanban',
+                );
+                if (ctx.mounted) Navigator.pop(ctx, true);
+              } catch (e) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Erro: $e')));
+                }
+              }
+            },
+            child: const Text('Criar'),
+          ),
+        ],
+      ),
+    );
+    nomeCtrl.dispose();
+    telefoneCtrl.dispose();
+    if (created == true) _load();
   }
 
   @override
@@ -113,21 +181,51 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                       ),
                     ],
                   ),
-                  Container(
-                    width: 44, height: 44,
-                    decoration: BoxDecoration(
-                      color: brand,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        if (!isDark) BoxShadow(color: brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))
-                      ],
+                  InkWell(
+                    onTap: _novoLeadRapido,
+                    borderRadius: BorderRadius.circular(999),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: brand,
+                        borderRadius: BorderRadius.circular(999),
+                        boxShadow: [
+                          if (!isDark) BoxShadow(color: brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))
+                        ],
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.add, color: Colors.white, size: 18),
+                          SizedBox(width: 6),
+                          Text('Lead', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                        ],
+                      ),
                     ),
-                    alignment: Alignment.center,
-                    child: const Icon(Icons.add, color: Colors.white, size: 24),
                   ),
                 ],
               ),
             ),
+
+            if (_showIntro)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: brand.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: brand.withValues(alpha: 0.20)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.swipe, color: brand, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text('Funil de Vendas: arraste cards entre colunas conforme cada contato avanca.', style: TextStyle(color: ink, fontSize: 13, fontWeight: FontWeight.w600))),
+                      IconButton(onPressed: _dismissIntro, icon: Icon(Icons.close, color: mute, size: 18)),
+                    ],
+                  ),
+                ),
+              ),
 
             if (_loading)
               const Expanded(child: Center(child: CircularProgressIndicator()))
@@ -136,7 +234,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Row(
-                  children: _kCols.where((c) => c != 'CANCELADO').map((col) {
+                  children: _kCols.where((c) => c != 'CANCELADO' && c != 'INADIMPLENTE').map((col) {
                     final cColor = _colColor(col, isDark);
                     return Expanded(
                       child: Container(
@@ -189,7 +287,12 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                     children: [
                                       Container(width: 8, height: 8, decoration: BoxDecoration(color: cColor, shape: BoxShape.circle)),
                                       const SizedBox(width: 8),
-                                      Text(_kLabels[col]!, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: ink)),
+                                      Tooltip(
+                                        message: _kHints[col]!,
+                                        child: Text(_kLabels[col]!, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: ink)),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Tooltip(message: _kHints[col]!, child: Icon(Icons.info_outline, size: 13, color: mute)),
                                       const SizedBox(width: 4),
                                       Text('(${leads.length})', style: TextStyle(fontSize: 11, color: mute, fontFamily: 'monospace')),
                                     ],

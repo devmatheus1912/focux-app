@@ -70,7 +70,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
                 ),
                 _StepTile(
                   title: 'Configure Pagamentos',
-                  isDone: data.primeiroPagamentoRecebido,
+                  isDone: data.pagamentoConfigurado,
                   onTap: () => context.push('/perfil/wallet'),
                 ),
               ],

@@ -92,6 +92,24 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
         ),
       ),
       body: Column(children: [
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: EagleTokens.brand.withValues(alpha: isDark ? 0.14 : 0.08),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: EagleTokens.brand.withValues(alpha: 0.18)),
+          ),
+          child: Text(
+            'Funil de Vendas: qualifique contatos, acompanhe testes e converta alunos.',
+            style: TextStyle(
+              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ),
         _FiltroBar(
           selecionado: _filtroStatus,
           onChanged: (s) { setState(() => _filtroStatus = s); _load(); },

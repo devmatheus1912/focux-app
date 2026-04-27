@@ -118,6 +118,10 @@ class _PersonalDashboardScreenState
                 data: (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
                 orElse: () => data.alunosAtivos,
               );
+              final totalAlunos = alunosAsync.maybeWhen(
+                data: (alunos) => alunos.length,
+                orElse: () => data.totalAlunos,
+              );
               final riscoAlto = alunosAsync.maybeWhen(
                 data: (alunos) => alunos.where((a) => a.emRisco).length,
                 orElse: () => 0,
@@ -523,7 +527,7 @@ class _PersonalDashboardScreenState
                             label: 'Alunos ativos',
                             value: alunosAtivos.toString(),
                             sub:
-                                '${data.totalAlunos - data.alunosAtivos} inativos',
+                                '${math.max(0, totalAlunos - alunosAtivos)} inativos',
                             accent: EagleTokens.brand,
                             isDark: isDark,
                           ),
@@ -661,7 +665,7 @@ class _PersonalDashboardScreenState
                             icon: 'chat',
                             label: 'Mensagens',
                             isDark: isDark,
-                            onTap: () => context.push('/chat/aluno'),
+                            onTap: () => context.push('/chat/inbox'),
                           ),
                           _ShortcutBtn(
                             icon: 'pix',
