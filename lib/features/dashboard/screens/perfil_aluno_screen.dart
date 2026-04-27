@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/api/media_upload_service.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -535,6 +536,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final async = ref.watch(alunoMeProvider);
     final medidasAsync = ref.watch(minhasMedidasProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -603,7 +605,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                       _fotoUrl != null && _fotoUrl!.isNotEmpty
                                           ? NetworkImage(_fotoUrl!)
                                           : null,
-                                  backgroundColor: EagleTokens.brandSoft,
+                                  backgroundColor: BrandPalette.soft(primary),
                                   child: _fotoUrl == null || _fotoUrl!.isEmpty
                                       ? Text(
                                           aluno.nome.isNotEmpty
@@ -691,11 +693,8 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                     child: LinearProgressIndicator(
                                       value: completion / 100,
                                       minHeight: 9,
-                                      backgroundColor:
-                                          EagleTokens.brand.withValues(alpha: 0.12),
-                                      valueColor: const AlwaysStoppedAnimation(
-                                        EagleTokens.brand,
-                                      ),
+                                      backgroundColor: BrandPalette.soft(primary),
+                                      valueColor: AlwaysStoppedAnimation(primary),
                                     ),
                                   ),
                                 ],
@@ -707,13 +706,13 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                               height: 56,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: EagleTokens.brand.withValues(alpha: 0.10),
+                                color: BrandPalette.soft(primary, dark: isDark),
                                 borderRadius: BorderRadius.circular(18),
                               ),
                               child: Text(
                                 '$completion%',
-                                style: const TextStyle(
-                                  color: EagleTokens.brand,
+                                style: TextStyle(
+                                  color: primary,
                                   fontWeight: FontWeight.w800,
                                   fontSize: 16,
                                 ),
@@ -900,7 +899,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                   decoration: BoxDecoration(
                                     color: isDark
                                         ? Colors.white.withValues(alpha: 0.04)
-                                        : EagleTokens.brand.withValues(alpha: 0.05),
+                                        : BrandPalette.softer(primary),
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   child: Text(
@@ -1151,18 +1150,19 @@ class _ProfileChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: isDark
             ? Colors.white.withValues(alpha: 0.06)
-            : EagleTokens.brand.withValues(alpha: 0.08),
+            : BrandPalette.softer(primary),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: EagleTokens.brand),
+          Icon(icon, size: 14, color: primary),
           const SizedBox(width: 6),
           Text(
             label,
@@ -1195,12 +1195,13 @@ class _MetricHighlightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isDark
             ? Colors.white.withValues(alpha: 0.04)
-            : EagleTokens.brand.withValues(alpha: 0.05),
+            : BrandPalette.softer(primary),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
@@ -1212,10 +1213,10 @@ class _MetricHighlightCard extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: EagleTokens.brand.withValues(alpha: 0.12),
+              color: BrandPalette.soft(primary, dark: isDark),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: EagleTokens.brand),
+            child: Icon(icon, color: primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1273,6 +1274,7 @@ class _ProgressEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final chips = <Widget>[
       if (medida.peso != null) _MiniValueChip(label: 'Peso', value: '${medida.peso!.toStringAsFixed(1)} kg'),
       if (medida.cintura != null) _MiniValueChip(label: 'Cintura', value: '${medida.cintura!.toStringAsFixed(1)} cm'),
@@ -1307,13 +1309,13 @@ class _ProgressEntryCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: EagleTokens.brand.withValues(alpha: 0.10),
+                    color: BrandPalette.soft(primary, dark: isDark),
                     borderRadius: BorderRadius.circular(999),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Com foto',
                     style: TextStyle(
-                      color: EagleTokens.brand,
+                      color: primary,
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                     ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'brand_palette.dart';
 import 'design_tokens.dart';
 
 class AppTheme {
@@ -8,6 +9,10 @@ class AppTheme {
   static ThemeData buildDarkTheme(Color primary) => _build(primary, true);
 
   static ThemeData _build(Color primary, bool dark) {
+    final primarySoft = BrandPalette.soft(primary, dark: dark);
+    final primarySofter = BrandPalette.softer(primary, dark: dark);
+    final primaryDeep = BrandPalette.deep(primary);
+    final primaryAccent = BrandPalette.accent(primary);
     final surface    = dark ? EagleTokens.darkCard    : EagleTokens.card;
     final scaffold   = dark ? EagleTokens.darkBg      : EagleTokens.paper;
     final onSurface  = dark ? EagleTokens.darkInk     : EagleTokens.ink;
@@ -18,11 +23,11 @@ class AppTheme {
       brightness: dark ? Brightness.dark : Brightness.light,
       primary: primary,
       onPrimary: Colors.white,
-      primaryContainer: dark ? EagleTokens.darkCardHi  : EagleTokens.brandSoft,
-      onPrimaryContainer: dark ? EagleTokens.brandAccent : EagleTokens.brandInk,
-      secondary: dark ? EagleTokens.brandAccent : const Color(0xFF4A7AEA),
+      primaryContainer: dark ? primarySofter : primarySoft,
+      onPrimaryContainer: dark ? primaryAccent : primaryDeep,
+      secondary: dark ? primaryAccent : primaryDeep,
       onSecondary: Colors.white,
-      secondaryContainer: dark ? EagleTokens.darkCard : EagleTokens.brandSofter,
+      secondaryContainer: dark ? EagleTokens.darkCardHi : primarySofter,
       onSecondaryContainer: onSurface,
       tertiary: EagleTokens.good,
       onTertiary: Colors.white,
@@ -41,7 +46,7 @@ class AppTheme {
       scrim: Colors.black,
       inverseSurface:    dark ? EagleTokens.card    : EagleTokens.darkCard,
       onInverseSurface:  dark ? EagleTokens.ink     : EagleTokens.darkInk,
-      inversePrimary:    dark ? EagleTokens.brand   : EagleTokens.brandAccent,
+      inversePrimary:    dark ? primary : primaryAccent,
       surfaceTint: primary,
     );
 
@@ -136,7 +141,7 @@ class AppTheme {
 
       chipTheme: ChipThemeData(
         backgroundColor: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
-        selectedColor:   dark ? EagleTokens.darkCardHi : EagleTokens.brandSoft,
+        selectedColor:   dark ? EagleTokens.darkCardHi : primarySoft,
         labelStyle: GoogleFonts.inter(fontSize: 12, color: onSurface, fontWeight: FontWeight.w500),
         side: BorderSide(color: outline),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
@@ -168,7 +173,7 @@ class AppTheme {
         backgroundColor: dark
             ? EagleTokens.darkCard.withValues(alpha: 0.92)
             : Colors.white.withValues(alpha: 0.88),
-        indicatorColor: dark ? EagleTokens.darkCardHi : EagleTokens.brandSoft,
+        indicatorColor: dark ? EagleTokens.darkCardHi : primarySoft,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) return IconThemeData(color: primary, size: 22);
           return IconThemeData(color: onSurfMute, size: 22);

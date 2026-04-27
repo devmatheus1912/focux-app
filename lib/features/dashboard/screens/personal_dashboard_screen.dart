@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -91,6 +92,8 @@ class _PersonalDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final primaryDeep = BrandPalette.deep(primary);
     final dashboardAsync = ref.watch(dashboardProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final alunosAsync = ref.watch(alunosProvider);
@@ -299,7 +302,7 @@ class _PersonalDashboardScreenState
                                             width: 7,
                                             height: 7,
                                             decoration: BoxDecoration(
-                                              color: EagleTokens.brand,
+                                              color: primary,
                                               shape: BoxShape.circle,
                                               border: Border.all(
                                                 color:
@@ -333,7 +336,7 @@ class _PersonalDashboardScreenState
                                           )
                                           : CircleAvatar(
                                             radius: 18,
-                                            backgroundColor: EagleTokens.brand,
+                                            backgroundColor: primary,
                                             child: Text(
                                               fxInitials(data.nomePersonal ?? 'F'),
                                               style: const TextStyle(
@@ -379,9 +382,9 @@ class _PersonalDashboardScreenState
                                       Color(0xFF1C3273),
                                       Color(0xFF0F1E4A),
                                     ]
-                                    : const [
-                                      EagleTokens.brand,
-                                      EagleTokens.brandDeep,
+                                    : [
+                                      primary,
+                                      primaryDeep,
                                     ],
                             begin: begin,
                             end: end,
@@ -528,7 +531,7 @@ class _PersonalDashboardScreenState
                             value: alunosAtivos.toString(),
                             sub:
                                 '${math.max(0, totalAlunos - alunosAtivos)} inativos',
-                            accent: EagleTokens.brand,
+                            accent: primary,
                             isDark: isDark,
                           ),
                           _QuickTile(
@@ -552,7 +555,7 @@ class _PersonalDashboardScreenState
                             label: 'Aderência média',
                             value: aderenciaMediaStr,
                             sub: 'últimos 7 dias',
-                            accent: EagleTokens.brand,
+                            accent: primary,
                             isDark: isDark,
                           ),
                         ],
@@ -844,6 +847,8 @@ class _QuickTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -865,16 +870,13 @@ class _QuickTile extends StatelessWidget {
             width: 30,
             height: 30,
             decoration: BoxDecoration(
-              color:
-                  isDark
-                      ? const Color(0xFF8DA4E2).withValues(alpha: 0.15)
-                      : EagleTokens.brandSoft,
+              color: primarySoft,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               icon,
               size: 16,
-              color: isDark ? const Color(0xFF8DA4E2) : accent,
+              color: accent,
             ),
           ),
           const SizedBox(height: 10),
@@ -913,6 +915,8 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final primaryAccent = BrandPalette.accent(primary);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
       child: Row(
@@ -935,7 +939,7 @@ class _SectionTitle extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+                color: isDark ? primaryAccent : primary,
               ),
             ),
         ],
@@ -958,6 +962,8 @@ class _AttentionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -981,7 +987,7 @@ class _AttentionCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: EagleTokens.brand,
+                backgroundColor: primary,
                 child: Text(
                   fxInitials(nome),
                   style: const TextStyle(color: Colors.white, fontSize: 12),
@@ -1044,10 +1050,7 @@ class _AttentionCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 9),
             decoration: BoxDecoration(
-              color:
-                  isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : EagleTokens.brandSoft,
+              color: primarySoft,
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
@@ -1056,7 +1059,7 @@ class _AttentionCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : EagleTokens.brand,
+                color: primary,
               ),
             ),
           ),
@@ -1080,6 +1083,8 @@ class _ShortcutBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final primaryAccent = BrandPalette.accent(primary);
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
 
@@ -1101,7 +1106,7 @@ class _ShortcutBtn extends StatelessWidget {
             FxIcon(
               name: icon,
               size: 18,
-              color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+              color: isDark ? primaryAccent : primary,
               strokeWidth: 1.9,
             ),
             const SizedBox(height: 10),
@@ -1127,6 +1132,9 @@ class _AderenciaSemanaWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
+    final primaryAccent = BrandPalette.accent(primary);
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -1208,13 +1216,11 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 20,
-                          backgroundColor: isDark
-                              ? const Color(0xFF8DA4E2).withValues(alpha: 0.15)
-                              : EagleTokens.brandSoft,
+                          backgroundColor: primarySoft,
                           child: Text(
                             fxInitials(a.nome),
                             style: TextStyle(
-                              color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+                              color: isDark ? primaryAccent : primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -1245,7 +1251,7 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                           data: a.sparkline,
                           width: 56,
                           height: 22,
-                          color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+                          color: isDark ? primaryAccent : primary,
                         ),
                         const SizedBox(width: 14),
                         SizedBox(

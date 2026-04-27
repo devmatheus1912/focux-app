@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/providers/personal_brand_provider.dart';
@@ -504,10 +505,11 @@ class _PrimaryActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: EagleTokens.brand.withValues(alpha: 0.08),
+        color: BrandPalette.soft(primary, dark: false),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -543,10 +545,13 @@ class _MiniMetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCardHi : EagleTokens.brandSofter,
+        color: isDark
+            ? EagleTokens.darkCardHi
+            : BrandPalette.softer(primary),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -640,6 +645,7 @@ class _ProgressCheckpointCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
@@ -740,7 +746,7 @@ class _ProgressCheckpointCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: isDark
                           ? Colors.white.withValues(alpha: 0.04)
-                          : EagleTokens.brand.withValues(alpha: 0.06),
+                          : BrandPalette.softer(primary),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -796,6 +802,7 @@ class _StudentJourneyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
@@ -883,13 +890,13 @@ class _StudentJourneyCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: EagleTokens.brand.withValues(alpha: 0.10),
+                  color: BrandPalette.soft(primary, dark: isDark),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   '$percent%',
-                  style: const TextStyle(
-                    color: EagleTokens.brand,
+                  style: TextStyle(
+                    color: primary,
                     fontWeight: FontWeight.w800,
                     fontSize: 15,
                   ),
@@ -903,8 +910,8 @@ class _StudentJourneyCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: concluidos / steps.length,
               minHeight: 9,
-              backgroundColor: EagleTokens.brand.withValues(alpha: 0.12),
-              valueColor: const AlwaysStoppedAnimation(EagleTokens.brand),
+              backgroundColor: BrandPalette.soft(primary, dark: isDark),
+              valueColor: AlwaysStoppedAnimation(primary),
             ),
           ),
           const SizedBox(height: 8),
@@ -923,7 +930,7 @@ class _StudentJourneyCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.04)
-                  : EagleTokens.brand.withValues(alpha: 0.06),
+                  : BrandPalette.softer(primary),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -932,10 +939,10 @@ class _StudentJourneyCard extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: EagleTokens.brand.withValues(alpha: 0.12),
+                    color: BrandPalette.soft(primary, dark: isDark),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(nextStep.icon, color: EagleTokens.brand),
+                  child: Icon(nextStep.icon, color: primary),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1020,6 +1027,7 @@ class _JourneyStepTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
@@ -1041,12 +1049,12 @@ class _JourneyStepTile extends StatelessWidget {
             decoration: BoxDecoration(
               color: step.done
                   ? EagleTokens.good.withValues(alpha: 0.14)
-                  : EagleTokens.brand.withValues(alpha: 0.10),
+                  : BrandPalette.soft(primary, dark: isDark),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               step.done ? Icons.check_rounded : step.icon,
-              color: step.done ? EagleTokens.good : EagleTokens.brand,
+              color: step.done ? EagleTokens.good : primary,
               size: 20,
             ),
           ),
@@ -1253,6 +1261,7 @@ class _AlunoProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final muteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final cardColor = isDark ? EagleTokens.darkCard : EagleTokens.card;
@@ -1286,18 +1295,18 @@ class _AlunoProfileCard extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: EagleTokens.brand, width: 2.5),
+                border: Border.all(color: primary, width: 2.5),
               ),
               child: CircleAvatar(
                 radius: 30,
-                backgroundColor: EagleTokens.brandSoft,
+                backgroundColor: BrandPalette.soft(primary, dark: false),
                 backgroundImage: hasFoto ? NetworkImage(aluno.fotoUrl!) : null,
                 child: hasFoto
                     ? null
                     : Text(
                         _initials(aluno.nome),
                         style: TextStyle(
-                          color: EagleTokens.brand,
+                          color: primary,
                           fontWeight: FontWeight.w700,
                           fontSize: 18,
                         ),
@@ -1325,7 +1334,7 @@ class _AlunoProfileCard extends StatelessWidget {
                     Text(
                       aluno.objetivo!,
                       style: TextStyle(
-                        color: EagleTokens.brand,
+                        color: primary,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1386,9 +1395,10 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final bg = isDark
         ? EagleTokens.darkCardHi
-        : EagleTokens.brandSofter;
+        : BrandPalette.softer(primary);
     final fg = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
@@ -1486,8 +1496,9 @@ class _AlunoDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final drawerBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final headerBg = isDark ? EagleTokens.darkCardHi : EagleTokens.brandSoft;
+    final headerBg = isDark ? EagleTokens.darkCardHi : BrandPalette.soft(primary);
     final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final dividerColor = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final hasFoto = aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty;
@@ -1516,18 +1527,18 @@ class _AlunoDrawer extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: EagleTokens.brand, width: 2.5),
+                    border: Border.all(color: primary, width: 2.5),
                   ),
                   child: CircleAvatar(
                     radius: 28,
-                    backgroundColor: EagleTokens.brandSoft,
+                    backgroundColor: BrandPalette.soft(primary, dark: false),
                     backgroundImage: hasFoto ? NetworkImage(aluno.fotoUrl!) : null,
                     child: hasFoto
                         ? null
                         : Text(
                             _initials(aluno.nome),
                             style: TextStyle(
-                              color: EagleTokens.brand,
+                              color: primary,
                               fontWeight: FontWeight.w700,
                               fontSize: 16,
                             ),
@@ -1553,7 +1564,7 @@ class _AlunoDrawer extends StatelessWidget {
                         Text(
                           aluno.objetivo!,
                           style: TextStyle(
-                            color: EagleTokens.brand,
+                            color: primary,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -1630,7 +1641,7 @@ class _AlunoDrawer extends StatelessWidget {
                 ),
                 // ── Logout ────────────────────────────────────────────────
                 ListTile(
-                  leading: Icon(Icons.logout, color: EagleTokens.brand, size: 22),
+                  leading: Icon(Icons.logout, color: primary, size: 22),
                   title: Text(
                     'Sair',
                     style: TextStyle(
@@ -1707,10 +1718,11 @@ class _DrawerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
 
     return ListTile(
-      leading: Icon(icon, color: EagleTokens.brand, size: 22),
+      leading: Icon(icon, color: primary, size: 22),
       title: Text(
         label,
         style: TextStyle(
@@ -1741,6 +1753,7 @@ class _ShortcutBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
 
@@ -1760,7 +1773,7 @@ class _ShortcutBtn extends StatelessWidget {
             Icon(
               icon,
               size: 18,
-              color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+              color: isDark ? BrandPalette.accent(primary) : primary,
             ),
             const Spacer(),
             Text(

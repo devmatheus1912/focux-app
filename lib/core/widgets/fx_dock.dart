@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../theme/brand_palette.dart';
 import '../theme/design_tokens.dart';
 import 'fx_icon.dart';
 
@@ -33,6 +34,7 @@ class FxDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final bgColor = isDark
         ? const Color.fromRGBO(20, 26, 48, 0.72)
         : const Color.fromRGBO(255, 255, 255, 0.78);
@@ -76,7 +78,7 @@ class FxDock extends StatelessWidget {
               children: List.generate(_items.length, (i) {
                 final item = _items[i];
                 final active = i == currentIndex;
-                final color = active ? EagleTokens.brand : inactiveColor;
+                final color = active ? primary : inactiveColor;
 
                 return Expanded(
                   child: GestureDetector(
@@ -91,7 +93,8 @@ class FxDock extends StatelessWidget {
                           height: 30,
                           decoration: BoxDecoration(
                             color: active
-                                ? EagleTokens.brand.withValues(alpha: 0.12)
+                                ? BrandPalette.soft(primary, dark: isDark)
+                                    .withValues(alpha: isDark ? 0.42 : 0.72)
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),

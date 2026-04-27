@@ -83,17 +83,14 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       final dio = ApiClient().dio;
       final response = await dio.get('/api/aluno/personal-brand');
       final data = response.data as Map<String, dynamic>;
-      final plano = data['plano'] as String? ?? 'FREE';
-      if (plano == 'ENTERPRISE') {
-        final corPrimaria = data['corPrimaria'] as String?;
-        if (corPrimaria != null && corPrimaria.length == 7) {
-          final hex = corPrimaria.replaceFirst('#', '0xFF');
-          ref.read(primaryColorProvider.notifier).state = Color(int.parse(hex));
-        }
-        final logoUrl = data['logoUrl'] as String?;
-        if (logoUrl != null && logoUrl.isNotEmpty) {
-          ref.read(logoUrlProvider.notifier).state = logoUrl;
-        }
+      final corPrimaria = data['corPrimaria'] as String?;
+      if (corPrimaria != null && corPrimaria.length == 7) {
+        final hex = corPrimaria.replaceFirst('#', '0xFF');
+        ref.read(primaryColorProvider.notifier).state = Color(int.parse(hex));
+      }
+      final logoUrl = data['logoUrl'] as String?;
+      if (logoUrl != null && logoUrl.isNotEmpty) {
+        ref.read(logoUrlProvider.notifier).state = logoUrl;
       }
     } catch (_) {}
   }

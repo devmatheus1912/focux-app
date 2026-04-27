@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -335,6 +336,7 @@ class _ActivationStepCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
@@ -356,12 +358,12 @@ class _ActivationStepCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: step.done
                   ? EagleTokens.good.withValues(alpha: 0.14)
-                  : EagleTokens.brand.withValues(alpha: 0.10),
+                  : BrandPalette.soft(primary, dark: isDark),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
               step.done ? Icons.check_rounded : step.icon,
-              color: step.done ? EagleTokens.good : EagleTokens.brand,
+              color: step.done ? EagleTokens.good : primary,
             ),
           ),
           const SizedBox(width: 12),
