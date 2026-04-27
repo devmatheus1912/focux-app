@@ -64,6 +64,7 @@ class ExercicioRepository {
   ExercicioRepository(ApiClient client) : _dio = client.dio;
 
   Future<List<Exercicio>> listar({
+    String? nome,
     String? categoria,
     String? tag,
     String? musculoAlvo,
@@ -74,6 +75,7 @@ class ExercicioRepository {
     bool? favoritos,
   }) async {
     final queryParams = <String, dynamic>{};
+    if (nome != null && nome.isNotEmpty) queryParams['nome'] = nome;
     if (categoria != null && categoria.isNotEmpty) queryParams['categoria'] = categoria;
     if (tag != null && tag.isNotEmpty) queryParams['tag'] = tag;
     if (musculoAlvo != null && musculoAlvo.isNotEmpty) queryParams['musculoAlvo'] = musculoAlvo;
@@ -81,11 +83,22 @@ class ExercicioRepository {
     if (nivel != null && nivel.isNotEmpty) queryParams['nivel'] = nivel;
     if (mecanica != null && mecanica.isNotEmpty) queryParams['mecanica'] = mecanica;
     if (objetivo != null && objetivo.isNotEmpty) queryParams['objetivo'] = objetivo;
-    if (favoritos == true) queryParams['favoritos'] = 'true';
+    if (favoritos == true) {
+      queryParams['favoritos'] = 'true';
+      final response = await _dio.get(
+        '/api/exercicios',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      final list = response.data as List<dynamic>;
+      return list.map((e) => Exercicio.fromJson(e as Map<String, dynamic>)).toList();
+    }
 
-    final response = await _dio.get('/api/exercicios',
-        queryParameters: queryParams.isNotEmpty ? queryParams : null);
-    final list = response.data as List<dynamic>;
+    queryParams['page'] = 0;
+    queryParams['size'] = 80;
+    queryParams['sort'] = 'nome,asc';
+    final response = await _dio.get('/api/exercicios/v2', queryParameters: queryParams);
+    final data = response.data;
+    final list = data is Map<String, dynamic> ? data['content'] as List<dynamic> : data as List<dynamic>;
     return list.map((e) => Exercicio.fromJson(e as Map<String, dynamic>)).toList();
   }
 

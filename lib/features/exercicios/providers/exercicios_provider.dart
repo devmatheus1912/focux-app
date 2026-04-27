@@ -8,6 +8,7 @@ final exercicioRepositoryProvider = Provider<ExercicioRepository>(
 
 // Parâmetros de filtro para a lista de exercícios
 class ExercicioFilter {
+  final String? nome;
   final String? categoria;
   final String? tag;
   final String? musculoAlvo;
@@ -18,6 +19,7 @@ class ExercicioFilter {
   final bool? favoritos;
 
   const ExercicioFilter({
+    this.nome,
     this.categoria,
     this.tag,
     this.musculoAlvo,
@@ -31,6 +33,7 @@ class ExercicioFilter {
   @override
   bool operator ==(Object other) =>
       other is ExercicioFilter &&
+      other.nome == nome &&
       other.categoria == categoria &&
       other.tag == tag &&
       other.musculoAlvo == musculoAlvo &&
@@ -42,6 +45,7 @@ class ExercicioFilter {
 
   @override
   int get hashCode => Object.hash(
+        nome,
         categoria,
         tag,
         musculoAlvo,
@@ -57,6 +61,7 @@ class ExercicioFilter {
 final exerciciosFilteredProvider =
     FutureProvider.family<List<Exercicio>, ExercicioFilter>((ref, filter) async {
   return ref.read(exercicioRepositoryProvider).listar(
+        nome: filter.nome,
         categoria: filter.categoria,
         tag: filter.tag,
         musculoAlvo: filter.musculoAlvo,

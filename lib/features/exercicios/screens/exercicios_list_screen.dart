@@ -81,6 +81,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   Widget build(BuildContext context) {
     final exerciciosAsync = ref.watch(exerciciosFilteredProvider(
       ExercicioFilter(
+        nome: _nomeFiltro.isEmpty ? null : _nomeFiltro,
         categoria: _categoriaParam,
         tag: _tagFiltro.isEmpty ? null : _tagFiltro,
         musculoAlvo: _musculoFiltro,
@@ -265,22 +266,17 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(child: Text('Erro: $e')),
                 data: (exercicios) {
-                  final filtrados = _nomeFiltro.isEmpty
-                      ? exercicios
-                      : exercicios
-                          .where((e) => e.nome.toLowerCase().contains(_nomeFiltro.toLowerCase()))
-                          .toList();
-                  if (filtrados.isEmpty) {
+                  if (exercicios.isEmpty) {
                     return const Center(child: Text('Nenhum exercicio encontrado.'));
                   }
                   return RefreshIndicator(
                     onRefresh: () async => ref.invalidate(exerciciosFilteredProvider),
                     child: ListView.separated(
                       padding: const EdgeInsets.fromLTRB(12, 2, 12, 96),
-                      itemCount: filtrados.length,
+                      itemCount: exercicios.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (context, i) => _ExercicioTile(
-                        exercicio: filtrados[i],
+                        exercicio: exercicios[i],
                         onFavoritoToggle: () => ref.invalidate(exerciciosFilteredProvider),
                       ),
                     ),
