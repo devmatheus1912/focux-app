@@ -45,7 +45,7 @@ class _DefinirSenhaAlunoScreenState
           );
       if (!mounted) return;
       HapticFeedback.heavyImpact();
-      context.go('/dashboard/aluno');
+      context.go('/aluno/ativacao');
     } catch (e) {
       if (!mounted) return;
       setState(() {

@@ -5,6 +5,7 @@ import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/dashboard/screens/personal_dashboard_screen.dart';
 import '../../features/dashboard/screens/aluno_dashboard_screen.dart';
+import '../../features/dashboard/screens/aluno_activation_screen.dart';
 import '../../features/dashboard/screens/perfil_aluno_screen.dart';
 import '../../features/alunos/screens/alunos_list_screen.dart';
 import '../../features/alunos/screens/add_aluno_screen.dart';
@@ -135,6 +136,10 @@ class AppRouter {
       GoRoute(
         path: '/dashboard/aluno',
         builder: (context, state) => const AlunoDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/aluno/ativacao',
+        builder: (context, state) => const AlunoActivationScreen(),
       ),
       GoRoute(
         path: '/aluno/perfil',

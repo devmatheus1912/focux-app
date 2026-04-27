@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../alunos/providers/alunos_provider.dart';
 import '../../perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
@@ -45,6 +46,24 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       final requiresPasswordChange = ref.read(requiresPasswordChangeProvider);
       if (!mounted) {
         return;
+      }
+      if (!requiresPasswordChange) {
+        try {
+          final aluno = await ref.read(alunoMeProvider.future);
+          final prefs = await SharedPreferences.getInstance();
+          final onboardingSeen =
+              prefs.getBool('aluno_activation_seen_${aluno.id}') ?? false;
+          if (!mounted) {
+            return;
+          }
+          context.go(onboardingSeen ? '/dashboard/aluno' : '/aluno/ativacao');
+          return;
+        } catch (_) {
+          if (mounted) {
+            context.go('/dashboard/aluno');
+          }
+          return;
+        }
       }
       context.go(
         requiresPasswordChange ? '/aluno/definir-senha' : '/dashboard/aluno',
