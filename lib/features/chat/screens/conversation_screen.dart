@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -41,16 +42,22 @@ class ConversationScreen extends ConsumerStatefulWidget {
 }
 
 class _ConversationScreenState extends ConsumerState<ConversationScreen> {
+  static const _quickReactions = ['🔥', '👏', '💪', '✅', '🙌', '🚀', '🙂', '😅', '❤️', '👊'];
+
   final List<ChatMsg> _msgs = [];
+  final Map<String, GlobalKey> _messageKeys = {};
   final _ctrl = TextEditingController();
   final _scroll = ScrollController();
   final _picker = ImagePicker();
+
   StompClient? _stomp;
   bool _loading = true;
   bool _sending = false;
   bool _uploading = false;
   bool _composerHasText = false;
   int? _alunoId;
+  ChatMsg? _replyingTo;
+  int? _highlightedMessageId;
 
   bool get _isAlunoMode => widget.mode == ConversationMode.aluno;
   bool get _isPersonalMode => widget.mode == ConversationMode.personal;
@@ -66,13 +73,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
-  void _handleComposerChange() {
-    final next = _ctrl.text.trim().isNotEmpty;
-    if (next != _composerHasText && mounted) {
-      setState(() => _composerHasText = next);
-    }
-  }
-
   @override
   void dispose() {
     _stomp?.deactivate();
@@ -80,6 +80,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     _ctrl.dispose();
     _scroll.dispose();
     super.dispose();
+  }
+
+  void _handleComposerChange() {
+    final next = _ctrl.text.trim().isNotEmpty;
+    if (next != _composerHasText && mounted) {
+      setState(() => _composerHasText = next);
+    }
   }
 
   Future<void> _loadHistorico() async {
@@ -94,17 +101,16 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           _connectWs(_alunoId!);
         }
       }
-      if (mounted) {
-        setState(() {
-          _msgs
-            ..clear()
-            ..addAll(msgs);
-          _loading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _msgs
+          ..clear()
+          ..addAll(msgs);
+        _loading = false;
+      });
       await _markRead();
       _scrollToBottom(animated: false);
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         setState(() => _loading = false);
       }
@@ -145,8 +151,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   void _onConnect(StompFrame frame, int alunoId) {
+    final destination =
+        _isAlunoMode ? '/topic/chat.aluno.$alunoId' : '/topic/chat.personal.$alunoId';
     _stomp?.subscribe(
-      destination: '/topic/chat.$alunoId',
+      destination: destination,
       callback: (f) async {
         if (f.body == null) return;
         try {
@@ -169,21 +177,36 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     return _isAlunoMode ? msg.remetente == 'PERSONAL' : msg.remetente == 'ALUNO';
   }
 
+  bool _isMine(ChatMsg msg) {
+    return _isAlunoMode ? msg.remetente == 'ALUNO' : msg.remetente == 'PERSONAL';
+  }
+
   Future<void> _sendText() async {
     final text = _ctrl.text.trim();
     if (text.isEmpty || _sending || _uploading) return;
+    final replyToMessageId = _replyingTo?.id;
     _ctrl.clear();
     HapticFeedback.lightImpact();
     setState(() => _sending = true);
     try {
       final repo = ChatRepository(ref.read(apiClientProvider));
       final msg = _isAlunoMode
-          ? await repo.enviarComoAluno(text)
-          : await repo.enviar(_alunoId!, text, 'PERSONAL');
+          ? await repo.enviarComoAluno(
+              text,
+              replyToMessageId: replyToMessageId,
+            )
+          : await repo.enviar(
+              _alunoId!,
+              text,
+              'PERSONAL',
+              replyToMessageId: replyToMessageId,
+            );
       _captureAlunoId(msg);
-      if (mounted) {
-        setState(() => _upsertMessage(msg));
-      }
+      if (!mounted) return;
+      setState(() {
+        _replyingTo = null;
+        _upsertMessage(msg);
+      });
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
@@ -228,6 +251,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
     if (file == null) return;
 
+    final replyToMessageId = _replyingTo?.id;
     setState(() => _uploading = true);
     try {
       final mediaUrl = await MediaUploadService(ref.read(apiClientProvider))
@@ -243,6 +267,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               conteudo: _mediaLabel(type),
               tipoMidia: _mediaType(type),
               midiaUrl: mediaUrl,
+              replyToMessageId: replyToMessageId,
             )
           : await repo.enviarMidia(
               alunoId: _alunoId!,
@@ -250,11 +275,14 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               remetente: 'PERSONAL',
               tipoMidia: _mediaType(type),
               midiaUrl: mediaUrl,
+              replyToMessageId: replyToMessageId,
             );
       _captureAlunoId(msg);
-      if (mounted) {
-        setState(() => _upsertMessage(msg));
-      }
+      if (!mounted) return;
+      setState(() {
+        _replyingTo = null;
+        _upsertMessage(msg);
+      });
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
@@ -269,65 +297,145 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
-  String _mediaType(MediaType type) {
-    switch (type) {
-      case MediaType.photo:
-        return 'IMAGE';
-      case MediaType.video:
-        return 'VIDEO';
-      case MediaType.audio:
-        return 'AUDIO';
-    }
-  }
-
-  String _mediaLabel(MediaType type) {
-    switch (type) {
-      case MediaType.photo:
-        return 'Foto';
-      case MediaType.video:
-        return 'Video';
-      case MediaType.audio:
-        return 'Audio';
-    }
-  }
-
-  void _upsertMessage(ChatMsg msg) {
-    final byId = msg.id != null ? _msgs.indexWhere((m) => m.id == msg.id) : -1;
-    if (byId >= 0) {
-      _msgs[byId] = msg;
-      _msgs.sort((a, b) => a.enviadoEm.compareTo(b.enviadoEm));
-      return;
-    }
-    final byClient = msg.clientMessageId != null
-        ? _msgs.indexWhere((m) => m.clientMessageId == msg.clientMessageId)
-        : -1;
-    if (byClient >= 0) {
-      _msgs[byClient] = msg;
-      _msgs.sort((a, b) => a.enviadoEm.compareTo(b.enviadoEm));
-      return;
-    }
-    _msgs.add(msg);
-    _msgs.sort((a, b) => a.enviadoEm.compareTo(b.enviadoEm));
-  }
-
-  void _scrollToBottom({bool animated = true}) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_scroll.hasClients) return;
-      final offset = _scroll.position.maxScrollExtent;
-      if (!animated) {
-        _scroll.jumpTo(offset);
-        return;
+  Future<void> _toggleReaction(ChatMsg msg, String emoji) async {
+    if (msg.id == null) return;
+    HapticFeedback.selectionClick();
+    try {
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final updated = _isAlunoMode
+          ? await repo.toggleReactionAluno(msg.id!, emoji)
+          : await repo.toggleReaction(msg.id!, emoji);
+      if (!mounted) return;
+      setState(() => _upsertMessage(updated));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Nao foi possivel reagir: $e')),
+        );
       }
-      _scroll.animateTo(
-        offset,
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-      );
+    }
+  }
+
+  void _setReply(ChatMsg msg) {
+    HapticFeedback.selectionClick();
+    setState(() => _replyingTo = msg);
+  }
+
+  void _focusMessage(ChatMsg msg) {
+    if (!mounted || msg.id == null) return;
+    setState(() => _highlightedMessageId = msg.id);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final key = _messageKeys[_messageIdentity(msg)];
+      final context = key?.currentContext;
+      if (context != null) {
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 240),
+          curve: Curves.easeOut,
+          alignment: 0.2,
+        );
+      }
     });
+    unawaited(Future<void>.delayed(const Duration(seconds: 2), () {
+      if (mounted && _highlightedMessageId == msg.id) {
+        setState(() => _highlightedMessageId = null);
+      }
+    }));
+  }
+
+  void _showMessageActions(ChatMsg msg) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Reagir',
+                style: TextStyle(
+                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final emoji in _quickReactions)
+                    InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                        _toggleReaction(msg, emoji);
+                      },
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: EagleTokens.brand.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          emoji,
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.reply_rounded, color: EagleTokens.brand),
+                title: const Text('Responder'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _setReply(msg);
+                },
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.content_copy_outlined, color: EagleTokens.brand),
+                title: const Text('Copiar mensagem'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await Clipboard.setData(ClipboardData(text: msg.conteudo));
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Mensagem copiada')),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _showEmojiSheet() {
-    const emojis = ['🔥', '👏', '💪', '✅', '🙌', '🚀', '🙂', '😅', '❤️', '👊'];
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -340,7 +448,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             spacing: 10,
             runSpacing: 10,
             children: [
-              for (final emoji in emojis)
+              for (final emoji in _quickReactions)
                 InkWell(
                   onTap: () {
                     Navigator.pop(context);
@@ -428,6 +536,150 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     );
   }
 
+  void _showSearchSheet() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ctrl = TextEditingController();
+    var query = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: StatefulBuilder(
+          builder: (context, setSheetState) {
+            final results = _searchMessages(query);
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                14,
+                16,
+                16 + MediaQuery.of(sheetContext).viewInsets.bottom,
+              ),
+              child: SizedBox(
+                height: 440,
+                child: Column(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: ctrl,
+                      autofocus: true,
+                      onChanged: (value) => setSheetState(() => query = value),
+                      decoration: InputDecoration(
+                        hintText: 'Buscar na conversa',
+                        prefixIcon: const Icon(Icons.search_rounded),
+                        filled: true,
+                        fillColor:
+                            isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Expanded(
+                      child: query.trim().isEmpty
+                          ? const _SearchState(
+                              icon: Icons.search_rounded,
+                              title: 'Digite para buscar',
+                              subtitle: 'Encontre mensagens antigas da conversa.',
+                            )
+                          : results.isEmpty
+                              ? const _SearchState(
+                                  icon: Icons.chat_bubble_outline,
+                                  title: 'Nada encontrado',
+                                  subtitle: 'Tente outra palavra-chave.',
+                                )
+                              : ListView.separated(
+                                  itemCount: results.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 8),
+                                  itemBuilder: (_, index) {
+                                    final msg = results[index];
+                                    return InkWell(
+                                      onTap: () {
+                                        Navigator.pop(sheetContext);
+                                        _focusMessage(msg);
+                                      },
+                                      borderRadius: BorderRadius.circular(14),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? EagleTokens.darkCardHi
+                                              : EagleTokens.card,
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              _replySenderLabel(msg.remetente),
+                                              style: const TextStyle(
+                                                color: EagleTokens.brand,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              _previewText(msg),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              _fullDateLabel(msg.enviadoEm),
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? EagleTokens.darkInkMute
+                                                    : EagleTokens.inkMute,
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    ).whenComplete(ctrl.dispose);
+  }
+
+  List<ChatMsg> _searchMessages(String query) {
+    final normalized = query.trim().toLowerCase();
+    if (normalized.isEmpty) return const [];
+    return _msgs.reversed
+        .where((msg) {
+          final content = msg.conteudo.toLowerCase();
+          final reply = (msg.replyToConteudo ?? '').toLowerCase();
+          return content.contains(normalized) || reply.contains(normalized);
+        })
+        .toList(growable: false);
+  }
+
   void _showChatMenu() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
@@ -442,14 +694,21 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           children: [
             if (_isPersonalMode)
               ListTile(
-                leading:
-                    const Icon(Icons.person_outline, color: EagleTokens.brand),
+                leading: const Icon(Icons.person_outline, color: EagleTokens.brand),
                 title: const Text('Ver perfil do aluno'),
                 onTap: () {
                   Navigator.pop(context);
                   context.push('/alunos/${widget.alunoId}');
                 },
               ),
+            ListTile(
+              leading: const Icon(Icons.search_rounded, color: EagleTokens.brand),
+              title: const Text('Buscar conversa'),
+              onTap: () {
+                Navigator.pop(context);
+                _showSearchSheet();
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.refresh, color: EagleTokens.brand),
               title: const Text('Atualizar conversa'),
@@ -459,8 +718,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               },
             ),
             ListTile(
-              leading:
-                  const Icon(Icons.emoji_emotions_outlined, color: EagleTokens.brand),
+              leading: const Icon(
+                Icons.emoji_emotions_outlined,
+                color: EagleTokens.brand,
+              ),
               title: const Text('Adicionar emoji'),
               onTap: () {
                 Navigator.pop(context);
@@ -471,6 +732,17 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         ),
       ),
     );
+  }
+
+  String _messageIdentity(ChatMsg msg) {
+    return msg.id?.toString() ??
+        msg.clientMessageId ??
+        '${msg.enviadoEm.microsecondsSinceEpoch}-${msg.conteudo.hashCode}';
+  }
+
+  GlobalKey _messageKey(ChatMsg msg) {
+    final identity = _messageIdentity(msg);
+    return _messageKeys.putIfAbsent(identity, GlobalKey.new);
   }
 
   String _displayName(PersonalBrand? brand) {
@@ -498,10 +770,97 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     return brand?.logoUrl;
   }
 
+  String _replySenderLabel(String remetente) {
+    if (_isAlunoMode) {
+      return remetente == 'ALUNO' ? 'Voce' : 'Personal';
+    }
+    return remetente == 'PERSONAL' ? 'Voce' : 'Aluno';
+  }
+
+  String _previewText(ChatMsg msg) {
+    if (msg.conteudo.trim().isNotEmpty &&
+        !_isMediaLabelOnly(msg.tipoMidia, msg.conteudo)) {
+      return msg.conteudo.trim();
+    }
+    if (msg.tipoMidia == 'IMAGE' || msg.tipoMidia == 'IMAGEM') return 'Foto';
+    if (msg.tipoMidia == 'VIDEO') return 'Video';
+    if (msg.tipoMidia == 'AUDIO') return 'Audio';
+    return 'Mensagem';
+  }
+
+  String _mediaType(MediaType type) {
+    switch (type) {
+      case MediaType.photo:
+        return 'IMAGE';
+      case MediaType.video:
+        return 'VIDEO';
+      case MediaType.audio:
+        return 'AUDIO';
+    }
+  }
+
+  String _mediaLabel(MediaType type) {
+    switch (type) {
+      case MediaType.photo:
+        return 'Foto';
+      case MediaType.video:
+        return 'Video';
+      case MediaType.audio:
+        return 'Audio';
+    }
+  }
+
+  bool _isMediaLabelOnly(String? tipoMidia, String conteudo) {
+    if (tipoMidia == null) return false;
+    return ['IMAGE', 'IMAGEM', 'VIDEO', 'AUDIO'].contains(tipoMidia);
+  }
+
+  void _upsertMessage(ChatMsg msg) {
+    final byId = msg.id != null ? _msgs.indexWhere((m) => m.id == msg.id) : -1;
+    if (byId >= 0) {
+      _msgs[byId] = msg;
+      _msgs.sort((a, b) => a.enviadoEm.compareTo(b.enviadoEm));
+      return;
+    }
+    final byClient = msg.clientMessageId != null
+        ? _msgs.indexWhere((m) => m.clientMessageId == msg.clientMessageId)
+        : -1;
+    if (byClient >= 0) {
+      _msgs[byClient] = msg;
+      _msgs.sort((a, b) => a.enviadoEm.compareTo(b.enviadoEm));
+      return;
+    }
+    _msgs.add(msg);
+    _msgs.sort((a, b) => a.enviadoEm.compareTo(b.enviadoEm));
+  }
+
+  void _scrollToBottom({bool animated = true}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scroll.hasClients) return;
+      final offset = _scroll.position.maxScrollExtent;
+      if (!animated) {
+        _scroll.jumpTo(offset);
+        return;
+      }
+      _scroll.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  String _fullDateLabel(DateTime dt) {
+    final local = dt.toLocal();
+    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')} '
+        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final brand = _isAlunoMode ? ref.watch(personalBrandProvider).valueOrNull : null;
+    final brand =
+        _isAlunoMode ? ref.watch(personalBrandProvider).valueOrNull : null;
     final title = _displayName(brand);
     final subtitle = _subtitle(brand);
 
@@ -631,20 +990,23 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         itemCount: _msgs.length,
                         itemBuilder: (_, index) {
                           final msg = _msgs[index];
-                          final previous =
-                              index > 0 ? _msgs[index - 1] : null;
+                          final previous = index > 0 ? _msgs[index - 1] : null;
                           final showDate = previous == null ||
                               !_sameDay(previous.enviadoEm, msg.enviadoEm);
                           return Column(
                             children: [
                               if (showDate)
                                 _DateDivider(date: msg.enviadoEm),
-                              _Bubble(
-                                msg: msg,
-                                mine: _isAlunoMode
-                                    ? msg.remetente == 'ALUNO'
-                                    : msg.remetente == 'PERSONAL',
-                                isDark: isDark,
+                              KeyedSubtree(
+                                key: _messageKey(msg),
+                                child: _Bubble(
+                                  msg: msg,
+                                  mine: _isMine(msg),
+                                  isDark: isDark,
+                                  highlighted: _highlightedMessageId == msg.id,
+                                  replyLabelBuilder: _replySenderLabel,
+                                  onLongPress: () => _showMessageActions(msg),
+                                ),
                               ),
                             ],
                           );
@@ -670,7 +1032,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 IconButton(
-                  onPressed: (_sending || _uploading) ? null : _showAttachmentSheet,
+                  onPressed:
+                      (_sending || _uploading) ? null : _showAttachmentSheet,
                   icon: const Icon(Icons.add_circle),
                   color: EagleTokens.inkMute,
                 ),
@@ -683,71 +1046,87 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         color: isDark ? EagleTokens.darkLine : EagleTokens.line,
                       ),
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _ctrl,
-                            style: TextStyle(
-                              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                              fontSize: 15,
-                            ),
-                            cursorColor: EagleTokens.brand,
-                            decoration: InputDecoration(
-                              hintText: 'Mensagem',
-                              hintStyle: TextStyle(
-                                color: isDark
-                                    ? EagleTokens.darkInkMute
-                                    : EagleTokens.inkMute,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              border: InputBorder.none,
-                            ),
-                            minLines: 1,
-                            maxLines: 5,
-                            textInputAction: TextInputAction.send,
-                            onSubmitted: (_) => _sendText(),
+                        if (_replyingTo != null)
+                          _ReplyComposerBar(
+                            isDark: isDark,
+                            sender: _replySenderLabel(_replyingTo!.remetente),
+                            preview: _previewText(_replyingTo!),
+                            onClose: () => setState(() => _replyingTo = null),
                           ),
-                        ),
-                        IconButton(
-                          onPressed: _showEmojiSheet,
-                          icon: const Icon(Icons.emoji_emotions_outlined),
-                          color: EagleTokens.inkMute,
-                        ),
-                        if (_composerHasText || _sending)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 6, bottom: 6),
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                color: EagleTokens.brand,
-                                shape: BoxShape.circle,
-                              ),
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-                                onPressed: (_sending || _uploading) ? null : _sendText,
-                                icon: _sending
-                                    ? const SizedBox(
-                                        width: 14,
-                                        height: 14,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.arrow_upward,
-                                        color: Colors.white,
-                                        size: 18,
-                                      ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _ctrl,
+                                style: TextStyle(
+                                  color: isDark
+                                      ? EagleTokens.darkInk
+                                      : EagleTokens.ink,
+                                  fontSize: 15,
+                                ),
+                                cursorColor: EagleTokens.brand,
+                                decoration: InputDecoration(
+                                  hintText: 'Mensagem',
+                                  hintStyle: TextStyle(
+                                    color: isDark
+                                        ? EagleTokens.darkInkMute
+                                        : EagleTokens.inkMute,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  border: InputBorder.none,
+                                ),
+                                minLines: 1,
+                                maxLines: 5,
+                                textInputAction: TextInputAction.send,
+                                onSubmitted: (_) => _sendText(),
                               ),
                             ),
-                          ),
+                            IconButton(
+                              onPressed: _showEmojiSheet,
+                              icon: const Icon(Icons.emoji_emotions_outlined),
+                              color: EagleTokens.inkMute,
+                            ),
+                            if (_composerHasText || _sending)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(right: 6, bottom: 6),
+                                child: Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: const BoxDecoration(
+                                    color: EagleTokens.brand,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: IconButton(
+                                    padding: EdgeInsets.zero,
+                                    onPressed:
+                                        (_sending || _uploading) ? null : _sendText,
+                                    icon: _sending
+                                        ? const SizedBox(
+                                            width: 14,
+                                            height: 14,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.arrow_upward,
+                                            color: Colors.white,
+                                            size: 18,
+                                          ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -897,11 +1276,17 @@ class _Bubble extends StatelessWidget {
   final ChatMsg msg;
   final bool mine;
   final bool isDark;
+  final bool highlighted;
+  final String Function(String remetente) replyLabelBuilder;
+  final VoidCallback onLongPress;
 
   const _Bubble({
     required this.msg,
     required this.mine,
     required this.isDark,
+    required this.highlighted,
+    required this.replyLabelBuilder,
+    required this.onLongPress,
   });
 
   @override
@@ -914,67 +1299,134 @@ class _Bubble extends StatelessWidget {
 
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 3),
-        padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.78,
-        ),
-        decoration: BoxDecoration(
-          gradient: mine
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [EagleTokens.brand, EagleTokens.brandInk],
-                )
-              : null,
-          color: mine
-              ? null
-              : (isDark ? EagleTokens.darkCardHi : EagleTokens.card),
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(20),
-            topRight: const Radius.circular(20),
-            bottomLeft: Radius.circular(mine ? 20 : 8),
-            bottomRight: Radius.circular(mine ? 8 : 20),
+      child: GestureDetector(
+        onLongPress: onLongPress,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          margin: const EdgeInsets.symmetric(vertical: 3),
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.78,
           ),
-          border: mine
-              ? null
-              : Border.all(
-                  color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+          decoration: BoxDecoration(
+            gradient: mine
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [EagleTokens.brand, EagleTokens.brandInk],
+                  )
+                : null,
+            color: mine
+                ? null
+                : (isDark ? EagleTokens.darkCardHi : EagleTokens.card),
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(20),
+              topRight: const Radius.circular(20),
+              bottomLeft: Radius.circular(mine ? 20 : 8),
+              bottomRight: Radius.circular(mine ? 8 : 20),
+            ),
+            border: Border.all(
+              color: highlighted
+                  ? EagleTokens.brand
+                  : mine
+                      ? Colors.transparent
+                      : (isDark ? EagleTokens.darkLine : EagleTokens.lineSoft),
+              width: highlighted ? 1.6 : 1,
+            ),
+            boxShadow: highlighted
+                ? [
+                    BoxShadow(
+                      color: EagleTokens.brand.withValues(alpha: 0.16),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (msg.replyToMessageId != null)
+                _ReplySnippet(
+                  mine: mine,
+                  isDark: isDark,
+                  sender: replyLabelBuilder(msg.replyToRemetente ?? ''),
+                  preview: msg.replyToConteudo?.trim().isNotEmpty == true
+                      ? msg.replyToConteudo!.trim()
+                      : 'Midia',
                 ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _MediaPreview(msg: msg, mine: mine, isDark: isDark),
-            if (msg.conteudo.isNotEmpty &&
-                !_isMediaLabelOnly(msg.tipoMidia, msg.conteudo))
-              Text(
-                msg.conteudo,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 15,
-                  height: 1.35,
-                ),
-              ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+              _MediaPreview(msg: msg, mine: mine, isDark: isDark),
+              if (msg.conteudo.isNotEmpty &&
+                  !_isMediaLabelOnly(msg.tipoMidia, msg.conteudo))
                 Text(
-                  _timeLabel(msg.enviadoEm),
-                  style: TextStyle(color: metaColor, fontSize: 11),
+                  msg.conteudo,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 15,
+                    height: 1.35,
+                  ),
                 ),
-                if (mine) ...[
-                  const SizedBox(width: 6),
+              if (msg.reactions.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final reaction in msg.reactions)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: reaction.mine
+                              ? (mine
+                                  ? Colors.white.withValues(alpha: 0.18)
+                                  : EagleTokens.brand.withValues(alpha: 0.12))
+                              : (mine
+                                  ? Colors.white.withValues(alpha: 0.10)
+                                  : (isDark
+                                      ? EagleTokens.darkBg
+                                      : EagleTokens.paper)),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: reaction.mine
+                                ? EagleTokens.brand.withValues(alpha: 0.5)
+                                : Colors.transparent,
+                          ),
+                        ),
+                        child: Text(
+                          '${reaction.emoji} ${reaction.total}',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 12,
+                            fontWeight:
+                                reaction.mine ? FontWeight.w700 : FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text(
-                    _statusLabel(msg),
+                    _timeLabel(msg.enviadoEm),
                     style: TextStyle(color: metaColor, fontSize: 11),
                   ),
+                  if (mine) ...[
+                    const SizedBox(width: 6),
+                    Text(
+                      _statusLabel(msg),
+                      style: TextStyle(color: metaColor, fontSize: 11),
+                    ),
+                  ],
                 ],
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -994,6 +1446,171 @@ class _Bubble extends StatelessWidget {
     if (msg.readAt != null) return 'Lido';
     if (msg.deliveredAt != null) return 'Entregue';
     return 'Enviado';
+  }
+}
+
+class _ReplySnippet extends StatelessWidget {
+  final bool mine;
+  final bool isDark;
+  final String sender;
+  final String preview;
+
+  const _ReplySnippet({
+    required this.mine,
+    required this.isDark,
+    required this.sender,
+    required this.preview,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor =
+        mine ? Colors.white : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: mine
+            ? Colors.white.withValues(alpha: 0.14)
+            : EagleTokens.brand.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            sender,
+            style: TextStyle(
+              color: textColor.withValues(alpha: 0.88),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            preview,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: textColor.withValues(alpha: 0.82),
+              fontSize: 12.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReplyComposerBar extends StatelessWidget {
+  final bool isDark;
+  final String sender;
+  final String preview;
+  final VoidCallback onClose;
+
+  const _ReplyComposerBar({
+    required this.isDark,
+    required this.sender,
+    required this.preview,
+    required this.onClose,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.paper,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 32,
+            decoration: BoxDecoration(
+              color: EagleTokens.brand,
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  sender,
+                  style: const TextStyle(
+                    color: EagleTokens.brand,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  preview,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color:
+                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onClose,
+            icon: const Icon(Icons.close_rounded, size: 18),
+            splashRadius: 18,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SearchState extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _SearchState({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 30, color: EagleTokens.inkMute),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: EagleTokens.inkMute),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

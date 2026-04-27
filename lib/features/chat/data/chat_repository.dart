@@ -1,5 +1,24 @@
 import 'package:dio/dio.dart';
+
 import '../../../core/api/api_client.dart';
+
+class ChatReaction {
+  final String emoji;
+  final int total;
+  final bool mine;
+
+  const ChatReaction({
+    required this.emoji,
+    required this.total,
+    required this.mine,
+  });
+
+  factory ChatReaction.fromJson(Map<String, dynamic> j) => ChatReaction(
+        emoji: j['emoji'] as String? ?? '',
+        total: j['total'] as int? ?? 0,
+        mine: j['mine'] as bool? ?? false,
+      );
+}
 
 class ChatMsg {
   final int? id;
@@ -12,36 +31,50 @@ class ChatMsg {
   final String? clientMessageId;
   final DateTime? deliveredAt;
   final DateTime? readAt;
+  final int? replyToMessageId;
+  final String? replyToConteudo;
+  final String? replyToRemetente;
+  final List<ChatReaction> reactions;
 
   ChatMsg({
-    this.id, 
-    this.alunoId, 
+    this.id,
+    this.alunoId,
     required this.remetente,
-    required this.conteudo, 
+    required this.conteudo,
     required this.enviadoEm,
     this.tipoMidia,
     this.midiaUrl,
     this.clientMessageId,
     this.deliveredAt,
     this.readAt,
+    this.replyToMessageId,
+    this.replyToConteudo,
+    this.replyToRemetente,
+    this.reactions = const [],
   });
 
   factory ChatMsg.fromJson(Map<String, dynamic> j) => ChatMsg(
-    id: j['id'] as int?,
-    alunoId: j['alunoId'] as int?,
-    remetente: j['remetente'] as String,
-    conteudo: j['conteudo'] as String,
-    enviadoEm: DateTime.parse(j['enviadoEm'] as String),
-    tipoMidia: j['tipoMidia'] as String?,
-    midiaUrl: j['midiaUrl'] as String?,
-    clientMessageId: j['clientMessageId'] as String?,
-    deliveredAt: j['deliveredAt'] != null
-        ? DateTime.tryParse(j['deliveredAt'].toString())
-        : null,
-    readAt: j['readAt'] != null
-        ? DateTime.tryParse(j['readAt'].toString())
-        : null,
-  );
+        id: j['id'] as int?,
+        alunoId: j['alunoId'] as int?,
+        remetente: j['remetente'] as String,
+        conteudo: j['conteudo'] as String,
+        enviadoEm: DateTime.parse(j['enviadoEm'] as String),
+        tipoMidia: j['tipoMidia'] as String?,
+        midiaUrl: j['midiaUrl'] as String?,
+        clientMessageId: j['clientMessageId'] as String?,
+        deliveredAt: j['deliveredAt'] != null
+            ? DateTime.tryParse(j['deliveredAt'].toString())
+            : null,
+        readAt: j['readAt'] != null
+            ? DateTime.tryParse(j['readAt'].toString())
+            : null,
+        replyToMessageId: j['replyToMessageId'] as int?,
+        replyToConteudo: j['replyToConteudo'] as String?,
+        replyToRemetente: j['replyToRemetente'] as String?,
+        reactions: ((j['reactions'] as List?) ?? const [])
+            .map((e) => ChatReaction.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
 }
 
 class ChatInboxItem {
@@ -64,18 +97,19 @@ class ChatInboxItem {
   });
 
   factory ChatInboxItem.fromJson(Map<String, dynamic> j) => ChatInboxItem(
-    alunoId: j['alunoId'] as int,
-    alunoNome: j['alunoNome'] as String,
-    fotoUrl: j['fotoUrl'] as String?,
-    ultimaMensagem: j['ultimaMensagem'] as String? ?? '',
-    ultimoRemetente: j['ultimoRemetente'] as String? ?? '',
-    enviadoEm: DateTime.parse(j['enviadoEm'] as String),
-    naoLidas: j['naoLidas'] as int? ?? 0,
-  );
+        alunoId: j['alunoId'] as int,
+        alunoNome: j['alunoNome'] as String,
+        fotoUrl: j['fotoUrl'] as String?,
+        ultimaMensagem: j['ultimaMensagem'] as String? ?? '',
+        ultimoRemetente: j['ultimoRemetente'] as String? ?? '',
+        enviadoEm: DateTime.parse(j['enviadoEm'] as String),
+        naoLidas: j['naoLidas'] as int? ?? 0,
+      );
 }
 
 class ChatRepository {
   final Dio _dio;
+
   ChatRepository(ApiClient c) : _dio = c.dio;
 
   Future<List<ChatMsg>> historico(int alunoId) async {
@@ -90,12 +124,18 @@ class ChatRepository {
         .toList();
   }
 
-  Future<ChatMsg> enviar(int alunoId, String conteudo, String remetente) async {
+  Future<ChatMsg> enviar(
+    int alunoId,
+    String conteudo,
+    String remetente, {
+    int? replyToMessageId,
+  }) async {
     final r = await _dio.post('/api/chat/enviar', data: {
       'alunoId': alunoId,
       'conteudo': conteudo,
       'remetente': remetente,
       'clientMessageId': _clientMessageId(),
+      if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
     });
     return ChatMsg.fromJson(r.data);
   }
@@ -113,10 +153,14 @@ class ChatRepository {
     await _dio.post('/api/chat/aluno/marcar-lido');
   }
 
-  Future<ChatMsg> enviarComoAluno(String conteudo) async {
+  Future<ChatMsg> enviarComoAluno(
+    String conteudo, {
+    int? replyToMessageId,
+  }) async {
     final r = await _dio.post('/api/chat/aluno/enviar', data: {
       'conteudo': conteudo,
       'clientMessageId': _clientMessageId(),
+      if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
     });
     return ChatMsg.fromJson(r.data);
   }
@@ -125,12 +169,14 @@ class ChatRepository {
     required String conteudo,
     required String tipoMidia,
     required String midiaUrl,
+    int? replyToMessageId,
   }) async {
     final r = await _dio.post('/api/chat/aluno/enviar', data: {
       'conteudo': conteudo,
       'tipoMidia': tipoMidia,
       'midiaUrl': midiaUrl,
       'clientMessageId': _clientMessageId(),
+      if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
     });
     return ChatMsg.fromJson(r.data);
   }
@@ -141,6 +187,7 @@ class ChatRepository {
     required String remetente,
     required String tipoMidia,
     required String midiaUrl,
+    int? replyToMessageId,
   }) async {
     final r = await _dio.post('/api/chat/enviar', data: {
       'alunoId': alunoId,
@@ -149,7 +196,24 @@ class ChatRepository {
       'tipoMidia': tipoMidia,
       'midiaUrl': midiaUrl,
       'clientMessageId': _clientMessageId(),
+      if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
     });
+    return ChatMsg.fromJson(r.data);
+  }
+
+  Future<ChatMsg> toggleReaction(int messageId, String emoji) async {
+    final r = await _dio.post(
+      '/api/chat/messages/$messageId/reacao',
+      data: {'emoji': emoji},
+    );
+    return ChatMsg.fromJson(r.data);
+  }
+
+  Future<ChatMsg> toggleReactionAluno(int messageId, String emoji) async {
+    final r = await _dio.post(
+      '/api/chat/aluno/messages/$messageId/reacao',
+      data: {'emoji': emoji},
+    );
     return ChatMsg.fromJson(r.data);
   }
 
