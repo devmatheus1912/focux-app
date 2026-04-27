@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -17,6 +18,7 @@ class ChatInboxScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(chatInboxProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -30,7 +32,7 @@ class ChatInboxScreen extends ConsumerWidget {
         title: const Text('Mensagens'),
       ),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: EagleTokens.brand)),
+        loading: () => Center(child: CircularProgressIndicator(color: primary)),
         error: (e, _) => _InboxState(
           icon: Icons.wifi_off_rounded,
           title: 'Nao foi possivel carregar',
@@ -49,7 +51,7 @@ class ChatInboxScreen extends ConsumerWidget {
           }
 
           return RefreshIndicator(
-            color: EagleTokens.brand,
+            color: primary,
             onRefresh: () async => ref.invalidate(chatInboxProvider),
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
@@ -119,6 +121,8 @@ class _InboxTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
@@ -139,12 +143,18 @@ class _InboxTile extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 24,
-              backgroundColor: EagleTokens.brand.withValues(alpha: 0.12),
+              backgroundColor: primarySoft,
               backgroundImage: item.fotoUrl == null || item.fotoUrl!.isEmpty
                   ? null
                   : NetworkImage(item.fotoUrl!),
               child: item.fotoUrl == null || item.fotoUrl!.isEmpty
-                  ? Text(fxInitials(item.alunoNome), style: const TextStyle(color: EagleTokens.brand, fontWeight: FontWeight.w700))
+                  ? Text(
+                      fxInitials(item.alunoNome),
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    )
                   : null,
             ),
             const SizedBox(width: 12),
@@ -171,7 +181,7 @@ class _InboxTile extends StatelessWidget {
               const SizedBox(width: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: const BoxDecoration(color: EagleTokens.brand, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: primary, shape: BoxShape.circle),
                 child: Text('${item.naoLidas}', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
               ),
             ],

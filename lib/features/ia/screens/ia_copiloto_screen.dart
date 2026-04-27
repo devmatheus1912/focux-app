@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -178,12 +179,16 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: dark);
+    final primaryAccent = BrandPalette.accent(primary);
+    final primaryDeep = BrandPalette.deep(primary);
     final bg = dark ? EagleTokens.darkBg : EagleTokens.paper;
     final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final brand = dark ? EagleTokens.brandAccent : EagleTokens.brand;
+    final brand = dark ? primaryAccent : primary;
 
     return Scaffold(
       backgroundColor: bg,
@@ -213,7 +218,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                   Container(
                     width: 30, height: 30,
                     decoration: BoxDecoration(
-                      color: dark ? const Color(0x268DA4E2) : EagleTokens.brandSoft,
+                      color: primarySoft,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(Icons.auto_awesome, color: brand, size: 15),
@@ -305,9 +310,11 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
             ].map((c) => Container(
               padding: const EdgeInsets.fromLTRB(8, 7, 11, 7),
               decoration: BoxDecoration(
-                color: dark ? const Color(0x208DA4E2) : EagleTokens.brandSoft,
+                color: primarySoft,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: dark ? const Color(0x338DA4E2) : const Color(0x263B5FE2)),
+                border: Border.all(
+                  color: primary.withValues(alpha: dark ? 0.36 : 0.14),
+                ),
               ),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Text(c['icon']!, style: const TextStyle(fontSize: 11)),
@@ -326,7 +333,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                   child: Container(
                     height: 52,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [brand, EagleTokens.brandDeep]),
+                      gradient: LinearGradient(colors: [brand, primaryDeep]),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [BoxShadow(color: brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
                     ),
@@ -361,7 +368,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                       child: LinearProgressIndicator(
                         value: _gerado ? 1.0 : null,
                         minHeight: 5,
-                        backgroundColor: dark ? const Color(0x128DA4E2) : EagleTokens.brandSoft,
+                        backgroundColor: primarySoft,
                         valueColor: const AlwaysStoppedAnimation(Color(0xFF2BB673)),
                       ),
                     ),
@@ -449,7 +456,9 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topLeft, end: Alignment.bottomRight,
-                              colors: dark ? const [Color(0xFF1A2852), Color(0xFF0F1A3C)] : [EagleTokens.brand, EagleTokens.brandDeep],
+                              colors: dark
+                                  ? [primaryDeep, BrandPalette.deep(primaryDeep)]
+                                  : [primary, primaryDeep],
                             ),
                           ),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -470,7 +479,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                               Container(
                                 width: 32, height: 32,
                                 decoration: BoxDecoration(
-                                  color: dark ? const Color(0x208DA4E2) : EagleTokens.brandSoft,
+                                  color: primarySoft,
                                   borderRadius: BorderRadius.circular(9),
                                 ),
                                 child: Center(child: Text('${e.key + 1}', style: TextStyle(color: brand, fontSize: 12, fontWeight: FontWeight.w700))),

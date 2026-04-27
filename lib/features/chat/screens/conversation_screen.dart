@@ -14,6 +14,7 @@ import '../../../core/api/media_upload_service.dart';
 import '../../../core/config/env.dart';
 import '../../../core/providers/personal_brand_provider.dart';
 import '../../../core/storage/secure_storage.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -379,6 +380,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   void _showMessageActions(ChatMsg msg) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     showModalBottomSheet(
       context: context,
       backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
@@ -428,7 +431,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         height: 48,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: EagleTokens.brand.withValues(alpha: 0.10),
+                          color: primarySoft,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
@@ -442,7 +445,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               const SizedBox(height: 18),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.reply_rounded, color: EagleTokens.brand),
+                leading: Icon(Icons.reply_rounded, color: primary),
                 title: const Text('Responder'),
                 onTap: () {
                   Navigator.pop(context);
@@ -451,7 +454,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.content_copy_outlined, color: EagleTokens.brand),
+                leading: Icon(Icons.content_copy_outlined, color: primary),
                 title: const Text('Copiar mensagem'),
                 onTap: () async {
                   Navigator.pop(context);
@@ -470,6 +473,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   void _showEmojiSheet() {
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -498,7 +503,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     height: 52,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: EagleTokens.brand.withValues(alpha: 0.10),
+                      color: primarySoft,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(emoji, style: const TextStyle(fontSize: 24)),
@@ -572,6 +577,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   void _showSearchSheet() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final ctrl = TextEditingController();
     var query = '';
     var searching = false;
@@ -659,9 +666,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             )
                           : searching
                               ? const Center(
-                                  child: CircularProgressIndicator(
-                                    color: EagleTokens.brand,
-                                  ),
+                                  child: CircularProgressIndicator(),
                                 )
                               : searched && results.isEmpty
                               ? const _SearchState(
@@ -686,7 +691,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         decoration: BoxDecoration(
                                           color: isDark
                                               ? EagleTokens.darkCardHi
-                                              : EagleTokens.card,
+                                              : primarySoft,
                                           borderRadius:
                                               BorderRadius.circular(14),
                                         ),
@@ -696,8 +701,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                           children: [
                                             Text(
                                               _replySenderLabel(msg.remetente),
-                                              style: const TextStyle(
-                                                color: EagleTokens.brand,
+                                              style: TextStyle(
+                                                color: primary,
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w700,
                                               ),
@@ -767,6 +772,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   void _showChatMenu() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     showModalBottomSheet(
       context: context,
       backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
@@ -779,7 +785,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           children: [
             if (_isPersonalMode)
               ListTile(
-                leading: const Icon(Icons.person_outline, color: EagleTokens.brand),
+                leading: Icon(Icons.person_outline, color: primary),
                 title: const Text('Ver perfil do aluno'),
                 onTap: () {
                   Navigator.pop(context);
@@ -787,7 +793,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 },
               ),
             ListTile(
-              leading: const Icon(Icons.search_rounded, color: EagleTokens.brand),
+              leading: Icon(Icons.search_rounded, color: primary),
               title: const Text('Buscar conversa'),
               onTap: () {
                 Navigator.pop(context);
@@ -795,7 +801,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.refresh, color: EagleTokens.brand),
+              leading: Icon(Icons.refresh, color: primary),
               title: const Text('Atualizar conversa'),
               onTap: () {
                 Navigator.pop(context);
@@ -803,9 +809,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.emoji_emotions_outlined,
-                color: EagleTokens.brand,
+                color: primary,
               ),
               title: const Text('Adicionar emoji'),
               onTap: () {
@@ -1010,6 +1016,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final brand =
         _isAlunoMode ? ref.watch(personalBrandProvider).valueOrNull : null;
     final title = _displayName(brand);
@@ -1036,20 +1044,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: EagleTokens.brand.withValues(alpha: 0.18),
+                  color: primary.withValues(alpha: 0.18),
                 ),
               ),
               child: CircleAvatar(
                 radius: 18,
-                backgroundColor: EagleTokens.brand.withValues(alpha: 0.12),
+                backgroundColor: primarySoft,
                 backgroundImage: _avatarImage(brand) == null
                     ? null
                     : NetworkImage(_avatarImage(brand)!),
                 child: _avatarImage(brand) == null
                     ? Text(
                         fxInitials(title),
-                        style: const TextStyle(
-                          color: EagleTokens.brand,
+                        style: TextStyle(
+                          color: primary,
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
@@ -1117,15 +1125,15 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: EagleTokens.brand.withValues(alpha: 0.10),
+              color: primarySoft,
               child: Row(
                 children: [
-                  const SizedBox(
+                  SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: EagleTokens.brand,
+                      color: primary,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -1141,8 +1149,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             ),
           Expanded(
             child: _loading
-                ? const Center(
-                    child: CircularProgressIndicator(color: EagleTokens.brand),
+                ? Center(
+                    child: CircularProgressIndicator(color: primary),
                   )
                 : _msgs.isEmpty
                     ? _EmptyConversation(
@@ -1170,7 +1178,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                   alignRight: _isMine(msg),
                                   accentColor: _isMine(msg)
                                       ? Colors.white
-                                      : EagleTokens.brand,
+                                      : primary,
                                   onReply: () => _setReply(msg),
                                   child: _Bubble(
                                     msg: msg,
@@ -1259,7 +1267,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                           : EagleTokens.ink,
                                       fontSize: 15,
                                     ),
-                                    cursorColor: EagleTokens.brand,
+                                    cursorColor: primary,
                                     decoration: InputDecoration(
                                       hintText: 'iMessage',
                                       hintStyle: TextStyle(
@@ -1291,8 +1299,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                     child: Container(
                                       width: 32,
                                       height: 32,
-                                      decoration: const BoxDecoration(
-                                        color: EagleTokens.brand,
+                                      decoration: BoxDecoration(
+                                        color: primary,
                                         shape: BoxShape.circle,
                                       ),
                                       child: IconButton(
