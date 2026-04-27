@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/env.dart';
 import '../models/public_personal_data.dart';
 import '../widgets/hero_section.dart';
+import '../widgets/metodo_section.dart';
 import '../widgets/social_proof_section.dart';
 import '../widgets/sobre_section.dart';
 import '../widgets/especialidades_section.dart';
@@ -16,6 +17,7 @@ import '../widgets/contato_section.dart';
 import '../widgets/cta_final_section.dart';
 import '../widgets/ofertas_section.dart';
 import '../widgets/powered_by_footer.dart';
+import '../widgets/tecnologia_section.dart';
 
 // ---------------------------------------------------------------------------
 // Provider
@@ -175,8 +177,10 @@ class _LandingContent extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(child: HeroSection(data: data, slug: slug, primaryColor: primaryColor, secondaryColor: secondaryColor)),
         SliverToBoxAdapter(child: SocialProofSection(data: data)),
+        SliverToBoxAdapter(child: MetodoSection(data: data, primaryColor: primaryColor)),
         SliverToBoxAdapter(child: SobreSection(data: data)),
         SliverToBoxAdapter(child: EspecialidadesSection(data: data, primaryColor: primaryColor)),
+        SliverToBoxAdapter(child: TecnologiaSection(data: data, primaryColor: primaryColor, secondaryColor: secondaryColor)),
         SliverToBoxAdapter(child: OfertasSection(data: data, slug: slug, primaryColor: primaryColor)),
         SliverToBoxAdapter(child: ContatoSection(data: data)),
         SliverToBoxAdapter(child: DepoimentosSection(data: data, primaryColor: primaryColor)),

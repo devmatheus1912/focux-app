@@ -6,11 +6,18 @@ class CtaFinalSection extends StatelessWidget {
   final PublicPersonalData data;
   final String slug;
   final Color primaryColor;
-  
-  const CtaFinalSection({super.key, required this.data, required this.slug, required this.primaryColor});
+
+  const CtaFinalSection({
+    super.key,
+    required this.data,
+    required this.slug,
+    required this.primaryColor,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final primeiroPacote = data.pacotes.isNotEmpty ? data.pacotes.first : null;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       padding: const EdgeInsets.all(28),
@@ -20,13 +27,16 @@ class CtaFinalSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Text(
-            'Comece hoje.\nSeu personal está esperando.',
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                height: 1.3),
+          Text(
+            primeiroPacote != null && primeiroPacote.preco.trim().isNotEmpty
+                ? 'Comece com ${primeiroPacote.preco}.\nConstrua sua rotina com suporte real.'
+                : 'Comece hoje.\nSeu personal esta esperando.',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              height: 1.3,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
@@ -38,13 +48,16 @@ class CtaFinalSection extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: data.isEnterprise ? primaryColor : const Color(0xFF3B5FE2),
+                foregroundColor:
+                    data.isEnterprise ? primaryColor : const Color(0xFF3B5FE2),
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 0,
               ),
               child: const Text(
-                'Criar minha conta grátis →',
+                'Quero comecar agora',
                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
               ),
             ),
