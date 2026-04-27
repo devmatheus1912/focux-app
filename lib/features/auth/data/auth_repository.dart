@@ -2,6 +2,24 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/storage/secure_storage.dart';
 
+class PasswordResetRequestResult {
+  final String mensagem;
+  final bool deliveryAvailable;
+
+  const PasswordResetRequestResult({
+    required this.mensagem,
+    required this.deliveryAvailable,
+  });
+
+  factory PasswordResetRequestResult.fromJson(Map<String, dynamic> json) {
+    return PasswordResetRequestResult(
+      mensagem: json['mensagem'] as String? ??
+          'Se o e-mail estiver cadastrado, voce recebera as instrucoes.',
+      deliveryAvailable: json['deliveryAvailable'] as bool? ?? true,
+    );
+  }
+}
+
 class AuthRepository {
   final Dio _dio;
 
@@ -78,6 +96,19 @@ class AuthRepository {
       'novaSenha': novaSenha,
     });
     await SecureStorage.saveRequiresPasswordChange(false);
+  }
+
+  Future<PasswordResetRequestResult> solicitarResetSenha({
+    required String email,
+    required bool isAluno,
+  }) async {
+    final response = await _dio.post('/api/auth/esqueci-senha', data: {
+      'email': email,
+      'tipo': isAluno ? 'ALUNO' : 'PERSONAL',
+    });
+    return PasswordResetRequestResult.fromJson(
+      response.data as Map<String, dynamic>,
+    );
   }
 
   Future<void> logout() async {

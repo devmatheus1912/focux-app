@@ -540,6 +540,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ctrl = TextEditingController();
     var query = '';
+    var searching = false;
+    var searched = false;
+    var results = <ChatMsg>[];
 
     showModalBottomSheet(
       context: context,
@@ -551,7 +554,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       builder: (sheetContext) => SafeArea(
         child: StatefulBuilder(
           builder: (context, setSheetState) {
-            final results = _searchMessages(query);
             return Padding(
               padding: EdgeInsets.fromLTRB(
                 16,
@@ -576,9 +578,34 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       controller: ctrl,
                       autofocus: true,
                       onChanged: (value) => setSheetState(() => query = value),
+                      onSubmitted: (_) async {
+                        await _performSearch(
+                          query: query,
+                          setSearching: (value) =>
+                              setSheetState(() => searching = value),
+                          setResults: (value) => setSheetState(() {
+                            searched = true;
+                            results = value;
+                          }),
+                        );
+                      },
                       decoration: InputDecoration(
                         hintText: 'Buscar na conversa',
                         prefixIcon: const Icon(Icons.search_rounded),
+                        suffixIcon: IconButton(
+                          onPressed: () async {
+                            await _performSearch(
+                              query: query,
+                              setSearching: (value) =>
+                                  setSheetState(() => searching = value),
+                              setResults: (value) => setSheetState(() {
+                                searched = true;
+                                results = value;
+                              }),
+                            );
+                          },
+                          icon: const Icon(Icons.arrow_forward_rounded),
+                        ),
                         filled: true,
                         fillColor:
                             isDark ? EagleTokens.darkCardHi : EagleTokens.card,
@@ -596,7 +623,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               title: 'Digite para buscar',
                               subtitle: 'Encontre mensagens antigas da conversa.',
                             )
-                          : results.isEmpty
+                          : searching
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    color: EagleTokens.brand,
+                                  ),
+                                )
+                              : searched && results.isEmpty
                               ? const _SearchState(
                                   icon: Icons.chat_bubble_outline,
                                   title: 'Nada encontrado',
@@ -668,16 +701,34 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     ).whenComplete(ctrl.dispose);
   }
 
-  List<ChatMsg> _searchMessages(String query) {
-    final normalized = query.trim().toLowerCase();
-    if (normalized.isEmpty) return const [];
-    return _msgs.reversed
-        .where((msg) {
-          final content = msg.conteudo.toLowerCase();
-          final reply = (msg.replyToConteudo ?? '').toLowerCase();
-          return content.contains(normalized) || reply.contains(normalized);
-        })
-        .toList(growable: false);
+  Future<void> _performSearch({
+    required String query,
+    required void Function(bool value) setSearching,
+    required void Function(List<ChatMsg> value) setResults,
+  }) async {
+    final normalized = query.trim();
+    if (normalized.isEmpty) {
+      setResults(const []);
+      return;
+    }
+    setSearching(true);
+    try {
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final results = _isAlunoMode
+          ? await repo.buscarHistoricoAluno(normalized)
+          : await repo.buscarHistorico(_alunoId!, normalized);
+      setResults(results);
+    } catch (_) {
+      final fallback = _msgs.reversed.where((msg) {
+        final content = msg.conteudo.toLowerCase();
+        final reply = (msg.replyToConteudo ?? '').toLowerCase();
+        return content.contains(normalized.toLowerCase()) ||
+            reply.contains(normalized.toLowerCase());
+      }).toList(growable: false);
+      setResults(fallback);
+    } finally {
+      setSearching(false);
+    }
   }
 
   void _showChatMenu() {

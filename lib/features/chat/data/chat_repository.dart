@@ -145,6 +145,22 @@ class ChatRepository {
     return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
   }
 
+  Future<List<ChatMsg>> buscarHistorico(int alunoId, String query) async {
+    final r = await _dio.get(
+      '/api/chat/historico/$alunoId/buscar',
+      queryParameters: {'q': query},
+    );
+    return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
+  }
+
+  Future<List<ChatMsg>> buscarHistoricoAluno(String query) async {
+    final r = await _dio.get(
+      '/api/chat/aluno/historico/buscar',
+      queryParameters: {'q': query},
+    );
+    return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
+  }
+
   Future<void> marcarLido(int alunoId) async {
     await _dio.post('/api/chat/historico/$alunoId/marcar-lido');
   }

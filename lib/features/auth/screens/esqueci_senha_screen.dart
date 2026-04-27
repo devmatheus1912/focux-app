@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_client.dart';
+import '../data/auth_repository.dart';
 import '../widgets/auth_shell.dart';
 
 class EsqueciSenhaScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
   bool _loading = false;
   String? _message;
   String? _error;
+  String? _hint;
   bool _isAluno = false;
 
   @override
@@ -36,17 +38,15 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
       _loading = true;
       _error = null;
       _message = null;
+      _hint = null;
     });
 
     HapticFeedback.mediumImpact();
 
     try {
-      await ApiClient().dio.post(
-        '/api/auth/esqueci-senha',
-        data: {
-          'email': _emailController.text.trim(),
-          'tipo': _isAluno ? 'ALUNO' : 'PERSONAL',
-        },
+      final result = await AuthRepository(ApiClient()).solicitarResetSenha(
+        email: _emailController.text.trim(),
+        isAluno: _isAluno,
       );
 
       if (!mounted) {
@@ -54,7 +54,10 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
       }
 
       setState(() {
-        _message = 'Se o e-mail existir, enviaremos o link de recuperação.';
+        _message = result.mensagem;
+        _hint = result.deliveryAvailable
+            ? 'Verifique sua caixa de entrada e spam.'
+            : 'Recuperacao por e-mail nao esta configurada neste ambiente ainda.';
       });
     } catch (error) {
       HapticFeedback.heavyImpact();
@@ -74,10 +77,10 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
     if (error is DioException) {
       final statusCode = error.response?.statusCode;
       if (statusCode == null) {
-        return 'Sem conexão com o servidor.';
+        return 'Sem conexao com o servidor.';
       }
     }
-    return 'Não foi possível enviar o link agora.';
+    return 'Nao foi possivel enviar o link agora.';
   }
 
   @override
@@ -158,7 +161,8 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                               onTap: () => setState(() => _isAluno = false),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 180),
-                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
                                   color: !_isAluno
                                       ? Colors.white.withValues(alpha: 0.18)
@@ -169,8 +173,12 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                                   'Personal',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: !_isAluno ? 1 : 0.55),
-                                    fontWeight: !_isAluno ? FontWeight.w700 : FontWeight.w500,
+                                    color: Colors.white.withValues(
+                                      alpha: !_isAluno ? 1 : 0.55,
+                                    ),
+                                    fontWeight: !_isAluno
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
                                     fontSize: 13,
                                   ),
                                 ),
@@ -182,7 +190,8 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                               onTap: () => setState(() => _isAluno = true),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 180),
-                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
                                   color: _isAluno
                                       ? Colors.white.withValues(alpha: 0.18)
@@ -193,8 +202,12 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                                   'Aluno',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: _isAluno ? 1 : 0.55),
-                                    fontWeight: _isAluno ? FontWeight.w700 : FontWeight.w500,
+                                    color: Colors.white.withValues(
+                                      alpha: _isAluno ? 1 : 0.55,
+                                    ),
+                                    fontWeight: _isAluno
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
                                     fontSize: 13,
                                   ),
                                 ),
@@ -239,10 +252,21 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                           fontSize: 12.5,
                         ),
                       ),
+                      const SizedBox(height: 10),
+                    ],
+                    if (_hint != null) ...[
+                      Text(
+                        _hint!,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.58),
+                          fontSize: 12.5,
+                          height: 1.45,
+                        ),
+                      ),
                       const SizedBox(height: 14),
                     ],
                     AuthPrimaryButton(
-                      label: 'Enviar link de recuperação',
+                      label: 'Enviar link de recuperacao',
                       icon: Icons.send_rounded,
                       isLoading: _loading,
                       onPressed: _submit,
