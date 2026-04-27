@@ -149,11 +149,11 @@ class AppRouter {
               builder: (context, state) => const TreinosListScreen(),
             ),
           ]),
-          // Tab 3: Financeiro
+          // Tab 3: Agenda
           StatefulShellBranch(routes: [
             GoRoute(
-              path: '/financeiro',
-              builder: (context, state) => const FinanceiroScreen(),
+              path: '/agenda',
+              builder: (context, state) => const AgendaScreen(),
             ),
           ]),
           // Tab 4: IA Copiloto
@@ -319,14 +319,16 @@ class AppRouter {
         builder: (context, state) => const HistoricoCheckinScreen(),
       ),
 
-      // Agenda
-      GoRoute(
-        path: '/agenda',
-        builder: (context, state) => const AgendaScreen(),
-      ),
+      // Agenda aluno sub-route (agenda tab is now in shell)
       GoRoute(
         path: '/agenda/aluno',
         builder: (context, state) => const AgendaAlunoScreen(),
+      ),
+
+      // Financeiro (moved out of dock — accessible via push)
+      GoRoute(
+        path: '/financeiro',
+        builder: (context, state) => const FinanceiroScreen(),
       ),
 
       // Perfil

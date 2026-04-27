@@ -27,7 +27,7 @@ class FxDock extends StatelessWidget {
     _FxDockItem(icon: 'home', label: 'Hoje'),
     _FxDockItem(icon: 'users', label: 'Alunos'),
     _FxDockItem(icon: 'dumbbell', label: 'Treinos'),
-    _FxDockItem(icon: 'coin', label: 'Finance'),
+    _FxDockItem(icon: 'calendar', label: 'Agenda'),
     _FxDockItem(icon: 'spark', label: 'IA'),
   ];
 
