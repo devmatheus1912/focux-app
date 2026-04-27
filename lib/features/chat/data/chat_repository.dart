@@ -10,6 +10,8 @@ class ChatMsg {
   final String? tipoMidia;
   final String? midiaUrl;
   final String? clientMessageId;
+  final DateTime? deliveredAt;
+  final DateTime? readAt;
 
   ChatMsg({
     this.id, 
@@ -20,6 +22,8 @@ class ChatMsg {
     this.tipoMidia,
     this.midiaUrl,
     this.clientMessageId,
+    this.deliveredAt,
+    this.readAt,
   });
 
   factory ChatMsg.fromJson(Map<String, dynamic> j) => ChatMsg(
@@ -31,6 +35,12 @@ class ChatMsg {
     tipoMidia: j['tipoMidia'] as String?,
     midiaUrl: j['midiaUrl'] as String?,
     clientMessageId: j['clientMessageId'] as String?,
+    deliveredAt: j['deliveredAt'] != null
+        ? DateTime.tryParse(j['deliveredAt'].toString())
+        : null,
+    readAt: j['readAt'] != null
+        ? DateTime.tryParse(j['readAt'].toString())
+        : null,
   );
 }
 
@@ -93,6 +103,14 @@ class ChatRepository {
   Future<List<ChatMsg>> historicoAluno() async {
     final r = await _dio.get('/api/chat/aluno/historico');
     return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
+  }
+
+  Future<void> marcarLido(int alunoId) async {
+    await _dio.post('/api/chat/historico/$alunoId/marcar-lido');
+  }
+
+  Future<void> marcarLidoAluno() async {
+    await _dio.post('/api/chat/aluno/marcar-lido');
   }
 
   Future<ChatMsg> enviarComoAluno(String conteudo) async {
