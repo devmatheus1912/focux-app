@@ -21,6 +21,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _loading = false;
   bool _showPassword = false;
   String? _error;
+  // BUG-39: role toggle — personal or aluno
+  bool _isAluno = false;
 
   @override
   void dispose() {
@@ -30,50 +32,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-
+    setState(() { _loading = true; _error = null; });
     HapticFeedback.mediumImpact();
 
     try {
-      await ref
-          .read(authProvider.notifier)
-          .login(_emailController.text.trim(), _passwordController.text);
-
-      if (!mounted) {
-        return;
+      if (_isAluno) {
+        // BUG-39: aluno uses dedicated endpoint
+        await ref.read(authProvider.notifier).loginAluno(
+          _emailController.text.trim(), _passwordController.text,
+        );
+        if (!mounted) return;
+        // BUG-40: redirect based on role + requiresPasswordChange
+        final requiresChange = ref.read(authProvider.notifier).requiresPasswordChange;
+        context.go(requiresChange ? '/aluno/definir-senha' : '/dashboard/aluno');
+      } else {
+        await ref.read(authProvider.notifier).login(
+          _emailController.text.trim(), _passwordController.text,
+        );
+        if (!mounted) return;
+        context.go('/dashboard/personal');
       }
-
-      context.go('/dashboard/personal');
     } catch (error) {
       HapticFeedback.heavyImpact();
-      setState(() {
-        _error = _mapError(error);
-      });
+      setState(() { _error = _mapError(error); });
     } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
+      if (mounted) setState(() { _loading = false; });
     }
   }
 
   String _mapError(Object error) {
     if (error is DioException) {
       final statusCode = error.response?.statusCode;
-      if (statusCode == null) {
-        return 'Sem conexão com o servidor.';
-      }
-      if (statusCode == 401) {
-        return 'Email ou senha incorretos.';
-      }
+      if (statusCode == null) return 'Sem conexão com o servidor.';
+      if (statusCode == 401) return 'Email ou senha incorretos.';
     }
     return 'Não foi possível entrar agora.';
   }
@@ -130,7 +123,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(height: 22),
+                          const SizedBox(height: 18),
+                          // BUG-39: role toggle
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(children: [
+                              Expanded(child: GestureDetector(
+                                onTap: () => setState(() => _isAluno = false),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 180),
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: !_isAluno ? Colors.white.withValues(alpha: 0.18) : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text('Personal', textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(alpha: !_isAluno ? 1.0 : 0.5),
+                                      fontWeight: !_isAluno ? FontWeight.w700 : FontWeight.w500,
+                                      fontSize: 13,
+                                    )),
+                                ),
+                              )),
+                              Expanded(child: GestureDetector(
+                                onTap: () => setState(() => _isAluno = true),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 180),
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: _isAluno ? Colors.white.withValues(alpha: 0.18) : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text('Aluno', textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(alpha: _isAluno ? 1.0 : 0.5),
+                                      fontWeight: _isAluno ? FontWeight.w700 : FontWeight.w500,
+                                      fontSize: 13,
+                                    )),
+                                ),
+                              )),
+                            ]),
+                          ),
+                          const SizedBox(height: 18),
                           AuthField(
                             label: 'E-mail',
                             controller: _emailController,

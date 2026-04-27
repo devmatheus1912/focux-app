@@ -318,7 +318,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               title: const Text('Agendar treino'),
               onTap: () {
                 Navigator.pop(sheetCtx);
-                context.push('/agenda');
+                context.go('/agenda');
               },
             ),
           ],

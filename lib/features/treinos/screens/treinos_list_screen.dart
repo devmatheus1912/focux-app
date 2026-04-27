@@ -19,20 +19,23 @@ class TreinosListScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: bg,
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
-        ),
-        child: FloatingActionButton(
-          onPressed: () async {
-            final criado = await context.push<bool>('/treinos/novo');
-            if (criado == true) ref.invalidate(treinosProvider);
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 72), // clear FxDock (70px + 18px bottom)
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          ),
+          child: FloatingActionButton(
+            onPressed: () async {
+              final criado = await context.push<bool>('/treinos/novo');
+              if (criado == true) ref.invalidate(treinosProvider);
+            },
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
         ),
       ),
       body: treinosAsync.when(

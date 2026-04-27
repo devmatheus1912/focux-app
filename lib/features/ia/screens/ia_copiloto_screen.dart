@@ -51,6 +51,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
     }
     final escolhido = await showModalBottomSheet<int>(
       context: context,
+      useRootNavigator: true,
       showDragHandle: true,
       builder: (ctx) => SafeArea(
         child: ListView(

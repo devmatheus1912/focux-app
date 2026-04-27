@@ -97,7 +97,8 @@ class _IdentidadeVisualScreenState
           Uri.parse('https://api.cloudinary.com/v1_1/focux/image/upload');
       final request = http.MultipartRequest('POST', uri)
         ..fields['upload_preset'] = 'focux_unsigned'
-        ..files.add(await http.MultipartFile.fromPath('file', file.path));
+        ..files.add(http.MultipartFile.fromBytes(
+            'file', await file.readAsBytes(), filename: file.name));
       final streamed = await request.send();
       final body = await streamed.stream.bytesToString();
       if (streamed.statusCode != 200) throw Exception('Upload failed: $body');

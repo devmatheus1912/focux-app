@@ -236,7 +236,8 @@ class _ChatAlunoScreenState extends ConsumerState<ChatAlunoScreen> {
     );
     final request = http.MultipartRequest('POST', uri)
       ..fields['upload_preset'] = _kUploadPreset
-      ..files.add(await http.MultipartFile.fromPath('file', file.path));
+      ..files.add(http.MultipartFile.fromBytes(
+          'file', await file.readAsBytes(), filename: file.name));
 
     final streamed = await request.send();
     final body     = await streamed.stream.bytesToString();

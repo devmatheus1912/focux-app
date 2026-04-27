@@ -643,7 +643,7 @@ class _PersonalDashboardScreenState
                             icon: 'spark',
                             label: 'IA Copiloto',
                             isDark: isDark,
-                            onTap: () => context.push('/ia/copiloto'),
+                            onTap: () => context.go('/ia/copiloto'),
                           ),
                           _ShortcutBtn(
                             icon: 'plus',
@@ -655,7 +655,7 @@ class _PersonalDashboardScreenState
                             icon: 'calendar',
                             label: 'Agenda',
                             isDark: isDark,
-                            onTap: () => context.push('/agenda'),
+                            onTap: () => context.go('/agenda'),
                           ),
                           _ShortcutBtn(
                             icon: 'chat',
