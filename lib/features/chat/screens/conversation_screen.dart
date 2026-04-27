@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -341,6 +342,27 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         setState(() => _highlightedMessageId = null);
       }
     }));
+  }
+
+  ChatMsg? _findMessageById(int? messageId) {
+    if (messageId == null) return null;
+    for (final msg in _msgs) {
+      if (msg.id == messageId) {
+        return msg;
+      }
+    }
+    return null;
+  }
+
+  void _jumpToReplySource(ChatMsg msg) {
+    final original = _findMessageById(msg.replyToMessageId);
+    if (original == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mensagem original nao encontrada aqui.')),
+      );
+      return;
+    }
+    _focusMessage(original);
   }
 
   void _showMessageActions(ChatMsg msg) {
@@ -995,7 +1017,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           ),
         ),
       ),
-      body: Column(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: _ChatBackdrop(isDark: isDark),
+          ),
+          Column(
         children: [
           if (_uploading)
             Container(
@@ -1050,13 +1077,23 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                 _DateDivider(date: msg.enviadoEm),
                               KeyedSubtree(
                                 key: _messageKey(msg),
-                                child: _Bubble(
-                                  msg: msg,
-                                  mine: _isMine(msg),
-                                  isDark: isDark,
-                                  highlighted: _highlightedMessageId == msg.id,
-                                  replyLabelBuilder: _replySenderLabel,
-                                  onLongPress: () => _showMessageActions(msg),
+                                child: _SwipeReplyWrapper(
+                                  alignRight: _isMine(msg),
+                                  accentColor: _isMine(msg)
+                                      ? Colors.white
+                                      : EagleTokens.brand,
+                                  onReply: () => _setReply(msg),
+                                  child: _Bubble(
+                                    msg: msg,
+                                    mine: _isMine(msg),
+                                    isDark: isDark,
+                                    highlighted: _highlightedMessageId == msg.id,
+                                    replyLabelBuilder: _replySenderLabel,
+                                    onLongPress: () => _showMessageActions(msg),
+                                    onReplyTap: msg.replyToMessageId == null
+                                        ? null
+                                        : () => _jumpToReplySource(msg),
+                                  ),
                                 ),
                               ),
                             ],
@@ -1072,12 +1109,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               10 + MediaQuery.of(context).viewInsets.bottom,
             ),
             decoration: BoxDecoration(
-              color: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+              color: (isDark ? EagleTokens.darkBg : EagleTokens.paper)
+                  .withValues(alpha: 0.86),
               border: Border(
                 top: BorderSide(
                   color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
                 ),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.05),
+                  blurRadius: 24,
+                  offset: const Offset(0, -8),
+                ),
+              ],
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -1089,102 +1134,112 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   color: EagleTokens.inkMute,
                 ),
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_replyingTo != null)
-                          _ReplyComposerBar(
-                            isDark: isDark,
-                            sender: _replySenderLabel(_replyingTo!.remetente),
-                            preview: _previewText(_replyingTo!),
-                            onClose: () => setState(() => _replyingTo = null),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(28),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: (isDark ? EagleTokens.darkCard : EagleTokens.card)
+                              .withValues(alpha: isDark ? 0.82 : 0.9),
+                          borderRadius: BorderRadius.circular(28),
+                          border: Border.all(
+                            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
                           ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _ctrl,
-                                style: TextStyle(
-                                  color: isDark
-                                      ? EagleTokens.darkInk
-                                      : EagleTokens.ink,
-                                  fontSize: 15,
-                                ),
-                                cursorColor: EagleTokens.brand,
-                                decoration: InputDecoration(
-                                  hintText: 'Mensagem',
-                                  hintStyle: TextStyle(
-                                    color: isDark
-                                        ? EagleTokens.darkInkMute
-                                        : EagleTokens.inkMute,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
-                                  border: InputBorder.none,
-                                ),
-                                minLines: 1,
-                                maxLines: 5,
-                                textInputAction: TextInputAction.send,
-                                onSubmitted: (_) => _sendText(),
+                            if (_replyingTo != null)
+                              _ReplyComposerBar(
+                                isDark: isDark,
+                                sender: _replySenderLabel(_replyingTo!.remetente),
+                                preview: _previewText(_replyingTo!),
+                                onClose: () => setState(() => _replyingTo = null),
                               ),
-                            ),
-                            IconButton(
-                              onPressed: _showEmojiSheet,
-                              icon: const Icon(Icons.emoji_emotions_outlined),
-                              color: EagleTokens.inkMute,
-                            ),
-                            if (_composerHasText || _sending)
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(right: 6, bottom: 6),
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: const BoxDecoration(
-                                    color: EagleTokens.brand,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: IconButton(
-                                    padding: EdgeInsets.zero,
-                                    onPressed:
-                                        (_sending || _uploading) ? null : _sendText,
-                                    icon: _sending
-                                        ? const SizedBox(
-                                            width: 14,
-                                            height: 14,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        : const Icon(
-                                            Icons.arrow_upward,
-                                            color: Colors.white,
-                                            size: 18,
-                                          ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _ctrl,
+                                    style: TextStyle(
+                                      color: isDark
+                                          ? EagleTokens.darkInk
+                                          : EagleTokens.ink,
+                                      fontSize: 15,
+                                    ),
+                                    cursorColor: EagleTokens.brand,
+                                    decoration: InputDecoration(
+                                      hintText: 'Mensagem',
+                                      hintStyle: TextStyle(
+                                        color: isDark
+                                            ? EagleTokens.darkInkMute
+                                            : EagleTokens.inkMute,
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                      border: InputBorder.none,
+                                    ),
+                                    minLines: 1,
+                                    maxLines: 5,
+                                    textInputAction: TextInputAction.send,
+                                    onSubmitted: (_) => _sendText(),
                                   ),
                                 ),
-                              ),
+                                IconButton(
+                                  onPressed: _showEmojiSheet,
+                                  icon: const Icon(Icons.emoji_emotions_outlined),
+                                  color: EagleTokens.inkMute,
+                                ),
+                                if (_composerHasText || _sending)
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.only(right: 6, bottom: 6),
+                                    child: Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: const BoxDecoration(
+                                        color: EagleTokens.brand,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: IconButton(
+                                        padding: EdgeInsets.zero,
+                                        onPressed: (_sending || _uploading)
+                                            ? null
+                                            : _sendText,
+                                        icon: _sending
+                                            ? const SizedBox(
+                                                width: 14,
+                                                height: 14,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            : const Icon(
+                                                Icons.arrow_upward,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
+        ],
+      ),
         ],
       ),
     );
@@ -1323,6 +1378,135 @@ class _DateDivider extends StatelessWidget {
   }
 }
 
+class _SwipeReplyWrapper extends StatefulWidget {
+  final Widget child;
+  final bool alignRight;
+  final Color accentColor;
+  final VoidCallback onReply;
+
+  const _SwipeReplyWrapper({
+    required this.child,
+    required this.alignRight,
+    required this.accentColor,
+    required this.onReply,
+  });
+
+  @override
+  State<_SwipeReplyWrapper> createState() => _SwipeReplyWrapperState();
+}
+
+class _SwipeReplyWrapperState extends State<_SwipeReplyWrapper> {
+  double _offset = 0;
+  bool _triggered = false;
+
+  void _handleUpdate(DragUpdateDetails details) {
+    final delta = details.primaryDelta ?? 0;
+    final next = widget.alignRight
+        ? (_offset + delta).clamp(-54.0, 0.0)
+        : (_offset + delta).clamp(0.0, 54.0);
+    if (!_triggered && next.abs() >= 34) {
+      _triggered = true;
+      HapticFeedback.lightImpact();
+      widget.onReply();
+    }
+    setState(() => _offset = next);
+  }
+
+  void _reset() {
+    if (mounted) {
+      setState(() => _offset = 0);
+    }
+    _triggered = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.86,
+      child: Stack(
+        alignment:
+            widget.alignRight ? Alignment.centerRight : Alignment.centerLeft,
+        children: [
+          Positioned(
+            left: widget.alignRight ? null : 6,
+            right: widget.alignRight ? 6 : null,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 120),
+              opacity: _offset.abs() > 8 ? 1 : 0,
+              child: Icon(
+                Icons.reply_rounded,
+                color: widget.accentColor,
+                size: 18,
+              ),
+            ),
+          ),
+          Transform.translate(
+            offset: Offset(_offset, 0),
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onHorizontalDragUpdate: _handleUpdate,
+              onHorizontalDragEnd: (_) => _reset(),
+              onHorizontalDragCancel: _reset,
+              child: widget.child,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChatBackdrop extends StatelessWidget {
+  final bool isDark;
+
+  const _ChatBackdrop({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: isDark
+              ? const [Color(0xFF09101F), Color(0xFF0C1428), Color(0xFF101B34)]
+              : const [Color(0xFFF6F7FB), Color(0xFFF8F8F6), Color(0xFFF2F5FB)],
+        ),
+      ),
+      child: CustomPaint(
+        painter: _ChatBackdropPainter(isDark: isDark),
+        child: const SizedBox.expand(),
+      ),
+    );
+  }
+}
+
+class _ChatBackdropPainter extends CustomPainter {
+  final bool isDark;
+
+  const _ChatBackdropPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final linePaint = Paint()
+      ..color = (isDark ? Colors.white : EagleTokens.brand)
+          .withValues(alpha: isDark ? 0.028 : 0.04)
+      ..strokeWidth = 1;
+    const gap = 26.0;
+    for (double x = 0; x < size.width; x += gap) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
+    }
+    for (double y = 0; y < size.height; y += gap) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ChatBackdropPainter oldDelegate) {
+    return oldDelegate.isDark != isDark;
+  }
+}
+
 class _Bubble extends StatelessWidget {
   final ChatMsg msg;
   final bool mine;
@@ -1330,6 +1514,7 @@ class _Bubble extends StatelessWidget {
   final bool highlighted;
   final String Function(String remetente) replyLabelBuilder;
   final VoidCallback onLongPress;
+  final VoidCallback? onReplyTap;
 
   const _Bubble({
     required this.msg,
@@ -1338,6 +1523,7 @@ class _Bubble extends StatelessWidget {
     required this.highlighted,
     required this.replyLabelBuilder,
     required this.onLongPress,
+    required this.onReplyTap,
   });
 
   @override
@@ -1405,6 +1591,7 @@ class _Bubble extends StatelessWidget {
                   preview: msg.replyToConteudo?.trim().isNotEmpty == true
                       ? msg.replyToConteudo!.trim()
                       : 'Midia',
+                  onTap: onReplyTap,
                 ),
               _MediaPreview(msg: msg, mine: mine, isDark: isDark),
               if (msg.conteudo.isNotEmpty &&
@@ -1505,50 +1692,56 @@ class _ReplySnippet extends StatelessWidget {
   final bool isDark;
   final String sender;
   final String preview;
+  final VoidCallback? onTap;
 
   const _ReplySnippet({
     required this.mine,
     required this.isDark,
     required this.sender,
     required this.preview,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final textColor =
         mine ? Colors.white : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: mine
-            ? Colors.white.withValues(alpha: 0.14)
-            : EagleTokens.brand.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            sender,
-            style: TextStyle(
-              color: textColor.withValues(alpha: 0.88),
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: mine
+              ? Colors.white.withValues(alpha: 0.14)
+              : EagleTokens.brand.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              sender,
+              style: TextStyle(
+                color: textColor.withValues(alpha: 0.88),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            preview,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: textColor.withValues(alpha: 0.82),
-              fontSize: 12.5,
+            const SizedBox(height: 2),
+            Text(
+              preview,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: textColor.withValues(alpha: 0.82),
+                fontSize: 12.5,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
