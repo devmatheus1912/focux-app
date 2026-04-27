@@ -9,7 +9,14 @@ import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../checkin/providers/checkin_provider.dart';
 import '../../checkin/data/checkin_repository.dart';
+import '../../evolucao/data/evolucao_repository.dart';
 import 'progresso_semanal_widget.dart';
+
+final minhasMedidasDashboardProvider =
+    FutureProvider<List<MedidaCorporal>>((ref) async {
+  final repo = EvolucaoRepository(ref.read(apiClientProvider));
+  return repo.listarMinhasMedidas();
+});
 
 class AlunoDashboardScreen extends ConsumerWidget {
   const AlunoDashboardScreen({super.key});
@@ -20,6 +27,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
     final alunoAsync = ref.watch(alunoMeProvider);
     final brandAsync = ref.watch(personalBrandProvider);
     final treinosAsync = ref.watch(meusTreinosProvider);
+    final medidasAsync = ref.watch(minhasMedidasDashboardProvider);
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -111,6 +119,16 @@ class AlunoDashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             const ProgressoSemanalWidget(),
+            const SizedBox(height: 16),
+            alunoAsync.when(
+              data: (aluno) => _ProgressCheckpointCard(
+                aluno: aluno,
+                medidasAsync: medidasAsync,
+                isDark: isDark,
+              ),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
             const SizedBox(height: 24),
             Text(
               'Acoes rapidas',
@@ -563,6 +581,166 @@ class _StudentStatsRow extends StatelessWidget {
           if (i != cards.length - 1) const SizedBox(width: 10),
         ],
       ],
+    );
+  }
+}
+
+class _ProgressCheckpointCard extends StatelessWidget {
+  final Aluno aluno;
+  final AsyncValue<List<MedidaCorporal>> medidasAsync;
+  final bool isDark;
+
+  const _ProgressCheckpointCard({
+    required this.aluno,
+    required this.medidasAsync,
+    required this.isDark,
+  });
+
+  String _formatarData(String value) {
+    final parsed = DateTime.tryParse(value);
+    if (parsed == null) return value;
+    final dia = parsed.day.toString().padLeft(2, '0');
+    final mes = parsed.month.toString().padLeft(2, '0');
+    return '$dia/$mes';
+  }
+
+  int _profileCompletion() {
+    final filled = [
+      aluno.telefone,
+      aluno.whatsapp,
+      aluno.objetivo,
+      aluno.genero,
+      aluno.peso?.toString(),
+      aluno.altura?.toString(),
+      aluno.dataNascimento,
+      aluno.fotoUrl,
+    ].where((value) => value != null && value.toString().trim().isNotEmpty).length;
+    return (filled / 8 * 100).round();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Checkpoint pessoal',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Veja seu progresso e ajuste o que falta sem esperar o personal chamar.',
+                      style: TextStyle(color: mute, height: 1.45),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilledButton.tonalIcon(
+                onPressed: () => context.push('/aluno/perfil'),
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('Abrir'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          medidasAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, __) => Text(
+              'Seu progresso corporal vai aparecer aqui assim que o app conseguir buscar as medidas.',
+              style: TextStyle(color: mute, height: 1.45),
+            ),
+            data: (medidas) {
+              final ultima = medidas.isNotEmpty ? medidas.first : null;
+              final pesos = medidas.where((item) => item.peso != null).toList()
+                ..sort((a, b) => a.data.compareTo(b.data));
+              final diff = pesos.length >= 2
+                  ? pesos.last.peso! - pesos.first.peso!
+                  : null;
+
+              return Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _MiniMetricCard(
+                          label: 'Perfil',
+                          value: '${_profileCompletion()}%',
+                          isDark: isDark,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _MiniMetricCard(
+                          label: 'Ultimo peso',
+                          value: ultima?.peso != null
+                              ? '${ultima!.peso!.toStringAsFixed(1)} kg'
+                              : 'Sem peso',
+                          isDark: isDark,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _MiniMetricCard(
+                          label: 'Variacao',
+                          value: diff == null
+                              ? '--'
+                              : '${diff > 0 ? '+' : ''}${diff.toStringAsFixed(1)} kg',
+                          isDark: isDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.04)
+                          : EagleTokens.brand.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      ultima == null
+                          ? 'Seu historico corporal ainda esta vazio. Registrar uma medida agora melhora os proximos ajustes do treino.'
+                          : 'Ultima atualizacao em ${_formatarData(ultima.data)}${ultima.fotoUrl != null && ultima.fotoUrl!.isNotEmpty ? ' com foto de progresso.' : '.'}',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13,
+                        height: 1.45,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
