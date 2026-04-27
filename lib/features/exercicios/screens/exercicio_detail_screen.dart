@@ -238,6 +238,33 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                         const SizedBox(height: 4),
                         Text(ex.descricao!),
                       ],
+                      if (ex.errosComuns?.trim().isNotEmpty == true) ...[
+                        const SizedBox(height: 12),
+                        _GuidanceCard(
+                          icon: Icons.report_problem_outlined,
+                          title: 'Erros comuns',
+                          text: ex.errosComuns!.trim(),
+                          color: EagleTokens.warn,
+                        ),
+                      ],
+                      if (ex.contraindicacoes?.trim().isNotEmpty == true) ...[
+                        const SizedBox(height: 12),
+                        _GuidanceCard(
+                          icon: Icons.health_and_safety_outlined,
+                          title: 'Contraindicacoes',
+                          text: ex.contraindicacoes!.trim(),
+                          color: EagleTokens.bad,
+                        ),
+                      ],
+                      if (ex.substitutos?.trim().isNotEmpty == true) ...[
+                        const SizedBox(height: 12),
+                        _GuidanceCard(
+                          icon: Icons.swap_horiz_rounded,
+                          title: 'Substitutos',
+                          text: ex.substitutos!.trim(),
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -245,6 +272,52 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _GuidanceCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String text;
+  final Color color;
+
+  const _GuidanceCard({
+    required this.icon,
+    required this.title,
+    required this.text,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.12 : 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(color: ink, fontSize: 13.5, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 4),
+                Text(text, style: TextStyle(color: ink.withValues(alpha: 0.82), fontSize: 12.8, height: 1.36)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

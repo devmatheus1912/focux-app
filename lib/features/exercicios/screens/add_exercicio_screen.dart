@@ -57,6 +57,9 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   final _descricaoCtrl = TextEditingController();
   final _tagsCtrl = TextEditingController();
   final _obsCtrl = TextEditingController();
+  final _errosComunsCtrl = TextEditingController();
+  final _contraindicacoesCtrl = TextEditingController();
+  final _substitutosCtrl = TextEditingController();
   String? _musculoAlvo;
   String? _categoria;
   String? _equipamento;
@@ -72,6 +75,9 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     _descricaoCtrl.dispose();
     _tagsCtrl.dispose();
     _obsCtrl.dispose();
+    _errosComunsCtrl.dispose();
+    _contraindicacoesCtrl.dispose();
+    _substitutosCtrl.dispose();
     super.dispose();
   }
 
@@ -91,6 +97,9 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
             nivel: _nivel,
             mecanica: _mecanica,
             objetivo: _objetivo,
+            errosComuns: _errosComunsCtrl.text.trim(),
+            contraindicacoes: _contraindicacoesCtrl.text.trim(),
+            substitutos: _substitutosCtrl.text.trim(),
             tags: _tagsCtrl.text.trim(),
             observacoes: _obsCtrl.text.trim(),
           );
@@ -376,6 +385,66 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                         controller: _obsCtrl,
                         decoration: InputDecoration(
                           labelText: 'Observações (opcional)',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                        ),
+                        style: TextStyle(color: ink),
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _errosComunsCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Erros comuns (opcional)',
+                          hintText: 'Ex: perder amplitude, compensar lombar',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                        ),
+                        style: TextStyle(color: ink),
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _contraindicacoesCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Contraindicacoes (opcional)',
+                          hintText: 'Ex: evitar em dor aguda no ombro',
+                          filled: true,
+                          fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                          ),
+                        ),
+                        style: TextStyle(color: ink),
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _substitutosCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Substitutos (opcional)',
+                          hintText: 'Ex: supino inclinado, flexao, crucifixo',
                           filled: true,
                           fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
                           border: OutlineInputBorder(

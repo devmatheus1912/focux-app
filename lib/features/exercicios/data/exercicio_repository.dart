@@ -12,6 +12,9 @@ class Exercicio {
   final String? nivel;
   final String? mecanica;
   final String? objetivo;
+  final String? errosComuns;
+  final String? contraindicacoes;
+  final String? substitutos;
   final String? videoUrl;
   final String? tags;
   final bool favoritado;
@@ -27,6 +30,9 @@ class Exercicio {
     this.nivel,
     this.mecanica,
     this.objetivo,
+    this.errosComuns,
+    this.contraindicacoes,
+    this.substitutos,
     this.videoUrl,
     this.tags,
     this.favoritado = false,
@@ -43,6 +49,9 @@ class Exercicio {
         nivel: json['nivel'] as String?,
         mecanica: json['mecanica'] as String?,
         objetivo: json['objetivo'] as String?,
+        errosComuns: json['errosComuns'] as String?,
+        contraindicacoes: json['contraindicacoes'] as String?,
+        substitutos: json['substitutos'] as String?,
         videoUrl: json['videoUrl'] as String?,
         tags: json['tags'] as String?,
         favoritado: json['favoritado'] as bool? ?? false,
@@ -94,6 +103,9 @@ class ExercicioRepository {
     String? nivel,
     String? mecanica,
     String? objetivo,
+    String? errosComuns,
+    String? contraindicacoes,
+    String? substitutos,
     String? tags,
     String? observacoes,
   }) async {
@@ -106,6 +118,9 @@ class ExercicioRepository {
       if (nivel != null && nivel.isNotEmpty) 'nivel': nivel,
       if (mecanica != null && mecanica.isNotEmpty) 'mecanica': mecanica,
       if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+      if (errosComuns != null && errosComuns.isNotEmpty) 'errosComuns': errosComuns,
+      if (contraindicacoes != null && contraindicacoes.isNotEmpty) 'contraindicacoes': contraindicacoes,
+      if (substitutos != null && substitutos.isNotEmpty) 'substitutos': substitutos,
       if (tags != null && tags.isNotEmpty) 'tags': tags,
       if (observacoes != null && observacoes.isNotEmpty) 'observacoes': observacoes,
     });
