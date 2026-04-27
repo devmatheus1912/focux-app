@@ -9,6 +9,12 @@ import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../anamnese/data/anamnese_repository.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../evolucao/data/evolucao_repository.dart';
+
+final minhasMedidasProvider = FutureProvider<List<MedidaCorporal>>((ref) async {
+  final repo = EvolucaoRepository(ref.read(apiClientProvider));
+  return repo.listarMinhasMedidas();
+});
 
 class PerfilAlunoScreen extends ConsumerStatefulWidget {
   const PerfilAlunoScreen({super.key});
@@ -273,9 +279,264 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     return chips;
   }
 
+  String _formatarDataCurta(String value) {
+    final parsed = DateTime.tryParse(value);
+    if (parsed == null) return value;
+    final dia = parsed.day.toString().padLeft(2, '0');
+    final mes = parsed.month.toString().padLeft(2, '0');
+    return '$dia/$mes/${parsed.year}';
+  }
+
+  String _variacaoPeso(List<MedidaCorporal> medidas) {
+    final comPeso = medidas.where((item) => item.peso != null).toList()
+      ..sort((a, b) => a.data.compareTo(b.data));
+    if (comPeso.length < 2) return 'Registre pelo menos 2 pesos para ver a variacao.';
+    final diff = comPeso.last.peso! - comPeso.first.peso!;
+    final sinal = diff > 0 ? '+' : '';
+    return '$sinal${diff.toStringAsFixed(1)} kg desde a primeira medida';
+  }
+
+  Future<void> _registrarMedida() async {
+    final dataCtrl = TextEditingController(
+      text: DateTime.now().toIso8601String().substring(0, 10),
+    );
+    final pesoCtrl = TextEditingController(text: _peso.text.trim());
+    final cinturaCtrl = TextEditingController();
+    final quadrilCtrl = TextEditingController();
+    final bracoCtrl = TextEditingController();
+    String? fotoUrl;
+    bool saving = false;
+    bool uploading = false;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            Future<void> selecionarFoto() async {
+              final file = await ImagePicker().pickImage(
+                source: ImageSource.gallery,
+                imageQuality: 86,
+              );
+              if (file == null) return;
+              setModalState(() => uploading = true);
+              try {
+                final url = await MediaUploadService(ref.read(apiClientProvider))
+                    .uploadBytes(
+                  bytes: await file.readAsBytes(),
+                  filename: file.name,
+                  folder: 'alunos/evolucao',
+                  resourceType: 'image',
+                );
+                setModalState(() => fotoUrl = url);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro ao enviar foto da evolucao: $e')),
+                  );
+                }
+              } finally {
+                if (ctx.mounted) {
+                  setModalState(() => uploading = false);
+                }
+              }
+            }
+
+            Future<void> salvar() async {
+              setModalState(() => saving = true);
+              try {
+                final repo = EvolucaoRepository(ref.read(apiClientProvider));
+                final peso = double.tryParse(
+                  pesoCtrl.text.trim().replaceAll(',', '.'),
+                );
+                await repo.adicionarMinhaMedida(
+                  data: dataCtrl.text.trim(),
+                  peso: peso,
+                  cintura: double.tryParse(
+                    cinturaCtrl.text.trim().replaceAll(',', '.'),
+                  ),
+                  quadril: double.tryParse(
+                    quadrilCtrl.text.trim().replaceAll(',', '.'),
+                  ),
+                  braco: double.tryParse(
+                    bracoCtrl.text.trim().replaceAll(',', '.'),
+                  ),
+                  fotoUrl: fotoUrl,
+                );
+                ref.invalidate(minhasMedidasProvider);
+                if (peso != null) {
+                  _peso.text = peso.toStringAsFixed(1);
+                  await _save(silent: true);
+                }
+                if (!ctx.mounted || !mounted) return;
+                Navigator.of(ctx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Nova medida registrada.')),
+                );
+              } catch (e) {
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Erro ao registrar medida: $e')),
+                );
+              } finally {
+                if (ctx.mounted) {
+                  setModalState(() => saving = false);
+                }
+              }
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 16,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Theme.of(ctx).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 42,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: EagleTokens.lineSoft,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Registrar progresso',
+                        style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Atualize peso, medidas e uma foto opcional para acompanhar sua evolucao sem depender do personal.',
+                        style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                              height: 1.4,
+                            ),
+                      ),
+                      const SizedBox(height: 16),
+                      _Field(
+                        controller: dataCtrl,
+                        label: 'Data AAAA-MM-DD',
+                        icon: Icons.calendar_today_outlined,
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _Field(
+                              controller: pesoCtrl,
+                              label: 'Peso kg',
+                              icon: Icons.monitor_weight_outlined,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _Field(
+                              controller: cinturaCtrl,
+                              label: 'Cintura cm',
+                              icon: Icons.straighten_outlined,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _Field(
+                              controller: quadrilCtrl,
+                              label: 'Quadril cm',
+                              icon: Icons.straighten_outlined,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _Field(
+                              controller: bracoCtrl,
+                              label: 'Braco cm',
+                              icon: Icons.fitness_center,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      OutlinedButton.icon(
+                        onPressed: uploading ? null : selecionarFoto,
+                        icon: uploading
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.add_a_photo_outlined),
+                        label: Text(
+                          fotoUrl == null
+                              ? 'Adicionar foto de progresso'
+                              : 'Foto de progresso pronta',
+                        ),
+                      ),
+                      if (fotoUrl != null) ...[
+                        const SizedBox(height: 12),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: AspectRatio(
+                            aspectRatio: 1.15,
+                            child: Image.network(
+                              fotoUrl!,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: saving ? null : salvar,
+                          icon: saving
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.check_circle_outline),
+                          label: const Text('Salvar medida'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(alunoMeProvider);
+    final medidasAsync = ref.watch(minhasMedidasProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
@@ -569,6 +830,115 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                   ),
                   const SizedBox(height: 14),
                   _SectionCard(
+                    title: 'Progresso corporal',
+                    subtitle:
+                        'Medidas, foto de evolucao e historico rapido para acompanhar resultado real.',
+                    isDark: isDark,
+                    trailing: FilledButton.tonalIcon(
+                      onPressed: _registrarMedida,
+                      icon: const Icon(Icons.add_chart),
+                      label: const Text('Registrar'),
+                    ),
+                    children: [
+                      medidasAsync.when(
+                        loading: () => const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (e, _) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            'Nao foi possivel carregar sua evolucao: $e',
+                            style: TextStyle(color: mute, height: 1.4),
+                          ),
+                        ),
+                        data: (medidas) {
+                          final ultima = medidas.isNotEmpty ? medidas.first : null;
+                          final cards = <Widget>[
+                            _MetricHighlightCard(
+                              label: 'Ultimo peso',
+                              value: ultima?.peso != null
+                                  ? '${ultima!.peso!.toStringAsFixed(1)} kg'
+                                  : 'Sem registro',
+                              helper: ultima != null
+                                  ? 'Atualizado em ${_formatarDataCurta(ultima.data)}'
+                                  : 'Registre a primeira medida',
+                              icon: Icons.monitor_weight_outlined,
+                              isDark: isDark,
+                            ),
+                            _MetricHighlightCard(
+                              label: 'Variacao',
+                              value: medidas.where((item) => item.peso != null).length >= 2
+                                  ? _variacaoPeso(medidas).split(' desde').first
+                                  : '--',
+                              helper: _variacaoPeso(medidas),
+                              icon: Icons.show_chart,
+                              isDark: isDark,
+                            ),
+                            _MetricHighlightCard(
+                              label: 'Entradas',
+                              value: '${medidas.length}',
+                              helper: medidas.isEmpty
+                                  ? 'Nenhuma atualizacao ainda'
+                                  : 'Historico pronto para comparar',
+                              icon: Icons.timeline,
+                              isDark: isDark,
+                            ),
+                          ];
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (var i = 0; i < cards.length; i++) ...[
+                                cards[i],
+                                if (i != cards.length - 1)
+                                  const SizedBox(height: 10),
+                              ],
+                              const SizedBox(height: 12),
+                              if (medidas.isEmpty)
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? Colors.white.withValues(alpha: 0.04)
+                                        : EagleTokens.brand.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  child: Text(
+                                    'Seu historico corporal ainda esta vazio. Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
+                                    style: TextStyle(
+                                      color: mute,
+                                      fontSize: 13,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                )
+                              else
+                                ...[
+                                  Text(
+                                    'Ultimas atualizacoes',
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  ...medidas.take(3).map(
+                                    (medida) => _ProgressEntryCard(
+                                      medida: medida,
+                                      isDark: isDark,
+                                      formatarData: _formatarDataCurta,
+                                    ),
+                                  ),
+                                ],
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  _SectionCard(
                     title: 'Saude e restricoes',
                     subtitle: 'Informacoes que deixam treino e dieta mais seguros.',
                     isDark: isDark,
@@ -708,12 +1078,14 @@ class _SectionCard extends StatelessWidget {
   final String subtitle;
   final bool isDark;
   final List<Widget> children;
+  final Widget? trailing;
 
   const _SectionCard({
     required this.title,
     required this.subtitle,
     required this.isDark,
     required this.children,
+    this.trailing,
   });
 
   @override
@@ -730,13 +1102,24 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              if (trailing != null) ...[
+                const SizedBox(width: 12),
+                trailing!,
+              ],
+            ],
           ),
           const SizedBox(height: 4),
           Text(
@@ -787,6 +1170,217 @@ class _ProfileChip extends StatelessWidget {
               color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
               fontSize: 12,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricHighlightCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final String helper;
+  final IconData icon;
+  final bool isDark;
+
+  const _MetricHighlightCard({
+    required this.label,
+    required this.value,
+    required this.helper,
+    required this.icon,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.04)
+            : EagleTokens.brand.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: EagleTokens.brand.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: EagleTokens.brand),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  helper,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    fontSize: 11.5,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressEntryCard extends StatelessWidget {
+  final MedidaCorporal medida;
+  final bool isDark;
+  final String Function(String value) formatarData;
+
+  const _ProgressEntryCard({
+    required this.medida,
+    required this.isDark,
+    required this.formatarData,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = <Widget>[
+      if (medida.peso != null) _MiniValueChip(label: 'Peso', value: '${medida.peso!.toStringAsFixed(1)} kg'),
+      if (medida.cintura != null) _MiniValueChip(label: 'Cintura', value: '${medida.cintura!.toStringAsFixed(1)} cm'),
+      if (medida.quadril != null) _MiniValueChip(label: 'Quadril', value: '${medida.quadril!.toStringAsFixed(1)} cm'),
+      if (medida.braco != null) _MiniValueChip(label: 'Braco', value: '${medida.braco!.toStringAsFixed(1)} cm'),
+    ];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkBg : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                formatarData(medida.data),
+                style: TextStyle(
+                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              if (medida.fotoUrl != null && medida.fotoUrl!.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: EagleTokens.brand.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: const Text(
+                    'Com foto',
+                    style: TextStyle(
+                      color: EagleTokens.brand,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (chips.isNotEmpty)
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: chips,
+            ),
+          if (medida.fotoUrl != null && medida.fotoUrl!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: AspectRatio(
+                aspectRatio: 1.4,
+                child: Image.network(
+                  medida.fotoUrl!,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniValueChip extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MiniValueChip({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],

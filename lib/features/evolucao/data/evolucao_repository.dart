@@ -44,6 +44,30 @@ class EvolucaoRepository {
   final Dio _dio;
   EvolucaoRepository(ApiClient c) : _dio = c.dio;
 
+  Future<List<MedidaCorporal>> listarMinhasMedidas() async {
+    final r = await _dio.get('/api/aluno/medidas');
+    return (r.data as List).map((e) => MedidaCorporal.fromJson(e)).toList();
+  }
+
+  Future<MedidaCorporal> adicionarMinhaMedida({
+    String? data,
+    double? peso,
+    double? cintura,
+    double? quadril,
+    double? braco,
+    String? fotoUrl,
+  }) async {
+    final r = await _dio.post('/api/aluno/medidas', data: {
+      'data': data ?? DateTime.now().toIso8601String().substring(0, 10),
+      if (peso != null) 'peso': peso,
+      if (cintura != null) 'cintura': cintura,
+      if (quadril != null) 'quadril': quadril,
+      if (braco != null) 'braco': braco,
+      if (fotoUrl != null && fotoUrl.isNotEmpty) 'fotoUrl': fotoUrl,
+    });
+    return MedidaCorporal.fromJson(r.data);
+  }
+
   Future<List<MedidaCorporal>> listarMedidas(int alunoId) async {
     final r = await _dio.get('/api/alunos/$alunoId/medidas');
     return (r.data as List).map((e) => MedidaCorporal.fromJson(e)).toList();
