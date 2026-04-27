@@ -8,8 +8,19 @@ class ExecucaoExercicio {
   final String? gifUrl;
   final int? series;
   final String? repeticoes;
+  final double? cargaKg;
+  final int? descansoSegundos;
+  final String? observacoes;
   final int seriesFeitas;
   final bool concluido;
+  final String? feedback;
+  final int? rpe;
+  final bool dor;
+  final double? cargaAnteriorKg;
+  final int? seriesFeitasAnterior;
+  final String? feedbackAnterior;
+  final int? rpeAnterior;
+  final bool? dorAnterior;
 
   ExecucaoExercicio({
     required this.id,
@@ -18,8 +29,19 @@ class ExecucaoExercicio {
     this.gifUrl,
     this.series,
     this.repeticoes,
+    this.cargaKg,
+    this.descansoSegundos,
+    this.observacoes,
     required this.seriesFeitas,
     required this.concluido,
+    this.feedback,
+    this.rpe,
+    this.dor = false,
+    this.cargaAnteriorKg,
+    this.seriesFeitasAnterior,
+    this.feedbackAnterior,
+    this.rpeAnterior,
+    this.dorAnterior,
   });
 
   factory ExecucaoExercicio.fromJson(Map<String, dynamic> j) => ExecucaoExercicio(
@@ -29,20 +51,55 @@ class ExecucaoExercicio {
         gifUrl: j['gifUrl'] as String?,
         series: j['series'] as int?,
         repeticoes: j['repeticoes'] as String?,
+        cargaKg: _toDouble(j['cargaKg']),
+        descansoSegundos: j['descansoSegundos'] as int?,
+        observacoes: j['observacoes'] as String?,
         seriesFeitas: j['seriesFeitas'] as int,
         concluido: j['concluido'] as bool,
+        feedback: j['feedback'] as String?,
+        rpe: j['rpe'] as int?,
+        dor: j['dor'] as bool? ?? false,
+        cargaAnteriorKg: _toDouble(j['cargaAnteriorKg']),
+        seriesFeitasAnterior: j['seriesFeitasAnterior'] as int?,
+        feedbackAnterior: j['feedbackAnterior'] as String?,
+        rpeAnterior: j['rpeAnterior'] as int?,
+        dorAnterior: j['dorAnterior'] as bool?,
       );
 
-  ExecucaoExercicio copyWith({int? seriesFeitas, bool? concluido}) => ExecucaoExercicio(
+  ExecucaoExercicio copyWith({
+    int? seriesFeitas,
+    bool? concluido,
+    String? feedback,
+    int? rpe,
+    bool? dor,
+  }) =>
+      ExecucaoExercicio(
         id: id,
         treinoExercicioId: treinoExercicioId,
         exercicioNome: exercicioNome,
         gifUrl: gifUrl,
         series: series,
         repeticoes: repeticoes,
+        cargaKg: cargaKg,
+        descansoSegundos: descansoSegundos,
+        observacoes: observacoes,
         seriesFeitas: seriesFeitas ?? this.seriesFeitas,
         concluido: concluido ?? this.concluido,
+        feedback: feedback ?? this.feedback,
+        rpe: rpe ?? this.rpe,
+        dor: dor ?? this.dor,
+        cargaAnteriorKg: cargaAnteriorKg,
+        seriesFeitasAnterior: seriesFeitasAnterior,
+        feedbackAnterior: feedbackAnterior,
+        rpeAnterior: rpeAnterior,
+        dorAnterior: dorAnterior,
       );
+}
+
+double? _toDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
 }
 
 class ExecucaoTreino {
@@ -92,10 +149,22 @@ class CheckinRepository {
     return ExecucaoTreino.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<ExecucaoExercicio> marcarExercicio(int execucaoId, int treinoExercicioId, int seriesFeitas) async {
+  Future<ExecucaoExercicio> marcarExercicio(
+    int execucaoId,
+    int treinoExercicioId,
+    int seriesFeitas, {
+    String? feedback,
+    int? rpe,
+    bool? dor,
+  }) async {
     final r = await _dio.put(
       '/api/checkin/$execucaoId/exercicio/$treinoExercicioId',
-      data: {'seriesFeitas': seriesFeitas},
+      data: {
+        'seriesFeitas': seriesFeitas,
+        if (feedback != null) 'feedback': feedback,
+        if (rpe != null) 'rpe': rpe,
+        if (dor != null) 'dor': dor,
+      },
     );
     return ExecucaoExercicio.fromJson(r.data as Map<String, dynamic>);
   }

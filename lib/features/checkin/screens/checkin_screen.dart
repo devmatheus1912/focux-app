@@ -26,8 +26,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   Duration _duration = Duration.zero;
   bool _showRestTimer = false;
   int _restSeconds = 60;
+  int _restTotalSeconds = 60;
   Timer? _restTimer;
-  final Map<int, String> _feedbackByExercise = {};
 
   @override
   void initState() {
@@ -79,7 +79,14 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       HapticFeedback.selectionClick();
       final updated = await ref
           .read(checkinRepositoryProvider)
-          .marcarExercicio(_execucao!.id!, ee.treinoExercicioId, next);
+          .marcarExercicio(
+            _execucao!.id!,
+            ee.treinoExercicioId,
+            next,
+            feedback: ee.feedback,
+            rpe: ee.rpe,
+            dor: ee.dor,
+          );
       if (!mounted) return;
       setState(() {
         _execucao = ExecucaoTreino(
@@ -95,7 +102,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
         );
       });
       if (increased) {
-        _startRestTimer();
+        _startRestTimer(ee.descansoSegundos ?? 60);
       }
     } catch (e) {
       if (mounted) {
@@ -104,23 +111,59 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     }
   }
 
-  void _setFeedback(ExecucaoExercicio ee, String value) {
+  Future<void> _setFeedback(ExecucaoExercicio ee, String value) async {
+    if (_execucao == null) return;
     HapticFeedback.selectionClick();
-    setState(() {
-      final current = _feedbackByExercise[ee.id];
-      if (current == value) {
-        _feedbackByExercise.remove(ee.id);
-      } else {
-        _feedbackByExercise[ee.id] = value;
+    final selected = ee.feedback == value;
+    final nextFeedback = selected ? null : value;
+    final nextRpe = selected ? null : _rpeForFeedback(value);
+    final nextDor = !selected && value == 'DOR';
+    try {
+      final updated = await ref.read(checkinRepositoryProvider).marcarExercicio(
+            _execucao!.id!,
+            ee.treinoExercicioId,
+            ee.seriesFeitas,
+            feedback: nextFeedback,
+            rpe: nextRpe,
+            dor: nextDor,
+          );
+      if (!mounted) return;
+      setState(() {
+        _execucao = ExecucaoTreino(
+          id: _execucao!.id,
+          treinoId: _execucao!.treinoId,
+          treinoNome: _execucao!.treinoNome,
+          status: _execucao!.status,
+          iniciadoEm: _execucao!.iniciadoEm,
+          concluidoEm: _execucao!.concluidoEm,
+          exercicios: _execucao!.exercicios
+              .map((e) => e.id == updated.id ? updated : e)
+              .toList(),
+        );
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
-    });
+    }
   }
 
-  void _startRestTimer() {
+  int _rpeForFeedback(String value) {
+    return switch (value) {
+      'FACIL' => 6,
+      'OK' => 7,
+      'DIFICIL' => 9,
+      'DOR' => 10,
+      _ => 7,
+    };
+  }
+
+  void _startRestTimer(int seconds) {
     _restTimer?.cancel();
     setState(() {
       _showRestTimer = true;
-      _restSeconds = 60;
+      _restSeconds = seconds.clamp(15, 600).toInt();
+      _restTotalSeconds = _restSeconds;
     });
     _restTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
@@ -250,7 +293,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                       mute: mute,
                       line: line,
                       cardBg: cardBg,
-                      feedback: _feedbackByExercise[item.id],
+                      feedback: item.feedback,
                       onFeedback: (value) => _setFeedback(item, value),
                       onMarcar: (s) => _marcar(item, s),
                     );
@@ -313,6 +356,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
               bottom: 88,
               child: _RestTimerDock(
                 seconds: _restSeconds,
+                totalSeconds: _restTotalSeconds,
                 onSkip: () {
                   _restTimer?.cancel();
                   setState(() {
@@ -625,6 +669,12 @@ class _SerieCard extends StatelessWidget {
     final targetSeries = ee.series ?? 0;
     final progress = targetSeries == 0 ? 0.0 : (ee.seriesFeitas / targetSeries).clamp(0.0, 1.0);
     final hasMedia = ee.gifUrl?.isNotEmpty == true;
+    final loadText = _formatKg(ee.cargaKg);
+    final restText = ee.descansoSegundos == null ? null : '${ee.descansoSegundos}s';
+    final hasPrevious = ee.cargaAnteriorKg != null ||
+        ee.seriesFeitasAnterior != null ||
+        ee.feedbackAnterior != null ||
+        ee.rpeAnterior != null;
 
     return Container(
       decoration: BoxDecoration(
@@ -684,6 +734,33 @@ class _SerieCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   _ExerciseMediaPreview(url: ee.gifUrl!, brand: brand, dark: dark),
                   const SizedBox(height: 14),
+                ],
+                if (loadText != null || restText != null) ...[
+                  _ExerciseMetaRow(
+                    loadText: loadText,
+                    restText: restText,
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    dark: dark,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (ee.observacoes?.trim().isNotEmpty == true) ...[
+                  _ExerciseNote(text: ee.observacoes!.trim(), mute: mute, line: line, dark: dark),
+                  const SizedBox(height: 12),
+                ],
+                if (hasPrevious) ...[
+                  _PreviousPerformance(
+                    loadText: _formatKg(ee.cargaAnteriorKg),
+                    seriesText: ee.seriesFeitasAnterior == null ? null : '${ee.seriesFeitasAnterior} series',
+                    feedbackText: _formatFeedback(ee.feedbackAnterior, ee.rpeAnterior, ee.dorAnterior),
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    dark: dark,
+                  ),
+                  const SizedBox(height: 12),
                 ],
                 Row(
                   children: [
@@ -765,15 +842,194 @@ class _SerieCard extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _FeedbackChip(label: 'Facil', selected: feedback == 'Facil', color: brand, onTap: () => onFeedback('Facil')),
-                    _FeedbackChip(label: 'Ok', selected: feedback == 'Ok', color: brand, onTap: () => onFeedback('Ok')),
-                    _FeedbackChip(label: 'Dificil', selected: feedback == 'Dificil', color: brand, onTap: () => onFeedback('Dificil')),
-                    _FeedbackChip(label: 'Dor', selected: feedback == 'Dor', color: EagleTokens.bad, onTap: () => onFeedback('Dor')),
+                    _FeedbackChip(label: 'Facil', selected: feedback == 'FACIL', color: brand, onTap: () => onFeedback('FACIL')),
+                    _FeedbackChip(label: 'Ok', selected: feedback == 'OK', color: brand, onTap: () => onFeedback('OK')),
+                    _FeedbackChip(label: 'Dificil', selected: feedback == 'DIFICIL', color: brand, onTap: () => onFeedback('DIFICIL')),
+                    _FeedbackChip(label: 'Dor', selected: feedback == 'DOR', color: EagleTokens.bad, onTap: () => onFeedback('DOR')),
                   ],
                 ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  String? _formatKg(double? value) {
+    if (value == null) return null;
+    final rounded = value.roundToDouble() == value ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
+    return '$rounded kg';
+  }
+
+  String? _formatFeedback(String? feedback, int? rpe, bool? dor) {
+    final labels = {
+      'FACIL': 'Facil',
+      'OK': 'Ok',
+      'DIFICIL': 'Dificil',
+      'DOR': 'Dor',
+    };
+    final parts = <String>[
+      if (feedback != null) labels[feedback] ?? feedback,
+      if (rpe != null) 'RPE $rpe',
+      if (dor == true && feedback != 'DOR') 'Dor',
+    ];
+    return parts.isEmpty ? null : parts.join(' | ');
+  }
+}
+
+class _ExerciseMetaRow extends StatelessWidget {
+  final String? loadText;
+  final String? restText;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final bool dark;
+
+  const _ExerciseMetaRow({
+    required this.loadText,
+    required this.restText,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.dark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        if (loadText != null)
+          _TinyMetric(icon: Icons.scale_rounded, label: 'Carga', value: loadText!, ink: ink, mute: mute, line: line, dark: dark),
+        if (restText != null)
+          _TinyMetric(icon: Icons.timer_rounded, label: 'Descanso', value: restText!, ink: ink, mute: mute, line: line, dark: dark),
+      ],
+    );
+  }
+}
+
+class _ExerciseNote extends StatelessWidget {
+  final String text;
+  final Color mute;
+  final Color line;
+  final bool dark;
+
+  const _ExerciseNote({
+    required this.text,
+    required this.mute,
+    required this.line,
+    required this.dark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: dark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.lineSoft,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: line),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(color: mute, fontSize: 12.5, fontWeight: FontWeight.w700, height: 1.35),
+      ),
+    );
+  }
+}
+
+class _PreviousPerformance extends StatelessWidget {
+  final String? loadText;
+  final String? seriesText;
+  final String? feedbackText;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final bool dark;
+
+  const _PreviousPerformance({
+    required this.loadText,
+    required this.seriesText,
+    required this.feedbackText,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.dark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final details = [
+      if (seriesText != null) seriesText!,
+      if (loadText != null) loadText!,
+      if (feedbackText != null) feedbackText!,
+    ].join(' | ');
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: dark ? const Color(0xFF10243C) : const Color(0xFFEAF4FF),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.history_rounded, size: 18, color: dark ? Colors.white70 : EagleTokens.ink),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Ultima execucao', style: TextStyle(color: mute, fontSize: 11, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 2),
+                Text(details, style: TextStyle(color: ink, fontSize: 12.5, fontWeight: FontWeight.w800)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TinyMetric extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final bool dark;
+
+  const _TinyMetric({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.dark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: dark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: mute),
+          const SizedBox(width: 6),
+          Text('$label: ', style: TextStyle(color: mute, fontSize: 11.5, fontWeight: FontWeight.w800)),
+          Text(value, style: TextStyle(color: ink, fontSize: 11.5, fontWeight: FontWeight.w900)),
         ],
       ),
     );
@@ -988,10 +1244,12 @@ class _LiveCoachingCard extends StatelessWidget {
 
 class _RestTimerDock extends StatelessWidget {
   final int seconds;
+  final int totalSeconds;
   final VoidCallback onSkip;
 
   const _RestTimerDock({
     required this.seconds,
+    required this.totalSeconds,
     required this.onSkip,
   });
 
@@ -1014,7 +1272,7 @@ class _RestTimerDock extends StatelessWidget {
             child: Stack(
               children: [
                 CircularProgressIndicator(
-                  value: seconds / 60.0,
+                  value: totalSeconds <= 0 ? 0 : seconds / totalSeconds,
                   strokeWidth: 3,
                   backgroundColor: Colors.white24,
                   valueColor: const AlwaysStoppedAnimation(Color(0xFF7AD19B)),
