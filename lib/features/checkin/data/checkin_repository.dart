@@ -6,6 +6,10 @@ class ExecucaoExercicio {
   final int treinoExercicioId;
   final String exercicioNome;
   final String? gifUrl;
+  final String? videoUrl;
+  final String? errosComuns;
+  final String? contraindicacoes;
+  final String? substitutos;
   final int? series;
   final String? repeticoes;
   final double? cargaKg;
@@ -27,6 +31,10 @@ class ExecucaoExercicio {
     required this.treinoExercicioId,
     required this.exercicioNome,
     this.gifUrl,
+    this.videoUrl,
+    this.errosComuns,
+    this.contraindicacoes,
+    this.substitutos,
     this.series,
     this.repeticoes,
     this.cargaKg,
@@ -49,6 +57,10 @@ class ExecucaoExercicio {
         treinoExercicioId: j['treinoExercicioId'] as int,
         exercicioNome: j['exercicioNome'] as String,
         gifUrl: j['gifUrl'] as String?,
+        videoUrl: j['videoUrl'] as String?,
+        errosComuns: j['errosComuns'] as String?,
+        contraindicacoes: j['contraindicacoes'] as String?,
+        substitutos: j['substitutos'] as String?,
         series: j['series'] as int?,
         repeticoes: j['repeticoes'] as String?,
         cargaKg: _toDouble(j['cargaKg']),
@@ -78,6 +90,10 @@ class ExecucaoExercicio {
         treinoExercicioId: treinoExercicioId,
         exercicioNome: exercicioNome,
         gifUrl: gifUrl,
+        videoUrl: videoUrl,
+        errosComuns: errosComuns,
+        contraindicacoes: contraindicacoes,
+        substitutos: substitutos,
         series: series,
         repeticoes: repeticoes,
         cargaKg: cargaKg,

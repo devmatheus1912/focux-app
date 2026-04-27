@@ -669,6 +669,7 @@ class _SerieCard extends StatelessWidget {
     final targetSeries = ee.series ?? 0;
     final progress = targetSeries == 0 ? 0.0 : (ee.seriesFeitas / targetSeries).clamp(0.0, 1.0);
     final hasMedia = ee.gifUrl?.isNotEmpty == true;
+    final hasVideo = ee.videoUrl?.isNotEmpty == true;
     final loadText = _formatKg(ee.cargaKg);
     final restText = ee.descansoSegundos == null ? null : '${ee.descansoSegundos}s';
     final hasPrevious = ee.cargaAnteriorKg != null ||
@@ -735,6 +736,11 @@ class _SerieCard extends StatelessWidget {
                   _ExerciseMediaPreview(url: ee.gifUrl!, brand: brand, dark: dark),
                   const SizedBox(height: 14),
                 ],
+                if (!hasMedia && hasVideo) ...[
+                  const SizedBox(height: 4),
+                  _ExerciseVideoAvailable(brand: brand, dark: dark),
+                  const SizedBox(height: 14),
+                ],
                 if (loadText != null || restText != null) ...[
                   _ExerciseMetaRow(
                     loadText: loadText,
@@ -748,6 +754,42 @@ class _SerieCard extends StatelessWidget {
                 ],
                 if (ee.observacoes?.trim().isNotEmpty == true) ...[
                   _ExerciseNote(text: ee.observacoes!.trim(), mute: mute, line: line, dark: dark),
+                  const SizedBox(height: 12),
+                ],
+                if (ee.errosComuns?.trim().isNotEmpty == true) ...[
+                  _ExecutionGuidanceCard(
+                    icon: Icons.report_problem_outlined,
+                    title: 'Erros comuns',
+                    text: ee.errosComuns!.trim(),
+                    color: EagleTokens.warn,
+                    ink: ink,
+                    line: line,
+                    dark: dark,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (ee.contraindicacoes?.trim().isNotEmpty == true) ...[
+                  _ExecutionGuidanceCard(
+                    icon: Icons.health_and_safety_outlined,
+                    title: 'Contraindicacoes',
+                    text: ee.contraindicacoes!.trim(),
+                    color: EagleTokens.bad,
+                    ink: ink,
+                    line: line,
+                    dark: dark,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (ee.substitutos?.trim().isNotEmpty == true) ...[
+                  _ExecutionGuidanceCard(
+                    icon: Icons.swap_horiz_rounded,
+                    title: 'Substitutos',
+                    text: ee.substitutos!.trim(),
+                    color: brand,
+                    ink: ink,
+                    line: line,
+                    dark: dark,
+                  ),
                   const SizedBox(height: 12),
                 ],
                 if (hasPrevious) ...[
@@ -941,6 +983,56 @@ class _ExerciseNote extends StatelessWidget {
   }
 }
 
+class _ExecutionGuidanceCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String text;
+  final Color color;
+  final Color ink;
+  final Color line;
+  final bool dark;
+
+  const _ExecutionGuidanceCard({
+    required this.icon,
+    required this.title,
+    required this.text,
+    required this.color,
+    required this.ink,
+    required this.line,
+    required this.dark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: dark ? 0.14 : 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(color: ink, fontSize: 12.5, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 3),
+                Text(text, style: TextStyle(color: ink.withValues(alpha: 0.82), fontSize: 12.3, height: 1.35)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _PreviousPerformance extends StatelessWidget {
   final String? loadText;
   final String? seriesText;
@@ -1102,6 +1194,42 @@ class _ExerciseMediaPreview extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ExerciseVideoAvailable extends StatelessWidget {
+  final Color brand;
+  final bool dark;
+
+  const _ExerciseVideoAvailable({
+    required this.brand,
+    required this.dark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 118,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: brand.withValues(alpha: 0.26)),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.play_circle_fill_rounded, color: brand, size: 34),
+            const SizedBox(height: 6),
+            Text(
+              'Video proprio do personal disponivel',
+              style: TextStyle(color: brand, fontSize: 12.5, fontWeight: FontWeight.w900),
+            ),
+          ],
+        ),
       ),
     );
   }
