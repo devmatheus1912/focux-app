@@ -652,7 +652,7 @@ class _PersonalDashboardScreenState
                           ),
                           _ShortcutBtn(
                             icon: 'pix',
-                            label: 'Cobrar PIX',
+                            label: 'Financeiro',
                             isDark: isDark,
                             onTap: () => context.go('/financeiro'),
                           ),

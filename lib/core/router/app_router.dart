@@ -73,6 +73,7 @@ import '../../features/anamnese/screens/anamnese_screen.dart';
 import '../../features/alimentar/screens/alimentar_screen.dart';
 import '../../features/ia/screens/ia_progressao_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
+import '../../features/perfil/screens/wallet_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -338,6 +339,10 @@ class AppRouter {
         builder: (context, state) => EditarPerfilScreen(
           perfil: state.extra as PerfilPersonal,
         ),
+      ),
+      GoRoute(
+        path: '/perfil/wallet',
+        builder: (context, state) => const WalletScreen(),
       ),
       GoRoute(
         path: '/identidade-visual',

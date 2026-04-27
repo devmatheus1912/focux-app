@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -60,7 +61,14 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
         context.pop(true);
       }
     } catch (e) {
-      if (mounted) setState(() { _error = 'Erro ao criar treino.'; });
+      String msg = 'Erro ao criar treino.';
+      if (e is DioException) {
+        final serverMsg = e.response?.data?['mensagem'] ??
+            e.response?.data?['message'] ??
+            e.response?.data?['erro'];
+        if (serverMsg != null) msg = serverMsg.toString();
+      }
+      if (mounted) setState(() { _error = msg; });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }

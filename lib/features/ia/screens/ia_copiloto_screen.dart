@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -190,7 +191,13 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Row(children: [
                 IconButton(
-                  onPressed: () => Navigator.of(context).maybePop(),
+                  onPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/home');
+                    }
+                  },
                   icon: Icon(Icons.arrow_back_ios_new, color: ink, size: 18),
                 ),
                 const SizedBox(width: 6),

@@ -33,11 +33,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         'trial': null,
         'cor': EagleTokens.inkMute,
         'tag': null,
-        'sub': 'Para comecar',
+        'sub': 'Para começar',
         'plan': SubscriptionPlan.FREE,
         'features': [
-          {'ok': true, 'label': 'Ate 3 alunos ativos'},
-          {'ok': true, 'label': 'Treinos basicos'},
+          {'ok': true, 'label': 'Até 5 alunos ativos'},
+          {'ok': true, 'label': 'Treinos básicos'},
           {'ok': false, 'label': 'Financeiro'},
           {'ok': false, 'label': 'IA Copiloto'},
           {'ok': false, 'label': 'Landing Page'},
@@ -47,17 +47,17 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       {
         'id': 1,
         'nome': 'PREMIUM',
-        'preco': '79,90',
-        'trial': 5,
+        'preco': '79,00',
+        'trial': 7,
         'cor': EagleTokens.brand,
         'tag': 'MAIS POPULAR',
-        'sub': 'Para consultores serios',
+        'sub': 'Para consultores sérios',
         'plan': SubscriptionPlan.PREMIUM,
         'features': [
-          {'ok': true, 'label': 'Ate 20 alunos ativos'},
+          {'ok': true, 'label': 'Até 20 alunos ativos'},
           {'ok': true, 'label': 'Financeiro e cobrancas'},
           {'ok': true, 'label': 'CRM Kanban de Leads'},
-          {'ok': true, 'label': 'Migracao Magica IA'},
+          {'ok': true, 'label': 'Migração Mágica IA'},
           {'ok': false, 'label': 'Landing Page white-label'},
           {'ok': false, 'label': 'IA ilimitada'},
         ],
@@ -66,7 +66,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         'id': 2,
         'nome': 'ENTERPRISE',
         'preco': '149,90',
-        'trial': 5,
+        'trial': 7,
         'cor': const Color(0xFFC49A2A),
         'tag': 'ESCALA TOTAL',
         'sub': 'Para quem quer crescer',
@@ -119,7 +119,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Trial Enterprise ativado por 5 dias.'),
+            content: Text('Trial Enterprise ativado por 7 dias.'),
           ),
         );
         Navigator.of(context).pop();
@@ -172,7 +172,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     } else if (selectedPlan == SubscriptionPlan.PREMIUM) {
       ctaLabel = 'Assinar Premium';
     } else if (!trialUsed) {
-      ctaLabel = 'Comecar 5 dias gratis';
+      ctaLabel = 'Começar 7 dias grátis';
     } else {
       ctaLabel = 'Assinar Enterprise';
     }
@@ -205,7 +205,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Escolha o plano\nideal para voce',
+                    'Escolha o plano\nideal para você',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
@@ -216,7 +216,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '5 dias gratis e cancelamento quando quiser',
+                    '7 dias grátis e cancelamento quando quiser',
                     style: TextStyle(fontSize: 14, color: mute, height: 1.5),
                   ),
                 ],
@@ -267,7 +267,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                             Text(
                               p['preco'] != null
                                   ? 'R\$ ${p['preco']}'
-                                  : 'Gratis',
+                                  : 'Grátis',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: isSelected
@@ -413,7 +413,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
-                                        '/mes',
+                                        '/mês',
                                         style: TextStyle(
                                           fontSize: 13,
                                           color: Colors.white
@@ -444,7 +444,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                       ),
                                       const SizedBox(width: 5),
                                       Text(
-                                        '${pl['trial']} dias gratis para comecar',
+                                        '${pl['trial']} dias grátis para começar',
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: Colors.white,
@@ -623,7 +623,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       child: Text(
                         selectedPlan == SubscriptionPlan.ENTERPRISE &&
                                 !trialUsed
-                            ? 'Apos o trial, a assinatura mensal passa a valer normalmente.'
+                            ? 'Após o trial, a assinatura mensal passa a valer normalmente.'
                             : 'Compra gerenciada pela loja do dispositivo.',
                         style: TextStyle(fontSize: 12, color: mute),
                         textAlign: TextAlign.center,
