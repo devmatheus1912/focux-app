@@ -95,6 +95,7 @@ class _PersonalDashboardScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final alunosAsync = ref.watch(alunosProvider);
     final historicoCheckinsAsync = ref.watch(historicoCheckinProvider);
+    final aderenciaAsync = ref.watch(aderenciaTop3Provider);
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.backgroundDark : EagleTokens.paper,
@@ -120,6 +121,18 @@ class _PersonalDashboardScreenState
               final riscoAlto = alunosAsync.maybeWhen(
                 data: (alunos) => alunos.where((a) => a.emRisco).length,
                 orElse: () => 0,
+              );
+
+              // BUG-07: aderência média real dos top-3 alunos
+              final aderenciaMediaStr = aderenciaAsync.maybeWhen(
+                data: (lista) {
+                  if (lista.isEmpty) return '—';
+                  final media = lista
+                      .map((a) => a.aderenciaPercent)
+                      .reduce((a, b) => a + b) ~/ lista.length;
+                  return '$media%';
+                },
+                orElse: () => '—',
               );
 
               final hoje = DateTime.now();
@@ -533,7 +546,7 @@ class _PersonalDashboardScreenState
                           _QuickTile(
                             icon: Icons.local_fire_department_outlined,
                             label: 'Aderência média',
-                            value: '—',
+                            value: aderenciaMediaStr,
                             sub: 'últimos 7 dias',
                             accent: EagleTokens.brand,
                             isDark: isDark,

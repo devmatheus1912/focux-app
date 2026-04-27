@@ -35,6 +35,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
   Object? _erro;
   int? _selectedAlunoId;
   String? _selectedAlunoNome;
+  // BUG-21: tempo real de geração
+  int _geracaoMs = 0;
   Map<String, dynamic>? _proximaAcao;
   final _modes = ['Treino', 'Dieta', 'Progressão'];
 
@@ -85,14 +87,17 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
       await _selecionarAluno();
       if (_selectedAlunoId == null) return;
     }
-    setState(() { _gerando = true; _gerado = false; _erro = null; });
+    setState(() { _gerando = true; _gerado = false; _erro = null; _geracaoMs = 0; });
+    final stopwatch = Stopwatch()..start();
     try {
       ref.invalidate(insightsProvider);
       ref.invalidate(resumoSemanalProvider);
       await ref.read(insightsProvider.future);
       _proximaAcao = await ref.read(proximaAcaoProvider(_selectedAlunoId!).future);
-      if (mounted) setState(() { _gerando = false; _gerado = true; });
+      stopwatch.stop();
+      if (mounted) setState(() { _gerando = false; _gerado = true; _geracaoMs = stopwatch.elapsedMilliseconds; });
     } catch (e) {
+      stopwatch.stop();
       if (mounted) setState(() { _gerando = false; _erro = e; });
     }
   }
@@ -340,7 +345,13 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                         const SizedBox(width: 8),
                         Text(_gerando ? 'Gerando...' : 'Geração concluída', style: TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.w600)),
                       ]),
-                      if (!_gerando) Text('1.2s', style: TextStyle(color: mute, fontSize: 11, fontFamily: 'monospace')),
+                      if (!_gerando && _geracaoMs > 0)
+                        Text(
+                          _geracaoMs >= 1000
+                              ? '${(_geracaoMs / 1000).toStringAsFixed(1)}s'
+                              : '${_geracaoMs}ms',
+                          style: TextStyle(color: mute, fontSize: 11, fontFamily: 'monospace'),
+                        ),
                     ]),
                     const SizedBox(height: 10),
                     ClipRRect(
