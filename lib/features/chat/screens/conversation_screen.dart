@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/config/env.dart';
@@ -43,7 +44,18 @@ class ConversationScreen extends ConsumerStatefulWidget {
 }
 
 class _ConversationScreenState extends ConsumerState<ConversationScreen> {
-  static const _quickReactions = ['🔥', '👏', '💪', '✅', '🙌', '🚀', '🙂', '😅', '❤️', '👊'];
+  static const _quickReactions = [
+    '\u{1F525}',
+    '\u{1F44F}',
+    '\u{1F4AA}',
+    '\u{2705}',
+    '\u{1F64C}',
+    '\u{1F680}',
+    '\u{1F642}',
+    '\u{1F605}',
+    '\u{2764}\u{FE0F}',
+    '\u{1F44A}',
+  ];
 
   final List<ChatMsg> _msgs = [];
   final Map<String, GlobalKey> _messageKeys = {};
@@ -524,7 +536,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               const SizedBox(height: 18),
               _AttachOption(
                 icon: Icons.photo_camera_outlined,
-                label: 'Foto',
+                label: 'Foto da galeria',
                 isDark: isDark,
                 onTap: () {
                   Navigator.pop(context);
@@ -534,7 +546,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               const SizedBox(height: 8),
               _AttachOption(
                 icon: Icons.videocam_outlined,
-                label: 'Video',
+                label: 'Video da galeria',
                 isDark: isDark,
                 onTap: () {
                   Navigator.pop(context);
@@ -544,7 +556,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               const SizedBox(height: 8),
               _AttachOption(
                 icon: Icons.mic_none_outlined,
-                label: 'Audio',
+                label: 'Selecionar audio',
                 isDark: isDark,
                 onTap: () {
                   Navigator.pop(context);
@@ -807,6 +819,72 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     );
   }
 
+  Future<void> _openMedia(ChatMsg msg) async {
+    final url = msg.midiaUrl;
+    if (url == null || url.isEmpty) return;
+    final tipo = msg.tipoMidia;
+    if (tipo == 'IMAGE' || tipo == 'IMAGEM') {
+      _showImageViewer(url);
+      return;
+    }
+    final opened = await launchUrlString(url);
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nao foi possivel abrir o anexo.')),
+      );
+    }
+  }
+
+  void _showImageViewer(String url) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.92),
+      builder: (_) => Dialog(
+        insetPadding: const EdgeInsets.all(12),
+        backgroundColor: Colors.transparent,
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              minScale: 0.85,
+              maxScale: 3.5,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Image.network(
+                  url,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Container(
+                    height: 240,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: const Icon(Icons.broken_image_outlined, size: 32),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 12,
+              right: 12,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close_rounded, color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   String _messageIdentity(ChatMsg msg) {
     return msg.id?.toString() ??
         msg.clientMessageId ??
@@ -829,11 +907,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   String _subtitle(PersonalBrand? brand) {
     if (_isPersonalMode) {
-      return 'Conversa ativa';
+      return 'Treino, ajustes e feedback em um so lugar';
     }
     return brand?.slogan?.trim().isNotEmpty == true
         ? brand!.slogan!
-        : 'Acompanhamento no app';
+        : 'Canal direto com seu personal';
   }
 
   String? _avatarImage(PersonalBrand? brand) {
@@ -952,22 +1030,32 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         titleSpacing: 0,
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: EagleTokens.brand.withValues(alpha: 0.12),
-              backgroundImage: _avatarImage(brand) == null
-                  ? null
-                  : NetworkImage(_avatarImage(brand)!),
-              child: _avatarImage(brand) == null
-                  ? Text(
-                      fxInitials(title),
-                      style: const TextStyle(
-                        color: EagleTokens.brand,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
-                    )
-                  : null,
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: EagleTokens.brand.withValues(alpha: 0.18),
+                ),
+              ),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundColor: EagleTokens.brand.withValues(alpha: 0.12),
+                backgroundImage: _avatarImage(brand) == null
+                    ? null
+                    : NetworkImage(_avatarImage(brand)!),
+                child: _avatarImage(brand) == null
+                    ? Text(
+                        fxInitials(title),
+                        style: const TextStyle(
+                          color: EagleTokens.brand,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      )
+                    : null,
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -992,6 +1080,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       color:
                           isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
                       fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -1001,8 +1090,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: _showEmojiSheet,
-            icon: const Icon(Icons.sentiment_satisfied_alt_outlined),
+            onPressed: _showSearchSheet,
+            icon: const Icon(Icons.search_rounded),
           ),
           IconButton(
             onPressed: _showChatMenu,
@@ -1040,8 +1129,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    'Enviando midia...',
+                    Text(
+                      'Enviando anexo...',
                     style: TextStyle(
                       color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
                       fontSize: 13,
@@ -1060,7 +1149,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         isDark: isDark,
                         title: 'Comece uma conversa',
                         subtitle:
-                            'As mensagens do treino vao aparecer aqui em tempo real.',
+                            'Fotos, videos, audios e ajustes do treino vao aparecer aqui em tempo real.',
                       )
                     : ListView.builder(
                         controller: _scroll,
@@ -1093,6 +1182,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                     onReplyTap: msg.replyToMessageId == null
                                         ? null
                                         : () => _jumpToReplySource(msg),
+                                    onOpenMedia: () => _openMedia(msg),
                                   ),
                                 ),
                               ),
@@ -1171,7 +1261,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                     ),
                                     cursorColor: EagleTokens.brand,
                                     decoration: InputDecoration(
-                                      hintText: 'Mensagem',
+                                      hintText: 'iMessage',
                                       hintStyle: TextStyle(
                                         color: isDark
                                             ? EagleTokens.darkInkMute
@@ -1353,27 +1443,78 @@ class _DateDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final local = date.toLocal();
-    final label =
-        '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}';
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final value = DateTime(local.year, local.month, local.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final label = value == today
+        ? 'Hoje'
+        : value == yesterday
+            ? 'Ontem'
+            : '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Center(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.06),
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : EagleTokens.brand.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
             label,
-            style: const TextStyle(
-              color: Color(0xFF94A3B8),
+            style: TextStyle(
+              color: isDark ? const Color(0xFF94A3B8) : EagleTokens.inkMute,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DeliveryStatus extends StatelessWidget {
+  final ChatMsg msg;
+  final Color color;
+
+  const _DeliveryStatus({
+    required this.msg,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final read = msg.readAt != null;
+    final delivered = msg.deliveredAt != null;
+    final iconColor = read ? const Color(0xFFAED6FF) : color;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          delivered ? Icons.done_all_rounded : Icons.check_rounded,
+          size: 14,
+          color: iconColor,
+        ),
+        const SizedBox(width: 2),
+        Text(
+          read
+              ? 'Lido'
+              : delivered
+                  ? 'Entregue'
+                  : 'Enviado',
+          style: TextStyle(
+            color: color,
+            fontSize: 10.5,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1515,6 +1656,7 @@ class _Bubble extends StatelessWidget {
   final String Function(String remetente) replyLabelBuilder;
   final VoidCallback onLongPress;
   final VoidCallback? onReplyTap;
+  final VoidCallback onOpenMedia;
 
   const _Bubble({
     required this.msg,
@@ -1524,6 +1666,7 @@ class _Bubble extends StatelessWidget {
     required this.replyLabelBuilder,
     required this.onLongPress,
     required this.onReplyTap,
+    required this.onOpenMedia,
   });
 
   @override
@@ -1593,7 +1736,12 @@ class _Bubble extends StatelessWidget {
                       : 'Midia',
                   onTap: onReplyTap,
                 ),
-              _MediaPreview(msg: msg, mine: mine, isDark: isDark),
+              _MediaPreview(
+                msg: msg,
+                mine: mine,
+                isDark: isDark,
+                onOpen: onOpenMedia,
+              ),
               if (msg.conteudo.isNotEmpty &&
                   !_isMediaLabelOnly(msg.tipoMidia, msg.conteudo))
                 Text(
@@ -1656,9 +1804,9 @@ class _Bubble extends StatelessWidget {
                   ),
                   if (mine) ...[
                     const SizedBox(width: 6),
-                    Text(
-                      _statusLabel(msg),
-                      style: TextStyle(color: metaColor, fontSize: 11),
+                    _DeliveryStatus(
+                      msg: msg,
+                      color: metaColor,
                     ),
                   ],
                 ],
@@ -1678,12 +1826,6 @@ class _Bubble extends StatelessWidget {
   String _timeLabel(DateTime dt) {
     final local = dt.toLocal();
     return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-  }
-
-  String _statusLabel(ChatMsg msg) {
-    if (msg.readAt != null) return 'Lido';
-    if (msg.deliveredAt != null) return 'Entregue';
-    return 'Enviado';
   }
 }
 
@@ -1862,11 +2004,13 @@ class _MediaPreview extends StatelessWidget {
   final ChatMsg msg;
   final bool mine;
   final bool isDark;
+  final VoidCallback onOpen;
 
   const _MediaPreview({
     required this.msg,
     required this.mine,
     required this.isDark,
+    required this.onOpen,
   });
 
   @override
@@ -1880,19 +2024,48 @@ class _MediaPreview extends StatelessWidget {
     if (tipo == 'IMAGE' || tipo == 'IMAGEM') {
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: Image.network(
-            url,
-            height: 200,
-            width: 220,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
-              height: 120,
-              width: 220,
-              color: Colors.black12,
-              alignment: Alignment.center,
-              child: const Icon(Icons.broken_image_outlined),
+        child: GestureDetector(
+          onTap: onOpen,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Stack(
+              children: [
+                Image.network(
+                  url,
+                  height: 200,
+                  width: 220,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    height: 120,
+                    width: 220,
+                    color: Colors.black12,
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.broken_image_outlined),
+                  ),
+                ),
+                Positioned(
+                  right: 8,
+                  bottom: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.42),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: const Text(
+                      'Abrir',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -1914,30 +2087,50 @@ class _MediaPreview extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: mine
-              ? Colors.white.withValues(alpha: 0.12)
-              : EagleTokens.brand.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: textColor),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w700,
+      child: InkWell(
+        onTap: onOpen,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: mine
+                ? Colors.white.withValues(alpha: 0.12)
+                : EagleTokens.brand.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: textColor),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Toque para abrir',
+                      style: TextStyle(
+                        color: textColor.withValues(alpha: 0.72),
+                        fontSize: 11.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Icon(Icons.open_in_new_rounded, color: textColor, size: 18),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
