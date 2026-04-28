@@ -789,9 +789,35 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
 
     try {
       final midias = _parseMidiasPayload(raw);
-      final result = await ref
-          .read(exercicioRepositoryProvider)
-          .importarMidias(midias);
+      final repo = ref.read(exercicioRepositoryProvider);
+      final preview = await repo.previewMidias(midias);
+      if (!context.mounted) return;
+      final aplicar = await showDialog<bool>(
+        context: context,
+        builder:
+            (ctx) => AlertDialog(
+              title: const Text('Preview da importacao'),
+              content: Text(
+                '${preview.atualizados}/${preview.total} midias encontradas.\n'
+                '${preview.naoEncontrados} nao encontradas.\n'
+                '${preview.prontosParaAluno} ficarao prontas para aluno.\n\n'
+                '${preview.naoEncontradosKeys.isEmpty ? '' : 'Nao encontradas: ${preview.naoEncontradosKeys.take(5).join(', ')}'}',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Cancelar'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Aplicar'),
+                ),
+              ],
+            ),
+      );
+      if (aplicar != true) return;
+
+      final result = await repo.importarMidias(midias);
       ref.invalidate(exerciciosFilteredProvider);
       ref.invalidate(exerciciosCuradoriaProvider);
       if (context.mounted) {

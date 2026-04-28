@@ -434,6 +434,18 @@ class ExercicioRepository {
     );
   }
 
+  Future<ImportarMidiasResultado> previewMidias(
+    List<Map<String, dynamic>> midias,
+  ) async {
+    final response = await _dio.post(
+      '/api/exercicios/curadoria/midias/preview',
+      data: {'midias': midias},
+    );
+    return ImportarMidiasResultado.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+  }
+
   Future<void> favoritarExercicio(int id) async {
     await _dio.post('/api/exercicios/$id/favoritar');
   }
