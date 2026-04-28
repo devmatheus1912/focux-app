@@ -496,7 +496,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   Future<void> _toggleReaction(ChatMsg msg, String emoji) async {
-    if (msg.id == null) return;
+    if (msg.id == null || msg.deletedAt != null) return;
     HapticFeedback.selectionClick();
     try {
       final repo = ChatRepository(ref.read(apiClientProvider));
@@ -515,7 +515,98 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
+  Future<void> _editMessage(ChatMsg msg) async {
+    if (!_canEditMessage(msg)) return;
+    final ctrl = TextEditingController(text: msg.conteudo);
+    final next = await showDialog<String>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('Editar mensagem'),
+            content: TextField(
+              controller: ctrl,
+              autofocus: true,
+              minLines: 1,
+              maxLines: 5,
+              textInputAction: TextInputAction.newline,
+              decoration: const InputDecoration(hintText: 'Mensagem'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, ctrl.text),
+                child: const Text('Salvar'),
+              ),
+            ],
+          ),
+    );
+    ctrl.dispose();
+    final normalized = next?.trim();
+    if (normalized == null ||
+        normalized.isEmpty ||
+        normalized == msg.conteudo.trim()) {
+      return;
+    }
+    try {
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final updated =
+          _isAlunoMode
+              ? await repo.editarMensagemAluno(msg.id!, normalized)
+              : await repo.editarMensagem(msg.id!, normalized);
+      if (!mounted) return;
+      setState(() => _upsertMessage(updated));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Nao foi possivel editar: $e')));
+    }
+  }
+
+  Future<void> _deleteMessage(ChatMsg msg) async {
+    if (!_canDeleteMessage(msg)) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('Apagar mensagem?'),
+            content: const Text(
+              'A conversa vai mostrar que a mensagem foi apagada.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Apagar'),
+              ),
+            ],
+          ),
+    );
+    if (confirmed != true) return;
+    try {
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final updated =
+          _isAlunoMode
+              ? await repo.apagarMensagemAluno(msg.id!)
+              : await repo.apagarMensagem(msg.id!);
+      if (!mounted) return;
+      setState(() => _upsertMessage(updated));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Nao foi possivel apagar: $e')));
+    }
+  }
+
   void _setReply(ChatMsg msg) {
+    if (msg.deletedAt != null) return;
     HapticFeedback.selectionClick();
     setState(() => _replyingTo = msg);
   }
@@ -569,6 +660,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
+    final canInteract = msg.deletedAt == null;
+    final canEdit = _canEditMessage(msg);
+    final canDelete = _canDeleteMessage(msg);
     showModalBottomSheet(
       context: context,
       backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
@@ -594,67 +688,95 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'Reagir',
-                    style: TextStyle(
-                      color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                  if (canInteract) ...[
+                    Text(
+                      'Reagir',
+                      style: TextStyle(
+                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      for (final emoji in _quickReactions)
-                        InkWell(
-                          onTap: () {
-                            Navigator.pop(context);
-                            _toggleReaction(msg, emoji);
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Container(
-                            width: 48,
-                            height: 48,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: primarySoft,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              emoji,
-                              style: const TextStyle(fontSize: 24),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        for (final emoji in _quickReactions)
+                          InkWell(
+                            onTap: () {
+                              Navigator.pop(context);
+                              _toggleReaction(msg, emoji);
+                            },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              width: 48,
+                              height: 48,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: primarySoft,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                emoji,
+                                style: const TextStyle(fontSize: 24),
+                              ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(Icons.reply_rounded, color: primary),
-                    title: const Text('Responder'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _setReply(msg);
-                    },
-                  ),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(Icons.content_copy_outlined, color: primary),
-                    title: const Text('Copiar mensagem'),
-                    onTap: () async {
-                      Navigator.pop(context);
-                      await Clipboard.setData(
-                        ClipboardData(text: msg.conteudo),
-                      );
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Mensagem copiada')),
-                      );
-                    },
-                  ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(Icons.reply_rounded, color: primary),
+                      title: const Text('Responder'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _setReply(msg);
+                      },
+                    ),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        Icons.content_copy_outlined,
+                        color: primary,
+                      ),
+                      title: const Text('Copiar mensagem'),
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await Clipboard.setData(
+                          ClipboardData(text: msg.conteudo),
+                        );
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Mensagem copiada')),
+                        );
+                      },
+                    ),
+                  ],
+                  if (canEdit)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(Icons.edit_outlined, color: primary),
+                      title: const Text('Editar mensagem'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _editMessage(msg);
+                      },
+                    ),
+                  if (canDelete)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: Color(0xFFE5484D),
+                      ),
+                      title: const Text('Apagar mensagem'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _deleteMessage(msg);
+                      },
+                    ),
                 ],
               ),
             ),
@@ -1318,6 +1440,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   String _previewText(ChatMsg msg) {
+    if (msg.deletedAt != null) return 'Mensagem apagada';
     if (msg.conteudo.trim().isNotEmpty &&
         !_isMediaLabelOnly(msg.tipoMidia, msg.conteudo)) {
       return msg.conteudo.trim();
@@ -1353,6 +1476,19 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   bool _isMediaLabelOnly(String? tipoMidia, String conteudo) {
     if (tipoMidia == null) return false;
     return ['IMAGE', 'IMAGEM', 'VIDEO', 'AUDIO'].contains(tipoMidia);
+  }
+
+  bool _canEditMessage(ChatMsg msg) {
+    return msg.id != null &&
+        _isMine(msg) &&
+        msg.deletedAt == null &&
+        (msg.midiaUrl == null || msg.midiaUrl!.isEmpty) &&
+        msg.conteudo.trim().isNotEmpty &&
+        !_isMediaLabelOnly(msg.tipoMidia, msg.conteudo);
+  }
+
+  bool _canDeleteMessage(ChatMsg msg) {
+    return msg.id != null && _isMine(msg) && msg.deletedAt == null;
   }
 
   void _upsertMessage(ChatMsg msg) {
@@ -2166,6 +2302,7 @@ class _Bubble extends StatelessWidget {
         mine
             ? Colors.white.withValues(alpha: 0.75)
             : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute);
+    final deleted = msg.deletedAt != null;
 
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
@@ -2220,7 +2357,7 @@ class _Bubble extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (msg.replyToMessageId != null)
+              if (!deleted && msg.replyToMessageId != null)
                 _ReplySnippet(
                   mine: mine,
                   isDark: isDark,
@@ -2231,13 +2368,24 @@ class _Bubble extends StatelessWidget {
                           : 'Midia',
                   onTap: onReplyTap,
                 ),
-              _MediaPreview(
-                msg: msg,
-                mine: mine,
-                isDark: isDark,
-                onOpen: onOpenMedia,
-              ),
-              if (msg.conteudo.isNotEmpty &&
+              if (!deleted)
+                _MediaPreview(
+                  msg: msg,
+                  mine: mine,
+                  isDark: isDark,
+                  onOpen: onOpenMedia,
+                ),
+              if (deleted)
+                Text(
+                  'Mensagem apagada',
+                  style: TextStyle(
+                    color: textColor.withValues(alpha: 0.72),
+                    fontSize: 14,
+                    height: 1.35,
+                    fontStyle: FontStyle.italic,
+                  ),
+                )
+              else if (msg.conteudo.isNotEmpty &&
                   !_isMediaLabelOnly(msg.tipoMidia, msg.conteudo))
                 Text(
                   msg.conteudo,
@@ -2299,6 +2447,13 @@ class _Bubble extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (!deleted && msg.editedAt != null) ...[
+                    Text(
+                      'editada',
+                      style: TextStyle(color: metaColor, fontSize: 11),
+                    ),
+                    const SizedBox(width: 5),
+                  ],
                   Text(
                     _timeLabel(msg.enviadoEm),
                     style: TextStyle(color: metaColor, fontSize: 11),
