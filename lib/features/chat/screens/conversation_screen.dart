@@ -2,11 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -63,15 +66,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   final _ctrl = TextEditingController();
   final _scroll = ScrollController();
   final _picker = ImagePicker();
+  final _audioRecorder = AudioRecorder();
 
   StompClient? _stomp;
   bool _loading = true;
   bool _sending = false;
   bool _uploading = false;
+  bool _recordingAudio = false;
   bool _composerHasText = false;
   int? _alunoId;
   ChatMsg? _replyingTo;
   int? _highlightedMessageId;
+  Timer? _recordTimer;
+  Duration _recordDuration = Duration.zero;
+  DateTime? _recordStartedAt;
 
   bool get _isAlunoMode => widget.mode == ConversationMode.aluno;
   bool get _isPersonalMode => widget.mode == ConversationMode.personal;
@@ -90,6 +98,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   @override
   void dispose() {
     _stomp?.deactivate();
+    _recordTimer?.cancel();
+    unawaited(_audioRecorder.dispose());
     _ctrl.removeListener(_handleComposerChange);
     _ctrl.dispose();
     _scroll.dispose();
@@ -302,6 +312,163 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao enviar midia: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _uploading = false);
+      }
+    }
+  }
+
+  Future<void> _startAudioRecording() async {
+    if (_recordingAudio || _sending || _uploading) return;
+    try {
+      final allowed = await _audioRecorder.hasPermission();
+      if (!allowed) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Permita o microfone para gravar audio.')),
+        );
+        return;
+      }
+
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final extension = kIsWeb ? 'webm' : 'm4a';
+      final filename = 'focux_audio_$now.$extension';
+      final path = kIsWeb
+          ? filename
+          : '${(await getTemporaryDirectory()).path}/$filename';
+
+      await _audioRecorder.start(
+        RecordConfig(
+          encoder: kIsWeb ? AudioEncoder.opus : AudioEncoder.aacLc,
+          bitRate: 96000,
+          sampleRate: 44100,
+        ),
+        path: path,
+      );
+
+      HapticFeedback.mediumImpact();
+      _recordTimer?.cancel();
+      setState(() {
+        _recordingAudio = true;
+        _recordDuration = Duration.zero;
+        _recordStartedAt = DateTime.now();
+      });
+      _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!mounted || _recordStartedAt == null) return;
+        setState(() {
+          _recordDuration = DateTime.now().difference(_recordStartedAt!);
+        });
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Nao foi possivel iniciar o audio: $e')),
+      );
+    }
+  }
+
+  Future<void> _stopAudioRecording({required bool send}) async {
+    if (!_recordingAudio) return;
+    final duration = _recordStartedAt == null
+        ? _recordDuration
+        : DateTime.now().difference(_recordStartedAt!);
+
+    _recordTimer?.cancel();
+    setState(() {
+      _recordingAudio = false;
+      _recordDuration = duration;
+      _recordStartedAt = null;
+    });
+
+    String? path;
+    try {
+      path = await _audioRecorder.stop();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Nao foi possivel finalizar o audio: $e')),
+      );
+      return;
+    }
+
+    if (!send) {
+      HapticFeedback.selectionClick();
+      return;
+    }
+    if (path == null || path.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Audio vazio. Grave novamente.')),
+      );
+      return;
+    }
+
+    try {
+      final file = XFile(
+        path,
+        mimeType: kIsWeb ? 'audio/webm' : 'audio/mp4',
+        name: path.split(RegExp(r'[\\/]')).last,
+      );
+      await _sendAudioBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        duration: duration,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Nao foi possivel enviar o audio: $e')),
+      );
+    }
+  }
+
+  Future<void> _sendAudioBytes({
+    required List<int> bytes,
+    required String filename,
+    required Duration duration,
+  }) async {
+    final replyToMessageId = _replyingTo?.id;
+    setState(() => _uploading = true);
+    try {
+      final mediaUrl = await MediaUploadService(ref.read(apiClientProvider))
+          .uploadBytes(
+        bytes: bytes,
+        filename: filename,
+        folder: 'chat/audio',
+        resourceType: 'auto',
+      );
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final label = 'Audio ${_formatDuration(duration)}';
+      final msg = _isAlunoMode
+          ? await repo.enviarMidiaComoAluno(
+              conteudo: label,
+              tipoMidia: 'AUDIO',
+              midiaUrl: mediaUrl,
+              replyToMessageId: replyToMessageId,
+            )
+          : await repo.enviarMidia(
+              alunoId: _alunoId!,
+              conteudo: label,
+              remetente: 'PERSONAL',
+              tipoMidia: 'AUDIO',
+              midiaUrl: mediaUrl,
+              replyToMessageId: replyToMessageId,
+            );
+      _captureAlunoId(msg);
+      if (!mounted) return;
+      setState(() {
+        _replyingTo = null;
+        _upsertMessage(msg);
+      });
+      HapticFeedback.mediumImpact();
+      _scrollToBottom();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao enviar audio: $e')),
         );
       }
     } finally {
@@ -561,11 +728,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               const SizedBox(height: 8),
               _AttachOption(
                 icon: Icons.mic_none_outlined,
-                label: 'Selecionar audio',
+                label: 'Gravar audio',
                 isDark: isDark,
                 onTap: () {
                   Navigator.pop(context);
-                  _pickAndSend(MediaType.audio);
+                  _startAudioRecording();
                 },
               ),
             ],
@@ -1013,6 +1180,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
   }
 
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -1255,6 +1428,14 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                 preview: _previewText(_replyingTo!),
                                 onClose: () => setState(() => _replyingTo = null),
                               ),
+                            if (_recordingAudio)
+                              _RecordingComposerBar(
+                                isDark: isDark,
+                                duration: _formatDuration(_recordDuration),
+                                onCancel: () =>
+                                    _stopAudioRecording(send: false),
+                                onSend: () => _stopAudioRecording(send: true),
+                              ),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
@@ -1322,6 +1503,41 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                 color: Colors.white,
                                                 size: 18,
                                               ),
+                                      ),
+                                    ),
+                                  ),
+                                if (!_composerHasText && !_sending)
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.only(right: 6, bottom: 6),
+                                    child: Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color: _recordingAudio
+                                            ? const Color(0xFFE5484D)
+                                            : primary,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: IconButton(
+                                        padding: EdgeInsets.zero,
+                                        tooltip: _recordingAudio
+                                            ? 'Enviar audio'
+                                            : 'Gravar audio',
+                                        onPressed: (_uploading || _sending)
+                                            ? null
+                                            : _recordingAudio
+                                                ? () => _stopAudioRecording(
+                                                      send: true,
+                                                    )
+                                                : _startAudioRecording,
+                                        icon: Icon(
+                                          _recordingAudio
+                                              ? Icons.stop_rounded
+                                              : Icons.mic_rounded,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -2008,6 +2224,74 @@ class _SearchState extends StatelessWidget {
   }
 }
 
+class _RecordingComposerBar extends StatelessWidget {
+  final bool isDark;
+  final String duration;
+  final VoidCallback onCancel;
+  final VoidCallback onSend;
+
+  const _RecordingComposerBar({
+    required this.isDark,
+    required this.duration,
+    required this.onCancel,
+    required this.onSend,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.paper,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: const BoxDecoration(
+              color: Color(0xFFE5484D),
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Gravando $duration',
+              style: TextStyle(
+                color: ink,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Cancelar audio',
+            visualDensity: VisualDensity.compact,
+            onPressed: onCancel,
+            icon: Icon(Icons.delete_outline_rounded, color: mute),
+          ),
+          IconButton(
+            tooltip: 'Enviar audio',
+            visualDensity: VisualDensity.compact,
+            onPressed: onSend,
+            icon: const Icon(Icons.arrow_upward_rounded, color: Colors.white),
+            style: IconButton.styleFrom(
+              backgroundColor: EagleTokens.brand,
+              minimumSize: const Size(32, 32),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _MediaPreview extends StatelessWidget {
   final ChatMsg msg;
   final bool mine;
@@ -2090,11 +2374,81 @@ class _MediaPreview extends StatelessWidget {
       label = 'Audio';
     }
 
-    final textColor =
-        mine ? Colors.white : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+      final textColor =
+          mine ? Colors.white : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      if (tipo == 'AUDIO') {
+        final bars = [0.28, 0.55, 0.36, 0.82, 0.48, 0.70, 0.42, 0.62, 0.34];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: InkWell(
+            onTap: onOpen,
+            borderRadius: BorderRadius.circular(18),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
+              decoration: BoxDecoration(
+                color: mine
+                    ? Colors.white.withValues(alpha: 0.14)
+                    : EagleTokens.brand.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: mine
+                          ? Colors.white.withValues(alpha: 0.22)
+                          : EagleTokens.brand.withValues(alpha: 0.14),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      color: textColor,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 96,
+                    height: 28,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        for (final bar in bars) ...[
+                          Container(
+                            width: 4,
+                            height: 8 + (bar * 20),
+                            decoration: BoxDecoration(
+                              color: textColor.withValues(alpha: 0.76),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    msg.conteudo.replaceFirst('Audio ', ''),
+                    style: TextStyle(
+                      color: textColor.withValues(alpha: 0.78),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: onOpen,
         borderRadius: BorderRadius.circular(14),

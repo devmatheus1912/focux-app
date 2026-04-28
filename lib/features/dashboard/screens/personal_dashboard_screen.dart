@@ -13,6 +13,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../providers/aderencia_provider.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../checkin/providers/checkin_provider.dart';
+import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../financeiro/data/financeiro_repository.dart';
@@ -1199,6 +1200,77 @@ class _CommandCenterSection extends ConsumerWidget {
         ? 'R\$ ${receitaMes.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}'
         : 'Ver finanças';
 
+    final alunosRisco = commandAsync.maybeWhen(
+      data: (cc) => cc.alunosEmRisco.length,
+      orElse: () => 0,
+    );
+    final filaAcoes = commandAsync.maybeWhen(
+      data: (cc) => cc.filaAcoes,
+      orElse: () => const <FilaAcaoResumo>[],
+    );
+    final cobrancasPendentes = commandAsync.maybeWhen(
+      data: (cc) => cc.cobrancasPendentes.length,
+      orElse: () => finData?.totalInadimplentes ?? 0,
+    );
+    final nextActions = <_CommandActionItem>[
+      if (unreadCount > 0)
+        _CommandActionItem(
+          icon: Icons.mark_chat_unread_rounded,
+          title: 'Responder mensagens',
+          subtitle:
+              '$unreadCount conversa${unreadCount == 1 ? '' : 's'} aguardando',
+          route: '/chat/inbox',
+          tone: _CommandActionTone.hot,
+        ),
+      if (alunosRisco > 0)
+        _CommandActionItem(
+          icon: Icons.warning_amber_rounded,
+          title: 'Recuperar aderencia',
+          subtitle: '$alunosRisco aluno${alunosRisco == 1 ? '' : 's'} em risco',
+          route: '/dashboard/qualidade',
+          tone: _CommandActionTone.hot,
+        ),
+      if (cobrancasPendentes > 0)
+        _CommandActionItem(
+          icon: Icons.payments_rounded,
+          title: 'Cobrar pendencias',
+          subtitle:
+              '$cobrancasPendentes mensalidade${cobrancasPendentes == 1 ? '' : 's'} no radar',
+          route: '/financeiro',
+          tone: _CommandActionTone.money,
+        ),
+      if (filaAcoes.isNotEmpty)
+        _CommandActionItem(
+          icon: Icons.bolt_rounded,
+          title: 'Executar proxima acao',
+          subtitle: filaAcoes.first.descricao,
+          route: filaAcoes.first.acaoUrl.startsWith('/')
+              ? filaAcoes.first.acaoUrl
+              : '/dashboard/personal',
+          tone: _CommandActionTone.primary,
+        ),
+      if (agendaHoje > 0)
+        _CommandActionItem(
+          icon: Icons.today_rounded,
+          title: 'Preparar agenda',
+          subtitle:
+              '$agendaHoje compromisso${agendaHoje == 1 ? '' : 's'} hoje',
+          route: '/agenda',
+          tone: _CommandActionTone.primary,
+        ),
+    ];
+    if (nextActions.isEmpty) {
+      nextActions.add(
+        _CommandActionItem(
+          icon: Icons.add_task_rounded,
+          title: 'Criar proxima oportunidade',
+          subtitle: 'Cadastre aluno, treino ou lead antes do pico do dia',
+          route: '/alunos/novo',
+          tone: _CommandActionTone.primary,
+        ),
+      );
+    }
+
     Widget card({
       required IconData icon,
       required String title,
@@ -1305,7 +1377,171 @@ class _CommandCenterSection extends ConsumerWidget {
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        _CommandActionPanel(
+          isDark: isDark,
+          primary: primary,
+          actions: nextActions.take(3).toList(growable: false),
+        ),
       ],
+    );
+  }
+}
+
+enum _CommandActionTone { primary, hot, money }
+
+class _CommandActionItem {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String route;
+  final _CommandActionTone tone;
+
+  const _CommandActionItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.route,
+    required this.tone,
+  });
+}
+
+class _CommandActionPanel extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final List<_CommandActionItem> actions;
+
+  const _CommandActionPanel({
+    required this.isDark,
+    required this.primary,
+    required this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.route_rounded, size: 17, color: primary),
+              const SizedBox(width: 8),
+              Text(
+                'Proximas acoes',
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                'prioridade',
+                style: TextStyle(
+                  color: mute,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          for (var index = 0; index < actions.length; index++) ...[
+            _CommandActionTile(
+              item: actions[index],
+              isDark: isDark,
+              primary: primary,
+            ),
+            if (index < actions.length - 1) const SizedBox(height: 8),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CommandActionTile extends StatelessWidget {
+  final _CommandActionItem item;
+  final bool isDark;
+  final Color primary;
+
+  const _CommandActionTile({
+    required this.item,
+    required this.isDark,
+    required this.primary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final accent = switch (item.tone) {
+      _CommandActionTone.hot => const Color(0xFFE5484D),
+      _CommandActionTone.money => const Color(0xFF0E9F6E),
+      _CommandActionTone.primary => primary,
+    };
+    return InkWell(
+      onTap: () => context.go(item.route),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: isDark ? 0.16 : 0.09),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: isDark ? 0.24 : 0.14),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(item.icon, color: accent, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    item.subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: mute, fontSize: 11.5),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.chevron_right_rounded, color: mute, size: 20),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -48,7 +48,7 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Usado para selecionar fotos e vídeos de exercícios.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Usado para gravar vídeos de exercícios com áudio e para o Copiloto de IA reconhecer comandos de voz.</string>
+	<string>Usado para gravar áudios no chat, vídeos de exercícios com áudio e comandos de voz do Copiloto IA.</string>
 	<!-- Reconhecimento de voz para o Copiloto IA -->
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>O Copiloto IA usa reconhecimento de voz para que você possa ditar comandos e registrar treinos sem digitar.</string>
