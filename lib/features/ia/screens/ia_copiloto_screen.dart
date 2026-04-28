@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/analytics/analytics_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -93,6 +94,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
     setState(() { _gerando = true; _gerado = false; _erro = null; _geracaoMs = 0; });
     final stopwatch = Stopwatch()..start();
     try {
+      await AnalyticsService.instance.track(
+        ProductEvents.iaInsightRequested,
+        props: {'mode': _modes[_modeIdx], 'alunoId': _selectedAlunoId},
+      );
       ref.invalidate(insightsProvider);
       ref.invalidate(resumoSemanalProvider);
       await ref.read(insightsProvider.future);
@@ -101,8 +106,29 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
       if (mounted) setState(() { _gerando = false; _gerado = true; _geracaoMs = stopwatch.elapsedMilliseconds; });
     } catch (e) {
       stopwatch.stop();
+      await AnalyticsService.instance.track(
+        ProductEvents.iaCopilotFailure,
+        props: {
+          'mode': _modes[_modeIdx],
+          'error': e.toString(),
+          if (e is IaOperationalException) 'retryable': e.retryable,
+          if (e is IaOperationalException && e.reference != null)
+            'reference': e.reference,
+        },
+      );
       if (mounted) setState(() { _gerando = false; _erro = e; });
     }
+  }
+
+  String _erroIaTexto(Object erro) {
+    if (erro is IaOperationalException) {
+      final refText = erro.reference == null ? '' : ' Ref: ${erro.reference}.';
+      if (erro.retryable) {
+        return '${erro.message}$refText Tente novamente em alguns instantes.';
+      }
+      return '${erro.message}$refText';
+    }
+    return 'Nao foi possivel gerar agora. Tente novamente.';
   }
 
   Future<void> _atribuir() async {
@@ -400,7 +426,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                 child: Row(children: [
                   const Icon(Icons.error_outline, color: Color(0xFFE25656), size: 20),
                   const SizedBox(width: 10),
-                  Expanded(child: Text('Não foi possível gerar agora. Tente novamente.', style: TextStyle(color: ink, fontSize: 13))),
+                  Expanded(child: Text(_erroIaTexto(_erro!), style: TextStyle(color: ink, fontSize: 13))),
                   TextButton(onPressed: _gerar, child: const Text('Tentar')),
                 ]),
               ),
@@ -425,12 +451,16 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                     child: Row(children: [
                       const Icon(Icons.error_outline, color: Color(0xFFE25656), size: 20),
                       const SizedBox(width: 10),
-                      Expanded(child: Text('Erro ao carregar insights.', style: TextStyle(color: ink, fontSize: 13))),
+                      Expanded(child: Text(_erroIaTexto(e), style: TextStyle(color: ink, fontSize: 13))),
                       TextButton(onPressed: () => ref.invalidate(insightsProvider), child: const Text('Recarregar')),
                     ]),
                   ),
                 ),
                 data: (insights) {
+                  final degraded = insights.any((insight) {
+                    final status = (insight['status'] ?? 'READY').toString();
+                    return status != 'READY';
+                  });
                   if (insights.isEmpty) {
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -467,6 +497,20 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
                             Text('${insights.length} recomendações geradas', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600, height: 1.2)),
                           ]),
                         ),
+                        if (degraded)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                            color: const Color(0xFFFFB020).withValues(alpha: 0.12),
+                            child: Text(
+                              'A IA respondeu fora do formato ideal. Mantivemos o resultado como rascunho para revisao.',
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                         ...insights.asMap().entries.map((e) {
                           final ins = e.value;
                           final titulo = (ins['titulo'] ?? ins['title'] ?? 'Insight ${e.key + 1}').toString();

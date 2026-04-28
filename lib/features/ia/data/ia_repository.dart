@@ -1,6 +1,47 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 
+class IaOperationalException implements Exception {
+  final String message;
+  final String? reference;
+  final int? statusCode;
+  final bool retryable;
+
+  const IaOperationalException({
+    required this.message,
+    this.reference,
+    this.statusCode,
+    required this.retryable,
+  });
+
+  factory IaOperationalException.fromDio(DioException error) {
+    final status = error.response?.statusCode;
+    final payload = error.response?.data;
+    final rawMessage = payload is Map
+        ? (payload['erro'] ?? payload['message'])?.toString()
+        : null;
+    final message = rawMessage?.trim().isNotEmpty == true
+        ? rawMessage!.trim()
+        : status == 429
+            ? 'Limite de IA atingido agora. Tente novamente em instantes.'
+            : status == null
+                ? 'Sem conexao com a IA agora.'
+                : 'IA temporariamente indisponivel.';
+    final reference = _extractReference(message);
+    final retryable =
+        status == null || status == 408 || status == 429 || status >= 500;
+    return IaOperationalException(
+      message: message,
+      reference: reference,
+      statusCode: status,
+      retryable: retryable,
+    );
+  }
+
+  @override
+  String toString() => message;
+}
+
 class IaRepository {
   final Dio _dio;
   static final _iaOpts = Options(receiveTimeout: const Duration(seconds: 60));
@@ -52,23 +93,40 @@ class IaRepository {
   // ── Copiloto ──────────────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> resumoSemanal() async {
-    final r = await _dio.get('/api/ia/copiloto/resumo-semanal', options: _iaOpts);
-    return r.data as Map<String, dynamic>;
+    return _withIaErrorContext(() async {
+      final r =
+          await _dio.get('/api/ia/copiloto/resumo-semanal', options: _iaOpts);
+      return r.data as Map<String, dynamic>;
+    });
   }
 
   Future<Map<String, dynamic>> proximaAcao(int alunoId) async {
-    final r = await _dio.get('/api/ia/copiloto/proxima-acao/$alunoId', options: _iaOpts);
-    return r.data as Map<String, dynamic>;
+    return _withIaErrorContext(() async {
+      final r = await _dio.get(
+        '/api/ia/copiloto/proxima-acao/$alunoId',
+        options: _iaOpts,
+      );
+      return r.data as Map<String, dynamic>;
+    });
   }
 
   Future<String> analisePerformance(int alunoId) async {
-    final r = await _dio.get('/api/ia/copiloto/analise-performance/$alunoId', options: _iaOpts);
-    return r.data['resposta'] as String;
+    return _withIaErrorContext(() async {
+      final r = await _dio.get(
+        '/api/ia/copiloto/analise-performance/$alunoId',
+        options: _iaOpts,
+      );
+      return r.data['resposta'] as String;
+    });
   }
 
   Future<List<Map<String, dynamic>>> insights() async {
-    final r = await _dio.get('/api/ia/copiloto/insights', options: _iaOpts);
-    return (r.data as List).cast<Map<String, dynamic>>();
+    return _withIaErrorContext(() async {
+      final r = await _dio.get('/api/ia/copiloto/insights', options: _iaOpts);
+      return (r.data as List)
+          .map((item) => Map<String, dynamic>.from(item as Map))
+          .toList();
+    });
   }
 
   // ── Progressão sugestões ──────────────────────────────────────────────────
@@ -90,4 +148,17 @@ class IaRepository {
     final r = await _dio.post('/api/ia/confirmar-publicar/$alunoId', options: _iaOpts);
     return r.data['confirmado'] == true;
   }
+}
+
+Future<T> _withIaErrorContext<T>(Future<T> Function() operation) async {
+  try {
+    return await operation();
+  } on DioException catch (error) {
+    throw IaOperationalException.fromDio(error);
+  }
+}
+
+String? _extractReference(String message) {
+  final match = RegExp(r'Ref:\s*([a-zA-Z0-9-]+)').firstMatch(message);
+  return match?.group(1);
 }

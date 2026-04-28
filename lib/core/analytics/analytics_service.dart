@@ -76,6 +76,7 @@ class ProductEvents {
 
   static const iaInsightRequested = 'ia_insight_requested';
   static const iaQuotaExhausted = 'ia_quota_exhausted';
+  static const iaCopilotFailure = 'ia_copilot_failure';
 
   static const featureGateBlocked = 'feature_gate_blocked';
   static const planGateStaleUsed = 'plan_gate_stale_used';
