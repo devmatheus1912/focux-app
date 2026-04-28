@@ -129,6 +129,21 @@ class IaRepository {
     });
   }
 
+  Future<Map<String, dynamic>> salvarAcaoCopiloto({
+    required int alunoId,
+    required String acao,
+    String? motivo,
+  }) async {
+    return _withIaErrorContext(() async {
+      final r = await _dio.post('/api/ia/copiloto/acoes', data: {
+        'alunoId': alunoId,
+        'acao': acao,
+        if (motivo != null && motivo.isNotEmpty) 'motivo': motivo,
+      });
+      return r.data as Map<String, dynamic>;
+    });
+  }
+
   // ── Progressão sugestões ──────────────────────────────────────────────────
 
   Future<List<Map<String, dynamic>>> sugestoesProgressao() async {

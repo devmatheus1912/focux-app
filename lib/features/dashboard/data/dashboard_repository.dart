@@ -62,4 +62,18 @@ class DashboardRepository {
       data: {'actionKey': actionKey},
     );
   }
+
+  Future<void> reopenCommandAction(String actionKey) async {
+    await _dio.post(
+      '/api/dashboard/command-center/actions/reopen',
+      data: {'actionKey': actionKey},
+    );
+  }
+
+  Future<void> snoozeCommandAction(String actionKey, {int hours = 24}) async {
+    await _dio.post(
+      '/api/dashboard/command-center/actions/snooze',
+      data: {'actionKey': actionKey, 'hours': hours},
+    );
+  }
 }

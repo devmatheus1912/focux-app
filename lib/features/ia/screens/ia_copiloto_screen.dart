@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/analytics/analytics_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/router/role_home.dart';
 import '../data/ia_repository.dart';
@@ -138,9 +139,19 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
     }
     try {
       final repo = IaRepository(ref.read(apiClientProvider));
-      final acao = await repo.proximaAcao(_selectedAlunoId!);
+      final acaoAtual = _proximaAcao ?? await repo.proximaAcao(_selectedAlunoId!);
+      final textoAcao =
+          (acaoAtual['acao'] ?? acaoAtual['titulo'] ?? acaoAtual['mensagem'] ?? '')
+              .toString();
+      final motivo = (acaoAtual['motivo'] ?? '').toString();
+      final acao = await repo.salvarAcaoCopiloto(
+        alunoId: _selectedAlunoId!,
+        acao: textoAcao.isEmpty ? 'Revisar aluno no Copiloto' : textoAcao,
+        motivo: motivo,
+      );
       if (!mounted) return;
       setState(() => _proximaAcao = acao);
+      ref.invalidate(commandCenterProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

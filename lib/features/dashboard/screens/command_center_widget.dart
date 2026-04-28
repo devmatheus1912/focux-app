@@ -186,6 +186,15 @@ class _CommandActionCard extends ConsumerWidget {
                 },
                 child: const Text('Concluir'),
               ),
+              TextButton(
+                onPressed: () async {
+                  await ref
+                      .read(dashboardRepositoryProvider)
+                      .snoozeCommandAction(action.actionKey);
+                  ref.invalidate(commandCenterProvider);
+                },
+                child: const Text('Adiar'),
+              ),
               FilledButton(
                 onPressed: () => context.push(action.acaoUrl),
                 style: FilledButton.styleFrom(backgroundColor: primary),
