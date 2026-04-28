@@ -234,6 +234,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                       if (value == 'importar_midias') {
                         _openImportarMidias(context, ref);
                       }
+                      if (value == 'historico_midias') {
+                        _openHistoricoMidias(context, ref);
+                      }
                     },
                     itemBuilder:
                         (_) => const [
@@ -274,6 +277,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                                 Icon(Icons.video_file_rounded, size: 20),
                                 SizedBox(width: 10),
                                 Text('Importar midias CSV/JSON'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'historico_midias',
+                            child: Row(
+                              children: [
+                                Icon(Icons.history_rounded, size: 20),
+                                SizedBox(width: 10),
+                                Text('Historico de importacoes'),
                               ],
                             ),
                           ),
@@ -924,6 +937,79 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         );
       }
     }
+  }
+
+  Future<void> _openHistoricoMidias(BuildContext context, WidgetRef ref) async {
+    final future =
+        ref.read(exercicioRepositoryProvider).historicoImportacaoMidias();
+    await showDialog<void>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Historico de importacoes'),
+            content: SizedBox(
+              width: 560,
+              child: FutureBuilder<List<ExercicioMediaImportBatch>>(
+                future: future,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(
+                      height: 120,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Text('Erro ao carregar historico: ${snapshot.error}');
+                  }
+                  final batches = snapshot.data ?? [];
+                  if (batches.isEmpty) {
+                    return const Text('Nenhuma importacao aplicada ainda.');
+                  }
+                  return ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 420),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: batches.length,
+                      separatorBuilder: (_, __) => const Divider(height: 20),
+                      itemBuilder: (context, index) {
+                        final batch = batches[index];
+                        final criado = batch.criadoEm;
+                        final date =
+                            criado == null
+                                ? 'sem data'
+                                : '${criado.day.toString().padLeft(2, '0')}/'
+                                    '${criado.month.toString().padLeft(2, '0')}/'
+                                    '${criado.year} '
+                                    '${criado.hour.toString().padLeft(2, '0')}:'
+                                    '${criado.minute.toString().padLeft(2, '0')}';
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: CircleAvatar(
+                            child: Text(batch.atualizados.toString()),
+                          ),
+                          title: Text(
+                            '${batch.atualizados}/${batch.total} midias aplicadas',
+                          ),
+                          subtitle: Text(
+                            '$date · ${batch.prontosParaAluno} prontos · '
+                            '${batch.naoEncontrados} nao encontradas'
+                            '${batch.naoEncontradosKeys.isEmpty ? '' : '\nNao encontradas: ${batch.naoEncontradosKeys.take(3).join(', ')}'}',
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Fechar'),
+              ),
+            ],
+          ),
+    );
   }
 
   Future<void> _openFilters(BuildContext context) async {

@@ -212,6 +212,43 @@ class ImportarMidiasResultado {
       );
 }
 
+class ExercicioMediaImportBatch {
+  final int id;
+  final int total;
+  final int atualizados;
+  final int naoEncontrados;
+  final int prontosParaAluno;
+  final List<String> naoEncontradosKeys;
+  final DateTime? criadoEm;
+
+  ExercicioMediaImportBatch({
+    required this.id,
+    required this.total,
+    required this.atualizados,
+    required this.naoEncontrados,
+    required this.prontosParaAluno,
+    required this.naoEncontradosKeys,
+    required this.criadoEm,
+  });
+
+  factory ExercicioMediaImportBatch.fromJson(Map<String, dynamic> json) =>
+      ExercicioMediaImportBatch(
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        total: (json['total'] as num?)?.toInt() ?? 0,
+        atualizados: (json['atualizados'] as num?)?.toInt() ?? 0,
+        naoEncontrados: (json['naoEncontrados'] as num?)?.toInt() ?? 0,
+        prontosParaAluno: (json['prontosParaAluno'] as num?)?.toInt() ?? 0,
+        naoEncontradosKeys:
+            ((json['naoEncontradosKeys'] as List<dynamic>?) ?? [])
+                .map((e) => e.toString())
+                .toList(),
+        criadoEm:
+            json['criadoEm'] == null
+                ? null
+                : DateTime.tryParse(json['criadoEm'].toString()),
+      );
+}
+
 class ExercicioRepository {
   final Dio _dio;
 
@@ -444,6 +481,13 @@ class ExercicioRepository {
     return ImportarMidiasResultado.fromJson(
       response.data as Map<String, dynamic>,
     );
+  }
+
+  Future<List<ExercicioMediaImportBatch>> historicoImportacaoMidias() async {
+    final response = await _dio.get('/api/exercicios/curadoria/midias/historico');
+    return ((response.data as List<dynamic>?) ?? [])
+        .map((e) => ExercicioMediaImportBatch.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> favoritarExercicio(int id) async {
