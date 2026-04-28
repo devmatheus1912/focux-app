@@ -120,6 +120,27 @@ class ChatInboxItem {
   );
 }
 
+class ChatPage {
+  final List<ChatMsg> items;
+  final int? nextBeforeId;
+  final bool hasMore;
+
+  const ChatPage({
+    required this.items,
+    required this.nextBeforeId,
+    required this.hasMore,
+  });
+
+  factory ChatPage.fromJson(Map<String, dynamic> j) => ChatPage(
+    items:
+        ((j['items'] as List?) ?? const [])
+            .map((e) => ChatMsg.fromJson(e as Map<String, dynamic>))
+            .toList(),
+    nextBeforeId: j['nextBeforeId'] as int?,
+    hasMore: j['hasMore'] as bool? ?? false,
+  );
+}
+
 class ChatRepository {
   final Dio _dio;
 
@@ -128,6 +149,21 @@ class ChatRepository {
   Future<List<ChatMsg>> historico(int alunoId) async {
     final r = await _dio.get('/api/chat/historico/$alunoId');
     return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
+  }
+
+  Future<ChatPage> historicoPage(
+    int alunoId, {
+    int? beforeId,
+    int limit = 30,
+  }) async {
+    final r = await _dio.get(
+      '/api/chat/historico/$alunoId/page',
+      queryParameters: {
+        'limit': limit,
+        if (beforeId != null) 'beforeId': beforeId,
+      },
+    );
+    return ChatPage.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<List<ChatInboxItem>> inbox() async {
@@ -159,6 +195,17 @@ class ChatRepository {
   Future<List<ChatMsg>> historicoAluno() async {
     final r = await _dio.get('/api/chat/aluno/historico');
     return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
+  }
+
+  Future<ChatPage> historicoAlunoPage({int? beforeId, int limit = 30}) async {
+    final r = await _dio.get(
+      '/api/chat/aluno/historico/page',
+      queryParameters: {
+        'limit': limit,
+        if (beforeId != null) 'beforeId': beforeId,
+      },
+    );
+    return ChatPage.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<List<ChatMsg>> buscarHistorico(int alunoId, String query) async {

@@ -75,7 +75,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   bool _uploading = false;
   bool _recordingAudio = false;
   bool _composerHasText = false;
+  bool _loadingOlder = false;
+  bool _hasMoreMessages = false;
   int? _alunoId;
+  int? _nextBeforeId;
   ChatMsg? _replyingTo;
   int? _highlightedMessageId;
   Timer? _recordTimer;
@@ -90,6 +93,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     super.initState();
     _alunoId = widget.alunoId;
     _ctrl.addListener(_handleComposerChange);
+    _scroll.addListener(_handleScroll);
     _loadHistorico();
     if (_alunoId != null) {
       _connectWs(_alunoId!);
@@ -101,6 +105,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     _stomp?.deactivate();
     _recordTimer?.cancel();
     unawaited(_audioRecorder.dispose());
+    _scroll.removeListener(_handleScroll);
     _ctrl.removeListener(_handleComposerChange);
     _ctrl.dispose();
     _scroll.dispose();
@@ -114,13 +119,23 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
+  void _handleScroll() {
+    if (!_scroll.hasClients || _loading || _loadingOlder || !_hasMoreMessages) {
+      return;
+    }
+    if (_scroll.position.pixels <= 120) {
+      unawaited(_loadOlderMessages());
+    }
+  }
+
   Future<void> _loadHistorico() async {
     try {
       final repo = ChatRepository(ref.read(apiClientProvider));
-      final msgs =
+      final page =
           _isAlunoMode
-              ? await repo.historicoAluno()
-              : await repo.historico(_alunoId!);
+              ? await repo.historicoAlunoPage()
+              : await repo.historicoPage(_alunoId!);
+      final msgs = page.items;
       if (_isAlunoMode && msgs.isNotEmpty && _alunoId == null) {
         _alunoId = msgs.first.alunoId;
         if (_alunoId != null) {
@@ -132,6 +147,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         _msgs
           ..clear()
           ..addAll(msgs);
+        _nextBeforeId = page.nextBeforeId;
+        _hasMoreMessages = page.hasMore;
         _loading = false;
       });
       await _markRead();
@@ -140,6 +157,37 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       if (mounted) {
         setState(() => _loading = false);
       }
+    }
+  }
+
+  Future<void> _loadOlderMessages() async {
+    if (_loadingOlder || !_hasMoreMessages || _nextBeforeId == null) return;
+    final previousMax =
+        _scroll.hasClients ? _scroll.position.maxScrollExtent : 0.0;
+    final previousOffset = _scroll.hasClients ? _scroll.offset : 0.0;
+    setState(() => _loadingOlder = true);
+    try {
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final page =
+          _isAlunoMode
+              ? await repo.historicoAlunoPage(beforeId: _nextBeforeId)
+              : await repo.historicoPage(_alunoId!, beforeId: _nextBeforeId);
+      if (!mounted) return;
+      setState(() {
+        for (final msg in page.items) {
+          _upsertMessage(msg);
+        }
+        _nextBeforeId = page.nextBeforeId;
+        _hasMoreMessages = page.hasMore;
+        _loadingOlder = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_scroll.hasClients) return;
+        final delta = _scroll.position.maxScrollExtent - previousMax;
+        _scroll.jumpTo(previousOffset + delta);
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loadingOlder = false);
     }
   }
 
@@ -1692,11 +1740,21 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         : ListView.builder(
                           controller: _scroll,
                           padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                          itemCount: _msgs.length,
+                          itemCount:
+                              _msgs.length +
+                              (_hasMoreMessages || _loadingOlder ? 1 : 0),
                           itemBuilder: (_, index) {
-                            final msg = _msgs[index];
+                            final hasLoader = _hasMoreMessages || _loadingOlder;
+                            if (hasLoader && index == 0) {
+                              return _OlderMessagesLoader(
+                                loading: _loadingOlder,
+                                onTap: _loadOlderMessages,
+                              );
+                            }
+                            final msgIndex = hasLoader ? index - 1 : index;
+                            final msg = _msgs[msgIndex];
                             final previous =
-                                index > 0 ? _msgs[index - 1] : null;
+                                msgIndex > 0 ? _msgs[msgIndex - 1] : null;
                             final showDate =
                                 previous == null ||
                                 !_sameDay(previous.enviadoEm, msg.enviadoEm);
@@ -2087,6 +2145,56 @@ class _DateDivider extends StatelessWidget {
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OlderMessagesLoader extends StatelessWidget {
+  final bool loading;
+  final VoidCallback onTap;
+
+  const _OlderMessagesLoader({required this.loading, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: InkWell(
+          onTap: loading ? null : onTap,
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color:
+                  isDark
+                      ? Colors.white.withValues(alpha: 0.06)
+                      : EagleTokens.brand.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child:
+                loading
+                    ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: primary,
+                      ),
+                    )
+                    : Text(
+                      'Carregar mensagens antigas',
+                      style: TextStyle(
+                        color: primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
           ),
         ),
       ),
