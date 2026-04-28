@@ -23,6 +23,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
   String? _hint;
   bool _isAluno = false;
   bool? _emailDeliveryAvailable;
+  AuthEnvironmentStatus? _environmentStatus;
 
   @override
   void initState() {
@@ -32,10 +33,11 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
 
   Future<void> _loadCapabilities() async {
     try {
-      final capabilities = await AuthRepository(ApiClient()).capabilities();
+      final status = await AuthRepository(ApiClient()).environmentStatus();
       if (!mounted) return;
       setState(() {
-        _emailDeliveryAvailable = capabilities.passwordResetEmailAvailable;
+        _environmentStatus = status;
+        _emailDeliveryAvailable = status.passwordResetReady;
       });
     } catch (_) {
       if (!mounted) return;
@@ -101,6 +103,22 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
       }
     }
     return 'Nao foi possivel enviar o link agora.';
+  }
+
+  String _resetEnvironmentWarning() {
+    final issue = _environmentStatus?.firstIssueFor('password_reset');
+    if (issue != null) {
+      final action = issue.action.isEmpty ? '' : '\nAcao: ${issue.action}';
+      return '${issue.title}. ${issue.detail}$action';
+    }
+    final actions = _environmentStatus?.nextActions
+            .where((action) => action.toLowerCase().contains('smtp'))
+            .toList() ??
+        const [];
+    if (actions.isNotEmpty) {
+      return 'Envio de e-mail ainda nao esta ativo neste ambiente.\nAcao: ${actions.first}';
+    }
+    return 'Envio de e-mail ainda nao esta ativo neste ambiente. O pedido sera registrado, mas a entrega depende da configuracao SMTP.';
   }
 
   @override
@@ -268,7 +286,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                           ),
                         ),
                         child: Text(
-                          'Envio de e-mail ainda nao esta ativo neste ambiente. O pedido sera registrado, mas a entrega depende da configuracao SMTP.',
+                          _resetEnvironmentWarning(),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.72),
                             fontSize: 12.5,

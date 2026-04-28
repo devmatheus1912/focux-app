@@ -24,6 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _loadingGoogle = false;
   bool _showPassword = false;
   bool _googleEnabled = false;
+  String? _googleStatusNote;
   String? _error;
   // BUG-39: role toggle — personal or aluno
   bool _isAluno = false;
@@ -36,16 +37,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _loadCapabilities() async {
     try {
-      final capabilities =
-          await ref.read(authRepositoryProvider).capabilities();
+      final status =
+          await ref.read(authRepositoryProvider).environmentStatus();
       if (!mounted) return;
+      final appClientConfigured = Env.googleWebClientId.isNotEmpty;
       setState(() {
         _googleEnabled =
-            capabilities.googleSignInEnabled && Env.googleWebClientId.isNotEmpty;
+            status.googleSignInReady && appClientConfigured;
+        if (_googleEnabled) {
+          _googleStatusNote = null;
+        } else if (!appClientConfigured) {
+          _googleStatusNote =
+              'Google indisponivel: o app precisa do GOOGLE_WEB_CLIENT_ID no build.';
+        } else {
+          final issue = status.firstIssueFor('google');
+          _googleStatusNote = issue == null
+              ? 'Google indisponivel neste ambiente.'
+              : '${issue.title}. ${issue.action}';
+        }
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _googleEnabled = false);
+      setState(() {
+        _googleEnabled = false;
+        _googleStatusNote = 'Nao foi possivel verificar o login Google agora.';
+      });
     }
   }
 
@@ -315,6 +331,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               icon: Icons.g_mobiledata_rounded,
                               onPressed: _loadingGoogle ? null : _submitGoogle,
                             ),
+                          ] else if (_googleStatusNote != null) ...[
+                            const SizedBox(height: 12),
+                            _AuthOperationalNotice(
+                              icon: Icons.g_mobiledata_rounded,
+                              text: _googleStatusNote!,
+                            ),
                           ],
                         ],
                       ),
@@ -348,6 +370,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AuthOperationalNotice extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _AuthOperationalNotice({
+    required this.icon,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFB020).withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFFFFB020).withValues(alpha: 0.22),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: const Color(0xFFFFD28A)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.72),
+                fontSize: 12.2,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

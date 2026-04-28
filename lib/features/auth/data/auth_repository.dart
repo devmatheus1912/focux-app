@@ -38,6 +38,92 @@ class AuthCapabilities {
   }
 }
 
+class AuthEnvironmentIssue {
+  final String area;
+  final String severity;
+  final String title;
+  final String detail;
+  final String action;
+
+  const AuthEnvironmentIssue({
+    required this.area,
+    required this.severity,
+    required this.title,
+    required this.detail,
+    required this.action,
+  });
+
+  factory AuthEnvironmentIssue.fromJson(Map<String, dynamic> json) {
+    return AuthEnvironmentIssue(
+      area: json['area'] as String? ?? '',
+      severity: json['severity'] as String? ?? 'INFO',
+      title: json['title'] as String? ?? 'Configuracao pendente',
+      detail: json['detail'] as String? ?? '',
+      action: json['action'] as String? ?? '',
+    );
+  }
+}
+
+class AuthEnvironmentStatus {
+  final String status;
+  final bool productionReady;
+  final bool passwordResetReady;
+  final bool googleSignInReady;
+  final bool googleSignInEnabled;
+  final bool googleClientIdsConfigured;
+  final List<String> missing;
+  final List<AuthEnvironmentIssue> issues;
+  final List<String> nextActions;
+
+  const AuthEnvironmentStatus({
+    required this.status,
+    required this.productionReady,
+    required this.passwordResetReady,
+    required this.googleSignInReady,
+    required this.googleSignInEnabled,
+    required this.googleClientIdsConfigured,
+    required this.missing,
+    required this.issues,
+    required this.nextActions,
+  });
+
+  factory AuthEnvironmentStatus.fromJson(Map<String, dynamic> json) {
+    final rawIssues = json['issues'];
+    final rawActions = json['nextActions'];
+    final rawMissing = json['missing'];
+    return AuthEnvironmentStatus(
+      status: json['status'] as String? ?? 'UNKNOWN',
+      productionReady: json['productionReady'] as bool? ?? false,
+      passwordResetReady: json['passwordResetReady'] as bool? ?? false,
+      googleSignInReady: json['googleSignInReady'] as bool? ?? false,
+      googleSignInEnabled: json['googleSignInEnabled'] as bool? ?? false,
+      googleClientIdsConfigured:
+          json['googleClientIdsConfigured'] as bool? ?? false,
+      missing: rawMissing is List
+          ? rawMissing.map((item) => item.toString()).toList()
+          : const [],
+      issues: rawIssues is List
+          ? rawIssues
+              .whereType<Map>()
+              .map((item) => AuthEnvironmentIssue.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ))
+              .toList()
+          : const [],
+      nextActions: rawActions is List
+          ? rawActions.map((item) => item.toString()).toList()
+          : const [],
+    );
+  }
+
+  AuthEnvironmentIssue? firstIssueFor(String area) {
+    for (final issue in issues) {
+      if (issue.area == area) return issue;
+    }
+    return null;
+  }
+}
+
 class AuthRepository {
   final Dio _dio;
 
@@ -46,6 +132,11 @@ class AuthRepository {
   Future<AuthCapabilities> capabilities() async {
     final response = await _dio.get('/api/auth/capabilities');
     return AuthCapabilities.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<AuthEnvironmentStatus> environmentStatus() async {
+    final response = await _dio.get('/api/auth/environment-status');
+    return AuthEnvironmentStatus.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<String> loginPersonal(String email, String password) async {
