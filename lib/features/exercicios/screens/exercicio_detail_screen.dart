@@ -154,11 +154,11 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (ex.gifUrl != null)
+                      if (ex.gifUrl != null || ex.thumbnailUrl != null)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.network(
-                            ex.gifUrl!,
+                            ex.gifUrl ?? ex.thumbnailUrl!,
                             height: 200,
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => const SizedBox.shrink(),
@@ -223,6 +223,13 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                         ),
                       ],
                       const SizedBox(height: 14),
+                      if (ex.videoSource?.isNotEmpty == true || ex.licenseStatus?.isNotEmpty == true) ...[
+                        _MediaMetadataPanel(
+                          source: ex.videoSource,
+                          licenseStatus: ex.licenseStatus,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       _OwnVideoPanel(
                         hasVideo: ex.videoUrl != null && ex.videoUrl!.isNotEmpty,
                         uploading: _uploadingVideo,
@@ -320,6 +327,78 @@ class _GuidanceCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _MediaMetadataPanel extends StatelessWidget {
+  final String? source;
+  final String? licenseStatus;
+
+  const _MediaMetadataPanel({
+    required this.source,
+    required this.licenseStatus,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final licensed = licenseStatus == 'LICENSED';
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            licensed ? Icons.verified_rounded : Icons.video_library_rounded,
+            color: licensed ? EagleTokens.good : Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  licensed ? 'Video licenciado' : 'Origem do video',
+                  style: TextStyle(color: ink, fontSize: 13.5, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  [
+                    if (source?.isNotEmpty == true) _formatSource(source!),
+                    if (licenseStatus?.isNotEmpty == true) _formatLicense(licenseStatus!),
+                  ].join(' | '),
+                  style: TextStyle(color: mute, fontSize: 12.5, fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatSource(String value) {
+    return switch (value) {
+      'FOCUX_LIBRARY' => 'Biblioteca Focux',
+      'PERSONAL_UPLOAD' => 'Video do personal',
+      _ => value.replaceAll('_', ' '),
+    };
+  }
+
+  String _formatLicense(String value) {
+    return switch (value) {
+      'LICENSED' => 'Licenciado',
+      'PERSONAL_OWNED' => 'Proprio',
+      'PENDING_REVIEW' => 'Pendente',
+      _ => value.replaceAll('_', ' '),
+    };
   }
 }
 

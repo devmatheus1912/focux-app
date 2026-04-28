@@ -447,6 +447,12 @@ class _ExercicioTile extends ConsumerWidget {
       exercicio.equipamento,
       exercicio.nivel,
     ].where((s) => s != null && s.isNotEmpty).join(' | ');
+    final mediaThumb = exercicio.thumbnailUrl?.isNotEmpty == true
+        ? exercicio.thumbnailUrl
+        : exercicio.gifUrl?.isNotEmpty == true
+            ? exercicio.gifUrl
+            : null;
+    final licensed = exercicio.licenseStatus == 'LICENSED';
 
     return Material(
       color: card,
@@ -456,14 +462,14 @@ class _ExercicioTile extends ConsumerWidget {
           borderRadius: BorderRadius.circular(14),
           side: BorderSide(color: line),
         ),
-        leading: exercicio.gifUrl != null
+        leading: mediaThumb != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: SizedBox(
                   width: 50,
                   height: 50,
                   child: Image.network(
-                    exercicio.gifUrl!,
+                    mediaThumb,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => const Icon(Icons.fitness_center),
                   ),
@@ -471,7 +477,33 @@ class _ExercicioTile extends ConsumerWidget {
               )
             : const CircleAvatar(child: Icon(Icons.fitness_center)),
         title: Text(exercicio.nome, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
+            if (licensed || exercicio.videoSource?.isNotEmpty == true) ...[
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  if (licensed)
+                    const _MiniMediaBadge(
+                      icon: Icons.verified_rounded,
+                      label: 'Licenciado',
+                      color: EagleTokens.good,
+                    ),
+                  if (exercicio.videoSource?.isNotEmpty == true)
+                    _MiniMediaBadge(
+                      icon: Icons.video_library_rounded,
+                      label: _formatSource(exercicio.videoSource!),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                ],
+              ),
+            ],
+          ],
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -489,6 +521,48 @@ class _ExercicioTile extends ConsumerWidget {
           ],
         ),
         onTap: () => context.push('/exercicios/${exercicio.id}'),
+      ),
+    );
+  }
+
+  String _formatSource(String value) {
+    return switch (value) {
+      'FOCUX_LIBRARY' => 'Focux',
+      'PERSONAL_UPLOAD' => 'Personal',
+      _ => value.replaceAll('_', ' '),
+    };
+  }
+}
+
+class _MiniMediaBadge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  const _MiniMediaBadge({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: TextStyle(color: color, fontSize: 10.5, fontWeight: FontWeight.w800),
+          ),
+        ],
       ),
     );
   }

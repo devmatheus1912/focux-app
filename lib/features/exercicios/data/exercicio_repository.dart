@@ -7,6 +7,9 @@ class Exercicio {
   final String? descricao;
   final String? musculoAlvo;
   final String? gifUrl;
+  final String? thumbnailUrl;
+  final String? videoSource;
+  final String? licenseStatus;
   final String? categoria;
   final String? equipamento;
   final String? nivel;
@@ -25,6 +28,9 @@ class Exercicio {
     this.descricao,
     this.musculoAlvo,
     this.gifUrl,
+    this.thumbnailUrl,
+    this.videoSource,
+    this.licenseStatus,
     this.categoria,
     this.equipamento,
     this.nivel,
@@ -44,6 +50,9 @@ class Exercicio {
         descricao: json['descricao'] as String?,
         musculoAlvo: json['musculoAlvo'] as String?,
         gifUrl: json['gifUrl'] as String?,
+        thumbnailUrl: json['thumbnailUrl'] as String?,
+        videoSource: json['videoSource'] as String?,
+        licenseStatus: json['licenseStatus'] as String?,
         categoria: json['categoria'] as String?,
         equipamento: json['equipamento'] as String?,
         nivel: json['nivel'] as String?,
