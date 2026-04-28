@@ -1,11 +1,13 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../data/exercicio_media_import_parser.dart';
 import '../data/exercicio_repository.dart';
+import '../data/exercise_media_file_io_stub.dart'
+    if (dart.library.html) '../data/exercise_media_file_io_web.dart';
 import '../providers/exercicios_provider.dart';
 
 // ---------------------------------------------------------------------------
@@ -744,38 +746,117 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
 
   Future<void> _openImportarMidias(BuildContext context, WidgetRef ref) async {
     final payloadCtrl = TextEditingController(
-      text:
-          'importKey,videoUrl,thumbnailUrl,videoSource,licenseStatus\n'
-          'supino-reto-peso-corporal-iniciante-hipertrofia|peito|peso-corporal,https://cdn.exemplo/supino.mp4,https://cdn.exemplo/supino.jpg,FOCUX_LIBRARY,LICENSED',
+      text: exerciseMediaImportTemplate,
     );
+    String? selectedFileName;
 
     final confirm = await showDialog<bool>(
       context: context,
       builder:
-          (ctx) => AlertDialog(
-            title: const Text('Importar midias CSV/JSON'),
-            content: SizedBox(
-              width: 560,
-              child: TextField(
-                controller: payloadCtrl,
-                minLines: 8,
-                maxLines: 14,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  isDense: true,
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setModalState) => AlertDialog(
+                  title: const Text('Importar midias CSV/JSON'),
+                  content: SizedBox(
+                    width: 560,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: () async {
+                                final picked = await pickExerciseMediaFile();
+                                if (picked == null) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Selecao de arquivo disponivel no app web.',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return;
+                                }
+                                setModalState(() {
+                                  selectedFileName = picked.name;
+                                  payloadCtrl.text = picked.content;
+                                });
+                              },
+                              icon: const Icon(Icons.upload_file_rounded),
+                              label: const Text('Escolher arquivo'),
+                            ),
+                            OutlinedButton.icon(
+                              onPressed: () async {
+                                final downloaded =
+                                    await downloadExerciseMediaTemplate(
+                                      filename:
+                                          'focux-template-midias-exercicios.csv',
+                                      content: exerciseMediaImportTemplate,
+                                    );
+                                if (!downloaded) {
+                                  await Clipboard.setData(
+                                    const ClipboardData(
+                                      text: exerciseMediaImportTemplate,
+                                    ),
+                                  );
+                                }
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        downloaded
+                                            ? 'Template baixado.'
+                                            : 'Template copiado para area de transferencia.',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              icon: const Icon(Icons.download_rounded),
+                              label: const Text('Template'),
+                            ),
+                          ],
+                        ),
+                        if (selectedFileName != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            selectedFileName!,
+                            style: Theme.of(context).textTheme.bodySmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: payloadCtrl,
+                          minLines: 8,
+                          maxLines: 14,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            helperText:
+                                'Aceita JSON, CSV com virgula ou CSV com ponto e virgula.',
+                            isDense: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancelar'),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Pre-visualizar'),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Importar'),
-              ),
-            ],
           ),
     );
     if (confirm != true) {
@@ -788,7 +869,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     if (!context.mounted) return;
 
     try {
-      final midias = _parseMidiasPayload(raw);
+      final midias = parseExerciseMediaImportPayload(raw);
       final repo = ref.read(exercicioRepositoryProvider);
       final preview = await repo.previewMidias(midias);
       if (!context.mounted) return;
@@ -843,47 +924,6 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         );
       }
     }
-  }
-
-  List<Map<String, dynamic>> _parseMidiasPayload(String raw) {
-    if (raw.isEmpty) {
-      throw Exception('conteudo vazio');
-    }
-    if (raw.startsWith('{') || raw.startsWith('[')) {
-      final decoded = jsonDecode(raw);
-      if (decoded is List) {
-        return decoded.map((e) => Map<String, dynamic>.from(e as Map)).toList();
-      }
-      if (decoded is Map && decoded['midias'] is List) {
-        return (decoded['midias'] as List)
-            .map((e) => Map<String, dynamic>.from(e as Map))
-            .toList();
-      }
-      throw Exception('JSON precisa ser lista ou objeto com midias');
-    }
-    return _parseMidiasCsv(raw);
-  }
-
-  List<Map<String, dynamic>> _parseMidiasCsv(String raw) {
-    final lines =
-        raw
-            .split(RegExp(r'\r?\n'))
-            .map((line) => line.trim())
-            .where((line) => line.isNotEmpty)
-            .toList();
-    if (lines.length < 2) {
-      throw Exception('CSV precisa de cabecalho e ao menos uma linha');
-    }
-    final headers = lines.first.split(',').map((e) => e.trim()).toList();
-    return [
-      for (final line in lines.skip(1))
-        {
-          for (var i = 0; i < headers.length; i++)
-            if (i < line.split(',').length &&
-                line.split(',')[i].trim().isNotEmpty)
-              headers[i]: line.split(',')[i].trim(),
-        },
-    ];
   }
 
   Future<void> _openFilters(BuildContext context) async {
