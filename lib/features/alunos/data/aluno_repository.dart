@@ -142,5 +142,25 @@ class AlunoRepository {
   }
 
   // Telefone getter helper (não está no modelo ainda)
+  Future<void> registrarEventoAutonomia({
+    required String taskId,
+    required String taskTitle,
+    required String action,
+    String? route,
+    String? priority,
+    bool? done,
+    int? profileCompletion,
+  }) async {
+    await _dio.post('/api/aluno/autonomia/eventos', data: {
+      'taskId': taskId,
+      'taskTitle': taskTitle,
+      'action': action,
+      if (route != null) 'route': route,
+      if (priority != null) 'priority': priority,
+      if (done != null) 'done': done,
+      if (profileCompletion != null) 'profileCompletion': profileCompletion,
+    });
+  }
+
   String? getTelefone(Aluno aluno) => null;
 }

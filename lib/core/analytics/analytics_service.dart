@@ -81,4 +81,8 @@ class ProductEvents {
   static const featureGateBlocked = 'feature_gate_blocked';
   static const planGateStaleUsed = 'plan_gate_stale_used';
   static const planGateRefreshFailed = 'plan_gate_refresh_failed';
+
+  static const alunoAutonomyTaskViewed = 'aluno_autonomy_task_viewed';
+  static const alunoAutonomyTaskClicked = 'aluno_autonomy_task_clicked';
+  static const alunoAutonomyTaskCompleted = 'aluno_autonomy_task_completed';
 }

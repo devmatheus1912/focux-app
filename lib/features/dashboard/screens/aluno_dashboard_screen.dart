@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -343,6 +346,7 @@ class _AlunoHeroCard extends StatelessWidget {
       ),
     );
   }
+
 }
 
 class _HeroPill extends StatelessWidget {
@@ -773,7 +777,7 @@ class _ProgressCheckpointCard extends StatelessWidget {
   }
 }
 
-class _StudentJourneyCard extends StatelessWidget {
+class _StudentJourneyCard extends ConsumerStatefulWidget {
   final Aluno aluno;
   final List<ExecucaoTreino> treinos;
   final AsyncValue<List<MedidaCorporal>> medidasAsync;
@@ -791,21 +795,28 @@ class _StudentJourneyCard extends StatelessWidget {
   });
 
   @override
+  ConsumerState<_StudentJourneyCard> createState() => _StudentJourneyCardState();
+}
+
+class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
+  final Set<String> _trackedSessionEvents = {};
+
+  @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final cardBg = widget.isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = widget.isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = widget.isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = widget.isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
-    final medidas = medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
-    final historico = historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
-    final mensagens = chatAsync.valueOrNull ?? const <ChatMsg>[];
+    final medidas = widget.medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
+    final historico = widget.historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
+    final mensagens = widget.chatAsync.valueOrNull ?? const <ChatMsg>[];
 
     final plan = buildAlunoAutonomyPlan(
-      aluno: aluno,
+      aluno: widget.aluno,
       medidas: medidas,
-      treinos: treinos,
+      treinos: widget.treinos,
       historico: historico,
       mensagens: mensagens,
     );
@@ -814,6 +825,7 @@ class _StudentJourneyCard extends StatelessWidget {
       if (nextTask != null) nextTask,
       ...plan.tasks.where((task) => task.id != nextTask?.id).take(5),
     ];
+    _trackVisibleTasks(visibleTasks, plan.profileCompletion);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -851,7 +863,7 @@ class _StudentJourneyCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: BrandPalette.soft(primary, dark: isDark),
+                  color: BrandPalette.soft(primary, dark: widget.isDark),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
@@ -871,7 +883,7 @@ class _StudentJourneyCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: plan.tasks.isEmpty ? 1 : plan.doneCount / plan.tasks.length,
               minHeight: 9,
-              backgroundColor: BrandPalette.soft(primary, dark: isDark),
+              backgroundColor: BrandPalette.soft(primary, dark: widget.isDark),
               valueColor: AlwaysStoppedAnimation(primary),
             ),
           ),
@@ -889,7 +901,7 @@ class _StudentJourneyCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: isDark
+              color: widget.isDark
                   ? Colors.white.withValues(alpha: 0.04)
                   : BrandPalette.softer(primary),
               borderRadius: BorderRadius.circular(16),
@@ -900,7 +912,7 @@ class _StudentJourneyCard extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: BrandPalette.soft(primary, dark: isDark),
+                    color: BrandPalette.soft(primary, dark: widget.isDark),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(_alunoTaskIcon(nextTask?.kind), color: primary),
@@ -938,7 +950,7 @@ class _StudentJourneyCard extends StatelessWidget {
                 if (nextTask != null) ...[
                   const SizedBox(width: 12),
                   FilledButton.tonal(
-                    onPressed: () => context.push(nextTask.route),
+                    onPressed: () => _openTask(nextTask),
                     child: Text(nextTask.cta),
                   ),
                 ],
@@ -949,12 +961,69 @@ class _StudentJourneyCard extends StatelessWidget {
           for (var i = 0; i < visibleTasks.length; i++) ...[
             _AutonomyTaskTile(
               task: visibleTasks[i],
-              isDark: isDark,
+              isDark: widget.isDark,
+              onTap: () => _openTask(visibleTasks[i]),
             ),
             if (i != visibleTasks.length - 1) const SizedBox(height: 10),
           ],
         ],
       ),
+    );
+  }
+
+  void _trackVisibleTasks(List<AlunoAutonomyTask> tasks, int profileCompletion) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      for (final task in tasks) {
+        _trackTask(task, 'VIEWED', profileCompletion);
+        if (task.done) {
+          _trackTask(task, 'COMPLETED', profileCompletion);
+        }
+      }
+    });
+  }
+
+  void _openTask(AlunoAutonomyTask task) {
+    _trackTask(task, 'CLICKED', null);
+    context.push(task.route);
+  }
+
+  void _trackTask(
+    AlunoAutonomyTask task,
+    String action,
+    int? profileCompletion,
+  ) {
+    final sessionKey = '$action:${task.id}:${task.done}';
+    if (action != 'CLICKED' && !_trackedSessionEvents.add(sessionKey)) {
+      return;
+    }
+    final eventName = switch (action) {
+      'CLICKED' => ProductEvents.alunoAutonomyTaskClicked,
+      'COMPLETED' => ProductEvents.alunoAutonomyTaskCompleted,
+      _ => ProductEvents.alunoAutonomyTaskViewed,
+    };
+    final props = {
+      'taskId': task.id,
+      'taskTitle': task.title,
+      'route': task.route,
+      'priority': task.priority.name,
+      'done': task.done,
+      if (profileCompletion != null) 'profileCompletion': profileCompletion,
+    };
+    unawaited(AnalyticsService.instance.track(eventName, props: props));
+    unawaited(
+      ref
+          .read(alunoRepositoryProvider)
+          .registrarEventoAutonomia(
+            taskId: task.id,
+            taskTitle: task.title,
+            action: action,
+            route: task.route,
+            priority: task.priority.name.toUpperCase(),
+            done: task.done,
+            profileCompletion: profileCompletion,
+          )
+          .catchError((_) {}),
     );
   }
 }
@@ -983,10 +1052,12 @@ IconData _alunoTaskIcon(AlunoTaskKind? kind) {
 class _AutonomyTaskTile extends StatelessWidget {
   final AlunoAutonomyTask task;
   final bool isDark;
+  final VoidCallback onTap;
 
   const _AutonomyTaskTile({
     required this.task,
     required this.isDark,
+    required this.onTap,
   });
 
   @override
@@ -1065,7 +1136,7 @@ class _AutonomyTaskTile extends StatelessWidget {
                   ),
                 )
               : TextButton(
-                  onPressed: () => context.push(task.route),
+                  onPressed: onTap,
                   child: Text(task.cta),
                 ),
         ],
