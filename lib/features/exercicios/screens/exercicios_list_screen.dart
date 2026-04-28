@@ -1043,11 +1043,30 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       context: context,
       builder:
           (ctx) => StatefulBuilder(
-            builder:
-                (ctx, setModalState) => AlertDialog(
-                  title: const Text('Fila editorial'),
+            builder: (ctx, setModalState) {
+              final media = MediaQuery.of(ctx);
+              final isCompact = media.size.width < 640;
+              final dialogWidth = isCompact ? media.size.width - 24 : 760.0;
+              final maxListHeight =
+                  isCompact ? media.size.height * 0.52 : 500.0;
+
+              return AlertDialog(
+                insetPadding: EdgeInsets.symmetric(
+                  horizontal: isCompact ? 12 : 24,
+                  vertical: 16,
+                ),
+                title: Row(
+                  children: [
+                    const Expanded(child: Text('Fila editorial')),
+                    IconButton(
+                      tooltip: 'Fechar',
+                      onPressed: () => Navigator.pop(ctx),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
                   content: SizedBox(
-                    width: 620,
+                    width: dialogWidth,
                     child: FutureBuilder<List<ExercicioEditorialQueue>>(
                       key: ValueKey(refreshToken),
                       future: loadQueues(),
@@ -1173,64 +1192,39 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                                 child: Text('Nada para revisar nesta fila.'),
                               )
                             else ...[
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                children: [
-                                  ActionChip(
-                                    avatar: const Icon(
-                                      Icons.select_all_rounded,
-                                      size: 18,
-                                    ),
-                                    label: Text(
-                                      selectedIds.length ==
-                                              activeQueue.items.length
-                                          ? 'Limpar selecao'
-                                          : 'Selecionar todos',
-                                    ),
-                                    onPressed:
-                                        () => setModalState(() {
-                                          if (selectedIds.length ==
-                                              activeQueue.items.length) {
-                                            selectedIds.clear();
-                                          } else {
-                                            selectedIds
-                                              ..clear()
-                                              ..addAll(
-                                                activeQueue.items.map(
-                                                  (item) => item.id,
-                                                ),
-                                              );
-                                          }
-                                        }),
-                                  ),
-                                  FilledButton.icon(
-                                    onPressed:
-                                        selectedIds.isEmpty
-                                            ? null
-                                            : () => bulkReview('APPROVED'),
-                                    icon: const Icon(Icons.verified_rounded),
-                                    label: Text(
-                                      'Aprovar ${selectedIds.length}',
-                                    ),
-                                  ),
-                                  OutlinedButton.icon(
-                                    onPressed:
-                                        selectedIds.isEmpty
-                                            ? null
-                                            : () => bulkReview('REJECTED'),
-                                    icon: const Icon(Icons.block_rounded),
-                                    label: Text(
-                                      'Reprovar ${selectedIds.length}',
-                                    ),
-                                  ),
-                                ],
+                              _EditorialQueueBulkBar(
+                                selectedCount: selectedIds.length,
+                                allSelected:
+                                    selectedIds.length ==
+                                    activeQueue.items.length,
+                                onToggleAll:
+                                    () => setModalState(() {
+                                      if (selectedIds.length ==
+                                          activeQueue.items.length) {
+                                        selectedIds.clear();
+                                      } else {
+                                        selectedIds
+                                          ..clear()
+                                          ..addAll(
+                                            activeQueue.items.map(
+                                              (item) => item.id,
+                                            ),
+                                          );
+                                      }
+                                    }),
+                                onApprove:
+                                    selectedIds.isEmpty
+                                        ? null
+                                        : () => bulkReview('APPROVED'),
+                                onReject:
+                                    selectedIds.isEmpty
+                                        ? null
+                                        : () => bulkReview('REJECTED'),
                               ),
                               const SizedBox(height: 8),
                               ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxHeight: 440,
+                                constraints: BoxConstraints(
+                                  maxHeight: maxListHeight,
                                 ),
                                 child: ListView.separated(
                                   shrinkWrap: true,
@@ -1266,13 +1260,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                       },
                     ),
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Fechar'),
-                    ),
-                  ],
-                ),
+                actions: const [],
+              );
+            },
           ),
     );
   }
@@ -1738,6 +1728,74 @@ String _formatSource(String value) {
   };
 }
 
+class _EditorialQueueBulkBar extends StatelessWidget {
+  final int selectedCount;
+  final bool allSelected;
+  final VoidCallback onToggleAll;
+  final VoidCallback? onApprove;
+  final VoidCallback? onReject;
+
+  const _EditorialQueueBulkBar({
+    required this.selectedCount,
+    required this.allSelected,
+    required this.onToggleAll,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 520;
+        final select = OutlinedButton.icon(
+          onPressed: onToggleAll,
+          icon: Icon(
+            allSelected
+                ? Icons.check_box_rounded
+                : Icons.select_all_rounded,
+          ),
+          label: Text(allSelected ? 'Limpar' : 'Todos'),
+        );
+        final approve = FilledButton.icon(
+          onPressed: onApprove,
+          icon: const Icon(Icons.verified_rounded),
+          label: Text('Aprovar $selectedCount'),
+        );
+        final reject = OutlinedButton.icon(
+          onPressed: onReject,
+          icon: const Icon(Icons.block_rounded),
+          label: Text('Reprovar $selectedCount'),
+        );
+
+        if (compact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              select,
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(child: approve),
+                  const SizedBox(width: 8),
+                  Expanded(child: reject),
+                ],
+              ),
+            ],
+          );
+        }
+
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [select, approve, reject],
+        );
+      },
+    );
+  }
+}
+
 class _EditorialQueueTile extends StatelessWidget {
   final Exercicio exercicio;
   final bool selected;
@@ -1761,58 +1819,107 @@ class _EditorialQueueTile extends StatelessWidget {
         exercicio.videoSource?.isNotEmpty == true
             ? _formatSource(exercicio.videoSource!)
             : 'Sem fonte';
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: SizedBox(
-        width: 82,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+    final subtitle = [
+      _formatEditorialStatus(exercicio.editorialStatus),
+      source,
+      license,
+      if (exercicio.editorialNotes?.trim().isNotEmpty == true)
+        exercicio.editorialNotes!.trim(),
+    ].join(' · ');
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 520;
+        final mediaIcon = CircleAvatar(
+          radius: 18,
+          backgroundColor:
+              hasMedia
+                  ? EagleTokens.good.withValues(alpha: 0.14)
+                  : EagleTokens.warn.withValues(alpha: 0.14),
+          child: Icon(
+            hasMedia
+                ? Icons.play_circle_fill_rounded
+                : Icons.videocam_off_rounded,
+            color: hasMedia ? EagleTokens.good : EagleTokens.warn,
+            size: 19,
+          ),
+        );
+        final actions = Wrap(
+          spacing: 6,
           children: [
-            Checkbox(value: selected, onChanged: onSelectedChanged),
-            CircleAvatar(
-              radius: 18,
-              backgroundColor:
-                  hasMedia
-                      ? EagleTokens.good.withValues(alpha: 0.14)
-                      : EagleTokens.warn.withValues(alpha: 0.14),
-              child: Icon(
-                hasMedia
-                    ? Icons.play_circle_fill_rounded
-                    : Icons.videocam_off_rounded,
-                color: hasMedia ? EagleTokens.good : EagleTokens.warn,
-                size: 19,
-              ),
+            IconButton.filledTonal(
+              tooltip: 'Aprovar',
+              onPressed: onApprove,
+              icon: const Icon(Icons.verified_rounded),
+            ),
+            IconButton(
+              tooltip: 'Reprovar',
+              onPressed: onReject,
+              icon: const Icon(Icons.block_rounded),
             ),
           ],
-        ),
-      ),
-      title: Text(exercicio.nome, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: Text(
-        [
-          _formatEditorialStatus(exercicio.editorialStatus),
-          source,
-          license,
-          if (exercicio.editorialNotes?.trim().isNotEmpty == true)
-            exercicio.editorialNotes!.trim(),
-        ].join(' · '),
-        maxLines: 3,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: Wrap(
-        spacing: 6,
-        children: [
-          IconButton.filledTonal(
-            tooltip: 'Aprovar',
-            onPressed: onApprove,
-            icon: const Icon(Icons.verified_rounded),
+        );
+
+        if (compact) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Checkbox(value: selected, onChanged: onSelectedChanged),
+                    mediaIcon,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        exercicio.nome,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 56, top: 2),
+                  child: Text(
+                    subtitle,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Align(alignment: Alignment.centerRight, child: actions),
+              ],
+            ),
+          );
+        }
+
+        return ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: SizedBox(
+            width: 82,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Checkbox(value: selected, onChanged: onSelectedChanged),
+                mediaIcon,
+              ],
+            ),
           ),
-          IconButton(
-            tooltip: 'Reprovar',
-            onPressed: onReject,
-            icon: const Icon(Icons.block_rounded),
+          title: Text(
+            exercicio.nome,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-        ],
-      ),
+          subtitle: Text(
+            subtitle,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: actions,
+        );
+      },
     );
   }
 }
@@ -1957,7 +2064,7 @@ class _ExercicioTile extends ConsumerWidget {
     );
   }
 
-String _formatSource(String value) {
+  String _formatSource(String value) {
     return switch (value) {
       'FOCUX_LIBRARY' => 'Focux',
       'PERSONAL_UPLOAD' => 'Personal',
@@ -1997,13 +2104,13 @@ class _MiniMediaBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 12, color: color),
-          const SizedBox(width: 3),
+          const SizedBox(width: 4),
           Text(
             label,
             style: TextStyle(
               color: color,
               fontSize: 10.5,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
             ),
           ),
         ],
@@ -2011,3 +2118,5 @@ class _MiniMediaBadge extends StatelessWidget {
     );
   }
 }
+
+
