@@ -83,16 +83,7 @@ class ExercicioRepository {
     if (nivel != null && nivel.isNotEmpty) queryParams['nivel'] = nivel;
     if (mecanica != null && mecanica.isNotEmpty) queryParams['mecanica'] = mecanica;
     if (objetivo != null && objetivo.isNotEmpty) queryParams['objetivo'] = objetivo;
-    if (favoritos == true) {
-      queryParams['favoritos'] = 'true';
-      final response = await _dio.get(
-        '/api/exercicios',
-        queryParameters: queryParams.isNotEmpty ? queryParams : null,
-      );
-      final list = response.data as List<dynamic>;
-      return list.map((e) => Exercicio.fromJson(e as Map<String, dynamic>)).toList();
-    }
-
+    if (favoritos == true) queryParams['favoritos'] = 'true';
     queryParams['page'] = 0;
     queryParams['size'] = 80;
     queryParams['sort'] = 'nome,asc';
