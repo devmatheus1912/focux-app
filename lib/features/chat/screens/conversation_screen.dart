@@ -713,119 +713,131 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final canDelete = _canDeleteMessage(msg);
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder:
           (_) => SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (canInteract) ...[
-                    Text(
-                      'Reagir',
-                      style: TextStyle(
-                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        for (final emoji in _quickReactions)
-                          InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                              _toggleReaction(msg, emoji);
-                            },
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: primarySoft,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                emoji,
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.72,
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color:
+                                isDark
+                                    ? EagleTokens.darkLine
+                                    : EagleTokens.line,
+                            borderRadius: BorderRadius.circular(999),
                           ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      if (canInteract) ...[
+                        Text(
+                          'Reagir',
+                          style: TextStyle(
+                            color:
+                                isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: [
+                            for (final emoji in _quickReactions)
+                              InkWell(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _toggleReaction(msg, emoji);
+                                },
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  width: 48,
+                                  height: 48,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: primarySoft,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    emoji,
+                                    style: const TextStyle(fontSize: 24),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 18),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(Icons.reply_rounded, color: primary),
+                          title: const Text('Responder'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _setReply(msg);
+                          },
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(
+                            Icons.content_copy_outlined,
+                            color: primary,
+                          ),
+                          title: const Text('Copiar mensagem'),
+                          onTap: () async {
+                            Navigator.pop(context);
+                            await Clipboard.setData(
+                              ClipboardData(text: msg.conteudo),
+                            );
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Mensagem copiada')),
+                            );
+                          },
+                        ),
                       ],
-                    ),
-                    const SizedBox(height: 18),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(Icons.reply_rounded, color: primary),
-                      title: const Text('Responder'),
-                      onTap: () {
-                        Navigator.pop(context);
-                        _setReply(msg);
-                      },
-                    ),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        Icons.content_copy_outlined,
-                        color: primary,
-                      ),
-                      title: const Text('Copiar mensagem'),
-                      onTap: () async {
-                        Navigator.pop(context);
-                        await Clipboard.setData(
-                          ClipboardData(text: msg.conteudo),
-                        );
-                        if (!mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Mensagem copiada')),
-                        );
-                      },
-                    ),
-                  ],
-                  if (canEdit)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(Icons.edit_outlined, color: primary),
-                      title: const Text('Editar mensagem'),
-                      onTap: () {
-                        Navigator.pop(context);
-                        _editMessage(msg);
-                      },
-                    ),
-                  if (canDelete)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(
-                        Icons.delete_outline_rounded,
-                        color: Color(0xFFE5484D),
-                      ),
-                      title: const Text('Apagar mensagem'),
-                      onTap: () {
-                        Navigator.pop(context);
-                        _deleteMessage(msg);
-                      },
-                    ),
-                ],
+                      if (canEdit)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(Icons.edit_outlined, color: primary),
+                          title: const Text('Editar mensagem'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _editMessage(msg);
+                          },
+                        ),
+                      if (canDelete)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.delete_outline_rounded,
+                            color: Color(0xFFE5484D),
+                          ),
+                          title: const Text('Apagar mensagem'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _deleteMessage(msg);
+                          },
+                        ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -2411,6 +2423,10 @@ class _Bubble extends StatelessWidget {
             ? Colors.white.withValues(alpha: 0.75)
             : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute);
     final deleted = msg.deletedAt != null;
+    final bubbleMaxWidth = (MediaQuery.sizeOf(context).width - 56).clamp(
+      220.0,
+      520.0,
+    );
 
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
@@ -2420,9 +2436,7 @@ class _Bubble extends StatelessWidget {
           duration: const Duration(milliseconds: 180),
           margin: const EdgeInsets.symmetric(vertical: 3),
           padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.78,
-          ),
+          constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
           decoration: BoxDecoration(
             gradient:
                 mine
@@ -2847,6 +2861,12 @@ class _MediaPreview extends StatelessWidget {
     }
 
     if (tipo == 'IMAGE' || tipo == 'IMAGEM') {
+      final previewWidth = (MediaQuery.sizeOf(context).width * 0.56).clamp(
+        156.0,
+        220.0,
+      );
+      final previewHeight = previewWidth * 0.9;
+
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: GestureDetector(
@@ -2857,13 +2877,13 @@ class _MediaPreview extends StatelessWidget {
               children: [
                 Image.network(
                   url,
-                  height: 200,
-                  width: 220,
+                  height: previewHeight,
+                  width: previewWidth,
                   fit: BoxFit.cover,
                   errorBuilder:
                       (_, __, ___) => Container(
-                        height: 120,
-                        width: 220,
+                        height: previewHeight,
+                        width: previewWidth,
                         color: Colors.black12,
                         alignment: Alignment.center,
                         child: const Icon(Icons.broken_image_outlined),
