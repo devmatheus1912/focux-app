@@ -1500,6 +1500,7 @@ class _ExercicioTile extends ConsumerWidget {
             ? exercicio.gifUrl
             : null;
     final licensed = exercicio.licenseStatus == 'LICENSED';
+    final approved = exercicio.editorialStatus == 'APPROVED';
 
     return Material(
       color: card,
@@ -1534,12 +1535,22 @@ class _ExercicioTile extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
-            if (licensed || exercicio.videoSource?.isNotEmpty == true) ...[
+            if (licensed ||
+                exercicio.videoSource?.isNotEmpty == true ||
+                exercicio.editorialStatus.isNotEmpty) ...[
               const SizedBox(height: 4),
               Wrap(
                 spacing: 6,
                 runSpacing: 4,
                 children: [
+                  _MiniMediaBadge(
+                    icon:
+                        approved
+                            ? Icons.fact_check_rounded
+                            : Icons.rate_review_rounded,
+                    label: _formatEditorialStatus(exercicio.editorialStatus),
+                    color: approved ? EagleTokens.good : EagleTokens.warn,
+                  ),
                   if (licensed)
                     const _MiniMediaBadge(
                       icon: Icons.verified_rounded,
@@ -1584,13 +1595,21 @@ class _ExercicioTile extends ConsumerWidget {
     );
   }
 
-  String _formatSource(String value) {
+String _formatSource(String value) {
     return switch (value) {
       'FOCUX_LIBRARY' => 'Focux',
       'PERSONAL_UPLOAD' => 'Personal',
       _ => value.replaceAll('_', ' '),
     };
   }
+}
+
+String _formatEditorialStatus(String value) {
+  return switch (value) {
+    'APPROVED' => 'Aprovado',
+    'REJECTED' => 'Reprovado',
+    _ => 'Revisar',
+  };
 }
 
 class _MiniMediaBadge extends StatelessWidget {

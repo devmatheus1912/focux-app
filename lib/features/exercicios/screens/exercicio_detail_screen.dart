@@ -76,6 +76,64 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     }
   }
 
+  Future<void> _updateEditorialReview(
+    BuildContext context,
+    String status,
+    String? currentNotes,
+  ) async {
+    final notesCtrl = TextEditingController(text: currentNotes ?? '');
+    final notes = await showDialog<String?>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: Text(_editorialActionTitle(status)),
+            content: TextField(
+              controller: notesCtrl,
+              minLines: 3,
+              maxLines: 6,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Notas tecnicas, fonte do video ou motivo da decisao',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, notesCtrl.text.trim()),
+                child: const Text('Salvar'),
+              ),
+            ],
+          ),
+    );
+    notesCtrl.dispose();
+    if (notes == null) return;
+
+    try {
+      await ref.read(exercicioRepositoryProvider).atualizarCuradoriaEditorial(
+            id: widget.exercicioId,
+            status: status,
+            notes: notes.isEmpty ? null : notes,
+          );
+      ref.invalidate(exercicioProvider(widget.exercicioId));
+      ref.invalidate(exerciciosFilteredProvider);
+      ref.invalidate(exerciciosCuradoriaProvider);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Curadoria marcada como ${_formatEditorialStatus(status)}.')),
+      );
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao salvar curadoria: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final exercicioAsync = ref.watch(exercicioProvider(widget.exercicioId));
@@ -224,6 +282,17 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                       ],
                       const SizedBox(height: 14),
                       if (ex.videoSource?.isNotEmpty == true || ex.licenseStatus?.isNotEmpty == true) ...[
+                        _EditorialReviewPanel(
+                          status: ex.editorialStatus,
+                          notes: ex.editorialNotes,
+                          reviewedAt: ex.editorialReviewedAt,
+                          onChange: (status) => _updateEditorialReview(
+                            context,
+                            status,
+                            ex.editorialNotes,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
                         _MediaMetadataPanel(
                           source: ex.videoSource,
                           licenseStatus: ex.licenseStatus,
@@ -279,6 +348,167 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+String _formatEditorialStatus(String value) {
+  return switch (value) {
+    'APPROVED' => 'Aprovado',
+    'REJECTED' => 'Reprovado',
+    _ => 'Pendente',
+  };
+}
+
+String _editorialActionTitle(String value) {
+  return switch (value) {
+    'APPROVED' => 'Aprovar midia',
+    'REJECTED' => 'Reprovar midia',
+    _ => 'Voltar para revisao',
+  };
+}
+
+class _EditorialReviewPanel extends StatelessWidget {
+  final String status;
+  final String? notes;
+  final DateTime? reviewedAt;
+  final ValueChanged<String> onChange;
+
+  const _EditorialReviewPanel({
+    required this.status,
+    required this.notes,
+    required this.reviewedAt,
+    required this.onChange,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final color = switch (status) {
+      'APPROVED' => EagleTokens.good,
+      'REJECTED' => EagleTokens.bad,
+      _ => EagleTokens.warn,
+    };
+    final reviewed =
+        reviewedAt == null
+            ? null
+            : '${reviewedAt!.day.toString().padLeft(2, '0')}/'
+                '${reviewedAt!.month.toString().padLeft(2, '0')}/'
+                '${reviewedAt!.year}';
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.14 : 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.fact_check_rounded, color: color),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Curadoria editorial',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      [
+                        _formatEditorialStatus(status),
+                        if (reviewed != null) 'revisado em $reviewed',
+                      ].join(' · '),
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (notes?.trim().isNotEmpty == true) ...[
+            const SizedBox(height: 10),
+            Text(
+              notes!.trim(),
+              style: TextStyle(
+                color: ink.withValues(alpha: 0.84),
+                fontSize: 12.5,
+                height: 1.35,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _EditorialActionButton(
+                label: 'Aprovar',
+                icon: Icons.verified_rounded,
+                selected: status == 'APPROVED',
+                onTap: () => onChange('APPROVED'),
+              ),
+              _EditorialActionButton(
+                label: 'Reprovar',
+                icon: Icons.block_rounded,
+                selected: status == 'REJECTED',
+                onTap: () => onChange('REJECTED'),
+              ),
+              _EditorialActionButton(
+                label: 'Revisar',
+                icon: Icons.rate_review_rounded,
+                selected: status == 'PENDING_REVIEW',
+                onTap: () => onChange('PENDING_REVIEW'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EditorialActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _EditorialActionButton({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 17),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        backgroundColor:
+            selected
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.12)
+                : null,
       ),
     );
   }

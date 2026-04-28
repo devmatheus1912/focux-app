@@ -21,6 +21,9 @@ class Exercicio {
   final String? videoUrl;
   final String? tags;
   final bool favoritado;
+  final String editorialStatus;
+  final String? editorialNotes;
+  final DateTime? editorialReviewedAt;
 
   Exercicio({
     required this.id,
@@ -42,6 +45,9 @@ class Exercicio {
     this.videoUrl,
     this.tags,
     this.favoritado = false,
+    this.editorialStatus = 'PENDING_REVIEW',
+    this.editorialNotes,
+    this.editorialReviewedAt,
   });
 
   factory Exercicio.fromJson(Map<String, dynamic> json) => Exercicio(
@@ -64,6 +70,12 @@ class Exercicio {
     videoUrl: json['videoUrl'] as String?,
     tags: json['tags'] as String?,
     favoritado: json['favoritado'] as bool? ?? false,
+    editorialStatus: json['editorialStatus'] as String? ?? 'PENDING_REVIEW',
+    editorialNotes: json['editorialNotes'] as String?,
+    editorialReviewedAt:
+        json['editorialReviewedAt'] == null
+            ? null
+            : DateTime.tryParse(json['editorialReviewedAt'].toString()),
   );
 }
 
@@ -378,6 +390,21 @@ class ExercicioRepository {
       'file': MultipartFile.fromBytes(bytes, filename: filename),
     });
     final response = await _dio.post('/api/exercicios/$id/video', data: form);
+    return Exercicio.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Exercicio> atualizarCuradoriaEditorial({
+    required int id,
+    required String status,
+    String? notes,
+  }) async {
+    final response = await _dio.patch(
+      '/api/exercicios/$id/curadoria-editorial',
+      data: {
+        'editorialStatus': status,
+        if (notes != null) 'editorialNotes': notes,
+      },
+    );
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
