@@ -40,6 +40,8 @@ const _equipamentosFiltro = [
 const _niveisFiltro = ['Iniciante', 'Intermediario', 'Avancado'];
 const _mecanicasFiltro = ['Composto', 'Isolado', 'Mobilidade', 'Cardio'];
 const _objetivosFiltro = ['Forca', 'Hipertrofia', 'Emagrecimento', 'Condicionamento', 'Mobilidade'];
+const _fontesVideoFiltro = ['FOCUX_LIBRARY', 'PERSONAL_UPLOAD'];
+const _licencasFiltro = ['LICENSED', 'PERSONAL_OWNED', 'PENDING_REVIEW'];
 
 class ExerciciosListScreen extends ConsumerStatefulWidget {
   const ExerciciosListScreen({super.key});
@@ -60,6 +62,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   String? _nivelFiltro;
   String? _mecanicaFiltro;
   String? _objetivoFiltro;
+  bool _comVideoFiltro = false;
+  String? _fonteVideoFiltro;
+  String? _licencaFiltro;
 
   @override
   void dispose() {
@@ -75,7 +80,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       _equipamentoFiltro != null ||
       _nivelFiltro != null ||
       _mecanicaFiltro != null ||
-      _objetivoFiltro != null;
+      _objetivoFiltro != null ||
+      _comVideoFiltro ||
+      _fonteVideoFiltro != null ||
+      _licencaFiltro != null;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +97,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         nivel: _nivelFiltro,
         mecanica: _mecanicaFiltro,
         objetivo: _objetivoFiltro,
+        hasVideo: _comVideoFiltro ? true : null,
+        videoSource: _fonteVideoFiltro,
+        licenseStatus: _licencaFiltro,
         favoritos: _apenasFavoritos ? true : null,
       ),
     ));
@@ -258,6 +269,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                     _ActiveFilterChip(label: _nivelFiltro, onDeleted: () => setState(() => _nivelFiltro = null)),
                     _ActiveFilterChip(label: _mecanicaFiltro, onDeleted: () => setState(() => _mecanicaFiltro = null)),
                     _ActiveFilterChip(label: _objetivoFiltro, onDeleted: () => setState(() => _objetivoFiltro = null)),
+                    _ActiveFilterChip(label: _comVideoFiltro ? 'Com video' : null, onDeleted: () => setState(() => _comVideoFiltro = false)),
+                    _ActiveFilterChip(label: _formatSourceLabel(_fonteVideoFiltro), onDeleted: () => setState(() => _fonteVideoFiltro = null)),
+                    _ActiveFilterChip(label: _formatLicenseLabel(_licencaFiltro), onDeleted: () => setState(() => _licencaFiltro = null)),
                   ],
                 ),
               ),
@@ -296,6 +310,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     var nivel = _nivelFiltro;
     var mecanica = _mecanicaFiltro;
     var objetivo = _objetivoFiltro;
+    var comVideo = _comVideoFiltro;
+    var fonteVideo = _fonteVideoFiltro;
+    var licenca = _licencaFiltro;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -321,6 +338,18 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   _FilterDropdown(label: 'Mecanica', value: mecanica, values: _mecanicasFiltro, onChanged: (v) => modalSetState(() => mecanica = v)),
                   const SizedBox(height: 10),
                   _FilterDropdown(label: 'Objetivo', value: objetivo, values: _objetivosFiltro, onChanged: (v) => modalSetState(() => objetivo = v)),
+                  const SizedBox(height: 10),
+                  SwitchListTile.adaptive(
+                    value: comVideo,
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Somente com video'),
+                    secondary: const Icon(Icons.play_circle_fill_rounded),
+                    onChanged: (value) => modalSetState(() => comVideo = value),
+                  ),
+                  const SizedBox(height: 10),
+                  _FilterDropdown(label: 'Fonte do video', value: fonteVideo, values: _fontesVideoFiltro, formatter: _formatSourceLabel, onChanged: (v) => modalSetState(() => fonteVideo = v)),
+                  const SizedBox(height: 10),
+                  _FilterDropdown(label: 'Licenca', value: licenca, values: _licencasFiltro, formatter: _formatLicenseLabel, onChanged: (v) => modalSetState(() => licenca = v)),
                   const SizedBox(height: 18),
                   Row(
                     children: [
@@ -333,6 +362,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                               nivel = null;
                               mecanica = null;
                               objetivo = null;
+                              comVideo = false;
+                              fonteVideo = null;
+                              licenca = null;
                             });
                           },
                           child: const Text('Limpar'),
@@ -348,6 +380,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                               _nivelFiltro = nivel;
                               _mecanicaFiltro = mecanica;
                               _objetivoFiltro = objetivo;
+                              _comVideoFiltro = comVideo;
+                              _fonteVideoFiltro = fonteVideo;
+                              _licencaFiltro = licenca;
                             });
                             Navigator.pop(ctx);
                           },
@@ -364,18 +399,39 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       },
     );
   }
+
+  String? _formatSourceLabel(String? value) {
+    return switch (value) {
+      'FOCUX_LIBRARY' => 'Biblioteca Focux',
+      'PERSONAL_UPLOAD' => 'Video do personal',
+      null || '' => null,
+      _ => value.replaceAll('_', ' '),
+    };
+  }
+
+  String? _formatLicenseLabel(String? value) {
+    return switch (value) {
+      'LICENSED' => 'Licenciado',
+      'PERSONAL_OWNED' => 'Proprio',
+      'PENDING_REVIEW' => 'Pendente',
+      null || '' => null,
+      _ => value.replaceAll('_', ' '),
+    };
+  }
 }
 
 class _FilterDropdown extends StatelessWidget {
   final String label;
   final String? value;
   final List<String> values;
+  final String? Function(String?)? formatter;
   final ValueChanged<String?> onChanged;
 
   const _FilterDropdown({
     required this.label,
     required this.value,
     required this.values,
+    this.formatter,
     required this.onChanged,
   });
 
@@ -384,7 +440,7 @@ class _FilterDropdown extends StatelessWidget {
     return DropdownButtonFormField<String>(
       value: value,
       decoration: InputDecoration(labelText: label, border: const OutlineInputBorder(), isDense: true),
-      items: values.map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+      items: values.map((v) => DropdownMenuItem(value: v, child: Text(formatter?.call(v) ?? v))).toList(),
       onChanged: onChanged,
     );
   }

@@ -81,6 +81,9 @@ class ExercicioRepository {
     String? nivel,
     String? mecanica,
     String? objetivo,
+    bool? hasVideo,
+    String? videoSource,
+    String? licenseStatus,
     bool? favoritos,
   }) async {
     final queryParams = <String, dynamic>{};
@@ -92,6 +95,9 @@ class ExercicioRepository {
     if (nivel != null && nivel.isNotEmpty) queryParams['nivel'] = nivel;
     if (mecanica != null && mecanica.isNotEmpty) queryParams['mecanica'] = mecanica;
     if (objetivo != null && objetivo.isNotEmpty) queryParams['objetivo'] = objetivo;
+    if (hasVideo == true) queryParams['hasVideo'] = 'true';
+    if (videoSource != null && videoSource.isNotEmpty) queryParams['videoSource'] = videoSource;
+    if (licenseStatus != null && licenseStatus.isNotEmpty) queryParams['licenseStatus'] = licenseStatus;
     if (favoritos == true) queryParams['favoritos'] = 'true';
     queryParams['page'] = 0;
     queryParams['size'] = 80;

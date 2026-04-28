@@ -16,6 +16,9 @@ class ExercicioFilter {
   final String? nivel;
   final String? mecanica;
   final String? objetivo;
+  final bool? hasVideo;
+  final String? videoSource;
+  final String? licenseStatus;
   final bool? favoritos;
 
   const ExercicioFilter({
@@ -27,6 +30,9 @@ class ExercicioFilter {
     this.nivel,
     this.mecanica,
     this.objetivo,
+    this.hasVideo,
+    this.videoSource,
+    this.licenseStatus,
     this.favoritos,
   });
 
@@ -41,6 +47,9 @@ class ExercicioFilter {
       other.nivel == nivel &&
       other.mecanica == mecanica &&
       other.objetivo == objetivo &&
+      other.hasVideo == hasVideo &&
+      other.videoSource == videoSource &&
+      other.licenseStatus == licenseStatus &&
       other.favoritos == favoritos;
 
   @override
@@ -53,6 +62,9 @@ class ExercicioFilter {
         nivel,
         mecanica,
         objetivo,
+        hasVideo,
+        videoSource,
+        licenseStatus,
         favoritos,
       );
 }
@@ -69,6 +81,9 @@ final exerciciosFilteredProvider =
         nivel: filter.nivel,
         mecanica: filter.mecanica,
         objetivo: filter.objetivo,
+        hasVideo: filter.hasVideo,
+        videoSource: filter.videoSource,
+        licenseStatus: filter.licenseStatus,
         favoritos: filter.favoritos,
       );
 });
