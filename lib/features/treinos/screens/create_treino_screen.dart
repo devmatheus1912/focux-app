@@ -77,6 +77,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -129,10 +130,10 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                 Container(
                   width: 56, height: 56,
                   decoration: BoxDecoration(
-                    color: EagleTokens.brand.withValues(alpha: 0.1),
+                    color: primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.fitness_center, color: EagleTokens.brand, size: 28),
+                  child: Icon(Icons.fitness_center, color: primary, size: 28),
                 ),
                 const SizedBox(height: 16),
                 Text('Configure o treino', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: isDark ? EagleTokens.darkInk : EagleTokens.ink)),
@@ -205,9 +206,9 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
                         : const Text('Criar Treino', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: EagleTokens.brand,
+                      backgroundColor: primary,
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
+                      disabledBackgroundColor: primary.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       elevation: 0,
                     ),
@@ -236,22 +237,25 @@ class _FxField extends StatelessWidget {
   const _FxField({required this.controller, required this.label, required this.icon, required this.isDark, this.maxLines = 1, this.validator});
 
   @override
-  Widget build(BuildContext context) => TextFormField(
-    controller: controller, maxLines: maxLines, validator: validator,
-    style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 15),
-    cursorColor: EagleTokens.brand,
-    decoration: InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(icon, size: 20, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-      filled: true,
-      fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-      labelStyle: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.bad)),
-      errorStyle: const TextStyle(color: EagleTokens.bad, fontSize: 11),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return TextFormField(
+      controller: controller, maxLines: maxLines, validator: validator,
+      style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 15),
+      cursorColor: primary,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 20, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+        filled: true,
+        fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+        labelStyle: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: primary, width: 1.5)),
+        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.bad)),
+        errorStyle: const TextStyle(color: EagleTokens.bad, fontSize: 11),
+      ),
+    );
+  }
 }

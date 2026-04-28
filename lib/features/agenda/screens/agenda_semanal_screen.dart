@@ -77,7 +77,7 @@ class _AgendaSemanalScreenState extends ConsumerState<AgendaSemanalScreen> {
       case 'PRESENTE': return EagleTokens.good;
       case 'FALTA': return EagleTokens.bad;
       case 'CANCELADO': return EagleTokens.inkMute;
-      default: return EagleTokens.brand;
+      default: return Theme.of(context).colorScheme.primary;
     }
   }
 

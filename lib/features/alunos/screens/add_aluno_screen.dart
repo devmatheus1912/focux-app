@@ -84,6 +84,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
 
   void _showSenhaBottomSheet(final aluno) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -121,9 +122,9 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
               decoration: BoxDecoration(
-                color: EagleTokens.brand.withValues(alpha: 0.08),
+                color: primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: EagleTokens.brand.withValues(alpha: 0.2)),
+                border: Border.all(color: primary.withValues(alpha: 0.2)),
               ),
               child: Text(
                 aluno.senhaProvisoria!,
@@ -213,6 +214,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -257,12 +259,12 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                       label: Text(g),
                       selected: _genero == g,
                       onSelected: (sel) => setState(() => _genero = sel ? g : null),
-                      selectedColor: EagleTokens.brand.withValues(alpha: 0.15),
+                      selectedColor: primary.withValues(alpha: 0.15),
                       labelStyle: TextStyle(
-                        color: _genero == g ? EagleTokens.brand : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+                        color: _genero == g ? primary : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
                         fontWeight: _genero == g ? FontWeight.w600 : FontWeight.w400,
                       ),
-                      side: BorderSide(color: _genero == g ? EagleTokens.brand.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                      side: BorderSide(color: _genero == g ? primary.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     )).toList(),
                   ),
@@ -280,9 +282,9 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                         label: Text(_tiposConsultoriaLabel[i]),
                         selected: sel,
                         onSelected: (s) => setState(() => _tipoConsultoria = s ? _tiposConsultoria[i] : null),
-                        selectedColor: EagleTokens.brand.withValues(alpha: 0.15),
-                        labelStyle: TextStyle(color: sel ? EagleTokens.brand : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), fontWeight: sel ? FontWeight.w600 : FontWeight.w400),
-                        side: BorderSide(color: sel ? EagleTokens.brand.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                        selectedColor: primary.withValues(alpha: 0.15),
+                        labelStyle: TextStyle(color: sel ? primary : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), fontWeight: sel ? FontWeight.w600 : FontWeight.w400),
+                        side: BorderSide(color: sel ? primary.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       );
                     }),
@@ -318,9 +320,9 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                           ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
                           : const Text('Cadastrar Aluno', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: EagleTokens.brand,
+                        backgroundColor: primary,
                         foregroundColor: Colors.white,
-                        disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
+                        disabledBackgroundColor: primary.withValues(alpha: 0.5),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         elevation: 0,
                       ),
@@ -346,10 +348,11 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Row(children: [
-      Icon(icon, size: 16, color: EagleTokens.brand),
+      Icon(icon, size: 16, color: primary),
       const SizedBox(width: 8),
-      Text(label, style: TextStyle(color: EagleTokens.brand, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+      Text(label, style: TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
     ]);
   }
 }
@@ -369,6 +372,7 @@ class _FxFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -376,7 +380,7 @@ class _FxFormField extends StatelessWidget {
       maxLines: maxLines,
       validator: validator,
       style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 15),
-      cursorColor: EagleTokens.brand,
+      cursorColor: primary,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
@@ -388,7 +392,7 @@ class _FxFormField extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: primary, width: 1.5)),
         errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.bad)),
         errorStyle: const TextStyle(color: EagleTokens.bad, fontSize: 11),
       ),

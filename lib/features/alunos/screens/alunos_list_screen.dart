@@ -102,7 +102,8 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   Widget build(BuildContext context) {
     final alunosAsync = ref.watch(alunosProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+    final primary = Theme.of(context).colorScheme.primary;
+
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -146,7 +147,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                               _modoSelecao
                                   ? (_selecionados.isEmpty ? 'SELECIONE OS ALUNOS' : '${_selecionados.length} SELECIONADO(S)')
                                   : '$ativosCount ativos · $inadCount inadimpl.'.toUpperCase(),
-                              style: TextStyle(fontSize: 12, color: _modoSelecao ? EagleTokens.brand : mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                              style: TextStyle(fontSize: 12, color: _modoSelecao ? primary : mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -193,10 +194,10 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                           child: Container(
                             width: 44, height: 44,
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.white : EagleTokens.brand,
+                              color: isDark ? Colors.white : primary,
                               shape: BoxShape.circle,
                               boxShadow: [
-                                if (!isDark) BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.5), blurRadius: 16, offset: const Offset(0, 6), spreadRadius: -6)
+                                if (!isDark) BoxShadow(color: primary.withValues(alpha: 0.5), blurRadius: 16, offset: const Offset(0, 6), spreadRadius: -6)
                               ],
                             ),
                             child: Icon(Icons.add, size: 24, color: isDark ? EagleTokens.ink : Colors.white),
@@ -224,7 +225,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                         Expanded(
                           child: Text('Buscar por nome, objetivo...', style: TextStyle(fontSize: 14, color: mute)),
                         ),
-                        Icon(Icons.tune, size: 20, color: isDark ? EagleTokens.brandAccent : EagleTokens.brand),
+                        Icon(Icons.tune, size: 20, color: primary),
                       ],
                     ),
                   ),
@@ -412,6 +413,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -464,10 +466,10 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected ? EagleTokens.brand.withValues(alpha: isDark ? 0.18 : 0.08) : cardBg,
+          color: isSelected ? primary.withValues(alpha: isDark ? 0.18 : 0.08) : cardBg,
           borderRadius: BorderRadius.circular(20),
           border: isSelected
-              ? Border.all(color: EagleTokens.brand.withValues(alpha: 0.5), width: 1.5)
+              ? Border.all(color: primary.withValues(alpha: 0.5), width: 1.5)
               : Border.all(color: line),
         ),
         child: Row(
@@ -479,7 +481,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                 child: Icon(
                   isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
                   key: ValueKey(isSelected),
-                  color: isSelected ? EagleTokens.brand : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+                  color: isSelected ? primary : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
                   size: 22,
                 ),
               ),

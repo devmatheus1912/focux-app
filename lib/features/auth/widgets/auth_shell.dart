@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/brand_palette.dart';
 
 class AuthShell extends StatelessWidget {
   const AuthShell({super.key, required this.child, this.dark = false});
@@ -329,6 +330,7 @@ class AuthPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     // Design spec: LinearGradient 135° brand→brandInk + shadow 8px -8px brand 60%
     return SizedBox(
       width: double.infinity,
@@ -340,16 +342,16 @@ class AuthPrimaryButton extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              EagleTokens.brand,
+              primary,
               isLoading
-                  ? EagleTokens.brand.withValues(alpha: 0.45)
-                  : EagleTokens.brandInk,
+                  ? primary.withValues(alpha: 0.45)
+                  : BrandPalette.deep(primary),
             ],
           ),
           boxShadow: [
             if (!isLoading)
               BoxShadow(
-                color: EagleTokens.brand.withValues(alpha: 0.6),
+                color: primary.withValues(alpha: 0.6),
                 blurRadius: 8,
                 offset: const Offset(0, -8),
                 spreadRadius: 0,
@@ -526,8 +528,8 @@ class AuthPlanCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           gradient:
               selected
-                  ? const LinearGradient(
-                    colors: [EagleTokens.brand, EagleTokens.brandInk],
+                  ? LinearGradient(
+                    colors: [Theme.of(context).colorScheme.primary, BrandPalette.deep(Theme.of(context).colorScheme.primary)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   )
@@ -539,11 +541,11 @@ class AuthPlanCard extends StatelessWidget {
                   : Border.all(color: Colors.white.withValues(alpha: 0.12)),
           boxShadow:
               selected
-                  ? const [
+                  ? [
                     BoxShadow(
-                      color: Color.fromRGBO(59, 95, 226, 0.4),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
                       blurRadius: 20,
-                      offset: Offset(0, 6),
+                      offset: const Offset(0, 6),
                     ),
                   ]
                   : null,

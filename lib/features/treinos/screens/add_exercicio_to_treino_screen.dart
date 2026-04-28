@@ -59,6 +59,7 @@ class _AddExercicioToTreinoScreenState
   Widget build(BuildContext context) {
     final exerciciosAsync = ref.watch(exerciciosProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -99,7 +100,7 @@ class _AddExercicioToTreinoScreenState
             ),
             Expanded(
               child: exerciciosAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator(color: EagleTokens.brand)),
+                loading: () => Center(child: CircularProgressIndicator(color: primary)),
                 error: (e, _) => Center(child: Text('Erro: $e', style: TextStyle(color: EagleTokens.bad))),
                 data: (exercicios) => SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
@@ -130,11 +131,11 @@ class _AddExercicioToTreinoScreenState
                           Container(
                             height: 56, // Match Dropdown height
                             decoration: BoxDecoration(
-                              color: EagleTokens.brand.withValues(alpha: 0.1),
+                              color: primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: IconButton(
-                              icon: const Icon(Icons.add, color: EagleTokens.brand),
+                              icon: Icon(Icons.add, color: primary),
                               tooltip: 'Criar novo exercício',
                               onPressed: () async {
                                 final criado = await context.push<bool>('/exercicios/novo');
@@ -214,9 +215,9 @@ class _AddExercicioToTreinoScreenState
                         child: ElevatedButton(
                           onPressed: _loading ? null : _submit,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: EagleTokens.brand,
+                            backgroundColor: primary,
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
+                            disabledBackgroundColor: primary.withValues(alpha: 0.5),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             elevation: 0,
                           ),

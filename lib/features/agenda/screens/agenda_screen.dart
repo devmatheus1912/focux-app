@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/brand_palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -38,10 +39,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     }
   }
 
-  Color _statusColor(String s, bool isDark) {
+  Color _statusColor(String s, bool isDark, Color primary) {
     if (s == 'PRESENTE' || s == 'CONCLUIDO') return isDark ? const Color(0xFF6FE296) : EagleTokens.good;
     if (s == 'FALTA' || s == 'CANCELADO') return isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad;
-    return isDark ? EagleTokens.brandAccent : EagleTokens.brand; // AGENDADO
+    return primary; // AGENDADO
   }
 
   @override
@@ -52,7 +53,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final brand = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
+    final primary = Theme.of(context).colorScheme.primary;
 
     final diasSemanaStr = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
@@ -79,10 +80,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       backgroundColor: bg,
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandDeep]),
+          gradient: LinearGradient(colors: [primary, BrandPalette.deep(primary)]),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
-            if (!isDark) BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))
+            if (!isDark) BoxShadow(color: primary.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))
           ],
         ),
         child: FloatingActionButton(
@@ -163,10 +164,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                       constraints: const BoxConstraints(minWidth: 46),
                       decoration: BoxDecoration(
-                        color: isSelected ? brand : cardBg,
+                        color: isSelected ? primary : cardBg,
                         borderRadius: BorderRadius.circular(14),
                         border: isSelected ? null : Border.all(color: isDark ? Colors.transparent : line),
-                        boxShadow: isSelected && !isDark ? [BoxShadow(color: brand.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))] : null,
+                        boxShadow: isSelected && !isDark ? [BoxShadow(color: primary.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))] : null,
                       ),
                       child: Column(
                         children: [
@@ -178,7 +179,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                             Container(
                               width: 16, height: 16,
                               decoration: BoxDecoration(
-                                color: isSelected ? Colors.white.withValues(alpha: 0.3) : brand,
+                                color: isSelected ? Colors.white.withValues(alpha: 0.3) : primary,
                                 shape: BoxShape.circle,
                               ),
                               alignment: Alignment.center,
@@ -201,7 +202,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
               child: Text.rich(TextSpan(
                 children: [
                   TextSpan(text: '${diasSemanaStr[_selectedIdx]} · ${selectedDate.day} ${monthNames[selectedDate.month]} · ', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: ink, letterSpacing: -0.2)),
-                  TextSpan(text: '${dailyEvents.length} atendimentos', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: brand, letterSpacing: -0.2)),
+                  TextSpan(text: '${dailyEvents.length} atendimentos', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: primary, letterSpacing: -0.2)),
                 ],
               )),
             ),
@@ -242,7 +243,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                         }
 
                         final e = dailyEvents[i];
-                        final sColor = _statusColor(e.status, isDark);
+                        final sColor = _statusColor(e.status, isDark, primary);
                         
                         return Container(
                           margin: const EdgeInsets.only(bottom: 8),
@@ -258,12 +259,12 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                 width: 52,
                                 child: Column(
                                   children: [
-                                    Text('${e.inicio.hour.toString().padLeft(2, '0')}:${e.inicio.minute.toString().padLeft(2, '0')}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: brand, fontFamily: 'monospace')),
+                                    Text('${e.inicio.hour.toString().padLeft(2, '0')}:${e.inicio.minute.toString().padLeft(2, '0')}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: primary, fontFamily: 'monospace')),
                                     Container(
                                       width: 2, height: 20,
                                       margin: const EdgeInsets.only(top: 4),
                                       decoration: BoxDecoration(
-                                        color: brand.withValues(alpha: 0.3),
+                                        color: primary.withValues(alpha: 0.3),
                                         borderRadius: BorderRadius.circular(2),
                                       ),
                                     ),
@@ -273,7 +274,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                               Container(
                                 width: 40, height: 40,
                                 margin: const EdgeInsets.only(right: 12),
-                                decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
+                                decoration: BoxDecoration(color: primary, shape: BoxShape.circle),
                                 alignment: Alignment.center,
                                 child: Text(e.alunoNome.isNotEmpty ? e.alunoNome[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                               ),
@@ -296,11 +297,11 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                               Container(
                                 width: 34, height: 34,
                                 decoration: BoxDecoration(
-                                  color: isDark ? Colors.white.withValues(alpha: 0.06) : EagleTokens.brandSoft,
+                                  color: isDark ? Colors.white.withValues(alpha: 0.06) : primary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 alignment: Alignment.center,
-                                child: Icon(Icons.chevron_right, size: 18, color: brand),
+                                child: Icon(Icons.chevron_right, size: 18, color: primary),
                               ),
                             ],
                           ),

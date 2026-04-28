@@ -5,6 +5,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 
@@ -48,7 +49,8 @@ class AlunoDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final alunoAsync = ref.watch(alunoProvider(alunoId));
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+    final primary = Theme.of(context).colorScheme.primary;
+
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
 
@@ -70,7 +72,7 @@ class AlunoDetailScreen extends ConsumerWidget {
               SliverAppBar(
                 expandedHeight: 320,
                 pinned: true,
-                backgroundColor: isDark ? const Color(0xFF0F1E4A) : EagleTokens.brand,
+                backgroundColor: primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 flexibleSpace: FlexibleSpaceBar(
@@ -79,9 +81,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: isDark 
-                            ? [const Color(0xFF1C3273), const Color(0xFF0F1E4A)]
-                            : [EagleTokens.brand, EagleTokens.brandDeep],
+                        colors: [primary, BrandPalette.deep(primary)],
                       ),
                     ),
                     child: SafeArea(
@@ -102,7 +102,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                   alignment: Alignment.center,
                                   child: Text(
                                     fxInitials(aluno.nome),
-                                    style: const TextStyle(color: EagleTokens.brand, fontSize: 28, fontWeight: FontWeight.bold),
+                                    style: TextStyle(color: primary, fontSize: 28, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -166,11 +166,11 @@ class AlunoDetailScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: EagleTokens.brand.withValues(alpha: 0.08),
+                          color: primary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Row(children: [
-                          const Icon(Icons.auto_awesome, color: EagleTokens.brand, size: 20),
+                          Icon(Icons.auto_awesome, color: primary, size: 20),
                           const SizedBox(width: 10),
                           Expanded(child: Text('Copiloto IA pronto para sugestões', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 13, fontWeight: FontWeight.w500))),
                         ]),
@@ -231,7 +231,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                               height: 72,
                               child: FxSparkline(
                                 data: const [68, 67.5, 66.8, 66.0, 65.2, 64.8, 64.1],
-                                color: isDark ? const Color(0xFF8DA4E2) : EagleTokens.brand,
+                                color: primary,
                                 fill: true,
                               ),
                             ),
@@ -390,13 +390,13 @@ class _ModuleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final accent = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
 
-    final bg = highlight ? (isDark ? const Color(0xFF1C3273) : EagleTokens.brandSoft) : cardBg;
+    final bg = highlight ? primary.withValues(alpha: isDark ? 0.18 : 0.1) : cardBg;
     final border = Border.all(color: highlight ? Colors.transparent : line);
 
     return InkWell(
@@ -411,16 +411,14 @@ class _ModuleTile extends StatelessWidget {
             Container(
               width: 32, height: 32,
               decoration: BoxDecoration(
-                color: highlight 
-                    ? (isDark ? Colors.white.withValues(alpha: 0.12) : EagleTokens.brand) 
-                    : (isDark ? EagleTokens.brandAccent.withValues(alpha: 0.12) : EagleTokens.brandSofter),
+                color: primary.withValues(alpha: highlight ? 0.18 : 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, size: 16, color: highlight ? Colors.white : accent),
+              child: Icon(icon, size: 16, color: highlight ? primary : primary),
             ),
             const Spacer(),
-            Text(label, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: highlight && !isDark ? EagleTokens.brand : ink, letterSpacing: -0.2)),
-            Text(sub, style: TextStyle(fontSize: 11.5, color: highlight && !isDark ? EagleTokens.brandInk : mute)),
+            Text(label, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: highlight ? primary : ink, letterSpacing: -0.2)),
+            Text(sub, style: TextStyle(fontSize: 11.5, color: highlight ? BrandPalette.deep(primary) : mute)),
           ],
         ),
       ),

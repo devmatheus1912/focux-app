@@ -89,6 +89,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -102,7 +103,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
               ? const Padding(padding: EdgeInsets.all(16), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
               : TextButton(
                   onPressed: _salvar,
-                  child: Text('Salvar', style: TextStyle(color: EagleTokens.brand, fontWeight: FontWeight.w700, fontSize: 15)),
+                  child: Text('Salvar', style: TextStyle(color: primary, fontWeight: FontWeight.w700, fontSize: 15)),
                 ),
         ],
       ),
@@ -120,10 +121,10 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                   child: Column(children: [
                     CircleAvatar(
                       radius: 36,
-                      backgroundColor: EagleTokens.brand.withValues(alpha: 0.12),
+                      backgroundColor: primary.withValues(alpha: 0.12),
                       child: Text(
                         fxInitials(widget.aluno.nome),
-                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: EagleTokens.brand),
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: primary),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -159,9 +160,9 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                       label: Text(g[0] + g.substring(1).toLowerCase()),
                       selected: sel,
                       onSelected: (s) => setState(() => _genero = s ? g : null),
-                      selectedColor: EagleTokens.brand.withValues(alpha: 0.15),
-                      labelStyle: TextStyle(color: sel ? EagleTokens.brand : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), fontWeight: sel ? FontWeight.w600 : FontWeight.w400),
-                      side: BorderSide(color: sel ? EagleTokens.brand.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                      selectedColor: primary.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(color: sel ? primary : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), fontWeight: sel ? FontWeight.w600 : FontWeight.w400),
+                      side: BorderSide(color: sel ? primary.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     );
                   }).toList(),
@@ -178,9 +179,9 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                       label: Text(e.$2),
                       selected: sel,
                       onSelected: (s) => setState(() => _tipoConsultoria = s ? e.$1 : null),
-                      selectedColor: EagleTokens.brand.withValues(alpha: 0.15),
-                      labelStyle: TextStyle(color: sel ? EagleTokens.brand : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), fontWeight: sel ? FontWeight.w600 : FontWeight.w400),
-                      side: BorderSide(color: sel ? EagleTokens.brand.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                      selectedColor: primary.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(color: sel ? primary : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), fontWeight: sel ? FontWeight.w600 : FontWeight.w400),
+                      side: BorderSide(color: sel ? primary.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     );
                   }).toList(),
@@ -192,9 +193,9 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                   child: ElevatedButton(
                     onPressed: _salvando ? null : _salvar,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: EagleTokens.brand,
+                      backgroundColor: primary,
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
+                      disabledBackgroundColor: primary.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       elevation: 0,
                     ),
@@ -216,11 +217,14 @@ class _SectionHeader extends StatelessWidget {
   final bool isDark;
   const _SectionHeader({required this.label, required this.icon, required this.isDark});
   @override
-  Widget build(BuildContext context) => Row(children: [
-    Icon(icon, size: 16, color: EagleTokens.brand),
-    const SizedBox(width: 8),
-    Text(label, style: TextStyle(color: EagleTokens.brand, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
-  ]);
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return Row(children: [
+      Icon(icon, size: 16, color: primary),
+      const SizedBox(width: 8),
+      Text(label, style: TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+    ]);
+  }
 }
 
 class _FxFormField extends StatelessWidget {
@@ -235,26 +239,29 @@ class _FxFormField extends StatelessWidget {
   const _FxFormField({required this.controller, required this.label, required this.icon, required this.isDark, this.keyboardType, this.textCapitalization = TextCapitalization.none, this.maxLines = 1, this.validator});
 
   @override
-  Widget build(BuildContext context) => TextFormField(
-    controller: controller,
-    keyboardType: keyboardType,
-    textCapitalization: textCapitalization,
-    maxLines: maxLines,
-    validator: validator,
-    style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 15),
-    cursorColor: EagleTokens.brand,
-    decoration: InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(icon, size: 20, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-      filled: true,
-      fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-      labelStyle: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.bad)),
-      errorStyle: const TextStyle(color: EagleTokens.bad, fontSize: 11),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      textCapitalization: textCapitalization,
+      maxLines: maxLines,
+      validator: validator,
+      style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 15),
+      cursorColor: primary,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 20, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+        filled: true,
+        fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+        labelStyle: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: primary, width: 1.5)),
+        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.bad)),
+        errorStyle: const TextStyle(color: EagleTokens.bad, fontSize: 11),
+      ),
+    );
+  }
 }

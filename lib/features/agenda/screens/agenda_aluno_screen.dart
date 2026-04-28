@@ -81,7 +81,7 @@ class _AgCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final inicio = ag.inicio;
     final fim = ag.fim;
-    final cor = _statusColor(ag.status);
+    final cor = _statusColor(context, ag.status);
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -130,11 +130,11 @@ class _AgCard extends StatelessWidget {
   String _hm(DateTime d) =>
       '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
-  Color _statusColor(String s) {
+  Color _statusColor(BuildContext context, String s) {
     switch (s) {
-      case 'AGENDADO': return EagleTokens.brand;
+      case 'AGENDADO': return Theme.of(context).colorScheme.primary;
       case 'CONFIRMADO': return EagleTokens.good;
-      case 'CONCLUIDO': return EagleTokens.brand;
+      case 'CONCLUIDO': return Theme.of(context).colorScheme.primary;
       case 'CANCELADO': return EagleTokens.inkMute;
       default: return EagleTokens.inkMute;
     }

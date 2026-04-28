@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/brand_palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
@@ -58,6 +59,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final medidasAsync = ref.watch(medidasProvider(widget.alunoId));
     final recordesAsync = ref.watch(recordesProvider(widget.alunoId));
 
@@ -74,8 +76,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
         iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: EagleTokens.brand,
-          labelColor: EagleTokens.brand,
+          indicatorColor: primary,
+          labelColor: primary,
           unselectedLabelColor: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
           indicatorWeight: 2.5,
           tabs: const [
@@ -101,9 +103,9 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
       ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+          gradient: LinearGradient(colors: [primary, BrandPalette.deep(primary)]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [BoxShadow(color: primary.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
         ),
         child: FloatingActionButton(
           onPressed: () {
