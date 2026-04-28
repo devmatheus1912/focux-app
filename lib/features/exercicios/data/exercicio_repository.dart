@@ -156,6 +156,34 @@ class ExercicioCuradoriaResumo {
   }
 }
 
+class CuradoriaLoteResultado {
+  final int afetados;
+  final int comVideo;
+  final int comThumbnail;
+  final int videosProprios;
+  final int pendentesLicenca;
+  final int prontosParaAluno;
+
+  CuradoriaLoteResultado({
+    required this.afetados,
+    required this.comVideo,
+    required this.comThumbnail,
+    required this.videosProprios,
+    required this.pendentesLicenca,
+    required this.prontosParaAluno,
+  });
+
+  factory CuradoriaLoteResultado.fromJson(Map<String, dynamic> json) =>
+      CuradoriaLoteResultado(
+        afetados: (json['afetados'] as num?)?.toInt() ?? 0,
+        comVideo: (json['comVideo'] as num?)?.toInt() ?? 0,
+        comThumbnail: (json['comThumbnail'] as num?)?.toInt() ?? 0,
+        videosProprios: (json['videosProprios'] as num?)?.toInt() ?? 0,
+        pendentesLicenca: (json['pendentesLicenca'] as num?)?.toInt() ?? 0,
+        prontosParaAluno: (json['prontosParaAluno'] as num?)?.toInt() ?? 0,
+      );
+}
+
 class ExercicioRepository {
   final Dio _dio;
 
@@ -311,6 +339,57 @@ class ExercicioRepository {
   Future<ExercicioCuradoriaResumo> buscarCuradoria() async {
     final response = await _dio.get('/api/exercicios/curadoria/resumo');
     return ExercicioCuradoriaResumo.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+  }
+
+  Future<CuradoriaLoteResultado> curarLote({
+    String? nome,
+    String? categoria,
+    String? tag,
+    String? musculoAlvo,
+    String? equipamento,
+    String? nivel,
+    String? mecanica,
+    String? objetivo,
+    bool? hasVideo,
+    String? videoSource,
+    String? licenseStatus,
+    String? novoVideoUrl,
+    String? novoThumbnailUrl,
+    String? novoVideoSource,
+    String? novoLicenseStatus,
+  }) async {
+    final data = <String, dynamic>{
+      if (nome != null && nome.isNotEmpty) 'nome': nome,
+      if (categoria != null && categoria.isNotEmpty) 'categoria': categoria,
+      if (tag != null && tag.isNotEmpty) 'tag': tag,
+      if (musculoAlvo != null && musculoAlvo.isNotEmpty)
+        'musculoAlvo': musculoAlvo,
+      if (equipamento != null && equipamento.isNotEmpty)
+        'equipamento': equipamento,
+      if (nivel != null && nivel.isNotEmpty) 'nivel': nivel,
+      if (mecanica != null && mecanica.isNotEmpty) 'mecanica': mecanica,
+      if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+      if (hasVideo == true) 'hasVideo': true,
+      if (videoSource != null && videoSource.isNotEmpty)
+        'videoSource': videoSource,
+      if (licenseStatus != null && licenseStatus.isNotEmpty)
+        'licenseStatus': licenseStatus,
+      if (novoVideoUrl != null && novoVideoUrl.isNotEmpty)
+        'novoVideoUrl': novoVideoUrl,
+      if (novoThumbnailUrl != null && novoThumbnailUrl.isNotEmpty)
+        'novoThumbnailUrl': novoThumbnailUrl,
+      if (novoVideoSource != null && novoVideoSource.isNotEmpty)
+        'novoVideoSource': novoVideoSource,
+      if (novoLicenseStatus != null && novoLicenseStatus.isNotEmpty)
+        'novoLicenseStatus': novoLicenseStatus,
+    };
+    final response = await _dio.patch(
+      '/api/exercicios/curadoria/lote',
+      data: data,
+    );
+    return CuradoriaLoteResultado.fromJson(
       response.data as Map<String, dynamic>,
     );
   }

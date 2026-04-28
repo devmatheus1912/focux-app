@@ -50,7 +50,11 @@ const _objetivosFiltro = [
   'Condicionamento',
   'Mobilidade',
 ];
-const _fontesVideoFiltro = ['FOCUX_LIBRARY', 'PERSONAL_UPLOAD'];
+const _fontesVideoFiltro = [
+  'CURATION_REQUIRED',
+  'FOCUX_LIBRARY',
+  'PERSONAL_UPLOAD',
+];
 const _licencasFiltro = ['LICENSED', 'PERSONAL_OWNED', 'PENDING_REVIEW'];
 
 class ExerciciosListScreen extends ConsumerStatefulWidget {
@@ -220,6 +224,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                       if (value == 'seed_premium_v1') {
                         _importarSeedPremiumV1(context, ref);
                       }
+                      if (value == 'curadoria_lote') {
+                        _openCuradoriaLote(context, ref);
+                      }
                     },
                     itemBuilder:
                         (_) => const [
@@ -240,6 +247,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                                 Icon(Icons.workspace_premium_rounded, size: 20),
                                 SizedBox(width: 10),
                                 Text('Importar seed premium 1500'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'curadoria_lote',
+                            child: Row(
+                              children: [
+                                Icon(Icons.fact_check_rounded, size: 20),
+                                SizedBox(width: 10),
+                                Text('Curadoria em lote'),
                               ],
                             ),
                           ),
@@ -562,6 +579,154 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     }
   }
 
+  Future<void> _openCuradoriaLote(BuildContext context, WidgetRef ref) async {
+    var novaFonte = _fonteVideoFiltro ?? 'PERSONAL_UPLOAD';
+    var novaLicenca =
+        _licencaFiltro == 'LICENSED' ? 'LICENSED' : 'PERSONAL_OWNED';
+    final videoCtrl = TextEditingController();
+    final thumbCtrl = TextEditingController();
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (context, modalSetState) => AlertDialog(
+                  title: const Text('Curadoria em lote'),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Aplica nos exercicios que batem com os filtros atuais. Use filtros antes para evitar alterar a biblioteca inteira.',
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? EagleTokens.darkInkMute
+                                    : EagleTokens.inkMute,
+                            height: 1.25,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        _FilterDropdown(
+                          label: 'Nova fonte',
+                          value: novaFonte,
+                          values: _fontesVideoFiltro,
+                          formatter: _formatSourceLabel,
+                          onChanged:
+                              (v) => modalSetState(
+                                () => novaFonte = v ?? 'PERSONAL_UPLOAD',
+                              ),
+                        ),
+                        const SizedBox(height: 10),
+                        _FilterDropdown(
+                          label: 'Nova licenca',
+                          value: novaLicenca,
+                          values: _licencasFiltro,
+                          formatter: _formatLicenseLabel,
+                          onChanged:
+                              (v) => modalSetState(
+                                () => novaLicenca = v ?? 'PERSONAL_OWNED',
+                              ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: videoCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'URL de video para aplicar',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: thumbCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'URL de thumbnail para aplicar',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancelar'),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Aplicar lote'),
+                    ),
+                  ],
+                ),
+          ),
+    );
+    if (confirm != true) {
+      videoCtrl.dispose();
+      thumbCtrl.dispose();
+      return;
+    }
+
+    final videoUrl = videoCtrl.text.trim();
+    final thumbnailUrl = thumbCtrl.text.trim();
+    videoCtrl.dispose();
+    thumbCtrl.dispose();
+    if (!context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Aplicando curadoria em lote...')),
+    );
+
+    try {
+      final result = await ref
+          .read(exercicioRepositoryProvider)
+          .curarLote(
+            nome: _nomeFiltro.isEmpty ? null : _nomeFiltro,
+            categoria: _categoriaParam,
+            tag: _tagFiltro.isEmpty ? null : _tagFiltro,
+            musculoAlvo: _musculoFiltro,
+            equipamento: _equipamentoFiltro,
+            nivel: _nivelFiltro,
+            mecanica: _mecanicaFiltro,
+            objetivo: _objetivoFiltro,
+            hasVideo: _comVideoFiltro ? true : null,
+            videoSource: _fonteVideoFiltro,
+            licenseStatus: _licencaFiltro,
+            novoVideoSource: novaFonte,
+            novoLicenseStatus: novaLicenca,
+            novoVideoUrl: videoUrl.isEmpty ? null : videoUrl,
+            novoThumbnailUrl: thumbnailUrl.isEmpty ? null : thumbnailUrl,
+          );
+      ref.invalidate(exerciciosFilteredProvider);
+      ref.invalidate(exerciciosCuradoriaProvider);
+      messenger.clearSnackBars();
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              '${result.afetados} exercicios atualizados · ${result.prontosParaAluno} prontos para aluno.',
+            ),
+            backgroundColor: EagleTokens.good,
+          ),
+        );
+      }
+    } catch (e) {
+      messenger.clearSnackBars();
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Erro na curadoria em lote: $e'),
+            backgroundColor: EagleTokens.bad,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _openFilters(BuildContext context) async {
     var musculo = _musculoFiltro;
     var equipamento = _equipamentoFiltro;
@@ -705,6 +870,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
 
   String? _formatSourceLabel(String? value) {
     return switch (value) {
+      'CURATION_REQUIRED' => 'Curadoria pendente',
       'FOCUX_LIBRARY' => 'Biblioteca Focux',
       'PERSONAL_UPLOAD' => 'Video do personal',
       null || '' => null,
