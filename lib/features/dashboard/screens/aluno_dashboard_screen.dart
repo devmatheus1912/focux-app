@@ -11,6 +11,7 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../chat/data/chat_repository.dart';
 import '../../checkin/providers/checkin_provider.dart';
 import '../../checkin/data/checkin_repository.dart';
+import '../data/aluno_autonomy_plan.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import 'progresso_semanal_widget.dart';
 
@@ -142,6 +143,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
             alunoAsync.when(
               data: (aluno) => _StudentJourneyCard(
                 aluno: aluno,
+                treinos: treinosAsync.valueOrNull ?? const [],
                 medidasAsync: medidasAsync,
                 historicoAsync: historicoAsync,
                 chatAsync: chatAsync,
@@ -773,6 +775,7 @@ class _ProgressCheckpointCard extends StatelessWidget {
 
 class _StudentJourneyCard extends StatelessWidget {
   final Aluno aluno;
+  final List<ExecucaoTreino> treinos;
   final AsyncValue<List<MedidaCorporal>> medidasAsync;
   final AsyncValue<List<ExecucaoTreino>> historicoAsync;
   final AsyncValue<List<ChatMsg>> chatAsync;
@@ -780,25 +783,12 @@ class _StudentJourneyCard extends StatelessWidget {
 
   const _StudentJourneyCard({
     required this.aluno,
+    required this.treinos,
     required this.medidasAsync,
     required this.historicoAsync,
     required this.chatAsync,
     required this.isDark,
   });
-
-  int _profileCompletion() {
-    final filled = [
-      aluno.telefone,
-      aluno.whatsapp,
-      aluno.objetivo,
-      aluno.genero,
-      aluno.peso?.toString(),
-      aluno.altura?.toString(),
-      aluno.dataNascimento,
-      aluno.fotoUrl,
-    ].where((value) => value != null && value.toString().trim().isNotEmpty).length;
-    return (filled / 8 * 100).round();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -812,47 +802,18 @@ class _StudentJourneyCard extends StatelessWidget {
     final historico = historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
     final mensagens = chatAsync.valueOrNull ?? const <ChatMsg>[];
 
-    final steps = <_JourneyStep>[
-      _JourneyStep(
-        title: 'Completar perfil base',
-        subtitle: 'Foto, objetivo, contato e dados corporais deixam o plano mais preciso.',
-        done: _profileCompletion() >= 80,
-        cta: 'Abrir perfil',
-        icon: Icons.person_outline,
-        onTap: () => context.push('/aluno/perfil'),
-      ),
-      _JourneyStep(
-        title: 'Registrar primeira medida',
-        subtitle: 'Seu progresso corporal precisa de um ponto de partida visivel.',
-        done: medidas.isNotEmpty,
-        cta: 'Registrar medida',
-        icon: Icons.straighten_outlined,
-        onTap: () => context.push('/aluno/perfil'),
-      ),
-      _JourneyStep(
-        title: 'Concluir primeiro treino',
-        subtitle: 'Executar o treino libera historico real para o personal ajustar carga e aderencia.',
-        done: historico.any((item) => item.status.toUpperCase() == 'CONCLUIDO'),
-        cta: 'Treinar agora',
-        icon: Icons.play_circle_outline,
-        onTap: () => context.push('/checkin/treinos'),
-      ),
-      _JourneyStep(
-        title: 'Abrir conversa com o personal',
-        subtitle: 'Seu acompanhamento fica melhor quando voce usa o chat para alinhar duvidas e feedback.',
-        done: mensagens.isNotEmpty,
-        cta: 'Ir para o chat',
-        icon: Icons.chat_bubble_outline,
-        onTap: () => context.push('/chat/aluno'),
-      ),
-    ];
-
-    final concluidos = steps.where((item) => item.done).length;
-    final percent = (concluidos / steps.length * 100).round();
-    final nextStep = steps.firstWhere(
-      (item) => !item.done,
-      orElse: () => steps.last,
+    final plan = buildAlunoAutonomyPlan(
+      aluno: aluno,
+      medidas: medidas,
+      treinos: treinos,
+      historico: historico,
+      mensagens: mensagens,
     );
+    final nextTask = plan.nextTask;
+    final visibleTasks = [
+      if (nextTask != null) nextTask,
+      ...plan.tasks.where((task) => task.id != nextTask?.id).take(5),
+    ];
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -871,7 +832,7 @@ class _StudentJourneyCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Jornada de ativacao',
+                      'Central do aluno',
                       style: TextStyle(
                         color: ink,
                         fontSize: 17,
@@ -880,7 +841,7 @@ class _StudentJourneyCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Passos simples para voce aproveitar melhor o app e dar contexto real para o personal.',
+                      'Pendencias e proximos passos para voce evoluir sem depender de cobranca do personal.',
                       style: TextStyle(color: mute, height: 1.45),
                     ),
                   ],
@@ -894,7 +855,7 @@ class _StudentJourneyCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  '$percent%',
+                  '${plan.progress}%',
                   style: TextStyle(
                     color: primary,
                     fontWeight: FontWeight.w800,
@@ -908,7 +869,7 @@ class _StudentJourneyCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
-              value: concluidos / steps.length,
+              value: plan.tasks.isEmpty ? 1 : plan.doneCount / plan.tasks.length,
               minHeight: 9,
               backgroundColor: BrandPalette.soft(primary, dark: isDark),
               valueColor: AlwaysStoppedAnimation(primary),
@@ -916,7 +877,7 @@ class _StudentJourneyCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '$concluidos de ${steps.length} marcos concluidos.',
+            '${plan.doneCount} de ${plan.tasks.length} pendencias fechadas. Perfil ${plan.profileCompletion}%.',
             style: TextStyle(
               color: mute,
               fontSize: 12.5,
@@ -942,7 +903,7 @@ class _StudentJourneyCard extends StatelessWidget {
                     color: BrandPalette.soft(primary, dark: isDark),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(nextStep.icon, color: primary),
+                  child: Icon(_alunoTaskIcon(nextTask?.kind), color: primary),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -950,8 +911,8 @@ class _StudentJourneyCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        concluidos == steps.length
-                            ? 'Base do aluno pronta'
+                        nextTask == null
+                            ? 'Tudo em dia'
                             : 'Proximo melhor passo',
                         style: TextStyle(
                           color: mute,
@@ -961,9 +922,9 @@ class _StudentJourneyCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        concluidos == steps.length
-                            ? 'Voce ja fechou os marcos iniciais. Agora o app tem contexto melhor para acompanhar sua rotina.'
-                            : nextStep.title,
+                        nextTask == null
+                            ? 'Sua rotina esta organizada. Continue acompanhando treino, medidas e agenda.'
+                            : nextTask.title,
                         style: TextStyle(
                           color: ink,
                           fontSize: 13.5,
@@ -974,23 +935,23 @@ class _StudentJourneyCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (concluidos != steps.length) ...[
+                if (nextTask != null) ...[
                   const SizedBox(width: 12),
                   FilledButton.tonal(
-                    onPressed: nextStep.onTap,
-                    child: const Text('Fazer'),
+                    onPressed: () => context.push(nextTask.route),
+                    child: Text(nextTask.cta),
                   ),
                 ],
               ],
             ),
           ),
           const SizedBox(height: 14),
-          for (var i = 0; i < steps.length; i++) ...[
-            _JourneyStepTile(
-              step: steps[i],
+          for (var i = 0; i < visibleTasks.length; i++) ...[
+            _AutonomyTaskTile(
+              task: visibleTasks[i],
               isDark: isDark,
             ),
-            if (i != steps.length - 1) const SizedBox(height: 10),
+            if (i != visibleTasks.length - 1) const SizedBox(height: 10),
           ],
         ],
       ),
@@ -998,30 +959,33 @@ class _StudentJourneyCard extends StatelessWidget {
   }
 }
 
-class _JourneyStep {
-  final String title;
-  final String subtitle;
-  final bool done;
-  final String cta;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _JourneyStep({
-    required this.title,
-    required this.subtitle,
-    required this.done,
-    required this.cta,
-    required this.icon,
-    required this.onTap,
-  });
+IconData _alunoTaskIcon(AlunoTaskKind? kind) {
+  switch (kind) {
+    case AlunoTaskKind.perfil:
+      return Icons.person_outline;
+    case AlunoTaskKind.fotoDados:
+      return Icons.add_a_photo_outlined;
+    case AlunoTaskKind.medida:
+      return Icons.straighten_outlined;
+    case AlunoTaskKind.treino:
+      return Icons.play_circle_outline;
+    case AlunoTaskKind.chat:
+      return Icons.chat_bubble_outline;
+    case AlunoTaskKind.agenda:
+      return Icons.calendar_month_outlined;
+    case AlunoTaskKind.financeiro:
+      return Icons.payments_outlined;
+    case null:
+      return Icons.check_circle_outline;
+  }
 }
 
-class _JourneyStepTile extends StatelessWidget {
-  final _JourneyStep step;
+class _AutonomyTaskTile extends StatelessWidget {
+  final AlunoAutonomyTask task;
   final bool isDark;
 
-  const _JourneyStepTile({
-    required this.step,
+  const _AutonomyTaskTile({
+    required this.task,
     required this.isDark,
   });
 
@@ -1047,14 +1011,14 @@ class _JourneyStepTile extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: step.done
+              color: task.done
                   ? EagleTokens.good.withValues(alpha: 0.14)
                   : BrandPalette.soft(primary, dark: isDark),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              step.done ? Icons.check_rounded : step.icon,
-              color: step.done ? EagleTokens.good : primary,
+              task.done ? Icons.check_rounded : _alunoTaskIcon(task.kind),
+              color: task.done ? EagleTokens.good : primary,
               size: 20,
             ),
           ),
@@ -1064,7 +1028,7 @@ class _JourneyStepTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  step.title,
+                  task.title,
                   style: TextStyle(
                     color: ink,
                     fontSize: 13.5,
@@ -1073,7 +1037,7 @@ class _JourneyStepTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  step.subtitle,
+                  task.description,
                   style: TextStyle(
                     color: mute,
                     fontSize: 12.5,
@@ -1084,7 +1048,7 @@ class _JourneyStepTile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          step.done
+          task.done
               ? Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
@@ -1101,8 +1065,8 @@ class _JourneyStepTile extends StatelessWidget {
                   ),
                 )
               : TextButton(
-                  onPressed: step.onTap,
-                  child: Text(step.cta),
+                  onPressed: () => context.push(task.route),
+                  child: Text(task.cta),
                 ),
         ],
       ),
