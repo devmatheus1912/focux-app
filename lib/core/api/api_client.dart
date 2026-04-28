@@ -124,8 +124,8 @@ class ApiClient {
                 'stacktrace': 'Path: ${e.requestOptions.path}\nMethod: ${e.requestOptions.method}\nStatus: ${e.response?.statusCode}\nResponse: ${e.response?.data}',
               });
             }
-          } catch (reportErr) {
-            debugPrint('[ApiClient] Error report failed: $reportErr');
+          } catch (_) {
+            // Error reporter is best-effort telemetry — silent fail is correct.
           }
         }
         handler.next(e);
