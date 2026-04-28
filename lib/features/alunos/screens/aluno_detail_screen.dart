@@ -48,6 +48,7 @@ class AlunoDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final alunoAsync = ref.watch(alunoProvider(alunoId));
+    final autonomiaAsync = ref.watch(alunoAutonomiaEventosProvider(alunoId));
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -176,6 +177,11 @@ class AlunoDetailScreen extends ConsumerWidget {
                         ]),
                       ),
                       const SizedBox(height: 16),
+                      _AutonomiaAlunoCard(
+                        eventosAsync: autonomiaAsync,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 16),
 
                       // Weight evolution card
                       Container(
@@ -286,6 +292,242 @@ class AlunoDetailScreen extends ConsumerWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _AutonomiaAlunoCard extends StatelessWidget {
+  final AsyncValue<List<AlunoAutonomiaEvento>> eventosAsync;
+  final bool isDark;
+
+  const _AutonomiaAlunoCard({
+    required this.eventosAsync,
+    required this.isDark,
+  });
+
+  String _formatDate(DateTime? value) {
+    if (value == null) return '--';
+    final day = value.day.toString().padLeft(2, '0');
+    final month = value.month.toString().padLeft(2, '0');
+    final hour = value.hour.toString().padLeft(2, '0');
+    final minute = value.minute.toString().padLeft(2, '0');
+    return '$day/$month $hour:$minute';
+  }
+
+  String _actionLabel(String action) {
+    switch (action.toUpperCase()) {
+      case 'CLICKED':
+        return 'Clicou';
+      case 'COMPLETED':
+        return 'Concluiu';
+      case 'VIEWED':
+        return 'Viu';
+      default:
+        return action;
+    }
+  }
+
+  Color _actionColor(String action) {
+    switch (action.toUpperCase()) {
+      case 'CLICKED':
+        return EagleTokens.warn;
+      case 'COMPLETED':
+        return EagleTokens.good;
+      default:
+        return EagleTokens.brand;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: BrandPalette.soft(primary, dark: isDark),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(Icons.fact_check_outlined, color: primary, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Autonomia do aluno',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Eventos recentes da Central do aluno.',
+                      style: TextStyle(color: mute, fontSize: 12.5),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          eventosAsync.when(
+            loading: () => const LinearProgressIndicator(minHeight: 2),
+            error: (_, __) => Text(
+              'Historico indisponivel agora.',
+              style: TextStyle(color: mute, fontSize: 12.5),
+            ),
+            data: (eventos) {
+              if (eventos.isEmpty) {
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : BrandPalette.softer(primary),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    'O aluno ainda nao interagiu com as tarefas de autonomia.',
+                    style: TextStyle(color: mute, height: 1.4),
+                  ),
+                );
+              }
+
+              return Column(
+                children: [
+                  for (final evento in eventos.take(5)) ...[
+                    _AutonomiaEventoTile(
+                      evento: evento,
+                      isDark: isDark,
+                      actionLabel: _actionLabel(evento.action),
+                      actionColor: _actionColor(evento.action),
+                      dateLabel: _formatDate(evento.criadoEm),
+                    ),
+                    if (evento != eventos.take(5).last)
+                      Divider(color: line, height: 14),
+                  ],
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AutonomiaEventoTile extends StatelessWidget {
+  final AlunoAutonomiaEvento evento;
+  final bool isDark;
+  final String actionLabel;
+  final Color actionColor;
+  final String dateLabel;
+
+  const _AutonomiaEventoTile({
+    required this.evento,
+    required this.isDark,
+    required this.actionLabel,
+    required this.actionColor,
+    required this.dateLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          margin: const EdgeInsets.only(top: 9),
+          decoration: BoxDecoration(color: actionColor, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                evento.taskTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: ink,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13.5,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  _MiniAutonomyChip(label: actionLabel, color: actionColor),
+                  if (evento.priority?.isNotEmpty == true)
+                    _MiniAutonomyChip(label: evento.priority!, color: mute),
+                  if (evento.profileCompletion != null)
+                    _MiniAutonomyChip(
+                      label: 'Perfil ${evento.profileCompletion}%',
+                      color: mute,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          dateLabel,
+          style: TextStyle(color: mute, fontSize: 11.5),
+        ),
+      ],
+    );
+  }
+}
+
+class _MiniAutonomyChip extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _MiniAutonomyChip({
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: TextStyle(
+        color: color,
+        fontSize: 11.5,
+        fontWeight: FontWeight.w700,
       ),
     );
   }
