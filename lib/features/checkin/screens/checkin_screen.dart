@@ -732,6 +732,7 @@ class _SerieCard extends StatelessWidget {
     final progress = targetSeries == 0 ? 0.0 : (ee.seriesFeitas / targetSeries).clamp(0.0, 1.0);
     final hasMedia = ee.gifUrl?.isNotEmpty == true;
     final hasVideo = ee.videoUrl?.isNotEmpty == true;
+    final hasThumbnail = !hasVideo && ee.thumbnailUrl?.isNotEmpty == true;
     final loadText = _formatKg(ee.cargaKg);
     final restText = ee.descansoSegundos == null ? null : '${ee.descansoSegundos}s';
     final hasPrevious = ee.cargaAnteriorKg != null ||
@@ -796,6 +797,16 @@ class _SerieCard extends StatelessWidget {
                 if (hasVideo) ...[
                   const SizedBox(height: 4),
                   _ExerciseVideoPreview(url: ee.videoUrl!, brand: brand, dark: dark),
+                  const SizedBox(height: 14),
+                ] else if (hasThumbnail) ...[
+                  const SizedBox(height: 4),
+                  _ExerciseThumbnailPreview(
+                    url: ee.thumbnailUrl!,
+                    videoSource: ee.videoSource,
+                    licenseStatus: ee.licenseStatus,
+                    brand: brand,
+                    dark: dark,
+                  ),
                   const SizedBox(height: 14),
                 ] else if (hasMedia) ...[
                   const SizedBox(height: 4),
@@ -1632,6 +1643,98 @@ class _TinyMetric extends StatelessWidget {
           const SizedBox(width: 6),
           Text('$label: ', style: TextStyle(color: mute, fontSize: 11.5, fontWeight: FontWeight.w800)),
           Text(value, style: TextStyle(color: ink, fontSize: 11.5, fontWeight: FontWeight.w900)),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExerciseThumbnailPreview extends StatelessWidget {
+  final String url;
+  final String? videoSource;
+  final String? licenseStatus;
+  final Color brand;
+  final bool dark;
+
+  const _ExerciseThumbnailPreview({
+    required this.url,
+    required this.videoSource,
+    required this.licenseStatus,
+    required this.brand,
+    required this.dark,
+  });
+
+  String _badgeLabel() {
+    if (licenseStatus == 'LICENSED') return 'Video licenciado';
+    if (videoSource == 'PERSONAL_UPLOAD') return 'Video do personal';
+    if (videoSource == 'FOCUX_LIBRARY') return 'Biblioteca Focux';
+    return 'Tecnica do exercicio';
+  }
+
+  IconData _badgeIcon() {
+    if (licenseStatus == 'LICENSED') return Icons.verified_rounded;
+    if (videoSource == 'PERSONAL_UPLOAD') return Icons.person_rounded;
+    return Icons.play_arrow_rounded;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Stack(
+        children: [
+          Image.network(
+            url,
+            height: 168,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              height: 120,
+              color: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+              alignment: Alignment.center,
+              child: Icon(Icons.play_circle_outline_rounded, color: brand),
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.5),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 12,
+            bottom: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.48),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(_badgeIcon(), color: Colors.white, size: 15),
+                  const SizedBox(width: 4),
+                  Text(
+                    _badgeLabel(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

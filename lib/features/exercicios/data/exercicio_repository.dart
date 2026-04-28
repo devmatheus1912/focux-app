@@ -158,6 +158,15 @@ class ExercicioRepository {
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<int> importarSeedV1() async {
+    final response = await _dio.post('/api/exercicios/importar/seed/v1');
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return (data['importados'] as int?) ?? (data['total'] as int?) ?? 0;
+    }
+    return 0;
+  }
+
   Future<void> favoritarExercicio(int id) async {
     await _dio.post('/api/exercicios/$id/favoritar');
   }

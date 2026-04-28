@@ -6,7 +6,10 @@ class ExecucaoExercicio {
   final int treinoExercicioId;
   final String exercicioNome;
   final String? gifUrl;
+  final String? thumbnailUrl;
   final String? videoUrl;
+  final String? videoSource;
+  final String? licenseStatus;
   final String? errosComuns;
   final String? contraindicacoes;
   final String? substitutos;
@@ -32,7 +35,10 @@ class ExecucaoExercicio {
     required this.treinoExercicioId,
     required this.exercicioNome,
     this.gifUrl,
+    this.thumbnailUrl,
     this.videoUrl,
+    this.videoSource,
+    this.licenseStatus,
     this.errosComuns,
     this.contraindicacoes,
     this.substitutos,
@@ -59,7 +65,10 @@ class ExecucaoExercicio {
         treinoExercicioId: j['treinoExercicioId'] as int,
         exercicioNome: j['exercicioNome'] as String,
         gifUrl: j['gifUrl'] as String?,
+        thumbnailUrl: j['thumbnailUrl'] as String?,
         videoUrl: j['videoUrl'] as String?,
+        videoSource: j['videoSource'] as String?,
+        licenseStatus: j['licenseStatus'] as String?,
         errosComuns: j['errosComuns'] as String?,
         contraindicacoes: j['contraindicacoes'] as String?,
         substitutos: j['substitutos'] as String?,
@@ -95,7 +104,10 @@ class ExecucaoExercicio {
         treinoExercicioId: treinoExercicioId,
         exercicioNome: exercicioNome,
         gifUrl: gifUrl,
+        thumbnailUrl: thumbnailUrl,
         videoUrl: videoUrl,
+        videoSource: videoSource,
+        licenseStatus: licenseStatus,
         errosComuns: errosComuns,
         contraindicacoes: contraindicacoes,
         substitutos: substitutos,
