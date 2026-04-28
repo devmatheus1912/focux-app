@@ -17,6 +17,7 @@ import '../providers/dashboard_provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
+import '../../chat/screens/chat_inbox_screen.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -559,6 +560,18 @@ class _PersonalDashboardScreenState
                             isDark: isDark,
                           ),
                         ],
+                      ),
+                    ),
+                  ),
+
+                  // CENTRAL DE COMANDO
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                      child: _CommandCenterSection(
+                        isDark: isDark,
+                        primary: primary,
+                        finData: _finData,
                       ),
                     ),
                   ),
@@ -1125,6 +1138,179 @@ class _ShortcutBtn extends StatelessWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// CENTRAL DE COMANDO
+// ---------------------------------------------------------------------------
+
+class _CommandCenterSection extends ConsumerWidget {
+  final bool isDark;
+  final Color primary;
+  final FinanceiroDashboard? finData;
+
+  const _CommandCenterSection({
+    required this.isDark,
+    required this.primary,
+    required this.finData,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    // Chat inbox — count total unread messages
+    final chatAsync = ref.watch(chatInboxProvider);
+    final unreadCount = chatAsync.maybeWhen(
+      data: (items) => items.fold<int>(0, (sum, i) => sum + i.naoLidas),
+      orElse: () => 0,
+    );
+    final totalConversas = chatAsync.maybeWhen(
+      data: (items) => items.length,
+      orElse: () => 0,
+    );
+    final chatSubtitle = unreadCount > 0
+        ? '$unreadCount não lida${unreadCount == 1 ? '' : 's'}'
+        : '$totalConversas conversa${totalConversas == 1 ? '' : 's'}';
+
+    // Alunos — active student count (already in parent but we watch again for isolation)
+    final alunosAsync = ref.watch(alunosProvider);
+    final alunosAtivos = alunosAsync.maybeWhen(
+      data: (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
+      orElse: () => 0,
+    );
+
+    // Agenda today — count from agendaHojeProvider (commandCenterProvider)
+    final commandAsync = ref.watch(commandCenterProvider);
+    final agendaHoje = commandAsync.maybeWhen(
+      data: (cc) => cc.agendaHoje.length,
+      orElse: () => 0,
+    );
+    final agendaSubtitle = agendaHoje > 0
+        ? '$agendaHoje hoje'
+        : 'Sem agenda';
+
+    // Financeiro — monthly revenue from already-loaded _finData
+    final receitaMes = finData?.receitaMes ?? 0;
+    final finSubtitle = receitaMes > 0
+        ? 'R\$ ${receitaMes.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}'
+        : 'Ver finanças';
+
+    Widget card({
+      required IconData icon,
+      required String title,
+      required String subtitle,
+      required VoidCallback onTap,
+    }) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: line, width: 1),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: primarySoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 18, color: primary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: ink,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(fontSize: 11.5, color: mute),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Text(
+            'Central de Comando',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ),
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 2.2,
+          children: [
+            card(
+              icon: Icons.chat_bubble_rounded,
+              title: 'Mensagens',
+              subtitle: chatSubtitle,
+              onTap: () => context.go('/chat/inbox'),
+            ),
+            card(
+              icon: Icons.people_rounded,
+              title: 'Alunos',
+              subtitle: '$alunosAtivos ativos',
+              onTap: () => context.go('/alunos'),
+            ),
+            card(
+              icon: Icons.event_rounded,
+              title: 'Agenda',
+              subtitle: agendaSubtitle,
+              onTap: () => context.go('/agenda'),
+            ),
+            card(
+              icon: Icons.attach_money_rounded,
+              title: 'Financeiro',
+              subtitle: finSubtitle,
+              onTap: () => context.go('/financeiro'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 class _AderenciaSemanaWidget extends StatelessWidget {
   final bool isDark;
