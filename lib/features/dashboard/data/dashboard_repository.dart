@@ -28,17 +28,17 @@ class DashboardData {
   });
 
   factory DashboardData.fromJson(Map<String, dynamic> json) => DashboardData(
-        totalAlunos: json['totalAlunos'] as int,
-        alunosAtivos: json['alunosAtivos'] as int,
-        planoAtual: json['planoAtual'] as String,
-        limiteAlunos: json['limiteAlunos'] as int,
-        nomePersonal: json['nomePersonal'] as String?,
-        logoUrl: json['logoUrl'] as String?,
-        corPrimaria: json['corPrimaria'] as String?,
-        corSecundaria: json['corSecundaria'] as String?,
-        descricaoProfissional: json['descricaoProfissional'] as String?,
-        instagram: json['instagram'] as String?,
-      );
+    totalAlunos: json['totalAlunos'] as int,
+    alunosAtivos: json['alunosAtivos'] as int,
+    planoAtual: json['planoAtual'] as String,
+    limiteAlunos: json['limiteAlunos'] as int,
+    nomePersonal: json['nomePersonal'] as String?,
+    logoUrl: json['logoUrl'] as String?,
+    corPrimaria: json['corPrimaria'] as String?,
+    corSecundaria: json['corSecundaria'] as String?,
+    descricaoProfissional: json['descricaoProfissional'] as String?,
+    instagram: json['instagram'] as String?,
+  );
 }
 
 class DashboardRepository {
@@ -54,5 +54,12 @@ class DashboardRepository {
   Future<CommandCenterData> getCommandCenter() async {
     final response = await _dio.get('/api/dashboard/command-center');
     return CommandCenterData.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<void> completeCommandAction(String actionKey) async {
+    await _dio.post(
+      '/api/dashboard/command-center/actions/complete',
+      data: {'actionKey': actionKey},
+    );
   }
 }
