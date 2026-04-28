@@ -217,6 +217,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                     tooltip: 'Mais opcoes',
                     onSelected: (value) {
                       if (value == 'seed_v1') _importarSeedV1(context, ref);
+                      if (value == 'seed_premium_v1') {
+                        _importarSeedPremiumV1(context, ref);
+                      }
                     },
                     itemBuilder:
                         (_) => const [
@@ -227,6 +230,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                                 Icon(Icons.download_rounded, size: 20),
                                 SizedBox(width: 10),
                                 Text('Importar biblioteca Focux v1'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'seed_premium_v1',
+                            child: Row(
+                              children: [
+                                Icon(Icons.workspace_premium_rounded, size: 20),
+                                SizedBox(width: 10),
+                                Text('Importar seed premium 1500'),
                               ],
                             ),
                           ),
@@ -465,6 +478,83 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         messenger.showSnackBar(
           SnackBar(
             content: Text('Erro ao importar: $e'),
+            backgroundColor: EagleTokens.bad,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _importarSeedPremiumV1(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Importar seed premium 1500'),
+            content: const Text(
+              'Isso vai importar 1500 exercicios com taxonomia completa e cobertura muscular balanceada.\n\nVideos oficiais nao serao falsificados. Os itens entram como PENDING_REVIEW/CURATION_REQUIRED ate a curadoria anexar videos licenciados ou videos proprios.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Importar 1500'),
+              ),
+            ],
+          ),
+    );
+    if (confirm != true) return;
+    if (!context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(width: 12),
+            Text('Importando seed premium...'),
+          ],
+        ),
+        duration: Duration(seconds: 45),
+      ),
+    );
+
+    try {
+      final count =
+          await ref.read(exercicioRepositoryProvider).importarSeedPremiumV1();
+      ref.invalidate(exerciciosFilteredProvider);
+      ref.invalidate(exerciciosCuradoriaProvider);
+      messenger.clearSnackBars();
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              '$count exercicios premium importados para curadoria.',
+            ),
+            backgroundColor: EagleTokens.good,
+          ),
+        );
+      }
+    } catch (e) {
+      messenger.clearSnackBars();
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Erro ao importar seed premium: $e'),
             backgroundColor: EagleTokens.bad,
           ),
         );

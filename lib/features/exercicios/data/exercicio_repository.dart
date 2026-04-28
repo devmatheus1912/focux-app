@@ -297,6 +297,17 @@ class ExercicioRepository {
     return 0;
   }
 
+  Future<int> importarSeedPremiumV1() async {
+    final response = await _dio.post(
+      '/api/exercicios/importar/seed/premium/v1',
+    );
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return (data['importados'] as int?) ?? (data['total'] as int?) ?? 0;
+    }
+    return 0;
+  }
+
   Future<ExercicioCuradoriaResumo> buscarCuradoria() async {
     final response = await _dio.get('/api/exercicios/curadoria/resumo');
     return ExercicioCuradoriaResumo.fromJson(
