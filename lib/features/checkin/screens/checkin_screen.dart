@@ -75,29 +75,16 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   Future<void> _marcar(ExecucaoExercicio ee, int seriesFeitas) async {
     if (_execucao == null) return;
     final next = seriesFeitas.clamp(0, ee.series ?? 999);
-    final increased = next > ee.seriesFeitas;
     try {
       HapticFeedback.selectionClick();
-      final repo = ref.read(checkinRepositoryProvider);
-      final updated = increased
-          ? await repo.registrarSerie(
-              _execucao!.id!,
-              ee.treinoExercicioId,
-              numero: next,
-              cargaKg: ee.cargaKg,
-              repeticoes: ee.repeticoes,
-              feedback: ee.feedback,
-              rpe: ee.rpe,
-              dor: ee.dor,
-            )
-          : await repo.marcarExercicio(
-              _execucao!.id!,
-              ee.treinoExercicioId,
-              next,
-              feedback: ee.feedback,
-              rpe: ee.rpe,
-              dor: ee.dor,
-            );
+      final updated = await ref.read(checkinRepositoryProvider).marcarExercicio(
+            _execucao!.id!,
+            ee.treinoExercicioId,
+            next,
+            feedback: ee.feedback,
+            rpe: ee.rpe,
+            dor: ee.dor,
+          );
       if (!mounted) return;
       setState(() {
         _execucao = ExecucaoTreino(
@@ -112,7 +99,64 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
               .toList(),
         );
       });
-      if (increased) {
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
+    }
+  }
+
+  Future<void> _registrarSerieDetalhada(
+    ExecucaoExercicio ee, {
+    required int numero,
+    ExecucaoSerie? serie,
+  }) async {
+    if (_execucao == null) return;
+    final total = ee.series ?? numero;
+    final safeNumero = numero.clamp(1, total).toInt();
+    final payload = await showModalBottomSheet<_SeriePayload>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _SerieDetailSheet(
+        title: 'Serie $safeNumero',
+        initialCargaKg: serie?.cargaKg ?? ee.cargaKg,
+        initialRepeticoes: serie?.repeticoes ?? ee.repeticoes,
+        initialFeedback: serie?.feedback ?? ee.feedback,
+        initialRpe: serie?.rpe ?? ee.rpe,
+        initialDor: serie?.dor ?? ee.dor,
+      ),
+    );
+    if (payload == null) return;
+
+    try {
+      HapticFeedback.selectionClick();
+      final updated = await ref.read(checkinRepositoryProvider).registrarSerie(
+            _execucao!.id!,
+            ee.treinoExercicioId,
+            numero: safeNumero,
+            cargaKg: payload.cargaKg,
+            repeticoes: payload.repeticoes,
+            feedback: payload.feedback,
+            rpe: payload.rpe,
+            dor: payload.dor,
+          );
+      if (!mounted) return;
+      setState(() {
+        _execucao = ExecucaoTreino(
+          id: _execucao!.id,
+          treinoId: _execucao!.treinoId,
+          treinoNome: _execucao!.treinoNome,
+          status: _execucao!.status,
+          iniciadoEm: _execucao!.iniciadoEm,
+          concluidoEm: _execucao!.concluidoEm,
+          exercicios: _execucao!.exercicios
+              .map((e) => e.id == updated.id ? updated : e)
+              .toList(),
+        );
+      });
+      if (safeNumero > ee.seriesFeitas) {
         _startRestTimer(ee.descansoSegundos ?? 60);
       }
     } catch (e) {
@@ -307,6 +351,11 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                       feedback: item.feedback,
                       onFeedback: (value) => _setFeedback(item, value),
                       onMarcar: (s) => _marcar(item, s),
+                      onSerieDetalhada: (numero, serie) => _registrarSerieDetalhada(
+                        item,
+                        numero: numero,
+                        serie: serie,
+                      ),
                     );
                   },
                 ),
@@ -659,6 +708,7 @@ class _SerieCard extends StatelessWidget {
   final String? feedback;
   final void Function(String) onFeedback;
   final void Function(int) onMarcar;
+  final void Function(int, ExecucaoSerie?) onSerieDetalhada;
 
   const _SerieCard({
     required this.ee,
@@ -673,6 +723,7 @@ class _SerieCard extends StatelessWidget {
     required this.feedback,
     required this.onFeedback,
     required this.onMarcar,
+    required this.onSerieDetalhada,
   });
 
   @override
@@ -823,6 +874,7 @@ class _SerieCard extends StatelessWidget {
                     dark: dark,
                     formatKg: _formatKg,
                     formatFeedback: _formatFeedback,
+                    onEdit: (serie) => onSerieDetalhada(serie.numero, serie),
                   ),
                   const SizedBox(height: 12),
                 ],
@@ -889,12 +941,37 @@ class _SerieCard extends StatelessWidget {
                           ),
                           IconButton(
                             icon: const Icon(Icons.add_rounded, size: 18),
-                            onPressed: () => onMarcar(ee.seriesFeitas + 1),
+                            onPressed: ee.seriesFeitas < targetSeries || targetSeries == 0
+                                ? () => onSerieDetalhada(ee.seriesFeitas + 1, null)
+                                : null,
                           ),
                         ],
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: ee.seriesFeitas <= 0
+                        ? () => onSerieDetalhada(1, null)
+                        : () {
+                            final last = ee.seriesDetalhes
+                                .where((serie) => serie.numero == ee.seriesFeitas)
+                                .cast<ExecucaoSerie?>()
+                                .firstOrNull;
+                            onSerieDetalhada(ee.seriesFeitas, last);
+                          },
+                    icon: const Icon(Icons.tune_rounded, size: 18),
+                    label: Text(ee.seriesFeitas <= 0 ? 'Registrar serie detalhada' : 'Editar ultima serie'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: brand,
+                      side: BorderSide(color: brand.withValues(alpha: 0.45)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 14),
                 Text(
@@ -1117,6 +1194,7 @@ class _SeriesHistory extends StatelessWidget {
   final bool dark;
   final String? Function(double?) formatKg;
   final String? Function(String?, int?, bool?) formatFeedback;
+  final void Function(ExecucaoSerie) onEdit;
 
   const _SeriesHistory({
     required this.series,
@@ -1126,6 +1204,7 @@ class _SeriesHistory extends StatelessWidget {
     required this.dark,
     required this.formatKg,
     required this.formatFeedback,
+    required this.onEdit,
   });
 
   @override
@@ -1174,11 +1253,345 @@ class _SeriesHistory extends StatelessWidget {
                       style: TextStyle(color: ink, fontSize: 12.5, fontWeight: FontWeight.w800),
                     ),
                   ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: 'Editar serie',
+                    icon: Icon(Icons.edit_rounded, size: 17, color: mute),
+                    onPressed: () => onEdit(serie),
+                  ),
                 ],
               ),
             );
           }),
         ],
+      ),
+    );
+  }
+}
+
+class _SeriePayload {
+  final double? cargaKg;
+  final String? repeticoes;
+  final String? feedback;
+  final int? rpe;
+  final bool dor;
+
+  const _SeriePayload({
+    required this.cargaKg,
+    required this.repeticoes,
+    required this.feedback,
+    required this.rpe,
+    required this.dor,
+  });
+}
+
+class _SerieDetailSheet extends StatefulWidget {
+  final String title;
+  final double? initialCargaKg;
+  final String? initialRepeticoes;
+  final String? initialFeedback;
+  final int? initialRpe;
+  final bool initialDor;
+
+  const _SerieDetailSheet({
+    required this.title,
+    required this.initialCargaKg,
+    required this.initialRepeticoes,
+    required this.initialFeedback,
+    required this.initialRpe,
+    required this.initialDor,
+  });
+
+  @override
+  State<_SerieDetailSheet> createState() => _SerieDetailSheetState();
+}
+
+class _SerieDetailSheetState extends State<_SerieDetailSheet> {
+  late final TextEditingController _cargaController;
+  late final TextEditingController _repsController;
+  late String? _feedback;
+  late int _rpe;
+  late bool _useRpe;
+  late bool _dor;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargaController = TextEditingController(text: _formatInitialKg(widget.initialCargaKg));
+    _repsController = TextEditingController(text: widget.initialRepeticoes ?? '');
+    _feedback = widget.initialFeedback;
+    _rpe = widget.initialRpe ?? 7;
+    _useRpe = widget.initialRpe != null;
+    _dor = widget.initialDor;
+  }
+
+  @override
+  void dispose() {
+    _cargaController.dispose();
+    _repsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
+    final primary = theme.colorScheme.primary;
+    final brand = dark ? BrandPalette.accent(primary) : primary;
+    final bg = dark ? EagleTokens.darkCard : Colors.white;
+    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border(top: BorderSide(color: line)),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: mute.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: TextStyle(color: ink, fontSize: 20, fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Fechar',
+                    icon: Icon(Icons.close_rounded, color: mute),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: _SerieField(
+                      controller: _cargaController,
+                      label: 'Carga',
+                      suffix: 'kg',
+                      icon: Icons.scale_rounded,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
+                      ink: ink,
+                      mute: mute,
+                      line: line,
+                      dark: dark,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _SerieField(
+                      controller: _repsController,
+                      label: 'Reps',
+                      suffix: 'x',
+                      icon: Icons.repeat_rounded,
+                      keyboardType: TextInputType.text,
+                      ink: ink,
+                      mute: mute,
+                      line: line,
+                      dark: dark,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text('Sensacao', style: TextStyle(color: mute, fontSize: 12, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _FeedbackChip(label: 'Facil', selected: _feedback == 'FACIL', color: brand, onTap: () => _toggleFeedback('FACIL')),
+                  _FeedbackChip(label: 'Ok', selected: _feedback == 'OK', color: brand, onTap: () => _toggleFeedback('OK')),
+                  _FeedbackChip(label: 'Dificil', selected: _feedback == 'DIFICIL', color: brand, onTap: () => _toggleFeedback('DIFICIL')),
+                  _FeedbackChip(label: 'Dor', selected: _feedback == 'DOR', color: EagleTokens.bad, onTap: () => _toggleFeedback('DOR')),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: dark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.lineSoft,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: line),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text('RPE ${_useRpe ? _rpe : "-"}', style: TextStyle(color: ink, fontWeight: FontWeight.w900)),
+                        ),
+                        Switch.adaptive(
+                          value: _useRpe,
+                          activeColor: brand,
+                          onChanged: (value) => setState(() => _useRpe = value),
+                        ),
+                      ],
+                    ),
+                    Slider(
+                      value: _rpe.toDouble(),
+                      min: 1,
+                      max: 10,
+                      divisions: 9,
+                      activeColor: brand,
+                      label: 'RPE $_rpe',
+                      onChanged: _useRpe ? (value) => setState(() => _rpe = value.round()) : null,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                activeColor: EagleTokens.bad,
+                value: _dor,
+                onChanged: (value) => setState(() {
+                  _dor = value;
+                  if (value) {
+                    _feedback = 'DOR';
+                    _useRpe = true;
+                    _rpe = _rpe < 8 ? 8 : _rpe;
+                  }
+                }),
+                title: Text('Senti dor nesta serie', style: TextStyle(color: ink, fontWeight: FontWeight.w800)),
+                subtitle: Text('Marca alerta para o personal acompanhar.', style: TextStyle(color: mute, fontSize: 12)),
+              ),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _submit,
+                  icon: const Icon(Icons.check_rounded),
+                  label: const Text('Salvar serie'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: brand,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _toggleFeedback(String value) {
+    setState(() {
+      _feedback = _feedback == value ? null : value;
+      if (_feedback == 'DOR') {
+        _dor = true;
+        _useRpe = true;
+        _rpe = _rpe < 8 ? 8 : _rpe;
+      }
+    });
+  }
+
+  void _submit() {
+    Navigator.pop(
+      context,
+      _SeriePayload(
+        cargaKg: _parseKg(_cargaController.text),
+        repeticoes: _blankToNull(_repsController.text),
+        feedback: _feedback,
+        rpe: _useRpe ? _rpe : null,
+        dor: _dor,
+      ),
+    );
+  }
+
+  String _formatInitialKg(double? value) {
+    if (value == null) return '';
+    return value.roundToDouble() == value ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
+  }
+
+  double? _parseKg(String value) {
+    final normalized = value.trim().replaceAll(',', '.');
+    if (normalized.isEmpty) return null;
+    return double.tryParse(normalized);
+  }
+
+  String? _blankToNull(String value) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+}
+
+class _SerieField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String suffix;
+  final IconData icon;
+  final TextInputType keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final bool dark;
+
+  const _SerieField({
+    required this.controller,
+    required this.label,
+    required this.suffix,
+    required this.icon,
+    required this.keyboardType,
+    this.inputFormatters,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.dark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      style: TextStyle(color: ink, fontWeight: FontWeight.w900),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: mute, fontWeight: FontWeight.w700),
+        suffixText: suffix,
+        suffixStyle: TextStyle(color: mute, fontWeight: FontWeight.w800),
+        prefixIcon: Icon(icon, color: mute, size: 18),
+        filled: true,
+        fillColor: dark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.lineSoft,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: line),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.4),
+        ),
       ),
     );
   }
