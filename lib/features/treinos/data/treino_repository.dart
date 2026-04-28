@@ -11,6 +11,8 @@ class TreinoExercicioItem {
   final int? descansoSegundos;
   final int ordem;
   final String? observacoes;
+  final String tipoSerie;
+  final int? grupoSuperset;
 
   TreinoExercicioItem({
     required this.id,
@@ -21,6 +23,8 @@ class TreinoExercicioItem {
     this.descansoSegundos,
     required this.ordem,
     this.observacoes,
+    this.tipoSerie = 'NORMAL',
+    this.grupoSuperset,
   });
 
   factory TreinoExercicioItem.fromJson(Map<String, dynamic> json) => TreinoExercicioItem(
@@ -32,6 +36,8 @@ class TreinoExercicioItem {
         descansoSegundos: json['descansoSegundos'] as int?,
         ordem: json['ordem'] as int,
         observacoes: json['observacoes'] as String?,
+        tipoSerie: json['tipoSerie'] as String? ?? 'NORMAL',
+        grupoSuperset: json['grupoSuperset'] as int?,
       );
 }
 
@@ -95,12 +101,20 @@ class TreinoRepository {
   }
 
   Future<Treino> adicionarExercicio(int treinoId, int exercicioId,
-      {int series = 3, String repeticoes = '10-12', int descanso = 60}) async {
+      {
+      int series = 3,
+      String repeticoes = '10-12',
+      int descanso = 60,
+      String tipoSerie = 'NORMAL',
+      int? grupoSuperset,
+      }) async {
     final response = await _dio.post('/api/treinos/$treinoId/exercicios', data: {
       'exercicioId': exercicioId,
       'series': series,
       'repeticoes': repeticoes,
       'descansoSegundos': descanso,
+      'tipoSerie': tipoSerie,
+      if (grupoSuperset != null) 'grupoSuperset': grupoSuperset,
     });
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }

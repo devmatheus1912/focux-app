@@ -545,6 +545,7 @@ class _ExercicioRow extends StatelessWidget {
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final hasMedia = (te.exercicio.videoUrl?.isNotEmpty == true) ||
         (te.exercicio.gifUrl?.isNotEmpty == true);
+    final isAdvanced = te.tipoSerie != 'NORMAL';
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
@@ -584,12 +585,24 @@ class _ExercicioRow extends StatelessWidget {
                     Text('${te.descansoSegundos ?? 60}s', style: TextStyle(color: mute, fontSize: 11.5)),
                   ],
                 ),
-                if (hasMedia || te.observacoes?.trim().isNotEmpty == true) ...[
+                if (isAdvanced || hasMedia || te.observacoes?.trim().isNotEmpty == true) ...[
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 6,
                     children: [
+                      if (isAdvanced)
+                        _ExerciseMeta(
+                          icon: te.tipoSerie == 'SUPERSET'
+                              ? Icons.link_rounded
+                              : Icons.trending_down_rounded,
+                          text: te.tipoSerie == 'SUPERSET'
+                              ? 'superset ${te.grupoSuperset ?? '-'}'
+                              : 'drop set',
+                          color: te.tipoSerie == 'SUPERSET'
+                              ? primary
+                              : EagleTokens.warn,
+                        ),
                       if (hasMedia)
                         _ExerciseMeta(
                           icon: Icons.play_circle_outline_rounded,

@@ -21,6 +21,8 @@ class _AddExercicioToTreinoScreenState
   final _seriesCtrl = TextEditingController(text: '3');
   final _repCtrl = TextEditingController(text: '10-12');
   final _descansoCtrl = TextEditingController(text: '60');
+  final _grupoSupersetCtrl = TextEditingController(text: '1');
+  String _tipoSerie = 'NORMAL';
   bool _loading = false;
   String? _error;
 
@@ -29,6 +31,7 @@ class _AddExercicioToTreinoScreenState
     _seriesCtrl.dispose();
     _repCtrl.dispose();
     _descansoCtrl.dispose();
+    _grupoSupersetCtrl.dispose();
     super.dispose();
   }
 
@@ -45,6 +48,10 @@ class _AddExercicioToTreinoScreenState
         series: int.tryParse(_seriesCtrl.text) ?? 3,
         repeticoes: _repCtrl.text,
         descanso: int.tryParse(_descansoCtrl.text) ?? 60,
+        tipoSerie: _tipoSerie,
+        grupoSuperset: _tipoSerie == 'SUPERSET'
+            ? int.tryParse(_grupoSupersetCtrl.text)
+            : null,
       );
       if (mounted) context.pop(true);
     } catch (e) {
@@ -181,6 +188,38 @@ class _AddExercicioToTreinoScreenState
                         ],
                       ),
                       const SizedBox(height: 16),
+                      _SerieTypeSelector(
+                        value: _tipoSerie,
+                        primary: primary,
+                        isDark: isDark,
+                        onChanged: (value) => setState(() => _tipoSerie = value),
+                      ),
+                      if (_tipoSerie == 'SUPERSET') ...[
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _grupoSupersetCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'Grupo do superset',
+                            helperText: 'Use o mesmo numero em exercicios que devem ficar juntos.',
+                            filled: true,
+                            fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                          ),
+                          keyboardType: TextInputType.number,
+                          style: TextStyle(color: ink),
+                        ),
+                      ],
+                      if (_tipoSerie == 'DROPSET') ...[
+                        const SizedBox(height: 12),
+                        _ModeHint(
+                          icon: Icons.trending_down_rounded,
+                          text: 'Drop set: registre reducoes de carga nas observacoes ou no acompanhamento por serie.',
+                          color: EagleTokens.warn,
+                          isDark: isDark,
+                        ),
+                      ],
+                      const SizedBox(height: 16),
                       TextFormField(
                         controller: _descansoCtrl,
                         decoration: InputDecoration(
@@ -233,6 +272,114 @@ class _AddExercicioToTreinoScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SerieTypeSelector extends StatelessWidget {
+  final String value;
+  final Color primary;
+  final bool isDark;
+  final ValueChanged<String> onChanged;
+
+  const _SerieTypeSelector({
+    required this.value,
+    required this.primary,
+    required this.isDark,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final card = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final options = const [
+      ('NORMAL', Icons.fitness_center_rounded, 'Normal'),
+      ('SUPERSET', Icons.link_rounded, 'Superset'),
+      ('DROPSET', Icons.trending_down_rounded, 'Drop set'),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tipo de serie',
+            style: TextStyle(color: mute, fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: options.map((option) {
+              final selected = value == option.$1;
+              return ChoiceChip(
+                selected: selected,
+                avatar: Icon(
+                  option.$2,
+                  size: 16,
+                  color: selected ? Colors.white : primary,
+                ),
+                label: Text(option.$3),
+                labelStyle: TextStyle(
+                  color: selected ? Colors.white : primary,
+                  fontWeight: FontWeight.w800,
+                ),
+                selectedColor: primary,
+                backgroundColor: primary.withValues(alpha: 0.08),
+                side: BorderSide(color: primary.withValues(alpha: selected ? 0 : 0.25)),
+                onSelected: (_) => onChanged(option.$1),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ModeHint extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Color color;
+  final bool isDark;
+
+  const _ModeHint({
+    required this.icon,
+    required this.text,
+    required this.color,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.16 : 0.10),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(color: color, fontSize: 12.5, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
       ),
     );
   }
