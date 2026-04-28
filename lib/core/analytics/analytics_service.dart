@@ -78,4 +78,6 @@ class ProductEvents {
   static const iaQuotaExhausted = 'ia_quota_exhausted';
 
   static const featureGateBlocked = 'feature_gate_blocked';
+  static const planGateStaleUsed = 'plan_gate_stale_used';
+  static const planGateRefreshFailed = 'plan_gate_refresh_failed';
 }

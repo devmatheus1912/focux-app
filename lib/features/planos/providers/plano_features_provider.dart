@@ -1,14 +1,89 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/planos_repository.dart';
 
-final _planosRepositoryProvider =
-    Provider<PlanosRepository>((ref) => PlanosRepository(ref.read(apiClientProvider)));
+final _planosRepositoryProvider = Provider<PlanosRepository>(
+  (ref) => PlanosRepository(ref.read(apiClientProvider)),
+);
 
-/// Server-side feature flags do plano atual. Cacheado por sessão; invalide
-/// (`ref.invalidate(planoFeaturesProvider)`) sempre que mudar a assinatura
-/// (verify IAP, webhook MP, troca de plano, ativação de trial).
-final planoFeaturesProvider = FutureProvider<PlanoFeatures>((ref) async {
-  return ref.read(_planosRepositoryProvider).getPlanoFeatures();
-});
+/// Server-side feature flags do plano atual.
+///
+/// Stale-while-revalidate: se existir snapshot local, o gate usa esse dado
+/// imediatamente e atualiza em segundo plano. Assim uma oscilacao de rede nao
+/// derruba usuario pagante em uma tela de bloqueio falsa.
+final planoFeaturesProvider =
+    StateNotifierProvider<PlanoFeaturesNotifier, AsyncValue<PlanoFeatures>>(
+  (ref) {
+    final notifier = PlanoFeaturesNotifier(ref.read(_planosRepositoryProvider));
+    unawaited(notifier.bootstrap());
+    return notifier;
+  },
+);
+
+class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
+  final PlanosRepository _repo;
+  bool _refreshing = false;
+
+  PlanoFeaturesNotifier(this._repo) : super(const AsyncLoading());
+
+  Future<void> bootstrap() async {
+    final cached = await _repo.loadCachedPlanoFeatures();
+    if (cached != null) {
+      state = AsyncData(cached);
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.planGateStaleUsed,
+          props: {
+            'plan': cached.plano.name,
+            'cacheSavedAt': cached.cacheSavedAt?.toIso8601String(),
+          },
+        ),
+      );
+      unawaited(refresh());
+      return;
+    }
+
+    await refresh(forceLoading: true);
+  }
+
+  Future<void> refresh({bool forceLoading = false}) async {
+    if (_refreshing) return;
+    _refreshing = true;
+    final previous = state.valueOrNull;
+    if (forceLoading || previous == null) {
+      state = const AsyncLoading();
+    }
+
+    try {
+      final fresh = await _repo.getPlanoFeaturesFresh();
+      state = AsyncData(fresh);
+    } catch (error, stack) {
+      if (previous != null) {
+        state = AsyncData(
+          previous.copyWithOperationalState(
+            fromCache: true,
+            syncWarning:
+                'Nao foi possivel confirmar o plano agora. Mantivemos o ultimo acesso salvo.',
+          ),
+        );
+        unawaited(
+          AnalyticsService.instance.track(
+            ProductEvents.planGateRefreshFailed,
+            props: {
+              'plan': previous.plano.name,
+              'error': error.toString(),
+            },
+          ),
+        );
+      } else {
+        state = AsyncError(error, stack);
+      }
+    } finally {
+      _refreshing = false;
+    }
+  }
+}

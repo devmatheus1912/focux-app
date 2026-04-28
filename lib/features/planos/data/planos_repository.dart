@@ -182,6 +182,9 @@ class PlanoFeatures {
   final int? limiteAlunos;
   final int? limiteIaMensal;
   final DateTime? validoAte;
+  final bool fromCache;
+  final DateTime? cacheSavedAt;
+  final String? syncWarning;
   final bool financeiro;
   final bool agenda;
   final bool relatorios;
@@ -195,6 +198,9 @@ class PlanoFeatures {
     this.limiteAlunos,
     this.limiteIaMensal,
     this.validoAte,
+    this.fromCache = false,
+    this.cacheSavedAt,
+    this.syncWarning,
     required this.financeiro,
     required this.agenda,
     required this.relatorios,
@@ -211,6 +217,9 @@ class PlanoFeatures {
       limiteAlunos: (j['limiteAlunos'] as num?)?.toInt(),
       limiteIaMensal: (j['limiteIaMensal'] as num?)?.toInt(),
       validoAte: _parseDateTime(j['validoAte']),
+      fromCache: j['fromCache'] as bool? ?? false,
+      cacheSavedAt: _parseDateTime(j['cacheSavedAt']),
+      syncWarning: j['syncWarning'] as String?,
       financeiro: f['financeiro'] as bool? ?? false,
       agenda: f['agenda'] as bool? ?? false,
       relatorios: f['relatorios'] as bool? ?? false,
@@ -226,6 +235,9 @@ class PlanoFeatures {
         if (limiteAlunos != null) 'limiteAlunos': limiteAlunos,
         if (limiteIaMensal != null) 'limiteIaMensal': limiteIaMensal,
         if (validoAte != null) 'validoAte': validoAte!.toIso8601String(),
+        'fromCache': fromCache,
+        if (cacheSavedAt != null) 'cacheSavedAt': cacheSavedAt!.toIso8601String(),
+        if (syncWarning != null) 'syncWarning': syncWarning,
         'features': {
           'financeiro': financeiro,
           'agenda': agenda,
@@ -235,6 +247,29 @@ class PlanoFeatures {
           'iaIlimitada': iaIlimitada,
         },
       };
+
+  PlanoFeatures copyWithOperationalState({
+    bool? fromCache,
+    DateTime? cacheSavedAt,
+    String? syncWarning,
+  }) {
+    return PlanoFeatures(
+      plano: plano,
+      planoNomeOriginal: planoNomeOriginal,
+      limiteAlunos: limiteAlunos,
+      limiteIaMensal: limiteIaMensal,
+      validoAte: validoAte,
+      fromCache: fromCache ?? this.fromCache,
+      cacheSavedAt: cacheSavedAt ?? this.cacheSavedAt,
+      syncWarning: syncWarning,
+      financeiro: financeiro,
+      agenda: agenda,
+      relatorios: relatorios,
+      whiteLabel: whiteLabel,
+      iaCopiloto: iaCopiloto,
+      iaIlimitada: iaIlimitada,
+    );
+  }
 
   static const free = PlanoFeatures(
     plano: SubscriptionPlan.FREE,
@@ -260,20 +295,38 @@ class PlanosRepository {
 
   Future<PlanoFeatures> getPlanoFeatures() async {
     try {
-      final r = await _dio.get('/api/planos/me');
-      final features = PlanoFeatures.fromJson(r.data as Map<String, dynamic>);
-      await _savePlanoFeaturesCache(features);
-      return features;
+      return getPlanoFeaturesFresh();
     } catch (_) {
-      final cached = await _loadPlanoFeaturesCache();
+      final cached = await loadCachedPlanoFeatures();
       if (cached != null) return cached;
       rethrow;
     }
   }
 
+  Future<PlanoFeatures> getPlanoFeaturesFresh() async {
+    final r = await _dio.get('/api/planos/me');
+    final features = PlanoFeatures.fromJson(r.data as Map<String, dynamic>)
+        .copyWithOperationalState(
+      fromCache: false,
+      syncWarning: null,
+    );
+    await _savePlanoFeaturesCache(features);
+    return features;
+  }
+
+  Future<PlanoFeatures?> loadCachedPlanoFeatures() async {
+    return _loadPlanoFeaturesCache();
+  }
+
   Future<void> _savePlanoFeaturesCache(PlanoFeatures features) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_cacheKey, jsonEncode(features.toJson()));
+    await prefs.setString(
+      _cacheKey,
+      jsonEncode({
+        'savedAt': DateTime.now().toIso8601String(),
+        'data': features.copyWithOperationalState(fromCache: false).toJson(),
+      }),
+    );
   }
 
   Future<PlanoFeatures?> _loadPlanoFeaturesCache() async {
@@ -281,7 +334,17 @@ class PlanosRepository {
     final raw = prefs.getString(_cacheKey);
     if (raw == null || raw.isEmpty) return null;
     try {
-      return PlanoFeatures.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      final isWrapped = decoded.containsKey('data');
+      final savedAt = isWrapped ? _parseDateTime(decoded['savedAt']) : null;
+      final data = isWrapped
+          ? Map<String, dynamic>.from(decoded['data'] as Map)
+          : decoded;
+      return PlanoFeatures.fromJson(data).copyWithOperationalState(
+        fromCache: true,
+        cacheSavedAt: savedAt,
+        syncWarning: 'Usando plano salvo enquanto a verificacao atualiza.',
+      );
     } catch (_) {
       await prefs.remove(_cacheKey);
       return null;

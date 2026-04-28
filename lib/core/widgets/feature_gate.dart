@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import '../../features/planos/data/planos_repository.dart';
+import '../analytics/analytics_service.dart';
 import '../router/role_home.dart';
 
 class FeatureGate extends ConsumerWidget {
@@ -41,7 +42,9 @@ class FeatureGate extends ConsumerWidget {
     // Mostra tela de retry em vez de "Acesso Restrito".
     if (featuresAsync.hasError) {
       return _ErrorRetryScreen(
-        onRetry: () => ref.invalidate(planoFeaturesProvider),
+        onRetry: () => ref
+            .read(planoFeaturesProvider.notifier)
+            .refresh(forceLoading: true),
       );
     }
 
@@ -58,13 +61,42 @@ class FeatureGate extends ConsumerWidget {
         ? _resolveCapability(features, capability!)
         : currentPlan.canAccess(requiredPlan);
 
-    if (hasAccess) {
-      return child;
+    if (hasAccess || features.fromCache) {
+      if (!hasAccess && features.fromCache) {
+        Future.microtask(
+          () => AnalyticsService.instance.track(
+            ProductEvents.featureGateBlocked,
+            props: {
+              'feature': featureName,
+              'requiredPlan': requiredPlan.name,
+              'currentPlan': currentPlan.name,
+              'allowedByStaleCache': true,
+            },
+          ),
+        );
+      }
+      return _PlanSyncBannerShell(
+        features: features,
+        onRefresh: () => ref.read(planoFeaturesProvider.notifier).refresh(),
+        child: child,
+      );
     }
 
     if (lockedBuilder != null) {
       return lockedBuilder!;
     }
+
+    Future.microtask(
+      () => AnalyticsService.instance.track(
+        ProductEvents.featureGateBlocked,
+        props: {
+          'feature': featureName,
+          'requiredPlan': requiredPlan.name,
+          'currentPlan': currentPlan.name,
+          'allowedByStaleCache': false,
+        },
+      ),
+    );
 
     // BUG-02+11: Default Locked UI com Scaffold (back button) + CTA → /planos
     return _LockedScreen(
@@ -136,6 +168,86 @@ class _ErrorRetryScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PlanSyncBannerShell extends StatelessWidget {
+  final PlanoFeatures features;
+  final VoidCallback onRefresh;
+  final Widget child;
+
+  const _PlanSyncBannerShell({
+    required this.features,
+    required this.onRefresh,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final warning = features.syncWarning;
+    if (!features.fromCache && warning == null) return child;
+
+    return Stack(
+      children: [
+        child,
+        Positioned(
+          top: MediaQuery.of(context).padding.top + 10,
+          left: 14,
+          right: 14,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF111827).withValues(alpha: 0.94),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: const Color(0xFFFFB020).withValues(alpha: 0.28),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.cloud_off_rounded,
+                    color: Color(0xFFFFD28A),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      warning ?? 'Plano salvo em cache. Atualizando...',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12.2,
+                        height: 1.25,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Atualizar plano',
+                    visualDensity: VisualDensity.compact,
+                    onPressed: onRefresh,
+                    icon: const Icon(
+                      Icons.refresh_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
