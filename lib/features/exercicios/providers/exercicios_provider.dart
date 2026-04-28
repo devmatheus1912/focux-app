@@ -19,6 +19,7 @@ class ExercicioFilter {
   final bool? hasVideo;
   final String? videoSource;
   final String? licenseStatus;
+  final String? editorialStatus;
   final bool? favoritos;
 
   const ExercicioFilter({
@@ -33,6 +34,7 @@ class ExercicioFilter {
     this.hasVideo,
     this.videoSource,
     this.licenseStatus,
+    this.editorialStatus,
     this.favoritos,
   });
 
@@ -50,6 +52,7 @@ class ExercicioFilter {
       other.hasVideo == hasVideo &&
       other.videoSource == videoSource &&
       other.licenseStatus == licenseStatus &&
+      other.editorialStatus == editorialStatus &&
       other.favoritos == favoritos;
 
   @override
@@ -65,6 +68,7 @@ class ExercicioFilter {
     hasVideo,
     videoSource,
     licenseStatus,
+    editorialStatus,
     favoritos,
   );
 }
@@ -89,6 +93,7 @@ final exerciciosFilteredProvider =
             hasVideo: filter.hasVideo,
             videoSource: filter.videoSource,
             licenseStatus: filter.licenseStatus,
+            editorialStatus: filter.editorialStatus,
             favoritos: filter.favoritos,
           );
     });

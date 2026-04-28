@@ -237,6 +237,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                       if (value == 'historico_midias') {
                         _openHistoricoMidias(context, ref);
                       }
+                      if (value == 'fila_editorial') {
+                        _openFilaEditorial(context, ref);
+                      }
                     },
                     itemBuilder:
                         (_) => const [
@@ -287,6 +290,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                                 Icon(Icons.history_rounded, size: 20),
                                 SizedBox(width: 10),
                                 Text('Historico de importacoes'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'fila_editorial',
+                            child: Row(
+                              children: [
+                                Icon(Icons.rate_review_rounded, size: 20),
+                                SizedBox(width: 10),
+                                Text('Fila editorial'),
                               ],
                             ),
                           ),
@@ -1012,6 +1025,159 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     );
   }
 
+  Future<void> _openFilaEditorial(BuildContext context, WidgetRef ref) async {
+    var status = 'PENDING_REVIEW';
+    var refreshToken = 0;
+
+    Future<List<ExercicioEditorialQueue>> loadQueues() {
+      final repo = ref.read(exercicioRepositoryProvider);
+      return Future.wait([
+        repo.buscarFilaEditorial('PENDING_REVIEW'),
+        repo.buscarFilaEditorial('REJECTED'),
+        repo.buscarFilaEditorial('APPROVED', size: 1),
+      ]);
+    }
+
+    await showDialog<void>(
+      context: context,
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setModalState) => AlertDialog(
+                  title: const Text('Fila editorial'),
+                  content: SizedBox(
+                    width: 620,
+                    child: FutureBuilder<List<ExercicioEditorialQueue>>(
+                      key: ValueKey(refreshToken),
+                      future: loadQueues(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const SizedBox(
+                            height: 180,
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                        if (snapshot.hasError) {
+                          return Text('Erro ao carregar fila: ${snapshot.error}');
+                        }
+
+                        final queues = snapshot.data ?? [];
+                        final pending =
+                            queues.isNotEmpty
+                                ? queues[0]
+                                : ExercicioEditorialQueue(
+                                  total: 0,
+                                  items: const [],
+                                );
+                        final rejected =
+                            queues.length > 1
+                                ? queues[1]
+                                : ExercicioEditorialQueue(
+                                  total: 0,
+                                  items: const [],
+                                );
+                        final approvedTotal =
+                            queues.length > 2 ? queues[2].total : 0;
+                        final activeQueue =
+                            status == 'REJECTED' ? rejected : pending;
+
+                        Future<void> review(
+                          Exercicio exercicio,
+                          String nextStatus,
+                        ) async {
+                          await ref
+                              .read(exercicioRepositoryProvider)
+                              .atualizarCuradoriaEditorial(
+                                id: exercicio.id,
+                                status: nextStatus,
+                                notes:
+                                    nextStatus == 'APPROVED'
+                                        ? 'Aprovado pela fila editorial.'
+                                        : 'Reprovado pela fila editorial.',
+                              );
+                          ref.invalidate(exerciciosFilteredProvider);
+                          ref.invalidate(exerciciosCuradoriaProvider);
+                          setModalState(() => refreshToken++);
+                        }
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                ChoiceChip(
+                                  label: Text('Pendentes ${pending.total}'),
+                                  selected: status == 'PENDING_REVIEW',
+                                  onSelected:
+                                      (_) => setModalState(
+                                        () => status = 'PENDING_REVIEW',
+                                      ),
+                                ),
+                                ChoiceChip(
+                                  label: Text('Reprovados ${rejected.total}'),
+                                  selected: status == 'REJECTED',
+                                  onSelected:
+                                      (_) => setModalState(
+                                        () => status = 'REJECTED',
+                                      ),
+                                ),
+                                Chip(
+                                  avatar: const Icon(
+                                    Icons.verified_rounded,
+                                    size: 16,
+                                  ),
+                                  label: Text('Aprovados $approvedTotal'),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            if (activeQueue.items.isEmpty)
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 28),
+                                child: Text('Nada para revisar nesta fila.'),
+                              )
+                            else
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxHeight: 440,
+                                ),
+                                child: ListView.separated(
+                                  shrinkWrap: true,
+                                  itemCount: activeQueue.items.length,
+                                  separatorBuilder:
+                                      (_, __) => const Divider(height: 20),
+                                  itemBuilder: (context, index) {
+                                    final exercicio = activeQueue.items[index];
+                                    return _EditorialQueueTile(
+                                      exercicio: exercicio,
+                                      onApprove:
+                                          () => review(exercicio, 'APPROVED'),
+                                      onReject:
+                                          () => review(exercicio, 'REJECTED'),
+                                    );
+                                  },
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Fechar'),
+                    ),
+                  ],
+                ),
+          ),
+    );
+  }
+
   Future<void> _openFilters(BuildContext context) async {
     var musculo = _musculoFiltro;
     var equipamento = _equipamentoFiltro;
@@ -1450,6 +1616,86 @@ class _ActiveFilterChip extends StatelessWidget {
         label: Text(label!),
         onDeleted: onDeleted,
         visualDensity: VisualDensity.compact,
+      ),
+    );
+  }
+}
+
+String _formatLicense(String value) {
+  return switch (value) {
+    'LICENSED' => 'Licenciado',
+    'PERSONAL_OWNED' => 'Proprio',
+    'PENDING_REVIEW' => 'Licenca pendente',
+    _ => value.replaceAll('_', ' '),
+  };
+}
+
+String _formatSource(String value) {
+  return switch (value) {
+    'FOCUX_LIBRARY' => 'Focux',
+    'PERSONAL_UPLOAD' => 'Personal',
+    'CURATION_REQUIRED' => 'Curadoria',
+    _ => value.replaceAll('_', ' '),
+  };
+}
+
+class _EditorialQueueTile extends StatelessWidget {
+  final Exercicio exercicio;
+  final Future<void> Function() onApprove;
+  final Future<void> Function() onReject;
+
+  const _EditorialQueueTile({
+    required this.exercicio,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasMedia = exercicio.videoUrl?.isNotEmpty == true;
+    final license = _formatLicense(exercicio.licenseStatus ?? 'PENDING_REVIEW');
+    final source =
+        exercicio.videoSource?.isNotEmpty == true
+            ? _formatSource(exercicio.videoSource!)
+            : 'Sem fonte';
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: CircleAvatar(
+        backgroundColor:
+            hasMedia
+                ? EagleTokens.good.withValues(alpha: 0.14)
+                : EagleTokens.warn.withValues(alpha: 0.14),
+        child: Icon(
+          hasMedia ? Icons.play_circle_fill_rounded : Icons.videocam_off_rounded,
+          color: hasMedia ? EagleTokens.good : EagleTokens.warn,
+        ),
+      ),
+      title: Text(exercicio.nome, maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text(
+        [
+          _formatEditorialStatus(exercicio.editorialStatus),
+          source,
+          license,
+          if (exercicio.editorialNotes?.trim().isNotEmpty == true)
+            exercicio.editorialNotes!.trim(),
+        ].join(' · '),
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: Wrap(
+        spacing: 6,
+        children: [
+          IconButton.filledTonal(
+            tooltip: 'Aprovar',
+            onPressed: onApprove,
+            icon: const Icon(Icons.verified_rounded),
+          ),
+          IconButton(
+            tooltip: 'Reprovar',
+            onPressed: onReject,
+            icon: const Icon(Icons.block_rounded),
+          ),
+        ],
       ),
     );
   }

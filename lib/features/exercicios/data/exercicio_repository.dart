@@ -261,6 +261,13 @@ class ExercicioMediaImportBatch {
       );
 }
 
+class ExercicioEditorialQueue {
+  final int total;
+  final List<Exercicio> items;
+
+  ExercicioEditorialQueue({required this.total, required this.items});
+}
+
 class ExercicioRepository {
   final Dio _dio;
 
@@ -278,6 +285,7 @@ class ExercicioRepository {
     bool? hasVideo,
     String? videoSource,
     String? licenseStatus,
+    String? editorialStatus,
     bool? favoritos,
   }) async {
     final queryParams = <String, dynamic>{};
@@ -314,6 +322,9 @@ class ExercicioRepository {
     if (licenseStatus != null && licenseStatus.isNotEmpty) {
       queryParams['licenseStatus'] = licenseStatus;
     }
+    if (editorialStatus != null && editorialStatus.isNotEmpty) {
+      queryParams['editorialStatus'] = editorialStatus;
+    }
     if (favoritos == true) {
       queryParams['favoritos'] = 'true';
     }
@@ -337,6 +348,29 @@ class ExercicioRepository {
   Future<Exercicio> buscar(int id) async {
     final response = await _dio.get('/api/exercicios/$id');
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<ExercicioEditorialQueue> buscarFilaEditorial(
+    String status, {
+    int size = 20,
+  }) async {
+    final response = await _dio.get(
+      '/api/exercicios/v2',
+      queryParameters: {
+        'editorialStatus': status,
+        'page': 0,
+        'size': size,
+        'sort': 'nome,asc',
+      },
+    );
+    final data = response.data as Map<String, dynamic>;
+    final list = (data['content'] as List<dynamic>? ?? [])
+        .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return ExercicioEditorialQueue(
+      total: (data['totalElements'] as num?)?.toInt() ?? list.length,
+      items: list,
+    );
   }
 
   Future<Exercicio> criar({
