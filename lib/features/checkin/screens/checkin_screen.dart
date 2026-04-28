@@ -78,16 +78,26 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     final increased = next > ee.seriesFeitas;
     try {
       HapticFeedback.selectionClick();
-      final updated = await ref
-          .read(checkinRepositoryProvider)
-          .marcarExercicio(
-            _execucao!.id!,
-            ee.treinoExercicioId,
-            next,
-            feedback: ee.feedback,
-            rpe: ee.rpe,
-            dor: ee.dor,
-          );
+      final repo = ref.read(checkinRepositoryProvider);
+      final updated = increased
+          ? await repo.registrarSerie(
+              _execucao!.id!,
+              ee.treinoExercicioId,
+              numero: next,
+              cargaKg: ee.cargaKg,
+              repeticoes: ee.repeticoes,
+              feedback: ee.feedback,
+              rpe: ee.rpe,
+              dor: ee.dor,
+            )
+          : await repo.marcarExercicio(
+              _execucao!.id!,
+              ee.treinoExercicioId,
+              next,
+              feedback: ee.feedback,
+              rpe: ee.rpe,
+              dor: ee.dor,
+            );
       if (!mounted) return;
       setState(() {
         _execucao = ExecucaoTreino(
@@ -804,6 +814,18 @@ class _SerieCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                 ],
+                if (ee.seriesDetalhes.isNotEmpty) ...[
+                  _SeriesHistory(
+                    series: ee.seriesDetalhes,
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    dark: dark,
+                    formatKg: _formatKg,
+                    formatFeedback: _formatFeedback,
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 Row(
                   children: [
                     Expanded(
@@ -1081,6 +1103,81 @@ class _PreviousPerformance extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SeriesHistory extends StatelessWidget {
+  final List<ExecucaoSerie> series;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final bool dark;
+  final String? Function(double?) formatKg;
+  final String? Function(String?, int?, bool?) formatFeedback;
+
+  const _SeriesHistory({
+    required this.series,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.dark,
+    required this.formatKg,
+    required this.formatFeedback,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: dark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Series registradas', style: TextStyle(color: mute, fontSize: 11, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 8),
+          ...series.map((serie) {
+            final details = [
+              if (serie.repeticoes?.isNotEmpty == true) serie.repeticoes!,
+              if (formatKg(serie.cargaKg) != null) formatKg(serie.cargaKg)!,
+              if (formatFeedback(serie.feedback, serie.rpe, serie.dor) != null)
+                formatFeedback(serie.feedback, serie.rpe, serie.dor)!,
+            ].join(' | ');
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: EagleTokens.good.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      serie.numero.toString(),
+                      style: const TextStyle(color: EagleTokens.good, fontSize: 11, fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      details.isEmpty ? 'Serie registrada' : details,
+                      style: TextStyle(color: ink, fontSize: 12.5, fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );

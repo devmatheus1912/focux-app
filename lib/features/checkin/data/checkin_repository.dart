@@ -25,6 +25,7 @@ class ExecucaoExercicio {
   final String? feedbackAnterior;
   final int? rpeAnterior;
   final bool? dorAnterior;
+  final List<ExecucaoSerie> seriesDetalhes;
 
   ExecucaoExercicio({
     required this.id,
@@ -50,6 +51,7 @@ class ExecucaoExercicio {
     this.feedbackAnterior,
     this.rpeAnterior,
     this.dorAnterior,
+    this.seriesDetalhes = const [],
   });
 
   factory ExecucaoExercicio.fromJson(Map<String, dynamic> j) => ExecucaoExercicio(
@@ -76,6 +78,9 @@ class ExecucaoExercicio {
         feedbackAnterior: j['feedbackAnterior'] as String?,
         rpeAnterior: j['rpeAnterior'] as int?,
         dorAnterior: j['dorAnterior'] as bool?,
+        seriesDetalhes: (j['seriesDetalhes'] as List<dynamic>? ?? const [])
+            .map((e) => ExecucaoSerie.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
 
   ExecucaoExercicio copyWith({
@@ -109,6 +114,40 @@ class ExecucaoExercicio {
         feedbackAnterior: feedbackAnterior,
         rpeAnterior: rpeAnterior,
         dorAnterior: dorAnterior,
+        seriesDetalhes: seriesDetalhes,
+      );
+}
+
+class ExecucaoSerie {
+  final int id;
+  final int numero;
+  final double? cargaKg;
+  final String? repeticoes;
+  final String? feedback;
+  final int? rpe;
+  final bool dor;
+  final String? criadoEm;
+
+  const ExecucaoSerie({
+    required this.id,
+    required this.numero,
+    this.cargaKg,
+    this.repeticoes,
+    this.feedback,
+    this.rpe,
+    this.dor = false,
+    this.criadoEm,
+  });
+
+  factory ExecucaoSerie.fromJson(Map<String, dynamic> json) => ExecucaoSerie(
+        id: json['id'] as int,
+        numero: json['numero'] as int,
+        cargaKg: _toDouble(json['cargaKg']),
+        repeticoes: json['repeticoes'] as String?,
+        feedback: json['feedback'] as String?,
+        rpe: json['rpe'] as int?,
+        dor: json['dor'] as bool? ?? false,
+        criadoEm: json['criadoEm'] as String?,
       );
 }
 
@@ -177,6 +216,30 @@ class CheckinRepository {
       '/api/checkin/$execucaoId/exercicio/$treinoExercicioId',
       data: {
         'seriesFeitas': seriesFeitas,
+        if (feedback != null) 'feedback': feedback,
+        if (rpe != null) 'rpe': rpe,
+        if (dor != null) 'dor': dor,
+      },
+    );
+    return ExecucaoExercicio.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<ExecucaoExercicio> registrarSerie(
+    int execucaoId,
+    int treinoExercicioId, {
+    required int numero,
+    double? cargaKg,
+    String? repeticoes,
+    String? feedback,
+    int? rpe,
+    bool? dor,
+  }) async {
+    final r = await _dio.post(
+      '/api/checkin/$execucaoId/exercicio/$treinoExercicioId/series',
+      data: {
+        'numero': numero,
+        if (cargaKg != null) 'cargaKg': cargaKg,
+        if (repeticoes != null && repeticoes.isNotEmpty) 'repeticoes': repeticoes,
         if (feedback != null) 'feedback': feedback,
         if (rpe != null) 'rpe': rpe,
         if (dor != null) 'dor': dor,
