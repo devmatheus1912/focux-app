@@ -20,10 +20,33 @@ class PasswordResetRequestResult {
   }
 }
 
+class AuthCapabilities {
+  final bool passwordResetEmailAvailable;
+  final bool googleSignInEnabled;
+
+  const AuthCapabilities({
+    required this.passwordResetEmailAvailable,
+    required this.googleSignInEnabled,
+  });
+
+  factory AuthCapabilities.fromJson(Map<String, dynamic> json) {
+    return AuthCapabilities(
+      passwordResetEmailAvailable:
+          json['passwordResetEmailAvailable'] as bool? ?? false,
+      googleSignInEnabled: json['googleSignInEnabled'] as bool? ?? false,
+    );
+  }
+}
+
 class AuthRepository {
   final Dio _dio;
 
   AuthRepository(ApiClient client) : _dio = client.dio;
+
+  Future<AuthCapabilities> capabilities() async {
+    final response = await _dio.get('/api/auth/capabilities');
+    return AuthCapabilities.fromJson(response.data as Map<String, dynamic>);
+  }
 
   Future<String> loginPersonal(String email, String password) async {
     final response = await _dio.post('/api/auth/login', data: {

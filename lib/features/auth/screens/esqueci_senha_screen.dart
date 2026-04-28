@@ -22,6 +22,26 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
   String? _error;
   String? _hint;
   bool _isAluno = false;
+  bool? _emailDeliveryAvailable;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCapabilities();
+  }
+
+  Future<void> _loadCapabilities() async {
+    try {
+      final capabilities = await AuthRepository(ApiClient()).capabilities();
+      if (!mounted) return;
+      setState(() {
+        _emailDeliveryAvailable = capabilities.passwordResetEmailAvailable;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _emailDeliveryAvailable = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -234,6 +254,30 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                       },
                     ),
                     const SizedBox(height: 24),
+                    if (_emailDeliveryAvailable == false) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFB020)
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFFFB020)
+                                .withValues(alpha: 0.28),
+                          ),
+                        ),
+                        child: Text(
+                          'Envio de e-mail ainda nao esta ativo neste ambiente. O pedido sera registrado, mas a entrega depende da configuracao SMTP.',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.72),
+                            fontSize: 12.5,
+                            height: 1.45,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                    ],
                     if (_error != null) ...[
                       Text(
                         _error!,
