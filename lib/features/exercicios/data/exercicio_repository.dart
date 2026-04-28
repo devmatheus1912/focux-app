@@ -442,6 +442,23 @@ class ExercicioRepository {
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<int> atualizarCuradoriaEditorialLote({
+    required List<int> ids,
+    required String status,
+    String? notes,
+  }) async {
+    final response = await _dio.patch(
+      '/api/exercicios/curadoria-editorial/lote',
+      data: {
+        'ids': ids,
+        'editorialStatus': status,
+        if (notes != null) 'editorialNotes': notes,
+      },
+    );
+    final data = response.data as Map<String, dynamic>;
+    return (data['atualizados'] as num?)?.toInt() ?? 0;
+  }
+
   Future<int> importarSeedV1() async {
     final response = await _dio.post('/api/exercicios/importar/seed/v1');
     final data = response.data;
