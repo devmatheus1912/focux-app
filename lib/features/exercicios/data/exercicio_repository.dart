@@ -184,6 +184,34 @@ class CuradoriaLoteResultado {
       );
 }
 
+class ImportarMidiasResultado {
+  final int total;
+  final int atualizados;
+  final int naoEncontrados;
+  final int prontosParaAluno;
+  final List<String> naoEncontradosKeys;
+
+  ImportarMidiasResultado({
+    required this.total,
+    required this.atualizados,
+    required this.naoEncontrados,
+    required this.prontosParaAluno,
+    required this.naoEncontradosKeys,
+  });
+
+  factory ImportarMidiasResultado.fromJson(Map<String, dynamic> json) =>
+      ImportarMidiasResultado(
+        total: (json['total'] as num?)?.toInt() ?? 0,
+        atualizados: (json['atualizados'] as num?)?.toInt() ?? 0,
+        naoEncontrados: (json['naoEncontrados'] as num?)?.toInt() ?? 0,
+        prontosParaAluno: (json['prontosParaAluno'] as num?)?.toInt() ?? 0,
+        naoEncontradosKeys:
+            ((json['naoEncontradosKeys'] as List<dynamic>?) ?? [])
+                .map((e) => e.toString())
+                .toList(),
+      );
+}
+
 class ExercicioRepository {
   final Dio _dio;
 
@@ -390,6 +418,18 @@ class ExercicioRepository {
       data: data,
     );
     return CuradoriaLoteResultado.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+  }
+
+  Future<ImportarMidiasResultado> importarMidias(
+    List<Map<String, dynamic>> midias,
+  ) async {
+    final response = await _dio.post(
+      '/api/exercicios/curadoria/midias/importar',
+      data: {'midias': midias},
+    );
+    return ImportarMidiasResultado.fromJson(
       response.data as Map<String, dynamic>,
     );
   }

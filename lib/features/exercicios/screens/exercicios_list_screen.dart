@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -227,6 +229,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                       if (value == 'curadoria_lote') {
                         _openCuradoriaLote(context, ref);
                       }
+                      if (value == 'importar_midias') {
+                        _openImportarMidias(context, ref);
+                      }
                     },
                     itemBuilder:
                         (_) => const [
@@ -257,6 +262,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                                 Icon(Icons.fact_check_rounded, size: 20),
                                 SizedBox(width: 10),
                                 Text('Curadoria em lote'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'importar_midias',
+                            child: Row(
+                              children: [
+                                Icon(Icons.video_file_rounded, size: 20),
+                                SizedBox(width: 10),
+                                Text('Importar midias CSV/JSON'),
                               ],
                             ),
                           ),
@@ -725,6 +740,124 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         );
       }
     }
+  }
+
+  Future<void> _openImportarMidias(BuildContext context, WidgetRef ref) async {
+    final payloadCtrl = TextEditingController(
+      text:
+          'importKey,videoUrl,thumbnailUrl,videoSource,licenseStatus\n'
+          'supino-reto-peso-corporal-iniciante-hipertrofia|peito|peso-corporal,https://cdn.exemplo/supino.mp4,https://cdn.exemplo/supino.jpg,FOCUX_LIBRARY,LICENSED',
+    );
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Importar midias CSV/JSON'),
+            content: SizedBox(
+              width: 560,
+              child: TextField(
+                controller: payloadCtrl,
+                minLines: 8,
+                maxLines: 14,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Importar'),
+              ),
+            ],
+          ),
+    );
+    if (confirm != true) {
+      payloadCtrl.dispose();
+      return;
+    }
+
+    final raw = payloadCtrl.text.trim();
+    payloadCtrl.dispose();
+    if (!context.mounted) return;
+
+    try {
+      final midias = _parseMidiasPayload(raw);
+      final result = await ref
+          .read(exercicioRepositoryProvider)
+          .importarMidias(midias);
+      ref.invalidate(exerciciosFilteredProvider);
+      ref.invalidate(exerciciosCuradoriaProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${result.atualizados}/${result.total} midias importadas · ${result.naoEncontrados} nao encontradas.',
+            ),
+            backgroundColor:
+                result.naoEncontrados == 0
+                    ? EagleTokens.good
+                    : EagleTokens.warn,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao importar midias: $e'),
+            backgroundColor: EagleTokens.bad,
+          ),
+        );
+      }
+    }
+  }
+
+  List<Map<String, dynamic>> _parseMidiasPayload(String raw) {
+    if (raw.isEmpty) {
+      throw Exception('conteudo vazio');
+    }
+    if (raw.startsWith('{') || raw.startsWith('[')) {
+      final decoded = jsonDecode(raw);
+      if (decoded is List) {
+        return decoded.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      }
+      if (decoded is Map && decoded['midias'] is List) {
+        return (decoded['midias'] as List)
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList();
+      }
+      throw Exception('JSON precisa ser lista ou objeto com midias');
+    }
+    return _parseMidiasCsv(raw);
+  }
+
+  List<Map<String, dynamic>> _parseMidiasCsv(String raw) {
+    final lines =
+        raw
+            .split(RegExp(r'\r?\n'))
+            .map((line) => line.trim())
+            .where((line) => line.isNotEmpty)
+            .toList();
+    if (lines.length < 2) {
+      throw Exception('CSV precisa de cabecalho e ao menos uma linha');
+    }
+    final headers = lines.first.split(',').map((e) => e.trim()).toList();
+    return [
+      for (final line in lines.skip(1))
+        {
+          for (var i = 0; i < headers.length; i++)
+            if (i < line.split(',').length &&
+                line.split(',')[i].trim().isNotEmpty)
+              headers[i]: line.split(',')[i].trim(),
+        },
+    ];
   }
 
   Future<void> _openFilters(BuildContext context) async {
