@@ -1229,8 +1229,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     List<ChatMsg> filtered(MediaType? type) {
       return _msgs
           .where((msg) {
-            final tipo = msg.tipoMidia;
-            final url = msg.midiaUrl;
+            final tipo = msg.primaryMediaType;
+            final url = msg.primaryMediaUrl;
             if (tipo == null || url == null || url.isEmpty) return false;
             if (type == null) return true;
             return _mediaType(type) == tipo ||
@@ -1368,9 +1368,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   Future<void> _openMedia(ChatMsg msg) async {
-    final url = msg.midiaUrl;
+    final url = msg.primaryMediaUrl;
     if (url == null || url.isEmpty) return;
-    final tipo = msg.tipoMidia;
+    final tipo = msg.primaryMediaType;
     if (tipo == 'IMAGE' || tipo == 'IMAGEM') {
       _showImageViewer(url);
       return;
@@ -1490,12 +1490,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   String _previewText(ChatMsg msg) {
     if (msg.deletedAt != null) return 'Mensagem apagada';
     if (msg.conteudo.trim().isNotEmpty &&
-        !_isMediaLabelOnly(msg.tipoMidia, msg.conteudo)) {
+        !_isMediaLabelOnly(msg.primaryMediaType, msg.conteudo)) {
       return msg.conteudo.trim();
     }
-    if (msg.tipoMidia == 'IMAGE' || msg.tipoMidia == 'IMAGEM') return 'Foto';
-    if (msg.tipoMidia == 'VIDEO') return 'Video';
-    if (msg.tipoMidia == 'AUDIO') return 'Audio';
+    if (msg.primaryMediaType == 'IMAGE') return 'Foto';
+    if (msg.primaryMediaType == 'VIDEO') return 'Video';
+    if (msg.primaryMediaType == 'AUDIO') return 'Audio';
     return 'Mensagem';
   }
 
@@ -1530,9 +1530,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     return msg.id != null &&
         _isMine(msg) &&
         msg.deletedAt == null &&
-        (msg.midiaUrl == null || msg.midiaUrl!.isEmpty) &&
+        (msg.primaryMediaUrl == null || msg.primaryMediaUrl!.isEmpty) &&
         msg.conteudo.trim().isNotEmpty &&
-        !_isMediaLabelOnly(msg.tipoMidia, msg.conteudo);
+        !_isMediaLabelOnly(msg.primaryMediaType, msg.conteudo);
   }
 
   bool _canDeleteMessage(ChatMsg msg) {
@@ -2494,7 +2494,7 @@ class _Bubble extends StatelessWidget {
                   ),
                 )
               else if (msg.conteudo.isNotEmpty &&
-                  !_isMediaLabelOnly(msg.tipoMidia, msg.conteudo))
+                  !_isMediaLabelOnly(msg.primaryMediaType, msg.conteudo))
                 Text(
                   msg.conteudo,
                   style: TextStyle(
@@ -2840,8 +2840,8 @@ class _MediaPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tipo = msg.tipoMidia;
-    final url = msg.midiaUrl;
+    final tipo = msg.primaryMediaType;
+    final url = msg.primaryMediaUrl;
     if (tipo == null || url == null || url.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -3042,11 +3042,11 @@ class _MediaGalleryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tipo = msg.tipoMidia;
+    final tipo = msg.primaryMediaType;
     final title = _title(tipo);
     final icon = _icon(tipo);
-    final url = msg.midiaUrl;
-    final isImage = tipo == 'IMAGE' || tipo == 'IMAGEM';
+    final url = msg.primaryMediaUrl;
+    final isImage = tipo == 'IMAGE';
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final muted = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 

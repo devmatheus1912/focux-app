@@ -20,6 +20,36 @@ class ChatReaction {
   );
 }
 
+class ChatAttachment {
+  final String type;
+  final String url;
+  final String? fileName;
+  final String? mimeType;
+  final String? thumbnailUrl;
+  final int? sizeBytes;
+  final int? durationSeconds;
+
+  const ChatAttachment({
+    required this.type,
+    required this.url,
+    this.fileName,
+    this.mimeType,
+    this.thumbnailUrl,
+    this.sizeBytes,
+    this.durationSeconds,
+  });
+
+  factory ChatAttachment.fromJson(Map<String, dynamic> j) => ChatAttachment(
+    type: j['type'] as String? ?? 'FILE',
+    url: j['url'] as String? ?? '',
+    fileName: j['fileName'] as String?,
+    mimeType: j['mimeType'] as String?,
+    thumbnailUrl: j['thumbnailUrl'] as String?,
+    sizeBytes: j['sizeBytes'] as int?,
+    durationSeconds: j['durationSeconds'] as int?,
+  );
+}
+
 class ChatMsg {
   final int? id;
   final int? alunoId;
@@ -36,6 +66,7 @@ class ChatMsg {
   final String? replyToRemetente;
   final DateTime? editedAt;
   final DateTime? deletedAt;
+  final List<ChatAttachment> attachments;
   final List<ChatReaction> reactions;
 
   ChatMsg({
@@ -54,6 +85,7 @@ class ChatMsg {
     this.replyToRemetente,
     this.editedAt,
     this.deletedAt,
+    this.attachments = const [],
     this.reactions = const [],
   });
 
@@ -83,11 +115,29 @@ class ChatMsg {
         j['deletedAt'] != null
             ? DateTime.tryParse(j['deletedAt'].toString())
             : null,
+    attachments:
+        ((j['attachments'] as List?) ?? const [])
+            .map((e) => ChatAttachment.fromJson(e as Map<String, dynamic>))
+            .where((e) => e.url.isNotEmpty)
+            .toList(),
     reactions:
         ((j['reactions'] as List?) ?? const [])
             .map((e) => ChatReaction.fromJson(e as Map<String, dynamic>))
             .toList(),
   );
+
+  ChatAttachment? get primaryAttachment {
+    if (attachments.isNotEmpty) return attachments.first;
+    if (midiaUrl == null || midiaUrl!.isEmpty) return null;
+    return ChatAttachment(type: tipoMidia ?? 'FILE', url: midiaUrl!);
+  }
+
+  String? get primaryMediaType {
+    final type = primaryAttachment?.type ?? tipoMidia;
+    return type == 'IMAGEM' ? 'IMAGE' : type;
+  }
+
+  String? get primaryMediaUrl => primaryAttachment?.url ?? midiaUrl;
 }
 
 class ChatInboxItem {
