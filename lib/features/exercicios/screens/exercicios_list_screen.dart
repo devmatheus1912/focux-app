@@ -43,7 +43,13 @@ const _equipamentosFiltro = [
 
 const _niveisFiltro = ['Iniciante', 'Intermediario', 'Avancado'];
 const _mecanicasFiltro = ['Composto', 'Isolado', 'Mobilidade', 'Cardio'];
-const _objetivosFiltro = ['Forca', 'Hipertrofia', 'Emagrecimento', 'Condicionamento', 'Mobilidade'];
+const _objetivosFiltro = [
+  'Forca',
+  'Hipertrofia',
+  'Emagrecimento',
+  'Condicionamento',
+  'Mobilidade',
+];
 const _fontesVideoFiltro = ['FOCUX_LIBRARY', 'PERSONAL_UPLOAD'];
 const _licencasFiltro = ['LICENSED', 'PERSONAL_OWNED', 'PENDING_REVIEW'];
 
@@ -51,7 +57,8 @@ class ExerciciosListScreen extends ConsumerStatefulWidget {
   const ExerciciosListScreen({super.key});
 
   @override
-  ConsumerState<ExerciciosListScreen> createState() => _ExerciciosListScreenState();
+  ConsumerState<ExerciciosListScreen> createState() =>
+      _ExerciciosListScreenState();
 }
 
 class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
@@ -77,7 +84,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     super.dispose();
   }
 
-  String? get _categoriaParam => _categoriaFiltro == 'Todos' ? null : _categoriaFiltro;
+  String? get _categoriaParam =>
+      _categoriaFiltro == 'Todos' ? null : _categoriaFiltro;
 
   bool get _hasAdvancedFilters =>
       _musculoFiltro != null ||
@@ -91,22 +99,25 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final exerciciosAsync = ref.watch(exerciciosFilteredProvider(
-      ExercicioFilter(
-        nome: _nomeFiltro.isEmpty ? null : _nomeFiltro,
-        categoria: _categoriaParam,
-        tag: _tagFiltro.isEmpty ? null : _tagFiltro,
-        musculoAlvo: _musculoFiltro,
-        equipamento: _equipamentoFiltro,
-        nivel: _nivelFiltro,
-        mecanica: _mecanicaFiltro,
-        objetivo: _objetivoFiltro,
-        hasVideo: _comVideoFiltro ? true : null,
-        videoSource: _fonteVideoFiltro,
-        licenseStatus: _licencaFiltro,
-        favoritos: _apenasFavoritos ? true : null,
+    final exerciciosAsync = ref.watch(
+      exerciciosFilteredProvider(
+        ExercicioFilter(
+          nome: _nomeFiltro.isEmpty ? null : _nomeFiltro,
+          categoria: _categoriaParam,
+          tag: _tagFiltro.isEmpty ? null : _tagFiltro,
+          musculoAlvo: _musculoFiltro,
+          equipamento: _equipamentoFiltro,
+          nivel: _nivelFiltro,
+          mecanica: _mecanicaFiltro,
+          objetivo: _objetivoFiltro,
+          hasVideo: _comVideoFiltro ? true : null,
+          videoSource: _fonteVideoFiltro,
+          licenseStatus: _licencaFiltro,
+          favoritos: _apenasFavoritos ? true : null,
+        ),
       ),
-    ));
+    );
+    final curadoriaAsync = ref.watch(exerciciosCuradoriaProvider);
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
@@ -117,7 +128,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       backgroundColor: bg,
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+          gradient: const LinearGradient(
+            colors: [EagleTokens.brand, EagleTokens.brandInk],
+          ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -179,13 +192,22 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                       color: _apenasFavoritos ? EagleTokens.warn : mute,
                     ),
                     tooltip: 'Apenas favoritos',
-                    onPressed: () => setState(() => _apenasFavoritos = !_apenasFavoritos),
+                    onPressed:
+                        () => setState(
+                          () => _apenasFavoritos = !_apenasFavoritos,
+                        ),
                   ),
                   IconButton(
                     icon: Badge(
                       isLabelVisible: _hasAdvancedFilters,
                       smallSize: 8,
-                      child: Icon(Icons.tune_rounded, color: _hasAdvancedFilters ? Theme.of(context).colorScheme.primary : mute),
+                      child: Icon(
+                        Icons.tune_rounded,
+                        color:
+                            _hasAdvancedFilters
+                                ? Theme.of(context).colorScheme.primary
+                                : mute,
+                      ),
                     ),
                     tooltip: 'Filtros avancados',
                     onPressed: () => _openFilters(context),
@@ -196,18 +218,19 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                     onSelected: (value) {
                       if (value == 'seed_v1') _importarSeedV1(context, ref);
                     },
-                    itemBuilder: (_) => const [
-                      PopupMenuItem(
-                        value: 'seed_v1',
-                        child: Row(
-                          children: [
-                            Icon(Icons.download_rounded, size: 20),
-                            SizedBox(width: 10),
-                            Text('Importar biblioteca Focux v1'),
-                          ],
-                        ),
-                      ),
-                    ],
+                    itemBuilder:
+                        (_) => const [
+                          PopupMenuItem(
+                            value: 'seed_v1',
+                            child: Row(
+                              children: [
+                                Icon(Icons.download_rounded, size: 20),
+                                SizedBox(width: 10),
+                                Text('Importar biblioteca Focux v1'),
+                              ],
+                            ),
+                          ),
+                        ],
                   ),
                   if (context.canPop())
                     IconButton(
@@ -224,15 +247,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 decoration: InputDecoration(
                   hintText: 'Buscar por nome',
                   prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _nomeFiltro.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _nomeCtrl.clear();
-                            setState(() => _nomeFiltro = '');
-                          },
-                        )
-                      : null,
+                  suffixIcon:
+                      _nomeFiltro.isNotEmpty
+                          ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _nomeCtrl.clear();
+                              setState(() => _nomeFiltro = '');
+                            },
+                          )
+                          : null,
                   isDense: true,
                   border: const OutlineInputBorder(),
                 ),
@@ -247,15 +271,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 decoration: InputDecoration(
                   hintText: 'Buscar por tag (ex: #EmCasa)',
                   prefixIcon: const Icon(Icons.tag),
-                  suffixIcon: _tagFiltro.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _tagCtrl.clear();
-                            setState(() => _tagFiltro = '');
-                          },
-                        )
-                      : null,
+                  suffixIcon:
+                      _tagFiltro.isNotEmpty
+                          ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _tagCtrl.clear();
+                              setState(() => _tagFiltro = '');
+                            },
+                          )
+                          : null,
                   isDense: true,
                   border: const OutlineInputBorder(),
                 ),
@@ -266,7 +291,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
               height: 48,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 itemCount: _categoriasFiltro.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (_, i) {
@@ -285,37 +313,80 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 height: 42,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   children: [
-                    _ActiveFilterChip(label: _musculoFiltro, onDeleted: () => setState(() => _musculoFiltro = null)),
-                    _ActiveFilterChip(label: _equipamentoFiltro, onDeleted: () => setState(() => _equipamentoFiltro = null)),
-                    _ActiveFilterChip(label: _nivelFiltro, onDeleted: () => setState(() => _nivelFiltro = null)),
-                    _ActiveFilterChip(label: _mecanicaFiltro, onDeleted: () => setState(() => _mecanicaFiltro = null)),
-                    _ActiveFilterChip(label: _objetivoFiltro, onDeleted: () => setState(() => _objetivoFiltro = null)),
-                    _ActiveFilterChip(label: _comVideoFiltro ? 'Com video' : null, onDeleted: () => setState(() => _comVideoFiltro = false)),
-                    _ActiveFilterChip(label: _formatSourceLabel(_fonteVideoFiltro), onDeleted: () => setState(() => _fonteVideoFiltro = null)),
-                    _ActiveFilterChip(label: _formatLicenseLabel(_licencaFiltro), onDeleted: () => setState(() => _licencaFiltro = null)),
+                    _ActiveFilterChip(
+                      label: _musculoFiltro,
+                      onDeleted: () => setState(() => _musculoFiltro = null),
+                    ),
+                    _ActiveFilterChip(
+                      label: _equipamentoFiltro,
+                      onDeleted:
+                          () => setState(() => _equipamentoFiltro = null),
+                    ),
+                    _ActiveFilterChip(
+                      label: _nivelFiltro,
+                      onDeleted: () => setState(() => _nivelFiltro = null),
+                    ),
+                    _ActiveFilterChip(
+                      label: _mecanicaFiltro,
+                      onDeleted: () => setState(() => _mecanicaFiltro = null),
+                    ),
+                    _ActiveFilterChip(
+                      label: _objetivoFiltro,
+                      onDeleted: () => setState(() => _objetivoFiltro = null),
+                    ),
+                    _ActiveFilterChip(
+                      label: _comVideoFiltro ? 'Com video' : null,
+                      onDeleted: () => setState(() => _comVideoFiltro = false),
+                    ),
+                    _ActiveFilterChip(
+                      label: _formatSourceLabel(_fonteVideoFiltro),
+                      onDeleted: () => setState(() => _fonteVideoFiltro = null),
+                    ),
+                    _ActiveFilterChip(
+                      label: _formatLicenseLabel(_licencaFiltro),
+                      onDeleted: () => setState(() => _licencaFiltro = null),
+                    ),
                   ],
                 ),
               ),
+            curadoriaAsync.when(
+              loading: () => const _CuradoriaSkeleton(),
+              error: (_, __) => const SizedBox.shrink(),
+              data:
+                  (resumo) => _CuradoriaCard(
+                    resumo: resumo,
+                    onImportSeed: () => _importarSeedV1(context, ref),
+                  ),
+            ),
             Expanded(
               child: exerciciosAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(child: Text('Erro: $e')),
                 data: (exercicios) {
                   if (exercicios.isEmpty) {
-                    return const Center(child: Text('Nenhum exercicio encontrado.'));
+                    return const Center(
+                      child: Text('Nenhum exercicio encontrado.'),
+                    );
                   }
                   return RefreshIndicator(
-                    onRefresh: () async => ref.invalidate(exerciciosFilteredProvider),
+                    onRefresh:
+                        () async => ref.invalidate(exerciciosFilteredProvider),
                     child: ListView.separated(
                       padding: const EdgeInsets.fromLTRB(12, 2, 12, 96),
                       itemCount: exercicios.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (context, i) => _ExercicioTile(
-                        exercicio: exercicios[i],
-                        onFavoritoToggle: () => ref.invalidate(exerciciosFilteredProvider),
-                      ),
+                      itemBuilder:
+                          (context, i) => _ExercicioTile(
+                            exercicio: exercicios[i],
+                            onFavoritoToggle:
+                                () =>
+                                    ref.invalidate(exerciciosFilteredProvider),
+                          ),
                     ),
                   );
                 },
@@ -330,16 +401,23 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   Future<void> _importarSeedV1(BuildContext context, WidgetRef ref) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Importar biblioteca Focux v1'),
-        content: const Text(
-          'Isso vai importar 26 exercicios iniciais da biblioteca Focux com videos, thumbnails e orientacoes profissionais.\n\nSe o exercicio ja existir, sera atualizado. A operacao e segura e pode ser repetida.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Importar')),
-        ],
-      ),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Importar biblioteca Focux v1'),
+            content: const Text(
+              'Isso vai importar 26 exercicios iniciais da biblioteca Focux com videos, thumbnails e orientacoes profissionais.\n\nSe o exercicio ja existir, sera atualizado. A operacao e segura e pode ser repetida.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Importar'),
+              ),
+            ],
+          ),
     );
     if (confirm != true) return;
     if (!context.mounted) return;
@@ -349,7 +427,14 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       const SnackBar(
         content: Row(
           children: [
-            SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            ),
             SizedBox(width: 12),
             Text('Importando biblioteca...'),
           ],
@@ -359,13 +444,17 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     );
 
     try {
-      final count = await ref.read(exercicioRepositoryProvider).importarSeedV1();
+      final count =
+          await ref.read(exercicioRepositoryProvider).importarSeedV1();
       ref.invalidate(exerciciosFilteredProvider);
+      ref.invalidate(exerciciosCuradoriaProvider);
       messenger.clearSnackBars();
       if (context.mounted) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('${count > 0 ? count : 26} exercicios importados com sucesso.'),
+            content: Text(
+              '${count > 0 ? count : 26} exercicios importados com sucesso.',
+            ),
             backgroundColor: EagleTokens.good,
           ),
         );
@@ -401,22 +490,55 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         return StatefulBuilder(
           builder: (context, modalSetState) {
             return Padding(
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.of(ctx).viewInsets.bottom),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                0,
+                20,
+                20 + MediaQuery.of(ctx).viewInsets.bottom,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text('Filtros da biblioteca', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                  const Text(
+                    'Filtros da biblioteca',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                  ),
                   const SizedBox(height: 14),
-                  _FilterDropdown(label: 'Grupo muscular', value: musculo, values: _gruposFiltro, onChanged: (v) => modalSetState(() => musculo = v)),
+                  _FilterDropdown(
+                    label: 'Grupo muscular',
+                    value: musculo,
+                    values: _gruposFiltro,
+                    onChanged: (v) => modalSetState(() => musculo = v),
+                  ),
                   const SizedBox(height: 10),
-                  _FilterDropdown(label: 'Equipamento', value: equipamento, values: _equipamentosFiltro, onChanged: (v) => modalSetState(() => equipamento = v)),
+                  _FilterDropdown(
+                    label: 'Equipamento',
+                    value: equipamento,
+                    values: _equipamentosFiltro,
+                    onChanged: (v) => modalSetState(() => equipamento = v),
+                  ),
                   const SizedBox(height: 10),
-                  _FilterDropdown(label: 'Nivel', value: nivel, values: _niveisFiltro, onChanged: (v) => modalSetState(() => nivel = v)),
+                  _FilterDropdown(
+                    label: 'Nivel',
+                    value: nivel,
+                    values: _niveisFiltro,
+                    onChanged: (v) => modalSetState(() => nivel = v),
+                  ),
                   const SizedBox(height: 10),
-                  _FilterDropdown(label: 'Mecanica', value: mecanica, values: _mecanicasFiltro, onChanged: (v) => modalSetState(() => mecanica = v)),
+                  _FilterDropdown(
+                    label: 'Mecanica',
+                    value: mecanica,
+                    values: _mecanicasFiltro,
+                    onChanged: (v) => modalSetState(() => mecanica = v),
+                  ),
                   const SizedBox(height: 10),
-                  _FilterDropdown(label: 'Objetivo', value: objetivo, values: _objetivosFiltro, onChanged: (v) => modalSetState(() => objetivo = v)),
+                  _FilterDropdown(
+                    label: 'Objetivo',
+                    value: objetivo,
+                    values: _objetivosFiltro,
+                    onChanged: (v) => modalSetState(() => objetivo = v),
+                  ),
                   const SizedBox(height: 10),
                   SwitchListTile.adaptive(
                     value: comVideo,
@@ -426,9 +548,21 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                     onChanged: (value) => modalSetState(() => comVideo = value),
                   ),
                   const SizedBox(height: 10),
-                  _FilterDropdown(label: 'Fonte do video', value: fonteVideo, values: _fontesVideoFiltro, formatter: _formatSourceLabel, onChanged: (v) => modalSetState(() => fonteVideo = v)),
+                  _FilterDropdown(
+                    label: 'Fonte do video',
+                    value: fonteVideo,
+                    values: _fontesVideoFiltro,
+                    formatter: _formatSourceLabel,
+                    onChanged: (v) => modalSetState(() => fonteVideo = v),
+                  ),
                   const SizedBox(height: 10),
-                  _FilterDropdown(label: 'Licenca', value: licenca, values: _licencasFiltro, formatter: _formatLicenseLabel, onChanged: (v) => modalSetState(() => licenca = v)),
+                  _FilterDropdown(
+                    label: 'Licenca',
+                    value: licenca,
+                    values: _licencasFiltro,
+                    formatter: _formatLicenseLabel,
+                    onChanged: (v) => modalSetState(() => licenca = v),
+                  ),
                   const SizedBox(height: 18),
                   Row(
                     children: [
@@ -499,6 +633,227 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   }
 }
 
+class _CuradoriaCard extends StatelessWidget {
+  final ExercicioCuradoriaResumo resumo;
+  final VoidCallback onImportSeed;
+
+  const _CuradoriaCard({required this.resumo, required this.onImportSeed});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final card = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
+    final topGroups = resumo.porGrupoMuscular.take(3).toList();
+    final alert =
+        resumo.alertas.isNotEmpty
+            ? resumo.alertas.first
+            : 'Biblioteca pronta para curadoria fina.';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: line),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Text(
+                    '${resumo.scoreProntidao}',
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Curadoria premium',
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${resumo.total}/${resumo.metaPremium} exercicios · ${resumo.prontosParaAluno} prontos para aluno',
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Importar seed',
+                  onPressed: onImportSeed,
+                  icon: Icon(Icons.download_rounded, color: primary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                minHeight: 7,
+                value: (resumo.scoreProntidao / 100).clamp(0.0, 1.0),
+                backgroundColor: primary.withValues(alpha: 0.10),
+                valueColor: AlwaysStoppedAnimation(primary),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _CuradoriaMetric(
+                  label: 'Com video',
+                  value: '${resumo.comVideo}',
+                  color: EagleTokens.good,
+                ),
+                _CuradoriaMetric(
+                  label: 'Licencas ok',
+                  value: '${resumo.licenciados + resumo.videosProprios}',
+                  color: primary,
+                ),
+                _CuradoriaMetric(
+                  label: 'Pendentes',
+                  value: '${resumo.pendentesLicenca}',
+                  color: EagleTokens.warn,
+                ),
+                _CuradoriaMetric(
+                  label: 'Faltam',
+                  value: '${resumo.faltamParaMeta}',
+                  color: EagleTokens.bad,
+                ),
+              ],
+            ),
+            if (topGroups.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final group in topGroups)
+                    Chip(
+                      label: Text(
+                        '${_prettyGroup(group.label)} ${group.total}',
+                      ),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline_rounded, size: 16, color: mute),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    alert,
+                    style: TextStyle(color: mute, fontSize: 12.5, height: 1.25),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _prettyGroup(String value) {
+    if (value == 'NAO_INFORMADO') return 'Sem grupo';
+    return value;
+  }
+}
+
+class _CuradoriaMetric extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _CuradoriaMetric({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        '$label $value',
+        style: TextStyle(
+          color: color,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _CuradoriaSkeleton extends StatelessWidget {
+  const _CuradoriaSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      child: Container(
+        height: 96,
+        decoration: BoxDecoration(
+          color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: const SizedBox(
+          width: 22,
+          height: 22,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+    );
+  }
+}
+
 class _FilterDropdown extends StatelessWidget {
   final String label;
   final String? value;
@@ -518,8 +873,20 @@ class _FilterDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
       value: value,
-      decoration: InputDecoration(labelText: label, border: const OutlineInputBorder(), isDense: true),
-      items: values.map((v) => DropdownMenuItem(value: v, child: Text(formatter?.call(v) ?? v))).toList(),
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        isDense: true,
+      ),
+      items:
+          values
+              .map(
+                (v) => DropdownMenuItem(
+                  value: v,
+                  child: Text(formatter?.call(v) ?? v),
+                ),
+              )
+              .toList(),
       onChanged: onChanged,
     );
   }
@@ -550,7 +917,10 @@ class _ActiveFilterChip extends StatelessWidget {
 class _ExercicioTile extends ConsumerWidget {
   final Exercicio exercicio;
   final VoidCallback onFavoritoToggle;
-  const _ExercicioTile({required this.exercicio, required this.onFavoritoToggle});
+  const _ExercicioTile({
+    required this.exercicio,
+    required this.onFavoritoToggle,
+  });
 
   Future<void> _toggleFavorito(WidgetRef ref, BuildContext context) async {
     final repo = ref.read(exercicioRepositoryProvider);
@@ -582,9 +952,10 @@ class _ExercicioTile extends ConsumerWidget {
       exercicio.equipamento,
       exercicio.nivel,
     ].where((s) => s != null && s.isNotEmpty).join(' | ');
-    final mediaThumb = exercicio.thumbnailUrl?.isNotEmpty == true
-        ? exercicio.thumbnailUrl
-        : exercicio.gifUrl?.isNotEmpty == true
+    final mediaThumb =
+        exercicio.thumbnailUrl?.isNotEmpty == true
+            ? exercicio.thumbnailUrl
+            : exercicio.gifUrl?.isNotEmpty == true
             ? exercicio.gifUrl
             : null;
     final licensed = exercicio.licenseStatus == 'LICENSED';
@@ -597,21 +968,27 @@ class _ExercicioTile extends ConsumerWidget {
           borderRadius: BorderRadius.circular(14),
           side: BorderSide(color: line),
         ),
-        leading: mediaThumb != null
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: Image.network(
-                    mediaThumb,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.fitness_center),
+        leading:
+            mediaThumb != null
+                ? ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: Image.network(
+                      mediaThumb,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (_, __, ___) => const Icon(Icons.fitness_center),
+                    ),
                   ),
-                ),
-              )
-            : const CircleAvatar(child: Icon(Icons.fitness_center)),
-        title: Text(exercicio.nome, maxLines: 1, overflow: TextOverflow.ellipsis),
+                )
+                : const CircleAvatar(child: Icon(Icons.fitness_center)),
+        title: Text(
+          exercicio.nome,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -643,13 +1020,19 @@ class _ExercicioTile extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (exercicio.videoUrl?.isNotEmpty == true)
-              const Icon(Icons.play_circle_fill_rounded, color: EagleTokens.good),
+              const Icon(
+                Icons.play_circle_fill_rounded,
+                color: EagleTokens.good,
+              ),
             IconButton(
               icon: Icon(
                 exercicio.favoritado ? Icons.star : Icons.star_border,
                 color: exercicio.favoritado ? EagleTokens.warn : null,
               ),
-              tooltip: exercicio.favoritado ? 'Remover dos favoritos' : 'Adicionar aos favoritos',
+              tooltip:
+                  exercicio.favoritado
+                      ? 'Remover dos favoritos'
+                      : 'Adicionar aos favoritos',
               onPressed: () => _toggleFavorito(ref, context),
             ),
             const Icon(Icons.chevron_right),
@@ -695,7 +1078,11 @@ class _MiniMediaBadge extends StatelessWidget {
           const SizedBox(width: 3),
           Text(
             label,
-            style: TextStyle(color: color, fontSize: 10.5, fontWeight: FontWeight.w800),
+            style: TextStyle(
+              color: color,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),

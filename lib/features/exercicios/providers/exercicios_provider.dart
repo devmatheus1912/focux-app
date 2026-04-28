@@ -54,45 +54,59 @@ class ExercicioFilter {
 
   @override
   int get hashCode => Object.hash(
-        nome,
-        categoria,
-        tag,
-        musculoAlvo,
-        equipamento,
-        nivel,
-        mecanica,
-        objetivo,
-        hasVideo,
-        videoSource,
-        licenseStatus,
-        favoritos,
-      );
+    nome,
+    categoria,
+    tag,
+    musculoAlvo,
+    equipamento,
+    nivel,
+    mecanica,
+    objetivo,
+    hasVideo,
+    videoSource,
+    licenseStatus,
+    favoritos,
+  );
 }
 
 // Provider com filtros
 final exerciciosFilteredProvider =
-    FutureProvider.family<List<Exercicio>, ExercicioFilter>((ref, filter) async {
-  return ref.read(exercicioRepositoryProvider).listar(
-        nome: filter.nome,
-        categoria: filter.categoria,
-        tag: filter.tag,
-        musculoAlvo: filter.musculoAlvo,
-        equipamento: filter.equipamento,
-        nivel: filter.nivel,
-        mecanica: filter.mecanica,
-        objetivo: filter.objetivo,
-        hasVideo: filter.hasVideo,
-        videoSource: filter.videoSource,
-        licenseStatus: filter.licenseStatus,
-        favoritos: filter.favoritos,
-      );
-});
+    FutureProvider.family<List<Exercicio>, ExercicioFilter>((
+      ref,
+      filter,
+    ) async {
+      return ref
+          .read(exercicioRepositoryProvider)
+          .listar(
+            nome: filter.nome,
+            categoria: filter.categoria,
+            tag: filter.tag,
+            musculoAlvo: filter.musculoAlvo,
+            equipamento: filter.equipamento,
+            nivel: filter.nivel,
+            mecanica: filter.mecanica,
+            objetivo: filter.objetivo,
+            hasVideo: filter.hasVideo,
+            videoSource: filter.videoSource,
+            licenseStatus: filter.licenseStatus,
+            favoritos: filter.favoritos,
+          );
+    });
 
 // Provider sem filtro (compatibilidade)
 final exerciciosProvider = FutureProvider<List<Exercicio>>((ref) async {
   return ref.read(exercicioRepositoryProvider).listar();
 });
 
-final exercicioProvider = FutureProvider.family<Exercicio, int>((ref, id) async {
+final exercicioProvider = FutureProvider.family<Exercicio, int>((
+  ref,
+  id,
+) async {
   return ref.read(exercicioRepositoryProvider).buscar(id);
+});
+
+final exerciciosCuradoriaProvider = FutureProvider<ExercicioCuradoriaResumo>((
+  ref,
+) async {
+  return ref.read(exercicioRepositoryProvider).buscarCuradoria();
 });
