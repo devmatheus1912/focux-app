@@ -97,6 +97,11 @@ class FilaAcaoResumo {
   final String status;
   final String ctaLabel;
   final bool iaSugerida;
+  final int? alunoId;
+  final String? snoozedUntil;
+  final String? resolvedAt;
+  final String? createdAt;
+  final String? updatedAt;
 
   FilaAcaoResumo({
     required this.tipo,
@@ -111,6 +116,11 @@ class FilaAcaoResumo {
     required this.status,
     required this.ctaLabel,
     required this.iaSugerida,
+    this.alunoId,
+    this.snoozedUntil,
+    this.resolvedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory FilaAcaoResumo.fromJson(Map<String, dynamic> json) => FilaAcaoResumo(
@@ -126,6 +136,11 @@ class FilaAcaoResumo {
     status: json['status'] as String? ?? 'ABERTO',
     ctaLabel: json['ctaLabel'] as String? ?? 'Abrir',
     iaSugerida: json['iaSugerida'] as bool? ?? false,
+    alunoId: (json['alunoId'] as num?)?.toInt(),
+    snoozedUntil: json['snoozedUntil'] as String?,
+    resolvedAt: json['resolvedAt'] as String?,
+    createdAt: json['createdAt'] as String?,
+    updatedAt: json['updatedAt'] as String?,
   );
 }
 

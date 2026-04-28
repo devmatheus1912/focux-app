@@ -56,6 +56,22 @@ class DashboardRepository {
     return CommandCenterData.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<List<FilaAcaoResumo>> getIaCommandActions({
+    String? status,
+    int? alunoId,
+  }) async {
+    final response = await _dio.get(
+      '/api/dashboard/command-center/actions/ia',
+      queryParameters: {
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (alunoId != null) 'alunoId': alunoId,
+      },
+    );
+    return (response.data as List)
+        .map((item) => FilaAcaoResumo.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<void> completeCommandAction(String actionKey) async {
     await _dio.post(
       '/api/dashboard/command-center/actions/complete',

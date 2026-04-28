@@ -29,7 +29,7 @@ class CommandCenterWidget extends ConsumerWidget {
           ),
       data: (data) {
         if (data.agendaHoje.isEmpty && data.filaAcoes.isEmpty) {
-          return const SizedBox.shrink();
+          return const _IaActionHistory();
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,9 +51,156 @@ class CommandCenterWidget extends ConsumerWidget {
               ...data.agendaHoje.map((ag) => _AgendaTile(agendamento: ag)),
               const SizedBox(height: 16),
             ],
+            const _IaActionHistory(),
           ],
         );
       },
+    );
+  }
+}
+
+class _IaActionHistory extends ConsumerStatefulWidget {
+  const _IaActionHistory();
+
+  @override
+  ConsumerState<_IaActionHistory> createState() => _IaActionHistoryState();
+}
+
+class _IaActionHistoryState extends ConsumerState<_IaActionHistory> {
+  String _status = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final repo = ref.watch(dashboardRepositoryProvider);
+    final primary = Theme.of(context).colorScheme.primary;
+    return FutureBuilder<List<FilaAcaoResumo>>(
+      future: repo.getIaCommandActions(status: _status),
+      builder: (context, snapshot) {
+        final actions = snapshot.data ?? const <FilaAcaoResumo>[];
+        if (snapshot.connectionState == ConnectionState.waiting && actions.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        if (actions.isEmpty && _status.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Histórico IA',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: primary,
+                          fontWeight: FontWeight.w900,
+                        ),
+                  ),
+                ),
+                DropdownButton<String>(
+                  value: _status,
+                  underline: const SizedBox.shrink(),
+                  items: const [
+                    DropdownMenuItem(value: '', child: Text('Todas')),
+                    DropdownMenuItem(value: 'ABERTO', child: Text('Abertas')),
+                    DropdownMenuItem(value: 'ADIADO', child: Text('Adiadas')),
+                    DropdownMenuItem(value: 'CONCLUIDO', child: Text('Concluidas')),
+                  ],
+                  onChanged: (value) => setState(() => _status = value ?? ''),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (actions.isEmpty)
+              Text(
+                'Nenhuma ação IA neste filtro.',
+                style: Theme.of(context).textTheme.bodySmall,
+              )
+            else
+              ...actions.take(6).map((action) => _IaHistoryTile(action: action)),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _IaHistoryTile extends ConsumerWidget {
+  final FilaAcaoResumo action;
+
+  const _IaHistoryTile({required this.action});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: primary.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.auto_awesome, color: primary, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  action.titulo,
+                  style: TextStyle(
+                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  action.descricao,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    fontSize: 12,
+                    height: 1.25,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    _Pill(label: action.status, color: primary),
+                    if (action.alunoId != null)
+                      _Pill(label: 'Aluno ${action.alunoId}', color: primary),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (action.status != 'ABERTO')
+            TextButton(
+              onPressed: () async {
+                await ref
+                    .read(dashboardRepositoryProvider)
+                    .reopenCommandAction(action.actionKey);
+                ref.invalidate(commandCenterProvider);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Ação reaberta.')),
+                  );
+                }
+              },
+              child: const Text('Reabrir'),
+            ),
+        ],
+      ),
     );
   }
 }
