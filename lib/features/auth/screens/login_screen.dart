@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../../core/config/env.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
 
@@ -19,10 +21,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _loading = false;
+  bool _loadingGoogle = false;
   bool _showPassword = false;
+  bool _googleEnabled = false;
   String? _error;
   // BUG-39: role toggle — personal or aluno
   bool _isAluno = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCapabilities();
+  }
+
+  Future<void> _loadCapabilities() async {
+    try {
+      final capabilities =
+          await ref.read(authRepositoryProvider).capabilities();
+      if (!mounted) return;
+      setState(() {
+        _googleEnabled =
+            capabilities.googleSignInEnabled && Env.googleWebClientId.isNotEmpty;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _googleEnabled = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -62,6 +87,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _submitGoogle() async {
+    if (_loading || _loadingGoogle) return;
+    setState(() {
+      _loadingGoogle = true;
+      _error = null;
+    });
+    HapticFeedback.mediumImpact();
+    try {
+      final google = GoogleSignIn(
+        clientId: Env.googleWebClientId,
+        serverClientId: Env.googleWebClientId,
+        scopes: const ['email', 'profile'],
+      );
+      final account = await google.signIn();
+      if (account == null) return;
+      final auth = await account.authentication;
+      final idToken = auth.idToken;
+      if (idToken == null || idToken.isEmpty) {
+        throw StateError('Google nao retornou idToken.');
+      }
+      await ref.read(authProvider.notifier).loginGoogle(
+            idToken: idToken,
+            isAluno: _isAluno,
+          );
+      if (!mounted) return;
+      context.go(_isAluno ? '/dashboard/aluno' : '/dashboard/personal');
+    } catch (error) {
+      HapticFeedback.heavyImpact();
+      if (!mounted) return;
+      setState(() => _error = _mapGoogleError(error));
+    } finally {
+      if (mounted) setState(() => _loadingGoogle = false);
+    }
+  }
+
   String _mapError(Object error) {
     if (error is DioException) {
       final statusCode = error.response?.statusCode;
@@ -69,6 +129,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (statusCode == 401) return 'Email ou senha incorretos.';
     }
     return 'Não foi possível entrar agora.';
+  }
+
+  String _mapGoogleError(Object error) {
+    if (error is DioException) {
+      final statusCode = error.response?.statusCode;
+      if (statusCode == 401) {
+        return _isAluno
+            ? 'Este Google nao esta vinculado a um aluno.'
+            : 'Nao foi possivel validar sua conta Google.';
+      }
+      if (statusCode == 503) {
+        return 'Login com Google ainda nao esta configurado neste ambiente.';
+      }
+      if (statusCode == null) return 'Sem conexao com o servidor.';
+    }
+    return 'Nao foi possivel entrar com Google agora.';
   }
 
   @override
@@ -232,6 +308,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             onPressed: _submit,
                             isLoading: _loading,
                           ),
+                          if (_googleEnabled) ...[
+                            const SizedBox(height: 12),
+                            AuthSecondaryButton(
+                              label: 'Continuar com Google',
+                              icon: Icons.g_mobiledata_rounded,
+                              onPressed: _loadingGoogle ? null : _submitGoogle,
+                            ),
+                          ],
                         ],
                       ),
                     ),

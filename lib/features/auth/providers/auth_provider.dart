@@ -63,6 +63,17 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     state = AuthStatus.authenticated;
   }
 
+  Future<void> loginGoogle({
+    required String idToken,
+    required bool isAluno,
+  }) async {
+    await _repo.loginGoogle(idToken: idToken, isAluno: isAluno);
+    _currentRole = isAluno ? UserRole.aluno : UserRole.personal;
+    _isAdmin = await SecureStorage.getIsAdmin();
+    _requiresPasswordChange = false;
+    state = AuthStatus.authenticated;
+  }
+
   Future<void> registerAluno(String nome, String email, String password, String conviteToken, {String? personalSlug}) async {
     await _repo.registerAluno(nome, email, password, conviteToken, personalSlug: personalSlug);
     _currentRole = UserRole.aluno;

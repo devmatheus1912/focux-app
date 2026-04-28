@@ -94,6 +94,27 @@ class AuthRepository {
     return requiresPasswordChange;
   }
 
+  Future<void> loginGoogle({
+    required String idToken,
+    required bool isAluno,
+  }) async {
+    final response = await _dio.post('/api/auth/google', data: {
+      'idToken': idToken,
+      'role': isAluno ? 'ALUNO' : 'PERSONAL',
+    });
+    final token = response.data['token'] as String;
+    final refreshToken = response.data['refreshToken'] as String?;
+    final role = response.data['role'] as String? ?? (isAluno ? 'ALUNO' : 'PERSONAL');
+    final isAdmin = response.data['isAdmin'] as bool? ?? false;
+    final requiresPasswordChange =
+        response.data['requiresPasswordChange'] as bool? ?? false;
+    await SecureStorage.saveToken(token);
+    if (refreshToken != null) await SecureStorage.saveRefreshToken(refreshToken);
+    await SecureStorage.saveRole(role);
+    await SecureStorage.saveIsAdmin(isAdmin);
+    await SecureStorage.saveRequiresPasswordChange(requiresPasswordChange);
+  }
+
   Future<String> registerAluno(String nome, String email, String password, String conviteToken, {String? personalSlug}) async {
     final requestBody = <String, dynamic>{
       'nome': nome,
