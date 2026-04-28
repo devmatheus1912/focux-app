@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
@@ -34,14 +35,14 @@ class ConversationScreen extends ConsumerStatefulWidget {
     super.key,
     required this.alunoId,
     required this.alunoNome,
-  })  : mode = ConversationMode.personal,
-        assert(alunoId != null),
-        assert(alunoNome != null);
+  }) : mode = ConversationMode.personal,
+       assert(alunoId != null),
+       assert(alunoNome != null);
 
   const ConversationScreen.aluno({super.key})
-      : mode = ConversationMode.aluno,
-        alunoId = null,
-        alunoNome = null;
+    : mode = ConversationMode.aluno,
+      alunoId = null,
+      alunoNome = null;
 
   @override
   ConsumerState<ConversationScreen> createState() => _ConversationScreenState();
@@ -116,9 +117,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   Future<void> _loadHistorico() async {
     try {
       final repo = ChatRepository(ref.read(apiClientProvider));
-      final msgs = _isAlunoMode
-          ? await repo.historicoAluno()
-          : await repo.historico(_alunoId!);
+      final msgs =
+          _isAlunoMode
+              ? await repo.historicoAluno()
+              : await repo.historico(_alunoId!);
       if (_isAlunoMode && msgs.isNotEmpty && _alunoId == null) {
         _alunoId = msgs.first.alunoId;
         if (_alunoId != null) {
@@ -176,7 +178,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   void _onConnect(StompFrame frame, int alunoId) {
     final destination =
-        _isAlunoMode ? '/topic/chat.aluno.$alunoId' : '/topic/chat.personal.$alunoId';
+        _isAlunoMode
+            ? '/topic/chat.aluno.$alunoId'
+            : '/topic/chat.personal.$alunoId';
     _stomp?.subscribe(
       destination: destination,
       callback: (f) async {
@@ -198,11 +202,15 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   bool _isIncoming(ChatMsg msg) {
-    return _isAlunoMode ? msg.remetente == 'PERSONAL' : msg.remetente == 'ALUNO';
+    return _isAlunoMode
+        ? msg.remetente == 'PERSONAL'
+        : msg.remetente == 'ALUNO';
   }
 
   bool _isMine(ChatMsg msg) {
-    return _isAlunoMode ? msg.remetente == 'ALUNO' : msg.remetente == 'PERSONAL';
+    return _isAlunoMode
+        ? msg.remetente == 'ALUNO'
+        : msg.remetente == 'PERSONAL';
   }
 
   Future<void> _sendText() async {
@@ -214,17 +222,18 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     setState(() => _sending = true);
     try {
       final repo = ChatRepository(ref.read(apiClientProvider));
-      final msg = _isAlunoMode
-          ? await repo.enviarComoAluno(
-              text,
-              replyToMessageId: replyToMessageId,
-            )
-          : await repo.enviar(
-              _alunoId!,
-              text,
-              'PERSONAL',
-              replyToMessageId: replyToMessageId,
-            );
+      final msg =
+          _isAlunoMode
+              ? await repo.enviarComoAluno(
+                text,
+                replyToMessageId: replyToMessageId,
+              )
+              : await repo.enviar(
+                _alunoId!,
+                text,
+                'PERSONAL',
+                replyToMessageId: replyToMessageId,
+              );
       _captureAlunoId(msg);
       if (!mounted) return;
       setState(() {
@@ -234,9 +243,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao enviar: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao enviar: $e')));
       }
     } finally {
       if (mounted) {
@@ -278,29 +287,31 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final replyToMessageId = _replyingTo?.id;
     setState(() => _uploading = true);
     try {
-      final mediaUrl = await MediaUploadService(ref.read(apiClientProvider))
-          .uploadBytes(
+      final mediaUrl = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
         bytes: await file.readAsBytes(),
         filename: file.name,
         folder: 'chat',
         resourceType: type == MediaType.photo ? 'image' : 'auto',
       );
       final repo = ChatRepository(ref.read(apiClientProvider));
-      final msg = _isAlunoMode
-          ? await repo.enviarMidiaComoAluno(
-              conteudo: _mediaLabel(type),
-              tipoMidia: _mediaType(type),
-              midiaUrl: mediaUrl,
-              replyToMessageId: replyToMessageId,
-            )
-          : await repo.enviarMidia(
-              alunoId: _alunoId!,
-              conteudo: _mediaLabel(type),
-              remetente: 'PERSONAL',
-              tipoMidia: _mediaType(type),
-              midiaUrl: mediaUrl,
-              replyToMessageId: replyToMessageId,
-            );
+      final msg =
+          _isAlunoMode
+              ? await repo.enviarMidiaComoAluno(
+                conteudo: _mediaLabel(type),
+                tipoMidia: _mediaType(type),
+                midiaUrl: mediaUrl,
+                replyToMessageId: replyToMessageId,
+              )
+              : await repo.enviarMidia(
+                alunoId: _alunoId!,
+                conteudo: _mediaLabel(type),
+                remetente: 'PERSONAL',
+                tipoMidia: _mediaType(type),
+                midiaUrl: mediaUrl,
+                replyToMessageId: replyToMessageId,
+              );
       _captureAlunoId(msg);
       if (!mounted) return;
       setState(() {
@@ -310,9 +321,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao enviar midia: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao enviar midia: $e')));
       }
     } finally {
       if (mounted) {
@@ -328,7 +339,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       if (!allowed) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Permita o microfone para gravar audio.')),
+          const SnackBar(
+            content: Text('Permita o microfone para gravar audio.'),
+          ),
         );
         return;
       }
@@ -336,9 +349,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       final now = DateTime.now().millisecondsSinceEpoch;
       final extension = kIsWeb ? 'webm' : 'm4a';
       final filename = 'focux_audio_$now.$extension';
-      final path = kIsWeb
-          ? filename
-          : '${(await getTemporaryDirectory()).path}/$filename';
+      final path =
+          kIsWeb
+              ? filename
+              : '${(await getTemporaryDirectory()).path}/$filename';
 
       await _audioRecorder.start(
         RecordConfig(
@@ -372,9 +386,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   Future<void> _stopAudioRecording({required bool send}) async {
     if (!_recordingAudio) return;
-    final duration = _recordStartedAt == null
-        ? _recordDuration
-        : DateTime.now().difference(_recordStartedAt!);
+    final duration =
+        _recordStartedAt == null
+            ? _recordDuration
+            : DateTime.now().difference(_recordStartedAt!);
 
     _recordTimer?.cancel();
     setState(() {
@@ -433,8 +448,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final replyToMessageId = _replyingTo?.id;
     setState(() => _uploading = true);
     try {
-      final mediaUrl = await MediaUploadService(ref.read(apiClientProvider))
-          .uploadBytes(
+      final mediaUrl = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
         bytes: bytes,
         filename: filename,
         folder: 'chat/audio',
@@ -442,21 +458,22 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       );
       final repo = ChatRepository(ref.read(apiClientProvider));
       final label = 'Audio ${_formatDuration(duration)}';
-      final msg = _isAlunoMode
-          ? await repo.enviarMidiaComoAluno(
-              conteudo: label,
-              tipoMidia: 'AUDIO',
-              midiaUrl: mediaUrl,
-              replyToMessageId: replyToMessageId,
-            )
-          : await repo.enviarMidia(
-              alunoId: _alunoId!,
-              conteudo: label,
-              remetente: 'PERSONAL',
-              tipoMidia: 'AUDIO',
-              midiaUrl: mediaUrl,
-              replyToMessageId: replyToMessageId,
-            );
+      final msg =
+          _isAlunoMode
+              ? await repo.enviarMidiaComoAluno(
+                conteudo: label,
+                tipoMidia: 'AUDIO',
+                midiaUrl: mediaUrl,
+                replyToMessageId: replyToMessageId,
+              )
+              : await repo.enviarMidia(
+                alunoId: _alunoId!,
+                conteudo: label,
+                remetente: 'PERSONAL',
+                tipoMidia: 'AUDIO',
+                midiaUrl: mediaUrl,
+                replyToMessageId: replyToMessageId,
+              );
       _captureAlunoId(msg);
       if (!mounted) return;
       setState(() {
@@ -467,9 +484,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao enviar audio: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao enviar audio: $e')));
       }
     } finally {
       if (mounted) {
@@ -483,16 +500,17 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     HapticFeedback.selectionClick();
     try {
       final repo = ChatRepository(ref.read(apiClientProvider));
-      final updated = _isAlunoMode
-          ? await repo.toggleReactionAluno(msg.id!, emoji)
-          : await repo.toggleReaction(msg.id!, emoji);
+      final updated =
+          _isAlunoMode
+              ? await repo.toggleReactionAluno(msg.id!, emoji)
+              : await repo.toggleReaction(msg.id!, emoji);
       if (!mounted) return;
       setState(() => _upsertMessage(updated));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Nao foi possivel reagir: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Nao foi possivel reagir: $e')));
       }
     }
   }
@@ -517,11 +535,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         );
       }
     });
-    unawaited(Future<void>.delayed(const Duration(seconds: 2), () {
-      if (mounted && _highlightedMessageId == msg.id) {
-        setState(() => _highlightedMessageId = null);
-      }
-    }));
+    unawaited(
+      Future<void>.delayed(const Duration(seconds: 2), () {
+        if (mounted && _highlightedMessageId == msg.id) {
+          setState(() => _highlightedMessageId = null);
+        }
+      }),
+    );
   }
 
   ChatMsg? _findMessageById(int? messageId) {
@@ -555,34 +575,106 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                    borderRadius: BorderRadius.circular(999),
+      builder:
+          (_) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Reagir',
+                    style: TextStyle(
+                      color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      for (final emoji in _quickReactions)
+                        InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                            _toggleReaction(msg, emoji);
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            width: 48,
+                            height: 48,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: primarySoft,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(
+                              emoji,
+                              style: const TextStyle(fontSize: 24),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.reply_rounded, color: primary),
+                    title: const Text('Responder'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _setReply(msg);
+                    },
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.content_copy_outlined, color: primary),
+                    title: const Text('Copiar mensagem'),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      await Clipboard.setData(
+                        ClipboardData(text: msg.conteudo),
+                      );
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Mensagem copiada')),
+                      );
+                    },
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Reagir',
-                style: TextStyle(
-                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Wrap(
+            ),
+          ),
+    );
+  }
+
+  void _showEmojiSheet() {
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary);
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder:
+          (_) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              child: Wrap(
                 spacing: 10,
                 runSpacing: 10,
                 children: [
@@ -590,12 +682,18 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     InkWell(
                       onTap: () {
                         Navigator.pop(context);
-                        _toggleReaction(msg, emoji);
+                        final next = '${_ctrl.text}$emoji';
+                        _ctrl.value = TextEditingValue(
+                          text: next,
+                          selection: TextSelection.collapsed(
+                            offset: next.length,
+                          ),
+                        );
                       },
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
-                        width: 48,
-                        height: 48,
+                        width: 52,
+                        height: 52,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: primarySoft,
@@ -609,77 +707,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     ),
                 ],
               ),
-              const SizedBox(height: 18),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.reply_rounded, color: primary),
-                title: const Text('Responder'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _setReply(msg);
-                },
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.content_copy_outlined, color: primary),
-                title: const Text('Copiar mensagem'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await Clipboard.setData(ClipboardData(text: msg.conteudo));
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Mensagem copiada')),
-                  );
-                },
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showEmojiSheet() {
-    final primary = Theme.of(context).colorScheme.primary;
-    final primarySoft = BrandPalette.soft(primary);
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
-          child: Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              for (final emoji in _quickReactions)
-                InkWell(
-                  onTap: () {
-                    Navigator.pop(context);
-                    final next = '${_ctrl.text}$emoji';
-                    _ctrl.value = TextEditingValue(
-                      text: next,
-                      selection: TextSelection.collapsed(offset: next.length),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    width: 52,
-                    height: 52,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: primarySoft,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(emoji, style: const TextStyle(fontSize: 24)),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -691,54 +720,55 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                  borderRadius: BorderRadius.circular(999),
-                ),
+      builder:
+          (_) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  _AttachOption(
+                    icon: Icons.photo_camera_outlined,
+                    label: 'Foto da galeria',
+                    isDark: isDark,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickAndSend(MediaType.photo);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  _AttachOption(
+                    icon: Icons.videocam_outlined,
+                    label: 'Video da galeria',
+                    isDark: isDark,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickAndSend(MediaType.video);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  _AttachOption(
+                    icon: Icons.mic_none_outlined,
+                    label: 'Gravar audio',
+                    isDark: isDark,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _startAudioRecording();
+                    },
+                  ),
+                ],
               ),
-              const SizedBox(height: 18),
-              _AttachOption(
-                icon: Icons.photo_camera_outlined,
-                label: 'Foto da galeria',
-                isDark: isDark,
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickAndSend(MediaType.photo);
-                },
-              ),
-              const SizedBox(height: 8),
-              _AttachOption(
-                icon: Icons.videocam_outlined,
-                label: 'Video da galeria',
-                isDark: isDark,
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickAndSend(MediaType.video);
-                },
-              ),
-              const SizedBox(height: 8),
-              _AttachOption(
-                icon: Icons.mic_none_outlined,
-                label: 'Gravar audio',
-                isDark: isDark,
-                onTap: () {
-                  Navigator.pop(context);
-                  _startAudioRecording();
-                },
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -759,151 +789,171 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (sheetContext) => SafeArea(
-        child: StatefulBuilder(
-          builder: (context, setSheetState) {
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                14,
-                16,
-                16 + MediaQuery.of(sheetContext).viewInsets.bottom,
-              ),
-              child: SizedBox(
-                height: 440,
-                child: Column(
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: ctrl,
-                      autofocus: true,
-                      onChanged: (value) => setSheetState(() => query = value),
-                      onSubmitted: (_) async {
-                        await _performSearch(
-                          query: query,
-                          setSearching: (value) =>
-                              setSheetState(() => searching = value),
-                          setResults: (value) => setSheetState(() {
-                            searched = true;
-                            results = value;
-                          }),
-                        );
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Buscar na conversa',
-                        prefixIcon: const Icon(Icons.search_rounded),
-                        suffixIcon: IconButton(
-                          onPressed: () async {
+      builder:
+          (sheetContext) => SafeArea(
+            child: StatefulBuilder(
+              builder: (context, setSheetState) {
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    14,
+                    16,
+                    16 + MediaQuery.of(sheetContext).viewInsets.bottom,
+                  ),
+                  child: SizedBox(
+                    height: 440,
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color:
+                                isDark
+                                    ? EagleTokens.darkLine
+                                    : EagleTokens.line,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: ctrl,
+                          autofocus: true,
+                          onChanged:
+                              (value) => setSheetState(() => query = value),
+                          onSubmitted: (_) async {
                             await _performSearch(
                               query: query,
-                              setSearching: (value) =>
-                                  setSheetState(() => searching = value),
-                              setResults: (value) => setSheetState(() {
-                                searched = true;
-                                results = value;
-                              }),
+                              setSearching:
+                                  (value) =>
+                                      setSheetState(() => searching = value),
+                              setResults:
+                                  (value) => setSheetState(() {
+                                    searched = true;
+                                    results = value;
+                                  }),
                             );
                           },
-                          icon: const Icon(Icons.arrow_forward_rounded),
-                        ),
-                        filled: true,
-                        fillColor:
-                            isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Expanded(
-                      child: query.trim().isEmpty
-                          ? const _SearchState(
-                              icon: Icons.search_rounded,
-                              title: 'Digite para buscar',
-                              subtitle: 'Encontre mensagens antigas da conversa.',
-                            )
-                          : searching
-                              ? const Center(
-                                  child: CircularProgressIndicator(),
-                                )
-                              : searched && results.isEmpty
-                              ? const _SearchState(
-                                  icon: Icons.chat_bubble_outline,
-                                  title: 'Nada encontrado',
-                                  subtitle: 'Tente outra palavra-chave.',
-                                )
-                              : ListView.separated(
-                                  itemCount: results.length,
-                                  separatorBuilder: (_, __) =>
-                                      const SizedBox(height: 8),
-                                  itemBuilder: (_, index) {
-                                    final msg = results[index];
-                                    return InkWell(
-                                      onTap: () {
-                                        Navigator.pop(sheetContext);
-                                        _focusMessage(msg);
-                                      },
-                                      borderRadius: BorderRadius.circular(14),
-                                      child: Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: isDark
-                                              ? EagleTokens.darkCardHi
-                                              : primarySoft,
-                                          borderRadius:
-                                              BorderRadius.circular(14),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              _replySenderLabel(msg.remetente),
-                                              style: TextStyle(
-                                                color: primary,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              _previewText(msg),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              _fullDateLabel(msg.enviadoEm),
-                                              style: TextStyle(
-                                                color: isDark
-                                                    ? EagleTokens.darkInkMute
-                                                    : EagleTokens.inkMute,
-                                                fontSize: 11,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                          decoration: InputDecoration(
+                            hintText: 'Buscar na conversa',
+                            prefixIcon: const Icon(Icons.search_rounded),
+                            suffixIcon: IconButton(
+                              onPressed: () async {
+                                await _performSearch(
+                                  query: query,
+                                  setSearching:
+                                      (value) => setSheetState(
+                                        () => searching = value,
                                       ),
-                                    );
-                                  },
-                                ),
+                                  setResults:
+                                      (value) => setSheetState(() {
+                                        searched = true;
+                                        results = value;
+                                      }),
+                                );
+                              },
+                              icon: const Icon(Icons.arrow_forward_rounded),
+                            ),
+                            filled: true,
+                            fillColor:
+                                isDark
+                                    ? EagleTokens.darkCardHi
+                                    : EagleTokens.card,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Expanded(
+                          child:
+                              query.trim().isEmpty
+                                  ? const _SearchState(
+                                    icon: Icons.search_rounded,
+                                    title: 'Digite para buscar',
+                                    subtitle:
+                                        'Encontre mensagens antigas da conversa.',
+                                  )
+                                  : searching
+                                  ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                  : searched && results.isEmpty
+                                  ? const _SearchState(
+                                    icon: Icons.chat_bubble_outline,
+                                    title: 'Nada encontrado',
+                                    subtitle: 'Tente outra palavra-chave.',
+                                  )
+                                  : ListView.separated(
+                                    itemCount: results.length,
+                                    separatorBuilder:
+                                        (_, __) => const SizedBox(height: 8),
+                                    itemBuilder: (_, index) {
+                                      final msg = results[index];
+                                      return InkWell(
+                                        onTap: () {
+                                          Navigator.pop(sheetContext);
+                                          _focusMessage(msg);
+                                        },
+                                        borderRadius: BorderRadius.circular(14),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                isDark
+                                                    ? EagleTokens.darkCardHi
+                                                    : primarySoft,
+                                            borderRadius: BorderRadius.circular(
+                                              14,
+                                            ),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                _replySenderLabel(
+                                                  msg.remetente,
+                                                ),
+                                                style: TextStyle(
+                                                  color: primary,
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                _previewText(msg),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                _fullDateLabel(msg.enviadoEm),
+                                                style: TextStyle(
+                                                  color:
+                                                      isDark
+                                                          ? EagleTokens
+                                                              .darkInkMute
+                                                          : EagleTokens.inkMute,
+                                                  fontSize: 11,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+                  ),
+                );
+              },
+            ),
+          ),
     ).whenComplete(ctrl.dispose);
   }
 
@@ -920,17 +970,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     setSearching(true);
     try {
       final repo = ChatRepository(ref.read(apiClientProvider));
-      final results = _isAlunoMode
-          ? await repo.buscarHistoricoAluno(normalized)
-          : await repo.buscarHistorico(_alunoId!, normalized);
+      final results =
+          _isAlunoMode
+              ? await repo.buscarHistoricoAluno(normalized)
+              : await repo.buscarHistorico(_alunoId!, normalized);
       setResults(results);
     } catch (_) {
-      final fallback = _msgs.reversed.where((msg) {
-        final content = msg.conteudo.toLowerCase();
-        final reply = (msg.replyToConteudo ?? '').toLowerCase();
-        return content.contains(normalized.toLowerCase()) ||
-            reply.contains(normalized.toLowerCase());
-      }).toList(growable: false);
+      final fallback = _msgs.reversed
+          .where((msg) {
+            final content = msg.conteudo.toLowerCase();
+            final reply = (msg.replyToConteudo ?? '').toLowerCase();
+            return content.contains(normalized.toLowerCase()) ||
+                reply.contains(normalized.toLowerCase());
+          })
+          .toList(growable: false);
       setResults(fallback);
     } finally {
       setSearching(false);
@@ -946,49 +999,201 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_isPersonalMode)
-              ListTile(
-                leading: Icon(Icons.person_outline, color: primary),
-                title: const Text('Ver perfil do aluno'),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push('/alunos/${widget.alunoId}');
-                },
-              ),
-            ListTile(
-              leading: Icon(Icons.search_rounded, color: primary),
-              title: const Text('Buscar conversa'),
-              onTap: () {
-                Navigator.pop(context);
-                _showSearchSheet();
-              },
+      builder:
+          (_) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_isPersonalMode)
+                  ListTile(
+                    leading: Icon(Icons.person_outline, color: primary),
+                    title: const Text('Ver perfil do aluno'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/alunos/${widget.alunoId}');
+                    },
+                  ),
+                ListTile(
+                  leading: Icon(Icons.search_rounded, color: primary),
+                  title: const Text('Buscar conversa'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showSearchSheet();
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.perm_media_outlined, color: primary),
+                  title: const Text('Midias da conversa'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showMediaGallerySheet();
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.refresh, color: primary),
+                  title: const Text('Atualizar conversa'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _loadHistorico();
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.emoji_emotions_outlined, color: primary),
+                  title: const Text('Adicionar emoji'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showEmojiSheet();
+                  },
+                ),
+              ],
             ),
-            ListTile(
-              leading: Icon(Icons.refresh, color: primary),
-              title: const Text('Atualizar conversa'),
-              onTap: () {
-                Navigator.pop(context);
-                _loadHistorico();
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.emoji_emotions_outlined,
-                color: primary,
-              ),
-              title: const Text('Adicionar emoji'),
-              onTap: () {
-                Navigator.pop(context);
-                _showEmojiSheet();
-              },
-            ),
-          ],
-        ),
+          ),
+    );
+  }
+
+  void _showMediaGallerySheet() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    MediaType? selected;
+
+    List<ChatMsg> filtered(MediaType? type) {
+      return _msgs
+          .where((msg) {
+            final tipo = msg.tipoMidia;
+            final url = msg.midiaUrl;
+            if (tipo == null || url == null || url.isEmpty) return false;
+            if (type == null) return true;
+            return _mediaType(type) == tipo ||
+                (type == MediaType.photo && tipo == 'IMAGEM');
+          })
+          .toList(growable: false)
+          .reversed
+          .toList(growable: false);
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      builder:
+          (sheetContext) => SafeArea(
+            child: StatefulBuilder(
+              builder: (context, setSheetState) {
+                final items = filtered(selected);
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+                  child: SizedBox(
+                    height: MediaQuery.of(sheetContext).size.height * 0.72,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 36,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkLine
+                                      : EagleTokens.line,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        Text(
+                          'Midias da conversa',
+                          style: TextStyle(
+                            color:
+                                isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              _MediaFilterChip(
+                                label: 'Tudo',
+                                selected: selected == null,
+                                onTap:
+                                    () => setSheetState(() => selected = null),
+                                primary: primary,
+                                isDark: isDark,
+                              ),
+                              _MediaFilterChip(
+                                label: 'Fotos',
+                                selected: selected == MediaType.photo,
+                                onTap:
+                                    () => setSheetState(
+                                      () => selected = MediaType.photo,
+                                    ),
+                                primary: primary,
+                                isDark: isDark,
+                              ),
+                              _MediaFilterChip(
+                                label: 'Videos',
+                                selected: selected == MediaType.video,
+                                onTap:
+                                    () => setSheetState(
+                                      () => selected = MediaType.video,
+                                    ),
+                                primary: primary,
+                                isDark: isDark,
+                              ),
+                              _MediaFilterChip(
+                                label: 'Audios',
+                                selected: selected == MediaType.audio,
+                                onTap:
+                                    () => setSheetState(
+                                      () => selected = MediaType.audio,
+                                    ),
+                                primary: primary,
+                                isDark: isDark,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Expanded(
+                          child:
+                              items.isEmpty
+                                  ? const _SearchState(
+                                    icon: Icons.perm_media_outlined,
+                                    title: 'Sem midias aqui',
+                                    subtitle:
+                                        'Fotos, videos e audios enviados aparecerao nesta area.',
+                                  )
+                                  : ListView.separated(
+                                    itemCount: items.length,
+                                    separatorBuilder:
+                                        (_, __) => const SizedBox(height: 8),
+                                    itemBuilder: (_, index) {
+                                      final msg = items[index];
+                                      return _MediaGalleryTile(
+                                        msg: msg,
+                                        isDark: isDark,
+                                        onTap: () {
+                                          Navigator.pop(sheetContext);
+                                          _focusMessage(msg);
+                                          _openMedia(msg);
+                                        },
+                                      );
+                                    },
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
     );
   }
 
@@ -1013,48 +1218,59 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     showDialog<void>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.92),
-      builder: (_) => Dialog(
-        insetPadding: const EdgeInsets.all(12),
-        backgroundColor: Colors.transparent,
-        child: Stack(
-          children: [
-            InteractiveViewer(
-              minScale: 0.85,
-              maxScale: 3.5,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Image.network(
-                  url,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => Container(
-                    height: 240,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                      borderRadius: BorderRadius.circular(24),
+      builder:
+          (_) => Dialog(
+            insetPadding: const EdgeInsets.all(12),
+            backgroundColor: Colors.transparent,
+            child: Stack(
+              children: [
+                InteractiveViewer(
+                  minScale: 0.85,
+                  maxScale: 3.5,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Image.network(
+                      url,
+                      fit: BoxFit.contain,
+                      errorBuilder:
+                          (_, __, ___) => Container(
+                            height: 240,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkCard
+                                      : EagleTokens.card,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: const Icon(
+                              Icons.broken_image_outlined,
+                              size: 32,
+                            ),
+                          ),
                     ),
-                    child: const Icon(Icons.broken_image_outlined, size: 32),
                   ),
                 ),
-              ),
-            ),
-            Positioned(
-              top: 12,
-              right: 12,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  shape: BoxShape.circle,
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
-                child: IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close_rounded, color: Colors.white),
-                ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -1146,9 +1362,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       _msgs.sort((a, b) => a.enviadoEm.compareTo(b.enviadoEm));
       return;
     }
-    final byClient = msg.clientMessageId != null
-        ? _msgs.indexWhere((m) => m.clientMessageId == msg.clientMessageId)
-        : -1;
+    final byClient =
+        msg.clientMessageId != null
+            ? _msgs.indexWhere((m) => m.clientMessageId == msg.clientMessageId)
+            : -1;
     if (byClient >= 0) {
       _msgs[byClient] = msg;
       _msgs.sort((a, b) => a.enviadoEm.compareTo(b.enviadoEm));
@@ -1216,26 +1433,26 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               height: 38,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: primary.withValues(alpha: 0.18),
-                ),
+                border: Border.all(color: primary.withValues(alpha: 0.18)),
               ),
               child: CircleAvatar(
                 radius: 18,
                 backgroundColor: primarySoft,
-                backgroundImage: _avatarImage(brand) == null
-                    ? null
-                    : NetworkImage(_avatarImage(brand)!),
-                child: _avatarImage(brand) == null
-                    ? Text(
-                        fxInitials(title),
-                        style: TextStyle(
-                          color: primary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                        ),
-                      )
-                    : null,
+                backgroundImage:
+                    _avatarImage(brand) == null
+                        ? null
+                        : NetworkImage(_avatarImage(brand)!),
+                child:
+                    _avatarImage(brand) == null
+                        ? Text(
+                          fxInitials(title),
+                          style: TextStyle(
+                            color: primary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        )
+                        : null,
               ),
             ),
             const SizedBox(width: 10),
@@ -1259,7 +1476,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color:
-                          isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                          isDark
+                              ? EagleTokens.darkInkMute
+                              : EagleTokens.inkMute,
                       fontSize: 11.5,
                       fontWeight: FontWeight.w500,
                     ),
@@ -1289,271 +1508,306 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       ),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: _ChatBackdrop(isDark: isDark),
-          ),
+          Positioned.fill(child: _ChatBackdrop(isDark: isDark)),
           Column(
-        children: [
-          if (_uploading)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: primarySoft,
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: primary,
-                    ),
+            children: [
+              if (_uploading)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
                   ),
-                  const SizedBox(width: 10),
-                    Text(
-                      'Enviando anexo...',
-                    style: TextStyle(
-                      color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          Expanded(
-            child: _loading
-                ? Center(
-                    child: CircularProgressIndicator(color: primary),
-                  )
-                : _msgs.isEmpty
-                    ? _EmptyConversation(
-                        isDark: isDark,
-                        title: 'Comece uma conversa',
-                        subtitle:
-                            'Fotos, videos, audios e ajustes do treino vao aparecer aqui em tempo real.',
-                      )
-                    : ListView.builder(
-                        controller: _scroll,
-                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                        itemCount: _msgs.length,
-                        itemBuilder: (_, index) {
-                          final msg = _msgs[index];
-                          final previous = index > 0 ? _msgs[index - 1] : null;
-                          final showDate = previous == null ||
-                              !_sameDay(previous.enviadoEm, msg.enviadoEm);
-                          return Column(
-                            children: [
-                              if (showDate)
-                                _DateDivider(date: msg.enviadoEm),
-                              KeyedSubtree(
-                                key: _messageKey(msg),
-                                child: _SwipeReplyWrapper(
-                                  alignRight: _isMine(msg),
-                                  accentColor: _isMine(msg)
-                                      ? Colors.white
-                                      : primary,
-                                  onReply: () => _setReply(msg),
-                                  child: _Bubble(
-                                    msg: msg,
-                                    mine: _isMine(msg),
-                                    isDark: isDark,
-                                    highlighted: _highlightedMessageId == msg.id,
-                                    replyLabelBuilder: _replySenderLabel,
-                                    onLongPress: () => _showMessageActions(msg),
-                                    onReplyTap: msg.replyToMessageId == null
-                                        ? null
-                                        : () => _jumpToReplySource(msg),
-                                    onOpenMedia: () => _openMedia(msg),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-          ),
-          Container(
-            padding: EdgeInsets.fromLTRB(
-              12,
-              10,
-              12,
-              10 + MediaQuery.of(context).viewInsets.bottom,
-            ),
-            decoration: BoxDecoration(
-              color: (isDark ? EagleTokens.darkBg : EagleTokens.paper)
-                  .withValues(alpha: 0.86),
-              border: Border(
-                top: BorderSide(
-                  color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-                ),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.05),
-                  blurRadius: 24,
-                  offset: const Offset(0, -8),
-                ),
-              ],
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                IconButton(
-                  onPressed:
-                      (_sending || _uploading) ? null : _showAttachmentSheet,
-                  icon: const Icon(Icons.add_circle),
-                  color: EagleTokens.inkMute,
-                ),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: (isDark ? EagleTokens.darkCard : EagleTokens.card)
-                              .withValues(alpha: isDark ? 0.82 : 0.9),
-                          borderRadius: BorderRadius.circular(28),
-                          border: Border.all(
-                            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                          ),
+                  color: primarySoft,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: primary,
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (_replyingTo != null)
-                              _ReplyComposerBar(
-                                isDark: isDark,
-                                sender: _replySenderLabel(_replyingTo!.remetente),
-                                preview: _previewText(_replyingTo!),
-                                onClose: () => setState(() => _replyingTo = null),
-                              ),
-                            if (_recordingAudio)
-                              _RecordingComposerBar(
-                                isDark: isDark,
-                                duration: _formatDuration(_recordDuration),
-                                onCancel: () =>
-                                    _stopAudioRecording(send: false),
-                                onSend: () => _stopAudioRecording(send: true),
-                              ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Enviando anexo...',
+                        style: TextStyle(
+                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              Expanded(
+                child:
+                    _loading
+                        ? Center(
+                          child: CircularProgressIndicator(color: primary),
+                        )
+                        : _msgs.isEmpty
+                        ? _EmptyConversation(
+                          isDark: isDark,
+                          title: 'Comece uma conversa',
+                          subtitle:
+                              'Fotos, videos, audios e ajustes do treino vao aparecer aqui em tempo real.',
+                        )
+                        : ListView.builder(
+                          controller: _scroll,
+                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                          itemCount: _msgs.length,
+                          itemBuilder: (_, index) {
+                            final msg = _msgs[index];
+                            final previous =
+                                index > 0 ? _msgs[index - 1] : null;
+                            final showDate =
+                                previous == null ||
+                                !_sameDay(previous.enviadoEm, msg.enviadoEm);
+                            return Column(
                               children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: _ctrl,
-                                    style: TextStyle(
-                                      color: isDark
-                                          ? EagleTokens.darkInk
-                                          : EagleTokens.ink,
-                                      fontSize: 15,
+                                if (showDate) _DateDivider(date: msg.enviadoEm),
+                                KeyedSubtree(
+                                  key: _messageKey(msg),
+                                  child: _SwipeReplyWrapper(
+                                    alignRight: _isMine(msg),
+                                    accentColor:
+                                        _isMine(msg) ? Colors.white : primary,
+                                    onReply: () => _setReply(msg),
+                                    child: _Bubble(
+                                      msg: msg,
+                                      mine: _isMine(msg),
+                                      isDark: isDark,
+                                      highlighted:
+                                          _highlightedMessageId == msg.id,
+                                      replyLabelBuilder: _replySenderLabel,
+                                      onLongPress:
+                                          () => _showMessageActions(msg),
+                                      onReplyTap:
+                                          msg.replyToMessageId == null
+                                              ? null
+                                              : () => _jumpToReplySource(msg),
+                                      onOpenMedia: () => _openMedia(msg),
                                     ),
-                                    cursorColor: primary,
-                                    decoration: InputDecoration(
-                                      hintText: 'iMessage',
-                                      hintStyle: TextStyle(
-                                        color: isDark
-                                            ? EagleTokens.darkInkMute
-                                            : EagleTokens.inkMute,
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 12,
-                                      ),
-                                      border: InputBorder.none,
-                                    ),
-                                    minLines: 1,
-                                    maxLines: 5,
-                                    textInputAction: TextInputAction.send,
-                                    onSubmitted: (_) => _sendText(),
                                   ),
                                 ),
-                                IconButton(
-                                  onPressed: _showEmojiSheet,
-                                  icon: const Icon(Icons.emoji_emotions_outlined),
-                                  color: EagleTokens.inkMute,
-                                ),
-                                if (_composerHasText || _sending)
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.only(right: 6, bottom: 6),
-                                    child: Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: primary,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: IconButton(
-                                        padding: EdgeInsets.zero,
-                                        onPressed: (_sending || _uploading)
-                                            ? null
-                                            : _sendText,
-                                        icon: _sending
-                                            ? const SizedBox(
-                                                width: 14,
-                                                height: 14,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  color: Colors.white,
-                                                ),
-                                              )
-                                            : const Icon(
-                                                Icons.arrow_upward,
-                                                color: Colors.white,
-                                                size: 18,
+                              ],
+                            );
+                          },
+                        ),
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(
+                  12,
+                  10,
+                  12,
+                  10 + MediaQuery.of(context).viewInsets.bottom,
+                ),
+                decoration: BoxDecoration(
+                  color: (isDark ? EagleTokens.darkBg : EagleTokens.paper)
+                      .withValues(alpha: 0.86),
+                  border: Border(
+                    top: BorderSide(
+                      color:
+                          isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                    ),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.18 : 0.05,
+                      ),
+                      blurRadius: 24,
+                      offset: const Offset(0, -8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      onPressed:
+                          (_sending || _uploading)
+                              ? null
+                              : _showAttachmentSheet,
+                      icon: const Icon(Icons.add_circle),
+                      color: EagleTokens.inkMute,
+                    ),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: (isDark
+                                      ? EagleTokens.darkCard
+                                      : EagleTokens.card)
+                                  .withValues(alpha: isDark ? 0.82 : 0.9),
+                              borderRadius: BorderRadius.circular(28),
+                              border: Border.all(
+                                color:
+                                    isDark
+                                        ? EagleTokens.darkLine
+                                        : EagleTokens.line,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (_replyingTo != null)
+                                  _ReplyComposerBar(
+                                    isDark: isDark,
+                                    sender: _replySenderLabel(
+                                      _replyingTo!.remetente,
+                                    ),
+                                    preview: _previewText(_replyingTo!),
+                                    onClose:
+                                        () =>
+                                            setState(() => _replyingTo = null),
+                                  ),
+                                if (_recordingAudio)
+                                  _RecordingComposerBar(
+                                    isDark: isDark,
+                                    duration: _formatDuration(_recordDuration),
+                                    onCancel:
+                                        () => _stopAudioRecording(send: false),
+                                    onSend:
+                                        () => _stopAudioRecording(send: true),
+                                  ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _ctrl,
+                                        style: TextStyle(
+                                          color:
+                                              isDark
+                                                  ? EagleTokens.darkInk
+                                                  : EagleTokens.ink,
+                                          fontSize: 15,
+                                        ),
+                                        cursorColor: primary,
+                                        decoration: InputDecoration(
+                                          hintText: 'iMessage',
+                                          hintStyle: TextStyle(
+                                            color:
+                                                isDark
+                                                    ? EagleTokens.darkInkMute
+                                                    : EagleTokens.inkMute,
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 12,
                                               ),
+                                          border: InputBorder.none,
+                                        ),
+                                        minLines: 1,
+                                        maxLines: 5,
+                                        textInputAction: TextInputAction.send,
+                                        onSubmitted: (_) => _sendText(),
                                       ),
                                     ),
-                                  ),
-                                if (!_composerHasText && !_sending)
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.only(right: 6, bottom: 6),
-                                    child: Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: _recordingAudio
-                                            ? const Color(0xFFE5484D)
-                                            : primary,
-                                        shape: BoxShape.circle,
+                                    IconButton(
+                                      onPressed: _showEmojiSheet,
+                                      icon: const Icon(
+                                        Icons.emoji_emotions_outlined,
                                       ),
-                                      child: IconButton(
-                                        padding: EdgeInsets.zero,
-                                        tooltip: _recordingAudio
-                                            ? 'Enviar audio'
-                                            : 'Gravar audio',
-                                        onPressed: (_uploading || _sending)
-                                            ? null
-                                            : _recordingAudio
-                                                ? () => _stopAudioRecording(
-                                                      send: true,
+                                      color: EagleTokens.inkMute,
+                                    ),
+                                    if (_composerHasText || _sending)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 6,
+                                          bottom: 6,
+                                        ),
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: BoxDecoration(
+                                            color: primary,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: IconButton(
+                                            padding: EdgeInsets.zero,
+                                            onPressed:
+                                                (_sending || _uploading)
+                                                    ? null
+                                                    : _sendText,
+                                            icon:
+                                                _sending
+                                                    ? const SizedBox(
+                                                      width: 14,
+                                                      height: 14,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                            strokeWidth: 2,
+                                                            color: Colors.white,
+                                                          ),
                                                     )
-                                                : _startAudioRecording,
-                                        icon: Icon(
-                                          _recordingAudio
-                                              ? Icons.stop_rounded
-                                              : Icons.mic_rounded,
-                                          color: Colors.white,
-                                          size: 18,
+                                                    : const Icon(
+                                                      Icons.arrow_upward,
+                                                      color: Colors.white,
+                                                      size: 18,
+                                                    ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
+                                    if (!_composerHasText && !_sending)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 6,
+                                          bottom: 6,
+                                        ),
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: BoxDecoration(
+                                            color:
+                                                _recordingAudio
+                                                    ? const Color(0xFFE5484D)
+                                                    : primary,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: IconButton(
+                                            padding: EdgeInsets.zero,
+                                            tooltip:
+                                                _recordingAudio
+                                                    ? 'Enviar audio'
+                                                    : 'Gravar audio',
+                                            onPressed:
+                                                (_uploading || _sending)
+                                                    ? null
+                                                    : _recordingAudio
+                                                    ? () => _stopAudioRecording(
+                                                      send: true,
+                                                    )
+                                                    : _startAudioRecording,
+                                            icon: Icon(
+                                              _recordingAudio
+                                                  ? Icons.stop_rounded
+                                                  : Icons.mic_rounded,
+                                              color: Colors.white,
+                                              size: 18,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
         ],
       ),
     );
@@ -1671,9 +1925,10 @@ class _DateDivider extends StatelessWidget {
     final today = DateTime(now.year, now.month, now.day);
     final value = DateTime(local.year, local.month, local.day);
     final yesterday = today.subtract(const Duration(days: 1));
-    final label = value == today
-        ? 'Hoje'
-        : value == yesterday
+    final label =
+        value == today
+            ? 'Hoje'
+            : value == yesterday
             ? 'Ontem'
             : '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}';
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -1683,9 +1938,10 @@ class _DateDivider extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.06)
-                : EagleTokens.brand.withValues(alpha: 0.08),
+            color:
+                isDark
+                    ? Colors.white.withValues(alpha: 0.06)
+                    : EagleTokens.brand.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
@@ -1706,10 +1962,7 @@ class _DeliveryStatus extends StatelessWidget {
   final ChatMsg msg;
   final Color color;
 
-  const _DeliveryStatus({
-    required this.msg,
-    required this.color,
-  });
+  const _DeliveryStatus({required this.msg, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -1730,8 +1983,8 @@ class _DeliveryStatus extends StatelessWidget {
           read
               ? 'Lido'
               : delivered
-                  ? 'Entregue'
-                  : 'Enviado',
+              ? 'Entregue'
+              : 'Enviado',
           style: TextStyle(
             color: color,
             fontSize: 10.5,
@@ -1766,9 +2019,10 @@ class _SwipeReplyWrapperState extends State<_SwipeReplyWrapper> {
 
   void _handleUpdate(DragUpdateDetails details) {
     final delta = details.primaryDelta ?? 0;
-    final next = widget.alignRight
-        ? (_offset + delta).clamp(-54.0, 0.0)
-        : (_offset + delta).clamp(0.0, 54.0);
+    final next =
+        widget.alignRight
+            ? (_offset + delta).clamp(-54.0, 0.0)
+            : (_offset + delta).clamp(0.0, 54.0);
     if (!_triggered && next.abs() >= 34) {
       _triggered = true;
       HapticFeedback.lightImpact();
@@ -1833,9 +2087,18 @@ class _ChatBackdrop extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: isDark
-              ? const [Color(0xFF09101F), Color(0xFF0C1428), Color(0xFF101B34)]
-              : const [Color(0xFFF6F7FB), Color(0xFFF8F8F6), Color(0xFFF2F5FB)],
+          colors:
+              isDark
+                  ? const [
+                    Color(0xFF09101F),
+                    Color(0xFF0C1428),
+                    Color(0xFF101B34),
+                  ]
+                  : const [
+                    Color(0xFFF6F7FB),
+                    Color(0xFFF8F8F6),
+                    Color(0xFFF2F5FB),
+                  ],
         ),
       ),
       child: CustomPaint(
@@ -1853,10 +2116,12 @@ class _ChatBackdropPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final linePaint = Paint()
-      ..color = (isDark ? Colors.white : EagleTokens.brand)
-          .withValues(alpha: isDark ? 0.028 : 0.04)
-      ..strokeWidth = 1;
+    final linePaint =
+        Paint()
+          ..color = (isDark ? Colors.white : EagleTokens.brand).withValues(
+            alpha: isDark ? 0.028 : 0.04,
+          )
+          ..strokeWidth = 1;
     const gap = 26.0;
     for (double x = 0; x < size.width; x += gap) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
@@ -1897,9 +2162,10 @@ class _Bubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final textColor =
         mine ? Colors.white : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
-    final metaColor = mine
-        ? Colors.white.withValues(alpha: 0.75)
-        : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute);
+    final metaColor =
+        mine
+            ? Colors.white.withValues(alpha: 0.75)
+            : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute);
 
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
@@ -1913,16 +2179,18 @@ class _Bubble extends StatelessWidget {
             maxWidth: MediaQuery.of(context).size.width * 0.78,
           ),
           decoration: BoxDecoration(
-            gradient: mine
-                ? const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [EagleTokens.brand, EagleTokens.brandInk],
-                  )
-                : null,
-            color: mine
-                ? null
-                : (isDark ? EagleTokens.darkCardHi : EagleTokens.card),
+            gradient:
+                mine
+                    ? const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [EagleTokens.brand, EagleTokens.brandInk],
+                    )
+                    : null,
+            color:
+                mine
+                    ? null
+                    : (isDark ? EagleTokens.darkCardHi : EagleTokens.card),
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(20),
               topRight: const Radius.circular(20),
@@ -1930,22 +2198,24 @@ class _Bubble extends StatelessWidget {
               bottomRight: Radius.circular(mine ? 8 : 20),
             ),
             border: Border.all(
-              color: highlighted
-                  ? EagleTokens.brand
-                  : mine
+              color:
+                  highlighted
+                      ? EagleTokens.brand
+                      : mine
                       ? Colors.transparent
                       : (isDark ? EagleTokens.darkLine : EagleTokens.lineSoft),
               width: highlighted ? 1.6 : 1,
             ),
-            boxShadow: highlighted
-                ? [
-                    BoxShadow(
-                      color: EagleTokens.brand.withValues(alpha: 0.16),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : null,
+            boxShadow:
+                highlighted
+                    ? [
+                      BoxShadow(
+                        color: EagleTokens.brand.withValues(alpha: 0.16),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ]
+                    : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1955,9 +2225,10 @@ class _Bubble extends StatelessWidget {
                   mine: mine,
                   isDark: isDark,
                   sender: replyLabelBuilder(msg.replyToRemetente ?? ''),
-                  preview: msg.replyToConteudo?.trim().isNotEmpty == true
-                      ? msg.replyToConteudo!.trim()
-                      : 'Midia',
+                  preview:
+                      msg.replyToConteudo?.trim().isNotEmpty == true
+                          ? msg.replyToConteudo!.trim()
+                          : 'Midia',
                   onTap: onReplyTap,
                 ),
               _MediaPreview(
@@ -1989,20 +2260,24 @@ class _Bubble extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: reaction.mine
-                              ? (mine
-                                  ? Colors.white.withValues(alpha: 0.18)
-                                  : EagleTokens.brand.withValues(alpha: 0.12))
-                              : (mine
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : (isDark
-                                      ? EagleTokens.darkBg
-                                      : EagleTokens.paper)),
+                          color:
+                              reaction.mine
+                                  ? (mine
+                                      ? Colors.white.withValues(alpha: 0.18)
+                                      : EagleTokens.brand.withValues(
+                                        alpha: 0.12,
+                                      ))
+                                  : (mine
+                                      ? Colors.white.withValues(alpha: 0.10)
+                                      : (isDark
+                                          ? EagleTokens.darkBg
+                                          : EagleTokens.paper)),
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(
-                            color: reaction.mine
-                                ? EagleTokens.brand.withValues(alpha: 0.5)
-                                : Colors.transparent,
+                            color:
+                                reaction.mine
+                                    ? EagleTokens.brand.withValues(alpha: 0.5)
+                                    : Colors.transparent,
                           ),
                         ),
                         child: Text(
@@ -2011,7 +2286,9 @@ class _Bubble extends StatelessWidget {
                             color: textColor,
                             fontSize: 12,
                             fontWeight:
-                                reaction.mine ? FontWeight.w700 : FontWeight.w500,
+                                reaction.mine
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
                           ),
                         ),
                       ),
@@ -2028,10 +2305,7 @@ class _Bubble extends StatelessWidget {
                   ),
                   if (mine) ...[
                     const SizedBox(width: 6),
-                    _DeliveryStatus(
-                      msg: msg,
-                      color: metaColor,
-                    ),
+                    _DeliveryStatus(msg: msg, color: metaColor),
                   ],
                 ],
               ),
@@ -2080,9 +2354,10 @@ class _ReplySnippet extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: mine
-              ? Colors.white.withValues(alpha: 0.14)
-              : EagleTokens.brand.withValues(alpha: 0.08),
+          color:
+              mine
+                  ? Colors.white.withValues(alpha: 0.14)
+                  : EagleTokens.brand.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
@@ -2205,12 +2480,7 @@ class _SearchState extends StatelessWidget {
           children: [
             Icon(icon, size: 30, color: EagleTokens.inkMute),
             const SizedBox(height: 10),
-            Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 4),
             Text(
               subtitle,
@@ -2327,13 +2597,14 @@ class _MediaPreview extends StatelessWidget {
                   height: 200,
                   width: 220,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    height: 120,
-                    width: 220,
-                    color: Colors.black12,
-                    alignment: Alignment.center,
-                    child: const Icon(Icons.broken_image_outlined),
-                  ),
+                  errorBuilder:
+                      (_, __, ___) => Container(
+                        height: 120,
+                        width: 220,
+                        color: Colors.black12,
+                        alignment: Alignment.center,
+                        child: const Icon(Icons.broken_image_outlined),
+                      ),
                 ),
                 Positioned(
                   right: 8,
@@ -2374,90 +2645,34 @@ class _MediaPreview extends StatelessWidget {
       label = 'Audio';
     }
 
-      final textColor =
-          mine ? Colors.white : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+    final textColor =
+        mine ? Colors.white : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
 
-      if (tipo == 'AUDIO') {
-        final bars = [0.28, 0.55, 0.36, 0.82, 0.48, 0.70, 0.42, 0.62, 0.34];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: InkWell(
-            onTap: onOpen,
-            borderRadius: BorderRadius.circular(18),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
-              decoration: BoxDecoration(
-                color: mine
-                    ? Colors.white.withValues(alpha: 0.14)
-                    : EagleTokens.brand.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: mine
-                          ? Colors.white.withValues(alpha: 0.22)
-                          : EagleTokens.brand.withValues(alpha: 0.14),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.play_arrow_rounded,
-                      color: textColor,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  SizedBox(
-                    width: 96,
-                    height: 28,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        for (final bar in bars) ...[
-                          Container(
-                            width: 4,
-                            height: 8 + (bar * 20),
-                            decoration: BoxDecoration(
-                              color: textColor.withValues(alpha: 0.76),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    msg.conteudo.replaceFirst('Audio ', ''),
-                    style: TextStyle(
-                      color: textColor.withValues(alpha: 0.78),
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      }
-
+    if (tipo == 'AUDIO') {
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
+        child: _AudioInlinePlayer(
+          url: url,
+          label: msg.conteudo.replaceFirst('Audio ', ''),
+          mine: mine,
+          isDark: isDark,
+          onFallbackOpen: onOpen,
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: onOpen,
         borderRadius: BorderRadius.circular(14),
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: mine
-                ? Colors.white.withValues(alpha: 0.12)
-                : EagleTokens.brand.withValues(alpha: 0.10),
+            color:
+                mine
+                    ? Colors.white.withValues(alpha: 0.12)
+                    : EagleTokens.brand.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Row(
@@ -2496,3 +2711,358 @@ class _MediaPreview extends StatelessWidget {
   }
 }
 
+class _MediaFilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color primary;
+  final bool isDark;
+
+  const _MediaFilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.primary,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink =
+        selected
+            ? Colors.white
+            : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          decoration: BoxDecoration(
+            color:
+                selected
+                    ? primary
+                    : (isDark ? EagleTokens.darkCardHi : EagleTokens.card),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color:
+                  selected
+                      ? primary
+                      : (isDark ? EagleTokens.darkLine : EagleTokens.line),
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: ink,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MediaGalleryTile extends StatelessWidget {
+  final ChatMsg msg;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _MediaGalleryTile({
+    required this.msg,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tipo = msg.tipoMidia;
+    final title = _title(tipo);
+    final icon = _icon(tipo);
+    final url = msg.midiaUrl;
+    final isImage = tipo == 'IMAGE' || tipo == 'IMAGEM';
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final muted = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+          ),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: 54,
+                height: 54,
+                color: EagleTokens.brand.withValues(alpha: 0.10),
+                child:
+                    isImage && url != null && url.isNotEmpty
+                        ? Image.network(
+                          url,
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (_, __, ___) => Icon(
+                                Icons.broken_image_outlined,
+                                color: EagleTokens.brand,
+                              ),
+                        )
+                        : Icon(icon, color: EagleTokens.brand, size: 26),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${_sender(msg.remetente)} - ${_dateLabel(msg.enviadoEm)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: muted, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.chevron_right_rounded, color: muted),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static IconData _icon(String? tipo) {
+    if (tipo == 'VIDEO') return Icons.play_circle_outline_rounded;
+    if (tipo == 'AUDIO') return Icons.graphic_eq_rounded;
+    return Icons.image_outlined;
+  }
+
+  static String _title(String? tipo) {
+    if (tipo == 'VIDEO') return 'Video';
+    if (tipo == 'AUDIO') return 'Audio';
+    return 'Foto';
+  }
+
+  static String _sender(String remetente) {
+    if (remetente == 'PERSONAL') return 'Personal';
+    if (remetente == 'ALUNO') return 'Aluno';
+    return remetente;
+  }
+
+  static String _dateLabel(DateTime dt) {
+    final local = dt.toLocal();
+    return '${local.day.toString().padLeft(2, '0')}/'
+        '${local.month.toString().padLeft(2, '0')} '
+        '${local.hour.toString().padLeft(2, '0')}:'
+        '${local.minute.toString().padLeft(2, '0')}';
+  }
+}
+
+class _AudioInlinePlayer extends StatefulWidget {
+  final String url;
+  final String label;
+  final bool mine;
+  final bool isDark;
+  final VoidCallback onFallbackOpen;
+
+  const _AudioInlinePlayer({
+    required this.url,
+    required this.label,
+    required this.mine,
+    required this.isDark,
+    required this.onFallbackOpen,
+  });
+
+  @override
+  State<_AudioInlinePlayer> createState() => _AudioInlinePlayerState();
+}
+
+class _AudioInlinePlayerState extends State<_AudioInlinePlayer> {
+  final AudioPlayer _player = AudioPlayer();
+  bool _loaded = false;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    unawaited(_player.dispose());
+    super.dispose();
+  }
+
+  Future<void> _toggle() async {
+    if (_busy) return;
+    if (_player.playing) {
+      await _player.pause();
+      return;
+    }
+
+    setState(() => _busy = true);
+    try {
+      if (!_loaded) {
+        await _player.setUrl(widget.url);
+        _loaded = true;
+      }
+      await _player.play();
+    } catch (_) {
+      widget.onFallbackOpen();
+    } finally {
+      if (mounted) {
+        setState(() => _busy = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bg =
+        widget.mine
+            ? Colors.white.withValues(alpha: 0.12)
+            : EagleTokens.brand.withValues(alpha: 0.10);
+    final ink =
+        widget.mine
+            ? Colors.white
+            : (widget.isDark ? EagleTokens.darkInk : EagleTokens.ink);
+    final muted = ink.withValues(alpha: 0.70);
+    final name = widget.label.trim().isEmpty ? 'Audio' : widget.label.trim();
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          children: [
+            StreamBuilder<PlayerState>(
+              stream: _player.playerStateStream,
+              builder: (context, snapshot) {
+                final processing =
+                    snapshot.data?.processingState ?? ProcessingState.idle;
+                final loading = _busy || processing == ProcessingState.loading;
+                final playing = snapshot.data?.playing ?? false;
+                return IconButton(
+                  tooltip: playing ? 'Pausar audio' : 'Reproduzir audio',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: loading ? null : _toggle,
+                  style: IconButton.styleFrom(
+                    backgroundColor:
+                        widget.mine
+                            ? Colors.white.withValues(alpha: 0.18)
+                            : EagleTokens.brand,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(36, 36),
+                  ),
+                  icon:
+                      loading
+                          ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : Icon(
+                            playing
+                                ? Icons.pause_rounded
+                                : Icons.play_arrow_rounded,
+                          ),
+                );
+              },
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: StreamBuilder<Duration?>(
+                stream: _player.durationStream,
+                builder: (context, durationSnapshot) {
+                  final duration = durationSnapshot.data;
+                  return StreamBuilder<Duration>(
+                    stream: _player.positionStream,
+                    builder: (context, positionSnapshot) {
+                      final position = positionSnapshot.data ?? Duration.zero;
+                      final totalMs = duration?.inMilliseconds ?? 0;
+                      final progress =
+                          totalMs <= 0
+                              ? 0.0
+                              : (position.inMilliseconds / totalMs).clamp(
+                                0.0,
+                                1.0,
+                              );
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 7),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(999),
+                            child: LinearProgressIndicator(
+                              minHeight: 4,
+                              value: progress,
+                              backgroundColor: ink.withValues(alpha: 0.16),
+                              valueColor: AlwaysStoppedAnimation<Color>(ink),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            '${_audioTime(position)} / ${_audioTime(duration)}',
+                            style: TextStyle(color: muted, fontSize: 11),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 6),
+            IconButton(
+              tooltip: 'Abrir anexo',
+              visualDensity: VisualDensity.compact,
+              onPressed: widget.onFallbackOpen,
+              icon: Icon(Icons.open_in_new_rounded, color: muted, size: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _audioTime(Duration? duration) {
+    if (duration == null) return '--:--';
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+}
