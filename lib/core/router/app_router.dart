@@ -227,13 +227,17 @@ class AppRouter {
       ),
       GoRoute(
         path: '/alunos/:id',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => AlunoDetailScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
         ),
       ),
       GoRoute(
         path: '/alunos/:id/editar',
-        redirect: (context, state) => state.extra is Aluno
+        redirect: (context, state) => _intPathParam(state, 'id') == null
+            ? '/alunos'
+            : state.extra is Aluno
             ? null
             : '/alunos/${state.pathParameters['id']}',
         builder: (context, state) => EditarAlunoScreen(
@@ -242,84 +246,108 @@ class AppRouter {
       ),
       GoRoute(
         path: '/alunos/:id/relatorio',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => RelatorioScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
           alunoNome: _stringExtra(state) ?? 'Aluno',
         ),
       ),
       GoRoute(
         path: '/alunos/:id/evolucao',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => EvolucaoScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
           alunoNome: _stringExtra(state) ?? 'Aluno',
         ),
       ),
       GoRoute(
         path: '/alunos/:id/anamnese',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => AnamneseScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
         ),
       ),
       GoRoute(
         path: '/alunos/:id/alimentar',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => AlimentarScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
         ),
       ),
       GoRoute(
         path: '/alunos/:id/treinos-list',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => TreinosListScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
           alunoNome: _stringExtra(state),
         ),
       ),
       GoRoute(
         path: '/alunos/:id/ia/progressao',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => IaProgressaoScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
           alunoNome: _stringExtra(state) ?? 'Aluno',
         ),
       ),
       GoRoute(
         path: '/alunos/:id/chat',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => ChatScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
           alunoNome: _stringExtra(state) ?? 'Aluno',
         ),
       ),
       GoRoute(
         path: '/alunos/:id/feedback-video',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => FeedbackVideoScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
           alunoNome: _stringExtra(state) ?? 'Aluno',
         ),
       ),
       GoRoute(
         path: '/alunos/:id/engajamento',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) {
-          final id = int.parse(state.pathParameters['id']!);
+          final id = _intPathParam(state, 'id')!;
           final nome = _stringExtra(state) ?? 'Aluno';
           return EngajamentoScreen(alunoId: id, alunoNome: nome);
         },
       ),
       GoRoute(
         path: '/alunos/:id/evolucao-comparativo',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => EvolucaoComparativoScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
           alunoNome: _stringExtra(state) ?? 'Aluno',
         ),
       ),
       GoRoute(
         path: '/alunos/:id/trilhas',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => TrilhasScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
           alunoNome: _stringExtra(state) ?? 'Aluno',
         ),
       ),
       GoRoute(
         path: '/alunos/:id/feedback-videos',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
         builder: (context, state) => FeedbackVideoScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
           alunoNome: _stringExtra(state) ?? 'Aluno',
         ),
       ),
@@ -331,14 +359,18 @@ class AppRouter {
       ),
       GoRoute(
         path: '/treinos/:id',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/treinos' : null,
         builder: (context, state) => TreinoDetailScreen(
-          treinoId: int.parse(state.pathParameters['id']!),
+          treinoId: _intPathParam(state, 'id')!,
         ),
       ),
       GoRoute(
         path: '/treinos/:id/exercicios/add',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/treinos' : null,
         builder: (context, state) => AddExercicioToTreinoScreen(
-          treinoId: int.parse(state.pathParameters['id']!),
+          treinoId: _intPathParam(state, 'id')!,
         ),
       ),
 
@@ -353,8 +385,10 @@ class AppRouter {
       ),
       GoRoute(
         path: '/exercicios/:id',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/exercicios' : null,
         builder: (context, state) => ExercicioDetailScreen(
-          exercicioId: int.parse(state.pathParameters['id']!),
+          exercicioId: _intPathParam(state, 'id')!,
         ),
       ),
 
@@ -471,8 +505,10 @@ class AppRouter {
       ),
       GoRoute(
         path: '/alertas/aluno/:id',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alertas' : null,
         builder: (context, state) => AlertaDetalheScreen(
-          alunoId: int.parse(state.pathParameters['id']!),
+          alunoId: _intPathParam(state, 'id')!,
           alunoNome: _stringExtra(state) ?? 'Aluno',
         ),
       ),
@@ -569,6 +605,12 @@ class AppRouter {
 String? _stringExtra(GoRouterState state) {
   final extra = state.extra;
   return extra is String && extra.trim().isNotEmpty ? extra : null;
+}
+
+int? _intPathParam(GoRouterState state, String key) {
+  final value = state.pathParameters[key];
+  final parsed = int.tryParse(value ?? '');
+  return parsed != null && parsed > 0 ? parsed : null;
 }
 
 int? _treinoIdFromState(GoRouterState state) {

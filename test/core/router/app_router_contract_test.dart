@@ -42,4 +42,14 @@ void main() {
     expect(router, isNot(contains('state.extra as int')));
     expect(router, isNot(contains('state.extra as String?')));
   });
+
+  test('router protects dynamic id paths from invalid ids', () {
+    final router = File('lib/core/router/app_router.dart').readAsStringSync();
+
+    expect(router, contains('int? _intPathParam'));
+    expect(router, contains("_intPathParam(state, 'id') == null"));
+    expect(router, contains("int.tryParse(value ?? '')"));
+
+    expect(router, isNot(contains("int.parse(state.pathParameters['id']!")));
+  });
 }
