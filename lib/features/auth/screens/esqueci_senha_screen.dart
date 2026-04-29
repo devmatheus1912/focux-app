@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_client.dart';
 import '../data/auth_repository.dart';
+import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 
 class EsqueciSenhaScreen extends StatefulWidget {
@@ -108,17 +109,31 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
   String _resetEnvironmentWarning() {
     final issue = _environmentStatus?.firstIssueFor('password_reset');
     if (issue != null) {
-      final action = issue.action.isEmpty ? '' : '\nAcao: ${issue.action}';
-      return '${issue.title}. ${issue.detail}$action';
+      return issue.detail.isEmpty
+          ? 'O pedido de reset sera registrado, mas a entrega do link depende da configuracao de e-mail.'
+          : issue.detail;
+    }
+    return 'Envio de e-mail ainda nao esta ativo neste ambiente. O pedido sera registrado, mas a entrega depende da configuracao SMTP.';
+  }
+
+  String _resetEnvironmentTitle() {
+    return _environmentStatus?.firstIssueFor('password_reset')?.title ??
+        'E-mail de recuperacao pendente';
+  }
+
+  String? _resetEnvironmentAction() {
+    final issue = _environmentStatus?.firstIssueFor('password_reset');
+    if (issue?.action.isNotEmpty == true) {
+      return issue!.action;
     }
     final actions = _environmentStatus?.nextActions
             .where((action) => action.toLowerCase().contains('smtp'))
             .toList() ??
         const [];
     if (actions.isNotEmpty) {
-      return 'Envio de e-mail ainda nao esta ativo neste ambiente.\nAcao: ${actions.first}';
+      return actions.first;
     }
-    return 'Envio de e-mail ainda nao esta ativo neste ambiente. O pedido sera registrado, mas a entrega depende da configuracao SMTP.';
+    return 'Configurar SMTP no ambiente real antes da publicacao.';
   }
 
   @override
@@ -273,26 +288,11 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                     ),
                     const SizedBox(height: 24),
                     if (_emailDeliveryAvailable == false) ...[
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFB020)
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0xFFFFB020)
-                                .withValues(alpha: 0.28),
-                          ),
-                        ),
-                        child: Text(
-                          _resetEnvironmentWarning(),
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.72),
-                            fontSize: 12.5,
-                            height: 1.45,
-                          ),
-                        ),
+                      AuthOperationalNotice(
+                        icon: Icons.mark_email_unread_outlined,
+                        title: _resetEnvironmentTitle(),
+                        text: _resetEnvironmentWarning(),
+                        action: _resetEnvironmentAction(),
                       ),
                       const SizedBox(height: 18),
                     ],

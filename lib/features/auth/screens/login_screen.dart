@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/config/env.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -24,7 +25,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _loadingGoogle = false;
   bool _showPassword = false;
   bool _googleEnabled = false;
+  String? _googleStatusTitle;
   String? _googleStatusNote;
+  String? _googleStatusAction;
   String? _error;
   // BUG-39: role toggle — personal or aluno
   bool _isAluno = false;
@@ -45,22 +48,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _googleEnabled =
             status.googleSignInReady && appClientConfigured;
         if (_googleEnabled) {
+          _googleStatusTitle = null;
           _googleStatusNote = null;
+          _googleStatusAction = null;
         } else if (!appClientConfigured) {
+          _googleStatusTitle = 'Google pendente no app';
           _googleStatusNote =
-              'Google indisponivel: o app precisa do GOOGLE_WEB_CLIENT_ID no build.';
+              'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.';
+          _googleStatusAction =
+              'Gerar o build com GOOGLE_WEB_CLIENT_ID e validar em staging.';
         } else {
           final issue = status.firstIssueFor('google');
-          _googleStatusNote = issue == null
-              ? 'Google indisponivel neste ambiente.'
-              : '${issue.title}. ${issue.action}';
+          _googleStatusTitle = issue?.title ?? 'Google pendente no ambiente';
+          _googleStatusNote = issue?.detail.isNotEmpty == true
+              ? issue!.detail
+              : 'Login Google ainda nao esta pronto neste ambiente.';
+          _googleStatusAction = issue?.action;
         }
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _googleEnabled = false;
-        _googleStatusNote = 'Nao foi possivel verificar o login Google agora.';
+        _googleStatusTitle = 'Nao foi possivel verificar o Google';
+        _googleStatusNote =
+            'Login por e-mail continua disponivel. Tente novamente quando o servidor responder.';
+        _googleStatusAction = null;
       });
     }
   }
@@ -167,9 +180,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             : 'Nao foi possivel validar sua conta Google.';
       }
       if (statusCode == 503) {
-        return 'Login com Google ainda nao esta configurado neste ambiente.';
+        return 'Google ainda nao esta configurado neste ambiente. Use e-mail e senha por enquanto.';
       }
       if (statusCode == null) return 'Sem conexao com o servidor.';
+    }
+    if (error is StateError) {
+      return 'O Google nao devolveu uma credencial valida para este build.';
     }
     return 'Nao foi possivel entrar com Google agora.';
   }
@@ -344,9 +360,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ] else if (_googleStatusNote != null) ...[
                             const SizedBox(height: 12),
-                            _AuthOperationalNotice(
+                            AuthOperationalNotice(
                               icon: Icons.g_mobiledata_rounded,
+                              title: _googleStatusTitle ??
+                                  'Google pendente no ambiente',
                               text: _googleStatusNote!,
+                              action: _googleStatusAction,
                             ),
                           ],
                         ],
@@ -464,46 +483,4 @@ bool _isPersonalPath(String path) {
       path.startsWith('/avaliacao/') ||
       path.startsWith('/anamnese/') ||
       path.startsWith('/alimentar/');
-}
-
-class _AuthOperationalNotice extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _AuthOperationalNotice({
-    required this.icon,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFB020).withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFFFFB020).withValues(alpha: 0.22),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 20, color: const Color(0xFFFFD28A)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.72),
-                fontSize: 12.2,
-                height: 1.35,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
