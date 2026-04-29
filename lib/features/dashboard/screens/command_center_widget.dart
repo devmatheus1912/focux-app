@@ -28,13 +28,20 @@ class CommandCenterWidget extends ConsumerWidget {
             ),
           ),
       data: (data) {
-        if (data.agendaHoje.isEmpty && data.filaAcoes.isEmpty) {
+        if (data.agendaHoje.isEmpty &&
+            data.filaAcoes.isEmpty &&
+            data.autonomiaGargalos.isEmpty) {
           return const _IaActionHistory();
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _CommandHeader(total: data.filaAcoes.length),
+            if (data.autonomiaGargalos.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              _AutonomiaGargalosSection(gargalos: data.autonomiaGargalos),
+              const SizedBox(height: 16),
+            ],
             if (data.filaAcoes.isNotEmpty) ...[
               const SizedBox(height: 10),
               ...data.filaAcoes.map((acao) => _CommandActionCard(action: acao)),
@@ -238,6 +245,167 @@ class _CommandHeader extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AutonomiaGargalosSection extends StatelessWidget {
+  final List<AutonomiaGargaloResumo> gargalos;
+
+  const _AutonomiaGargalosSection({required this.gargalos});
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: primary.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.account_tree_outlined, color: primary, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Gargalos de autonomia',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              _Pill(label: '${gargalos.length} ativos', color: primary),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Alunos clicando em tarefas sem concluir.',
+            style: TextStyle(color: mute, fontSize: 12.5),
+          ),
+          const SizedBox(height: 12),
+          for (final gargalo in gargalos.take(5)) ...[
+            _AutonomiaGargaloTile(gargalo: gargalo),
+            if (gargalo != gargalos.take(5).last)
+              Divider(
+                height: 16,
+                color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AutonomiaGargaloTile extends StatelessWidget {
+  final AutonomiaGargaloResumo gargalo;
+
+  const _AutonomiaGargaloTile({required this.gargalo});
+
+  String _actionLabel(String action) {
+    switch (action.toUpperCase()) {
+      case 'CLICKED':
+        return 'Clicou';
+      case 'COMPLETED':
+        return 'Concluiu';
+      case 'VIEWED':
+        return 'Viu';
+      default:
+        return action;
+    }
+  }
+
+  String _dateLabel(String? value) {
+    final parsed = value == null ? null : DateTime.tryParse(value);
+    if (parsed == null) return '--';
+    final day = parsed.day.toString().padLeft(2, '0');
+    final month = parsed.month.toString().padLeft(2, '0');
+    final hour = parsed.hour.toString().padLeft(2, '0');
+    final minute = parsed.minute.toString().padLeft(2, '0');
+    return '$day/$month $hour:$minute';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final openClicks = gargalo.cliques - gargalo.concluidos;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: EagleTokens.warn.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Icon(
+            Icons.touch_app_outlined,
+            color: EagleTokens.warn,
+            size: 18,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                gargalo.alunoNome,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: ink,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13.5,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                gargalo.taskTitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: mute, fontSize: 12.5, height: 1.25),
+              ),
+              const SizedBox(height: 7),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  _Pill(label: '$openClicks pendente', color: EagleTokens.warn),
+                  _Pill(label: gargalo.prioridade, color: primary),
+                  _Pill(
+                    label: _actionLabel(gargalo.ultimaAcao),
+                    color: primary,
+                  ),
+                  _Pill(label: _dateLabel(gargalo.ultimoEventoEm), color: mute),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          onPressed: () => context.push(gargalo.acaoUrl),
+          icon: const Icon(Icons.arrow_forward_rounded),
+          tooltip: 'Abrir aluno',
         ),
       ],
     );

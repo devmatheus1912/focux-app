@@ -3,12 +3,14 @@ class CommandCenterData {
   final List<AlertaResumo> alunosEmRisco;
   final List<FilaAcaoResumo> filaAcoes;
   final List<MensalidadeResumo> cobrancasPendentes;
+  final List<AutonomiaGargaloResumo> autonomiaGargalos;
 
   CommandCenterData({
     required this.agendaHoje,
     required this.alunosEmRisco,
     required this.filaAcoes,
     required this.cobrancasPendentes,
+    required this.autonomiaGargalos,
   });
 
   factory CommandCenterData.fromJson(Map<String, dynamic> json) {
@@ -37,8 +39,59 @@ class CommandCenterData {
               )
               .toList() ??
           [],
+      autonomiaGargalos:
+          (json['autonomiaGargalos'] as List?)
+              ?.map(
+                (e) =>
+                    AutonomiaGargaloResumo.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
     );
   }
+}
+
+class AutonomiaGargaloResumo {
+  final int alunoId;
+  final String alunoNome;
+  final String taskId;
+  final String taskTitle;
+  final String prioridade;
+  final int vistos;
+  final int cliques;
+  final int concluidos;
+  final String ultimaAcao;
+  final String? ultimoEventoEm;
+  final String acaoUrl;
+
+  AutonomiaGargaloResumo({
+    required this.alunoId,
+    required this.alunoNome,
+    required this.taskId,
+    required this.taskTitle,
+    required this.prioridade,
+    required this.vistos,
+    required this.cliques,
+    required this.concluidos,
+    required this.ultimaAcao,
+    required this.ultimoEventoEm,
+    required this.acaoUrl,
+  });
+
+  factory AutonomiaGargaloResumo.fromJson(Map<String, dynamic> json) =>
+      AutonomiaGargaloResumo(
+        alunoId: (json['alunoId'] as num?)?.toInt() ?? 0,
+        alunoNome: json['alunoNome'] as String? ?? 'Aluno',
+        taskId: json['taskId'] as String? ?? '',
+        taskTitle: json['taskTitle'] as String? ?? 'Tarefa do aluno',
+        prioridade: json['prioridade'] as String? ?? 'MEDIA',
+        vistos: (json['vistos'] as num?)?.toInt() ?? 0,
+        cliques: (json['cliques'] as num?)?.toInt() ?? 0,
+        concluidos: (json['concluidos'] as num?)?.toInt() ?? 0,
+        ultimaAcao: json['ultimaAcao'] as String? ?? 'CLICKED',
+        ultimoEventoEm: json['ultimoEventoEm'] as String?,
+        acaoUrl: json['acaoUrl'] as String? ?? '/alunos',
+      );
 }
 
 class AgendamentoResumo {

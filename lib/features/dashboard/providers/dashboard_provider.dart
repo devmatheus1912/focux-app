@@ -37,6 +37,7 @@ final commandCenterProvider = FutureProvider<CommandCenterData>((ref) async {
       alunosEmRisco: const [],
       filaAcoes: const [],
       cobrancasPendentes: const [],
+      autonomiaGargalos: const [],
     );
   }
 });
