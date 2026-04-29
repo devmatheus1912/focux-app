@@ -110,6 +110,48 @@ class AlunoAutonomiaEvento {
       );
 }
 
+class AlunoAutonomiaResumo {
+  final int alunoId;
+  final int totalEventos;
+  final int vistos;
+  final int cliques;
+  final int concluidos;
+  final String? gargaloTaskId;
+  final String? gargaloTitulo;
+  final String? gargaloPrioridade;
+  final String? gargaloUltimaAcao;
+  final DateTime? gargaloCriadoEm;
+
+  const AlunoAutonomiaResumo({
+    required this.alunoId,
+    required this.totalEventos,
+    required this.vistos,
+    required this.cliques,
+    required this.concluidos,
+    this.gargaloTaskId,
+    this.gargaloTitulo,
+    this.gargaloPrioridade,
+    this.gargaloUltimaAcao,
+    this.gargaloCriadoEm,
+  });
+
+  factory AlunoAutonomiaResumo.fromJson(Map<String, dynamic> json) =>
+      AlunoAutonomiaResumo(
+        alunoId: (json['alunoId'] as num?)?.toInt() ?? 0,
+        totalEventos: (json['totalEventos'] as num?)?.toInt() ?? 0,
+        vistos: (json['vistos'] as num?)?.toInt() ?? 0,
+        cliques: (json['cliques'] as num?)?.toInt() ?? 0,
+        concluidos: (json['concluidos'] as num?)?.toInt() ?? 0,
+        gargaloTaskId: json['gargaloTaskId'] as String?,
+        gargaloTitulo: json['gargaloTitulo'] as String?,
+        gargaloPrioridade: json['gargaloPrioridade'] as String?,
+        gargaloUltimaAcao: json['gargaloUltimaAcao'] as String?,
+        gargaloCriadoEm: json['gargaloCriadoEm'] == null
+            ? null
+            : DateTime.tryParse(json['gargaloCriadoEm'].toString()),
+      );
+}
+
 class AlunoRepository {
   final Dio _dio;
 
@@ -172,6 +214,13 @@ class AlunoRepository {
         .toList();
   }
 
+  Future<AlunoAutonomiaResumo> buscarAutonomiaResumo(int alunoId) async {
+    final response = await _dio.get('/api/alunos/$alunoId/autonomia/resumo');
+    return AlunoAutonomiaResumo.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+  }
+
   Future<String> gerarSenhaProvisoria(int id) async {
     final response = await _dio.post('/api/alunos/$id/gerar-senha-provisoria');
     return response.data['senhaProvisoria'] as String;
@@ -187,7 +236,6 @@ class AlunoRepository {
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 
-  // Telefone getter helper (não está no modelo ainda)
   Future<void> registrarEventoAutonomia({
     required String taskId,
     required String taskTitle,
@@ -208,5 +256,6 @@ class AlunoRepository {
     });
   }
 
+  // Telefone getter helper (nao esta no modelo ainda)
   String? getTelefone(Aluno aluno) => null;
 }

@@ -49,6 +49,7 @@ class AlunoDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final alunoAsync = ref.watch(alunoProvider(alunoId));
     final autonomiaAsync = ref.watch(alunoAutonomiaEventosProvider(alunoId));
+    final autonomiaResumoAsync = ref.watch(alunoAutonomiaResumoProvider(alunoId));
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -179,6 +180,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                       const SizedBox(height: 16),
                       _AutonomiaAlunoCard(
                         eventosAsync: autonomiaAsync,
+                        resumoAsync: autonomiaResumoAsync,
                         isDark: isDark,
                       ),
                       const SizedBox(height: 16),
@@ -299,10 +301,12 @@ class AlunoDetailScreen extends ConsumerWidget {
 
 class _AutonomiaAlunoCard extends StatelessWidget {
   final AsyncValue<List<AlunoAutonomiaEvento>> eventosAsync;
+  final AsyncValue<AlunoAutonomiaResumo> resumoAsync;
   final bool isDark;
 
   const _AutonomiaAlunoCard({
     required this.eventosAsync,
+    required this.resumoAsync,
     required this.isDark,
   });
 
@@ -392,6 +396,57 @@ class _AutonomiaAlunoCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
+          resumoAsync.when(
+            loading: () => const LinearProgressIndicator(minHeight: 2),
+            error: (_, __) => Text(
+              'Resumo indisponivel agora.',
+              style: TextStyle(color: mute, fontSize: 12.5),
+            ),
+            data: (resumo) => Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _AutonomiaMetric(
+                        label: 'Vistos',
+                        value: resumo.vistos.toString(),
+                        color: primary,
+                        isDark: isDark,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _AutonomiaMetric(
+                        label: 'Cliques',
+                        value: resumo.cliques.toString(),
+                        color: EagleTokens.warn,
+                        isDark: isDark,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _AutonomiaMetric(
+                        label: 'Fechados',
+                        value: resumo.concluidos.toString(),
+                        color: EagleTokens.good,
+                        isDark: isDark,
+                      ),
+                    ),
+                  ],
+                ),
+                if (resumo.gargaloTitulo?.isNotEmpty == true) ...[
+                  const SizedBox(height: 10),
+                  _AutonomiaBottleneck(
+                    resumo: resumo,
+                    isDark: isDark,
+                    actionLabel: _actionLabel(resumo.gargaloUltimaAcao ?? ''),
+                    dateLabel: _formatDate(resumo.gargaloCriadoEm),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
           eventosAsync.when(
             loading: () => const LinearProgressIndicator(minHeight: 2),
             error: (_, __) => Text(
@@ -416,9 +471,10 @@ class _AutonomiaAlunoCard extends StatelessWidget {
                 );
               }
 
+              final recentes = eventos.take(5).toList();
               return Column(
                 children: [
-                  for (final evento in eventos.take(5)) ...[
+                  for (final evento in recentes) ...[
                     _AutonomiaEventoTile(
                       evento: evento,
                       isDark: isDark,
@@ -426,12 +482,146 @@ class _AutonomiaAlunoCard extends StatelessWidget {
                       actionColor: _actionColor(evento.action),
                       dateLabel: _formatDate(evento.criadoEm),
                     ),
-                    if (evento != eventos.take(5).last)
+                    if (evento != recentes.last)
                       Divider(color: line, height: 14),
                   ],
                 ],
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AutonomiaMetric extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+  final bool isDark;
+
+  const _AutonomiaMetric({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = isDark ? Colors.white.withValues(alpha: 0.04) : color.withValues(alpha: 0.08);
+    final border = isDark ? Colors.white.withValues(alpha: 0.08) : color.withValues(alpha: 0.14);
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: mute,
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AutonomiaBottleneck extends StatelessWidget {
+  final AlunoAutonomiaResumo resumo;
+  final bool isDark;
+  final String actionLabel;
+  final String dateLabel;
+
+  const _AutonomiaBottleneck({
+    required this.resumo,
+    required this.isDark,
+    required this.actionLabel,
+    required this.dateLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final bg = isDark
+        ? Colors.white.withValues(alpha: 0.04)
+        : BrandPalette.softer(primary);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.flag_outlined, color: primary, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Gargalo principal',
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  resumo.gargaloTitulo ?? 'Tarefa do aluno',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    _MiniAutonomyChip(label: actionLabel, color: primary),
+                    if (resumo.gargaloPrioridade?.isNotEmpty == true)
+                      _MiniAutonomyChip(
+                        label: resumo.gargaloPrioridade!,
+                        color: mute,
+                      ),
+                    _MiniAutonomyChip(label: dateLabel, color: mute),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -19,6 +19,11 @@ final alunoAutonomiaEventosProvider =
   return ref.read(alunoRepositoryProvider).listarAutonomiaEventos(id);
 });
 
+final alunoAutonomiaResumoProvider =
+    FutureProvider.family<AlunoAutonomiaResumo, int>((ref, id) async {
+  return ref.read(alunoRepositoryProvider).buscarAutonomiaResumo(id);
+});
+
 /// Perfil do aluno autenticado (endpoint /api/alunos/me).
 final alunoMeProvider = FutureProvider<Aluno>((ref) async {
   return ref.read(alunoRepositoryProvider).me();
