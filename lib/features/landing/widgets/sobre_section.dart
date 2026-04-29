@@ -11,6 +11,7 @@ class SobreSection extends StatelessWidget {
         data.descricaoProfissional!.isEmpty) {
       return const SizedBox.shrink();
     }
+    final accent = Theme.of(context).colorScheme.primary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -47,7 +48,7 @@ class SobreSection extends StatelessWidget {
                     else
                       CircleAvatar(
                         radius: 30,
-                        backgroundColor: const Color(0xFF3B5FE2),
+                        backgroundColor: accent,
                         child: Text(
                           data.nomePersonal.isNotEmpty
                               ? data.nomePersonal[0].toUpperCase()
@@ -80,15 +81,18 @@ class SobreSection extends StatelessWidget {
                     _InfoPill(
                       icon: Icons.people_outline,
                       text: '${data.totalAlunos}+ alunos',
+                      color: accent,
                     ),
                     _InfoPill(
                       icon: Icons.calendar_today_outlined,
                       text: 'Desde ${data.anoCriacao}',
+                      color: accent,
                     ),
                     if (data.cref?.trim().isNotEmpty == true)
-                      const _InfoPill(
+                      _InfoPill(
                         icon: Icons.verified_outlined,
                         text: 'CREF ativo',
+                        color: accent,
                       ),
                   ],
                 ),
@@ -105,10 +109,12 @@ class SobreSection extends StatelessWidget {
 class _InfoPill extends StatelessWidget {
   final IconData icon;
   final String text;
+  final Color color;
 
   const _InfoPill({
     required this.icon,
     required this.text,
+    required this.color,
   });
 
   @override
@@ -123,7 +129,7 @@ class _InfoPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: const Color(0xFF3B5FE2), size: 15),
+          Icon(icon, color: color, size: 15),
           const SizedBox(width: 6),
           Text(
             text,

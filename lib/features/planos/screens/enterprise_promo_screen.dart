@@ -66,6 +66,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final trialEndDate = DateTime.now().add(const Duration(days: 5));
     final dateStr =
         '${trialEndDate.day.toString().padLeft(2, '0')}/${trialEndDate.month.toString().padLeft(2, '0')}/${trialEndDate.year}';
@@ -85,9 +86,9 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
             child: Column(
               children: [
                 const Spacer(),
-                const Icon(
+                Icon(
                   Icons.workspace_premium_outlined,
-                  color: Color(0xFF3B5FE2),
+                  color: primary,
                   size: 56,
                 ),
                 const SizedBox(height: 20),
@@ -189,7 +190,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                   child: FilledButton(
                     onPressed: _starting ? null : _startTrial,
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF3B5FE2),
+                      backgroundColor: primary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),

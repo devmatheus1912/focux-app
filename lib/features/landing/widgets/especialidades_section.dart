@@ -12,6 +12,7 @@ class EspecialidadesSection extends StatelessWidget {
     if (data.especialidades == null || data.especialidades!.isEmpty) {
       return const SizedBox.shrink();
     }
+    final accent = data.isEnterprise ? primaryColor : Theme.of(context).colorScheme.primary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -38,20 +39,16 @@ class EspecialidadesSection extends StatelessWidget {
                 .map((e) => Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: data.isEnterprise
-                            ? primaryColor.withValues(alpha: 0.18)
-                            : const Color(0xFF3B5FE2).withValues(alpha: 0.18),
+                        color: accent.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(50),
                         border: Border.all(
-                          color: data.isEnterprise
-                              ? primaryColor.withValues(alpha: 0.4)
-                              : const Color(0xFF3B5FE2).withValues(alpha: 0.4),
+                          color: accent.withValues(alpha: 0.4),
                         ),
                       ),
                       child: Text(
                         e,
                         style: TextStyle(
-                          color: data.isEnterprise ? primaryColor : const Color(0xFF3B5FE2),
+                          color: accent,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),

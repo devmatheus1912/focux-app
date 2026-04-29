@@ -88,6 +88,7 @@ class _BuscaGlobalWidgetState extends ConsumerState<BuscaGlobalWidget> {
   }
 
   Widget _buildResults(BuildContext context, Map<String, dynamic> data) {
+    final primary = Theme.of(context).colorScheme.primary;
     final alunos = (data['alunos'] as List? ?? []);
     final treinos = (data['treinos'] as List? ?? []);
     final cobrancas = (data['cobrancas'] as List? ?? []);
@@ -111,7 +112,7 @@ class _BuscaGlobalWidgetState extends ConsumerState<BuscaGlobalWidget> {
       children: [
         if (alunos.isNotEmpty) ...[
           _sectionHeader('Alunos', Icons.person_outline),
-          ...alunos.map((a) => _resultTile(context, a, EagleTokens.brand)),
+          ...alunos.map((a) => _resultTile(context, a, primary)),
           const SizedBox(height: 16),
         ],
         if (treinos.isNotEmpty) ...[

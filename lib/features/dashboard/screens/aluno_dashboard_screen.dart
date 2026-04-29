@@ -1383,6 +1383,7 @@ class _InlineActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -1397,7 +1398,7 @@ class _InlineActionButton extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, color: EagleTokens.brand, size: 18),
+            Icon(icon, color: primary, size: 18),
             const SizedBox(height: 8),
             Text(
               label,

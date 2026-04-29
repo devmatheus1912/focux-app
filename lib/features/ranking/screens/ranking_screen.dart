@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 
 class RankingItem {
@@ -120,6 +121,8 @@ class _PodioCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -129,11 +132,11 @@ class _PodioCard extends StatelessWidget {
             const SizedBox(height: 4),
             CircleAvatar(
               radius: 28,
-              backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.brandSoft,
+              backgroundColor: isDark ? EagleTokens.darkCard : primarySoft,
               backgroundImage: item.logoUrl != null ? NetworkImage(item.logoUrl!) : null,
               child: item.logoUrl == null
                   ? Text(item.nome.isNotEmpty ? item.nome[0].toUpperCase() : '?',
-                      style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.brand, fontSize: 20))
+                      style: TextStyle(color: isDark ? EagleTokens.darkInk : primary, fontSize: 20))
                   : null,
             ),
             const SizedBox(height: 6),
@@ -146,12 +149,12 @@ class _PodioCard extends StatelessWidget {
             ),
             Text(
               '${item.totalAlunosAtivos} alunos',
-              style: theme.textTheme.bodySmall?.copyWith(color: EagleTokens.brand),
+              style: theme.textTheme.bodySmall?.copyWith(color: primary),
             ),
             Container(
               height: alturaBase,
               decoration: BoxDecoration(
-                color: isDark ? EagleTokens.darkCard : EagleTokens.brandSoft,
+                color: isDark ? EagleTokens.darkCard : primarySoft,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
               ),
             ),
@@ -169,9 +172,10 @@ class _RankingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primarySoft = BrandPalette.soft(Theme.of(context).colorScheme.primary, dark: isDark);
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.brandSoft,
+        backgroundColor: isDark ? EagleTokens.darkCard : primarySoft,
         child: Text(
           '${item.posicao}',
           style: TextStyle(

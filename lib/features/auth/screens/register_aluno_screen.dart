@@ -89,6 +89,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
     final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -166,18 +167,18 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
-                            color: EagleTokens.brand.withValues(alpha: 0.15),
+                            color: primary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: EagleTokens.brand.withValues(alpha: 0.25)),
+                            border: Border.all(color: primary.withValues(alpha: 0.25)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.mail_outline, color: EagleTokens.brandAccent, size: 16),
+                              Icon(Icons.mail_outline, color: primary, size: 16),
                               const SizedBox(width: 8),
-                              const Text(
+                              Text(
                                 'Convite do seu Personal',
-                                style: TextStyle(color: EagleTokens.brandAccent, fontSize: 12, fontWeight: FontWeight.w600),
+                                style: TextStyle(color: primary, fontSize: 12, fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -209,22 +210,22 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                             padding: const EdgeInsets.all(14),
                             margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF3B5FE2).withValues(alpha: 0.1),
+                              color: primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                  color: const Color(0xFF3B5FE2)
+                                  color: primary
                                       .withValues(alpha: 0.3)),
                             ),
-                            child: const Row(
+                            child: Row(
                               children: [
                                 Icon(Icons.fitness_center,
-                                    color: Color(0xFF3B5FE2), size: 20),
-                                SizedBox(width: 10),
+                                    color: primary, size: 20),
+                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     'Você está se cadastrando no app de seu personal trainer',
                                     style: TextStyle(
-                                      color: Color(0xFF3B5FE2),
+                                      color: primary,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13,
                                     ),
@@ -240,7 +241,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                           children: [
                             Text(
                               'CÓDIGO DO CONVITE',
-                              style: TextStyle(color: EagleTokens.brandAccent.withValues(alpha: 0.8), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                              style: TextStyle(color: primary.withValues(alpha: 0.8), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2),
                             ),
                             const SizedBox(height: 8),
                             TextFormField(
@@ -248,17 +249,17 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                               textCapitalization: TextCapitalization.characters,
                               style: TextStyle(color: inkColor, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 4),
                               textAlign: TextAlign.center,
-                              cursorColor: EagleTokens.brand,
+                              cursorColor: primary,
                               validator: (v) => v == null || v.isEmpty ? 'Informe o código' : null,
                               decoration: InputDecoration(
                                 hintText: '• • • • • •',
                                 hintStyle: TextStyle(color: inkColor.withValues(alpha: 0.15), letterSpacing: 6),
                                 filled: true,
-                                fillColor: EagleTokens.brand.withValues(alpha: 0.08),
+                                fillColor: primary.withValues(alpha: 0.08),
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.brand.withValues(alpha: 0.25))),
-                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.brand.withValues(alpha: 0.25))),
-                                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: primary.withValues(alpha: 0.25))),
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: primary.withValues(alpha: 0.25))),
+                                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: primary, width: 1.5)),
                                 errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.bad)),
                                 errorStyle: TextStyle(color: EagleTokens.bad, fontSize: 11),
                               ),
@@ -319,9 +320,9 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                           child: ElevatedButton(
                             onPressed: _loading ? null : _submit,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: EagleTokens.brand,
+                              backgroundColor: primary,
                               foregroundColor: EagleTokens.card,
-                              disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
+                              disabledBackgroundColor: primary.withValues(alpha: 0.5),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               elevation: 0,
                             ),
@@ -340,7 +341,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                               Text('Já tem conta? ', style: TextStyle(color: inkColor.withValues(alpha: 0.45), fontSize: 14)),
                               GestureDetector(
                                 onTap: () => context.go('/login'),
-                                child: const Text('Entrar', style: TextStyle(color: EagleTokens.brandAccent, fontSize: 14, fontWeight: FontWeight.w600)),
+                                child: Text('Entrar', style: TextStyle(color: primary, fontSize: 14, fontWeight: FontWeight.w600)),
                               ),
                             ],
                           ),
@@ -387,6 +388,7 @@ class _FxTextField extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
     final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -399,7 +401,7 @@ class _FxTextField extends StatelessWidget {
           textCapitalization: textCapitalization,
           validator: validator,
           style: TextStyle(color: inkColor, fontSize: 15),
-          cursorColor: EagleTokens.brand,
+          cursorColor: primary,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(color: inkColor.withValues(alpha: 0.2)),
@@ -410,7 +412,7 @@ class _FxTextField extends StatelessWidget {
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08))),
             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08))),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.brand, width: 1.5)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: primary, width: 1.5)),
             errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: EagleTokens.bad)),
             errorStyle: TextStyle(color: EagleTokens.bad, fontSize: 11),
           ),

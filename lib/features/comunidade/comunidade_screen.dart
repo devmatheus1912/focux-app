@@ -26,6 +26,7 @@ class _ComunidadeScreenState extends State<ComunidadeScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ComunidadeProvider>();
+    final primary = Theme.of(context).colorScheme.primary;
     
     return Scaffold(
       backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -51,7 +52,7 @@ class _ComunidadeScreenState extends State<ComunidadeScreen> {
                     title: Text(grupo.nome, style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(grupo.descricao),
                     trailing: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: EagleTokens.brand),
+                      style: ElevatedButton.styleFrom(backgroundColor: primary),
                       onPressed: () async {
                         try {
                           await provider.entrarGrupo(grupo.id);

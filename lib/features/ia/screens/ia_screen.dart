@@ -25,21 +25,22 @@ class _IaScreenState extends ConsumerState<IaScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
         title: Row(children: [
-          Container(width: 32, height: 32, decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.auto_awesome, color: EagleTokens.brand, size: 18)),
+          Container(width: 32, height: 32, decoration: BoxDecoration(color: primary.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)), child: Icon(Icons.auto_awesome, color: primary, size: 18)),
           const SizedBox(width: 10),
           Text('IA Focux', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
         ]),
         iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         bottom: TabBar(
           controller: _tabs,
-          indicatorColor: EagleTokens.brand,
-          labelColor: EagleTokens.brand,
+          indicatorColor: primary,
+          labelColor: primary,
           unselectedLabelColor: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
           indicatorWeight: 2.5,
           tabs: const [

@@ -171,6 +171,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
   Widget build(BuildContext context) {
     if (_loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
@@ -179,8 +180,8 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
         title: Text('Anamnese', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
         iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         bottom: TabBar(
-          indicatorColor: EagleTokens.brand,
-          labelColor: EagleTokens.brand,
+          indicatorColor: primary,
+          labelColor: primary,
           unselectedLabelColor: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
           indicatorWeight: 2.5,
           controller: _tabController,

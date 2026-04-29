@@ -83,6 +83,7 @@ class _PlanoAlimentarDetailScreenState
   }
 
   Future<void> _abrirGerarIa() async {
+    final primary = Theme.of(context).colorScheme.primary;
     final objetivoCtrl = TextEditingController(text: 'Hipertrofia');
     final calCtrl = TextEditingController(text: '2500');
     final refCtrl = TextEditingController(text: '4');
@@ -91,10 +92,10 @@ class _PlanoAlimentarDetailScreenState
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, set) => AlertDialog(
-          title: const Row(children: [
-            Icon(Icons.auto_awesome, color: EagleTokens.brand),
-            SizedBox(width: 8),
-            Text('Gerar Dieta com IA')
+          title: Row(children: [
+            Icon(Icons.auto_awesome, color: primary),
+            const SizedBox(width: 8),
+            const Text('Gerar Dieta com IA')
           ]),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -157,7 +158,7 @@ class _PlanoAlimentarDetailScreenState
         title: Text(p.nome),
         actions: [
           IconButton(
-            icon: const Icon(Icons.auto_awesome, color: EagleTokens.brand),
+            icon: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.primary),
             tooltip: 'Gerar Dieta IA',
             onPressed: _abrirGerarIa,
           ),

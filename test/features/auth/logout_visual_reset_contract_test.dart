@@ -16,7 +16,8 @@ void main() {
 
     expect(main, contains('void _resetCustomTheme()'));
     expect(main, contains('primaryColorProvider.notifier'));
-    expect(main, contains('const Color(0xFF0288D1)'));
+    expect(main, contains('EagleTokens.brand'));
+    expect(main, isNot(contains('const Color(0xFF0288D1)')));
     expect(main, contains('logoUrlProvider.notifier'));
     expect(main, contains('personalNameProvider.notifier'));
     expect(main, contains('next == AuthStatus.unauthenticated'));

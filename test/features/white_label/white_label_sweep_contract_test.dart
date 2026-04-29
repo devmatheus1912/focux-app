@@ -32,32 +32,17 @@ void main() {
     expect(commandCenter, isNot(contains('return const Color(0xFF2563EB);')));
   });
 
-  test('commercial screens do not use fixed Focux brand tokens', () {
+  test('feature screens do not use fixed Focux brand tokens', () {
     final files = Directory('lib/features')
         .listSync(recursive: true)
         .whereType<File>()
-        .where((file) {
-      final path = file.path.replaceAll('\\', '/');
-      return path.contains('/financeiro/') ||
-          path.contains('/leads/') ||
-          path.contains('/feed/') ||
-          path.contains('/analytics/') ||
-          path.contains('/assinatura/') ||
-          path.contains('/subscription/') ||
-          path.contains('/exercicios/') ||
-          path.contains('/admin/') ||
-          path.contains('/perfil/') ||
-          path.contains('/growth/') ||
-          path.contains('/landing/') ||
-          path.contains('/depoimentos/') ||
-          path.contains('/planos/') ||
-          path.contains('/onboarding/');
-    }).where((file) => file.path.endsWith('.dart'));
+        .where((file) => file.path.endsWith('.dart'));
 
     for (final file in files) {
       final source = file.readAsStringSync();
       expect(source, isNot(contains('EagleTokens.brand')), reason: file.path);
       expect(source, isNot(contains('Color(0xFF2563EB)')), reason: file.path);
+      expect(source, isNot(contains('Color(0xFF0288D1)')), reason: file.path);
     }
   });
 }

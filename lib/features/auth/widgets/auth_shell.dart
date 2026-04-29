@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
 
 class AuthShell extends StatelessWidget {
@@ -72,6 +71,7 @@ class AuthLogoMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = size * 0.26;
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       width: size,
       height: size,
@@ -85,7 +85,7 @@ class AuthLogoMark extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3B5FE2).withValues(alpha: 0.28),
+            color: primary.withValues(alpha: 0.28),
             blurRadius: 24,
             offset: const Offset(0, 4),
           ),
@@ -243,6 +243,7 @@ class AuthField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -293,7 +294,7 @@ class AuthField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: EagleTokens.brandAccent),
+              borderSide: BorderSide(color: primary),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),

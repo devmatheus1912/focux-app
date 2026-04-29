@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -153,7 +154,8 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final brand = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
+    final brand = Theme.of(context).colorScheme.primary;
+    final brandDeep = BrandPalette.deep(brand);
 
     final altos = _alertas.where((a) => a.score >= 2).length;
     final medios = _alertas.where((a) => a.score == 1).length;
@@ -239,9 +241,9 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withValues(alpha: 0.04) : EagleTokens.brand.withValues(alpha: 0.05),
+                      color: isDark ? Colors.white.withValues(alpha: 0.04) : brand.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: isDark ? line : EagleTokens.brand.withValues(alpha: 0.12)),
+                      border: Border.all(color: isDark ? line : brand.withValues(alpha: 0.12)),
                     ),
                     child: Row(
                       children: [
@@ -351,7 +353,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                     children: [
                                       Container(
                                         width: 44, height: 44,
-                                        decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
+                                        decoration: BoxDecoration(color: isDark ? brandDeep : brand, shape: BoxShape.circle),
                                         alignment: Alignment.center,
                                         child: Text(fxInitials(a.alunoNome), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
                                       ),

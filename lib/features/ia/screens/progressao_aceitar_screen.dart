@@ -126,6 +126,7 @@ class _CardSugestao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final alunoNome = sugestao['alunoNome'] as String? ?? 'Aluno';
     final exercicio = sugestao['exercicio'] as String?
         ?? sugestao['exercicioNome'] as String?
@@ -140,17 +141,17 @@ class _CardSugestao extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: EagleTokens.brand.withValues(alpha: 0.3)),
+        side: BorderSide(color: primary.withValues(alpha: 0.3)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           // Cabeçalho: nome do aluno
           Row(children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 16,
-              backgroundColor: EagleTokens.brand,
-              child: Icon(Icons.person, size: 16, color: Colors.white),
+              backgroundColor: primary,
+              child: const Icon(Icons.person, size: 16, color: Colors.white),
             ),
             const SizedBox(width: 8),
             Text(alunoNome,
@@ -173,14 +174,14 @@ class _CardSugestao extends StatelessWidget {
               valor: cargaAtual != null ? '${cargaAtual}kg' : '—',
               cor: EagleTokens.inkMute,
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              child: Icon(Icons.arrow_forward, color: EagleTokens.brand),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Icon(Icons.arrow_forward, color: primary),
             ),
             _CargaBox(
               label: 'Sugerido',
               valor: cargaSugerida != null ? '${cargaSugerida}kg' : '—',
-              cor: EagleTokens.brand,
+              cor: primary,
             ),
           ]),
 

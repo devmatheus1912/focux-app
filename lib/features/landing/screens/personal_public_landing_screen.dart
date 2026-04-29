@@ -111,6 +111,7 @@ class _NotAvailableView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -125,7 +126,7 @@ class _NotAvailableView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.fitness_center, color: Color(0xFF3B5FE2), size: 64),
+              Icon(Icons.fitness_center, color: primary, size: 64),
               const SizedBox(height: 24),
               const Text(
                 'Focux Personal',
@@ -142,7 +143,7 @@ class _NotAvailableView extends StatelessWidget {
               ElevatedButton(
                 onPressed: () => _abrirStore(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3B5FE2),
+                  backgroundColor: primary,
                   foregroundColor: Colors.white,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
@@ -170,7 +171,7 @@ class _LandingContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = _hexColor(data.corPrimaria, const Color(0xFF3B5FE2));
+    final primaryColor = _hexColor(data.corPrimaria, Theme.of(context).colorScheme.primary);
     final secondaryColor = _hexColor(data.corSecundaria, const Color(0xFF0097A7));
 
     return CustomScrollView(

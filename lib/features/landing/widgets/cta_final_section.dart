@@ -17,12 +17,13 @@ class CtaFinalSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primeiroPacote = data.pacotes.isNotEmpty ? data.pacotes.first : null;
+    final accent = data.isEnterprise ? primaryColor : Theme.of(context).colorScheme.primary;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: data.isEnterprise ? primaryColor : const Color(0xFF3B5FE2),
+        color: accent,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -48,8 +49,7 @@ class CtaFinalSection extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor:
-                    data.isEnterprise ? primaryColor : const Color(0xFF3B5FE2),
+                foregroundColor: accent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

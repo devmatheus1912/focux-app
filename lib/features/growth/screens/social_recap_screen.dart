@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
 
@@ -8,6 +9,7 @@ class SocialRecapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final primaryDeep = BrandPalette.deep(primary);
     // In a real app, fetch from GET /api/v1/social/recap/{alunoId}
     return Scaffold(
       backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -23,8 +25,8 @@ class SocialRecapScreen extends StatelessWidget {
               width: 300,
               height: 500,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF1E3A8A), Color(0xFF9333EA)], // Vibrant Blue to Purple
+                gradient: LinearGradient(
+                  colors: [primaryDeep, primary],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),

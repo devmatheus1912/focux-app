@@ -160,12 +160,13 @@ class _CardUltimoTreino extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            const Icon(Icons.fitness_center, color: EagleTokens.brand),
+            Icon(Icons.fitness_center, color: primary),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

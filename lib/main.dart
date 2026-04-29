@@ -12,6 +12,7 @@ import 'core/api/api_client.dart';
 import 'core/fcm/fcm_service.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/design_tokens.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/perfil/data/perfil_repository.dart';
@@ -98,7 +99,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
   }
 
   void _resetCustomTheme() {
-    ref.read(primaryColorProvider.notifier).state = const Color(0xFF0288D1);
+    ref.read(primaryColorProvider.notifier).state = EagleTokens.brand;
     ref.read(logoUrlProvider.notifier).state = null;
     ref.read(personalNameProvider.notifier).state = null;
   }

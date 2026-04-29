@@ -15,9 +15,12 @@ const _severidadeColors = {
 
 const _statusColors = {
   'ABERTO': EagleTokens.warn,
-  'EM_ANALISE': EagleTokens.brand,
   'RESOLVIDO': EagleTokens.good,
 };
+
+Color _statusColor(BuildContext context, String status) {
+  return _statusColors[status] ?? Theme.of(context).colorScheme.primary;
+}
 
 class SuporteScreen extends ConsumerStatefulWidget {
   const SuporteScreen({super.key});
@@ -481,7 +484,7 @@ class _TicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _statusColors[ticket.status] ?? EagleTokens.inkMute;
+    final statusColor = _statusColor(context, ticket.status);
     final sevColor = _severidadeColors[ticket.severidade] ?? EagleTokens.inkMute;
     final resolvido = ticket.status == 'RESOLVIDO';
     final temResposta = resolvido && ticket.respostaAdmin != null;

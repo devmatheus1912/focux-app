@@ -111,6 +111,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -306,11 +307,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           fontSize: 11.5,
                           height: 1.5,
                         ),
-                        children: const [
+                        children: [
                           TextSpan(text: 'Ao criar, você concorda com os '),
                           TextSpan(
                             text: 'Termos de uso',
-                            style: TextStyle(color: Color(0xFF7CC0FF)),
+                            style: TextStyle(color: primary),
                           ),
                         ],
                       ),

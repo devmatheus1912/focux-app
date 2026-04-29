@@ -192,6 +192,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -314,8 +315,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               },
                               child: Text(
                                 _showPassword ? 'Ocultar' : 'Ver',
-                                style: const TextStyle(
-                                  color: Color(0xFF7CC0FF),
+                                style: TextStyle(
+                                  color: primary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -326,10 +327,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: () => context.go('/esqueci-senha'),
-                              child: const Text(
+                              child: Text(
                                 'Esqueci minha senha',
                                 style: TextStyle(
-                                  color: Color(0xFF7CC0FF),
+                                  color: primary,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),

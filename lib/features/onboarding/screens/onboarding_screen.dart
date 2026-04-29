@@ -24,19 +24,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: Icons.fitness_center_rounded,
       title: 'Seus alunos,\nsua gestão.',
       subtitle: 'Cadastre alunos, monte treinos e acompanhe a evolução de cada um em tempo real.',
-      accent: Color(0xFF7CC0FF),
+      accent: Colors.white,
     ),
     _OBData(
       icon: Icons.auto_awesome_rounded,
       title: 'IA que\nentende treino.',
       subtitle: 'Gere treinos e dietas personalizados em segundos. A IA aprende com o histórico de cada aluno.',
-      accent: Color(0xFFA0CCFF),
+      accent: Colors.white,
     ),
     _OBData(
       icon: Icons.attach_money_rounded,
       title: 'Financeiro\nsem complicação.',
       subtitle: 'Cobranças, inadimplências e relatórios automatizados. Você foca no que importa: resultados.',
-      accent: Color(0xFFB8D9FF),
+      accent: Colors.white,
     ),
   ];
 
@@ -91,7 +91,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFF7CC0FF).withValues(alpha: 0.18),
+                      primary.withValues(alpha: 0.18),
                       Colors.transparent,
                     ],
                     stops: const [0.0, 0.7],

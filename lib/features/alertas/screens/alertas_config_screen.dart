@@ -77,6 +77,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
 
     return Scaffold(
       backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -120,8 +121,8 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.calendar_month_outlined,
-                                      color: EagleTokens.brand),
+                                  Icon(Icons.calendar_month_outlined,
+                                      color: primary),
                                   const SizedBox(width: 10),
                                   Text(
                                     'Dias sem treino',
@@ -133,7 +134,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: EagleTokens.brand
+                                      color: primary
                                           .withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -142,7 +143,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                       style: theme.textTheme.bodyMedium
                                           ?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: EagleTokens.brand,
+                                        color: primary,
                                       ),
                                     ),
                                   ),

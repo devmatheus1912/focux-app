@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -31,13 +32,14 @@ class GamificacaoScreen extends ConsumerWidget {
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final brand = dark ? EagleTokens.brandAccent : EagleTokens.brand;
+    final brand = Theme.of(context).colorScheme.primary;
+    final brandSofter = BrandPalette.softer(brand, dark: dark);
 
     final async = ref.watch(gamificacaoProvider);
 
     final badges = [
       {'tipo': 'STREAK_10', 'icon': '🔥', 'label': 'Sequência 10d', 'cor': const Color(0xFFE2B46F), 'earned': true},
-      {'tipo': 'PR_CARGA',  'icon': '💪', 'label': 'PR de carga',   'cor': EagleTokens.brand,        'earned': true},
+      {'tipo': 'PR_CARGA',  'icon': '💪', 'label': 'PR de carga',   'cor': brand,        'earned': true},
       {'tipo': 'FREQ_100',  'icon': '⭐', 'label': '100% semana',   'cor': const Color(0xFF2BB673),   'earned': true},
       {'tipo': 'FIRST_AI',  'icon': '✨', 'label': 'Usou a IA',     'cor': const Color(0xFF9B7AFF),   'earned': true},
       {'tipo': 'LOCK1',     'icon': '🏆', 'label': '50 treinos',    'cor': EagleTokens.inkMute,       'earned': false},
@@ -143,9 +145,9 @@ class GamificacaoScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: dark ? const Color(0x148DA4E2) : EagleTokens.brandSofter,
+                    color: dark ? brand.withValues(alpha: 0.14) : brandSofter,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: dark ? const Color(0x263B5FE2) : const Color(0x1F3B5FE2)),
+                    border: Border.all(color: brand.withValues(alpha: dark ? 0.26 : 0.12)),
                   ),
                   child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                     Text('FOCUX20', style: TextStyle(color: ink, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 2.5, fontFamily: 'monospace')),
@@ -203,11 +205,12 @@ class _StreakHeroStatic extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brandDeep = BrandPalette.deep(brand);
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft, end: Alignment.bottomRight,
-          colors: dark ? const [Color(0xFF1A2852), Color(0xFF0A0F1E)] : [EagleTokens.brand, EagleTokens.brandDeep],
+          colors: dark ? [brandDeep, const Color(0xFF0A0F1E)] : [brand, brandDeep],
         ),
         borderRadius: BorderRadius.circular(26),
       ),

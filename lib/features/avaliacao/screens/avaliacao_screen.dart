@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -100,6 +101,8 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primaryDeep = BrandPalette.deep(primary);
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
@@ -121,9 +124,9 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
       ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+          gradient: LinearGradient(colors: [primary, primaryDeep]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [BoxShadow(color: primary.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
         ),
         child: FloatingActionButton(
           onPressed: () async {
@@ -138,7 +141,7 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
+          ? Center(child: CircularProgressIndicator(color: primary))
           : _avaliacoes.isEmpty
               ? const Center(child: Text('Nenhuma avaliação registrada.'))
               : ListView.builder(

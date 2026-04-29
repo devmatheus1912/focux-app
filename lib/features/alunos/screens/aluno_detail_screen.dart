@@ -333,14 +333,14 @@ class _AutonomiaAlunoCard extends StatelessWidget {
     }
   }
 
-  Color _actionColor(String action) {
+  Color _actionColor(String action, Color fallback) {
     switch (action.toUpperCase()) {
       case 'CLICKED':
         return EagleTokens.warn;
       case 'COMPLETED':
         return EagleTokens.good;
       default:
-        return EagleTokens.brand;
+        return fallback;
     }
   }
 
@@ -480,7 +480,7 @@ class _AutonomiaAlunoCard extends StatelessWidget {
                       evento: evento,
                       isDark: isDark,
                       actionLabel: _actionLabel(evento.action),
-                      actionColor: _actionColor(evento.action),
+                      actionColor: _actionColor(evento.action, primary),
                       dateLabel: _formatDate(evento.criadoEm),
                     ),
                     if (evento != recentes.last)

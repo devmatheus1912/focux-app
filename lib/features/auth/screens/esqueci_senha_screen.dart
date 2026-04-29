@@ -138,6 +138,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -172,9 +173,9 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                           color: Colors.white.withValues(alpha: 0.12),
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.send_rounded,
-                        color: Color(0xFF7CC0FF),
+                        color: primary,
                         size: 30,
                       ),
                     ),
@@ -338,8 +339,8 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                       child: GestureDetector(
                         onTap: () => context.go('/login'),
                         child: RichText(
-                          text: const TextSpan(
-                            style: TextStyle(
+                          text: TextSpan(
+                            style: const TextStyle(
                               color: Color.fromRGBO(255, 255, 255, 0.4),
                               fontSize: 13,
                             ),
@@ -348,7 +349,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                               TextSpan(
                                 text: 'Voltar ao login',
                                 style: TextStyle(
-                                  color: Color(0xFF7CC0FF),
+                                  color: primary,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
