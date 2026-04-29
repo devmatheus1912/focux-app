@@ -83,6 +83,7 @@ import 'role_home.dart';
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/',
+    errorBuilder: (context, state) => const HomeRedirectScreen(),
     routes: [
       // ── Auth / public ────────────────────────────────────────────────────────
       GoRoute(
@@ -92,6 +93,26 @@ class AppRouter {
       GoRoute(
         path: '/home',
         builder: (context, state) => const HomeRedirectScreen(),
+      ),
+      GoRoute(
+        path: '/dashboard',
+        builder: (context, state) => const HomeRedirectScreen(),
+      ),
+      GoRoute(
+        path: '/dashboard/home',
+        builder: (context, state) => const HomeRedirectScreen(),
+      ),
+      GoRoute(
+        path: '/aluno',
+        redirect: (context, state) => '/dashboard/aluno',
+      ),
+      GoRoute(
+        path: '/personal',
+        redirect: (context, state) => '/dashboard/personal',
+      ),
+      GoRoute(
+        path: '/ia',
+        redirect: (context, state) => '/ia/copiloto',
       ),
       GoRoute(
         path: '/p/:slug',
