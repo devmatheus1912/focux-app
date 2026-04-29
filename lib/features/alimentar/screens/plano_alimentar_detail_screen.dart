@@ -36,7 +36,8 @@ class _PlanoAlimentarDetailScreenState
     try {
       final repo = AlimentarRepository(ref.read(apiClientProvider));
       final lista = await repo.listarRefeicoes(widget.alunoId, widget.plano.id);
-      if (mounted) setState(() { _refeicoes = lista; _loading = false; });
+      if (!mounted) return;
+      setState(() { _refeicoes = lista; _loading = false; });
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
@@ -130,6 +131,7 @@ class _PlanoAlimentarDetailScreenState
         caloriasAlvo: int.tryParse(calCtrl.text),
         numeroRefeicoes: int.tryParse(refCtrl.text),
       );
+      if (!mounted) return;
       await _load();
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dieta gerada com sucesso!')));
     } catch (e) {

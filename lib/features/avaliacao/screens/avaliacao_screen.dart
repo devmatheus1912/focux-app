@@ -46,9 +46,11 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
     setState(() => _loading = true);
     try {
       final r = await AvaliacaoRepository(ref.read(apiClientProvider)).listar(widget.alunoId);
+      if (!mounted) return;
       setState(() { _avaliacoes = r; _loading = false; });
-    } catch (e) { debugPrint('[Focux] Error: $e');
-      setState(() => _loading = false);
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -127,6 +129,7 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
           onPressed: () async {
             await Navigator.push(context, MaterialPageRoute(
               builder: (_) => _NovaAvaliacaoScreen(alunoId: widget.alunoId)));
+            if (!context.mounted) return;
             _load();
           },
           backgroundColor: Colors.transparent,

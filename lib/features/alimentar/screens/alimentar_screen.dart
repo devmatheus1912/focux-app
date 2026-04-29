@@ -23,8 +23,12 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
   Future<void> _load() async {
     try {
       final r = await AlimentarRepository(ref.read(apiClientProvider)).listar(widget.alunoId);
+      if (!mounted) return;
       setState(() { _planos = r; _loading = false; });
-    } catch (e) { debugPrint('[Focux] Error: $e'); setState(() => _loading = false); }
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -43,6 +47,7 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
         onPressed: () async {
           await Navigator.push(context, MaterialPageRoute(
             builder: (_) => _NovoPlanoScreen(alunoId: widget.alunoId)));
+          if (!context.mounted) return;
           _load();
         },
         child: const Icon(Icons.add),

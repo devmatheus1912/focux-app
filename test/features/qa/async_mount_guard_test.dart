@@ -1,0 +1,22 @@
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  test('visual QA screens guard async reloads before setState', () {
+    for (final path in [
+      'lib/features/alimentar/screens/alimentar_screen.dart',
+      'lib/features/alimentar/screens/plano_alimentar_detail_screen.dart',
+      'lib/features/agenda/screens/agenda_screen.dart',
+      'lib/features/avaliacao/screens/avaliacao_screen.dart',
+    ]) {
+      final source = File(path).readAsStringSync();
+
+      expect(
+        source,
+        contains('if (!mounted) return;'),
+        reason: '$path must avoid setState after dispose during route QA.',
+      );
+    }
+  });
+}

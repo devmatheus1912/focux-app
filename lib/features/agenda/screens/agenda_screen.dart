@@ -32,6 +32,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   Future<void> _load() async {
     try {
       final r = await AgendaRepository(ref.read(apiClientProvider)).proximos();
+      if (!mounted) return;
       setState(() { _ags = r; _loading = false; });
     } catch (e) {
       debugPrint('[Focux] Error: $e');
@@ -89,6 +90,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
         child: FloatingActionButton(
           onPressed: () async {
             await Navigator.push(context, MaterialPageRoute(builder: (_) => const _NovoAgendamentoScreen()));
+            if (!context.mounted) return;
             _load();
           },
           backgroundColor: Colors.transparent,
