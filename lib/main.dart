@@ -68,6 +68,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
     try {
       final repo = PerfilRepository(ApiClient());
       final perfil = await repo.buscar();
+      if (!mounted) return;
       if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
         final hex = perfil.corPrimaria!.replaceFirst('#', '0xFF');
         ref.read(primaryColorProvider.notifier).state = Color(int.parse(hex));
@@ -83,6 +84,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       final dio = ApiClient().dio;
       final response = await dio.get('/api/aluno/personal-brand');
       final data = response.data as Map<String, dynamic>;
+      if (!mounted) return;
       final corPrimaria = data['corPrimaria'] as String?;
       if (corPrimaria != null && corPrimaria.length == 7) {
         final hex = corPrimaria.replaceFirst('#', '0xFF');
@@ -95,11 +97,20 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
     } catch (_) {}
   }
 
+  void _resetCustomTheme() {
+    ref.read(primaryColorProvider.notifier).state = const Color(0xFF0288D1);
+    ref.read(logoUrlProvider.notifier).state = null;
+    ref.read(personalNameProvider.notifier).state = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<AuthStatus>(authProvider, (previous, next) {
       if (next == AuthStatus.authenticated && previous != AuthStatus.authenticated) {
         _loadCustomTheme();
+      } else if (next == AuthStatus.unauthenticated &&
+          previous == AuthStatus.authenticated) {
+        _resetCustomTheme();
       }
     });
 

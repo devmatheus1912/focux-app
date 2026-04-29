@@ -104,7 +104,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
   }
 
   Future<void> logout() async {
-    await _repo.logout();
+    await SessionInvalidator.invalidate(reason: 'logout manual');
     _currentRole = null;
     _isAdmin = false;
     _requiresPasswordChange = false;
