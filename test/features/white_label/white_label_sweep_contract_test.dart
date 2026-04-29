@@ -45,4 +45,40 @@ void main() {
       expect(source, isNot(contains('Color(0xFF0288D1)')), reason: file.path);
     }
   });
+
+  test('lib only keeps Focux brand reset in central theme entrypoints', () {
+    const allowedBrandTokenFiles = {
+      'lib/core/theme/theme_provider.dart',
+      'lib/main.dart',
+    };
+
+    final files = Directory('lib')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((file) => file.path.endsWith('.dart'));
+
+    for (final file in files) {
+      final normalizedPath = file.path.replaceAll(r'\', '/');
+      final source = file.readAsStringSync();
+
+      if (!allowedBrandTokenFiles.contains(normalizedPath)) {
+        expect(
+          source,
+          isNot(contains('EagleTokens.brand')),
+          reason: normalizedPath,
+        );
+      }
+
+      expect(
+        source,
+        isNot(contains('Color(0xFF2563EB)')),
+        reason: normalizedPath,
+      );
+      expect(
+        source,
+        isNot(contains('Color(0xFF0288D1)')),
+        reason: normalizedPath,
+      );
+    }
+  });
 }
