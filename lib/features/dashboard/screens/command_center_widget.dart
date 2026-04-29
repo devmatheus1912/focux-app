@@ -262,6 +262,7 @@ class _AutonomiaGargalosSection extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final topGargalos = gargalos.take(5).toList();
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -292,13 +293,13 @@ class _AutonomiaGargalosSection extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Alunos clicando em tarefas sem concluir.',
+            'Priorize alunos que pediram ajuda na pratica e ainda nao fecharam a tarefa.',
             style: TextStyle(color: mute, fontSize: 12.5),
           ),
           const SizedBox(height: 12),
-          for (final gargalo in gargalos.take(5)) ...[
+          for (final gargalo in topGargalos) ...[
             _AutonomiaGargaloTile(gargalo: gargalo),
-            if (gargalo != gargalos.take(5).last)
+            if (gargalo != topGargalos.last)
               Divider(
                 height: 16,
                 color: isDark ? EagleTokens.darkLine : EagleTokens.line,
@@ -345,6 +346,7 @@ class _AutonomiaGargaloTile extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final openClicks = gargalo.cliques - gargalo.concluidos;
+    final pendingLabel = openClicks == 1 ? '1 clique aberto' : '$openClicks cliques abertos';
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,12 +386,24 @@ class _AutonomiaGargaloTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: mute, fontSize: 12.5, height: 1.25),
               ),
+              const SizedBox(height: 4),
+              Text(
+                _suggestedAction(gargalo.taskId),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  height: 1.25,
+                ),
+              ),
               const SizedBox(height: 7),
               Wrap(
                 spacing: 6,
                 runSpacing: 4,
                 children: [
-                  _Pill(label: '$openClicks pendente', color: EagleTokens.warn),
+                  _Pill(label: pendingLabel, color: EagleTokens.warn),
                   _Pill(label: gargalo.prioridade, color: primary),
                   _Pill(
                     label: _actionLabel(gargalo.ultimaAcao),
@@ -410,6 +424,18 @@ class _AutonomiaGargaloTile extends StatelessWidget {
       ],
     );
   }
+}
+
+String _suggestedAction(String taskId) {
+  return switch (taskId) {
+    'perfil-base' || 'foto-dados' => 'Peca os dados que faltam e explique por que isso melhora o acompanhamento.',
+    'medida-recente' => 'Convide o aluno a registrar medida ou envie um lembrete com prazo curto.',
+    'chat-contexto' => 'Abra conversa com uma pergunta objetiva para destravar o contexto.',
+    'agenda-semana' => 'Confirme o melhor horario e reduza atrito de agenda.',
+    'financeiro' => 'Oriente regularizacao antes de bloquear acesso.',
+    'treino-semana' => 'Confirme treino ativo e remova barreira para executar.',
+    _ => 'Abra a ficha e resolva o proximo passo com o aluno.',
+  };
 }
 
 class _CommandActionCard extends ConsumerWidget {

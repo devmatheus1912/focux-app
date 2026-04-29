@@ -387,7 +387,7 @@ class _AutonomiaAlunoCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Eventos recentes da Central do aluno.',
+                      'Mostra onde o aluno tenta agir sozinho e onde ainda trava.',
                       style: TextStyle(color: mute, fontSize: 12.5),
                     ),
                   ],
@@ -465,7 +465,7 @@ class _AutonomiaAlunoCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    'O aluno ainda nao interagiu com as tarefas de autonomia.',
+                    'Sem sinais ainda. Quando o aluno abrir, clicar ou concluir tarefas, o historico aparece aqui.',
                     style: TextStyle(color: mute, height: 1.4),
                   ),
                 );
@@ -606,6 +606,18 @@ class _AutonomiaBottleneck extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
+                const SizedBox(height: 5),
+                Text(
+                  _bottleneckHint(resumo.gargaloTaskId),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    height: 1.25,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 8,
@@ -627,6 +639,18 @@ class _AutonomiaBottleneck extends StatelessWidget {
       ),
     );
   }
+}
+
+String _bottleneckHint(String? taskId) {
+  return switch (taskId) {
+    'perfil-base' || 'foto-dados' => 'Bom ponto para pedir foto, contato ou dados corporais que estao faltando.',
+    'medida-recente' => 'Vale pedir uma medida recente para manter comparativos confiaveis.',
+    'treino-semana' => 'Verifique se existe treino ativo ou se o aluno precisa de ajuste.',
+    'chat-contexto' => 'Abra conversa com uma pergunta simples para reduzir dependencia.',
+    'agenda-semana' => 'Confirme agenda e proximos compromissos com o aluno.',
+    'financeiro' => 'Resolva pendencia financeira antes que vire bloqueio de acesso.',
+    _ => 'Abra a ficha e remova a barreira principal desse aluno.',
+  };
 }
 
 class _AutonomiaEventoTile extends StatelessWidget {

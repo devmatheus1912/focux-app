@@ -944,6 +944,19 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
                           height: 1.35,
                         ),
                       ),
+                      if (nextTask != null) ...[
+                        const SizedBox(height: 5),
+                        Text(
+                          nextTask.description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -1100,6 +1113,8 @@ class _AutonomyTaskTile extends StatelessWidget {
               children: [
                 Text(
                   task.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: ink,
                     fontSize: 13.5,
@@ -1109,11 +1124,28 @@ class _AutonomyTaskTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   task.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: mute,
                     fontSize: 12.5,
                     height: 1.4,
                   ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    _AutonomyTaskPill(
+                      label: _taskPriorityLabel(task.priority),
+                      color: _taskPriorityColor(task.priority, primary),
+                    ),
+                    _AutonomyTaskPill(
+                      label: task.done ? 'Sem acao agora' : _taskHint(task.kind),
+                      color: task.done ? EagleTokens.good : mute,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1143,6 +1175,63 @@ class _AutonomyTaskTile extends StatelessWidget {
       ),
     );
   }
+}
+
+class _AutonomyTaskPill extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _AutonomyTaskPill({
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+String _taskPriorityLabel(AlunoTaskPriority priority) {
+  return switch (priority) {
+    AlunoTaskPriority.alta => 'Prioridade alta',
+    AlunoTaskPriority.media => 'Prioridade media',
+    AlunoTaskPriority.baixa => 'Opcional',
+  };
+}
+
+Color _taskPriorityColor(AlunoTaskPriority priority, Color primary) {
+  return switch (priority) {
+    AlunoTaskPriority.alta => EagleTokens.warn,
+    AlunoTaskPriority.media => primary,
+    AlunoTaskPriority.baixa => const Color(0xFF64748B),
+  };
+}
+
+String _taskHint(AlunoTaskKind kind) {
+  return switch (kind) {
+    AlunoTaskKind.perfil => 'Atualize seus dados',
+    AlunoTaskKind.fotoDados => 'Foto e medidas',
+    AlunoTaskKind.medida => 'Registrar progresso',
+    AlunoTaskKind.treino => 'Mover treino',
+    AlunoTaskKind.chat => 'Chamar personal',
+    AlunoTaskKind.agenda => 'Conferir horario',
+    AlunoTaskKind.financeiro => 'Ver financeiro',
+  };
 }
 
 class _QuickActionStrip extends StatelessWidget {
