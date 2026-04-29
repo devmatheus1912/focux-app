@@ -906,68 +906,10 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
                   : BrandPalette.softer(primary),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: BrandPalette.soft(primary, dark: widget.isDark),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(_alunoTaskIcon(nextTask?.kind), color: primary),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        nextTask == null
-                            ? 'Tudo em dia'
-                            : 'Proximo melhor passo',
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        nextTask == null
-                            ? 'Sua rotina esta organizada. Continue acompanhando treino, medidas e agenda.'
-                            : nextTask.title,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w700,
-                          height: 1.35,
-                        ),
-                      ),
-                      if (nextTask != null) ...[
-                        const SizedBox(height: 5),
-                        Text(
-                          nextTask.description,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: mute,
-                            fontSize: 12,
-                            height: 1.3,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                if (nextTask != null) ...[
-                  const SizedBox(width: 12),
-                  FilledButton.tonal(
-                    onPressed: () => _openTask(nextTask),
-                    child: Text(nextTask.cta),
-                  ),
-                ],
-              ],
+            child: _NextBestTaskPanel(
+              task: nextTask,
+              isDark: widget.isDark,
+              onTap: nextTask == null ? null : () => _openTask(nextTask),
             ),
           ),
           const SizedBox(height: 14),
@@ -1041,6 +983,123 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
   }
 }
 
+class _NextBestTaskPanel extends StatelessWidget {
+  final AlunoAutonomyTask? task;
+  final bool isDark;
+  final VoidCallback? onTap;
+
+  const _NextBestTaskPanel({
+    required this.task,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final icon = Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+        color: BrandPalette.soft(primary, dark: isDark),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(_alunoTaskIcon(task?.kind), color: primary),
+    );
+    final copy = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          task == null ? 'Tudo em dia' : 'Proximo melhor passo',
+          style: TextStyle(
+            color: mute,
+            fontSize: 11.5,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          task == null
+              ? 'Sua rotina esta organizada. Continue acompanhando treino, medidas e agenda.'
+              : task!.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: ink,
+            fontSize: 13.5,
+            fontWeight: FontWeight.w700,
+            height: 1.35,
+          ),
+        ),
+        if (task != null) ...[
+          const SizedBox(height: 5),
+          Text(
+            task!.description,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: mute,
+              fontSize: 12,
+              height: 1.3,
+            ),
+          ),
+        ],
+      ],
+    );
+    final action = task == null
+        ? null
+        : FilledButton.tonal(
+            onPressed: onTap,
+            child: Text(
+              task!.cta,
+              overflow: TextOverflow.ellipsis,
+            ),
+          );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 390;
+        if (compact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  icon,
+                  const SizedBox(width: 12),
+                  Expanded(child: copy),
+                ],
+              ),
+              if (action != null) ...[
+                const SizedBox(height: 12),
+                SizedBox(width: double.infinity, child: action),
+              ],
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            icon,
+            const SizedBox(width: 12),
+            Expanded(child: copy),
+            if (action != null) ...[
+              const SizedBox(width: 12),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 144),
+                child: action,
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
 IconData _alunoTaskIcon(AlunoTaskKind? kind) {
   switch (kind) {
     case AlunoTaskKind.perfil:
@@ -1079,100 +1138,135 @@ class _AutonomyTaskTile extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
-    return Container(
-      padding: const EdgeInsets.all(14),
+    final icon = Container(
+      width: 38,
+      height: 38,
       decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkBg : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-        ),
+        color: task.done
+            ? EagleTokens.good.withValues(alpha: 0.14)
+            : BrandPalette.soft(primary, dark: isDark),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: task.done
-                  ? EagleTokens.good.withValues(alpha: 0.14)
-                  : BrandPalette.soft(primary, dark: isDark),
-              borderRadius: BorderRadius.circular(12),
+      child: Icon(
+        task.done ? Icons.check_rounded : _alunoTaskIcon(task.kind),
+        color: task.done ? EagleTokens.good : primary,
+        size: 20,
+      ),
+    );
+    final copy = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          task.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: ink,
+            fontSize: 13.5,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          task.description,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: mute,
+            fontSize: 12.5,
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 6,
+          runSpacing: 4,
+          children: [
+            _AutonomyTaskPill(
+              label: _taskPriorityLabel(task.priority),
+              color: _taskPriorityColor(task.priority, primary),
             ),
-            child: Icon(
-              task.done ? Icons.check_rounded : _alunoTaskIcon(task.kind),
-              color: task.done ? EagleTokens.good : primary,
-              size: 20,
+            _AutonomyTaskPill(
+              label: task.done ? 'Sem acao agora' : _taskHint(task.kind),
+              color: task.done ? EagleTokens.good : mute,
+            ),
+          ],
+        ),
+      ],
+    );
+    final action = task.done
+        ? Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: EagleTokens.good.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: const Text(
+              'Feito',
+              style: TextStyle(
+                color: EagleTokens.good,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          )
+        : TextButton(
+            onPressed: onTap,
+            child: Text(
+              task.cta,
+              overflow: TextOverflow.ellipsis,
+            ),
+          );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        return Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: isDark ? EagleTokens.darkBg : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  task.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 12.5,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
+          child: compact
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _AutonomyTaskPill(
-                      label: _taskPriorityLabel(task.priority),
-                      color: _taskPriorityColor(task.priority, primary),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        icon,
+                        const SizedBox(width: 12),
+                        Expanded(child: copy),
+                      ],
                     ),
-                    _AutonomyTaskPill(
-                      label: task.done ? 'Sem acao agora' : _taskHint(task.kind),
-                      color: task.done ? EagleTokens.good : mute,
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 180),
+                        child: action,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    icon,
+                    const SizedBox(width: 12),
+                    Expanded(child: copy),
+                    const SizedBox(width: 12),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 132),
+                      child: action,
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          task.done
-              ? Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: EagleTokens.good.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: const Text(
-                    'Feito',
-                    style: TextStyle(
-                      color: EagleTokens.good,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                )
-              : TextButton(
-                  onPressed: onTap,
-                  child: Text(task.cta),
-                ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
