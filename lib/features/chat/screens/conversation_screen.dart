@@ -24,6 +24,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/chat_repository.dart';
+import '../data/chat_text_formatter.dart';
 
 enum ConversationMode { personal, aluno }
 
@@ -77,6 +78,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   bool _recordingAudio = false;
   bool _composerHasText = false;
   bool _loadingOlder = false;
+  bool _loadFailed = false;
   bool _hasMoreMessages = false;
   int? _alunoId;
   int? _nextBeforeId;
@@ -150,13 +152,17 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           ..addAll(msgs);
         _nextBeforeId = page.nextBeforeId;
         _hasMoreMessages = page.hasMore;
+        _loadFailed = false;
         _loading = false;
       });
       await _markRead();
       _scrollToBottom(animated: false);
     } catch (_) {
       if (mounted) {
-        setState(() => _loading = false);
+        setState(() {
+          _loadFailed = true;
+          _loading = false;
+        });
       }
     }
   }
@@ -1502,9 +1508,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   String _previewText(ChatMsg msg) {
     if (msg.deletedAt != null) return 'Mensagem apagada';
-    if (msg.conteudo.trim().isNotEmpty &&
+    final displayText = formatChatTextForDisplay(msg.conteudo);
+    if (displayText.isNotEmpty &&
         !_isMediaLabelOnly(msg.primaryMediaType, msg.conteudo)) {
-      return msg.conteudo.trim();
+      return displayText;
     }
     if (msg.primaryMediaType == 'IMAGE') return 'Foto';
     if (msg.primaryMediaType == 'VIDEO') return 'Video';
@@ -1708,7 +1715,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       ),
       body: Stack(
         children: [
-          Positioned.fill(child: _ChatBackdrop(isDark: isDark)),
+          Positioned.fill(
+            child: _ChatBackdrop(isDark: isDark, accentColor: primary),
+          ),
           Column(
             children: [
               if (_uploading)
@@ -1746,9 +1755,22 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         ? Center(
                           child: CircularProgressIndicator(color: primary),
                         )
+                        : _loadFailed
+                        ? _ConversationErrorState(
+                          isDark: isDark,
+                          accentColor: primary,
+                          onRetry: () {
+                            setState(() {
+                              _loading = true;
+                              _loadFailed = false;
+                            });
+                            unawaited(_loadHistorico());
+                          },
+                        )
                         : _msgs.isEmpty
                         ? _EmptyConversation(
                           isDark: isDark,
+                          accentColor: primary,
                           title: 'Comece uma conversa',
                           subtitle:
                               'Fotos, videos, audios e ajustes do treino vao aparecer aqui em tempo real.',
@@ -1788,6 +1810,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                       msg: msg,
                                       mine: _isMine(msg),
                                       isDark: isDark,
+                                      accentColor: primary,
                                       highlighted:
                                           _highlightedMessageId == msg.id,
                                       replyLabelBuilder: _replySenderLabel,
@@ -2070,11 +2093,13 @@ class _AttachOption extends StatelessWidget {
 
 class _EmptyConversation extends StatelessWidget {
   final bool isDark;
+  final Color accentColor;
   final String title;
   final String subtitle;
 
   const _EmptyConversation({
     required this.isDark,
+    required this.accentColor,
     required this.title,
     required this.subtitle,
   });
@@ -2091,12 +2116,12 @@ class _EmptyConversation extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: EagleTokens.brand.withValues(alpha: 0.1),
+                color: accentColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.chat_bubble_outline,
-                color: EagleTokens.brand,
+                color: accentColor,
                 size: 28,
               ),
             ),
@@ -2115,6 +2140,66 @@ class _EmptyConversation extends StatelessWidget {
               style: TextStyle(
                 color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ConversationErrorState extends StatelessWidget {
+  final bool isDark;
+  final Color accentColor;
+  final VoidCallback onRetry;
+
+  const _ConversationErrorState({
+    required this.isDark,
+    required this.accentColor,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final muted = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.wifi_off_rounded,
+                color: accentColor,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Nao foi possivel carregar a conversa',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: ink, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Verifique a conexao e tente novamente.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: muted),
+            ),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Tentar novamente'),
+              style: FilledButton.styleFrom(backgroundColor: accentColor),
             ),
           ],
         ),
@@ -2337,8 +2422,9 @@ class _SwipeReplyWrapperState extends State<_SwipeReplyWrapper> {
 
 class _ChatBackdrop extends StatelessWidget {
   final bool isDark;
+  final Color accentColor;
 
-  const _ChatBackdrop({required this.isDark});
+  const _ChatBackdrop({required this.isDark, required this.accentColor});
 
   @override
   Widget build(BuildContext context) {
@@ -2362,7 +2448,10 @@ class _ChatBackdrop extends StatelessWidget {
         ),
       ),
       child: CustomPaint(
-        painter: _ChatBackdropPainter(isDark: isDark),
+        painter: _ChatBackdropPainter(
+          isDark: isDark,
+          accentColor: accentColor,
+        ),
         child: const SizedBox.expand(),
       ),
     );
@@ -2371,14 +2460,18 @@ class _ChatBackdrop extends StatelessWidget {
 
 class _ChatBackdropPainter extends CustomPainter {
   final bool isDark;
+  final Color accentColor;
 
-  const _ChatBackdropPainter({required this.isDark});
+  const _ChatBackdropPainter({
+    required this.isDark,
+    required this.accentColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final linePaint =
         Paint()
-          ..color = (isDark ? Colors.white : EagleTokens.brand).withValues(
+          ..color = (isDark ? Colors.white : accentColor).withValues(
             alpha: isDark ? 0.028 : 0.04,
           )
           ..strokeWidth = 1;
@@ -2393,7 +2486,8 @@ class _ChatBackdropPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ChatBackdropPainter oldDelegate) {
-    return oldDelegate.isDark != isDark;
+    return oldDelegate.isDark != isDark ||
+        oldDelegate.accentColor != accentColor;
   }
 }
 
@@ -2401,6 +2495,7 @@ class _Bubble extends StatelessWidget {
   final ChatMsg msg;
   final bool mine;
   final bool isDark;
+  final Color accentColor;
   final bool highlighted;
   final String Function(String remetente) replyLabelBuilder;
   final VoidCallback onLongPress;
@@ -2411,6 +2506,7 @@ class _Bubble extends StatelessWidget {
     required this.msg,
     required this.mine,
     required this.isDark,
+    required this.accentColor,
     required this.highlighted,
     required this.replyLabelBuilder,
     required this.onLongPress,
@@ -2427,6 +2523,7 @@ class _Bubble extends StatelessWidget {
             ? Colors.white.withValues(alpha: 0.75)
             : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute);
     final deleted = msg.deletedAt != null;
+    final displayText = formatChatTextForDisplay(msg.conteudo);
     final bubbleMaxWidth = (MediaQuery.sizeOf(context).width - 56).clamp(
       220.0,
       520.0,
@@ -2444,10 +2541,10 @@ class _Bubble extends StatelessWidget {
           decoration: BoxDecoration(
             gradient:
                 mine
-                    ? const LinearGradient(
+                    ? LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [EagleTokens.brand, EagleTokens.brandInk],
+                      colors: [accentColor, BrandPalette.deep(accentColor)],
                     )
                     : null,
             color:
@@ -2463,7 +2560,7 @@ class _Bubble extends StatelessWidget {
             border: Border.all(
               color:
                   highlighted
-                      ? EagleTokens.brand
+                      ? accentColor
                       : mine
                       ? Colors.transparent
                       : (isDark ? EagleTokens.darkLine : EagleTokens.lineSoft),
@@ -2473,7 +2570,7 @@ class _Bubble extends StatelessWidget {
                 highlighted
                     ? [
                       BoxShadow(
-                        color: EagleTokens.brand.withValues(alpha: 0.16),
+                        color: accentColor.withValues(alpha: 0.16),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -2487,6 +2584,7 @@ class _Bubble extends StatelessWidget {
                 _ReplySnippet(
                   mine: mine,
                   isDark: isDark,
+                  accentColor: accentColor,
                   sender: replyLabelBuilder(msg.replyToRemetente ?? ''),
                   preview:
                       msg.replyToConteudo?.trim().isNotEmpty == true
@@ -2511,10 +2609,10 @@ class _Bubble extends StatelessWidget {
                     fontStyle: FontStyle.italic,
                   ),
                 )
-              else if (msg.conteudo.isNotEmpty &&
+              else if (displayText.isNotEmpty &&
                   !_isMediaLabelOnly(msg.primaryMediaType, msg.conteudo))
                 Text(
-                  msg.conteudo,
+                  displayText,
                   style: TextStyle(
                     color: textColor,
                     fontSize: 15,
@@ -2538,7 +2636,7 @@ class _Bubble extends StatelessWidget {
                               reaction.mine
                                   ? (mine
                                       ? Colors.white.withValues(alpha: 0.18)
-                                      : EagleTokens.brand.withValues(
+                                      : accentColor.withValues(
                                         alpha: 0.12,
                                       ))
                                   : (mine
@@ -2550,7 +2648,7 @@ class _Bubble extends StatelessWidget {
                           border: Border.all(
                             color:
                                 reaction.mine
-                                    ? EagleTokens.brand.withValues(alpha: 0.5)
+                                    ? accentColor.withValues(alpha: 0.5)
                                     : Colors.transparent,
                           ),
                         ),
@@ -2611,6 +2709,7 @@ class _Bubble extends StatelessWidget {
 class _ReplySnippet extends StatelessWidget {
   final bool mine;
   final bool isDark;
+  final Color accentColor;
   final String sender;
   final String preview;
   final VoidCallback? onTap;
@@ -2618,6 +2717,7 @@ class _ReplySnippet extends StatelessWidget {
   const _ReplySnippet({
     required this.mine,
     required this.isDark,
+    required this.accentColor,
     required this.sender,
     required this.preview,
     required this.onTap,
@@ -2638,7 +2738,7 @@ class _ReplySnippet extends StatelessWidget {
           color:
               mine
                   ? Colors.white.withValues(alpha: 0.14)
-                  : EagleTokens.brand.withValues(alpha: 0.08),
+                  : accentColor.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
@@ -2684,6 +2784,7 @@ class _ReplyComposerBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accentColor = Theme.of(context).colorScheme.primary;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
@@ -2698,7 +2799,7 @@ class _ReplyComposerBar extends StatelessWidget {
             width: 3,
             height: 32,
             decoration: BoxDecoration(
-              color: EagleTokens.brand,
+              color: accentColor,
               borderRadius: BorderRadius.circular(999),
             ),
           ),
@@ -2709,8 +2810,8 @@ class _ReplyComposerBar extends StatelessWidget {
               children: [
                 Text(
                   sender,
-                  style: const TextStyle(
-                    color: EagleTokens.brand,
+                  style: TextStyle(
+                    color: accentColor,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),
