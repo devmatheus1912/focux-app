@@ -37,6 +37,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0,
@@ -60,10 +61,10 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                         border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Row(children: [
-                          CircleAvatar(radius: 18, backgroundColor: EagleTokens.brandSoft,
+                          CircleAvatar(radius: 18, backgroundColor: primary.withValues(alpha: 0.12),
                             backgroundImage: d.fotoAluno != null ? NetworkImage(d.fotoAluno!) : null,
                             child: d.fotoAluno == null ? Text(d.nomeAluno.isNotEmpty ? d.nomeAluno[0].toUpperCase() : 'A',
-                              style: TextStyle(color: EagleTokens.brand, fontWeight: FontWeight.w700)) : null),
+                              style: TextStyle(color: primary, fontWeight: FontWeight.w700)) : null),
                           const SizedBox(width: 10),
                           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Text(d.nomeAluno, style: TextStyle(fontWeight: FontWeight.w600,

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -236,6 +237,8 @@ class _IdentidadeVisualScreenState
     final plano = perfil?.plano ?? 'FREE';
     final isEnterprise = plano.toUpperCase() == 'ENTERPRISE';
     final isPremiumOrAbove = ['PREMIUM', 'ENTERPRISE'].contains(plano.toUpperCase());
+    final themePrimary = Theme.of(context).colorScheme.primary;
+    final themePrimarySoft = BrandPalette.soft(themePrimary, dark: isDark);
 
     final slug = perfil?.slug;
     final nomePersonal = perfil?.nome ?? '';
@@ -518,7 +521,7 @@ class _IdentidadeVisualScreenState
                             radius: 48,
                             backgroundColor: isDark
                                 ? EagleTokens.darkCard
-                                : EagleTokens.brandSoft,
+                                : themePrimarySoft,
                             backgroundImage: _logoUrl != null
                                 ? NetworkImage(_logoUrl!)
                                 : null,
@@ -532,7 +535,7 @@ class _IdentidadeVisualScreenState
                                       fontWeight: FontWeight.w700,
                                       color: isDark
                                           ? EagleTokens.darkInk
-                                          : EagleTokens.brand,
+                                          : themePrimary,
                                     ),
                                   )
                                 : null,
@@ -543,7 +546,7 @@ class _IdentidadeVisualScreenState
                               width: 30,
                               height: 30,
                               decoration: BoxDecoration(
-                                color: EagleTokens.brand,
+                                color: isEnterprise ? _corPrimaria : themePrimary,
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                     color: isDark
@@ -736,20 +739,21 @@ class _PaywallCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark ? EagleTokens.darkCard : EagleTokens.card,
         borderRadius: BorderRadius.circular(14),
         border:
-            Border.all(color: EagleTokens.brand.withValues(alpha: 0.4)),
+            Border.all(color: primary.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: EagleTokens.brand, size: 20),
+              Icon(icon, color: primary, size: 20),
               const SizedBox(width: 8),
               Text(title,
                   style: const TextStyle(

@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/data/dashboard_repository.dart';
@@ -149,16 +150,17 @@ class _PerfilBody extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final themePrimary = theme.colorScheme.primary;
 
     final primaryColor = _parseColor(
       perfil.corPrimaria ?? dashboard.corPrimaria,
-      fallback: EagleTokens.brand,
+      fallback: themePrimary,
     );
     final secondaryColor = _parseColor(
       perfil.corSecundaria ?? dashboard.corSecundaria,
-      fallback: EagleTokens.brandDeep,
+      fallback: BrandPalette.deep(themePrimary),
     );
-    final accent = isDark ? EagleTokens.brandAccent : primaryColor;
+    final accent = primaryColor;
 
     final stats = [
       ('Alunos', dashboard.totalAlunos.toString()),
@@ -642,7 +644,7 @@ class _CardSection extends StatelessWidget {
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final accent = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
+    final accent = Theme.of(context).colorScheme.primary;
 
     return Container(
       decoration: BoxDecoration(
@@ -780,8 +782,8 @@ class _InfoTile extends StatelessWidget {
           _LeadingIcon(
             icon: icon,
             background: isDark
-                ? EagleTokens.brandAccent.withValues(alpha: 0.14)
-                : EagleTokens.brandSoft,
+                ? accent.withValues(alpha: 0.14)
+                : BrandPalette.soft(accent),
             color: accent,
           ),
           const SizedBox(width: 12),

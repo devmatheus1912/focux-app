@@ -253,6 +253,7 @@ class _StatsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (stats == null) return const Center(child: Text('Sem dados'));
     final s = stats!;
+    final primary = Theme.of(context).colorScheme.primary;
     final plataformaSaudavel = true; // sem campo tickets na AdminStats — exibe positivo por padrão
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -280,7 +281,7 @@ class _StatsTab extends StatelessWidget {
                 label: 'Total Personais',
                 value: '${s.totalPersonais}',
                 icon: Icons.people,
-                color: const Color(0xFF2B4A9E),
+                color: primary,
               ),
               _MetricCard(
                 label: 'Total Alunos',
@@ -398,6 +399,7 @@ class _MonitorTab extends StatelessWidget {
     if (monitor == null) return const Center(child: Text('Sem dados de monitoramento.'));
 
     final m = monitor!;
+    final primary = Theme.of(context).colorScheme.primary;
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
@@ -408,7 +410,7 @@ class _MonitorTab extends StatelessWidget {
               children: [
                 _SummaryChip(
                   label: '${m.ticketsAbertos} Abertos',
-                  color: EagleTokens.brand,
+                  color: primary,
                 ),
                 _SummaryChip(
                   label: '${m.ticketsCriticos} Críticos',
@@ -905,11 +907,11 @@ class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
     } catch (e) { debugPrint('[Focux] Error: $e'); return iso; }
   }
 
-  Color _acaoColor(String acao) {
+  Color _acaoColor(String acao, Color fallback) {
     if (acao.contains('DELETE') || acao.contains('EXCLUIR')) return EagleTokens.bad;
     if (acao.contains('CREATE') || acao.contains('CRIAR')) return EagleTokens.good;
     if (acao.contains('UPDATE') || acao.contains('EDITAR')) return EagleTokens.warn;
-    return EagleTokens.brand;
+    return fallback;
   }
 
   @override
@@ -952,7 +954,7 @@ class _AuditoriaTabState extends ConsumerState<_AuditoriaTab>
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (ctx, i) {
           final log = _logs[i];
-          final cor = _acaoColor(log.acao);
+          final cor = _acaoColor(log.acao, Theme.of(context).colorScheme.primary);
           return Card(
             child: ListTile(
               leading: CircleAvatar(

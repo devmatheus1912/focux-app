@@ -59,6 +59,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -172,10 +173,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           child: ElevatedButton(
                             onPressed: _next,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: EagleTokens.brand,
+                              backgroundColor: primary,
                               foregroundColor: Colors.white,
                               elevation: 0,
-                              shadowColor: const Color(0xFF3B5FE2).withValues(alpha: 0.6),
+                              shadowColor: primary.withValues(alpha: 0.6),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                             ),
                             child: Row(
@@ -202,10 +203,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               ),
                               children: [
                                 const TextSpan(text: 'Já tenho uma conta · '),
-                                const TextSpan(
+                                TextSpan(
                                   text: 'Entrar',
                                   style: TextStyle(
-                                    color: EagleTokens.brandAccent,
+                                    color: primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),

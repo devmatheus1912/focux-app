@@ -44,7 +44,14 @@ void main() {
           path.contains('/analytics/') ||
           path.contains('/assinatura/') ||
           path.contains('/subscription/') ||
-          path.contains('/exercicios/');
+          path.contains('/exercicios/') ||
+          path.contains('/admin/') ||
+          path.contains('/perfil/') ||
+          path.contains('/growth/') ||
+          path.contains('/landing/') ||
+          path.contains('/depoimentos/') ||
+          path.contains('/planos/') ||
+          path.contains('/onboarding/');
     }).where((file) => file.path.endsWith('.dart'));
 
     for (final file in files) {

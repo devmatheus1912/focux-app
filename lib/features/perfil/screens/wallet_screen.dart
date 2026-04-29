@@ -271,6 +271,7 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
   Widget build(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_resumo == null) return const SizedBox.shrink();
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Card(
       child: Padding(
@@ -284,7 +285,7 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _Stat(label: 'Recebido', valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}', color: EagleTokens.good),
-                _Stat(label: 'Previsto', valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}', color: EagleTokens.brand),
+                _Stat(label: 'Previsto', valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}', color: primary),
                 _Stat(label: 'Inadimplentes', valor: '${_resumo!.inadimplentes}', color: EagleTokens.bad),
               ],
             ),

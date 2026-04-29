@@ -50,6 +50,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
   @override
   Widget build(BuildContext context) {
     final permissoesAsync = ref.watch(permissoesProvider);
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -92,10 +93,10 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: p.nivelAcesso == 'ADMIN' ? EagleTokens.bad.withValues(alpha: 0.1) : EagleTokens.brand.withValues(alpha: 0.1),
+                    backgroundColor: p.nivelAcesso == 'ADMIN' ? EagleTokens.bad.withValues(alpha: 0.1) : primary.withValues(alpha: 0.1),
                     child: Icon(
                       p.nivelAcesso == 'ADMIN' ? Icons.security : Icons.vpn_key,
-                      color: p.nivelAcesso == 'ADMIN' ? EagleTokens.bad : EagleTokens.brand,
+                      color: p.nivelAcesso == 'ADMIN' ? EagleTokens.bad : primary,
                     ),
                   ),
                   title: Text('Recurso: ${p.recurso}', style: const TextStyle(fontWeight: FontWeight.bold)),

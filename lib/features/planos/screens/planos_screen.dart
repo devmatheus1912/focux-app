@@ -54,6 +54,7 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
     final trialUsed   = perfil?.trialUsed ?? false;
     final trialEndsAt = perfil?.trialEndsAt;
     final trialAtivo  = trialEndsAt != null && trialEndsAt.isAfter(DateTime.now());
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: bg,
@@ -114,7 +115,7 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
               isDark: isDark,
               name: 'PREMIUM',
               price: 'R\$ 79,00/mês',
-              accentColor: EagleTokens.brand,
+              accentColor: primary,
               isCurrent: currentPlan == SubscriptionPlan.PREMIUM,
               badge: !trialUsed && currentPlan == SubscriptionPlan.FREE
                   ? _PlanBadge(label: '7 dias grátis', color: EagleTokens.good)
@@ -556,7 +557,7 @@ class _PrimaryButton extends StatelessWidget {
       child: FilledButton(
         onPressed: onTap,
         style: FilledButton.styleFrom(
-          backgroundColor: EagleTokens.brand,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 14),
           disabledBackgroundColor: EagleTokens.darkCardHi,

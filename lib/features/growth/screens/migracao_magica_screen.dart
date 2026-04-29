@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
@@ -131,7 +132,10 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final brand = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
+    final brand = Theme.of(context).colorScheme.primary;
+    final brandDeep = BrandPalette.deep(brand);
+    final brandSoft = BrandPalette.soft(brand, dark: isDark);
+    final brandSofter = BrandPalette.softer(brand, dark: isDark);
 
     return Scaffold(
       backgroundColor: bg,
@@ -156,7 +160,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       Container(
                         width: 32, height: 32,
                         decoration: BoxDecoration(
-                          color: isDark ? Colors.white.withValues(alpha: 0.15) : EagleTokens.brandSoft,
+                          color: isDark ? Colors.white.withValues(alpha: 0.15) : brandSoft,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         alignment: Alignment.center,
@@ -181,7 +185,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
-                  gradient: isDark ? const LinearGradient(colors: [Color(0xFF1A2852), Color(0xFF0A0F1E)]) : LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandDeep]),
+                  gradient: isDark ? LinearGradient(colors: [brandDeep, const Color(0xFF0A0F1E)]) : LinearGradient(colors: [brand, brandDeep]),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,9 +233,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withValues(alpha: 0.04) : EagleTokens.brandSofter,
+                        color: isDark ? Colors.white.withValues(alpha: 0.04) : brandSofter,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.brand.withValues(alpha: 0.12)),
+                        border: Border.all(color: isDark ? EagleTokens.darkLine : brand.withValues(alpha: 0.12)),
                       ),
                       child: TextField(
                         controller: _controller,
@@ -304,7 +308,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         children: [
                           Container(
                             width: 42, height: 42,
-                            decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
+                            decoration: BoxDecoration(color: isDark ? brandDeep : brand, shape: BoxShape.circle),
                             alignment: Alignment.center,
                             child: Text(nome.toString().isNotEmpty ? nome.toString()[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                           ),

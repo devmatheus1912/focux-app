@@ -110,6 +110,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = primary.withValues(alpha: 0.12);
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -133,7 +135,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                     children: [
                       CircleAvatar(
                         radius: 52,
-                        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.brandSoft,
+                        backgroundColor: isDark ? EagleTokens.darkCard : primarySoft,
                         backgroundImage: _logoUrl != null ? NetworkImage(_logoUrl!) : null,
                         child: _logoUrl == null
                             ? Text(
@@ -143,7 +145,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                 style: TextStyle(
                                   fontSize: 36,
                                   fontWeight: FontWeight.w700,
-                                  color: isDark ? EagleTokens.darkInk : EagleTokens.brand,
+                                  color: isDark ? EagleTokens.darkInk : primary,
                                 ),
                               )
                             : null,
@@ -154,7 +156,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: EagleTokens.brand,
+                            color: primary,
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: isDark ? EagleTokens.darkBg : EagleTokens.paper,

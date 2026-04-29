@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../perfil/providers/perfil_provider.dart';
 
@@ -34,7 +35,7 @@ class LandingPageConfigScreen extends ConsumerWidget {
         data: (perfil) {
           final brand = _hexToColor(
             perfil.corPrimaria,
-            dark ? EagleTokens.brandAccent : EagleTokens.brand,
+            Theme.of(context).colorScheme.primary,
           );
           final slug = perfil.slug ?? 'seu-perfil';
           final publicUrl = 'https://focux.app/p/$slug';
@@ -123,7 +124,7 @@ class LandingPageConfigScreen extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: dark ? const Color(0x14182640) : EagleTokens.brandSofter,
+                      color: dark ? const Color(0x14182640) : BrandPalette.softer(brand),
                       borderRadius: BorderRadius.circular(22),
                       border: Border.all(
                         color: brand.withValues(alpha: 0.26),

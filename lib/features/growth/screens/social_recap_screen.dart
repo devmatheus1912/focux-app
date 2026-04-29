@@ -7,6 +7,7 @@ class SocialRecapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     // In a real app, fetch from GET /api/v1/social/recap/{alunoId}
     return Scaffold(
       backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -84,7 +85,7 @@ class SocialRecapScreen extends StatelessWidget {
               icon: const Icon(Icons.share, color: Colors.white),
               label: const Text('Compartilhar no Instagram', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: EagleTokens.brand,
+                backgroundColor: primary,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
