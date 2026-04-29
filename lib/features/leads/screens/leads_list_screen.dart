@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -15,13 +16,13 @@ const _statusLabels = {
   'CANCELADO': 'Cancelado',
 };
 
-const _statusColors = {
-  'LEAD': EagleTokens.brand,
-  'TESTE': EagleTokens.warn,
-  'ATIVO': EagleTokens.good,
-  'INADIMPLENTE': EagleTokens.bad,
-  'CANCELADO': EagleTokens.inkMute,
-};
+Color _statusColor(String status, Color fallback) {
+  if (status == 'LEAD') return fallback;
+  if (status == 'TESTE') return EagleTokens.warn;
+  if (status == 'ATIVO') return EagleTokens.good;
+  if (status == 'INADIMPLENTE') return EagleTokens.bad;
+  return EagleTokens.inkMute;
+}
 
 class LeadsListScreen extends ConsumerStatefulWidget {
   const LeadsListScreen({super.key});
@@ -55,6 +56,9 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
+    final primaryDeep = BrandPalette.deep(primary);
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
@@ -76,9 +80,9 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+          gradient: LinearGradient(colors: [primary, primaryDeep]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [BoxShadow(color: primary.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
         ),
         child: FloatingActionButton.extended(
           onPressed: () async {
@@ -97,9 +101,9 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
           margin: const EdgeInsets.fromLTRB(12, 12, 12, 4),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: EagleTokens.brand.withValues(alpha: isDark ? 0.14 : 0.08),
+            color: primarySoft,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: EagleTokens.brand.withValues(alpha: 0.18)),
+            border: Border.all(color: primary.withValues(alpha: 0.18)),
           ),
           child: Text(
             'Funil de Vendas: qualifique contatos, acompanhe testes e converta alunos.',
@@ -116,10 +120,10 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
         ),
         Expanded(
           child: _loading
-              ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
+              ? Center(child: CircularProgressIndicator(color: primary))
               : _leads.isEmpty
                   ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      Container(width: 56, height: 56, decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), shape: BoxShape.circle), child: const Icon(Icons.person_search, color: EagleTokens.brand, size: 28)),
+                      Container(width: 56, height: 56, decoration: BoxDecoration(color: primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(Icons.person_search, color: primary, size: 28)),
                       const SizedBox(height: 12),
                       Text(_filtroStatus != null ? 'Nenhum lead "${_statusLabels[_filtroStatus]}"' : 'Nenhum lead cadastrado', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 14)),
                     ]))
@@ -163,7 +167,7 @@ class _FiltroBar extends StatelessWidget {
         child: FilterChip(
           label: Text(e.value),
           selected: selecionado == e.key,
-          selectedColor: (_statusColors[e.key] ?? EagleTokens.inkMute).withValues(alpha: 0.2),
+          selectedColor: _statusColor(e.key, Theme.of(context).colorScheme.primary).withValues(alpha: 0.2),
           onSelected: (_) => onChanged(selecionado == e.key ? null : e.key),
         ),
       )),
@@ -178,7 +182,7 @@ class _LeadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColors[lead.status] ?? EagleTokens.inkMute;
+    final color = _statusColor(lead.status, Theme.of(context).colorScheme.primary);
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(

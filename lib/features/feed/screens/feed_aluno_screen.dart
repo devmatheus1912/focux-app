@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -78,6 +79,8 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary);
     return Scaffold(
       backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
@@ -102,7 +105,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                         margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: p.fixado ? const BorderSide(color: EagleTokens.brand, width: 2) : BorderSide.none,
+                          side: p.fixado ? BorderSide(color: primary, width: 2) : BorderSide.none,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -112,7 +115,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                               Row(
                                 children: [
                                   if (p.fixado) ...[
-                                    const Icon(Icons.push_pin, color: EagleTokens.brand, size: 18),
+                                    Icon(Icons.push_pin, color: primary, size: 18),
                                     const SizedBox(width: 8),
                                   ],
                                   Icon(_getIconForTipo(p.tipoPost), size: 20, color: const Color(0xFF374151)),
@@ -130,12 +133,12 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: EagleTokens.brand.withValues(alpha: 0.1),
+                                    color: primarySoft,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
                                     p.tipoPost!,
-                                    style: const TextStyle(fontSize: 10, color: EagleTokens.brand, fontWeight: FontWeight.bold),
+                                    style: TextStyle(fontSize: 10, color: primary, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
@@ -308,7 +311,7 @@ class _ComentariosBottomSheetState extends State<_ComentariosBottomSheet> {
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: _enviar,
-                  icon: const Icon(Icons.send, color: EagleTokens.brand),
+                  icon: Icon(Icons.send, color: Theme.of(context).colorScheme.primary),
                 ),
               ],
             ),

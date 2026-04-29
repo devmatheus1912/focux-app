@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -54,6 +55,9 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
 
     final d = _data!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
+    final primaryDeep = BrandPalette.deep(primary);
     
     return RefreshIndicator(
       onRefresh: _load,
@@ -78,7 +82,7 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Vencimentos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.darkInk : EagleTokens.ink, letterSpacing: -0.2)),
-                  Text('Cobrar todos →', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.brandAccent : EagleTokens.brand)),
+                  Text('Cobrar todos →', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: primary)),
                 ],
               ),
             ),
@@ -119,16 +123,16 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
                           Container(
                             width: 26, height: 26,
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.white.withValues(alpha: 0.15) : EagleTokens.brandSoft,
+                              color: isDark ? primary.withValues(alpha: 0.18) : primarySoft,
                               shape: BoxShape.circle,
                             ),
                             alignment: Alignment.center,
-                            child: Text('$rank', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isDark ? EagleTokens.brandAccent : EagleTokens.brand)),
+                            child: Text('$rank', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primary)),
                           ),
                           const SizedBox(width: 10),
                           Container(
                             width: 32, height: 32,
-                            decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
+                            decoration: BoxDecoration(color: isDark ? primaryDeep : primary, shape: BoxShape.circle),
                             alignment: Alignment.center,
                             child: Text(t.alunoNome.isNotEmpty ? t.alunoNome[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
                           ),
@@ -162,6 +166,8 @@ class _HeroRing extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     
     final perc = data.previsaoReceita > 0 ? (data.receitaMes / data.previsaoReceita) : 0.0;
     
@@ -187,7 +193,7 @@ class _HeroRing extends StatelessWidget {
                     child: CircularProgressIndicator(
                       value: 1.0,
                       strokeWidth: 8,
-                      color: isDark ? Colors.white.withValues(alpha: 0.08) : EagleTokens.brandSoft,
+                      color: isDark ? Colors.white.withValues(alpha: 0.08) : primarySoft,
                     ),
                   ),
                   SizedBox(
@@ -196,7 +202,7 @@ class _HeroRing extends StatelessWidget {
                       value: perc.clamp(0.0, 1.0),
                       strokeWidth: 8,
                       strokeCap: StrokeCap.round,
-                      color: isDark ? EagleTokens.brandAccent : EagleTokens.brand,
+                      color: primary,
                     ),
                   ),
                   Column(
@@ -331,6 +337,10 @@ class _EvolucaoChart extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
+    final primaryDeep = BrandPalette.deep(primary);
+    final primaryAccent = BrandPalette.accent(primary);
     
     final maxV = items.map((e) => e.recebido).reduce(math.max);
     final chartMax = maxV <= 0 ? 100.0 : maxV;
@@ -395,10 +405,10 @@ class _EvolucaoChart extends StatelessWidget {
                                   gradient: isLast
                                       ? LinearGradient(
                                           begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                                          colors: isDark ? [EagleTokens.brandAccent, EagleTokens.brand] : [EagleTokens.brand, EagleTokens.brandDeep],
+                                          colors: isDark ? [primaryAccent, primary] : [primary, primaryDeep],
                                         )
                                       : null,
-                                  color: !isLast ? (isDark ? Colors.white.withValues(alpha: 0.08) : EagleTokens.brandSoft) : null,
+                                  color: !isLast ? (isDark ? Colors.white.withValues(alpha: 0.08) : primarySoft) : null,
                                 ),
                               ),
                             ),
@@ -430,6 +440,9 @@ class _VencimentoRow extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
+    final primaryDeep = BrandPalette.deep(primary);
     
     final isAtrasado = item.status == 'ATRASADO';
     final color = isAtrasado ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad) : (isDark ? const Color(0xFFE2B46F) : EagleTokens.warn);
@@ -446,7 +459,7 @@ class _VencimentoRow extends StatelessWidget {
         children: [
           Container(
             width: 38, height: 38,
-            decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
+            decoration: BoxDecoration(color: isDark ? primaryDeep : primary, shape: BoxShape.circle),
             alignment: Alignment.center,
             child: Text(item.alunoNome.isNotEmpty ? item.alunoNome[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
           ),
@@ -476,10 +489,10 @@ class _VencimentoRow extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.1) : EagleTokens.brandSoft,
+                  color: isDark ? Colors.white.withValues(alpha: 0.1) : primarySoft,
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Text('Cobrar', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.brandAccent : EagleTokens.brand)),
+                child: Text('Cobrar', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: primary)),
               ),
             ],
           ),

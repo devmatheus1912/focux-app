@@ -50,6 +50,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
 
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
@@ -114,8 +115,8 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
             ),
             TabBar(
               controller: _tabController,
-              indicatorColor: EagleTokens.brand,
-              labelColor: EagleTokens.brand,
+              indicatorColor: primary,
+              labelColor: primary,
               unselectedLabelColor: mute,
               indicatorWeight: 2.5,
               dividerColor: Colors.transparent,
@@ -667,7 +668,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                   onPressed: () => _registrarContato(m),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.pix, color: EagleTokens.brand),
+                                  icon: Icon(Icons.pix, color: Theme.of(context).colorScheme.primary),
                                   onPressed: () => _mostrarPix(m.id),
                                   tooltip: 'Gerar PIX',
                                 ),

@@ -131,7 +131,7 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
                                 titulo: 'Total previsto',
                                 valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}',
                                 icone: Icons.trending_up,
-                                cor: EagleTokens.brand,
+                                cor: cs.primary,
                               ),
                               _ResumoCard(
                                 titulo: 'Inadimplentes',

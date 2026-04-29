@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -85,12 +86,12 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
     }
   }
 
-  Color _colColor(String status, bool isDark) {
+  Color _colColor(String status, bool isDark, Color fallback) {
     if (status == 'TESTE') return isDark ? const Color(0xFFE2B46F) : EagleTokens.warn;
     if (status == 'ATIVO') return isDark ? const Color(0xFF6FE296) : EagleTokens.good;
     if (status == 'INADIMPLENTE') return EagleTokens.bad;
     if (status == 'CANCELADO') return isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    return isDark ? EagleTokens.brandAccent : EagleTokens.brand; // LEAD
+    return fallback; // LEAD
   }
 
   Future<void> _novoLeadRapido() async {
@@ -144,7 +145,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final brand = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
+    final brand = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: bg,
@@ -234,7 +235,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Row(
                   children: _kCols.where((c) => c != 'CANCELADO' && c != 'INADIMPLENTE').map((col) {
-                    final cColor = _colColor(col, isDark);
+                    final cColor = _colColor(col, isDark, brand);
                     return Expanded(
                       child: Container(
                         margin: EdgeInsets.only(right: col == 'ATIVO' ? 0 : 8),
@@ -265,7 +266,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: _kCols.map((col) {
-                      final cColor = _colColor(col, isDark);
+                      final cColor = _colColor(col, isDark, brand);
                       final leads = _cols[col] ?? [];
                       
                       return DragTarget<Lead>(
@@ -365,7 +366,9 @@ class _LeadCard extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final brand = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
+    final brand = Theme.of(context).colorScheme.primary;
+    final brandSoft = BrandPalette.soft(brand, dark: isDark);
+    final brandDeep = BrandPalette.deep(brand);
 
     // Simulate tag/origem/tempo since the API model doesn't strictly have them all
     final tag = lead.status == 'LEAD' ? 'novo' : (lead.status == 'TESTE' ? 'urgente' : null);
@@ -390,7 +393,7 @@ class _LeadCard extends StatelessWidget {
             children: [
               Container(
                 width: 32, height: 32,
-                decoration: BoxDecoration(color: isDark ? EagleTokens.brandDeep : EagleTokens.brand, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: isDark ? brandDeep : brand, shape: BoxShape.circle),
                 alignment: Alignment.center,
                 child: Text(lead.nome.isNotEmpty ? lead.nome[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
               ),
@@ -419,7 +422,7 @@ class _LeadCard extends StatelessWidget {
                 child: Container(
                   height: 30,
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.brandSoft,
+                    color: isDark ? Colors.white.withValues(alpha: 0.05) : brandSoft,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   alignment: Alignment.center,

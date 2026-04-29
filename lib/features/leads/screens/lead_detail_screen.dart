@@ -14,13 +14,13 @@ const _statusLabels = {
   'INADIMPLENTE': 'Inadimplente',
   'CANCELADO': 'Cancelado',
 };
-const _statusColors = {
-  'LEAD': EagleTokens.brand,
-  'TESTE': EagleTokens.warn,
-  'ATIVO': EagleTokens.good,
-  'INADIMPLENTE': EagleTokens.bad,
-  'CANCELADO': EagleTokens.inkMute,
-};
+Color _statusColor(String status, Color fallback) {
+  if (status == 'LEAD') return fallback;
+  if (status == 'TESTE') return EagleTokens.warn;
+  if (status == 'ATIVO') return EagleTokens.good;
+  if (status == 'INADIMPLENTE') return EagleTokens.bad;
+  return EagleTokens.inkMute;
+}
 
 const _tiposInteracao = ['WHATSAPP', 'LIGACAO', 'EMAIL', 'PRESENCIAL', 'OUTRO'];
 const _tipoIcons = {
@@ -269,7 +269,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColors[_lead.status] ?? EagleTokens.inkMute;
+    final color = _statusColor(_lead.status, Theme.of(context).colorScheme.primary);
     final podeConverter =
         _lead.status != 'CONVERTIDO' && _lead.status != 'ATIVO';
 
@@ -291,7 +291,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                       value: s,
                       child: Row(children: [
                         Icon(Icons.circle, size: 10,
-                            color: _statusColors[s] ?? EagleTokens.inkMute),
+                            color: _statusColor(s, Theme.of(context).colorScheme.primary)),
                         const SizedBox(width: 8),
                         Text(_statusLabels[s] ?? s),
                       ]),

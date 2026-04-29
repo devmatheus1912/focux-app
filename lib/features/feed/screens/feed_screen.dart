@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -212,6 +213,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
+    final primaryDeep = BrandPalette.deep(primary);
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
@@ -222,9 +226,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [EagleTokens.brand, EagleTokens.brandInk]),
+          gradient: LinearGradient(colors: [primary, primaryDeep]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: EagleTokens.brand.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [BoxShadow(color: primary.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
         ),
         child: FloatingActionButton(
           onPressed: _abrirFormulario,
@@ -235,17 +239,17 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: EagleTokens.brand))
+          ? Center(child: CircularProgressIndicator(color: primary))
           : _posts.isEmpty
               ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Container(width: 64, height: 64, decoration: BoxDecoration(color: EagleTokens.brand.withValues(alpha: 0.1), shape: BoxShape.circle), child: const Icon(Icons.article_outlined, color: EagleTokens.brand, size: 28)),
+                  Container(width: 64, height: 64, decoration: BoxDecoration(color: primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(Icons.article_outlined, color: primary, size: 28)),
                   const SizedBox(height: 14),
                   Text('Nenhuma publicação', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 17, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 6),
                   Text('Crie a primeira publicação!', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 14)),
                 ]))
               : RefreshIndicator(
-                  color: EagleTokens.brand,
+                  color: primary,
                   onRefresh: _load,
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
@@ -257,7 +261,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                         margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: p.fixado ? const BorderSide(color: EagleTokens.brand, width: 2) : BorderSide.none,
+                          side: p.fixado ? BorderSide(color: primary, width: 2) : BorderSide.none,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -267,7 +271,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               Row(
                                 children: [
                                   if (p.fixado) ...[
-                                    const Icon(Icons.push_pin, color: EagleTokens.brand, size: 18),
+                                    Icon(Icons.push_pin, color: primary, size: 18),
                                     const SizedBox(width: 8),
                                   ],
                                   Icon(_getIconForTipo(p.tipoPost), size: 20, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
@@ -324,12 +328,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: EagleTokens.brand.withValues(alpha: 0.1),
+                                    color: primarySoft,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
                                     p.tipoPost!,
-                                    style: const TextStyle(fontSize: 10, color: EagleTokens.brand, fontWeight: FontWeight.bold),
+                                    style: TextStyle(fontSize: 10, color: primary, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
