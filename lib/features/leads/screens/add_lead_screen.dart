@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 
@@ -41,7 +42,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
         objetivo: _objetivo.text.trim(),
         observacoes: _observacoes.text.trim(),
       );
-      if (mounted) Navigator.pop(context);
+      if (mounted) safePopOrGo(context, '/leads');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -53,7 +54,13 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Novo Lead')),
+    appBar: AppBar(
+      title: const Text('Novo Lead'),
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => safePopOrGo(context, '/leads'),
+      ),
+    ),
     body: SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Form(

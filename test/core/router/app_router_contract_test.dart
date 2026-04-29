@@ -67,4 +67,26 @@ void main() {
     expect(copilot, contains('safePopOr(context, () => goToRoleHome(context, ref))'));
     expect(chat, contains("_isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal'"));
   });
+
+  test('operational screens use safe fallback navigation', () {
+    final agenda = File('lib/features/agenda/screens/agenda_screen.dart').readAsStringSync();
+    final alertas = File('lib/features/alertas/screens/alertas_screen.dart').readAsStringSync();
+    final financeiro = File('lib/features/financeiro/screens/financeiro_screen.dart').readAsStringSync();
+    final leadsKanban = File('lib/features/leads/screens/leads_kanban_screen.dart').readAsStringSync();
+    final leadDetail = File('lib/features/leads/screens/lead_detail_screen.dart').readAsStringSync();
+    final assinatura = File('lib/features/assinatura/screens/assinatura_screen.dart').readAsStringSync();
+    final avaliacao = File('lib/features/avaliacao/screens/avaliacao_screen.dart').readAsStringSync();
+    final alimentar = File('lib/features/alimentar/screens/alimentar_screen.dart').readAsStringSync();
+    final planoAlimentar = File('lib/features/alimentar/screens/plano_alimentar_detail_screen.dart').readAsStringSync();
+
+    expect(agenda, contains("safePopOrGo(context, '/dashboard/personal')"));
+    expect(alertas, contains("safePopOrGo(context, '/dashboard/personal')"));
+    expect(financeiro, contains("safePopOrGo(context, '/dashboard/personal')"));
+    expect(leadsKanban, contains("safePopOrGo(context, '/leads')"));
+    expect(leadDetail, contains("safePopOrGo(context, '/leads')"));
+    expect(assinatura, contains("safePopOrGo(context, '/planos')"));
+    expect(avaliacao, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
+    expect(alimentar, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
+    expect(planoAlimentar, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}/alimentar')"));
+  });
 }

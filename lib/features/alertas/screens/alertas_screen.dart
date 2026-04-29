@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 
@@ -175,15 +175,13 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      if (context.canPop()) ...[
-                        InkWell(
-                          onTap: () => context.pop(),
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: Icon(Icons.arrow_back_ios_new, size: 24, color: ink),
-                          ),
+                      InkWell(
+                        onTap: () => safePopOrGo(context, '/dashboard/personal'),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: Icon(Icons.arrow_back_ios_new, size: 24, color: ink),
                         ),
-                      ],
+                      ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -32,7 +33,12 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
       backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,title: const Text('Planos Alimentares')),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+        ),
+        title: const Text('Planos Alimentares')),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await Navigator.push(context, MaterialPageRoute(
@@ -119,7 +125,7 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
         if (_gord.text.isNotEmpty) 'gorduraG': int.tryParse(_gord.text),
         if (_obs.text.isNotEmpty) 'observacoes': _obs.text,
       });
-      if (mounted) Navigator.pop(context);
+      if (mounted) safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar');
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
     }
@@ -132,7 +138,12 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
       backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,title: const Text('Novo Plano Alimentar')),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
+        ),
+        title: const Text('Novo Plano Alimentar')),
       body: SingleChildScrollView(padding: const EdgeInsets.all(16), child: Column(children: [
         _field(_nome, 'Nome do plano *'),
         _num(_cal, 'Calorias/dia (kcal)'), _num(_prot, 'Proteína (g)'),

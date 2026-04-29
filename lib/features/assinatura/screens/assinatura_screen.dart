@@ -6,12 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/planos/data/planos_repository.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
-import 'package:go_router/go_router.dart';
 
 import '../data/assinatura_repository.dart';
 import '../providers/assinatura_provider.dart';
@@ -185,7 +185,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         ),
       );
 
-      if (mounted) context.pop();
+      if (mounted) safePopOrGo(context, '/planos');
     } catch (error) {
       _finishPurchaseFlowWithError('Não foi possível sincronizar a assinatura: $error');
     } finally {
@@ -320,6 +320,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => safePopOrGo(context, '/planos'),
+        ),
         title: const Text('Assinatura'),
       ),
       body: planosAsync.when(

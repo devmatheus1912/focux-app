@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -111,7 +112,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Lead convertido!')),
         );
-        Navigator.pop(context);
+        safePopOrGo(context, '/leads');
       }
     } catch (e) {
       if (mounted) {
@@ -136,7 +137,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     if (confirm != true) return;
     try {
       await LeadRepository(ref.read(apiClientProvider)).arquivar(_lead.id);
-      if (mounted) Navigator.pop(context);
+      if (mounted) safePopOrGo(context, '/leads');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -277,6 +278,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => safePopOrGo(context, '/leads'),
+        ),
         title: Text(_lead.nome),
         actions: [
           PopupMenuButton<String>(

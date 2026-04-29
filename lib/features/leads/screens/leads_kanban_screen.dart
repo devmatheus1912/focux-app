@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -162,15 +163,13 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      if (Navigator.canPop(context)) ...[
-                        InkWell(
-                          onTap: () => Navigator.pop(context),
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: Icon(Icons.arrow_back_ios_new, size: 24, color: ink),
-                          ),
+                      InkWell(
+                        onTap: () => safePopOrGo(context, '/leads'),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: Icon(Icons.arrow_back_ios_new, size: 24, color: ink),
                         ),
-                      ],
+                      ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

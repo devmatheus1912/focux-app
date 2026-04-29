@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,15 +70,13 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      if (context.canPop()) ...[
-                        InkWell(
-                          onTap: () => context.pop(),
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 12, bottom: 4),
-                            child: Icon(Icons.arrow_back_ios_new, size: 20, color: ink),
-                          ),
+                      InkWell(
+                        onTap: () => safePopOrGo(context, '/dashboard/personal'),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 12, bottom: 4),
+                          child: Icon(Icons.arrow_back_ios_new, size: 20, color: ink),
                         ),
-                      ],
+                      ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

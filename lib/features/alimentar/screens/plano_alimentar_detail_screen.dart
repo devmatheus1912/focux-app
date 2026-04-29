@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -147,6 +148,10 @@ class _PlanoAlimentarDetailScreenState
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
+        ),
         title: Text(p.nome),
         actions: [
           IconButton(
