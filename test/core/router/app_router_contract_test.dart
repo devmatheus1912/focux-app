@@ -57,6 +57,7 @@ void main() {
     final router = File('lib/core/router/app_router.dart').readAsStringSync();
 
     expect(router, contains('redirect: (context, state) async => _authRedirect(state)'));
+    expect(router, contains('refreshListenable: SessionInvalidator.listenable'));
     expect(router, contains('Future<String?> _authRedirect'));
     expect(router, contains('SecureStorage.getToken()'));
     expect(router, contains("return from.isEmpty ? '/login' : '/login?from=\$from'"));

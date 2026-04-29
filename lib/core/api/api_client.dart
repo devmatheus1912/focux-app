@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import '../auth/session_invalidator.dart';
 import '../config/env.dart';
 import '../storage/secure_storage.dart';
 import 'offline_sync_service.dart';
@@ -80,7 +81,7 @@ class ApiClient {
 
         // ── Auto Refresh Token on 401 ─────────────────────────
         if (e.response?.statusCode == 401 &&
-            !e.requestOptions.path.contains('/auth/') &&
+            !_isAuthPath(e.requestOptions.path) &&
             !_isRefreshing) {
           _isRefreshing = true;
           try {
@@ -105,14 +106,19 @@ class ApiClient {
             }
           } catch (refreshErr) {
             debugPrint('[ApiClient] Refresh failed: $refreshErr');
-            await SecureStorage.clearAll();
           }
           _isRefreshing = false;
         }
 
+        if (!_isRefreshing && _shouldInvalidateSession(e)) {
+          await SessionInvalidator.invalidate(
+            reason: 'API ${e.response?.statusCode} em ${e.requestOptions.path}',
+          );
+        }
+
         // ── Error Reporter ──────────────────────────────────────
         if (e.requestOptions.path != '/api/suporte/analisar-erro' &&
-            !e.requestOptions.path.contains('/auth/')) {
+            !_isAuthPath(e.requestOptions.path)) {
           try {
             final token = await SecureStorage.getToken();
             final role = await SecureStorage.getRole();
@@ -160,7 +166,7 @@ class ApiClient {
 
   static bool _shouldRetry(DioException e) {
     if (e.requestOptions.extra['fxNoRetry'] == true) return false;
-    if (e.requestOptions.path.contains('/auth/')) return false;
+    if (_isAuthPath(e.requestOptions.path)) return false;
     if (e.requestOptions.path == '/api/suporte/analisar-erro') return false;
     if (e.response != null) {
       final status = e.response?.statusCode ?? 0;
@@ -171,5 +177,31 @@ class ApiClient {
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.sendTimeout ||
         e.type == DioExceptionType.unknown;
+  }
+
+  static bool _shouldInvalidateSession(DioException e) {
+    if (_isAuthPath(e.requestOptions.path)) return false;
+    final status = e.response?.statusCode;
+    if (status == 401) return true;
+    if (status == 403) return _isLikelySessionAuthFailure(e);
+    return false;
+  }
+
+  static bool _isLikelySessionAuthFailure(DioException e) {
+    final data = e.response?.data;
+    if (data == null) return true;
+    final text = data.toString().toLowerCase();
+    if (text.isEmpty) return true;
+    return text.contains('full authentication') ||
+        text.contains('unauthorized') ||
+        text.contains('forbidden') ||
+        text.contains('token') ||
+        text.contains('jwt') ||
+        text.contains('expir') ||
+        text.contains('autentic');
+  }
+
+  static bool _isAuthPath(String path) {
+    return path.contains('/auth/');
   }
 }

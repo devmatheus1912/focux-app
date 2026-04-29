@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/auth/session_invalidator.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../data/auth_repository.dart';
 
@@ -24,7 +25,21 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
   bool get requiresPasswordChange => _requiresPasswordChange;
 
   AuthNotifier(this._repo) : super(AuthStatus.unknown) {
+    SessionInvalidator.listenable.addListener(_handleSessionInvalidated);
     _checkToken();
+  }
+
+  void _handleSessionInvalidated() {
+    _currentRole = null;
+    _isAdmin = false;
+    _requiresPasswordChange = false;
+    state = AuthStatus.unauthenticated;
+  }
+
+  @override
+  void dispose() {
+    SessionInvalidator.listenable.removeListener(_handleSessionInvalidated);
+    super.dispose();
   }
 
   Future<void> _checkToken() async {

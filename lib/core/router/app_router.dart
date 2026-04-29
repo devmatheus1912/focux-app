@@ -78,6 +78,7 @@ import '../../features/alimentar/screens/alimentar_screen.dart';
 import '../../features/ia/screens/ia_progressao_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../../features/perfil/screens/wallet_screen.dart';
+import '../auth/session_invalidator.dart';
 import '../storage/secure_storage.dart';
 import 'role_home.dart';
 
@@ -85,6 +86,7 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/',
     errorBuilder: (context, state) => const HomeRedirectScreen(),
+    refreshListenable: SessionInvalidator.listenable,
     redirect: (context, state) async => _authRedirect(state),
     routes: [
       // ── Auth / public ────────────────────────────────────────────────────────
