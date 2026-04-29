@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/api/media_upload_service.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../alunos/data/aluno_repository.dart';
@@ -550,8 +550,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
         title: const Text('Meu perfil'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/dashboard/aluno'),
+          onPressed: () => safePopOrGo(context, '/dashboard/aluno'),
         ),
         actions: [
           TextButton(

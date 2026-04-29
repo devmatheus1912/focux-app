@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/analytics/analytics_service.dart';
@@ -8,6 +7,7 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/router/role_home.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../data/ia_repository.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
@@ -240,13 +240,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen> with Single
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Row(children: [
                 IconButton(
-                  onPressed: () {
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      goToRoleHome(context, ref);
-                    }
-                  },
+                  onPressed: () => safePopOr(context, () => goToRoleHome(context, ref)),
                   icon: Icon(Icons.arrow_back_ios_new, color: ink, size: 18),
                 ),
                 const SizedBox(width: 6),

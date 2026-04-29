@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,11 +79,10 @@ class TreinosListScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    if (context.canPop())
-                      IconButton(
-                        icon: Icon(Icons.arrow_back, color: mute),
-                        onPressed: () => context.pop(),
-                      ),
+                    IconButton(
+                      icon: Icon(Icons.arrow_back, color: mute),
+                      onPressed: () => safePopOrGo(context, '/treinos'),
+                    ),
                   ],
                 ),
               ),

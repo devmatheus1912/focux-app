@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
@@ -36,7 +37,7 @@ class AlunoDetailScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Aluno excluído.')),
         );
-        context.pop();
+        safePopOrGo(context, '/alunos');
       }
     } catch (e) {
       if (context.mounted) {

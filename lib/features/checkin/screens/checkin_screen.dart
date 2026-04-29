@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../data/checkin_repository.dart';
@@ -68,7 +68,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
         _loading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
-      context.pop();
+      safePopOrGo(context, '/checkin/treinos');
     }
   }
 
@@ -248,7 +248,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Treino concluido. Historico atualizado.')),
       );
-      context.pop();
+      safePopOrGo(context, '/checkin/treinos');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
@@ -328,7 +328,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                   mute: mute,
                   line: line,
                   dark: dark,
-                  onBack: () => context.pop(),
+                  onBack: () => safePopOrGo(context, '/checkin/treinos'),
                 ),
               ),
               SliverPadding(

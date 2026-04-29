@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../providers/exercicios_provider.dart';
 
@@ -193,11 +193,10 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                         loading: () => const SizedBox.shrink(),
                         error: (_, __) => const SizedBox.shrink(),
                       ),
-                      if (context.canPop())
-                        IconButton(
-                          icon: Icon(Icons.arrow_back, color: mute),
-                          onPressed: () => context.pop(),
-                        ),
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: mute),
+                        onPressed: () => safePopOrGo(context, '/exercicios'),
+                      ),
                     ],
                   ),
                 ],

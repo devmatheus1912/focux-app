@@ -17,6 +17,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/config/env.dart';
 import '../../../core/providers/personal_brand_provider.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -1619,7 +1620,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             Icons.arrow_back,
             color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
           ),
-          onPressed: () => context.pop(),
+          onPressed: () => safePopOrGo(
+            context,
+            _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal',
+          ),
         ),
         titleSpacing: 0,
         title: Row(

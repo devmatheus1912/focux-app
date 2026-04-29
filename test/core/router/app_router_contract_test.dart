@@ -52,4 +52,19 @@ void main() {
 
     expect(router, isNot(contains("int.parse(state.pathParameters['id']!")));
   });
+
+  test('safe navigation provides fallback for direct opened screens', () {
+    final helper = File('lib/core/router/safe_navigation.dart').readAsStringSync();
+    final checkin = File('lib/features/checkin/screens/checkin_screen.dart').readAsStringSync();
+    final copilot = File('lib/features/ia/screens/ia_copiloto_screen.dart').readAsStringSync();
+    final chat = File('lib/features/chat/screens/conversation_screen.dart').readAsStringSync();
+
+    expect(helper, contains('void safePopOrGo'));
+    expect(helper, contains('context.canPop()'));
+    expect(helper, contains('context.go(fallbackLocation)'));
+    expect(helper, contains('void safePopOr'));
+    expect(checkin, contains("safePopOrGo(context, '/checkin/treinos')"));
+    expect(copilot, contains('safePopOr(context, () => goToRoleHome(context, ref))'));
+    expect(chat, contains("_isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal'"));
+  });
 }

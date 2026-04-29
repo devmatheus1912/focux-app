@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/api/media_upload_service.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/data/dashboard_repository.dart';
@@ -212,9 +213,7 @@ class _PerfilBody extends StatelessWidget {
                             children: [
                               _HeroAction(
                                 icon: Icons.arrow_back_ios_new,
-                                onTap: () {
-                                  if (context.canPop()) context.pop();
-                                },
+                                onTap: () => safePopOrGo(context, '/dashboard/personal'),
                               ),
                               Text(
                                 'Perfil',
