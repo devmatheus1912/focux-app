@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
@@ -49,7 +50,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         'nome': 'PREMIUM',
         'preco': '79,00',
         'trial': 7,
-        'cor': EagleTokens.brand,
+        'cor': null,
         'tag': 'MAIS POPULAR',
         'sub': 'Para consultores sérios',
         'plan': SubscriptionPlan.PREMIUM,
@@ -81,6 +82,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         ],
       },
     ];
+  }
+
+  Color _planAccent(SubscriptionPlan plan, Color primary, bool isDark) {
+    return switch (plan) {
+      SubscriptionPlan.FREE => isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+      SubscriptionPlan.PREMIUM => primary,
+      SubscriptionPlan.ENTERPRISE => const Color(0xFFC49A2A),
+    };
   }
 
   Future<void> _handlePrimaryAction() async {
@@ -157,11 +166,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final brand = isDark ? EagleTokens.brandAccent : EagleTokens.brand;
+    final brand = Theme.of(context).colorScheme.primary;
+    final brandDeep = BrandPalette.deep(brand);
 
     final pl = _planos[_selected];
-    final plCor = pl['cor'] as Color;
     final selectedPlan = pl['plan'] as SubscriptionPlan;
+    final plCor = _planAccent(selectedPlan, brand, isDark);
     final isCurrentPlan = selectedPlan == currentPlan;
 
     String ctaLabel;
@@ -227,7 +237,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               child: Row(
                 children: _planos.map((p) {
                   final isSelected = _selected == p['id'];
-                  final cColor = p['cor'] as Color;
+                  final cColor = _planAccent(
+                    p['plan'] as SubscriptionPlan,
+                    brand,
+                    isDark,
+                  );
                   return Expanded(
                     child: GestureDetector(
                       onTap: () => setState(() => _selected = p['id'] as int),
@@ -316,7 +330,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                 colors: [
                                   plCor.withValues(alpha: 0.93),
                                   pl['id'] == 1
-                                      ? EagleTokens.brandDeep
+                                      ? brandDeep
                                       : const Color(0xFF3A2600),
                                 ],
                                 begin: Alignment.topLeft,
@@ -574,8 +588,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                 )
                               : LinearGradient(
                                   colors: [
-                                    EagleTokens.brand,
-                                    EagleTokens.brandInk,
+                                    brand,
+                                    brandDeep,
                                   ],
                                 ),
                           boxShadow: [

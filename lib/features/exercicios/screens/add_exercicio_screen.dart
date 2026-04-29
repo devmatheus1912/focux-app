@@ -119,6 +119,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: bg,
@@ -488,9 +489,9 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                         child: ElevatedButton(
                           onPressed: _loading ? null : _submit,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: EagleTokens.brand,
+                            backgroundColor: primary,
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor: EagleTokens.brand.withValues(alpha: 0.5),
+                            disabledBackgroundColor: primary.withValues(alpha: 0.5),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             elevation: 0,
                           ),

@@ -142,6 +142,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: bg,
@@ -204,7 +205,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
             ),
             Expanded(
               child: exercicioAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator(color: EagleTokens.brand)),
+                loading: () => Center(child: CircularProgressIndicator(color: primary)),
                 error: (e, _) => Center(child: Text('Erro: $e')),
                 data: (ex) => SingleChildScrollView(
                   padding: const EdgeInsets.all(16),

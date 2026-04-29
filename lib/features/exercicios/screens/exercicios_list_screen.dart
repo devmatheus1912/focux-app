@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../data/exercicio_media_import_parser.dart';
 import '../data/exercicio_repository.dart';
@@ -132,18 +133,20 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primaryDeep = BrandPalette.deep(primary);
 
     return Scaffold(
       backgroundColor: bg,
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [EagleTokens.brand, EagleTokens.brandInk],
+          gradient: LinearGradient(
+            colors: [primary, primaryDeep],
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: EagleTokens.brand.withValues(alpha: 0.4),
+              color: primary.withValues(alpha: 0.4),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),

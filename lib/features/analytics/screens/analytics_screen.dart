@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../data/analytics_repository.dart';
 import '../providers/analytics_provider.dart';
@@ -11,13 +12,14 @@ class AnalyticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final async = ref.watch(analyticsDashboardProvider);
 
     return Scaffold(
       backgroundColor: dark ? EagleTokens.darkBg : EagleTokens.paper,
       body: async.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: EagleTokens.brand),
+        loading: () => Center(
+          child: CircularProgressIndicator(color: primary),
         ),
         error: (e, _) => Center(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -45,7 +47,7 @@ class AnalyticsScreen extends ConsumerWidget {
               icon: const Icon(Icons.refresh, size: 16),
               label: const Text('Tentar novamente'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: EagleTokens.brand,
+                backgroundColor: primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -55,7 +57,7 @@ class AnalyticsScreen extends ConsumerWidget {
           ]),
         ),
         data: (data) => RefreshIndicator(
-          color: EagleTokens.brand,
+          color: primary,
           onRefresh: () async => ref.invalidate(analyticsDashboardProvider),
           child: _AnalyticsBody(data: data, dark: dark),
         ),
@@ -76,7 +78,7 @@ class _AnalyticsBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final brand = dark ? EagleTokens.brandAccent : EagleTokens.brand;
+    final brand = Theme.of(context).colorScheme.primary;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -266,7 +268,8 @@ class _KpiCard extends StatelessWidget {
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final accent = highlight ? EagleTokens.good : EagleTokens.brand;
+    final primary = Theme.of(context).colorScheme.primary;
+    final accent = highlight ? EagleTokens.good : primary;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -416,6 +419,8 @@ class _FunilBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final primarySoft = BrandPalette.soft(primary, dark: dark);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -432,9 +437,8 @@ class _FunilBar extends StatelessWidget {
           child: LinearProgressIndicator(
             value: step.ratio.clamp(0.0, 1.0),
             minHeight: 6,
-            backgroundColor:
-                dark ? EagleTokens.darkLine : EagleTokens.brandSoft,
-            color: EagleTokens.brand,
+            backgroundColor: dark ? EagleTokens.darkLine : primarySoft,
+            color: primary,
           ),
         ),
       ]),
@@ -450,16 +454,17 @@ class _PillTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: EagleTokens.brand.withValues(alpha: 0.12),
+        color: primary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: EagleTokens.brand,
+        style: TextStyle(
+          color: primary,
           fontSize: 11,
           fontWeight: FontWeight.w700,
         ),
@@ -482,6 +487,8 @@ class _WauChart extends StatelessWidget {
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
+    final primaryDeep = BrandPalette.deep(primary);
     final maxVal = wau.map((e) => e.usuarios).reduce(max).toDouble();
 
     return Container(
@@ -499,7 +506,7 @@ class _WauChart extends StatelessWidget {
           ),
           Text(
             'pico: ${wau.map((e) => e.usuarios).reduce(max)}',
-            style: TextStyle(color: EagleTokens.brand, fontSize: 11, fontWeight: FontWeight.w700),
+            style: TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w700),
           ),
         ]),
         const SizedBox(height: 16),
@@ -539,10 +546,10 @@ class _WauChart extends StatelessWidget {
                                   ? LinearGradient(
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
-                                      colors: [EagleTokens.brand, EagleTokens.brandInk],
+                                      colors: [primary, primaryDeep],
                                     )
                                   : null,
-                              color: isLast ? null : EagleTokens.brand.withValues(alpha: 0.22),
+                              color: isLast ? null : primary.withValues(alpha: 0.22),
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(6),
                                 bottom: Radius.circular(2),
@@ -586,6 +593,7 @@ class _CohortTable extends StatelessWidget {
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
@@ -605,7 +613,7 @@ class _CohortTable extends StatelessWidget {
             child: Text('Cad.', textAlign: TextAlign.center, style: TextStyle(color: mute, fontSize: 11, fontWeight: FontWeight.w700)),
           ),
           Expanded(
-            child: Text('D7', textAlign: TextAlign.center, style: TextStyle(color: EagleTokens.brand, fontSize: 11, fontWeight: FontWeight.w700)),
+            child: Text('D7', textAlign: TextAlign.center, style: TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w700)),
           ),
           Expanded(
             child: Text('D30', textAlign: TextAlign.center, style: TextStyle(color: EagleTokens.good, fontSize: 11, fontWeight: FontWeight.w700)),
@@ -632,7 +640,7 @@ class _CohortTable extends StatelessWidget {
                 Expanded(
                   child: _RetencaoBadge(
                     value: c.retencaoD7,
-                    color: EagleTokens.brand,
+                    color: primary,
                   ),
                 ),
                 Expanded(

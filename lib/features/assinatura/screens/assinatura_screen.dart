@@ -308,6 +308,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final primary = theme.colorScheme.primary;
 
     final perfil = ref.watch(perfilProvider).valueOrNull;
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
@@ -420,7 +421,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.receipt_long_outlined, color: EagleTokens.brand, size: 18),
+                          Icon(Icons.receipt_long_outlined, color: primary, size: 18),
                           const SizedBox(width: 8),
                           Text(
                             'Preview da cobrança Enterprise',
@@ -469,7 +470,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     _ResumoRow(
                       label: 'Preço',
                       value: _formatPrice(selectedBackendPlan, _productDetails[_productIds[selectedPlan]]),
-                      ink: EagleTokens.brand,
+                      ink: primary,
                       mute: mute,
                       valueBold: true,
                     ),
@@ -730,9 +731,10 @@ class _PlanoCard extends StatelessWidget {
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
     final accent = switch (plan) {
       SubscriptionPlan.FREE       => isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-      SubscriptionPlan.PREMIUM    => EagleTokens.brand,
+      SubscriptionPlan.PREMIUM    => primary,
       SubscriptionPlan.ENTERPRISE => const Color(0xFFC49A2A),
     };
 

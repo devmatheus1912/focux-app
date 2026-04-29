@@ -40,7 +40,11 @@ void main() {
       final path = file.path.replaceAll('\\', '/');
       return path.contains('/financeiro/') ||
           path.contains('/leads/') ||
-          path.contains('/feed/');
+          path.contains('/feed/') ||
+          path.contains('/analytics/') ||
+          path.contains('/assinatura/') ||
+          path.contains('/subscription/') ||
+          path.contains('/exercicios/');
     }).where((file) => file.path.endsWith('.dart'));
 
     for (final file in files) {
