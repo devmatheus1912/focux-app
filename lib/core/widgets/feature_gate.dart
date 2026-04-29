@@ -6,6 +6,7 @@ import '../../features/planos/providers/plano_features_provider.dart';
 import '../../features/planos/data/planos_repository.dart';
 import '../analytics/analytics_service.dart';
 import '../router/role_home.dart';
+import '../router/safe_navigation.dart';
 
 class FeatureGate extends ConsumerWidget {
   final SubscriptionPlan requiredPlan;
@@ -275,13 +276,7 @@ class _LockedScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: BackButton(
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              goToRoleHome(context, ref);
-            }
-          },
+          onPressed: () => safePopOr(context, () => goToRoleHome(context, ref)),
         ),
       ),
       body: SafeArea(
@@ -325,13 +320,7 @@ class _LockedScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () {
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      goToRoleHome(context, ref);
-                    }
-                  },
+                  onPressed: () => safePopOr(context, () => goToRoleHome(context, ref)),
                   child: const Text('Voltar'),
                 ),
               ],

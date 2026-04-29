@@ -89,4 +89,22 @@ void main() {
     expect(alimentar, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
     expect(planoAlimentar, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}/alimentar')"));
   });
+
+  test('residual back controls keep safe fallbacks', () {
+    final featureGate = File('lib/core/widgets/feature_gate.dart').readAsStringSync();
+    final alunosList = File('lib/features/alunos/screens/alunos_list_screen.dart').readAsStringSync();
+    final acoesMassa = File('lib/features/alunos/screens/acoes_massa_screen.dart').readAsStringSync();
+    final exerciciosList = File('lib/features/exercicios/screens/exercicios_list_screen.dart').readAsStringSync();
+    final identidade = File('lib/features/perfil/screens/identidade_visual_screen.dart').readAsStringSync();
+    final agenda = File('lib/features/agenda/screens/agenda_screen.dart').readAsStringSync();
+    final avaliacao = File('lib/features/avaliacao/screens/avaliacao_screen.dart').readAsStringSync();
+
+    expect(featureGate, contains('safePopOr(context, () => goToRoleHome(context, ref))'));
+    expect(alunosList, contains("safePopOrGo(context, '/dashboard/personal')"));
+    expect(acoesMassa, contains("safePopOrGo(context, '/alunos')"));
+    expect(exerciciosList, contains("safePopOrGo(context, '/dashboard/personal')"));
+    expect(identidade, contains("safePopOrGo(context, '/dashboard/personal')"));
+    expect(agenda, contains("safePopOrGo(context, '/agenda')"));
+    expect(avaliacao, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
+  });
 }

@@ -196,13 +196,13 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                     onTap: () {
                       showModalBottomSheet(
                         context: context,
-                        builder: (_) => SafeArea(
+                        builder: (sheetContext) => SafeArea(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              ListTile(title: const Text('Todos'), onTap: () { setState(() => _filtroScoreMin = null); Navigator.pop(context); }),
-                              ListTile(title: const Text('Score ≥ 2 (alto)'), onTap: () { setState(() => _filtroScoreMin = 2); Navigator.pop(context); }),
-                              ListTile(title: const Text('Score = 1 (médio)'), onTap: () { setState(() => _filtroScoreMin = 1); Navigator.pop(context); }),
+                              ListTile(title: const Text('Todos'), onTap: () { setState(() => _filtroScoreMin = null); Navigator.pop(sheetContext); }),
+                              ListTile(title: const Text('Score ≥ 2 (alto)'), onTap: () { setState(() => _filtroScoreMin = 2); Navigator.pop(sheetContext); }),
+                              ListTile(title: const Text('Score = 1 (médio)'), onTap: () { setState(() => _filtroScoreMin = 1); Navigator.pop(sheetContext); }),
                             ],
                           ),
                         ),

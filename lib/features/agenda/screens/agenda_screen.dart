@@ -350,7 +350,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<_NovoAgendamentoScreen> 
     try {
       await AgendaRepository(ref.read(apiClientProvider))
           .criar(alunoId, _inicio!, _fim!, _titulo.text.isEmpty ? null : _titulo.text);
-      if (mounted) Navigator.pop(context);
+      if (mounted) safePopOrGo(context, '/agenda');
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
     }
@@ -363,7 +363,13 @@ class _NovoAgendamentoScreenState extends ConsumerState<_NovoAgendamentoScreen> 
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Novo Agendamento')),
+    appBar: AppBar(
+      title: const Text('Novo Agendamento'),
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => safePopOrGo(context, '/agenda'),
+      ),
+    ),
     body: SingleChildScrollView(padding: const EdgeInsets.all(16), child: Column(children: [
       TextFormField(controller: _alunoId, decoration: const InputDecoration(labelText: 'ID do Aluno *'),
           keyboardType: TextInputType.number),

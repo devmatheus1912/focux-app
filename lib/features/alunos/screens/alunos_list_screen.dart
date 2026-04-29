@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
@@ -129,16 +130,14 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      if (context.canPop()) ...[
-                        InkWell(
-                          onTap: () => context.pop(),
-                          borderRadius: BorderRadius.circular(24),
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 12, top: 4, bottom: 4),
-                            child: Icon(Icons.arrow_back_ios_new, size: 20, color: ink),
-                          ),
+                      InkWell(
+                        onTap: () => safePopOrGo(context, '/dashboard/personal'),
+                        borderRadius: BorderRadius.circular(24),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 12, top: 4, bottom: 4),
+                          child: Icon(Icons.arrow_back_ios_new, size: 20, color: ink),
                         ),
-                      ],
+                      ),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

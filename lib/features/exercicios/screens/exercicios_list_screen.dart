@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../data/exercicio_media_import_parser.dart';
 import '../data/exercicio_repository.dart';
@@ -305,11 +306,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                           ),
                         ],
                   ),
-                  if (context.canPop())
-                    IconButton(
-                      icon: Icon(Icons.arrow_back, color: mute),
-                      onPressed: () => context.pop(),
-                    ),
+                  IconButton(
+                    icon: Icon(Icons.arrow_back, color: mute),
+                    onPressed: () => safePopOrGo(context, '/dashboard/personal'),
+                  ),
                 ],
               ),
             ),

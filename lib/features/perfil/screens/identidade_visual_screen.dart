@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/api/media_upload_service.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -251,13 +252,7 @@ class _IdentidadeVisualScreenState
             ? null
             : IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/dashboard/personal');
-                  }
-                },
+                onPressed: () => safePopOrGo(context, '/dashboard/personal'),
               ),
         actions: [
           if (isPremiumOrAbove)

@@ -103,11 +103,11 @@ class _AvaliacaoScreenState extends ConsumerState<AvaliacaoScreen> {
       appBar: AppBar(
         backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
-        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
         ),
+        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         title: const Text('Avaliações Físicas'),
         actions: [
           IconButton(
@@ -428,7 +428,7 @@ class _NovaAvaliacaoScreenState extends ConsumerState<_NovaAvaliacaoScreen> {
         if (_circCoxa.text.isNotEmpty) 'circCoxa': double.tryParse(_circCoxa.text),
         if (_obsAvaliacao.text.isNotEmpty) 'observacoesAvaliacao': _obsAvaliacao.text,
       });
-      if (mounted) Navigator.pop(context);
+      if (mounted) safePopOrGo(context, '/alunos/${widget.alunoId}');
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
     }

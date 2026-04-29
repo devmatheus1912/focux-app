@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
@@ -44,18 +45,18 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
     }
     showModalBottomSheet(
       context: context,
-      builder: (_) => _BottomSheetAcoes(
+      builder: (sheetContext) => _BottomSheetAcoes(
         qtd: _selecionados.length,
         onMarcarPagos: () {
-          Navigator.pop(context);
+          Navigator.pop(sheetContext);
           _marcarPagos();
         },
         onAtualizarStatus: (status) {
-          Navigator.pop(context);
+          Navigator.pop(sheetContext);
           _atualizarStatus(status);
         },
         onExcluir: () {
-          Navigator.pop(context);
+          Navigator.pop(sheetContext);
           _confirmarExclusao(context);
         },
       ),
@@ -165,6 +166,10 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ações em Massa'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => safePopOrGo(context, '/alunos'),
+        ),
         actions: [
           alunosAsync.whenOrNull(
             data: (alunos) => TextButton(
