@@ -480,7 +480,7 @@ class _CommandActionCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
-    final severityColor = _severityColor(action.severidade);
+    final severityColor = _severityColor(action.severidade, primary);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
 
@@ -582,10 +582,10 @@ class _CommandActionCard extends ConsumerWidget {
     );
   }
 
-  Color _severityColor(String severity) {
+  Color _severityColor(String severity, Color fallback) {
     if (severity == 'ALTA') return EagleTokens.bad;
     if (severity == 'MEDIA') return EagleTokens.warn;
-    return const Color(0xFF2563EB);
+    return fallback;
   }
 }
 

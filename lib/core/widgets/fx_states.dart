@@ -17,6 +17,7 @@ class FxErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -45,7 +46,7 @@ class FxErrorState extends StatelessWidget {
             icon: const Icon(Icons.refresh, size: 18),
             label: const Text('Tentar novamente'),
             style: FilledButton.styleFrom(
-              backgroundColor: EagleTokens.brand,
+              backgroundColor: primary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
@@ -73,6 +74,7 @@ class FxEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -81,10 +83,10 @@ class FxEmptyState extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: EagleTokens.brand.withValues(alpha: 0.1),
+              color: primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: EagleTokens.brand, size: 28),
+            child: Icon(icon, color: primary, size: 28),
           ),
           const SizedBox(height: 12),
           Text(
@@ -113,8 +115,10 @@ class FxLoading extends StatelessWidget {
   const FxLoading({super.key});
 
   @override
-  Widget build(BuildContext context) => const Center(
-    child: CircularProgressIndicator(color: EagleTokens.brand),
+  Widget build(BuildContext context) => Center(
+    child: CircularProgressIndicator(
+      color: Theme.of(context).colorScheme.primary,
+    ),
   );
 }
 

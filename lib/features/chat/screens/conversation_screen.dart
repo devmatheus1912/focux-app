@@ -2070,6 +2070,7 @@ class _AttachOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -2081,7 +2082,7 @@ class _AttachOption extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: EagleTokens.brand),
+            Icon(icon, color: primary),
             const SizedBox(width: 12),
             Text(label),
           ],
@@ -2227,6 +2228,7 @@ class _DateDivider extends StatelessWidget {
             ? 'Ontem'
             : '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}';
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Center(
@@ -2236,7 +2238,7 @@ class _DateDivider extends StatelessWidget {
             color:
                 isDark
                     ? Colors.white.withValues(alpha: 0.06)
-                    : EagleTokens.brand.withValues(alpha: 0.08),
+                    : primary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
@@ -2275,7 +2277,7 @@ class _OlderMessagesLoader extends StatelessWidget {
               color:
                   isDark
                       ? Colors.white.withValues(alpha: 0.06)
-                      : EagleTokens.brand.withValues(alpha: 0.08),
+                      : primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(999),
             ),
             child:
@@ -2891,6 +2893,7 @@ class _RecordingComposerBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Container(
@@ -2934,7 +2937,7 @@ class _RecordingComposerBar extends StatelessWidget {
             onPressed: onSend,
             icon: const Icon(Icons.arrow_upward_rounded, color: Colors.white),
             style: IconButton.styleFrom(
-              backgroundColor: EagleTokens.brand,
+              backgroundColor: primary,
               minimumSize: const Size(32, 32),
             ),
           ),
@@ -2959,6 +2962,7 @@ class _MediaPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final tipo = msg.primaryMediaType;
     final url = msg.primaryMediaUrl;
     if (tipo == null || url == null || url.isEmpty) {
@@ -3060,7 +3064,7 @@ class _MediaPreview extends StatelessWidget {
             color:
                 mine
                     ? Colors.white.withValues(alpha: 0.12)
-                    : EagleTokens.brand.withValues(alpha: 0.10),
+                    : primary.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Row(
@@ -3172,6 +3176,7 @@ class _MediaGalleryTile extends StatelessWidget {
     final icon = _icon(tipo);
     final url = msg.primaryMediaUrl;
     final isImage = tipo == 'IMAGE';
+    final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final muted = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
@@ -3194,7 +3199,7 @@ class _MediaGalleryTile extends StatelessWidget {
               child: Container(
                 width: 54,
                 height: 54,
-                color: EagleTokens.brand.withValues(alpha: 0.10),
+                color: primary.withValues(alpha: 0.10),
                 child:
                     isImage && url != null && url.isNotEmpty
                         ? Image.network(
@@ -3203,10 +3208,10 @@ class _MediaGalleryTile extends StatelessWidget {
                           errorBuilder:
                               (_, __, ___) => Icon(
                                 Icons.broken_image_outlined,
-                                color: EagleTokens.brand,
+                                color: primary,
                               ),
                         )
-                        : Icon(icon, color: EagleTokens.brand, size: 26),
+                        : Icon(icon, color: primary, size: 26),
               ),
             ),
             const SizedBox(width: 12),
@@ -3324,10 +3329,11 @@ class _AudioInlinePlayerState extends State<_AudioInlinePlayer> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final bg =
         widget.mine
             ? Colors.white.withValues(alpha: 0.12)
-            : EagleTokens.brand.withValues(alpha: 0.10);
+            : primary.withValues(alpha: 0.10);
     final ink =
         widget.mine
             ? Colors.white
@@ -3359,7 +3365,7 @@ class _AudioInlinePlayerState extends State<_AudioInlinePlayer> {
                     backgroundColor:
                         widget.mine
                             ? Colors.white.withValues(alpha: 0.18)
-                            : EagleTokens.brand,
+                            : primary,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(36, 36),
                   ),
