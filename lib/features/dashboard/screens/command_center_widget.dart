@@ -348,80 +348,114 @@ class _AutonomiaGargaloTile extends StatelessWidget {
     final openClicks = gargalo.cliques - gargalo.concluidos;
     final pendingLabel = openClicks == 1 ? '1 clique aberto' : '$openClicks cliques abertos';
 
-    return Row(
+    final icon = Container(
+      width: 34,
+      height: 34,
+      decoration: BoxDecoration(
+        color: EagleTokens.warn.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: const Icon(
+        Icons.touch_app_outlined,
+        color: EagleTokens.warn,
+        size: 18,
+      ),
+    );
+    final copy = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            color: EagleTokens.warn.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: const Icon(
-            Icons.touch_app_outlined,
-            color: EagleTokens.warn,
-            size: 18,
+        Text(
+          gargalo.alunoNome,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: ink,
+            fontWeight: FontWeight.w900,
+            fontSize: 13.5,
           ),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                gargalo.alunoNome,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: ink,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 13.5,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                gargalo.taskTitle,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: mute, fontSize: 12.5, height: 1.25),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _suggestedAction(gargalo.taskId),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  height: 1.25,
-                ),
-              ),
-              const SizedBox(height: 7),
-              Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                children: [
-                  _Pill(label: pendingLabel, color: EagleTokens.warn),
-                  _Pill(label: gargalo.prioridade, color: primary),
-                  _Pill(
-                    label: _actionLabel(gargalo.ultimaAcao),
-                    color: primary,
-                  ),
-                  _Pill(label: _dateLabel(gargalo.ultimoEventoEm), color: mute),
-                ],
-              ),
-            ],
+        const SizedBox(height: 2),
+        Text(
+          gargalo.taskTitle,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: mute, fontSize: 12.5, height: 1.25),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _suggestedAction(gargalo.taskId),
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: ink,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            height: 1.25,
           ),
         ),
-        const SizedBox(width: 8),
-        IconButton(
-          onPressed: () => context.push(gargalo.acaoUrl),
-          icon: const Icon(Icons.arrow_forward_rounded),
-          tooltip: 'Abrir aluno',
+        const SizedBox(height: 7),
+        Wrap(
+          spacing: 6,
+          runSpacing: 4,
+          children: [
+            _Pill(label: pendingLabel, color: EagleTokens.warn),
+            _Pill(label: gargalo.prioridade, color: primary),
+            _Pill(
+              label: _actionLabel(gargalo.ultimaAcao),
+              color: primary,
+            ),
+            _Pill(label: _dateLabel(gargalo.ultimoEventoEm), color: mute),
+          ],
         ),
       ],
+    );
+    final action = IconButton.filledTonal(
+      onPressed: () => context.push(gargalo.acaoUrl),
+      icon: const Icon(Icons.arrow_forward_rounded),
+      tooltip: 'Abrir aluno',
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        if (compact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  icon,
+                  const SizedBox(width: 10),
+                  Expanded(child: copy),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 150),
+                  child: action,
+                ),
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            icon,
+            const SizedBox(width: 10),
+            Expanded(child: copy),
+            const SizedBox(width: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 52),
+              child: action,
+            ),
+          ],
+        );
+      },
     );
   }
 }
