@@ -78,12 +78,14 @@ import '../../features/alimentar/screens/alimentar_screen.dart';
 import '../../features/ia/screens/ia_progressao_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../../features/perfil/screens/wallet_screen.dart';
+import '../storage/secure_storage.dart';
 import 'role_home.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/',
     errorBuilder: (context, state) => const HomeRedirectScreen(),
+    redirect: (context, state) async => _authRedirect(state),
     routes: [
       // ── Auth / public ────────────────────────────────────────────────────────
       GoRoute(
@@ -600,6 +602,34 @@ class AppRouter {
       ),
     ],
   );
+}
+
+Future<String?> _authRedirect(GoRouterState state) async {
+  if (_isPublicLocation(state.uri.path)) {
+    return null;
+  }
+
+  final token = (await SecureStorage.getToken())?.trim();
+  if (token != null && token.isNotEmpty) {
+    return null;
+  }
+
+  final from = Uri.encodeComponent(state.uri.toString());
+  return from.isEmpty ? '/login' : '/login?from=$from';
+}
+
+bool _isPublicLocation(String path) {
+  return path == '/' ||
+      path == '/home' ||
+      path == '/dashboard' ||
+      path == '/dashboard/home' ||
+      path == '/login' ||
+      path == '/register' ||
+      path == '/register/aluno' ||
+      path == '/onboarding' ||
+      path == '/esqueci-senha' ||
+      path == '/resetar-senha' ||
+      path.startsWith('/p/');
 }
 
 String? _stringExtra(GoRouterState state) {

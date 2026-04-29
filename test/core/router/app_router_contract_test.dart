@@ -53,6 +53,36 @@ void main() {
     expect(router, isNot(contains("int.parse(state.pathParameters['id']!")));
   });
 
+  test('router guards private deep links without a stored session', () {
+    final router = File('lib/core/router/app_router.dart').readAsStringSync();
+
+    expect(router, contains('redirect: (context, state) async => _authRedirect(state)'));
+    expect(router, contains('Future<String?> _authRedirect'));
+    expect(router, contains('SecureStorage.getToken()'));
+    expect(router, contains("return from.isEmpty ? '/login' : '/login?from=\$from'"));
+    expect(router, contains('bool _isPublicLocation'));
+
+    for (final publicPath in [
+      '/',
+      '/home',
+      '/dashboard',
+      '/dashboard/home',
+      '/login',
+      '/register',
+      '/register/aluno',
+      '/onboarding',
+      '/esqueci-senha',
+      '/resetar-senha',
+    ]) {
+      expect(router, contains("path == '$publicPath'"));
+    }
+
+    expect(router, contains("path.startsWith('/p/')"));
+    expect(router, isNot(contains("path == '/ia'")));
+    expect(router, isNot(contains("path == '/aluno'")));
+    expect(router, isNot(contains("path == '/personal'")));
+  });
+
   test('safe navigation provides fallback for direct opened screens', () {
     final helper = File('lib/core/router/safe_navigation.dart').readAsStringSync();
     final checkin = File('lib/features/checkin/screens/checkin_screen.dart').readAsStringSync();
