@@ -4,6 +4,7 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 import 'package:image_picker/image_picker.dart';
+import '../data/exercicio_repository.dart';
 import '../providers/exercicios_provider.dart';
 
 class ExercicioDetailScreen extends ConsumerStatefulWidget {
@@ -281,6 +282,8 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                         ),
                       ],
                       const SizedBox(height: 14),
+                      _PrescriptionReadinessPanel(exercicio: ex),
+                      const SizedBox(height: 12),
                       if (ex.videoSource?.isNotEmpty == true || ex.licenseStatus?.isNotEmpty == true) ...[
                         _EditorialReviewPanel(
                           status: ex.editorialStatus,
@@ -351,6 +354,161 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
       ),
     );
   }
+}
+
+class _PrescriptionReadinessPanel extends StatelessWidget {
+  final Exercicio exercicio;
+
+  const _PrescriptionReadinessPanel({required this.exercicio});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final color = _trustColor(exercicio, primary);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.15 : 0.09),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(_trustIcon(exercicio), color: color, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Prontidao para prescricao',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      exercicio.mediaTrustLabel,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            exercicio.mediaTrustDescription,
+            style: TextStyle(
+              color: ink.withValues(alpha: 0.82),
+              fontSize: 12.8,
+              height: 1.35,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _ReadinessCheck(
+                ok: exercicio.hasPlayableMedia,
+                label: 'midia',
+                color: color,
+              ),
+              _ReadinessCheck(
+                ok: exercicio.isLicensedMedia || exercicio.isPersonalUpload,
+                label: 'licenca/origem',
+                color: color,
+              ),
+              _ReadinessCheck(
+                ok: exercicio.isEditorialApproved,
+                label: 'curadoria',
+                color: color,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadinessCheck extends StatelessWidget {
+  final bool ok;
+  final String label;
+  final Color color;
+
+  const _ReadinessCheck({
+    required this.ok,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fallback = Theme.of(context).brightness == Brightness.dark
+        ? EagleTokens.darkInkMute
+        : EagleTokens.inkMute;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: (ok ? color : fallback).withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            ok ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
+            color: ok ? color : fallback,
+            size: 15,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              color: ok ? color : fallback,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Color _trustColor(Exercicio exercicio, Color primary) {
+  return switch (exercicio.mediaTrustLevel) {
+    'READY' => exercicio.isPersonalUpload ? primary : EagleTokens.good,
+    'NO_VIDEO' => EagleTokens.bad,
+    _ => EagleTokens.warn,
+  };
+}
+
+IconData _trustIcon(Exercicio exercicio) {
+  return switch (exercicio.mediaTrustLevel) {
+    'READY' => exercicio.isPersonalUpload
+        ? Icons.workspace_premium_rounded
+        : Icons.verified_rounded,
+    'NO_VIDEO' => Icons.videocam_off_outlined,
+    _ => Icons.rate_review_outlined,
+  };
 }
 
 String _formatEditorialStatus(String value) {

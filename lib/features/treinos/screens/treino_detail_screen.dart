@@ -4,6 +4,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../exercicios/data/exercicio_repository.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
 
@@ -543,9 +544,9 @@ class _ExercicioRow extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final hasMedia = (te.exercicio.videoUrl?.isNotEmpty == true) ||
-        (te.exercicio.gifUrl?.isNotEmpty == true);
+    final hasMedia = te.exercicio.hasPlayableMedia;
     final isAdvanced = te.tipoSerie != 'NORMAL';
+    final trustColor = _trustColor(te.exercicio, primary);
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
@@ -568,7 +569,7 @@ class _ExercicioRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(te.exercicio.nome, style: TextStyle(color: ink, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: -0.2)),
+                Text(te.exercicio.nome, style: TextStyle(color: ink, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0)),
                 const SizedBox(height: 4),
                 Row(
                   children: [
@@ -591,6 +592,11 @@ class _ExercicioRow extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 6,
                     children: [
+                      _ExerciseMeta(
+                        icon: _trustIcon(te.exercicio),
+                        text: te.exercicio.mediaTrustLabel,
+                        color: trustColor,
+                      ),
                       if (isAdvanced)
                         _ExerciseMeta(
                           icon: te.tipoSerie == 'SUPERSET'
@@ -602,12 +608,6 @@ class _ExercicioRow extends StatelessWidget {
                           color: te.tipoSerie == 'SUPERSET'
                               ? primary
                               : EagleTokens.warn,
-                        ),
-                      if (hasMedia)
-                        _ExerciseMeta(
-                          icon: Icons.play_circle_outline_rounded,
-                          text: 'video disponivel',
-                          color: primary,
                         ),
                       if (te.observacoes?.trim().isNotEmpty == true)
                         _ExerciseMeta(
@@ -635,6 +635,24 @@ class _ExercicioRow extends StatelessWidget {
 
 /// Grid texture painter — white lines 6% opacity, 26×26px cells.
 /// Matches auth_shell.dart _AuthGridPainter; reused on hero surfaces.
+Color _trustColor(Exercicio exercicio, Color primary) {
+  return switch (exercicio.mediaTrustLevel) {
+    'READY' => exercicio.isPersonalUpload ? primary : EagleTokens.good,
+    'NO_VIDEO' => EagleTokens.bad,
+    _ => EagleTokens.warn,
+  };
+}
+
+IconData _trustIcon(Exercicio exercicio) {
+  return switch (exercicio.mediaTrustLevel) {
+    'READY' => exercicio.isPersonalUpload
+        ? Icons.workspace_premium_rounded
+        : Icons.verified_rounded,
+    'NO_VIDEO' => Icons.videocam_off_outlined,
+    _ => Icons.rate_review_outlined,
+  };
+}
+
 class _ExerciseMeta extends StatelessWidget {
   final IconData? icon;
   final String text;

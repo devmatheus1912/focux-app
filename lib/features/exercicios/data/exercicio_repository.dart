@@ -77,6 +77,50 @@ class Exercicio {
             ? null
             : DateTime.tryParse(json['editorialReviewedAt'].toString()),
   );
+
+  bool get hasPlayableMedia =>
+      (videoUrl?.trim().isNotEmpty ?? false) ||
+      (gifUrl?.trim().isNotEmpty ?? false);
+
+  bool get isPersonalUpload =>
+      videoSource == 'PERSONAL_UPLOAD' || licenseStatus == 'PERSONAL_OWNED';
+
+  bool get isLicensedMedia => licenseStatus == 'LICENSED';
+
+  bool get isEditorialApproved => editorialStatus == 'APPROVED';
+
+  bool get isReadyForStudent =>
+      hasPlayableMedia &&
+      isEditorialApproved &&
+      (isLicensedMedia || isPersonalUpload);
+
+  String get mediaTrustLevel {
+    if (isReadyForStudent) return 'READY';
+    if (!hasPlayableMedia) return 'NO_VIDEO';
+    if (!isEditorialApproved) return 'NEEDS_REVIEW';
+    if (!isLicensedMedia && !isPersonalUpload) return 'NEEDS_LICENSE';
+    return 'NEEDS_REVIEW';
+  }
+
+  String get mediaTrustLabel {
+    return switch (mediaTrustLevel) {
+      'READY' => isPersonalUpload ? 'video do personal' : 'licenciado',
+      'NO_VIDEO' => 'sem video',
+      'NEEDS_LICENSE' => 'licenca pendente',
+      _ => 'revisar midia',
+    };
+  }
+
+  String get mediaTrustDescription {
+    return switch (mediaTrustLevel) {
+      'READY' => isPersonalUpload
+          ? 'Demonstracao propria validada para passar mais confianca ao aluno.'
+          : 'Midia licenciada e aprovada para prescricao.',
+      'NO_VIDEO' => 'Adicione video ou GIF antes de priorizar este exercicio.',
+      'NEEDS_LICENSE' => 'Informe se a midia e licenciada ou propria do personal.',
+      _ => 'Aprove a curadoria antes de usar como exercicio premium.',
+    };
+  }
 }
 
 class ExercicioCuradoriaBucket {

@@ -154,6 +154,14 @@ class _AddExercicioToTreinoScreenState
                           ),
                         ],
                       ),
+                      if (_selecionado != null) ...[
+                        const SizedBox(height: 14),
+                        _SelectedExerciseTrustPanel(
+                          exercicio: _selecionado!,
+                          primary: primary,
+                          isDark: isDark,
+                        ),
+                      ],
                       const SizedBox(height: 20),
                       Row(
                         children: [
@@ -275,6 +283,85 @@ class _AddExercicioToTreinoScreenState
       ),
     );
   }
+}
+
+class _SelectedExerciseTrustPanel extends StatelessWidget {
+  final Exercicio exercicio;
+  final Color primary;
+  final bool isDark;
+
+  const _SelectedExerciseTrustPanel({
+    required this.exercicio,
+    required this.primary,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final color = _trustColor(exercicio, primary);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.16 : 0.10),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(_trustIcon(exercicio), color: color, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  exercicio.mediaTrustLabel,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  exercicio.mediaTrustDescription,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 12.5,
+                    height: 1.35,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Color _trustColor(Exercicio exercicio, Color primary) {
+  return switch (exercicio.mediaTrustLevel) {
+    'READY' => exercicio.isPersonalUpload ? primary : EagleTokens.good,
+    'NO_VIDEO' => EagleTokens.bad,
+    _ => EagleTokens.warn,
+  };
+}
+
+IconData _trustIcon(Exercicio exercicio) {
+  return switch (exercicio.mediaTrustLevel) {
+    'READY' => exercicio.isPersonalUpload
+        ? Icons.workspace_premium_rounded
+        : Icons.verified_rounded,
+    'NO_VIDEO' => Icons.videocam_off_outlined,
+    _ => Icons.rate_review_outlined,
+  };
 }
 
 class _SerieTypeSelector extends StatelessWidget {
