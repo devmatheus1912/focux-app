@@ -168,6 +168,21 @@ class TreinoRepository {
     await _dio.delete('/api/treinos/$treinoId/exercicios/$itemId');
   }
 
+  Future<Treino> reordenarExercicios(int treinoId, List<int> itemIds) async {
+    final response = await _dio.patch(
+      '/api/treinos/$treinoId/exercicios/ordem',
+      data: {'itemIds': itemIds},
+    );
+    return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Treino> duplicarExercicio(int treinoId, int itemId) async {
+    final response = await _dio.post(
+      '/api/treinos/$treinoId/exercicios/$itemId/duplicar',
+    );
+    return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<void> desvincularAluno(int alunoId, int treinoId) async {
     await _dio.delete('/api/alunos/$alunoId/treinos/$treinoId');
   }

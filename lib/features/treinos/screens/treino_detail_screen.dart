@@ -154,6 +154,8 @@ class _TreinoDetailBody extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
+    final orderedExercises = [...treino.exercicios]
+      ..sort((a, b) => a.ordem.compareTo(b.ordem));
 
     // Group by muscle
     final grouped = <String, List<TreinoExercicioItem>>{};
@@ -408,13 +410,47 @@ class _TreinoDetailBody extends StatelessWidget {
                           children: entry.value.asMap().entries.map((e) {
                             final i = e.key;
                             final te = e.value;
+                            final globalIndex = orderedExercises.indexWhere((item) => item.id == te.id);
+                            Future<void> reorder(int direction) async {
+                              final ids = orderedExercises.map((item) => item.id).toList();
+                              final targetIndex = globalIndex + direction;
+                              if (globalIndex < 0 || targetIndex < 0 || targetIndex >= ids.length) return;
+                              final current = ids.removeAt(globalIndex);
+                              ids.insert(targetIndex, current);
+                              try {
+                                await repo.reordenarExercicios(treinoId, ids);
+                                ref.invalidate(treinoProvider(treinoId));
+                              } catch (error) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Erro ao reordenar: $error')),
+                                  );
+                                }
+                              }
+                            }
                             return _ExercicioRow(
                               te: te,
-                              index: i + 1,
+                              index: globalIndex + 1,
                               isDark: isDark,
                               primary: primary,
                               primarySoft: primarySoft,
                               isLast: i == entry.value.length - 1,
+                              canMoveUp: globalIndex > 0,
+                              canMoveDown: globalIndex < orderedExercises.length - 1,
+                              onMoveUp: () => reorder(-1),
+                              onMoveDown: () => reorder(1),
+                              onDuplicate: () async {
+                                try {
+                                  await repo.duplicarExercicio(treinoId, te.id);
+                                  ref.invalidate(treinoProvider(treinoId));
+                                } catch (error) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Erro ao duplicar: $error')),
+                                    );
+                                  }
+                                }
+                              },
                               onRemove: () async {
                                 final confirm = await showDialog<bool>(
                                   context: context,
@@ -527,6 +563,11 @@ class _ExercicioRow extends StatelessWidget {
   final Color primary;
   final Color primarySoft;
   final bool isLast;
+  final bool canMoveUp;
+  final bool canMoveDown;
+  final VoidCallback onMoveUp;
+  final VoidCallback onMoveDown;
+  final VoidCallback onDuplicate;
   final VoidCallback onRemove;
 
   const _ExercicioRow({
@@ -536,6 +577,11 @@ class _ExercicioRow extends StatelessWidget {
     required this.primary,
     required this.primarySoft,
     required this.isLast,
+    required this.canMoveUp,
+    required this.canMoveDown,
+    required this.onMoveUp,
+    required this.onMoveDown,
+    required this.onDuplicate,
     required this.onRemove,
   });
 
@@ -624,8 +670,29 @@ class _ExercicioRow extends StatelessWidget {
           PopupMenuButton<String>(
             iconColor: mute,
             iconSize: 20,
-            onSelected: (val) { if (val == 'remove') onRemove(); },
-            itemBuilder: (_) => [const PopupMenuItem(value: 'remove', child: Text('Remover', style: TextStyle(color: EagleTokens.bad)))],
+            onSelected: (val) {
+              if (val == 'up') onMoveUp();
+              if (val == 'down') onMoveDown();
+              if (val == 'duplicate') onDuplicate();
+              if (val == 'remove') onRemove();
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'up',
+                enabled: canMoveUp,
+                child: const Text('Mover para cima'),
+              ),
+              PopupMenuItem(
+                value: 'down',
+                enabled: canMoveDown,
+                child: const Text('Mover para baixo'),
+              ),
+              const PopupMenuItem(
+                value: 'duplicate',
+                child: Text('Duplicar item'),
+              ),
+              const PopupMenuItem(value: 'remove', child: Text('Remover', style: TextStyle(color: EagleTokens.bad))),
+            ],
           ),
         ],
       ),

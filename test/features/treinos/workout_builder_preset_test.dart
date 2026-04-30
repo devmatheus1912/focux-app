@@ -27,4 +27,21 @@ void main() {
     expect(screen, contains('Carga alvo'));
     expect(screen, contains('Observacoes de execucao'));
   });
+
+  test('workout detail exposes persisted reorder and duplicate actions', () {
+    final repository = File(
+      'lib/features/treinos/data/treino_repository.dart',
+    ).readAsStringSync();
+    final detail = File(
+      'lib/features/treinos/screens/treino_detail_screen.dart',
+    ).readAsStringSync();
+
+    expect(repository, contains('reordenarExercicios'));
+    expect(repository, contains('/exercicios/ordem'));
+    expect(repository, contains('duplicarExercicio'));
+    expect(repository, contains('/duplicar'));
+    expect(detail, contains('Mover para cima'));
+    expect(detail, contains('Mover para baixo'));
+    expect(detail, contains('Duplicar item'));
+  });
 }
