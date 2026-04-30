@@ -95,6 +95,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           iniciadoEm: _execucao!.iniciadoEm,
           concluidoEm: _execucao!.concluidoEm,
           evolucoesCarga: _execucao!.evolucoesCarga,
+          evolucoesPerformance: _execucao!.evolucoesPerformance,
           exercicios: _execucao!.exercicios
               .map((e) => e.id == updated.id ? updated : e)
               .toList(),
@@ -153,6 +154,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           iniciadoEm: _execucao!.iniciadoEm,
           concluidoEm: _execucao!.concluidoEm,
           evolucoesCarga: _execucao!.evolucoesCarga,
+          evolucoesPerformance: _execucao!.evolucoesPerformance,
           exercicios: _execucao!.exercicios
               .map((e) => e.id == updated.id ? updated : e)
               .toList(),
@@ -194,6 +196,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           iniciadoEm: _execucao!.iniciadoEm,
           concluidoEm: _execucao!.concluidoEm,
           evolucoesCarga: _execucao!.evolucoesCarga,
+          evolucoesPerformance: _execucao!.evolucoesPerformance,
           exercicios: _execucao!.exercicios
               .map((e) => e.id == updated.id ? updated : e)
               .toList(),
@@ -249,8 +252,25 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       ref.invalidate(historicoCheckinProvider);
       ref.invalidate(meusTreinosProvider);
       if (!mounted) return;
-      if (concluida.evolucoesCarga.isNotEmpty) {
-        await _showEvolucaoCarga(concluida.evolucoesCarga);
+      final evolucoes = concluida.evolucoesPerformance.isNotEmpty
+          ? concluida.evolucoesPerformance
+          : concluida.evolucoesCarga
+              .map(
+                (e) => EvolucaoPerformance(
+                  tipo: 'CARGA',
+                  exercicioId: e.exercicioId,
+                  exercicioNome: e.exercicioNome,
+                  valorAnterior: e.cargaAnteriorKg,
+                  valorAtual: e.cargaAtualKg,
+                  diferenca: e.diferencaKg,
+                  percentual: e.percentual,
+                  unidade: 'kg',
+                  mensagem: e.mensagem,
+                ),
+              )
+              .toList();
+      if (evolucoes.isNotEmpty) {
+        await _showEvolucaoPerformance(evolucoes);
         if (!mounted) return;
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -273,7 +293,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     }
   }
 
-  Future<void> _showEvolucaoCarga(List<EvolucaoCarga> evolucoes) async {
+  Future<void> _showEvolucaoPerformance(
+    List<EvolucaoPerformance> evolucoes,
+  ) async {
     if (!mounted) return;
     final primary = Theme.of(context).colorScheme.primary;
     await showDialog<void>(
@@ -287,7 +309,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Voce aumentou carga neste treino. A mensagem tambem ficou salva no chat com seu personal.',
+                'Voce evoluiu neste treino. A mensagem tambem ficou salva no chat com seu personal.',
               ),
               const SizedBox(height: 14),
               for (final evolucao in evolucoes.take(4))
@@ -300,7 +322,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          '${evolucao.exercicioNome}: ${_fmtKg(evolucao.cargaAnteriorKg)}kg -> ${_fmtKg(evolucao.cargaAtualKg)}kg'
+                          '${_labelEvolucao(evolucao.tipo)} em ${evolucao.exercicioNome}: '
+                          '${_fmtValor(evolucao.valorAnterior, evolucao.unidade)} -> ${_fmtValor(evolucao.valorAtual, evolucao.unidade)}'
                           '${evolucao.percentual == null ? '' : ' (+${evolucao.percentual}%)'}',
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
@@ -329,6 +352,23 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
     }
     return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
+  String _labelEvolucao(String tipo) {
+    switch (tipo) {
+      case 'REPETICOES':
+        return 'Repeticoes';
+      case 'VOLUME':
+        return 'Volume';
+      default:
+        return 'Carga';
+    }
+  }
+
+  String _fmtValor(double value, String unidade) {
+    final base = _fmtKg(value);
+    if (unidade.isEmpty) return base;
+    return '$base $unidade';
   }
 
   String _fmtKg(double value) {

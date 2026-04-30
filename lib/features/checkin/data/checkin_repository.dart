@@ -178,6 +178,7 @@ class ExecucaoTreino {
   final String? concluidoEm;
   final List<ExecucaoExercicio> exercicios;
   final List<EvolucaoCarga> evolucoesCarga;
+  final List<EvolucaoPerformance> evolucoesPerformance;
 
   ExecucaoTreino({
     this.id,
@@ -188,6 +189,7 @@ class ExecucaoTreino {
     this.concluidoEm,
     required this.exercicios,
     this.evolucoesCarga = const [],
+    this.evolucoesPerformance = const [],
   });
 
   factory ExecucaoTreino.fromJson(Map<String, dynamic> j) => ExecucaoTreino(
@@ -203,6 +205,11 @@ class ExecucaoTreino {
         evolucoesCarga: (j['evolucoesCarga'] as List<dynamic>? ?? const [])
             .map((e) => EvolucaoCarga.fromJson(e as Map<String, dynamic>))
             .toList(),
+        evolucoesPerformance:
+            (j['evolucoesPerformance'] as List<dynamic>? ?? const [])
+                .map((e) =>
+                    EvolucaoPerformance.fromJson(e as Map<String, dynamic>))
+                .toList(),
       );
 }
 
@@ -232,6 +239,43 @@ class EvolucaoCarga {
         cargaAtualKg: _toDouble(json['cargaAtualKg']) ?? 0,
         diferencaKg: _toDouble(json['diferencaKg']) ?? 0,
         percentual: json['percentual'] as int?,
+        mensagem: json['mensagem'] as String? ?? '',
+      );
+}
+
+class EvolucaoPerformance {
+  final String tipo;
+  final int exercicioId;
+  final String exercicioNome;
+  final double valorAnterior;
+  final double valorAtual;
+  final double diferenca;
+  final int? percentual;
+  final String unidade;
+  final String mensagem;
+
+  const EvolucaoPerformance({
+    required this.tipo,
+    required this.exercicioId,
+    required this.exercicioNome,
+    required this.valorAnterior,
+    required this.valorAtual,
+    required this.diferenca,
+    this.percentual,
+    required this.unidade,
+    required this.mensagem,
+  });
+
+  factory EvolucaoPerformance.fromJson(Map<String, dynamic> json) =>
+      EvolucaoPerformance(
+        tipo: json['tipo'] as String? ?? 'CARGA',
+        exercicioId: json['exercicioId'] as int,
+        exercicioNome: json['exercicioNome'] as String,
+        valorAnterior: _toDouble(json['valorAnterior']) ?? 0,
+        valorAtual: _toDouble(json['valorAtual']) ?? 0,
+        diferenca: _toDouble(json['diferenca']) ?? 0,
+        percentual: json['percentual'] as int?,
+        unidade: json['unidade'] as String? ?? '',
         mensagem: json['mensagem'] as String? ?? '',
       );
 }

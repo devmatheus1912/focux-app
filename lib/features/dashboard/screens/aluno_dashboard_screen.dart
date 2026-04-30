@@ -133,6 +133,11 @@ class AlunoDashboardScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             const ProgressoSemanalWidget(),
             const SizedBox(height: 16),
+            _PerformanceEvolutionCard(
+              historicoAsync: historicoAsync,
+              isDark: isDark,
+            ),
+            const SizedBox(height: 16),
             alunoAsync.when(
               data: (aluno) => _ProgressCheckpointCard(
                 aluno: aluno,
@@ -613,6 +618,238 @@ class _StudentStatsRow extends StatelessWidget {
         ],
       ],
     );
+  }
+}
+
+class _PerformanceEvolutionCard extends StatelessWidget {
+  final AsyncValue<List<ExecucaoTreino>> historicoAsync;
+  final bool isDark;
+
+  const _PerformanceEvolutionCard({
+    required this.historicoAsync,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: line),
+      ),
+      child: historicoAsync.when(
+        loading: () => const SizedBox(
+          height: 96,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+        error: (_, __) => Text(
+          'Sua evolucao de performance vai aparecer aqui assim que o historico carregar.',
+          style: TextStyle(color: mute, height: 1.45),
+        ),
+        data: (historico) {
+          final treinosConcluidos = historico
+              .where((treino) => treino.status == 'CONCLUIDO')
+              .toList();
+          final ultimaEvolucao = _ultimaEvolucao(treinosConcluidos);
+          final volumeSemana = _volumePeriodo(treinosConcluidos, _inicioSemana());
+          final volumeMes = _volumePeriodo(treinosConcluidos, _inicioMes());
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: BrandPalette.soft(primary, dark: isDark),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(Icons.emoji_events_outlined, color: primary),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Evolucao real',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          ultimaEvolucao == null
+                              ? 'Registre as series para o app enxergar carga, repeticoes e volume.'
+                              : ultimaEvolucao.mensagem,
+                          style: TextStyle(color: mute, height: 1.45),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: _MiniMetricCard(
+                      label: 'Ultimo PR',
+                      value: ultimaEvolucao == null
+                          ? '--'
+                          : _labelEvolucao(ultimaEvolucao.tipo),
+                      isDark: isDark,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _MiniMetricCard(
+                      label: 'Volume semana',
+                      value: _fmtVolume(volumeSemana),
+                      isDark: isDark,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _MiniMetricCard(
+                      label: 'Volume mes',
+                      value: _fmtVolume(volumeMes),
+                      isDark: isDark,
+                    ),
+                  ),
+                ],
+              ),
+              if (ultimaEvolucao != null) ...[
+                const SizedBox(height: 14),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : BrandPalette.softer(primary),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    '${ultimaEvolucao.exercicioNome}: ${_fmtValor(ultimaEvolucao.valorAnterior, ultimaEvolucao.unidade)} -> ${_fmtValor(ultimaEvolucao.valorAtual, ultimaEvolucao.unidade)}'
+                    '${ultimaEvolucao.percentual == null ? '' : ' (+${ultimaEvolucao.percentual}%)'}',
+                    style: TextStyle(
+                      color: ink,
+                      fontWeight: FontWeight.w700,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  EvolucaoPerformance? _ultimaEvolucao(List<ExecucaoTreino> historico) {
+    for (final treino in historico) {
+      if (treino.evolucoesPerformance.isNotEmpty) {
+        return treino.evolucoesPerformance.first;
+      }
+      if (treino.evolucoesCarga.isNotEmpty) {
+        final item = treino.evolucoesCarga.first;
+        return EvolucaoPerformance(
+          tipo: 'CARGA',
+          exercicioId: item.exercicioId,
+          exercicioNome: item.exercicioNome,
+          valorAnterior: item.cargaAnteriorKg,
+          valorAtual: item.cargaAtualKg,
+          diferenca: item.diferencaKg,
+          percentual: item.percentual,
+          unidade: 'kg',
+          mensagem: item.mensagem,
+        );
+      }
+    }
+    return null;
+  }
+
+  double _volumePeriodo(List<ExecucaoTreino> historico, DateTime inicio) {
+    return historico
+        .where((treino) {
+          final data = _dataTreino(treino);
+          return data != null && !data.isBefore(inicio);
+        })
+        .fold<double>(0, (total, treino) => total + _volumeTreino(treino));
+  }
+
+  double _volumeTreino(ExecucaoTreino treino) {
+    var total = 0.0;
+    for (final exercicio in treino.exercicios) {
+      for (final serie in exercicio.seriesDetalhes) {
+        final reps = _primeiroNumero(serie.repeticoes);
+        final carga = serie.cargaKg;
+        if (reps != null && carga != null) {
+          total += carga * reps;
+        }
+      }
+    }
+    return total;
+  }
+
+  DateTime? _dataTreino(ExecucaoTreino treino) {
+    return DateTime.tryParse(treino.concluidoEm ?? treino.iniciadoEm ?? '');
+  }
+
+  DateTime _inicioSemana() {
+    final now = DateTime.now();
+    final start = now.subtract(Duration(days: now.weekday - 1));
+    return DateTime(start.year, start.month, start.day);
+  }
+
+  DateTime _inicioMes() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month);
+  }
+
+  int? _primeiroNumero(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final match = RegExp(r'\d+').firstMatch(value);
+    return match == null ? null : int.tryParse(match.group(0)!);
+  }
+
+  String _labelEvolucao(String tipo) {
+    switch (tipo) {
+      case 'REPETICOES':
+        return 'Repeticoes';
+      case 'VOLUME':
+        return 'Volume';
+      default:
+        return 'Carga';
+    }
+  }
+
+  String _fmtVolume(double value) {
+    if (value <= 0) return '--';
+    if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)}t';
+    return '${value.toStringAsFixed(0)}kg';
+  }
+
+  String _fmtValor(double value, String unidade) {
+    final formatted = value == value.roundToDouble()
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(1);
+    if (unidade.isEmpty) return formatted;
+    return '$formatted $unidade';
   }
 }
 
