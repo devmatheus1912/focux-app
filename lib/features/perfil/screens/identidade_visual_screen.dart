@@ -45,7 +45,6 @@ class _IdentidadeVisualScreenState
   final _domCtrl = TextEditingController();
   final _videoCtrl = TextEditingController();
   final _trackingCtrl = TextEditingController();
-  final _heroPromptCtrl = TextEditingController();
   final _heroImageCtrl = TextEditingController();
   final _serviceTitleCtrls = List.generate(3, (_) => TextEditingController());
   final _serviceDescCtrls = List.generate(3, (_) => TextEditingController());
@@ -59,28 +58,20 @@ class _IdentidadeVisualScreenState
   bool _salvando = false;
   bool _uploadingLogo = false;
   bool _uploadingVideo = false;
-  bool _applyingHeroImage = false;
+  bool _uploadingHeroPhoto = false;
   bool _perfilLoaded = false;
-  bool _hydratingPerfil = false;
   final bool _showManualVideoUrl = false;
   String? _logoUrl;
 
   @override
   void initState() {
     super.initState();
-    _heroPromptCtrl.addListener(_onHeroPromptChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(perfilProvider);
     });
   }
 
-  void _onHeroPromptChanged() {
-    if (_hydratingPerfil) return;
-    if (mounted) setState(() {});
-  }
-
   void _applyPerfil(PerfilPersonal perfil) {
-    _hydratingPerfil = true;
     _descCtrl.text = perfil.descricaoProfissional ?? '';
     _espCtrl.text = perfil.especialidades ?? '';
     _instaCtrl.text = perfil.instagram ?? '';
@@ -88,8 +79,9 @@ class _IdentidadeVisualScreenState
     _domCtrl.text = perfil.dominioCustomizado ?? '';
     _videoCtrl.text = perfil.videoUrl ?? '';
     _trackingCtrl.text = perfil.trackingId ?? '';
-    _heroPromptCtrl.text = perfil.heroPrompt ?? '';
-    _heroImageCtrl.text = perfil.heroImageUrl ?? '';
+    final heroImageUrl = perfil.heroImageUrl?.trim() ?? '';
+    _heroImageCtrl.text =
+        _isAiGeneratedHeroUrl(heroImageUrl) ? '' : heroImageUrl;
     _logoUrl = perfil.logoUrl;
     if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
       final hex = int.tryParse(perfil.corPrimaria!.replaceFirst('#', '0xFF'));
@@ -114,7 +106,6 @@ class _IdentidadeVisualScreenState
       _faqQuestionCtrls[i].text = item?.pergunta ?? '';
       _faqAnswerCtrls[i].text = item?.resposta ?? '';
     }
-    _hydratingPerfil = false;
     _perfilLoaded = true;
   }
 
@@ -159,7 +150,6 @@ class _IdentidadeVisualScreenState
 
   @override
   void dispose() {
-    _heroPromptCtrl.removeListener(_onHeroPromptChanged);
     _descCtrl.dispose();
     _espCtrl.dispose();
     _instaCtrl.dispose();
@@ -167,7 +157,6 @@ class _IdentidadeVisualScreenState
     _domCtrl.dispose();
     _videoCtrl.dispose();
     _trackingCtrl.dispose();
-    _heroPromptCtrl.dispose();
     _heroImageCtrl.dispose();
     for (final controller in _serviceTitleCtrls) {
       controller.dispose();
@@ -256,6 +245,41 @@ class _IdentidadeVisualScreenState
     }
   }
 
+  Future<void> _pickHeroPhoto(String plano) async {
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 88,
+      maxWidth: 1800,
+    );
+    if (file == null || !mounted) return;
+    setState(() => _uploadingHeroPhoto = true);
+    try {
+      final url = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        folder: 'landing/hero',
+        resourceType: 'image',
+      );
+      if (mounted) {
+        setState(() => _heroImageCtrl.text = url);
+        await _salvar(
+          plano,
+          successMessage: 'Foto principal enviada e salva na landing.',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao enviar foto: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingHeroPhoto = false);
+    }
+  }
+
   Future<void> _salvar(
     String plano, {
     String successMessage = 'Identidade visual salva!',
@@ -289,7 +313,7 @@ class _IdentidadeVisualScreenState
         }
         body['trackingId'] = _trackingCtrl.text.trim();
         final typedHeroUrl = _heroImageCtrl.text.trim();
-        body['heroPrompt'] = _heroPromptCtrl.text.trim();
+        body['heroPrompt'] = '';
         body['heroImageUrl'] =
             typedHeroUrl.isEmpty || _isAiGeneratedHeroUrl(typedHeroUrl)
                 ? ''
@@ -320,63 +344,6 @@ class _IdentidadeVisualScreenState
     }
   }
 
-  Future<void> _applyHeroAsBackground(String plano, String url) async {
-    if (_applyingHeroImage) return;
-    setState(() {
-      _applyingHeroImage = true;
-      _heroImageCtrl.clear();
-    });
-    try {
-      await _salvar(
-        plano,
-        successMessage: 'Imagem IA aplicada como fundo da landing.',
-      );
-    } finally {
-      if (mounted) setState(() => _applyingHeroImage = false);
-    }
-  }
-
-  String _buildGeneratedHeroUrl({PerfilPersonal? perfil}) {
-    final prompt = _buildGeneratedHeroPrompt(perfil);
-    if (prompt.isEmpty) return '';
-    final encoded = Uri.encodeComponent(prompt);
-    final slugOrId =
-        perfil?.slug ?? perfil?.id.toString() ?? _currentPerfilSeedSource;
-    final seed = _stablePositiveSeed(slugOrId);
-    return 'https://image.pollinations.ai/prompt/$encoded'
-        '?width=1600&height=1000&model=flux&nologo=true&seed=$seed';
-  }
-
-  String get _currentPerfilSeedSource {
-    final perfil = ref.read(perfilProvider).value;
-    return perfil?.slug ?? perfil?.id.toString() ?? 'focux-landing';
-  }
-
-  String _buildGeneratedHeroPrompt(PerfilPersonal? perfil) {
-    final brief = _heroPromptCtrl.text.trim();
-    final nome =
-        (perfil?.nome ?? '').trim().isNotEmpty
-            ? perfil!.nome.trim()
-            : 'personal trainer';
-    final especialidades =
-        _espCtrl.text.trim().isNotEmpty
-            ? _espCtrl.text.trim()
-            : (perfil?.especialidades ?? perfil?.especialidade ?? '').trim();
-    final primary =
-        '#${_corPrimaria.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
-    final secondary =
-        '#${_corSecundaria.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
-    final base =
-        brief.isNotEmpty
-            ? brief
-            : 'personal trainer premium, treino personalizado, visual sofisticado';
-    return '$base, landing page premium para $nome, '
-        '${especialidades.isEmpty ? 'fitness transformation' : especialidades}, '
-        'realistic cinematic fitness photography, elegant mobile first hero background, '
-        'deep contrast, premium studio lighting, brand colors $primary and $secondary, '
-        'clear space for headline, no text, no logo, no watermark';
-  }
-
   bool _isAiGeneratedHeroUrl(String url) {
     final value = url.trim().toLowerCase();
     return value.contains('image.pollinations.ai/prompt/');
@@ -388,14 +355,6 @@ class _IdentidadeVisualScreenState
         clean.endsWith('.webm') ||
         clean.endsWith('.mov') ||
         clean.endsWith('.m4v');
-  }
-
-  int _stablePositiveSeed(String value) {
-    var hash = 0;
-    for (final code in value.codeUnits) {
-      hash = (hash * 31 + code) & 0x7fffffff;
-    }
-    return hash == 0 ? 1015133771 : hash;
   }
 
   @override
@@ -417,17 +376,11 @@ class _IdentidadeVisualScreenState
 
     final slug = perfil?.slug;
     final nomePersonal = perfil?.nome ?? '';
-    final generatedHeroUrl = perfil?.generatedHeroImageUrl?.trim();
-    final heroStatus = perfil?.heroImageStatus?.trim();
-    final heroBrief = perfil?.heroImageBrief?.trim();
-    final draftGeneratedHeroUrl = _buildGeneratedHeroUrl(perfil: perfil);
-    final typedHeroUrl = _heroImageCtrl.text.trim();
-    final previewHeroUrl =
-        typedHeroUrl.isEmpty || _isAiGeneratedHeroUrl(typedHeroUrl)
-            ? draftGeneratedHeroUrl
-            : typedHeroUrl;
-    final hasUnsavedHeroBrief =
-        (_heroPromptCtrl.text.trim()) != (perfil?.heroPrompt ?? '').trim();
+    final heroPhotoUrl = _heroImageCtrl.text.trim();
+    final heroPhotoReady = heroPhotoUrl.isNotEmpty;
+    final servicesCount = _buildServicosPayload().length;
+    final packagesCount = _buildPacotesPayload().length;
+    final faqCount = _buildFaqPayload().length;
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -947,73 +900,67 @@ class _IdentidadeVisualScreenState
                     const SizedBox(height: 16),
                     _LandingEditorCard(
                       isDark: isDark,
-                      title: 'Imagem IA unica da landing',
+                      title: 'Foto principal da landing',
                       subtitle:
-                          'Opcional: gere uma referencia criativa. A primeira dobra ja usa uma assinatura premium unica com suas cores, sem depender de imagem externa.',
+                          'Suba uma foto real sua, do seu estudio ou de um atendimento. Essa foto vira o impacto visual da primeira tela.',
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          TextFormField(
-                            controller: _heroPromptCtrl,
-                            enabled: isEnterprise,
-                            maxLines: 3,
-                            maxLength: 500,
-                            decoration: const InputDecoration(
-                              labelText: 'Briefing para IA',
-                              hintText:
-                                  'Ex: personal feminino em estudio premium, luz natural, treino funcional, tom sofisticado.',
-                              alignLabelWithHint: true,
-                            ),
+                          _HeroPhotoPreview(
+                            isDark: isDark,
+                            url: heroPhotoUrl,
+                            primary: _corPrimaria,
+                            secondary: _corSecundaria,
+                            name: nomePersonal,
+                            slogan: _sloganCtrl.text.trim(),
                           ),
                           const SizedBox(height: 12),
-                          if (previewHeroUrl.isNotEmpty) ...[
-                            _GeneratedHeroAssetCard(
-                              isDark: isDark,
-                              url: previewHeroUrl,
-                              status:
-                                  hasUnsavedHeroBrief
-                                      ? 'PREVIEW'
-                                      : (heroStatus ?? 'PREVIEW'),
-                              brief:
-                                  hasUnsavedHeroBrief
-                                      ? _heroPromptCtrl.text.trim()
-                                      : (heroBrief ??
-                                          _heroPromptCtrl.text.trim()),
-                              applying: _applyingHeroImage || _salvando,
-                              onUseAsBackground:
-                                  isEnterprise
-                                      ? () => _applyHeroAsBackground(
-                                        plano,
-                                        previewHeroUrl,
-                                      )
-                                      : null,
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                          TextFormField(
-                            controller: _heroImageCtrl,
-                            enabled: isEnterprise,
-                            decoration: const InputDecoration(
-                              labelText: 'URL manual de imagem',
-                              hintText: 'https://cdn.focux.app/landing/...',
-                              helperText:
-                                  'Opcional: use apenas se quiser substituir a IA por uma imagem propria.',
-                              helperMaxLines: 2,
+                          OutlinedButton.icon(
+                            onPressed:
+                                isEnterprise && !_uploadingHeroPhoto
+                                    ? () => _pickHeroPhoto(plano)
+                                    : null,
+                            icon:
+                                _uploadingHeroPhoto
+                                    ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                    : const Icon(Icons.add_photo_alternate),
+                            label: Text(
+                              _uploadingHeroPhoto
+                                  ? 'Enviando foto...'
+                                  : heroPhotoReady
+                                  ? 'Trocar foto principal'
+                                  : 'Subir foto principal',
                             ),
                           ),
-                          if (generatedHeroUrl != null &&
-                              generatedHeroUrl.isNotEmpty &&
-                              generatedHeroUrl != previewHeroUrl) ...[
-                            const SizedBox(height: 8),
+                          if (heroPhotoReady) ...[
+                            const SizedBox(height: 10),
                             _LandingMediaStatusCard(
                               isDark: isDark,
-                              icon: Icons.history,
-                              title: 'Imagem IA salva anteriormente',
+                              icon: Icons.photo_camera_back_outlined,
+                              title: 'Foto conectada ao hero',
                               subtitle:
-                                  'Voce mudou o briefing. Aplique a nova imagem para atualizar a landing.',
-                              url: generatedHeroUrl,
+                                  'A landing usa esta foto com recorte premium, overlay e assinatura visual da marca.',
+                              url: heroPhotoUrl,
+                              showUrl: false,
                             ),
                           ],
-                          const SizedBox(height: 12),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _LandingEditorCard(
+                      isDark: isDark,
+                      title: 'Publicacao e campanha',
+                      subtitle:
+                          'Use tracking para saber de onde veio o aluno. O dominio customizado fica acima, junto da marca.',
+                      child: Column(
+                        children: [
                           TextFormField(
                             controller: _trackingCtrl,
                             enabled: isEnterprise,
@@ -1027,73 +974,32 @@ class _IdentidadeVisualScreenState
                         ],
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    _LandingPremiumPlanner(
+                      isDark: isDark,
+                      primary: _corPrimaria,
+                      secondary: _corSecundaria,
+                      name: nomePersonal,
+                      slogan: _sloganCtrl.text.trim(),
+                      specialty: _espCtrl.text.trim(),
+                      heroPhotoReady: heroPhotoReady,
+                      videoReady: _videoCtrl.text.trim().isNotEmpty,
+                      aboutReady: _descCtrl.text.trim().isNotEmpty,
+                      servicesCount: servicesCount,
+                      packagesCount: packagesCount,
+                      faqCount: faqCount,
+                    ),
                     const SizedBox(height: 20),
 
                     // Preview
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [_corPrimaria, _corSecundaria],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.3,
-                            ),
-                            backgroundImage:
-                                _logoUrl != null
-                                    ? NetworkImage(_logoUrl!)
-                                    : null,
-                            child:
-                                _logoUrl == null
-                                    ? Text(
-                                      nomePersonal.isNotEmpty
-                                          ? nomePersonal[0].toUpperCase()
-                                          : 'P',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    )
-                                    : null,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  nomePersonal,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                if (_sloganCtrl.text.isNotEmpty)
-                                  Text(
-                                    _sloganCtrl.text,
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.75,
-                                      ),
-                                      fontSize: 12,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    _PremiumLandingPreviewCard(
+                      primary: _corPrimaria,
+                      secondary: _corSecundaria,
+                      logoUrl: _logoUrl,
+                      heroPhotoUrl: heroPhotoUrl,
+                      name: nomePersonal,
+                      slogan: _sloganCtrl.text.trim(),
+                      specialty: _espCtrl.text.trim(),
                     ),
                   ],
                 ),
@@ -1282,151 +1188,104 @@ class _LandingCoachCard extends StatelessWidget {
   }
 }
 
-class _GeneratedHeroAssetCard extends StatelessWidget {
-  final String url;
-  final String? status;
-  final String? brief;
-  final bool applying;
-  final VoidCallback? onUseAsBackground;
+class _HeroPhotoPreview extends StatelessWidget {
   final bool isDark;
+  final String url;
+  final Color primary;
+  final Color secondary;
+  final String name;
+  final String slogan;
 
-  const _GeneratedHeroAssetCard({
-    required this.url,
-    required this.status,
-    required this.brief,
-    required this.applying,
-    required this.onUseAsBackground,
+  const _HeroPhotoPreview({
     required this.isDark,
+    required this.url,
+    required this.primary,
+    required this.secondary,
+    required this.name,
+    required this.slogan,
   });
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCardHi : EagleTokens.paper,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: primary.withValues(alpha: 0.22)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Stack(
-                fit: StackFit.expand,
+    final hasPhoto = url.trim().isNotEmpty;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: AspectRatio(
+        aspectRatio: 16 / 10,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (hasPhoto)
+              Image.network(
+                url,
+                fit: BoxFit.cover,
+                errorBuilder:
+                    (_, __, ___) => _PremiumHeroPreviewCanvas(
+                      primary: primary,
+                      secondary: secondary,
+                    ),
+              )
+            else
+              _PremiumHeroPreviewCanvas(primary: primary, secondary: secondary),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    const Color(0xFF050814).withValues(alpha: 0.88),
+                    const Color(0xFF050814).withValues(alpha: 0.44),
+                    primary.withValues(alpha: 0.20),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _PremiumHeroPreviewCanvas(primary: primary),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.42),
-                        ],
-                      ),
+                  Text(
+                    hasPhoto ? 'FOTO REAL DA LANDING' : 'ASSINATURA PREMIUM',
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
                     ),
                   ),
-                  const Positioned(
-                    left: 12,
-                    bottom: 10,
-                    child: Text(
-                      'Preview da assinatura premium',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12,
-                      ),
+                  const SizedBox(height: 7),
+                  Text(
+                    slogan.isNotEmpty ? slogan : name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      height: 1.02,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    hasPhoto
+                        ? 'Recorte com overlay, contraste e identidade visual.'
+                        : 'Envie uma foto para deixar a primeira dobra humana.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.74),
+                      fontSize: 12,
+                      height: 1.35,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(Icons.image_outlined, color: primary, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Imagem IA gerada',
-                  style: TextStyle(
-                    color: ink,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13.5,
-                  ),
-                ),
-              ),
-              if (status != null && status!.isNotEmpty)
-                Text(
-                  status!,
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-            ],
-          ),
-          if (brief != null && brief!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              brief!,
-              style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
           ],
-          const SizedBox(height: 10),
-          SelectableText(
-            url,
-            style: TextStyle(
-              color: primary,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              OutlinedButton.icon(
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: url));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('URL da imagem copiada.')),
-                  );
-                },
-                icon: const Icon(Icons.copy, size: 16),
-                label: const Text('Copiar link'),
-              ),
-              FilledButton.icon(
-                onPressed: applying ? null : onUseAsBackground,
-                icon:
-                    applying
-                        ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                        : const Icon(Icons.wallpaper_outlined, size: 16),
-                label: Text(
-                  applying ? 'Aplicando...' : 'Aplicar como fundo premium',
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -1434,13 +1293,20 @@ class _GeneratedHeroAssetCard extends StatelessWidget {
 
 class _PremiumHeroPreviewCanvas extends StatelessWidget {
   final Color primary;
+  final Color secondary;
 
-  const _PremiumHeroPreviewCanvas({required this.primary});
+  const _PremiumHeroPreviewCanvas({
+    required this.primary,
+    required this.secondary,
+  });
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _PremiumHeroPreviewPainter(primary: primary),
+      painter: _PremiumHeroPreviewPainter(
+        primary: primary,
+        secondary: secondary,
+      ),
       child: const SizedBox.expand(),
     );
   }
@@ -1448,8 +1314,12 @@ class _PremiumHeroPreviewCanvas extends StatelessWidget {
 
 class _PremiumHeroPreviewPainter extends CustomPainter {
   final Color primary;
+  final Color secondary;
 
-  const _PremiumHeroPreviewPainter({required this.primary});
+  const _PremiumHeroPreviewPainter({
+    required this.primary,
+    required this.secondary,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1462,7 +1332,7 @@ class _PremiumHeroPreviewPainter extends CustomPainter {
             colors: [
               const Color(0xFF050814),
               Color.lerp(primary, const Color(0xFF050814), 0.64)!,
-              const Color(0xFF111827),
+              Color.lerp(secondary, const Color(0xFF111827), 0.62)!,
             ],
           ).createShader(rect);
     canvas.drawRect(rect, background);
@@ -1516,7 +1386,421 @@ class _PremiumHeroPreviewPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _PremiumHeroPreviewPainter oldDelegate) {
-    return oldDelegate.primary != primary;
+    return oldDelegate.primary != primary || oldDelegate.secondary != secondary;
+  }
+}
+
+class _LandingPremiumPlanner extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final Color secondary;
+  final String name;
+  final String slogan;
+  final String specialty;
+  final bool heroPhotoReady;
+  final bool videoReady;
+  final bool aboutReady;
+  final int servicesCount;
+  final int packagesCount;
+  final int faqCount;
+
+  const _LandingPremiumPlanner({
+    required this.isDark,
+    required this.primary,
+    required this.secondary,
+    required this.name,
+    required this.slogan,
+    required this.specialty,
+    required this.heroPhotoReady,
+    required this.videoReady,
+    required this.aboutReady,
+    required this.servicesCount,
+    required this.packagesCount,
+    required this.faqCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final items = [
+      _PlannerItem(
+        title: 'Promessa clara',
+        detail:
+            slogan.isNotEmpty
+                ? slogan
+                : 'Defina uma frase curta que diga o resultado que voce entrega.',
+        done: slogan.isNotEmpty,
+        icon: Icons.campaign_outlined,
+      ),
+      _PlannerItem(
+        title: 'Foto real de autoridade',
+        detail:
+            heroPhotoReady
+                ? 'Foto principal pronta para a primeira dobra.'
+                : 'Suba uma foto sua, do estudio ou de um atendimento real.',
+        done: heroPhotoReady,
+        icon: Icons.photo_camera_back_outlined,
+      ),
+      _PlannerItem(
+        title: 'Video de apresentacao',
+        detail:
+            videoReady
+                ? 'Player conectado ao hero da landing.'
+                : 'Grave 30 a 90 segundos explicando para quem e seu metodo.',
+        done: videoReady,
+        icon: Icons.play_circle_outline,
+      ),
+      _PlannerItem(
+        title: 'Oferta comparavel',
+        detail:
+            '$servicesCount servicos, $packagesCount planos e $faqCount FAQs.',
+        done: servicesCount >= 2 && packagesCount >= 1 && faqCount >= 2,
+        icon: Icons.sell_outlined,
+      ),
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.paper,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: primary.withValues(alpha: 0.22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [primary, secondary]),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.auto_awesome, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Direcao premium da landing',
+                      style: TextStyle(
+                        color: ink,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      specialty.isNotEmpty
+                          ? 'Posicionamento: ${specialty.split(',').first.trim()}'
+                          : 'Escolha um nicho principal para a pagina nao ficar generica.',
+                      style: TextStyle(color: mute, fontSize: 12.5),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children:
+                items
+                    .map(
+                      (item) => SizedBox(
+                        width: 150,
+                        child: _PlannerTile(
+                          item: item,
+                          primary: primary,
+                          isDark: isDark,
+                        ),
+                      ),
+                    )
+                    .toList(),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Base de design: foto real + contraste forte + prova visivel + oferta clara. Isso deixa cada personal diferente sem depender de gerador externo.',
+            style: TextStyle(color: mute, fontSize: 12.5, height: 1.45),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlannerItem {
+  final String title;
+  final String detail;
+  final bool done;
+  final IconData icon;
+
+  const _PlannerItem({
+    required this.title,
+    required this.detail,
+    required this.done,
+    required this.icon,
+  });
+}
+
+class _PlannerTile extends StatelessWidget {
+  final _PlannerItem item;
+  final Color primary;
+  final bool isDark;
+
+  const _PlannerTile({
+    required this.item,
+    required this.primary,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final color = item.done ? const Color(0xFF22C55E) : primary;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 132),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.14 : 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                item.done ? Icons.check_circle : item.icon,
+                color: color,
+                size: 18,
+              ),
+              const Spacer(),
+              Text(
+                item.done ? 'OK' : 'FALTA',
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 9.5,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            item.title,
+            style: TextStyle(color: ink, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            item.detail,
+            style: TextStyle(color: mute, fontSize: 11.5, height: 1.35),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PremiumLandingPreviewCard extends StatelessWidget {
+  final Color primary;
+  final Color secondary;
+  final String? logoUrl;
+  final String heroPhotoUrl;
+  final String name;
+  final String slogan;
+  final String specialty;
+
+  const _PremiumLandingPreviewCard({
+    required this.primary,
+    required this.secondary,
+    required this.logoUrl,
+    required this.heroPhotoUrl,
+    required this.name,
+    required this.slogan,
+    required this.specialty,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasHeroPhoto = heroPhotoUrl.trim().isNotEmpty;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: AspectRatio(
+        aspectRatio: 16 / 11,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (hasHeroPhoto)
+              Image.network(
+                heroPhotoUrl,
+                fit: BoxFit.cover,
+                errorBuilder:
+                    (_, __, ___) => _PremiumHeroPreviewCanvas(
+                      primary: primary,
+                      secondary: secondary,
+                    ),
+              )
+            else
+              _PremiumHeroPreviewCanvas(primary: primary, secondary: secondary),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF050814).withValues(alpha: 0.20),
+                    const Color(0xFF050814).withValues(alpha: 0.92),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              left: 18,
+              right: 18,
+              top: 18,
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white.withValues(alpha: 0.16),
+                    backgroundImage:
+                        logoUrl != null && logoUrl!.isNotEmpty
+                            ? NetworkImage(logoUrl!)
+                            : null,
+                    child:
+                        logoUrl == null || logoUrl!.isEmpty
+                            ? Text(
+                              name.isNotEmpty ? name[0].toUpperCase() : 'P',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            )
+                            : null,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: primary,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: const Text(
+                      'QUERO TREINAR',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 9,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              left: 18,
+              right: 18,
+              bottom: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    specialty.isNotEmpty
+                        ? specialty.split(',').first.trim().toUpperCase()
+                        : 'PERSONAL TRAINER',
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    slogan.isNotEmpty
+                        ? slogan
+                        : 'Treino com metodo, presenca e resultado.',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      height: 1.0,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _PreviewPill(
+                        label: hasHeroPhoto ? 'Foto real' : 'Assinatura visual',
+                      ),
+                      const _PreviewPill(label: 'Video no hero'),
+                      const _PreviewPill(label: 'Servicos e valores'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PreviewPill extends StatelessWidget {
+  final String label;
+
+  const _PreviewPill({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
   }
 }
 

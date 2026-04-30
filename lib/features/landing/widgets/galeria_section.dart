@@ -10,38 +10,149 @@ class GaleriaSection extends StatelessWidget {
     if (!data.isEnterprise || data.fotos.isEmpty) {
       return const SizedBox.shrink();
     }
+    final accent = Theme.of(context).colorScheme.primary;
+    final photos = data.fotos.take(6).toList();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'GALERIA',
-            style: TextStyle(
-              color: Color(0xFF6B7280),
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth > 780;
+        final horizontalPadding = wide ? 56.0 : 16.0;
+        final contentWidth =
+            (constraints.maxWidth - horizontalPadding * 2)
+                .clamp(0.0, 1100.0)
+                .toDouble();
+        final tileWidth = wide ? (contentWidth - 24) / 3 : contentWidth;
+
+        return Container(
+          color: const Color(0xFF0A0F1E),
+          padding: EdgeInsets.fromLTRB(
+            horizontalPadding,
+            wide ? 48 : 32,
+            horizontalPadding,
+            wide ? 56 : 36,
+          ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1100),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'BASTIDORES REAIS',
+                    style: TextStyle(
+                      color: accent,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Fotos que fazem a pagina parecer humana, nao template.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      height: 1.08,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      for (var i = 0; i < photos.length; i++)
+                        SizedBox(
+                          width: tileWidth,
+                          child: _GalleryEditorialTile(
+                            url: photos[i],
+                            index: i,
+                            accent: accent,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 12),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 4,
-              mainAxisSpacing: 4,
+        );
+      },
+    );
+  }
+}
+
+class _GalleryEditorialTile extends StatelessWidget {
+  final String url;
+  final int index;
+  final Color accent;
+
+  const _GalleryEditorialTile({
+    required this.url,
+    required this.index,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: index == 0 ? 1.16 : 1.0,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.network(
+              url,
+              fit: BoxFit.cover,
+              errorBuilder:
+                  (_, __, ___) => Container(
+                    color: const Color(0xFF111827),
+                    child: Icon(
+                      Icons.image_not_supported_outlined,
+                      color: accent,
+                    ),
+                  ),
             ),
-            itemCount: data.fotos.length,
-            itemBuilder: (_, i) => ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(data.fotos[i], fit: BoxFit.cover),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    const Color(0xFF050814).withValues(alpha: 0.54),
+                  ],
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-        ],
+            Positioned(
+              left: 12,
+              bottom: 12,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.44),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.16),
+                  ),
+                ),
+                child: Text(
+                  'Cena ${index + 1}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

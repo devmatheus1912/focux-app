@@ -5,7 +5,7 @@ import 'package:focux_app/features/landing/models/public_personal_data.dart';
 import 'package:focux_app/features/perfil/data/perfil_repository.dart';
 
 void main() {
-  test('public landing parses FAQ tracking and AI hero fields', () {
+  test('public landing parses FAQ tracking and legacy hero fields', () {
     final data = PublicPersonalData.fromJson({
       'nomePersonal': 'Matheus',
       'totalAlunos': 42,
@@ -34,7 +34,7 @@ void main() {
     expect(data.faq.single.pergunta, contains('treinar'));
   });
 
-  test('profile landing config parses editable FAQ and AI hero fields', () {
+  test('profile landing config parses editable FAQ and legacy hero fields', () {
     final perfil = PerfilPersonal.fromJson({
       'id': 1,
       'nome': 'Matheus',
@@ -93,11 +93,11 @@ void main() {
     expect(landing, contains('FaqSection(data: data'));
     expect(landing, contains("eventType: 'landing_view'"));
     expect(hero, contains('data.heroImageUrl'));
-    expect(hero, contains('data.generatedHeroImageUrl'));
+    expect(hero, isNot(contains('data.generatedHeroImageUrl')));
     expect(hero, contains('_LandingBrandCanvas'));
     expect(hero, contains('_LandingSignature'));
     expect(hero, contains('_isAiGeneratedHeroUrl'));
-    expect(hero, contains('Assinatura'));
+    expect(hero, contains('_SignatureBadge'));
     expect(hero, isNot(contains('webHtmlElementStrategy')));
     expect(hero, isNot(contains('WebHtmlElementStrategy.prefer')));
     expect(hero, isNot(contains('Ver apresentacao')));
@@ -115,18 +115,22 @@ void main() {
     expect(tracking, contains(r'/api/public/personal/$slug/eventos'));
     expect(tracking, contains('landingRegisterPath'));
     expect(tracking, contains('eventType'));
-    expect(identidade, contains('generatedHeroImageUrl'));
-    expect(identidade, contains('_GeneratedHeroAssetCard'));
+    expect(identidade, isNot(contains('Imagem IA unica')));
+    expect(identidade, isNot(contains('_GeneratedHeroAssetCard')));
+    expect(identidade, isNot(contains('_buildGeneratedHeroUrl')));
+    expect(identidade, isNot(contains('_applyHeroAsBackground')));
+    expect(identidade, isNot(contains('Briefing para IA')));
+    expect(identidade, isNot(contains("'URL manual de imagem'")));
+    expect(identidade, contains('Foto principal da landing'));
+    expect(identidade, contains('_pickHeroPhoto'));
+    expect(identidade, contains("folder: 'landing/hero'"));
+    expect(identidade, contains('_HeroPhotoPreview'));
+    expect(identidade, contains('_LandingPremiumPlanner'));
+    expect(identidade, contains('_PremiumLandingPreviewCard'));
     expect(identidade, contains('_PremiumHeroPreviewCanvas'));
-    expect(identidade, contains('Aplicar como fundo premium'));
-    expect(identidade, contains('sem depender de imagem externa'));
     expect(identidade, isNot(contains('webHtmlElementStrategy')));
     expect(identidade, isNot(contains('WebHtmlElementStrategy.prefer')));
-    expect(identidade, contains('_buildGeneratedHeroUrl'));
-    expect(identidade, contains('_applyHeroAsBackground'));
-    expect(identidade, contains("_heroImageCtrl.clear()"));
     expect(identidade, contains("body['heroImageUrl']"));
-    expect(identidade, contains("'URL manual de imagem'"));
     expect(identidade, contains('Video de apresentacao enviado e salvo'));
     expect(identidade, contains('_pickPresentationVideo'));
     expect(identidade, contains("resourceType: 'video'"));

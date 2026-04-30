@@ -22,14 +22,11 @@ class HeroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final firstName = data.nomePersonal.split(' ').first;
     final customHero = data.heroImageUrl?.trim();
-    final generatedHero = data.generatedHeroImageUrl?.trim();
     final heroImage =
-        customHero != null && customHero.isNotEmpty
+        customHero != null &&
+                customHero.isNotEmpty &&
+                !_isAiGeneratedHeroUrl(customHero)
             ? customHero
-            : generatedHero != null &&
-                generatedHero.isNotEmpty &&
-                !_isAiGeneratedHeroUrl(generatedHero)
-            ? generatedHero
             : data.fotos.isNotEmpty
             ? data.fotos.first
             : (data.logoUrl != null && data.logoUrl!.isNotEmpty
@@ -37,10 +34,20 @@ class HeroSection extends StatelessWidget {
                 : null);
     final compact = MediaQuery.of(context).size.width < 640;
     final signature = _signatureVariant(slug, data.nomePersonal);
+    final composition = _compositionVariant(slug, data.nomePersonal);
     final minHeight = (MediaQuery.of(context).size.height * 0.86).clamp(
       620.0,
       820.0,
     );
+    final headline =
+        data.slogan?.trim().isNotEmpty == true
+            ? data.slogan!.trim()
+            : data.nomePersonal;
+    final support =
+        data.descricaoProfissional?.trim().isNotEmpty == true
+            ? data.descricaoProfissional!.trim()
+            : 'Treinamento personalizado, acompanhamento proximo e plano feito para sua rotina.';
+    final alignRight = !compact && composition == _LandingComposition.editorial;
 
     return Container(
       constraints: BoxConstraints(minHeight: minHeight),
@@ -52,6 +59,7 @@ class HeroSection extends StatelessWidget {
               primary: primaryColor,
               secondary: secondaryColor,
               variant: signature,
+              composition: composition,
             ),
           ),
           if (heroImage != null)
@@ -97,65 +105,91 @@ class HeroSection extends StatelessWidget {
                 crossAxisAlignment:
                     compact
                         ? CrossAxisAlignment.center
+                        : alignRight
+                        ? CrossAxisAlignment.end
                         : CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  CircleAvatar(
-                    radius: 36,
-                    backgroundColor: Colors.white.withValues(alpha: 0.18),
-                    backgroundImage:
-                        data.logoUrl != null && data.logoUrl!.isNotEmpty
-                            ? NetworkImage(data.logoUrl!) as ImageProvider
-                            : null,
-                    child:
-                        data.logoUrl != null && data.logoUrl!.isNotEmpty
-                            ? null
-                            : Text(
-                              data.nomePersonal.isNotEmpty
-                                  ? data.nomePersonal[0].toUpperCase()
-                                  : 'P',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 34,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 780),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment:
+                          compact
+                              ? MainAxisAlignment.center
+                              : alignRight
+                              ? MainAxisAlignment.end
+                              : MainAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          radius: 26,
+                          backgroundColor: Colors.white.withValues(alpha: 0.18),
+                          backgroundImage:
+                              data.logoUrl != null && data.logoUrl!.isNotEmpty
+                                  ? NetworkImage(data.logoUrl!) as ImageProvider
+                                  : null,
+                          child:
+                              data.logoUrl != null && data.logoUrl!.isNotEmpty
+                                  ? null
+                                  : Text(
+                                    data.nomePersonal.isNotEmpty
+                                        ? data.nomePersonal[0].toUpperCase()
+                                        : 'P',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                        ),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: _SignatureBadge(
+                            label:
+                                '${data.nomePersonal} · ${signature.label} ${composition.label}',
+                            primary: primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  _SignatureBadge(
-                    label: 'Assinatura ${signature.label}',
-                    primary: primaryColor,
-                  ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 18),
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 760),
                     child: Text(
-                      data.nomePersonal,
+                      headline,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: compact ? 42 : 64,
+                        fontSize: compact ? 40 : 70,
                         height: 0.98,
                         fontWeight: FontWeight.w900,
                       ),
-                      textAlign: compact ? TextAlign.center : TextAlign.left,
+                      textAlign:
+                          compact
+                              ? TextAlign.center
+                              : alignRight
+                              ? TextAlign.right
+                              : TextAlign.left,
                     ),
                   ),
                   const SizedBox(height: 14),
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 620),
                     child: Text(
-                      (data.slogan != null && data.slogan!.trim().isNotEmpty)
-                          ? data.slogan!
-                          : (data.descricaoProfissional?.trim().isNotEmpty ==
-                                  true
-                              ? data.descricaoProfissional!
-                              : 'Treinamento personalizado, acompanhamento proximo e plano feito para sua rotina.'),
+                      headline == data.nomePersonal
+                          ? support
+                          : '$support Com $firstName, o acompanhamento fica mais humano, claro e consistente.',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.84),
                         fontSize: compact ? 16 : 19,
                         height: 1.45,
                       ),
-                      textAlign: compact ? TextAlign.center : TextAlign.left,
+                      textAlign:
+                          compact
+                              ? TextAlign.center
+                              : alignRight
+                              ? TextAlign.right
+                              : TextAlign.left,
                       maxLines: compact ? 4 : 3,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -165,7 +199,11 @@ class HeroSection extends StatelessWidget {
                     spacing: 12,
                     runSpacing: 12,
                     alignment:
-                        compact ? WrapAlignment.center : WrapAlignment.start,
+                        compact
+                            ? WrapAlignment.center
+                            : alignRight
+                            ? WrapAlignment.end
+                            : WrapAlignment.start,
                     children: [
                       ElevatedButton(
                         onPressed: () {
@@ -210,7 +248,11 @@ class HeroSection extends StatelessWidget {
                     spacing: 10,
                     runSpacing: 10,
                     alignment:
-                        compact ? WrapAlignment.center : WrapAlignment.start,
+                        compact
+                            ? WrapAlignment.center
+                            : alignRight
+                            ? WrapAlignment.end
+                            : WrapAlignment.start,
                     children: [
                       _HeroPill(value: '${data.totalAlunos}+', label: 'alunos'),
                       _HeroPill(
@@ -403,6 +445,15 @@ _LandingSignature _signatureVariant(String slug, String name) {
   return _LandingSignature.values[hash % _LandingSignature.values.length];
 }
 
+_LandingComposition _compositionVariant(String slug, String name) {
+  final source = 'composition-$slug-$name';
+  var hash = 0;
+  for (final code in source.codeUnits) {
+    hash = (hash * 37 + code) & 0x7fffffff;
+  }
+  return _LandingComposition.values[hash % _LandingComposition.values.length];
+}
+
 enum _LandingSignature {
   precision('Precision'),
   studio('Studio'),
@@ -412,15 +463,26 @@ enum _LandingSignature {
   const _LandingSignature(this.label);
 }
 
+enum _LandingComposition {
+  editorial('Editorial'),
+  studio('Studio'),
+  arena('Arena');
+
+  final String label;
+  const _LandingComposition(this.label);
+}
+
 class _LandingBrandCanvas extends StatelessWidget {
   final Color primary;
   final Color secondary;
   final _LandingSignature variant;
+  final _LandingComposition composition;
 
   const _LandingBrandCanvas({
     required this.primary,
     required this.secondary,
     required this.variant,
+    required this.composition,
   });
 
   @override
@@ -430,6 +492,7 @@ class _LandingBrandCanvas extends StatelessWidget {
         primary: primary,
         secondary: secondary,
         variant: variant,
+        composition: composition,
       ),
       child: const SizedBox.expand(),
     );
@@ -440,11 +503,13 @@ class _LandingBrandPainter extends CustomPainter {
   final Color primary;
   final Color secondary;
   final _LandingSignature variant;
+  final _LandingComposition composition;
 
   const _LandingBrandPainter({
     required this.primary,
     required this.secondary,
     required this.variant,
+    required this.composition,
   });
 
   @override
@@ -466,7 +531,12 @@ class _LandingBrandPainter extends CustomPainter {
         Paint()
           ..color = Colors.white.withValues(alpha: 0.055)
           ..strokeWidth = 1;
-    final step = variant == _LandingSignature.studio ? 42.0 : 56.0;
+    final step =
+        composition == _LandingComposition.studio
+            ? 38.0
+            : variant == _LandingSignature.studio
+            ? 42.0
+            : 56.0;
     for (var x = -size.height; x < size.width + size.height; x += step) {
       canvas.drawLine(
         Offset(x, 0),
@@ -481,7 +551,12 @@ class _LandingBrandPainter extends CustomPainter {
           ..strokeWidth = variant == _LandingSignature.performance ? 18 : 12
           ..color = primary.withValues(alpha: 0.22);
     final band = Path();
-    if (variant == _LandingSignature.precision) {
+    if (composition == _LandingComposition.arena) {
+      band.moveTo(size.width * 0.16, size.height + 30);
+      band.lineTo(size.width * 0.72, -40);
+      band.moveTo(size.width * 0.44, size.height + 40);
+      band.lineTo(size.width + 40, size.height * 0.16);
+    } else if (variant == _LandingSignature.precision) {
       band.moveTo(size.width * 0.58, -40);
       band.lineTo(size.width * 0.95, size.height * 0.42);
       band.lineTo(size.width * 0.70, size.height + 60);
@@ -521,7 +596,8 @@ class _LandingBrandPainter extends CustomPainter {
   bool shouldRepaint(covariant _LandingBrandPainter oldDelegate) {
     return oldDelegate.primary != primary ||
         oldDelegate.secondary != secondary ||
-        oldDelegate.variant != variant;
+        oldDelegate.variant != variant ||
+        oldDelegate.composition != composition;
   }
 }
 

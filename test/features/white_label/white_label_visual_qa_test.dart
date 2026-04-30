@@ -20,7 +20,9 @@ void main() {
       'white-label screenshot QA renders ${scenario.name} without legacy blue',
       () async {
         final image = await _drawQaContactSheet(scenario);
-        final rawData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+        final rawData = await image.toByteData(
+          format: ui.ImageByteFormat.rawRgba,
+        );
         final pngData = await image.toByteData(format: ui.ImageByteFormat.png);
         image.dispose();
 
@@ -46,11 +48,7 @@ void main() {
         theme.colorScheme.onPrimary,
       );
 
-      expect(
-        contrast,
-        greaterThanOrEqualTo(4.5),
-        reason: scenario.name,
-      );
+      expect(contrast, greaterThanOrEqualTo(4.5), reason: scenario.name);
     }
   });
 }
@@ -147,7 +145,7 @@ Future<ui.Image> _drawQaContactSheet(_BrandScenario scenario) async {
     icon: Icons.public,
     primary: primary,
     onPrimary: onPrimary,
-    rows: const ['Servicos e valores', 'Imagem IA unica'],
+    rows: const ['Servicos e valores', 'Foto principal'],
   );
 
   canvas.drawRRect(
@@ -188,7 +186,13 @@ void _drawHeader(Canvas canvas, ThemeData theme, String label) {
     13,
     theme.colorScheme.onSurfaceVariant,
   );
-  _drawButton(canvas, 'Ativo', const Rect.fromLTWH(300, 26, 70, 42), primary, onPrimary);
+  _drawButton(
+    canvas,
+    'Ativo',
+    const Rect.fromLTWH(300, 26, 70, 42),
+    primary,
+    onPrimary,
+  );
 }
 
 double _drawPanel(
@@ -220,7 +224,14 @@ double _drawPanel(
 
   _drawCircle(canvas, Offset(40, top + 28), 16, soft);
   _drawIcon(canvas, icon, Offset(31, top + 19), 18, primary);
-  _drawText(canvas, title, Offset(66, top + 19), 15, theme.colorScheme.onSurface, bold: true);
+  _drawText(
+    canvas,
+    title,
+    Offset(66, top + 19),
+    15,
+    theme.colorScheme.onSurface,
+    bold: true,
+  );
 
   var rowTop = top + 52;
   for (final row in rows) {
@@ -231,7 +242,13 @@ double _drawPanel(
       ),
       Paint()..color = soft,
     );
-    _drawText(canvas, row, Offset(40, rowTop + 5), 11, theme.colorScheme.onSurface);
+    _drawText(
+      canvas,
+      row,
+      Offset(40, rowTop + 5),
+      11,
+      theme.colorScheme.onSurface,
+    );
     rowTop += 30;
   }
 
@@ -246,7 +263,13 @@ double _drawPanel(
   return top + 130;
 }
 
-void _drawButton(Canvas canvas, String label, Rect rect, Color color, Color textColor) {
+void _drawButton(
+  Canvas canvas,
+  String label,
+  Rect rect,
+  Color color,
+  Color textColor,
+) {
   canvas.drawRRect(
     RRect.fromRectAndRadius(rect, const Radius.circular(EagleTokens.radiusSm)),
     Paint()..color = color,
@@ -265,7 +288,13 @@ void _drawCircle(Canvas canvas, Offset center, double radius, Color color) {
   canvas.drawCircle(center, radius, Paint()..color = color);
 }
 
-void _drawIcon(Canvas canvas, IconData icon, Offset offset, double size, Color color) {
+void _drawIcon(
+  Canvas canvas,
+  IconData icon,
+  Offset offset,
+  double size,
+  Color color,
+) {
   final painter = TextPainter(
     text: TextSpan(
       text: String.fromCharCode(icon.codePoint),

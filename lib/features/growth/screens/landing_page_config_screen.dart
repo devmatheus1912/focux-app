@@ -22,16 +22,17 @@ class LandingPageConfigScreen extends ConsumerWidget {
       backgroundColor: bg,
       body: perfilAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              'Nao foi possivel carregar a configuracao da landing agora.',
-              style: TextStyle(color: mute),
-              textAlign: TextAlign.center,
+        error:
+            (error, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'Nao foi possivel carregar a configuracao da landing agora.',
+                  style: TextStyle(color: mute),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
-          ),
-        ),
         data: (perfil) {
           final brand = _hexToColor(
             perfil.corPrimaria,
@@ -42,9 +43,11 @@ class LandingPageConfigScreen extends ConsumerWidget {
           final servicesCount = perfil.servicos.length;
           final packagesCount = perfil.pacotes.length;
           final faqCount = perfil.faq.length;
-          final heroReady = (perfil.slogan?.trim().isNotEmpty ?? false) &&
+          final heroReady =
+              (perfil.slogan?.trim().isNotEmpty ?? false) &&
               (perfil.descricaoProfissional?.trim().isNotEmpty ?? false);
-          final mediaReady = (perfil.logoUrl?.trim().isNotEmpty ?? false) ||
+          final mediaReady =
+              (perfil.logoUrl?.trim().isNotEmpty ?? false) ||
               (perfil.videoUrl?.trim().isNotEmpty ?? false) ||
               (perfil.heroImageUrl?.trim().isNotEmpty ?? false);
           final trackingReady = perfil.trackingId?.trim().isNotEmpty ?? false;
@@ -53,23 +56,26 @@ class LandingPageConfigScreen extends ConsumerWidget {
             (
               icon: Icons.design_services_outlined,
               label: 'Servicos publicados',
-              value: servicesCount == 0
-                  ? 'Nenhum servico configurado'
-                  : '$servicesCount servicos em destaque',
+              value:
+                  servicesCount == 0
+                      ? 'Nenhum servico configurado'
+                      : '$servicesCount servicos em destaque',
             ),
             (
               icon: Icons.sell_outlined,
               label: 'Pacotes e valores',
-              value: packagesCount == 0
-                  ? 'Nenhum pacote com preco'
-                  : '$packagesCount pacotes ativos',
+              value:
+                  packagesCount == 0
+                      ? 'Nenhum pacote com preco'
+                      : '$packagesCount pacotes ativos',
             ),
             (
               icon: Icons.help_outline,
               label: 'FAQ de venda',
-              value: faqCount == 0
-                  ? 'Nenhuma pergunta configurada'
-                  : '$faqCount perguntas publicadas',
+              value:
+                  faqCount == 0
+                      ? 'Nenhuma pergunta configurada'
+                      : '$faqCount perguntas publicadas',
             ),
             (
               icon: Icons.palette_outlined,
@@ -79,23 +85,24 @@ class LandingPageConfigScreen extends ConsumerWidget {
             (
               icon: Icons.camera_alt_outlined,
               label: 'Midia de autoridade',
-              value: mediaReady
-                  ? 'Logo/video configurados'
-                  : 'Sem logo ou video ainda',
+              value:
+                  mediaReady
+                      ? 'Logo, foto ou video configurados'
+                      : 'Sem foto principal ou video ainda',
             ),
             (
               icon: Icons.query_stats_outlined,
               label: 'Tracking',
-              value: trackingReady
-                  ? 'Campanha marcada'
-                  : 'Sem origem de campanha',
+              value:
+                  trackingReady ? 'Campanha marcada' : 'Sem origem de campanha',
             ),
             (
               icon: Icons.edit_note_outlined,
               label: 'Copy principal',
-              value: heroReady
-                  ? 'Hero da landing preenchido'
-                  : 'Complete slogan e descricao',
+              value:
+                  heroReady
+                      ? 'Hero da landing preenchido'
+                      : 'Complete slogan e descricao',
             ),
           ];
 
@@ -131,7 +138,11 @@ class LandingPageConfigScreen extends ConsumerWidget {
                       const SizedBox(height: 6),
                       Text(
                         'Aqui fica o resumo do que ja esta pronto para captar alunos e o que ainda falta preencher.',
-                        style: TextStyle(color: mute, fontSize: 14, height: 1.55),
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 14,
+                          height: 1.55,
+                        ),
                       ),
                     ],
                   ),
@@ -141,7 +152,10 @@ class LandingPageConfigScreen extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: dark ? const Color(0x14182640) : BrandPalette.softer(brand),
+                      color:
+                          dark
+                              ? const Color(0x14182640)
+                              : BrandPalette.softer(brand),
                       borderRadius: BorderRadius.circular(22),
                       border: Border.all(
                         color: brand.withValues(alpha: 0.26),
@@ -196,10 +210,14 @@ class LandingPageConfigScreen extends ConsumerWidget {
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            color: dark ? EagleTokens.darkCard : EagleTokens.card,
+                            color:
+                                dark ? EagleTokens.darkCard : EagleTokens.card,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: dark ? EagleTokens.darkLine : EagleTokens.line,
+                              color:
+                                  dark
+                                      ? EagleTokens.darkLine
+                                      : EagleTokens.line,
                             ),
                           ),
                           child: Row(
@@ -216,9 +234,13 @@ class LandingPageConfigScreen extends ConsumerWidget {
                               ),
                               IconButton(
                                 onPressed: () {
-                                  Clipboard.setData(ClipboardData(text: publicUrl));
+                                  Clipboard.setData(
+                                    ClipboardData(text: publicUrl),
+                                  );
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Link copiado!')),
+                                    const SnackBar(
+                                      content: Text('Link copiado!'),
+                                    ),
                                   );
                                 },
                                 icon: Icon(Icons.copy, color: brand, size: 16),
@@ -281,10 +303,14 @@ class LandingPageConfigScreen extends ConsumerWidget {
                             vertical: 13,
                           ),
                           decoration: BoxDecoration(
-                            color: dark ? EagleTokens.darkCard : EagleTokens.card,
+                            color:
+                                dark ? EagleTokens.darkCard : EagleTokens.card,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: dark ? EagleTokens.darkLine : EagleTokens.line,
+                              color:
+                                  dark
+                                      ? EagleTokens.darkLine
+                                      : EagleTokens.line,
                             ),
                           ),
                           child: Row(
@@ -296,7 +322,11 @@ class LandingPageConfigScreen extends ConsumerWidget {
                                   color: brand.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: Icon(config.icon, color: brand, size: 16),
+                                child: Icon(
+                                  config.icon,
+                                  color: brand,
+                                  size: 16,
+                                ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
