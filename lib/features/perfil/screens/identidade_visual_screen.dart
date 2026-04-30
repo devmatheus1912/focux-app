@@ -47,24 +47,18 @@ class _IdentidadeVisualScreenState
   final _trackingCtrl = TextEditingController();
   final _heroPromptCtrl = TextEditingController();
   final _heroImageCtrl = TextEditingController();
-  final _serviceTitleCtrls =
-      List.generate(3, (_) => TextEditingController());
-  final _serviceDescCtrls =
-      List.generate(3, (_) => TextEditingController());
-  final _packageNameCtrls =
-      List.generate(3, (_) => TextEditingController());
-  final _packagePriceCtrls =
-      List.generate(3, (_) => TextEditingController());
-  final _packageDescCtrls =
-      List.generate(3, (_) => TextEditingController());
-  final _faqQuestionCtrls =
-      List.generate(4, (_) => TextEditingController());
-  final _faqAnswerCtrls =
-      List.generate(4, (_) => TextEditingController());
+  final _serviceTitleCtrls = List.generate(3, (_) => TextEditingController());
+  final _serviceDescCtrls = List.generate(3, (_) => TextEditingController());
+  final _packageNameCtrls = List.generate(3, (_) => TextEditingController());
+  final _packagePriceCtrls = List.generate(3, (_) => TextEditingController());
+  final _packageDescCtrls = List.generate(3, (_) => TextEditingController());
+  final _faqQuestionCtrls = List.generate(4, (_) => TextEditingController());
+  final _faqAnswerCtrls = List.generate(4, (_) => TextEditingController());
   Color _corPrimaria = const Color(0xFF3B5FE2);
   Color _corSecundaria = const Color(0xFF0097A7);
   bool _salvando = false;
   bool _uploadingLogo = false;
+  bool _uploadingVideo = false;
   bool _perfilLoaded = false;
   String? _logoUrl;
 
@@ -92,8 +86,7 @@ class _IdentidadeVisualScreenState
       if (hex != null) _corPrimaria = Color(hex);
     }
     if (perfil.corSecundaria != null && perfil.corSecundaria!.length == 7) {
-      final hex =
-          int.tryParse(perfil.corSecundaria!.replaceFirst('#', '0xFF'));
+      final hex = int.tryParse(perfil.corSecundaria!.replaceFirst('#', '0xFF'));
       if (hex != null) _corSecundaria = Color(hex);
     }
     for (var i = 0; i < 3; i++) {
@@ -120,10 +113,7 @@ class _IdentidadeVisualScreenState
       final titulo = _serviceTitleCtrls[i].text.trim();
       final descricao = _serviceDescCtrls[i].text.trim();
       if (titulo.isEmpty && descricao.isEmpty) continue;
-      items.add({
-        'titulo': titulo,
-        'descricao': descricao,
-      });
+      items.add({'titulo': titulo, 'descricao': descricao});
     }
     return items;
   }
@@ -151,10 +141,7 @@ class _IdentidadeVisualScreenState
       final pergunta = _faqQuestionCtrls[i].text.trim();
       final resposta = _faqAnswerCtrls[i].text.trim();
       if (pergunta.isEmpty && resposta.isEmpty) continue;
-      items.add({
-        'pergunta': pergunta,
-        'resposta': resposta,
-      });
+      items.add({'pergunta': pergunta, 'resposta': resposta});
     }
     return items;
   }
@@ -196,25 +183,63 @@ class _IdentidadeVisualScreenState
 
   Future<void> _pickLogo() async {
     final file = await ImagePicker().pickImage(
-        source: ImageSource.gallery, imageQuality: 80, maxWidth: 800);
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 800,
+    );
     if (file == null || !mounted) return;
     setState(() => _uploadingLogo = true);
     try {
-      final url = await MediaUploadService(ref.read(apiClientProvider))
-          .uploadBytes(
-            bytes: await file.readAsBytes(),
-            filename: file.name,
-            folder: 'identidade',
-            resourceType: 'image',
-          );
+      final url = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        folder: 'identidade',
+        resourceType: 'image',
+      );
       if (mounted) setState(() => _logoUrl = url);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Erro upload: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro upload: $e')));
       }
     } finally {
       if (mounted) setState(() => _uploadingLogo = false);
+    }
+  }
+
+  Future<void> _pickPresentationVideo() async {
+    final file = await ImagePicker().pickVideo(
+      source: ImageSource.gallery,
+      maxDuration: const Duration(minutes: 5),
+    );
+    if (file == null || !mounted) return;
+    setState(() => _uploadingVideo = true);
+    try {
+      final url = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        folder: 'landing/apresentacao',
+        resourceType: 'video',
+      );
+      if (mounted) {
+        setState(() => _videoCtrl.text = url);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Video de apresentacao enviado.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao enviar video: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingVideo = false);
     }
   }
 
@@ -237,9 +262,15 @@ class _IdentidadeVisualScreenState
         body['corSecundaria'] =
             '#${_corSecundaria.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
         body['slogan'] = _sloganCtrl.text.trim();
-        if (_logoUrl != null) body['logoUrl'] = _logoUrl;
-        if (_domCtrl.text.trim().isNotEmpty) body['dominioCustomizado'] = _domCtrl.text.trim();
-        if (_videoCtrl.text.trim().isNotEmpty) body['videoUrl'] = _videoCtrl.text.trim();
+        if (_logoUrl != null) {
+          body['logoUrl'] = _logoUrl;
+        }
+        if (_domCtrl.text.trim().isNotEmpty) {
+          body['dominioCustomizado'] = _domCtrl.text.trim();
+        }
+        if (_videoCtrl.text.trim().isNotEmpty) {
+          body['videoUrl'] = _videoCtrl.text.trim();
+        }
         body['trackingId'] = _trackingCtrl.text.trim();
         body['heroPrompt'] = _heroPromptCtrl.text.trim();
         body['heroImageUrl'] = _heroImageCtrl.text.trim();
@@ -260,8 +291,9 @@ class _IdentidadeVisualScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Erro: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     } finally {
       if (mounted) setState(() => _salvando = false);
@@ -278,12 +310,18 @@ class _IdentidadeVisualScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final plano = perfil?.plano ?? 'FREE';
     final isEnterprise = plano.toUpperCase() == 'ENTERPRISE';
-    final isPremiumOrAbove = ['PREMIUM', 'ENTERPRISE'].contains(plano.toUpperCase());
+    final isPremiumOrAbove = [
+      'PREMIUM',
+      'ENTERPRISE',
+    ].contains(plano.toUpperCase());
     final themePrimary = Theme.of(context).colorScheme.primary;
     final themePrimarySoft = BrandPalette.soft(themePrimary, dark: isDark);
 
     final slug = perfil?.slug;
     final nomePersonal = perfil?.nome ?? '';
+    final generatedHeroUrl = perfil?.generatedHeroImageUrl?.trim();
+    final heroStatus = perfil?.heroImageStatus?.trim();
+    final heroBrief = perfil?.heroImageBrief?.trim();
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -291,26 +329,31 @@ class _IdentidadeVisualScreenState
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-            widget.isSetup ? 'Configurar meu app' : 'Identidade Visual'),
+          widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
+        ),
         automaticallyImplyLeading: !widget.isSetup,
-        leading: widget.isSetup
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => safePopOrGo(context, '/dashboard/personal'),
-              ),
+        leading:
+            widget.isSetup
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => safePopOrGo(context, '/dashboard/personal'),
+                ),
         actions: [
           if (isPremiumOrAbove)
             TextButton(
               onPressed: _salvando ? null : () => _salvar(plano),
-              child: _salvando
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child:
-                          CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Salvar',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+              child:
+                  _salvando
+                      ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : const Text(
+                        'Salvar',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
             ),
         ],
       ),
@@ -336,36 +379,45 @@ class _IdentidadeVisualScreenState
             // SECTION A — Landing page content (PREMIUM+)
             _SectionHeader(text: 'Sua landing page', isDark: isDark),
             const SizedBox(height: 8),
+            _LandingCoachCard(
+              isDark: isDark,
+              title: 'Direcao criativa',
+              tips: const [
+                'Escolha uma promessa clara: emagrecimento, performance, hipertrofia ou saude.',
+                'Use fotos e videos reais para passar confianca antes do aluno chamar.',
+                'Deixe preco, servicos e duvidas frequentes simples de comparar.',
+              ],
+            ),
+            const SizedBox(height: 12),
 
             // Slug display
             if (slug != null && isPremiumOrAbove) ...[
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color:
-                      isDark ? EagleTokens.darkCard : EagleTokens.card,
+                  color: isDark ? EagleTokens.darkCard : EagleTokens.card,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: isDark
-                          ? EagleTokens.darkLine
-                          : EagleTokens.lineSoft),
+                    color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.link,
-                        size: 16,
-                        color: isDark
-                            ? EagleTokens.darkInkMute
-                            : EagleTokens.inkMute),
+                    Icon(
+                      Icons.link,
+                      size: 16,
+                      color:
+                          isDark
+                              ? EagleTokens.darkInkMute
+                              : EagleTokens.inkMute,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'focux.app/p/$slug',
                         style: TextStyle(
                           fontSize: 13,
-                          color: isDark
-                              ? EagleTokens.darkInk
-                              : EagleTokens.ink,
+                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -373,11 +425,11 @@ class _IdentidadeVisualScreenState
                     IconButton(
                       icon: const Icon(Icons.copy, size: 16),
                       onPressed: () {
-                        Clipboard.setData(ClipboardData(
-                            text: 'https://focux.app/p/$slug'));
+                        Clipboard.setData(
+                          ClipboardData(text: 'https://focux.app/p/$slug'),
+                        );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Link copiado!')),
+                          const SnackBar(content: Text('Link copiado!')),
                         );
                       },
                       padding: EdgeInsets.zero,
@@ -390,11 +442,11 @@ class _IdentidadeVisualScreenState
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                    icon: const Icon(Icons.open_in_new, size: 16),
-                    label: const Text('Ver minha landing page'),
-                    onPressed: () => context.go('/p/$slug'),
-                  ),
+                  icon: const Icon(Icons.open_in_new, size: 16),
+                  label: const Text('Ver minha landing page'),
+                  onPressed: () => context.go('/p/$slug'),
                 ),
+              ),
               const SizedBox(height: 16),
             ],
 
@@ -411,8 +463,7 @@ class _IdentidadeVisualScreenState
                       maxLength: 500,
                       decoration: const InputDecoration(
                         labelText: 'Descrição profissional',
-                        hintText:
-                            'Descreva sua trajetória e metodologia...',
+                        hintText: 'Descreva sua trajetória e metodologia...',
                         alignLabelWithHint: true,
                       ),
                     ),
@@ -422,8 +473,7 @@ class _IdentidadeVisualScreenState
                       enabled: isPremiumOrAbove,
                       decoration: const InputDecoration(
                         labelText: 'Especialidades',
-                        hintText:
-                            'Ex: Musculação, Funcional, Emagrecimento',
+                        hintText: 'Ex: Musculação, Funcional, Emagrecimento',
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -444,7 +494,11 @@ class _IdentidadeVisualScreenState
                           'Mostre o que voce entrega na pratica. Isso alimenta a secao publica da landing.',
                       child: Column(
                         children: [
-                          for (var i = 0; i < _serviceTitleCtrls.length; i++) ...[
+                          for (
+                            var i = 0;
+                            i < _serviceTitleCtrls.length;
+                            i++
+                          ) ...[
                             TextFormField(
                               controller: _serviceTitleCtrls[i],
                               enabled: isPremiumOrAbove,
@@ -479,7 +533,11 @@ class _IdentidadeVisualScreenState
                           'Cadastre ate 3 opcoes de entrada para o aluno entender seu ticket.',
                       child: Column(
                         children: [
-                          for (var i = 0; i < _packageNameCtrls.length; i++) ...[
+                          for (
+                            var i = 0;
+                            i < _packageNameCtrls.length;
+                            i++
+                          ) ...[
                             Row(
                               children: [
                                 Expanded(
@@ -532,7 +590,11 @@ class _IdentidadeVisualScreenState
                           'Responda as duvidas que mais travam a decisao antes do aluno chamar voce.',
                       child: Column(
                         children: [
-                          for (var i = 0; i < _faqQuestionCtrls.length; i++) ...[
+                          for (
+                            var i = 0;
+                            i < _faqQuestionCtrls.length;
+                            i++
+                          ) ...[
                             TextFormField(
                               controller: _faqQuestionCtrls[i],
                               enabled: isPremiumOrAbove,
@@ -596,26 +658,30 @@ class _IdentidadeVisualScreenState
                         children: [
                           CircleAvatar(
                             radius: 48,
-                            backgroundColor: isDark
-                                ? EagleTokens.darkCard
-                                : themePrimarySoft,
-                            backgroundImage: _logoUrl != null
-                                ? NetworkImage(_logoUrl!)
-                                : null,
-                            child: _logoUrl == null
-                                ? Text(
-                                    nomePersonal.isNotEmpty
-                                        ? nomePersonal[0].toUpperCase()
-                                        : '?',
-                                    style: TextStyle(
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.w700,
-                                      color: isDark
-                                          ? EagleTokens.darkInk
-                                          : themePrimary,
-                                    ),
-                                  )
-                                : null,
+                            backgroundColor:
+                                isDark
+                                    ? EagleTokens.darkCard
+                                    : themePrimarySoft,
+                            backgroundImage:
+                                _logoUrl != null
+                                    ? NetworkImage(_logoUrl!)
+                                    : null,
+                            child:
+                                _logoUrl == null
+                                    ? Text(
+                                      nomePersonal.isNotEmpty
+                                          ? nomePersonal[0].toUpperCase()
+                                          : '?',
+                                      style: TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.w700,
+                                        color:
+                                            isDark
+                                                ? EagleTokens.darkInk
+                                                : themePrimary,
+                                      ),
+                                    )
+                                    : null,
                           ),
                           GestureDetector(
                             onTap: isEnterprise ? _pickLogo : null,
@@ -623,22 +689,31 @@ class _IdentidadeVisualScreenState
                               width: 30,
                               height: 30,
                               decoration: BoxDecoration(
-                                color: isEnterprise ? _corPrimaria : themePrimary,
+                                color:
+                                    isEnterprise ? _corPrimaria : themePrimary,
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                    color: isDark
-                                        ? EagleTokens.darkBg
-                                        : EagleTokens.paper,
-                                    width: 2),
+                                  color:
+                                      isDark
+                                          ? EagleTokens.darkBg
+                                          : EagleTokens.paper,
+                                  width: 2,
+                                ),
                               ),
-                              child: _uploadingLogo
-                                  ? const Padding(
-                                      padding: EdgeInsets.all(6),
-                                      child: CircularProgressIndicator(
+                              child:
+                                  _uploadingLogo
+                                      ? const Padding(
+                                        padding: EdgeInsets.all(6),
+                                        child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          color: Colors.white))
-                                  : const Icon(Icons.camera_alt,
-                                      size: 14, color: Colors.white),
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                      : const Icon(
+                                        Icons.camera_alt,
+                                        size: 14,
+                                        color: Colors.white,
+                                      ),
                             ),
                           ),
                         ],
@@ -660,26 +735,32 @@ class _IdentidadeVisualScreenState
                     const SizedBox(height: 16),
 
                     // Cor principal
-                    Text('Cor principal',
-                        style: Theme.of(context).textTheme.titleSmall),
+                    Text(
+                      'Cor principal',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                     const SizedBox(height: 8),
                     _ColorPicker(
                       selected: _corPrimaria,
-                      onSelect: isEnterprise
-                          ? (c) => setState(() => _corPrimaria = c)
-                          : null,
+                      onSelect:
+                          isEnterprise
+                              ? (c) => setState(() => _corPrimaria = c)
+                              : null,
                     ),
                     const SizedBox(height: 16),
 
                     // Cor secundária
-                    Text('Cor secundária',
-                        style: Theme.of(context).textTheme.titleSmall),
+                    Text(
+                      'Cor secundária',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                     const SizedBox(height: 8),
                     _ColorPicker(
                       selected: _corSecundaria,
-                      onSelect: isEnterprise
-                          ? (c) => setState(() => _corSecundaria = c)
-                          : null,
+                      onSelect:
+                          isEnterprise
+                              ? (c) => setState(() => _corSecundaria = c)
+                              : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -688,18 +769,54 @@ class _IdentidadeVisualScreenState
                       decoration: const InputDecoration(
                         labelText: 'Domínio customizado',
                         hintText: 'Ex: treino.seudominio.com.br',
-                        helperText: 'Configure um CNAME apontando para focux.app',
+                        helperText:
+                            'Configure um CNAME apontando para focux.app',
                         helperMaxLines: 2,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _videoCtrl,
-                      enabled: isEnterprise,
-                      decoration: const InputDecoration(
-                        labelText: 'URL do vídeo de apresentação',
-                        hintText: 'https://youtube.com/watch?v=...',
-                        helperText: 'Aparece na sua landing page. YouTube, Vimeo ou qualquer link.',
+                    _LandingEditorCard(
+                      isDark: isDark,
+                      title: 'Video de apresentacao',
+                      subtitle:
+                          'Suba um video curto seu ou cole um link. Videos enviados pelo Focux aparecem como player dentro da landing.',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextFormField(
+                            controller: _videoCtrl,
+                            enabled: isEnterprise,
+                            decoration: const InputDecoration(
+                              labelText: 'URL do vídeo de apresentação',
+                              hintText: 'https://cdn.focux.app/video.mp4',
+                              helperText:
+                                  'Use MP4/WebM para player embutido. YouTube/Vimeo abrem em link externo.',
+                              helperMaxLines: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          OutlinedButton.icon(
+                            onPressed:
+                                isEnterprise && !_uploadingVideo
+                                    ? _pickPresentationVideo
+                                    : null,
+                            icon:
+                                _uploadingVideo
+                                    ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                    : const Icon(Icons.video_call_outlined),
+                            label: Text(
+                              _uploadingVideo
+                                  ? 'Enviando video...'
+                                  : 'Subir video de apresentacao',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -723,6 +840,22 @@ class _IdentidadeVisualScreenState
                             ),
                           ),
                           const SizedBox(height: 12),
+                          if (generatedHeroUrl != null &&
+                              generatedHeroUrl.isNotEmpty) ...[
+                            _GeneratedHeroAssetCard(
+                              isDark: isDark,
+                              url: generatedHeroUrl,
+                              status: heroStatus,
+                              brief: heroBrief,
+                              onUseAsBackground:
+                                  isEnterprise
+                                      ? () => setState(() {
+                                        _heroImageCtrl.text = generatedHeroUrl;
+                                      })
+                                      : null,
+                            ),
+                            const SizedBox(height: 12),
+                          ],
                           TextFormField(
                             controller: _heroImageCtrl,
                             enabled: isEnterprise,
@@ -764,39 +897,48 @@ class _IdentidadeVisualScreenState
                         children: [
                           CircleAvatar(
                             radius: 24,
-                            backgroundColor:
-                                Colors.white.withValues(alpha: 0.3),
-                            backgroundImage: _logoUrl != null
-                                ? NetworkImage(_logoUrl!)
-                                : null,
-                            child: _logoUrl == null
-                                ? Text(
-                                    nomePersonal.isNotEmpty
-                                        ? nomePersonal[0].toUpperCase()
-                                        : 'P',
-                                    style: const TextStyle(
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.3,
+                            ),
+                            backgroundImage:
+                                _logoUrl != null
+                                    ? NetworkImage(_logoUrl!)
+                                    : null,
+                            child:
+                                _logoUrl == null
+                                    ? Text(
+                                      nomePersonal.isNotEmpty
+                                          ? nomePersonal[0].toUpperCase()
+                                          : 'P',
+                                      style: const TextStyle(
                                         color: Colors.white,
-                                        fontWeight: FontWeight.w700))
-                                : null,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    )
+                                    : null,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(nomePersonal,
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 15)),
+                                Text(
+                                  nomePersonal,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                  ),
+                                ),
                                 if (_sloganCtrl.text.isNotEmpty)
                                   Text(
                                     _sloganCtrl.text,
                                     style: TextStyle(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.75),
-                                        fontSize: 12),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.75,
+                                      ),
+                                      fontSize: 12,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -818,19 +960,24 @@ class _IdentidadeVisualScreenState
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: _salvando ? null : () => _salvar(plano),
-                  style: isEnterprise
-                      ? FilledButton.styleFrom(
-                          backgroundColor: _corPrimaria)
-                      : null,
-                  child: _salvando
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2))
-                      : Text(widget.isSetup
-                          ? 'Finalizar configuração'
-                          : 'Salvar'),
+                  style:
+                      isEnterprise
+                          ? FilledButton.styleFrom(
+                            backgroundColor: _corPrimaria,
+                          )
+                          : null,
+                  child:
+                      _salvando
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : Text(
+                            widget.isSetup
+                                ? 'Finalizar configuração'
+                                : 'Salvar',
+                          ),
                 ),
               ),
 
@@ -867,8 +1014,7 @@ class _PaywallCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? EagleTokens.darkCard : EagleTokens.card,
         borderRadius: BorderRadius.circular(14),
-        border:
-            Border.all(color: primary.withValues(alpha: 0.4)),
+        border: Border.all(color: primary.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -877,28 +1023,27 @@ class _PaywallCard extends StatelessWidget {
             children: [
               Icon(icon, color: primary, size: 20),
               const SizedBox(width: 8),
-              Text(title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 15)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             subtitle,
             style: TextStyle(
-              color: isDark
-                  ? EagleTokens.darkInkMute
-                  : EagleTokens.inkMute,
+              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
               fontSize: 13,
             ),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton(
-              onPressed: onTap,
-              child: Text(buttonText),
-            ),
+            child: OutlinedButton(onPressed: onTap, child: Text(buttonText)),
           ),
         ],
       ),
@@ -920,6 +1065,173 @@ class _SectionHeader extends StatelessWidget {
         fontWeight: FontWeight.w700,
         color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
         letterSpacing: 1.0,
+      ),
+    );
+  }
+}
+
+class _LandingCoachCard extends StatelessWidget {
+  final String title;
+  final List<String> tips;
+  final bool isDark;
+
+  const _LandingCoachCard({
+    required this.title,
+    required this.tips,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: isDark ? 0.16 : 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: primary.withValues(alpha: 0.24)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_awesome, color: primary, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  color: ink,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          for (final tip in tips)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.check_circle, color: primary, size: 15),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      tip,
+                      style: TextStyle(color: mute, height: 1.35),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GeneratedHeroAssetCard extends StatelessWidget {
+  final String url;
+  final String? status;
+  final String? brief;
+  final VoidCallback? onUseAsBackground;
+  final bool isDark;
+
+  const _GeneratedHeroAssetCard({
+    required this.url,
+    required this.status,
+    required this.brief,
+    required this.onUseAsBackground,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.paper,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: primary.withValues(alpha: 0.22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.image_outlined, color: primary, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Imagem IA gerada',
+                  style: TextStyle(
+                    color: ink,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13.5,
+                  ),
+                ),
+              ),
+              if (status != null && status!.isNotEmpty)
+                Text(
+                  status!,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+            ],
+          ),
+          if (brief != null && brief!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              brief!,
+              style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          const SizedBox(height: 10),
+          SelectableText(
+            url,
+            style: TextStyle(
+              color: primary,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: url));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('URL da imagem copiada.')),
+                  );
+                },
+                icon: const Icon(Icons.copy, size: 16),
+                label: const Text('Copiar link'),
+              ),
+              FilledButton.icon(
+                onPressed: onUseAsBackground,
+                icon: const Icon(Icons.wallpaper_outlined, size: 16),
+                label: const Text('Usar como fundo'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -955,10 +1267,7 @@ class _LandingEditorCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-            ),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 6),
           Text(
@@ -986,33 +1295,39 @@ class _ColorPicker extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: _coresPredefinidas.map((c) {
-        final isSelected = c.toARGB32() == selected.toARGB32();
-        return GestureDetector(
-          onTap: onSelect != null ? () => onSelect!(c) : null,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: c,
-              shape: BoxShape.circle,
-              border: isSelected
-                  ? Border.all(color: Colors.white, width: 3)
-                  : null,
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                          color: c.withValues(alpha: 0.6), blurRadius: 8)
-                    ]
-                  : null,
-            ),
-            child: isSelected
-                ? const Icon(Icons.check, color: Colors.white, size: 18)
-                : null,
-          ),
-        );
-      }).toList(),
+      children:
+          _coresPredefinidas.map((c) {
+            final isSelected = c.toARGB32() == selected.toARGB32();
+            return GestureDetector(
+              onTap: onSelect != null ? () => onSelect!(c) : null,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: c,
+                  shape: BoxShape.circle,
+                  border:
+                      isSelected
+                          ? Border.all(color: Colors.white, width: 3)
+                          : null,
+                  boxShadow:
+                      isSelected
+                          ? [
+                            BoxShadow(
+                              color: c.withValues(alpha: 0.6),
+                              blurRadius: 8,
+                            ),
+                          ]
+                          : null,
+                ),
+                child:
+                    isSelected
+                        ? const Icon(Icons.check, color: Colors.white, size: 18)
+                        : null,
+              ),
+            );
+          }).toList(),
     );
   }
 }

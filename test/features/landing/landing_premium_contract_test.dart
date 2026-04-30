@@ -21,7 +21,7 @@ void main() {
         {
           'pergunta': 'Preciso treinar todos os dias?',
           'resposta': 'Nao. O plano respeita sua rotina.',
-        }
+        },
       ],
     });
 
@@ -47,7 +47,7 @@ void main() {
       'heroImageStatus': 'AI_GENERATED_URL',
       'heroImageBrief': 'unique hero image',
       'faq': [
-        {'pergunta': 'Como funciona?', 'resposta': 'Com acompanhamento.'}
+        {'pergunta': 'Como funciona?', 'resposta': 'Com acompanhamento.'},
       ],
     });
 
@@ -61,30 +61,48 @@ void main() {
   });
 
   test('landing public surface exposes FAQ and tracked CTA contracts', () {
-    final landing = File(
-      'lib/features/landing/screens/personal_public_landing_screen.dart',
-    ).readAsStringSync();
-    final hero = File(
-      'lib/features/landing/widgets/hero_section.dart',
-    ).readAsStringSync();
-    final ofertas = File(
-      'lib/features/landing/widgets/ofertas_section.dart',
-    ).readAsStringSync();
-    final cta = File(
-      'lib/features/landing/widgets/cta_final_section.dart',
-    ).readAsStringSync();
-    final tracking = File(
-      'lib/features/landing/data/landing_tracking.dart',
-    ).readAsStringSync();
+    final landing =
+        File(
+          'lib/features/landing/screens/personal_public_landing_screen.dart',
+        ).readAsStringSync();
+    final hero =
+        File(
+          'lib/features/landing/widgets/hero_section.dart',
+        ).readAsStringSync();
+    final ofertas =
+        File(
+          'lib/features/landing/widgets/ofertas_section.dart',
+        ).readAsStringSync();
+    final cta =
+        File(
+          'lib/features/landing/widgets/cta_final_section.dart',
+        ).readAsStringSync();
+    final tracking =
+        File(
+          'lib/features/landing/data/landing_tracking.dart',
+        ).readAsStringSync();
+    final identidade =
+        File(
+          'lib/features/perfil/screens/identidade_visual_screen.dart',
+        ).readAsStringSync();
 
     expect(landing, contains('FaqSection(data: data'));
     expect(landing, contains("eventType: 'landing_view'"));
     expect(hero, contains('data.heroImageUrl'));
+    expect(hero, contains('VideoPlayerController.networkUrl'));
+    expect(hero, contains('_PresentationVideoCard'));
+    expect(hero, contains('_isDirectVideoUrl'));
     expect(hero, contains("source: 'landing'"));
     expect(ofertas, contains("source: 'landing_offer'"));
     expect(cta, contains("source: 'landing_cta'"));
     expect(tracking, contains(r'/api/public/personal/$slug/eventos'));
     expect(tracking, contains('landingRegisterPath'));
     expect(tracking, contains('eventType'));
+    expect(identidade, contains('generatedHeroImageUrl'));
+    expect(identidade, contains('_GeneratedHeroAssetCard'));
+    expect(identidade, contains('Usar como fundo'));
+    expect(identidade, contains('_pickPresentationVideo'));
+    expect(identidade, contains("resourceType: 'video'"));
+    expect(identidade, contains('Subir video de apresentacao'));
   });
 }
