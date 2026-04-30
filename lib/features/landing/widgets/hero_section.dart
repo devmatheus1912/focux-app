@@ -23,9 +23,12 @@ class HeroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final firstName = data.nomePersonal.split(' ').first;
     final customHero = data.heroImageUrl?.trim();
+    final generatedHero = data.generatedHeroImageUrl?.trim();
     final heroImage =
         customHero != null && customHero.isNotEmpty
             ? customHero
+            : generatedHero != null && generatedHero.isNotEmpty
+            ? generatedHero
             : data.fotos.isNotEmpty
             ? data.fotos.first
             : (data.logoUrl != null && data.logoUrl!.isNotEmpty
@@ -59,8 +62,12 @@ class HeroSection extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.40),
-                    primaryColor.withValues(alpha: 0.38),
+                    Colors.black.withValues(
+                      alpha: heroImage == null ? 0.20 : 0.44,
+                    ),
+                    primaryColor.withValues(
+                      alpha: heroImage == null ? 0.58 : 0.34,
+                    ),
                     const Color(0xFF050814).withValues(alpha: 0.96),
                   ],
                 ),

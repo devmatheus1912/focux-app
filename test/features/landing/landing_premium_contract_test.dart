@@ -89,6 +89,7 @@ void main() {
     expect(landing, contains('FaqSection(data: data'));
     expect(landing, contains("eventType: 'landing_view'"));
     expect(hero, contains('data.heroImageUrl'));
+    expect(hero, contains('data.generatedHeroImageUrl'));
     expect(hero, contains('VideoPlayerController.networkUrl'));
     expect(hero, contains('_PresentationVideoCard'));
     expect(hero, contains('_isDirectVideoUrl'));
@@ -100,9 +101,13 @@ void main() {
     expect(tracking, contains('eventType'));
     expect(identidade, contains('generatedHeroImageUrl'));
     expect(identidade, contains('_GeneratedHeroAssetCard'));
-    expect(identidade, contains('Usar como fundo'));
+    expect(identidade, contains('Aplicar como fundo premium'));
+    expect(identidade, contains('_buildGeneratedHeroUrl'));
+    expect(identidade, contains('_applyHeroAsBackground'));
+    expect(identidade, contains('Video de apresentacao enviado e salvo'));
     expect(identidade, contains('_pickPresentationVideo'));
     expect(identidade, contains("resourceType: 'video'"));
     expect(identidade, contains('Subir video de apresentacao'));
+    expect(identidade, contains('_LandingMediaStatusCard'));
   });
 }

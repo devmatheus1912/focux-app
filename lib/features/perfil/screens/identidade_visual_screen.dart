@@ -59,18 +59,27 @@ class _IdentidadeVisualScreenState
   bool _salvando = false;
   bool _uploadingLogo = false;
   bool _uploadingVideo = false;
+  bool _applyingHeroImage = false;
   bool _perfilLoaded = false;
+  bool _hydratingPerfil = false;
   String? _logoUrl;
 
   @override
   void initState() {
     super.initState();
+    _heroPromptCtrl.addListener(_onHeroPromptChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(perfilProvider);
     });
   }
 
+  void _onHeroPromptChanged() {
+    if (_hydratingPerfil) return;
+    if (mounted) setState(() {});
+  }
+
   void _applyPerfil(PerfilPersonal perfil) {
+    _hydratingPerfil = true;
     _descCtrl.text = perfil.descricaoProfissional ?? '';
     _espCtrl.text = perfil.especialidades ?? '';
     _instaCtrl.text = perfil.instagram ?? '';
@@ -104,6 +113,7 @@ class _IdentidadeVisualScreenState
       _faqQuestionCtrls[i].text = item?.pergunta ?? '';
       _faqAnswerCtrls[i].text = item?.resposta ?? '';
     }
+    _hydratingPerfil = false;
     _perfilLoaded = true;
   }
 
@@ -148,6 +158,7 @@ class _IdentidadeVisualScreenState
 
   @override
   void dispose() {
+    _heroPromptCtrl.removeListener(_onHeroPromptChanged);
     _descCtrl.dispose();
     _espCtrl.dispose();
     _instaCtrl.dispose();
@@ -210,7 +221,7 @@ class _IdentidadeVisualScreenState
     }
   }
 
-  Future<void> _pickPresentationVideo() async {
+  Future<void> _pickPresentationVideo(String plano) async {
     final file = await ImagePicker().pickVideo(
       source: ImageSource.gallery,
       maxDuration: const Duration(minutes: 5),
@@ -228,8 +239,9 @@ class _IdentidadeVisualScreenState
       );
       if (mounted) {
         setState(() => _videoCtrl.text = url);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Video de apresentacao enviado.')),
+        await _salvar(
+          plano,
+          successMessage: 'Video de apresentacao enviado e salvo na landing.',
         );
       }
     } catch (e) {
@@ -243,7 +255,10 @@ class _IdentidadeVisualScreenState
     }
   }
 
-  Future<void> _salvar(String plano) async {
+  Future<void> _salvar(
+    String plano, {
+    String successMessage = 'Identidade visual salva!',
+  }) async {
     if (plano.toUpperCase() == 'FREE') return;
     setState(() => _salvando = true);
     try {
@@ -272,8 +287,13 @@ class _IdentidadeVisualScreenState
           body['videoUrl'] = _videoCtrl.text.trim();
         }
         body['trackingId'] = _trackingCtrl.text.trim();
+        final draftHeroUrl = _buildGeneratedHeroUrl(perfil: null);
+        final typedHeroUrl = _heroImageCtrl.text.trim();
         body['heroPrompt'] = _heroPromptCtrl.text.trim();
-        body['heroImageUrl'] = _heroImageCtrl.text.trim();
+        body['heroImageUrl'] =
+            typedHeroUrl.isEmpty || _isAiGeneratedHeroUrl(typedHeroUrl)
+                ? draftHeroUrl
+                : typedHeroUrl;
       }
       await dio.put('/api/personal/identidade', data: body);
       if (plano.toUpperCase() == 'ENTERPRISE') {
@@ -284,9 +304,9 @@ class _IdentidadeVisualScreenState
       }
       ref.invalidate(perfilProvider);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Identidade visual salva!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(successMessage)));
         if (widget.isSetup) context.pop(true);
       }
     } catch (e) {
@@ -298,6 +318,84 @@ class _IdentidadeVisualScreenState
     } finally {
       if (mounted) setState(() => _salvando = false);
     }
+  }
+
+  Future<void> _applyHeroAsBackground(String plano, String url) async {
+    if (_applyingHeroImage) return;
+    setState(() {
+      _applyingHeroImage = true;
+      _heroImageCtrl.text = url;
+    });
+    try {
+      await _salvar(
+        plano,
+        successMessage: 'Imagem IA aplicada como fundo da landing.',
+      );
+    } finally {
+      if (mounted) setState(() => _applyingHeroImage = false);
+    }
+  }
+
+  String _buildGeneratedHeroUrl({PerfilPersonal? perfil}) {
+    final prompt = _buildGeneratedHeroPrompt(perfil);
+    if (prompt.isEmpty) return '';
+    final encoded = Uri.encodeComponent(prompt);
+    final slugOrId =
+        perfil?.slug ?? perfil?.id.toString() ?? _currentPerfilSeedSource;
+    final seed = _stablePositiveSeed(slugOrId);
+    return 'https://image.pollinations.ai/prompt/$encoded'
+        '?width=1600&height=1000&model=flux&nologo=true&seed=$seed';
+  }
+
+  String get _currentPerfilSeedSource {
+    final perfil = ref.read(perfilProvider).value;
+    return perfil?.slug ?? perfil?.id.toString() ?? 'focux-landing';
+  }
+
+  String _buildGeneratedHeroPrompt(PerfilPersonal? perfil) {
+    final brief = _heroPromptCtrl.text.trim();
+    final nome =
+        (perfil?.nome ?? '').trim().isNotEmpty
+            ? perfil!.nome.trim()
+            : 'personal trainer';
+    final especialidades =
+        _espCtrl.text.trim().isNotEmpty
+            ? _espCtrl.text.trim()
+            : (perfil?.especialidades ?? perfil?.especialidade ?? '').trim();
+    final primary =
+        '#${_corPrimaria.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
+    final secondary =
+        '#${_corSecundaria.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
+    final base =
+        brief.isNotEmpty
+            ? brief
+            : 'personal trainer premium, treino personalizado, visual sofisticado';
+    return '$base, landing page premium para $nome, '
+        '${especialidades.isEmpty ? 'fitness transformation' : especialidades}, '
+        'realistic cinematic fitness photography, elegant mobile first hero background, '
+        'deep contrast, premium studio lighting, brand colors $primary and $secondary, '
+        'clear space for headline, no text, no logo, no watermark';
+  }
+
+  bool _isAiGeneratedHeroUrl(String url) {
+    final value = url.trim().toLowerCase();
+    return value.contains('image.pollinations.ai/prompt/');
+  }
+
+  bool _isDirectVideoUrl(String url) {
+    final clean = url.toLowerCase().split('?').first;
+    return clean.endsWith('.mp4') ||
+        clean.endsWith('.webm') ||
+        clean.endsWith('.mov') ||
+        clean.endsWith('.m4v');
+  }
+
+  int _stablePositiveSeed(String value) {
+    var hash = 0;
+    for (final code in value.codeUnits) {
+      hash = (hash * 31 + code) & 0x7fffffff;
+    }
+    return hash == 0 ? 1015133771 : hash;
   }
 
   @override
@@ -322,6 +420,14 @@ class _IdentidadeVisualScreenState
     final generatedHeroUrl = perfil?.generatedHeroImageUrl?.trim();
     final heroStatus = perfil?.heroImageStatus?.trim();
     final heroBrief = perfil?.heroImageBrief?.trim();
+    final draftGeneratedHeroUrl = _buildGeneratedHeroUrl(perfil: perfil);
+    final typedHeroUrl = _heroImageCtrl.text.trim();
+    final previewHeroUrl =
+        typedHeroUrl.isEmpty || _isAiGeneratedHeroUrl(typedHeroUrl)
+            ? draftGeneratedHeroUrl
+            : typedHeroUrl;
+    final hasUnsavedHeroBrief =
+        (_heroPromptCtrl.text.trim()) != (perfil?.heroPrompt ?? '').trim();
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -386,6 +492,7 @@ class _IdentidadeVisualScreenState
                 'Escolha uma promessa clara: emagrecimento, performance, hipertrofia ou saude.',
                 'Use fotos e videos reais para passar confianca antes do aluno chamar.',
                 'Deixe preco, servicos e duvidas frequentes simples de comparar.',
+                'Use a imagem IA como fundo da primeira dobra: ela precisa combinar com sua cor, nicho e tom de venda.',
               ],
             ),
             const SizedBox(height: 12),
@@ -798,7 +905,7 @@ class _IdentidadeVisualScreenState
                           OutlinedButton.icon(
                             onPressed:
                                 isEnterprise && !_uploadingVideo
-                                    ? _pickPresentationVideo
+                                    ? () => _pickPresentationVideo(plano)
                                     : null,
                             icon:
                                 _uploadingVideo
@@ -816,6 +923,19 @@ class _IdentidadeVisualScreenState
                                   : 'Subir video de apresentacao',
                             ),
                           ),
+                          if (_videoCtrl.text.trim().isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            _LandingMediaStatusCard(
+                              isDark: isDark,
+                              icon: Icons.play_circle_outline,
+                              title: 'Video conectado a landing',
+                              subtitle:
+                                  _isDirectVideoUrl(_videoCtrl.text.trim())
+                                      ? 'Vai abrir em player embutido na primeira tela.'
+                                      : 'Vai aparecer como chamada profissional para abrir o link.',
+                              url: _videoCtrl.text.trim(),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -824,7 +944,7 @@ class _IdentidadeVisualScreenState
                       isDark: isDark,
                       title: 'Imagem IA unica da landing',
                       subtitle:
-                          'Descreva a imagem de fundo que representa seu posicionamento. Quando a IA gerar a imagem, cole a URL final aqui.',
+                          'Descreva o estilo da primeira tela. A IA cria uma imagem premium para virar fundo principal da landing.',
                       child: Column(
                         children: [
                           TextFormField(
@@ -840,18 +960,26 @@ class _IdentidadeVisualScreenState
                             ),
                           ),
                           const SizedBox(height: 12),
-                          if (generatedHeroUrl != null &&
-                              generatedHeroUrl.isNotEmpty) ...[
+                          if (previewHeroUrl.isNotEmpty) ...[
                             _GeneratedHeroAssetCard(
                               isDark: isDark,
-                              url: generatedHeroUrl,
-                              status: heroStatus,
-                              brief: heroBrief,
+                              url: previewHeroUrl,
+                              status:
+                                  hasUnsavedHeroBrief
+                                      ? 'PREVIEW'
+                                      : (heroStatus ?? 'PREVIEW'),
+                              brief:
+                                  hasUnsavedHeroBrief
+                                      ? _heroPromptCtrl.text.trim()
+                                      : (heroBrief ??
+                                          _heroPromptCtrl.text.trim()),
+                              applying: _applyingHeroImage || _salvando,
                               onUseAsBackground:
                                   isEnterprise
-                                      ? () => setState(() {
-                                        _heroImageCtrl.text = generatedHeroUrl;
-                                      })
+                                      ? () => _applyHeroAsBackground(
+                                        plano,
+                                        previewHeroUrl,
+                                      )
                                       : null,
                             ),
                             const SizedBox(height: 12),
@@ -863,9 +991,22 @@ class _IdentidadeVisualScreenState
                               labelText: 'URL da imagem gerada',
                               hintText: 'https://cdn.focux.app/landing/...',
                               helperText:
-                                  'Aparece como fundo principal antes da galeria.',
+                                  'Este link e salvo como fundo da primeira tela da landing.',
                             ),
                           ),
+                          if (generatedHeroUrl != null &&
+                              generatedHeroUrl.isNotEmpty &&
+                              generatedHeroUrl != previewHeroUrl) ...[
+                            const SizedBox(height: 8),
+                            _LandingMediaStatusCard(
+                              isDark: isDark,
+                              icon: Icons.history,
+                              title: 'Imagem IA salva anteriormente',
+                              subtitle:
+                                  'Voce mudou o briefing. Aplique a nova imagem para atualizar a landing.',
+                              url: generatedHeroUrl,
+                            ),
+                          ],
                           const SizedBox(height: 12),
                           TextFormField(
                             controller: _trackingCtrl,
@@ -1139,6 +1280,7 @@ class _GeneratedHeroAssetCard extends StatelessWidget {
   final String url;
   final String? status;
   final String? brief;
+  final bool applying;
   final VoidCallback? onUseAsBackground;
   final bool isDark;
 
@@ -1146,6 +1288,7 @@ class _GeneratedHeroAssetCard extends StatelessWidget {
     required this.url,
     required this.status,
     required this.brief,
+    required this.applying,
     required this.onUseAsBackground,
     required this.isDark,
   });
@@ -1166,6 +1309,55 @@ class _GeneratedHeroAssetCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    url,
+                    fit: BoxFit.cover,
+                    errorBuilder:
+                        (_, __, ___) => Container(
+                          color: primary.withValues(alpha: 0.10),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            color: primary,
+                          ),
+                        ),
+                  ),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.42),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Positioned(
+                    left: 12,
+                    bottom: 10,
+                    child: Text(
+                      'Preview do fundo principal',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           Row(
             children: [
               Icon(Icons.image_outlined, color: primary, size: 18),
@@ -1225,11 +1417,88 @@ class _GeneratedHeroAssetCard extends StatelessWidget {
                 label: const Text('Copiar link'),
               ),
               FilledButton.icon(
-                onPressed: onUseAsBackground,
-                icon: const Icon(Icons.wallpaper_outlined, size: 16),
-                label: const Text('Usar como fundo'),
+                onPressed: applying ? null : onUseAsBackground,
+                icon:
+                    applying
+                        ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : const Icon(Icons.wallpaper_outlined, size: 16),
+                label: Text(
+                  applying ? 'Aplicando...' : 'Aplicar como fundo premium',
+                ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LandingMediaStatusCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String url;
+  final bool isDark;
+
+  const _LandingMediaStatusCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.url,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: isDark ? 0.14 : 0.07),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: primary.withValues(alpha: 0.20)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: primary, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: ink,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(color: mute, fontSize: 12, height: 1.3),
+                ),
+                const SizedBox(height: 6),
+                SelectableText(
+                  url,
+                  style: TextStyle(
+                    color: primary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
