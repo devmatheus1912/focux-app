@@ -91,6 +91,7 @@ void main() {
     expect(hero, contains('data.heroImageUrl'));
     expect(hero, contains('data.generatedHeroImageUrl'));
     expect(hero, contains('webHtmlElementStrategy'));
+    expect(hero, contains('WebHtmlElementStrategy.prefer'));
     expect(hero, isNot(contains('Ver apresentacao')));
     expect(hero, contains('VideoPlayerController.networkUrl'));
     expect(hero, contains('_PresentationVideoCard'));
@@ -105,6 +106,7 @@ void main() {
     expect(identidade, contains('_GeneratedHeroAssetCard'));
     expect(identidade, contains('Aplicar como fundo premium'));
     expect(identidade, contains('webHtmlElementStrategy'));
+    expect(identidade, contains('WebHtmlElementStrategy.prefer'));
     expect(identidade, contains('_buildGeneratedHeroUrl'));
     expect(identidade, contains('_applyHeroAsBackground'));
     expect(identidade, contains("_heroImageCtrl.clear()"));

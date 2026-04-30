@@ -1325,7 +1325,7 @@ class _GeneratedHeroAssetCard extends StatelessWidget {
                   Image.network(
                     url,
                     fit: BoxFit.cover,
-                    webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+                    webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
                     errorBuilder:
                         (_, __, ___) => Container(
                           color: primary.withValues(alpha: 0.10),

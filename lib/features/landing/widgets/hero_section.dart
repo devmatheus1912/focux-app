@@ -50,7 +50,7 @@ class HeroSection extends StatelessWidget {
                 heroImage,
                 fit: BoxFit.cover,
                 alignment: Alignment.center,
-                webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+                webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
                 errorBuilder: (_, __, ___) => const SizedBox.shrink(),
               ),
             ),
