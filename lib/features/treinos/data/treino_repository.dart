@@ -100,19 +100,25 @@ class TreinoRepository {
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<Treino> adicionarExercicio(int treinoId, int exercicioId,
-      {
-      int series = 3,
-      String repeticoes = '10-12',
-      int descanso = 60,
-      String tipoSerie = 'NORMAL',
-      int? grupoSuperset,
-      }) async {
+  Future<Treino> adicionarExercicio(
+    int treinoId,
+    int exercicioId, {
+    int series = 3,
+    String repeticoes = '10-12',
+    int descanso = 60,
+    double? cargaKg,
+    String? observacoes,
+    String tipoSerie = 'NORMAL',
+    int? grupoSuperset,
+  }) async {
     final response = await _dio.post('/api/treinos/$treinoId/exercicios', data: {
       'exercicioId': exercicioId,
       'series': series,
       'repeticoes': repeticoes,
       'descansoSegundos': descanso,
+      if (cargaKg != null) 'cargaKg': cargaKg,
+      if (observacoes != null && observacoes.trim().isNotEmpty)
+        'observacoes': observacoes.trim(),
       'tipoSerie': tipoSerie,
       if (grupoSuperset != null) 'grupoSuperset': grupoSuperset,
     });

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
+import '../data/workout_builder_preset.dart';
 import '../providers/treinos_provider.dart';
 
 class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
@@ -21,7 +22,10 @@ class _AddExercicioToTreinoScreenState
   final _seriesCtrl = TextEditingController(text: '3');
   final _repCtrl = TextEditingController(text: '10-12');
   final _descansoCtrl = TextEditingController(text: '60');
+  final _cargaCtrl = TextEditingController();
+  final _observacoesCtrl = TextEditingController();
   final _grupoSupersetCtrl = TextEditingController(text: '1');
+  String _presetId = 'hypertrophy';
   String _tipoSerie = 'NORMAL';
   bool _loading = false;
   String? _error;
@@ -31,8 +35,25 @@ class _AddExercicioToTreinoScreenState
     _seriesCtrl.dispose();
     _repCtrl.dispose();
     _descansoCtrl.dispose();
+    _cargaCtrl.dispose();
+    _observacoesCtrl.dispose();
     _grupoSupersetCtrl.dispose();
     super.dispose();
+  }
+
+  void _applyPreset(String id) {
+    final preset = workoutBuilderPresetById(id);
+    setState(() {
+      _presetId = id;
+      _seriesCtrl.text = preset.series.toString();
+      _repCtrl.text = preset.repeticoes;
+      _descansoCtrl.text = preset.descansoSegundos.toString();
+      _tipoSerie = preset.tipoSerie;
+      _observacoesCtrl.text = preset.observacoes;
+      if (preset.grupoSuperset != null) {
+        _grupoSupersetCtrl.text = preset.grupoSuperset.toString();
+      }
+    });
   }
 
   Future<void> _submit() async {
@@ -48,6 +69,8 @@ class _AddExercicioToTreinoScreenState
         series: int.tryParse(_seriesCtrl.text) ?? 3,
         repeticoes: _repCtrl.text,
         descanso: int.tryParse(_descansoCtrl.text) ?? 60,
+        cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
+        observacoes: _observacoesCtrl.text,
         tipoSerie: _tipoSerie,
         grupoSuperset: _tipoSerie == 'SUPERSET'
             ? int.tryParse(_grupoSupersetCtrl.text)
@@ -163,6 +186,13 @@ class _AddExercicioToTreinoScreenState
                         ),
                       ],
                       const SizedBox(height: 20),
+                      _PresetSelector(
+                        selectedId: _presetId,
+                        primary: primary,
+                        isDark: isDark,
+                        onSelected: _applyPreset,
+                      ),
+                      const SizedBox(height: 20),
                       Row(
                         children: [
                           Expanded(
@@ -190,6 +220,40 @@ class _AddExercicioToTreinoScreenState
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
                                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
                               ),
+                              style: TextStyle(color: ink),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _descansoCtrl,
+                              decoration: InputDecoration(
+                                labelText: 'Descanso (segundos)',
+                                filled: true,
+                                fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                              ),
+                              keyboardType: TextInputType.number,
+                              style: TextStyle(color: ink),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _cargaCtrl,
+                              decoration: InputDecoration(
+                                labelText: 'Carga alvo (kg)',
+                                filled: true,
+                                fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               style: TextStyle(color: ink),
                             ),
                           ),
@@ -229,15 +293,16 @@ class _AddExercicioToTreinoScreenState
                       ],
                       const SizedBox(height: 16),
                       TextFormField(
-                        controller: _descansoCtrl,
+                        controller: _observacoesCtrl,
                         decoration: InputDecoration(
-                          labelText: 'Descanso (segundos)',
+                          labelText: 'Observacoes de execucao',
                           filled: true,
                           fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
                           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
                         ),
-                        keyboardType: TextInputType.number,
+                        minLines: 2,
+                        maxLines: 4,
                         style: TextStyle(color: ink),
                       ),
                       if (_error != null) ...[
@@ -280,6 +345,89 @@ class _AddExercicioToTreinoScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PresetSelector extends StatelessWidget {
+  final String selectedId;
+  final Color primary;
+  final bool isDark;
+  final ValueChanged<String> onSelected;
+
+  const _PresetSelector({
+    required this.selectedId,
+    required this.primary,
+    required this.isDark,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = workoutBuilderPresetById(selectedId);
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final card = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.tune_rounded, color: primary, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                'Presets de prescricao',
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: workoutBuilderPresets.map((preset) {
+              final isSelected = preset.id == selectedId;
+              return ChoiceChip(
+                selected: isSelected,
+                label: Text(preset.label),
+                labelStyle: TextStyle(
+                  color: isSelected ? Colors.white : primary,
+                  fontWeight: FontWeight.w800,
+                ),
+                selectedColor: primary,
+                backgroundColor: primary.withValues(alpha: 0.08),
+                side: BorderSide(
+                  color: primary.withValues(alpha: isSelected ? 0 : 0.24),
+                ),
+                onSelected: (_) => onSelected(preset.id),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            selected.summary,
+            style: TextStyle(
+              color: mute,
+              fontSize: 12.5,
+              height: 1.35,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
