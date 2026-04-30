@@ -94,6 +94,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           status: _execucao!.status,
           iniciadoEm: _execucao!.iniciadoEm,
           concluidoEm: _execucao!.concluidoEm,
+          evolucoesCarga: _execucao!.evolucoesCarga,
           exercicios: _execucao!.exercicios
               .map((e) => e.id == updated.id ? updated : e)
               .toList(),
@@ -151,6 +152,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           status: _execucao!.status,
           iniciadoEm: _execucao!.iniciadoEm,
           concluidoEm: _execucao!.concluidoEm,
+          evolucoesCarga: _execucao!.evolucoesCarga,
           exercicios: _execucao!.exercicios
               .map((e) => e.id == updated.id ? updated : e)
               .toList(),
@@ -191,6 +193,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           status: _execucao!.status,
           iniciadoEm: _execucao!.iniciadoEm,
           concluidoEm: _execucao!.concluidoEm,
+          evolucoesCarga: _execucao!.evolucoesCarga,
           exercicios: _execucao!.exercicios
               .map((e) => e.id == updated.id ? updated : e)
               .toList(),
@@ -241,13 +244,21 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       _concluindo = true;
     });
     try {
-      await ref.read(checkinRepositoryProvider).concluir(_execucao!.id!);
+      final concluida =
+          await ref.read(checkinRepositoryProvider).concluir(_execucao!.id!);
       ref.invalidate(historicoCheckinProvider);
       ref.invalidate(meusTreinosProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Treino concluido. Historico atualizado.')),
-      );
+      if (concluida.evolucoesCarga.isNotEmpty) {
+        await _showEvolucaoCarga(concluida.evolucoesCarga);
+        if (!mounted) return;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Treino concluido. Historico atualizado.'),
+          ),
+        );
+      }
       safePopOrGo(context, '/checkin/treinos');
     } catch (e) {
       if (mounted) {
@@ -262,6 +273,54 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     }
   }
 
+  Future<void> _showEvolucaoCarga(List<EvolucaoCarga> evolucoes) async {
+    if (!mounted) return;
+    final primary = Theme.of(context).colorScheme.primary;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Evolucao registrada'),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Voce aumentou carga neste treino. A mensagem tambem ficou salva no chat com seu personal.',
+              ),
+              const SizedBox(height: 14),
+              for (final evolucao in evolucoes.take(4))
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.trending_up_rounded, color: primary, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${evolucao.exercicioNome}: ${_fmtKg(evolucao.cargaAnteriorKg)}kg -> ${_fmtKg(evolucao.cargaAtualKg)}kg'
+                          '${evolucao.percentual == null ? '' : ' (+${evolucao.percentual}%)'}',
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Continuar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _fmt(Duration d) {
     final h = d.inHours;
     final m = d.inMinutes.remainder(60);
@@ -270,6 +329,11 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
     }
     return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
+  String _fmtKg(double value) {
+    final fixed = value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 1);
+    return fixed.replaceAll('.', ',');
   }
 
   String _nextExerciseLabel(List<ExecucaoExercicio> exercicios) {

@@ -177,6 +177,7 @@ class ExecucaoTreino {
   final String? iniciadoEm;
   final String? concluidoEm;
   final List<ExecucaoExercicio> exercicios;
+  final List<EvolucaoCarga> evolucoesCarga;
 
   ExecucaoTreino({
     this.id,
@@ -186,6 +187,7 @@ class ExecucaoTreino {
     this.iniciadoEm,
     this.concluidoEm,
     required this.exercicios,
+    this.evolucoesCarga = const [],
   });
 
   factory ExecucaoTreino.fromJson(Map<String, dynamic> j) => ExecucaoTreino(
@@ -198,6 +200,39 @@ class ExecucaoTreino {
         exercicios: (j['exercicios'] as List<dynamic>)
             .map((e) => ExecucaoExercicio.fromJson(e as Map<String, dynamic>))
             .toList(),
+        evolucoesCarga: (j['evolucoesCarga'] as List<dynamic>? ?? const [])
+            .map((e) => EvolucaoCarga.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+class EvolucaoCarga {
+  final int exercicioId;
+  final String exercicioNome;
+  final double cargaAnteriorKg;
+  final double cargaAtualKg;
+  final double diferencaKg;
+  final int? percentual;
+  final String mensagem;
+
+  const EvolucaoCarga({
+    required this.exercicioId,
+    required this.exercicioNome,
+    required this.cargaAnteriorKg,
+    required this.cargaAtualKg,
+    required this.diferencaKg,
+    this.percentual,
+    required this.mensagem,
+  });
+
+  factory EvolucaoCarga.fromJson(Map<String, dynamic> json) => EvolucaoCarga(
+        exercicioId: json['exercicioId'] as int,
+        exercicioNome: json['exercicioNome'] as String,
+        cargaAnteriorKg: _toDouble(json['cargaAnteriorKg']) ?? 0,
+        cargaAtualKg: _toDouble(json['cargaAtualKg']) ?? 0,
+        diferencaKg: _toDouble(json['diferencaKg']) ?? 0,
+        percentual: json['percentual'] as int?,
+        mensagem: json['mensagem'] as String? ?? '',
       );
 }
 
