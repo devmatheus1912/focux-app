@@ -73,6 +73,10 @@ void main() {
         File(
           'lib/features/landing/widgets/ofertas_section.dart',
         ).readAsStringSync();
+    final metodo =
+        File(
+          'lib/features/landing/widgets/metodo_section.dart',
+        ).readAsStringSync();
     final cta =
         File(
           'lib/features/landing/widgets/cta_final_section.dart',
@@ -90,6 +94,9 @@ void main() {
     expect(landing, contains("eventType: 'landing_view'"));
     expect(hero, contains('data.heroImageUrl'));
     expect(hero, contains('data.generatedHeroImageUrl'));
+    expect(hero, contains('_LandingBrandCanvas'));
+    expect(hero, contains('_LandingSignature'));
+    expect(hero, contains('Assinatura'));
     expect(hero, contains('webHtmlElementStrategy'));
     expect(hero, contains('WebHtmlElementStrategy.prefer'));
     expect(hero, isNot(contains('Ver apresentacao')));
@@ -98,6 +105,11 @@ void main() {
     expect(hero, contains('_isDirectVideoUrl'));
     expect(hero, contains("source: 'landing'"));
     expect(ofertas, contains("source: 'landing_offer'"));
+    expect(ofertas, contains('_ServiceTile'));
+    expect(ofertas, contains('_PackageTile'));
+    expect(ofertas, contains('MAIS PROCURADO'));
+    expect(metodo, contains('METODO PREMIUM'));
+    expect(metodo, contains('_MetodoCard'));
     expect(cta, contains("source: 'landing_cta'"));
     expect(tracking, contains(r'/api/public/personal/$slug/eventos'));
     expect(tracking, contains('landingRegisterPath'));
@@ -105,6 +117,7 @@ void main() {
     expect(identidade, contains('generatedHeroImageUrl'));
     expect(identidade, contains('_GeneratedHeroAssetCard'));
     expect(identidade, contains('Aplicar como fundo premium'));
+    expect(identidade, contains('Opcional: a IA pode criar um fundo'));
     expect(identidade, contains('webHtmlElementStrategy'));
     expect(identidade, contains('WebHtmlElementStrategy.prefer'));
     expect(identidade, contains('_buildGeneratedHeroUrl'));

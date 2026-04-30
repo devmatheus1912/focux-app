@@ -36,98 +36,131 @@ class MetodoSection extends StatelessWidget {
       ),
     ];
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'METODO',
-            style: TextStyle(
-              color: Color(0xFF6B7280),
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Um processo claro para transformar treino em resultado.',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              height: 1.15,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            data.slogan?.trim().isNotEmpty == true
-                ? data.slogan!
-                : 'Sem improviso, sem planilha solta e sem acompanhamento generico.',
-            style: const TextStyle(
-              color: Color(0xFF94A3B8),
-              fontSize: 14,
-              height: 1.6,
-            ),
-          ),
-          const SizedBox(height: 18),
-          for (var i = 0; i < etapas.length; i++)
-            Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: const Color(0xFF111827),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFF1F2937)),
-              ),
-              child: Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth > 720;
+        final contentWidth =
+            constraints.maxWidth > 1100 ? 1100.0 : constraints.maxWidth;
+        return Container(
+          padding: EdgeInsets.fromLTRB(wide ? 56 : 16, 34, wide ? 56 : 16, 22),
+          decoration: const BoxDecoration(color: Color(0xFF070B16)),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1100),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: primaryColor.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '${i + 1}',
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontWeight: FontWeight.w800,
-                      ),
+                  Text(
+                    'METODO PREMIUM',
+                    style: TextStyle(
+                      color: primaryColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
                     ),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          etapas[i].titulo,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          etapas[i].descricao,
-                          style: const TextStyle(
-                            color: Color(0xFF94A3B8),
-                            fontSize: 14,
-                            height: 1.55,
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 10),
+                  const Text(
+                    'A jornada nao parece uma ficha. Parece um acompanhamento.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      height: 1.08,
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    data.slogan?.trim().isNotEmpty == true
+                        ? data.slogan!
+                        : 'Sem improviso, sem planilha solta e sem acompanhamento generico.',
+                    style: const TextStyle(
+                      color: Color(0xFF94A3B8),
+                      fontSize: 15,
+                      height: 1.55,
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      for (var i = 0; i < etapas.length; i++)
+                        SizedBox(
+                          width:
+                              wide ? (contentWidth - 36) / 4 : double.infinity,
+                          child: _MetodoCard(
+                            index: i + 1,
+                            title: etapas[i].titulo,
+                            description: etapas[i].descricao,
+                            primaryColor: primaryColor,
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),
             ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _MetodoCard extends StatelessWidget {
+  final int index;
+  final String title;
+  final String description;
+  final Color primaryColor;
+
+  const _MetodoCard({
+    required this.index,
+    required this.title,
+    required this.description,
+    required this.primaryColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minHeight: 190),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFF101827),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '0$index',
+            style: TextStyle(
+              color: primaryColor,
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            description,
+            style: const TextStyle(
+              color: Color(0xFF94A3B8),
+              fontSize: 13,
+              height: 1.5,
+            ),
+          ),
         ],
       ),
     );

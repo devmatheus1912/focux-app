@@ -949,7 +949,7 @@ class _IdentidadeVisualScreenState
                       isDark: isDark,
                       title: 'Imagem IA unica da landing',
                       subtitle:
-                          'Descreva o estilo da primeira tela. A IA cria uma imagem premium para virar fundo principal da landing.',
+                          'Opcional: a IA pode criar um fundo. Se ela falhar, a landing ainda usa uma assinatura premium unica com suas cores.',
                       child: Column(
                         children: [
                           TextFormField(

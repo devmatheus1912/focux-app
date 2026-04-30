@@ -34,6 +34,7 @@ class HeroSection extends StatelessWidget {
                 ? data.logoUrl
                 : null);
     final compact = MediaQuery.of(context).size.width < 640;
+    final signature = _signatureVariant(slug, data.nomePersonal);
     final minHeight = (MediaQuery.of(context).size.height * 0.86).clamp(
       620.0,
       820.0,
@@ -44,30 +45,40 @@ class HeroSection extends StatelessWidget {
       color: const Color(0xFF0A0F1E),
       child: Stack(
         children: [
+          Positioned.fill(
+            child: _LandingBrandCanvas(
+              primary: primaryColor,
+              secondary: secondaryColor,
+              variant: signature,
+            ),
+          ),
           if (heroImage != null)
             Positioned.fill(
-              child: Image.network(
-                heroImage,
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
-                webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              child: Opacity(
+                opacity: 0.78,
+                child: Image.network(
+                  heroImage,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.center,
+                  webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                ),
               ),
             ),
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+                  begin: compact ? Alignment.topCenter : Alignment.centerLeft,
+                  end: compact ? Alignment.bottomCenter : Alignment.centerRight,
                   colors: [
-                    Colors.black.withValues(
-                      alpha: heroImage == null ? 0.20 : 0.44,
-                    ),
+                    const Color(0xFF050814).withValues(alpha: 0.98),
+                    const Color(
+                      0xFF050814,
+                    ).withValues(alpha: heroImage == null ? 0.74 : 0.62),
                     primaryColor.withValues(
-                      alpha: heroImage == null ? 0.58 : 0.34,
+                      alpha: heroImage == null ? 0.44 : 0.26,
                     ),
-                    const Color(0xFF050814).withValues(alpha: 0.96),
                   ],
                 ),
               ),
@@ -89,7 +100,7 @@ class HeroSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   CircleAvatar(
-                    radius: 42,
+                    radius: 36,
                     backgroundColor: Colors.white.withValues(alpha: 0.18),
                     backgroundImage:
                         data.logoUrl != null && data.logoUrl!.isNotEmpty
@@ -109,7 +120,12 @@ class HeroSection extends StatelessWidget {
                               ),
                             ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 16),
+                  _SignatureBadge(
+                    label: 'Assinatura ${signature.label}',
+                    primary: primaryColor,
+                  ),
+                  const SizedBox(height: 14),
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 760),
                     child: Text(
@@ -143,7 +159,7 @@ class HeroSection extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 26),
+                  const SizedBox(height: 24),
                   Wrap(
                     spacing: 12,
                     runSpacing: 12,
@@ -188,7 +204,7 @@ class HeroSection extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   Wrap(
                     spacing: 10,
                     runSpacing: 10,
@@ -208,7 +224,7 @@ class HeroSection extends StatelessWidget {
                     ],
                   ),
                   if (data.videoUrl?.trim().isNotEmpty == true) ...[
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 22),
                     _PresentationVideoCard(
                       url: data.videoUrl!.trim(),
                       slug: slug,
@@ -371,6 +387,165 @@ bool _isDirectVideoUrl(String url) {
       clean.endsWith('.webm') ||
       clean.endsWith('.mov') ||
       clean.endsWith('.m4v');
+}
+
+_LandingSignature _signatureVariant(String slug, String name) {
+  final source = '$slug-$name';
+  var hash = 0;
+  for (final code in source.codeUnits) {
+    hash = (hash * 31 + code) & 0x7fffffff;
+  }
+  return _LandingSignature.values[hash % _LandingSignature.values.length];
+}
+
+enum _LandingSignature {
+  precision('Precision'),
+  studio('Studio'),
+  performance('Performance');
+
+  final String label;
+  const _LandingSignature(this.label);
+}
+
+class _LandingBrandCanvas extends StatelessWidget {
+  final Color primary;
+  final Color secondary;
+  final _LandingSignature variant;
+
+  const _LandingBrandCanvas({
+    required this.primary,
+    required this.secondary,
+    required this.variant,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _LandingBrandPainter(
+        primary: primary,
+        secondary: secondary,
+        variant: variant,
+      ),
+      child: const SizedBox.expand(),
+    );
+  }
+}
+
+class _LandingBrandPainter extends CustomPainter {
+  final Color primary;
+  final Color secondary;
+  final _LandingSignature variant;
+
+  const _LandingBrandPainter({
+    required this.primary,
+    required this.secondary,
+    required this.variant,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bg =
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF050814),
+              Color.lerp(primary, const Color(0xFF050814), 0.74)!,
+              Color.lerp(secondary, const Color(0xFF050814), 0.70)!,
+            ],
+          ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, bg);
+
+    final linePaint =
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.055)
+          ..strokeWidth = 1;
+    final step = variant == _LandingSignature.studio ? 42.0 : 56.0;
+    for (var x = -size.height; x < size.width + size.height; x += step) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x + size.height, size.height),
+        linePaint,
+      );
+    }
+
+    final bandPaint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = variant == _LandingSignature.performance ? 18 : 12
+          ..color = primary.withValues(alpha: 0.22);
+    final band = Path();
+    if (variant == _LandingSignature.precision) {
+      band.moveTo(size.width * 0.58, -40);
+      band.lineTo(size.width * 0.95, size.height * 0.42);
+      band.lineTo(size.width * 0.70, size.height + 60);
+    } else if (variant == _LandingSignature.studio) {
+      band.moveTo(size.width * 0.76, -30);
+      band.cubicTo(
+        size.width,
+        size.height * 0.22,
+        size.width * 0.54,
+        size.height * 0.58,
+        size.width * 0.92,
+        size.height + 30,
+      );
+    } else {
+      band.moveTo(size.width * 0.40, -20);
+      band.lineTo(size.width + 40, size.height * 0.24);
+      band.moveTo(size.width * 0.52, size.height + 20);
+      band.lineTo(size.width + 20, size.height * 0.56);
+    }
+    canvas.drawPath(band, bandPaint);
+
+    final panelPaint =
+        Paint()
+          ..color = secondary.withValues(alpha: 0.16)
+          ..style = PaintingStyle.fill;
+    final panel =
+        Path()
+          ..moveTo(size.width * 0.70, size.height * 0.10)
+          ..lineTo(size.width, size.height * 0.02)
+          ..lineTo(size.width, size.height * 0.72)
+          ..lineTo(size.width * 0.82, size.height * 0.92)
+          ..close();
+    canvas.drawPath(panel, panelPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _LandingBrandPainter oldDelegate) {
+    return oldDelegate.primary != primary ||
+        oldDelegate.secondary != secondary ||
+        oldDelegate.variant != variant;
+  }
+}
+
+class _SignatureBadge extends StatelessWidget {
+  final String label;
+  final Color primary;
+
+  const _SignatureBadge({required this.label, required this.primary});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0,
+        ),
+      ),
+    );
+  }
 }
 
 class _HeroPill extends StatelessWidget {
