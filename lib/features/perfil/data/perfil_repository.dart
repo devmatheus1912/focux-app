@@ -51,6 +51,27 @@ class LandingPackageItem {
       };
 }
 
+class LandingFaqItem {
+  final String pergunta;
+  final String resposta;
+
+  const LandingFaqItem({
+    required this.pergunta,
+    required this.resposta,
+  });
+
+  factory LandingFaqItem.fromJson(Map<String, dynamic> json) =>
+      LandingFaqItem(
+        pergunta: json['pergunta'] as String? ?? '',
+        resposta: json['resposta'] as String? ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {
+        'pergunta': pergunta,
+        'resposta': resposta,
+      };
+}
+
 class PerfilPersonal {
   final int id;
   final String nome;
@@ -64,6 +85,9 @@ class PerfilPersonal {
   final String? slug;
   final String? dominioCustomizado;
   final String? videoUrl;
+  final String? trackingId;
+  final String? heroPrompt;
+  final String? heroImageUrl;
   final bool? trialUsed;
   final DateTime? trialEndsAt;
   final String plano;
@@ -80,6 +104,7 @@ class PerfilPersonal {
   final String? instagram;
   final List<LandingServiceItem> servicos;
   final List<LandingPackageItem> pacotes;
+  final List<LandingFaqItem> faq;
 
   PerfilPersonal({
     required this.id,
@@ -94,6 +119,9 @@ class PerfilPersonal {
     this.slug,
     this.dominioCustomizado,
     this.videoUrl,
+    this.trackingId,
+    this.heroPrompt,
+    this.heroImageUrl,
     this.trialUsed,
     this.trialEndsAt,
     required this.plano,
@@ -108,6 +136,7 @@ class PerfilPersonal {
     this.instagram,
     this.servicos = const [],
     this.pacotes = const [],
+    this.faq = const [],
   });
 
   factory PerfilPersonal.fromJson(Map<String, dynamic> json) => PerfilPersonal(
@@ -123,6 +152,9 @@ class PerfilPersonal {
         slug: json['slug'] as String?,
         dominioCustomizado: json['dominioCustomizado'] as String?,
         videoUrl: json['videoUrl'] as String?,
+        trackingId: json['trackingId'] as String?,
+        heroPrompt: json['heroPrompt'] as String?,
+        heroImageUrl: json['heroImageUrl'] as String?,
         trialUsed: json['trialUsed'] as bool?,
         trialEndsAt: json['trialEndsAt'] != null ? DateTime.tryParse(json['trialEndsAt'].toString()) : null,
         plano: json['plano'] as String,
@@ -140,6 +172,9 @@ class PerfilPersonal {
             .toList(),
         pacotes: (json['pacotes'] as List<dynamic>? ?? [])
             .map((e) => LandingPackageItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        faq: (json['faq'] as List<dynamic>? ?? [])
+            .map((e) => LandingFaqItem.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
 }

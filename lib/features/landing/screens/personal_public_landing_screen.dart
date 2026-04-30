@@ -18,6 +18,7 @@ import '../widgets/cta_final_section.dart';
 import '../widgets/ofertas_section.dart';
 import '../widgets/powered_by_footer.dart';
 import '../widgets/tecnologia_section.dart';
+import '../widgets/faq_section.dart';
 
 // ---------------------------------------------------------------------------
 // Provider
@@ -183,6 +184,7 @@ class _LandingContent extends StatelessWidget {
         SliverToBoxAdapter(child: EspecialidadesSection(data: data, primaryColor: primaryColor)),
         SliverToBoxAdapter(child: TecnologiaSection(data: data, primaryColor: primaryColor, secondaryColor: secondaryColor)),
         SliverToBoxAdapter(child: OfertasSection(data: data, slug: slug, primaryColor: primaryColor)),
+        SliverToBoxAdapter(child: FaqSection(data: data, primaryColor: primaryColor)),
         SliverToBoxAdapter(child: ContatoSection(data: data)),
         SliverToBoxAdapter(child: DepoimentosSection(data: data, primaryColor: primaryColor)),
         SliverToBoxAdapter(child: GaleriaSection(data: data)),

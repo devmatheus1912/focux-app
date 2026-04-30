@@ -41,10 +41,13 @@ class LandingPageConfigScreen extends ConsumerWidget {
           final publicUrl = 'https://focux.app/p/$slug';
           final servicesCount = perfil.servicos.length;
           final packagesCount = perfil.pacotes.length;
+          final faqCount = perfil.faq.length;
           final heroReady = (perfil.slogan?.trim().isNotEmpty ?? false) &&
               (perfil.descricaoProfissional?.trim().isNotEmpty ?? false);
           final mediaReady = (perfil.logoUrl?.trim().isNotEmpty ?? false) ||
-              (perfil.videoUrl?.trim().isNotEmpty ?? false);
+              (perfil.videoUrl?.trim().isNotEmpty ?? false) ||
+              (perfil.heroImageUrl?.trim().isNotEmpty ?? false);
+          final trackingReady = perfil.trackingId?.trim().isNotEmpty ?? false;
 
           final configs = [
             (
@@ -62,6 +65,13 @@ class LandingPageConfigScreen extends ConsumerWidget {
                   : '$packagesCount pacotes ativos',
             ),
             (
+              icon: Icons.help_outline,
+              label: 'FAQ de venda',
+              value: faqCount == 0
+                  ? 'Nenhuma pergunta configurada'
+                  : '$faqCount perguntas publicadas',
+            ),
+            (
               icon: Icons.palette_outlined,
               label: 'Cor principal',
               value: perfil.corPrimaria?.toUpperCase() ?? '#3B5FE2',
@@ -72,6 +82,13 @@ class LandingPageConfigScreen extends ConsumerWidget {
               value: mediaReady
                   ? 'Logo/video configurados'
                   : 'Sem logo ou video ainda',
+            ),
+            (
+              icon: Icons.query_stats_outlined,
+              label: 'Tracking',
+              value: trackingReady
+                  ? 'Campanha marcada'
+                  : 'Sem origem de campanha',
             ),
             (
               icon: Icons.edit_note_outlined,
@@ -230,10 +247,8 @@ class LandingPageConfigScreen extends ConsumerWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: _MetricCard(
-                                label: 'Instagram',
-                                value: (perfil.instagram?.trim().isNotEmpty ?? false)
-                                    ? 'OK'
-                                    : '--',
+                                label: 'FAQ',
+                                value: faqCount.toString(),
                                 dark: dark,
                               ),
                             ),

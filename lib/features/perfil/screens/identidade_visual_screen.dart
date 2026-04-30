@@ -44,6 +44,9 @@ class _IdentidadeVisualScreenState
   final _sloganCtrl = TextEditingController();
   final _domCtrl = TextEditingController();
   final _videoCtrl = TextEditingController();
+  final _trackingCtrl = TextEditingController();
+  final _heroPromptCtrl = TextEditingController();
+  final _heroImageCtrl = TextEditingController();
   final _serviceTitleCtrls =
       List.generate(3, (_) => TextEditingController());
   final _serviceDescCtrls =
@@ -54,6 +57,10 @@ class _IdentidadeVisualScreenState
       List.generate(3, (_) => TextEditingController());
   final _packageDescCtrls =
       List.generate(3, (_) => TextEditingController());
+  final _faqQuestionCtrls =
+      List.generate(4, (_) => TextEditingController());
+  final _faqAnswerCtrls =
+      List.generate(4, (_) => TextEditingController());
   Color _corPrimaria = const Color(0xFF3B5FE2);
   Color _corSecundaria = const Color(0xFF0097A7);
   bool _salvando = false;
@@ -76,6 +83,9 @@ class _IdentidadeVisualScreenState
     _sloganCtrl.text = perfil.slogan ?? '';
     _domCtrl.text = perfil.dominioCustomizado ?? '';
     _videoCtrl.text = perfil.videoUrl ?? '';
+    _trackingCtrl.text = perfil.trackingId ?? '';
+    _heroPromptCtrl.text = perfil.heroPrompt ?? '';
+    _heroImageCtrl.text = perfil.heroImageUrl ?? '';
     _logoUrl = perfil.logoUrl;
     if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
       final hex = int.tryParse(perfil.corPrimaria!.replaceFirst('#', '0xFF'));
@@ -95,6 +105,11 @@ class _IdentidadeVisualScreenState
       _packageNameCtrls[i].text = pacote?.nome ?? '';
       _packagePriceCtrls[i].text = pacote?.preco ?? '';
       _packageDescCtrls[i].text = pacote?.descricao ?? '';
+    }
+    for (var i = 0; i < _faqQuestionCtrls.length; i++) {
+      final item = i < perfil.faq.length ? perfil.faq[i] : null;
+      _faqQuestionCtrls[i].text = item?.pergunta ?? '';
+      _faqAnswerCtrls[i].text = item?.resposta ?? '';
     }
     _perfilLoaded = true;
   }
@@ -130,6 +145,20 @@ class _IdentidadeVisualScreenState
     return items;
   }
 
+  List<Map<String, dynamic>> _buildFaqPayload() {
+    final items = <Map<String, dynamic>>[];
+    for (var i = 0; i < _faqQuestionCtrls.length; i++) {
+      final pergunta = _faqQuestionCtrls[i].text.trim();
+      final resposta = _faqAnswerCtrls[i].text.trim();
+      if (pergunta.isEmpty && resposta.isEmpty) continue;
+      items.add({
+        'pergunta': pergunta,
+        'resposta': resposta,
+      });
+    }
+    return items;
+  }
+
   @override
   void dispose() {
     _descCtrl.dispose();
@@ -138,6 +167,9 @@ class _IdentidadeVisualScreenState
     _sloganCtrl.dispose();
     _domCtrl.dispose();
     _videoCtrl.dispose();
+    _trackingCtrl.dispose();
+    _heroPromptCtrl.dispose();
+    _heroImageCtrl.dispose();
     for (final controller in _serviceTitleCtrls) {
       controller.dispose();
     }
@@ -151,6 +183,12 @@ class _IdentidadeVisualScreenState
       controller.dispose();
     }
     for (final controller in _packageDescCtrls) {
+      controller.dispose();
+    }
+    for (final controller in _faqQuestionCtrls) {
+      controller.dispose();
+    }
+    for (final controller in _faqAnswerCtrls) {
       controller.dispose();
     }
     super.dispose();
@@ -191,6 +229,7 @@ class _IdentidadeVisualScreenState
         'instagram': _instaCtrl.text.trim(),
         'servicos': _buildServicosPayload(),
         'pacotes': _buildPacotesPayload(),
+        'faq': _buildFaqPayload(),
       };
       if (plano.toUpperCase() == 'ENTERPRISE') {
         body['corPrimaria'] =
@@ -201,6 +240,9 @@ class _IdentidadeVisualScreenState
         if (_logoUrl != null) body['logoUrl'] = _logoUrl;
         if (_domCtrl.text.trim().isNotEmpty) body['dominioCustomizado'] = _domCtrl.text.trim();
         if (_videoCtrl.text.trim().isNotEmpty) body['videoUrl'] = _videoCtrl.text.trim();
+        body['trackingId'] = _trackingCtrl.text.trim();
+        body['heroPrompt'] = _heroPromptCtrl.text.trim();
+        body['heroImageUrl'] = _heroImageCtrl.text.trim();
       }
       await dio.put('/api/personal/identidade', data: body);
       if (plano.toUpperCase() == 'ENTERPRISE') {
@@ -482,6 +524,41 @@ class _IdentidadeVisualScreenState
                         ],
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    _LandingEditorCard(
+                      isDark: isDark,
+                      title: 'FAQ de venda',
+                      subtitle:
+                          'Responda as duvidas que mais travam a decisao antes do aluno chamar voce.',
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < _faqQuestionCtrls.length; i++) ...[
+                            TextFormField(
+                              controller: _faqQuestionCtrls[i],
+                              enabled: isPremiumOrAbove,
+                              decoration: InputDecoration(
+                                labelText: 'Pergunta ${i + 1}',
+                                hintText: 'Ex: Preciso treinar todos os dias?',
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            TextFormField(
+                              controller: _faqAnswerCtrls[i],
+                              enabled: isPremiumOrAbove,
+                              maxLines: 2,
+                              decoration: const InputDecoration(
+                                labelText: 'Resposta',
+                                hintText:
+                                    'Explique de forma simples, direta e segura.',
+                                alignLabelWithHint: true,
+                              ),
+                            ),
+                            if (i != _faqQuestionCtrls.length - 1)
+                              const SizedBox(height: 16),
+                          ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -623,6 +700,51 @@ class _IdentidadeVisualScreenState
                         labelText: 'URL do vídeo de apresentação',
                         hintText: 'https://youtube.com/watch?v=...',
                         helperText: 'Aparece na sua landing page. YouTube, Vimeo ou qualquer link.',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _LandingEditorCard(
+                      isDark: isDark,
+                      title: 'Imagem IA unica da landing',
+                      subtitle:
+                          'Descreva a imagem de fundo que representa seu posicionamento. Quando a IA gerar a imagem, cole a URL final aqui.',
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _heroPromptCtrl,
+                            enabled: isEnterprise,
+                            maxLines: 3,
+                            maxLength: 500,
+                            decoration: const InputDecoration(
+                              labelText: 'Briefing para IA',
+                              hintText:
+                                  'Ex: personal feminino em estudio premium, luz natural, treino funcional, tom sofisticado.',
+                              alignLabelWithHint: true,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _heroImageCtrl,
+                            enabled: isEnterprise,
+                            decoration: const InputDecoration(
+                              labelText: 'URL da imagem gerada',
+                              hintText: 'https://cdn.focux.app/landing/...',
+                              helperText:
+                                  'Aparece como fundo principal antes da galeria.',
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _trackingCtrl,
+                            enabled: isEnterprise,
+                            decoration: const InputDecoration(
+                              labelText: 'Tracking de campanha',
+                              hintText: 'Ex: campanha-instagram-abril',
+                              helperText:
+                                  'Entra nos links de cadastro da landing para medir origem.',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 20),

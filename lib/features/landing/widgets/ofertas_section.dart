@@ -137,7 +137,7 @@ class OfertasSection extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () => context.go('/register/aluno?p=$slug'),
+                          onPressed: () => context.go(_registerPath(slug, data.trackingId)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primaryColor,
                             foregroundColor: Colors.white,
@@ -164,4 +164,14 @@ class OfertasSection extends StatelessWidget {
       ),
     );
   }
+}
+
+String _registerPath(String slug, String? trackingId) {
+  final track = trackingId?.trim();
+  final params = {
+    'p': slug,
+    'src': 'landing_offer',
+    if (track != null && track.isNotEmpty) 'track': track,
+  };
+  return Uri(path: '/register/aluno', queryParameters: params).toString();
 }

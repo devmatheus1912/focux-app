@@ -45,7 +45,7 @@ class CtaFinalSection extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                context.go('/register/aluno?p=$slug');
+                context.go(_registerPath(slug, data.trackingId));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
@@ -66,4 +66,14 @@ class CtaFinalSection extends StatelessWidget {
       ),
     );
   }
+}
+
+String _registerPath(String slug, String? trackingId) {
+  final track = trackingId?.trim();
+  final params = {
+    'p': slug,
+    'src': 'landing_cta',
+    if (track != null && track.isNotEmpty) 'track': track,
+  };
+  return Uri(path: '/register/aluno', queryParameters: params).toString();
 }

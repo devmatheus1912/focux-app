@@ -20,7 +20,10 @@ class HeroSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firstName = data.nomePersonal.split(' ').first;
-    final heroImage = data.fotos.isNotEmpty
+    final customHero = data.heroImageUrl?.trim();
+    final heroImage = customHero != null && customHero.isNotEmpty
+        ? customHero
+        : data.fotos.isNotEmpty
         ? data.fotos.first
         : (data.logoUrl != null && data.logoUrl!.isNotEmpty ? data.logoUrl : null);
     final compact = MediaQuery.of(context).size.width < 640;
@@ -111,7 +114,7 @@ class HeroSection extends StatelessWidget {
                     alignment: compact ? WrapAlignment.center : WrapAlignment.start,
                     children: [
                       ElevatedButton(
-                        onPressed: () => context.go('/register/aluno?p=$slug'),
+                        onPressed: () => context.go(_registerPath(slug, data.trackingId)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: primaryColor,
@@ -158,6 +161,16 @@ class HeroSection extends StatelessWidget {
       ),
     );
   }
+}
+
+String _registerPath(String slug, String? trackingId) {
+  final track = trackingId?.trim();
+  final params = {
+    'p': slug,
+    'src': 'landing',
+    if (track != null && track.isNotEmpty) 'track': track,
+  };
+  return Uri(path: '/register/aluno', queryParameters: params).toString();
 }
 
 class _HeroPill extends StatelessWidget {

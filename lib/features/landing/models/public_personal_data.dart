@@ -46,6 +46,21 @@ class PublicLandingPackageItem {
       );
 }
 
+class PublicLandingFaqItem {
+  final String pergunta;
+  final String resposta;
+  const PublicLandingFaqItem({
+    required this.pergunta,
+    required this.resposta,
+  });
+
+  factory PublicLandingFaqItem.fromJson(Map<String, dynamic> j) =>
+      PublicLandingFaqItem(
+        pergunta: j['pergunta'] as String? ?? '',
+        resposta: j['resposta'] as String? ?? '',
+      );
+}
+
 class PublicPersonalData {
   final String nomePersonal;
   final String? slogan;
@@ -60,8 +75,12 @@ class PublicPersonalData {
   final int anoCriacao;
   final String plano;
   final String? videoUrl;
+  final String? trackingId;
+  final String? heroPrompt;
+  final String? heroImageUrl;
   final List<PublicLandingServiceItem> servicos;
   final List<PublicLandingPackageItem> pacotes;
+  final List<PublicLandingFaqItem> faq;
   final List<PublicDepoimentoItem> depoimentos;
   final List<String> fotos;
 
@@ -79,8 +98,12 @@ class PublicPersonalData {
     required this.anoCriacao,
     required this.plano,
     this.videoUrl,
+    this.trackingId,
+    this.heroPrompt,
+    this.heroImageUrl,
     this.servicos = const [],
     this.pacotes = const [],
+    this.faq = const [],
     this.depoimentos = const [],
     this.fotos = const [],
   });
@@ -99,11 +122,17 @@ class PublicPersonalData {
         anoCriacao: j['anoCriacao'] as int? ?? DateTime.now().year,
         plano: j['plano'] as String? ?? 'PREMIUM',
         videoUrl: j['videoUrl'] as String?,
+        trackingId: j['trackingId'] as String?,
+        heroPrompt: j['heroPrompt'] as String?,
+        heroImageUrl: j['heroImageUrl'] as String?,
         servicos: (j['servicos'] as List<dynamic>? ?? [])
             .map((e) => PublicLandingServiceItem.fromJson(e as Map<String, dynamic>))
             .toList(),
         pacotes: (j['pacotes'] as List<dynamic>? ?? [])
             .map((e) => PublicLandingPackageItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        faq: (j['faq'] as List<dynamic>? ?? [])
+            .map((e) => PublicLandingFaqItem.fromJson(e as Map<String, dynamic>))
             .toList(),
         depoimentos: (j['depoimentos'] as List<dynamic>? ?? [])
             .map((e) => PublicDepoimentoItem.fromJson(e as Map<String, dynamic>))
