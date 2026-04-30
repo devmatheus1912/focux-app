@@ -38,4 +38,19 @@ void main() {
     expect(rows.single['importKey'], 'remada');
     expect(rows.single['videoUrl'], 'https://cdn/remada.mp4');
   });
+
+  test('parseExerciseMediaCsv converts editorial approval values', () {
+    final rows = parseExerciseMediaCsv(
+      'importKey,videoUrl,thumbnailUrl,videoSource,licenseStatus,aprovarEditorial,editorialNotes\n'
+      'supino,https://cdn/supino.mp4,https://cdn/supino.jpg,FOCUX_LIBRARY,LICENSED,true,Revisado',
+    );
+
+    expect(rows.single['aprovarEditorial'], isTrue);
+    expect(rows.single['editorialNotes'], 'Revisado');
+  });
+
+  test('exerciseMediaImportTemplate includes editorial approval columns', () {
+    expect(exerciseMediaImportTemplate, contains('aprovarEditorial'));
+    expect(exerciseMediaImportTemplate, contains('editorialNotes'));
+  });
 }

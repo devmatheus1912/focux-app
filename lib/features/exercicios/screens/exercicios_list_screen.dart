@@ -777,6 +777,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final payloadCtrl = TextEditingController(
       text: exerciseMediaImportTemplate,
     );
+    final editorialNotesCtrl = TextEditingController(
+      text: 'Midia revisada e liberada para prescricao premium.',
+    );
+    var aprovarEditorial = true;
     String? selectedFileName;
 
     final confirm = await showDialog<bool>(
@@ -872,6 +876,29 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                             isDense: true,
                           ),
                         ),
+                        const SizedBox(height: 12),
+                        SwitchListTile.adaptive(
+                          contentPadding: EdgeInsets.zero,
+                          value: aprovarEditorial,
+                          title: const Text('Aprovar editorialmente'),
+                          subtitle: const Text(
+                            'O backend so libera automaticamente itens completos com video, thumbnail, licenca e orientacao.',
+                          ),
+                          onChanged:
+                              (value) => setModalState(
+                                () => aprovarEditorial = value,
+                              ),
+                        ),
+                        TextField(
+                          controller: editorialNotesCtrl,
+                          minLines: 2,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            labelText: 'Notas editoriais padrao',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -890,15 +917,31 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     );
     if (confirm != true) {
       payloadCtrl.dispose();
+      editorialNotesCtrl.dispose();
       return;
     }
 
     final raw = payloadCtrl.text.trim();
+    final shouldApprove = aprovarEditorial;
+    final editorialNotes = editorialNotesCtrl.text.trim();
     payloadCtrl.dispose();
+    editorialNotesCtrl.dispose();
     if (!context.mounted) return;
 
     try {
-      final midias = parseExerciseMediaImportPayload(raw);
+      final midias =
+          parseExerciseMediaImportPayload(raw)
+              .map(
+                (row) => {
+                  ...row,
+                  if (!row.containsKey('aprovarEditorial'))
+                    'aprovarEditorial': shouldApprove,
+                  if (!row.containsKey('editorialNotes') &&
+                      editorialNotes.isNotEmpty)
+                    'editorialNotes': editorialNotes,
+                },
+              )
+              .toList();
       final repo = ref.read(exercicioRepositoryProvider);
       final preview = await repo.previewMidias(midias);
       if (!context.mounted) return;
@@ -934,7 +977,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '${result.atualizados}/${result.total} midias importadas · ${result.naoEncontrados} nao encontradas.',
+              '${result.atualizados}/${result.total} midias importadas · ${result.prontosParaAluno} prontas · ${result.naoEncontrados} nao encontradas.',
             ),
             backgroundColor:
                 result.naoEncontrados == 0

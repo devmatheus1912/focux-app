@@ -61,4 +61,15 @@ void main() {
     expect(detail, contains('_PrescriptionReadinessPanel'));
     expect(treinoDetail, contains('mediaTrustLabel'));
   });
+
+  test('exercise media import surface exposes editorial approval controls', () {
+    final list = File(
+      'lib/features/exercicios/screens/exercicios_list_screen.dart',
+    ).readAsStringSync();
+
+    expect(list, contains('Aprovar editorialmente'));
+    expect(list, contains('Notas editoriais padrao'));
+    expect(list, contains('previewMidias(midias)'));
+    expect(list, contains('importarMidias(midias)'));
+  });
 }
