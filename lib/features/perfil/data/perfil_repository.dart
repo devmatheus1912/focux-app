@@ -88,6 +88,9 @@ class PerfilPersonal {
   final String? trackingId;
   final String? heroPrompt;
   final String? heroImageUrl;
+  final String? generatedHeroImageUrl;
+  final String? heroImageStatus;
+  final String? heroImageBrief;
   final bool? trialUsed;
   final DateTime? trialEndsAt;
   final String plano;
@@ -122,6 +125,9 @@ class PerfilPersonal {
     this.trackingId,
     this.heroPrompt,
     this.heroImageUrl,
+    this.generatedHeroImageUrl,
+    this.heroImageStatus,
+    this.heroImageBrief,
     this.trialUsed,
     this.trialEndsAt,
     required this.plano,
@@ -155,6 +161,9 @@ class PerfilPersonal {
         trackingId: json['trackingId'] as String?,
         heroPrompt: json['heroPrompt'] as String?,
         heroImageUrl: json['heroImageUrl'] as String?,
+        generatedHeroImageUrl: json['generatedHeroImageUrl'] as String?,
+        heroImageStatus: json['heroImageStatus'] as String?,
+        heroImageBrief: json['heroImageBrief'] as String?,
         trialUsed: json['trialUsed'] as bool?,
         trialEndsAt: json['trialEndsAt'] != null ? DateTime.tryParse(json['trialEndsAt'].toString()) : null,
         plano: json['plano'] as String,

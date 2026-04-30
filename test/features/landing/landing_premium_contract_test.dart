@@ -14,6 +14,9 @@ void main() {
       'trackingId': 'campanha-instagram-abril',
       'heroPrompt': 'studio premium functional training',
       'heroImageUrl': 'https://cdn.focux.app/landing/matheus.png',
+      'generatedHeroImageUrl': 'https://image.pollinations.ai/prompt/studio',
+      'heroImageStatus': 'MANUAL',
+      'heroImageBrief': 'studio premium functional training',
       'faq': [
         {
           'pergunta': 'Preciso treinar todos os dias?',
@@ -25,6 +28,9 @@ void main() {
     expect(data.trackingId, 'campanha-instagram-abril');
     expect(data.heroPrompt, 'studio premium functional training');
     expect(data.heroImageUrl, endsWith('matheus.png'));
+    expect(data.generatedHeroImageUrl, contains('pollinations'));
+    expect(data.heroImageStatus, 'MANUAL');
+    expect(data.heroImageBrief, contains('studio premium'));
     expect(data.faq.single.pergunta, contains('treinar'));
   });
 
@@ -37,6 +43,9 @@ void main() {
       'trackingId': 'utm-live',
       'heroPrompt': 'unique hero image',
       'heroImageUrl': 'https://cdn.focux.app/hero.png',
+      'generatedHeroImageUrl': 'https://image.pollinations.ai/prompt/unique',
+      'heroImageStatus': 'AI_GENERATED_URL',
+      'heroImageBrief': 'unique hero image',
       'faq': [
         {'pergunta': 'Como funciona?', 'resposta': 'Com acompanhamento.'}
       ],
@@ -45,6 +54,9 @@ void main() {
     expect(perfil.trackingId, 'utm-live');
     expect(perfil.heroPrompt, 'unique hero image');
     expect(perfil.heroImageUrl, contains('hero.png'));
+    expect(perfil.generatedHeroImageUrl, contains('pollinations'));
+    expect(perfil.heroImageStatus, 'AI_GENERATED_URL');
+    expect(perfil.heroImageBrief, 'unique hero image');
     expect(perfil.faq.single.resposta, 'Com acompanhamento.');
   });
 
@@ -61,11 +73,18 @@ void main() {
     final cta = File(
       'lib/features/landing/widgets/cta_final_section.dart',
     ).readAsStringSync();
+    final tracking = File(
+      'lib/features/landing/data/landing_tracking.dart',
+    ).readAsStringSync();
 
     expect(landing, contains('FaqSection(data: data'));
+    expect(landing, contains("eventType: 'landing_view'"));
     expect(hero, contains('data.heroImageUrl'));
-    expect(hero, contains("'src': 'landing'"));
-    expect(ofertas, contains("'src': 'landing_offer'"));
-    expect(cta, contains("'src': 'landing_cta'"));
+    expect(hero, contains("source: 'landing'"));
+    expect(ofertas, contains("source: 'landing_offer'"));
+    expect(cta, contains("source: 'landing_cta'"));
+    expect(tracking, contains(r'/api/public/personal/$slug/eventos'));
+    expect(tracking, contains('landingRegisterPath'));
+    expect(tracking, contains('eventType'));
   });
 }

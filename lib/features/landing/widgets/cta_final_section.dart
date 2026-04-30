@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../data/landing_tracking.dart';
 import '../models/public_personal_data.dart';
 
 class CtaFinalSection extends StatelessWidget {
@@ -45,7 +46,19 @@ class CtaFinalSection extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                context.go(_registerPath(slug, data.trackingId));
+                final path = landingRegisterPath(
+                  slug,
+                  data.trackingId,
+                  source: 'landing_cta',
+                );
+                trackLandingEvent(
+                  slug: slug,
+                  eventType: 'landing_cta_click',
+                  source: 'landing_cta',
+                  trackingId: data.trackingId,
+                  path: path,
+                );
+                context.go(path);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
@@ -66,14 +79,4 @@ class CtaFinalSection extends StatelessWidget {
       ),
     );
   }
-}
-
-String _registerPath(String slug, String? trackingId) {
-  final track = trackingId?.trim();
-  final params = {
-    'p': slug,
-    'src': 'landing_cta',
-    if (track != null && track.isNotEmpty) 'track': track,
-  };
-  return Uri(path: '/register/aluno', queryParameters: params).toString();
 }

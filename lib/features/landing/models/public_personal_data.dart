@@ -78,6 +78,9 @@ class PublicPersonalData {
   final String? trackingId;
   final String? heroPrompt;
   final String? heroImageUrl;
+  final String? generatedHeroImageUrl;
+  final String? heroImageStatus;
+  final String? heroImageBrief;
   final List<PublicLandingServiceItem> servicos;
   final List<PublicLandingPackageItem> pacotes;
   final List<PublicLandingFaqItem> faq;
@@ -101,6 +104,9 @@ class PublicPersonalData {
     this.trackingId,
     this.heroPrompt,
     this.heroImageUrl,
+    this.generatedHeroImageUrl,
+    this.heroImageStatus,
+    this.heroImageBrief,
     this.servicos = const [],
     this.pacotes = const [],
     this.faq = const [],
@@ -125,6 +131,9 @@ class PublicPersonalData {
         trackingId: j['trackingId'] as String?,
         heroPrompt: j['heroPrompt'] as String?,
         heroImageUrl: j['heroImageUrl'] as String?,
+        generatedHeroImageUrl: j['generatedHeroImageUrl'] as String?,
+        heroImageStatus: j['heroImageStatus'] as String?,
+        heroImageBrief: j['heroImageBrief'] as String?,
         servicos: (j['servicos'] as List<dynamic>? ?? [])
             .map((e) => PublicLandingServiceItem.fromJson(e as Map<String, dynamic>))
             .toList(),

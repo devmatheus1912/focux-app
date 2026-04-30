@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../data/landing_tracking.dart';
 import '../models/public_personal_data.dart';
 
 class HeroSection extends StatelessWidget {
@@ -114,7 +115,21 @@ class HeroSection extends StatelessWidget {
                     alignment: compact ? WrapAlignment.center : WrapAlignment.start,
                     children: [
                       ElevatedButton(
-                        onPressed: () => context.go(_registerPath(slug, data.trackingId)),
+                        onPressed: () {
+                          final path = landingRegisterPath(
+                            slug,
+                            data.trackingId,
+                            source: 'landing',
+                          );
+                          trackLandingEvent(
+                            slug: slug,
+                            eventType: 'landing_cta_click',
+                            source: 'landing',
+                            trackingId: data.trackingId,
+                            path: path,
+                          );
+                          context.go(path);
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: primaryColor,
@@ -128,7 +143,16 @@ class HeroSection extends StatelessWidget {
                         OutlinedButton.icon(
                           onPressed: () async {
                             final uri = Uri.tryParse(data.videoUrl!);
-                            if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
+                            if (uri != null) {
+                              trackLandingEvent(
+                                slug: slug,
+                                eventType: 'landing_video_click',
+                                source: 'landing_video',
+                                trackingId: data.trackingId,
+                                path: uri.toString(),
+                              );
+                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                            }
                           },
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.white,
@@ -161,16 +185,6 @@ class HeroSection extends StatelessWidget {
       ),
     );
   }
-}
-
-String _registerPath(String slug, String? trackingId) {
-  final track = trackingId?.trim();
-  final params = {
-    'p': slug,
-    'src': 'landing',
-    if (track != null && track.isNotEmpty) 'track': track,
-  };
-  return Uri(path: '/register/aluno', queryParameters: params).toString();
 }
 
 class _HeroPill extends StatelessWidget {

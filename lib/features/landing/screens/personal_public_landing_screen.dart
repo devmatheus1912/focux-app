@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/config/env.dart';
+import '../data/landing_tracking.dart';
 import '../models/public_personal_data.dart';
 import '../widgets/hero_section.dart';
 import '../widgets/metodo_section.dart';
@@ -165,13 +166,32 @@ class _NotAvailableView extends StatelessWidget {
 // _LandingContent
 // ---------------------------------------------------------------------------
 
-class _LandingContent extends StatelessWidget {
+class _LandingContent extends StatefulWidget {
   final String slug;
   final PublicPersonalData data;
   const _LandingContent({required this.slug, required this.data});
 
   @override
+  State<_LandingContent> createState() => _LandingContentState();
+}
+
+class _LandingContentState extends State<_LandingContent> {
+  @override
+  void initState() {
+    super.initState();
+    trackLandingEvent(
+      slug: widget.slug,
+      eventType: 'landing_view',
+      source: 'landing',
+      trackingId: widget.data.trackingId,
+      path: '/p/${widget.slug}',
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final data = widget.data;
+    final slug = widget.slug;
     final primaryColor = _hexColor(data.corPrimaria, Theme.of(context).colorScheme.primary);
     final secondaryColor = _hexColor(data.corSecundaria, const Color(0xFF0097A7));
 
