@@ -287,12 +287,11 @@ class _IdentidadeVisualScreenState
           body['videoUrl'] = _videoCtrl.text.trim();
         }
         body['trackingId'] = _trackingCtrl.text.trim();
-        final draftHeroUrl = _buildGeneratedHeroUrl(perfil: null);
         final typedHeroUrl = _heroImageCtrl.text.trim();
         body['heroPrompt'] = _heroPromptCtrl.text.trim();
         body['heroImageUrl'] =
             typedHeroUrl.isEmpty || _isAiGeneratedHeroUrl(typedHeroUrl)
-                ? draftHeroUrl
+                ? ''
                 : typedHeroUrl;
       }
       await dio.put('/api/personal/identidade', data: body);
@@ -324,7 +323,7 @@ class _IdentidadeVisualScreenState
     if (_applyingHeroImage) return;
     setState(() {
       _applyingHeroImage = true;
-      _heroImageCtrl.text = url;
+      _heroImageCtrl.clear();
     });
     try {
       await _salvar(
@@ -988,10 +987,11 @@ class _IdentidadeVisualScreenState
                             controller: _heroImageCtrl,
                             enabled: isEnterprise,
                             decoration: const InputDecoration(
-                              labelText: 'URL da imagem gerada',
+                              labelText: 'URL manual de imagem',
                               hintText: 'https://cdn.focux.app/landing/...',
                               helperText:
-                                  'Este link e salvo como fundo da primeira tela da landing.',
+                                  'Opcional: use apenas se quiser substituir a IA por uma imagem propria.',
+                              helperMaxLines: 2,
                             ),
                           ),
                           if (generatedHeroUrl != null &&

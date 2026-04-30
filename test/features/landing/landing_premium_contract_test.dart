@@ -104,6 +104,9 @@ void main() {
     expect(identidade, contains('Aplicar como fundo premium'));
     expect(identidade, contains('_buildGeneratedHeroUrl'));
     expect(identidade, contains('_applyHeroAsBackground'));
+    expect(identidade, contains("_heroImageCtrl.clear()"));
+    expect(identidade, contains("body['heroImageUrl']"));
+    expect(identidade, contains("'URL manual de imagem'"));
     expect(identidade, contains('Video de apresentacao enviado e salvo'));
     expect(identidade, contains('_pickPresentationVideo'));
     expect(identidade, contains("resourceType: 'video'"));
