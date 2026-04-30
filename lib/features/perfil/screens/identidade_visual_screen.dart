@@ -62,6 +62,7 @@ class _IdentidadeVisualScreenState
   bool _applyingHeroImage = false;
   bool _perfilLoaded = false;
   bool _hydratingPerfil = false;
+  final bool _showManualVideoUrl = false;
   String? _logoUrl;
 
   @override
@@ -885,22 +886,24 @@ class _IdentidadeVisualScreenState
                       isDark: isDark,
                       title: 'Video de apresentacao',
                       subtitle:
-                          'Suba um video curto seu ou cole um link. Videos enviados pelo Focux aparecem como player dentro da landing.',
+                          'Suba um video curto seu. Ele aparece como player dentro da primeira tela da landing.',
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          TextFormField(
-                            controller: _videoCtrl,
-                            enabled: isEnterprise,
-                            decoration: const InputDecoration(
-                              labelText: 'URL do vídeo de apresentação',
-                              hintText: 'https://cdn.focux.app/video.mp4',
-                              helperText:
-                                  'Use MP4/WebM para player embutido. YouTube/Vimeo abrem em link externo.',
-                              helperMaxLines: 2,
+                          if (_showManualVideoUrl) ...[
+                            TextFormField(
+                              controller: _videoCtrl,
+                              enabled: isEnterprise,
+                              decoration: const InputDecoration(
+                                labelText: 'URL do vídeo de apresentação',
+                                hintText: 'https://cdn.focux.app/video.mp4',
+                                helperText:
+                                    'Use MP4/WebM para player embutido. YouTube/Vimeo abrem em link externo.',
+                                helperMaxLines: 2,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
+                            const SizedBox(height: 12),
+                          ],
                           OutlinedButton.icon(
                             onPressed:
                                 isEnterprise && !_uploadingVideo
@@ -919,7 +922,9 @@ class _IdentidadeVisualScreenState
                             label: Text(
                               _uploadingVideo
                                   ? 'Enviando video...'
-                                  : 'Subir video de apresentacao',
+                                  : _videoCtrl.text.trim().isEmpty
+                                  ? 'Subir video de apresentacao'
+                                  : 'Trocar video de apresentacao',
                             ),
                           ),
                           if (_videoCtrl.text.trim().isNotEmpty) ...[
@@ -927,12 +932,13 @@ class _IdentidadeVisualScreenState
                             _LandingMediaStatusCard(
                               isDark: isDark,
                               icon: Icons.play_circle_outline,
-                              title: 'Video conectado a landing',
+                              title: 'Video enviado para a landing',
                               subtitle:
                                   _isDirectVideoUrl(_videoCtrl.text.trim())
                                       ? 'Vai abrir em player embutido na primeira tela.'
-                                      : 'Vai aparecer como chamada profissional para abrir o link.',
+                                      : 'Arquivo enviado. Se nao aparecer como player, envie em MP4, WebM, MOV ou M4V.',
                               url: _videoCtrl.text.trim(),
+                              showUrl: false,
                             ),
                           ],
                         ],
@@ -1319,6 +1325,7 @@ class _GeneratedHeroAssetCard extends StatelessWidget {
                   Image.network(
                     url,
                     fit: BoxFit.cover,
+                    webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
                     errorBuilder:
                         (_, __, ___) => Container(
                           color: primary.withValues(alpha: 0.10),
@@ -1444,6 +1451,7 @@ class _LandingMediaStatusCard extends StatelessWidget {
   final String subtitle;
   final String url;
   final bool isDark;
+  final bool showUrl;
 
   const _LandingMediaStatusCard({
     required this.icon,
@@ -1451,6 +1459,7 @@ class _LandingMediaStatusCard extends StatelessWidget {
     required this.subtitle,
     required this.url,
     required this.isDark,
+    this.showUrl = true,
   });
 
   @override
@@ -1488,15 +1497,17 @@ class _LandingMediaStatusCard extends StatelessWidget {
                   subtitle,
                   style: TextStyle(color: mute, fontSize: 12, height: 1.3),
                 ),
-                const SizedBox(height: 6),
-                SelectableText(
-                  url,
-                  style: TextStyle(
-                    color: primary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 11,
+                if (showUrl) ...[
+                  const SizedBox(height: 6),
+                  SelectableText(
+                    url,
+                    style: TextStyle(
+                      color: primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

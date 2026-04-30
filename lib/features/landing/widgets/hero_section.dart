@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 import '../data/landing_tracking.dart';
 import '../models/public_personal_data.dart';
@@ -42,19 +41,19 @@ class HeroSection extends StatelessWidget {
 
     return Container(
       constraints: BoxConstraints(minHeight: minHeight),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0A0F1E),
-        image:
-            heroImage == null
-                ? null
-                : DecorationImage(
-                  image: NetworkImage(heroImage),
-                  fit: BoxFit.cover,
-                  alignment: Alignment.center,
-                ),
-      ),
+      color: const Color(0xFF0A0F1E),
       child: Stack(
         children: [
+          if (heroImage != null)
+            Positioned.fill(
+              child: Image.network(
+                heroImage,
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+                webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            ),
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -187,40 +186,6 @@ class HeroSection extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (data.videoUrl != null && data.videoUrl!.isNotEmpty)
-                        OutlinedButton.icon(
-                          onPressed: () async {
-                            final uri = Uri.tryParse(data.videoUrl!);
-                            if (uri != null) {
-                              trackLandingEvent(
-                                slug: slug,
-                                eventType: 'landing_video_click',
-                                source: 'landing_video',
-                                trackingId: data.trackingId,
-                                path: uri.toString(),
-                              );
-                              await launchUrl(
-                                uri,
-                                mode: LaunchMode.externalApplication,
-                              );
-                            }
-                          },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.42),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 22,
-                              vertical: 18,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                          ),
-                          icon: const Icon(Icons.play_circle_outline, size: 18),
-                          label: const Text('Ver apresentacao'),
-                        ),
                     ],
                   ),
                   const SizedBox(height: 32),
@@ -276,7 +241,9 @@ class _PresentationVideoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final direct = _isDirectVideoUrl(url);
+    if (!_isDirectVideoUrl(url)) {
+      return const SizedBox.shrink();
+    }
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 620),
       child: Container(
@@ -286,54 +253,12 @@ class _PresentationVideoCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
         ),
-        child:
-            direct
-                ? _InlinePresentationVideo(url: url, brand: primaryColor)
-                : Row(
-                  children: [
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        color: primaryColor.withValues(alpha: 0.22),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(
-                        Icons.play_circle_outline,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        'Assista a apresentacao do personal',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        trackLandingEvent(
-                          slug: slug,
-                          eventType: 'landing_video_click',
-                          source: 'landing_video',
-                          trackingId: trackingId,
-                          path: url,
-                        );
-                        final uri = Uri.tryParse(url);
-                        if (uri != null) {
-                          await launchUrl(
-                            uri,
-                            mode: LaunchMode.externalApplication,
-                          );
-                        }
-                      },
-                      child: const Text('Abrir'),
-                    ),
-                  ],
-                ),
+        child: _InlinePresentationVideo(
+          url: url,
+          brand: primaryColor,
+          slug: slug,
+          trackingId: trackingId,
+        ),
       ),
     );
   }
@@ -342,8 +267,15 @@ class _PresentationVideoCard extends StatelessWidget {
 class _InlinePresentationVideo extends StatefulWidget {
   final String url;
   final Color brand;
+  final String slug;
+  final String? trackingId;
 
-  const _InlinePresentationVideo({required this.url, required this.brand});
+  const _InlinePresentationVideo({
+    required this.url,
+    required this.brand,
+    required this.slug,
+    required this.trackingId,
+  });
 
   @override
   State<_InlinePresentationVideo> createState() =>
@@ -399,9 +331,18 @@ class _InlinePresentationVideoState extends State<_InlinePresentationVideo> {
               ),
               onPressed:
                   () => setState(() {
-                    _controller.value.isPlaying
-                        ? _controller.pause()
-                        : _controller.play();
+                    if (_controller.value.isPlaying) {
+                      _controller.pause();
+                    } else {
+                      trackLandingEvent(
+                        slug: widget.slug,
+                        eventType: 'landing_video_click',
+                        source: 'landing_video',
+                        trackingId: widget.trackingId,
+                        path: widget.url,
+                      );
+                      _controller.play();
+                    }
                   }),
               icon: Icon(
                 _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
