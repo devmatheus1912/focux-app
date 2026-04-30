@@ -26,7 +26,9 @@ class HeroSection extends StatelessWidget {
     final heroImage =
         customHero != null && customHero.isNotEmpty
             ? customHero
-            : generatedHero != null && generatedHero.isNotEmpty
+            : generatedHero != null &&
+                generatedHero.isNotEmpty &&
+                !_isAiGeneratedHeroUrl(generatedHero)
             ? generatedHero
             : data.fotos.isNotEmpty
             ? data.fotos.first
@@ -60,7 +62,6 @@ class HeroSection extends StatelessWidget {
                   heroImage,
                   fit: BoxFit.cover,
                   alignment: Alignment.center,
-                  webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
                   errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                 ),
               ),
@@ -387,6 +388,10 @@ bool _isDirectVideoUrl(String url) {
       clean.endsWith('.webm') ||
       clean.endsWith('.mov') ||
       clean.endsWith('.m4v');
+}
+
+bool _isAiGeneratedHeroUrl(String url) {
+  return url.trim().toLowerCase().contains('image.pollinations.ai/prompt/');
 }
 
 _LandingSignature _signatureVariant(String slug, String name) {

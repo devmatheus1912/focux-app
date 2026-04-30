@@ -39,8 +39,12 @@ class MetodoSection extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth > 720;
+        final horizontalPadding = wide ? 112.0 : 32.0;
         final contentWidth =
-            constraints.maxWidth > 1100 ? 1100.0 : constraints.maxWidth;
+            (constraints.maxWidth - horizontalPadding)
+                .clamp(0.0, 1100.0)
+                .toDouble();
+        final cardWidth = wide ? (contentWidth - 36) / 4 : contentWidth;
         return Container(
           padding: EdgeInsets.fromLTRB(wide ? 56 : 16, 34, wide ? 56 : 16, 22),
           decoration: const BoxDecoration(color: Color(0xFF070B16)),
@@ -87,8 +91,7 @@ class MetodoSection extends StatelessWidget {
                     children: [
                       for (var i = 0; i < etapas.length; i++)
                         SizedBox(
-                          width:
-                              wide ? (contentWidth - 36) / 4 : double.infinity,
+                          width: cardWidth,
                           child: _MetodoCard(
                             index: i + 1,
                             title: etapas[i].titulo,

@@ -492,7 +492,7 @@ class _IdentidadeVisualScreenState
                 'Escolha uma promessa clara: emagrecimento, performance, hipertrofia ou saude.',
                 'Use fotos e videos reais para passar confianca antes do aluno chamar.',
                 'Deixe preco, servicos e duvidas frequentes simples de comparar.',
-                'Use a imagem IA como fundo da primeira dobra: ela precisa combinar com sua cor, nicho e tom de venda.',
+                'Use o briefing de IA como direcao criativa: a landing fica unica pelas cores, assinatura visual, video real e promessa do personal.',
               ],
             ),
             const SizedBox(height: 12),
@@ -949,7 +949,7 @@ class _IdentidadeVisualScreenState
                       isDark: isDark,
                       title: 'Imagem IA unica da landing',
                       subtitle:
-                          'Opcional: a IA pode criar um fundo. Se ela falhar, a landing ainda usa uma assinatura premium unica com suas cores.',
+                          'Opcional: gere uma referencia criativa. A primeira dobra ja usa uma assinatura premium unica com suas cores, sem depender de imagem externa.',
                       child: Column(
                         children: [
                           TextFormField(
@@ -1322,20 +1322,7 @@ class _GeneratedHeroAssetCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    url,
-                    fit: BoxFit.cover,
-                    webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-                    errorBuilder:
-                        (_, __, ___) => Container(
-                          color: primary.withValues(alpha: 0.10),
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            color: primary,
-                          ),
-                        ),
-                  ),
+                  _PremiumHeroPreviewCanvas(primary: primary),
                   DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -1352,7 +1339,7 @@ class _GeneratedHeroAssetCard extends StatelessWidget {
                     left: 12,
                     bottom: 10,
                     child: Text(
-                      'Preview do fundo principal',
+                      'Preview da assinatura premium',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
@@ -1442,6 +1429,94 @@ class _GeneratedHeroAssetCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _PremiumHeroPreviewCanvas extends StatelessWidget {
+  final Color primary;
+
+  const _PremiumHeroPreviewCanvas({required this.primary});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _PremiumHeroPreviewPainter(primary: primary),
+      child: const SizedBox.expand(),
+    );
+  }
+}
+
+class _PremiumHeroPreviewPainter extends CustomPainter {
+  final Color primary;
+
+  const _PremiumHeroPreviewPainter({required this.primary});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final background =
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF050814),
+              Color.lerp(primary, const Color(0xFF050814), 0.64)!,
+              const Color(0xFF111827),
+            ],
+          ).createShader(rect);
+    canvas.drawRect(rect, background);
+
+    final grid =
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.08)
+          ..strokeWidth = 1;
+    for (var x = -size.height; x < size.width + size.height; x += 36) {
+      canvas.drawLine(Offset(x, 0), Offset(x + size.height, size.height), grid);
+    }
+
+    final ribbon =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 10
+          ..strokeCap = StrokeCap.round
+          ..color = primary.withValues(alpha: 0.42);
+    final path =
+        Path()
+          ..moveTo(size.width * 0.62, -20)
+          ..cubicTo(
+            size.width * 0.96,
+            size.height * 0.20,
+            size.width * 0.58,
+            size.height * 0.62,
+            size.width * 0.88,
+            size.height + 20,
+          );
+    canvas.drawPath(path, ribbon);
+
+    final glow =
+        Paint()
+          ..shader = RadialGradient(
+            colors: [
+              primary.withValues(alpha: 0.34),
+              primary.withValues(alpha: 0),
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width * 0.80, size.height * 0.22),
+              radius: size.width * 0.38,
+            ),
+          );
+    canvas.drawCircle(
+      Offset(size.width * 0.80, size.height * 0.22),
+      size.width * 0.38,
+      glow,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _PremiumHeroPreviewPainter oldDelegate) {
+    return oldDelegate.primary != primary;
   }
 }
 

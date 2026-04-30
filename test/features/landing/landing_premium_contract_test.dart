@@ -96,9 +96,10 @@ void main() {
     expect(hero, contains('data.generatedHeroImageUrl'));
     expect(hero, contains('_LandingBrandCanvas'));
     expect(hero, contains('_LandingSignature'));
+    expect(hero, contains('_isAiGeneratedHeroUrl'));
     expect(hero, contains('Assinatura'));
-    expect(hero, contains('webHtmlElementStrategy'));
-    expect(hero, contains('WebHtmlElementStrategy.prefer'));
+    expect(hero, isNot(contains('webHtmlElementStrategy')));
+    expect(hero, isNot(contains('WebHtmlElementStrategy.prefer')));
     expect(hero, isNot(contains('Ver apresentacao')));
     expect(hero, contains('VideoPlayerController.networkUrl'));
     expect(hero, contains('_PresentationVideoCard'));
@@ -116,10 +117,11 @@ void main() {
     expect(tracking, contains('eventType'));
     expect(identidade, contains('generatedHeroImageUrl'));
     expect(identidade, contains('_GeneratedHeroAssetCard'));
+    expect(identidade, contains('_PremiumHeroPreviewCanvas'));
     expect(identidade, contains('Aplicar como fundo premium'));
-    expect(identidade, contains('Opcional: a IA pode criar um fundo'));
-    expect(identidade, contains('webHtmlElementStrategy'));
-    expect(identidade, contains('WebHtmlElementStrategy.prefer'));
+    expect(identidade, contains('sem depender de imagem externa'));
+    expect(identidade, isNot(contains('webHtmlElementStrategy')));
+    expect(identidade, isNot(contains('WebHtmlElementStrategy.prefer')));
     expect(identidade, contains('_buildGeneratedHeroUrl'));
     expect(identidade, contains('_applyHeroAsBackground'));
     expect(identidade, contains("_heroImageCtrl.clear()"));

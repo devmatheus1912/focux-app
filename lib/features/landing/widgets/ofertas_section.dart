@@ -24,9 +24,12 @@ class OfertasSection extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth > 760;
+        final horizontalPadding = wide ? 112.0 : 32.0;
         final contentWidth =
-            constraints.maxWidth > 1100 ? 1100.0 : constraints.maxWidth;
-        final serviceWidth = wide ? (contentWidth - 24) / 3 : double.infinity;
+            (constraints.maxWidth - horizontalPadding)
+                .clamp(0.0, 1100.0)
+                .toDouble();
+        final serviceWidth = wide ? (contentWidth - 24) / 3 : contentWidth;
 
         return Container(
           padding: EdgeInsets.fromLTRB(wide ? 56 : 16, 30, wide ? 56 : 16, 32),
@@ -245,8 +248,7 @@ class _PackageTile extends StatelessWidget {
               ),
             ),
           ],
-          const Spacer(),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
