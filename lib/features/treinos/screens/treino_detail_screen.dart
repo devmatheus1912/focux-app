@@ -381,7 +381,16 @@ class _TreinoDetailBody extends StatelessWidget {
 
         if (treino.exercicios.isEmpty)
           const SliverFillRemaining(child: Center(child: Text('Nenhum exercício no treino.')))
-        else
+        else ...[
+          SliverToBoxAdapter(
+            child: _DraggableExerciseOrderPanel(
+              treinoId: treinoId,
+              exercises: orderedExercises,
+              isDark: isDark,
+              primary: primary,
+              ref: ref,
+            ),
+          ),
           ...grouped.entries.map((entry) => SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
@@ -480,11 +489,221 @@ class _TreinoDetailBody extends StatelessWidget {
                   ),
                 ),
               )),
+        ],
         const SliverToBoxAdapter(child: SizedBox(height: 80)),
       ],
     );
   }
 
+}
+
+class _DraggableExerciseOrderPanel extends StatelessWidget {
+  final int treinoId;
+  final List<TreinoExercicioItem> exercises;
+  final bool isDark;
+  final Color primary;
+  final WidgetRef ref;
+
+  const _DraggableExerciseOrderPanel({
+    required this.treinoId,
+    required this.exercises,
+    required this.isDark,
+    required this.primary,
+    required this.ref,
+  });
+
+  Future<void> _persistOrder(
+    BuildContext context,
+    int oldIndex,
+    int newIndex,
+  ) async {
+    if (newIndex > oldIndex) newIndex -= 1;
+    if (oldIndex == newIndex) return;
+
+    final ids = exercises.map((item) => item.id).toList();
+    final moved = ids.removeAt(oldIndex);
+    ids.insert(newIndex, moved);
+
+    try {
+      await ref.read(treinoRepositoryProvider).reordenarExercicios(treinoId, ids);
+      ref.invalidate(treinoProvider(treinoId));
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao reordenar: $error')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: card,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: line),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 6),
+              child: Row(
+                children: [
+                  Icon(Icons.drag_indicator_rounded, color: primary, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Ordem do treino',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${exercises.length} ex.',
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              buildDefaultDragHandles: false,
+              proxyDecorator: (child, index, animation) {
+                return Material(
+                  elevation: 10,
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                  child: child,
+                );
+              },
+              onReorder: (oldIndex, newIndex) =>
+                  _persistOrder(context, oldIndex, newIndex),
+              itemCount: exercises.length,
+              itemBuilder: (context, index) {
+                final item = exercises[index];
+                return _DraggableOrderTile(
+                  key: ValueKey('drag-order-${item.id}'),
+                  item: item,
+                  index: index + 1,
+                  dragIndex: index,
+                  isDark: isDark,
+                  primary: primary,
+                  isLast: index == exercises.length - 1,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DraggableOrderTile extends StatelessWidget {
+  final TreinoExercicioItem item;
+  final int index;
+  final int dragIndex;
+  final bool isDark;
+  final Color primary;
+  final bool isLast;
+
+  const _DraggableOrderTile({
+    super.key,
+    required this.item,
+    required this.index,
+    required this.dragIndex,
+    required this.isDark,
+    required this.primary,
+    required this.isLast,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        border: isLast ? null : Border(bottom: BorderSide(color: line, width: 0.5)),
+      ),
+      padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+      child: Row(
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '$index',
+              style: TextStyle(
+                color: primary,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.exercicio.nome,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${item.series}x${item.repeticoes} · ${item.descansoSegundos ?? 60}s',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ReorderableDragStartListener(
+            index: dragIndex,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Icon(Icons.drag_handle_rounded, color: mute, size: 20),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _MenuActionTile extends StatelessWidget {

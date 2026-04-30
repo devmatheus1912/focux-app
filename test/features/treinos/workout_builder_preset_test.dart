@@ -44,4 +44,16 @@ void main() {
     expect(detail, contains('Mover para baixo'));
     expect(detail, contains('Duplicar item'));
   });
+
+  test('workout detail exposes drag and drop order surface', () {
+    final detail = File(
+      'lib/features/treinos/screens/treino_detail_screen.dart',
+    ).readAsStringSync();
+
+    expect(detail, contains('_DraggableExerciseOrderPanel'));
+    expect(detail, contains('ReorderableListView.builder'));
+    expect(detail, contains('ReorderableDragStartListener'));
+    expect(detail, contains('Ordem do treino'));
+    expect(detail, contains('reordenarExercicios(treinoId, ids)'));
+  });
 }
