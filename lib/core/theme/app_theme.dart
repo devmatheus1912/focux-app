@@ -8,11 +8,66 @@ class AppTheme {
   static ThemeData buildTheme(Color primary) => _build(primary, false);
   static ThemeData buildDarkTheme(Color primary) => _build(primary, true);
 
+  static Color _readableOn(Color color) {
+    return ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+        ? Colors.white
+        : EagleTokens.ink;
+  }
+
+  static TextStyle _spaceGrotesk({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? letterSpacing,
+  }) {
+    if (!GoogleFonts.config.allowRuntimeFetching) {
+      return TextStyle(
+        fontFamily: 'Space Grotesk',
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: color,
+        letterSpacing: letterSpacing,
+      );
+    }
+
+    return GoogleFonts.spaceGrotesk(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+    );
+  }
+
+  static TextStyle _inter({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? letterSpacing,
+  }) {
+    if (!GoogleFonts.config.allowRuntimeFetching) {
+      return TextStyle(
+        fontFamily: 'Inter',
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: color,
+        letterSpacing: letterSpacing,
+      );
+    }
+
+    return GoogleFonts.inter(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+    );
+  }
+
   static ThemeData _build(Color primary, bool dark) {
     final primarySoft = BrandPalette.soft(primary, dark: dark);
     final primarySofter = BrandPalette.softer(primary, dark: dark);
     final primaryDeep = BrandPalette.deep(primary);
     final primaryAccent = BrandPalette.accent(primary);
+    final onPrimary = _readableOn(primary);
     final surface    = dark ? EagleTokens.darkCard    : EagleTokens.card;
     final scaffold   = dark ? EagleTokens.darkBg      : EagleTokens.paper;
     final onSurface  = dark ? EagleTokens.darkInk     : EagleTokens.ink;
@@ -22,7 +77,7 @@ class AppTheme {
     final cs = ColorScheme(
       brightness: dark ? Brightness.dark : Brightness.light,
       primary: primary,
-      onPrimary: Colors.white,
+      onPrimary: onPrimary,
       primaryContainer: dark ? primarySofter : primarySoft,
       onPrimaryContainer: dark ? primaryAccent : primaryDeep,
       secondary: dark ? primaryAccent : primaryDeep,
@@ -51,26 +106,26 @@ class AppTheme {
     );
 
     final textTheme = TextTheme(
-      displayLarge:   GoogleFonts.spaceGrotesk(fontSize: 48, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: -1.5),
-      displayMedium:  GoogleFonts.spaceGrotesk(fontSize: 36, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: -1.0),
-      displaySmall:   GoogleFonts.spaceGrotesk(fontSize: 28, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: -0.8),
-      headlineLarge:  GoogleFonts.spaceGrotesk(fontSize: 24, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: -0.5),
-      headlineMedium: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: -0.4),
-      headlineSmall:  GoogleFonts.spaceGrotesk(fontSize: 17, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: -0.2),
-      titleLarge:     GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: -0.2),
-      titleMedium:    GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: -0.1),
-      titleSmall:     GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0.1),
-      bodyLarge:      GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w400, color: onSurface, letterSpacing: -0.1),
-      bodyMedium:     GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400, color: onSurface, letterSpacing: -0.1),
-      bodySmall:      GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w400, color: onSurfMute),
-      labelLarge:     GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: onSurface,  letterSpacing: 0.05),
-      labelMedium:    GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: onSurfMute, letterSpacing: 0.5),
-      labelSmall:     GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: onSurfMute, letterSpacing: 0.8),
+      displayLarge:   _spaceGrotesk(fontSize: 48, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: 0),
+      displayMedium:  _spaceGrotesk(fontSize: 36, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: 0),
+      displaySmall:   _spaceGrotesk(fontSize: 28, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: 0),
+      headlineLarge:  _spaceGrotesk(fontSize: 24, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
+      headlineMedium: _spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
+      headlineSmall:  _spaceGrotesk(fontSize: 17, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
+      titleLarge:     _inter(fontSize: 16, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
+      titleMedium:    _inter(fontSize: 14, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
+      titleSmall:     _inter(fontSize: 12, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0.1),
+      bodyLarge:      _inter(fontSize: 16, fontWeight: FontWeight.w400, color: onSurface, letterSpacing: 0),
+      bodyMedium:     _inter(fontSize: 14, fontWeight: FontWeight.w400, color: onSurface, letterSpacing: 0),
+      bodySmall:      _inter(fontSize: 12, fontWeight: FontWeight.w400, color: onSurfMute),
+      labelLarge:     _inter(fontSize: 13, fontWeight: FontWeight.w600, color: onSurface,  letterSpacing: 0.05),
+      labelMedium:    _inter(fontSize: 11, fontWeight: FontWeight.w600, color: onSurfMute, letterSpacing: 0.5),
+      labelSmall:     _inter(fontSize: 10, fontWeight: FontWeight.w600, color: onSurfMute, letterSpacing: 0.8),
     );
 
     return ThemeData(
       useMaterial3: true,
-      fontFamily: GoogleFonts.spaceGrotesk().fontFamily,
+      fontFamily: _spaceGrotesk().fontFamily,
       colorScheme: cs,
       scaffoldBackgroundColor: scaffold,
       textTheme: textTheme,
@@ -81,7 +136,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0.5,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: -0.3),
+        titleTextStyle: _spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
         systemOverlayStyle: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
             .copyWith(statusBarColor: Colors.transparent),
         iconTheme: IconThemeData(color: onSurface),
@@ -103,8 +158,8 @@ class AppTheme {
         filled: true,
         fillColor: surface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        hintStyle: GoogleFonts.inter(color: onSurfMute, fontSize: 14),
-        labelStyle: GoogleFonts.inter(color: onSurfMute, fontSize: 14),
+        hintStyle: _inter(color: onSurfMute, fontSize: 14),
+        labelStyle: _inter(color: onSurfMute, fontSize: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusSm), borderSide: BorderSide(color: outline)),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusSm), borderSide: BorderSide(color: outline)),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusSm), borderSide: BorderSide(color: primary, width: 1.5)),
@@ -114,10 +169,10 @@ class AppTheme {
 
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: primary, foregroundColor: Colors.white,
+          backgroundColor: primary, foregroundColor: onPrimary,
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusSm)),
-          textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
+          textStyle: _inter(fontSize: 15, fontWeight: FontWeight.w700),
           elevation: 0,
         ),
       ),
@@ -128,21 +183,21 @@ class AppTheme {
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusSm)),
           side: BorderSide(color: primary, width: 1.5),
-          textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
+          textStyle: _inter(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primary,
-          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+          textStyle: _inter(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
 
       chipTheme: ChipThemeData(
         backgroundColor: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
         selectedColor:   dark ? EagleTokens.darkCardHi : primarySoft,
-        labelStyle: GoogleFonts.inter(fontSize: 12, color: onSurface, fontWeight: FontWeight.w500),
+        labelStyle: _inter(fontSize: 12, color: onSurface, fontWeight: FontWeight.w500),
         side: BorderSide(color: outline),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -160,7 +215,7 @@ class AppTheme {
       dialogTheme: DialogTheme(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusXl)),
         backgroundColor: surface,
-        titleTextStyle: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w600, color: onSurface),
+        titleTextStyle: _spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w600, color: onSurface),
       ),
 
       bottomSheetTheme: BottomSheetThemeData(
@@ -179,15 +234,15 @@ class AppTheme {
           return IconThemeData(color: onSurfMute, size: 22);
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return GoogleFonts.inter(fontSize: 10.5, fontWeight: FontWeight.w700, color: primary);
-          return GoogleFonts.inter(fontSize: 10.5, fontWeight: FontWeight.w500, color: onSurfMute);
+          if (states.contains(WidgetState.selected)) return _inter(fontSize: 10.5, fontWeight: FontWeight.w700, color: primary);
+          return _inter(fontSize: 10.5, fontWeight: FontWeight.w500, color: onSurfMute);
         }),
         elevation: 0,
         height: 76,
       ),
 
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: primary, foregroundColor: Colors.white,
+        backgroundColor: primary, foregroundColor: onPrimary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusMd)),
         elevation: 2,
       ),
@@ -196,7 +251,7 @@ class AppTheme {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusSm)),
         backgroundColor: dark ? EagleTokens.darkCardHi : EagleTokens.ink,
-        contentTextStyle: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+        contentTextStyle: _inter(color: Colors.white, fontSize: 14),
       ),
 
       switchTheme: SwitchThemeData(
@@ -209,7 +264,7 @@ class AppTheme {
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) =>
             states.contains(WidgetState.selected) ? primary : Colors.transparent),
-        checkColor: WidgetStateProperty.all(Colors.white),
+        checkColor: WidgetStateProperty.all(onPrimary),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         side: BorderSide(color: outline, width: 1.5),
       ),
