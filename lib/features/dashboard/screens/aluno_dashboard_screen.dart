@@ -16,6 +16,7 @@ import '../../checkin/providers/checkin_provider.dart';
 import '../../checkin/data/checkin_repository.dart';
 import '../data/aluno_autonomy_plan.dart';
 import '../../evolucao/data/evolucao_repository.dart';
+import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import 'progresso_semanal_widget.dart';
 
 final minhasMedidasDashboardProvider =
@@ -68,6 +69,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
         ),
         iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
         actions: [
+          NotificacaoBadgeButton(isDark: isDark),
           IconButton(
             icon: Icon(
               isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,

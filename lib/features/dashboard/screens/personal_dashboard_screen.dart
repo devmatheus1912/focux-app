@@ -17,6 +17,7 @@ import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../financeiro/data/financeiro_repository.dart';
+import '../../notificacoes/data/notificacoes_repository.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
 import '../../chat/screens/chat_inbox_screen.dart';
 
@@ -101,6 +102,8 @@ class _PersonalDashboardScreenState
     final alunosAsync = ref.watch(alunosProvider);
     final historicoCheckinsAsync = ref.watch(historicoCheckinProvider);
     final aderenciaAsync = ref.watch(aderenciaTop3Provider);
+    final notificacoesNaoLidas =
+        ref.watch(notificacoesNaoLidasProvider).valueOrNull ?? 0;
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.backgroundDark : EagleTokens.paper,
@@ -164,6 +167,8 @@ class _PersonalDashboardScreenState
                 ref.invalidate(commandCenterProvider);
                 ref.invalidate(alunosProvider);
                 ref.invalidate(historicoCheckinProvider);
+                ref.invalidate(notificacoesProvider);
+                ref.invalidate(notificacoesNaoLidasProvider);
                 await _loadFin();
               },
               child: CustomScrollView(
@@ -264,7 +269,7 @@ class _PersonalDashboardScreenState
                                 InkWell(
                                   onTap:
                                       () => context.push(
-                                        '/alertas',
+                                        '/notificacoes',
                                       ), // Rota de notificações
                                   borderRadius: BorderRadius.circular(18),
                                   child: Container(
@@ -297,7 +302,8 @@ class _PersonalDashboardScreenState
                                                   : EagleTokens.ink,
                                           strokeWidth: 1.9,
                                         ),
-                                        Positioned(
+                                        if (notificacoesNaoLidas > 0)
+                                          Positioned(
                                           top: 8,
                                           right: 9,
                                           child: Container(
