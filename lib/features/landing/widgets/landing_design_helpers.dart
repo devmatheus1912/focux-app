@@ -214,6 +214,12 @@ class LandingDesign {
     return null;
   }
 
+  static String? bioImageUrl(PublicPersonalData data) {
+    final bio = clean(data.bioImageUrl);
+    if (bio != null && !_isAiGeneratedHeroUrl(bio)) return bio;
+    return null;
+  }
+
   static List<PublicLandingServiceItem> services(PublicPersonalData data) {
     final real =
         data.servicos

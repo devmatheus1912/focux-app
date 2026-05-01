@@ -15,6 +15,7 @@ void main() {
       'trackingId': 'campanha-instagram-abril',
       'heroPrompt': 'studio premium functional training',
       'heroImageUrl': 'https://cdn.focux.app/landing/matheus.png',
+      'bioImageUrl': 'https://cdn.focux.app/landing/bio-matheus.png',
       'generatedHeroImageUrl': 'https://image.pollinations.ai/prompt/studio',
       'heroImageStatus': 'MANUAL',
       'heroImageBrief': 'studio premium functional training',
@@ -29,6 +30,7 @@ void main() {
     expect(data.trackingId, 'campanha-instagram-abril');
     expect(data.heroPrompt, 'studio premium functional training');
     expect(data.heroImageUrl, endsWith('matheus.png'));
+    expect(data.bioImageUrl, endsWith('bio-matheus.png'));
     expect(data.generatedHeroImageUrl, contains('pollinations'));
     expect(data.heroImageStatus, 'MANUAL');
     expect(data.heroImageBrief, contains('studio premium'));
@@ -44,6 +46,7 @@ void main() {
       'trackingId': 'utm-live',
       'heroPrompt': 'unique hero image',
       'heroImageUrl': 'https://cdn.focux.app/hero.png',
+      'bioImageUrl': 'https://cdn.focux.app/bio.png',
       'generatedHeroImageUrl': 'https://image.pollinations.ai/prompt/unique',
       'heroImageStatus': 'AI_GENERATED_URL',
       'heroImageBrief': 'unique hero image',
@@ -55,6 +58,7 @@ void main() {
     expect(perfil.trackingId, 'utm-live');
     expect(perfil.heroPrompt, 'unique hero image');
     expect(perfil.heroImageUrl, contains('hero.png'));
+    expect(perfil.bioImageUrl, contains('bio.png'));
     expect(perfil.generatedHeroImageUrl, contains('pollinations'));
     expect(perfil.heroImageStatus, 'AI_GENERATED_URL');
     expect(perfil.heroImageBrief, 'unique hero image');
@@ -128,6 +132,7 @@ void main() {
     expect(designHelpers, contains('hasValidCref'));
     expect(designHelpers, contains('123456'));
     expect(designHelpers, contains('Vagas'));
+    expect(designHelpers, contains('static String? bioImageUrl'));
     expect(designHelpers, contains('static List<PublicLandingFaqItem> faq'));
     expect(tracking, contains(r'/api/public/personal/$slug/eventos'));
     expect(tracking, contains('landingRegisterPath'));
@@ -139,15 +144,20 @@ void main() {
     expect(identidade, isNot(contains('Briefing para IA')));
     expect(identidade, isNot(contains("'URL manual de imagem'")));
     expect(identidade, contains('Foto principal da landing'));
+    expect(identidade, contains('Foto pessoal da bio'));
     expect(identidade, contains('_pickHeroPhoto'));
+    expect(identidade, contains('_pickBioPhoto'));
     expect(identidade, contains("folder: 'landing/hero'"));
+    expect(identidade, contains("folder: 'landing/bio'"));
     expect(identidade, contains('_HeroPhotoPreview'));
+    expect(identidade, contains('_BioPhotoPreview'));
     expect(identidade, contains('_LandingPremiumPlanner'));
     expect(identidade, contains('_PremiumLandingPreviewCard'));
     expect(identidade, contains('_PremiumHeroPreviewCanvas'));
     expect(identidade, isNot(contains('webHtmlElementStrategy')));
     expect(identidade, isNot(contains('WebHtmlElementStrategy.prefer')));
     expect(identidade, contains("body['heroImageUrl']"));
+    expect(identidade, contains("body['bioImageUrl']"));
     expect(identidade, contains('Video de apresentacao enviado e salvo'));
     expect(identidade, contains('_pickPresentationVideo'));
     expect(identidade, contains("resourceType: 'video'"));
@@ -163,6 +173,8 @@ void main() {
       'anoCriacao': DateTime.now().year,
       'cref': '123456-G/SP',
       'especialidades': 'Hipertrofia',
+      'heroImageUrl': 'https://cdn.focux.app/hero.jpg',
+      'bioImageUrl': 'https://cdn.focux.app/bio.jpg',
       'slogan': 'Transformando vida através de movimento',
       'pacotes': [
         {
@@ -184,6 +196,8 @@ void main() {
       'Treino de Hipertrofia com acompanhamento real.',
     );
     expect(LandingDesign.heroPills(data).first.value, 'Vagas');
+    expect(LandingDesign.firstImageUrl(data), endsWith('hero.jpg'));
+    expect(LandingDesign.bioImageUrl(data), endsWith('bio.jpg'));
     expect(LandingDesign.formatPrice(data.pacotes.single.preco), 'R\$ 250/mes');
     expect(LandingDesign.faq(data).length, greaterThanOrEqualTo(3));
   });

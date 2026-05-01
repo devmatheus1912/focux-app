@@ -46,6 +46,7 @@ class _IdentidadeVisualScreenState
   final _videoCtrl = TextEditingController();
   final _trackingCtrl = TextEditingController();
   final _heroImageCtrl = TextEditingController();
+  final _bioImageCtrl = TextEditingController();
   final _serviceTitleCtrls = List.generate(3, (_) => TextEditingController());
   final _serviceDescCtrls = List.generate(3, (_) => TextEditingController());
   final _packageNameCtrls = List.generate(3, (_) => TextEditingController());
@@ -59,6 +60,7 @@ class _IdentidadeVisualScreenState
   bool _uploadingLogo = false;
   bool _uploadingVideo = false;
   bool _uploadingHeroPhoto = false;
+  bool _uploadingBioPhoto = false;
   bool _perfilLoaded = false;
   final bool _showManualVideoUrl = false;
   String? _logoUrl;
@@ -82,6 +84,8 @@ class _IdentidadeVisualScreenState
     final heroImageUrl = perfil.heroImageUrl?.trim() ?? '';
     _heroImageCtrl.text =
         _isAiGeneratedHeroUrl(heroImageUrl) ? '' : heroImageUrl;
+    final bioImageUrl = perfil.bioImageUrl?.trim() ?? '';
+    _bioImageCtrl.text = _isAiGeneratedHeroUrl(bioImageUrl) ? '' : bioImageUrl;
     _logoUrl = perfil.logoUrl;
     if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
       final hex = int.tryParse(perfil.corPrimaria!.replaceFirst('#', '0xFF'));
@@ -158,6 +162,7 @@ class _IdentidadeVisualScreenState
     _videoCtrl.dispose();
     _trackingCtrl.dispose();
     _heroImageCtrl.dispose();
+    _bioImageCtrl.dispose();
     for (final controller in _serviceTitleCtrls) {
       controller.dispose();
     }
@@ -280,6 +285,41 @@ class _IdentidadeVisualScreenState
     }
   }
 
+  Future<void> _pickBioPhoto(String plano) async {
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 88,
+      maxWidth: 1400,
+    );
+    if (file == null || !mounted) return;
+    setState(() => _uploadingBioPhoto = true);
+    try {
+      final url = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        folder: 'landing/bio',
+        resourceType: 'image',
+      );
+      if (mounted) {
+        setState(() => _bioImageCtrl.text = url);
+        await _salvar(
+          plano,
+          successMessage: 'Foto pessoal enviada e salva na bio da landing.',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao enviar foto: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingBioPhoto = false);
+    }
+  }
+
   Future<void> _salvar(
     String plano, {
     String successMessage = 'Identidade visual salva!',
@@ -318,6 +358,11 @@ class _IdentidadeVisualScreenState
             typedHeroUrl.isEmpty || _isAiGeneratedHeroUrl(typedHeroUrl)
                 ? ''
                 : typedHeroUrl;
+        final typedBioUrl = _bioImageCtrl.text.trim();
+        body['bioImageUrl'] =
+            typedBioUrl.isEmpty || _isAiGeneratedHeroUrl(typedBioUrl)
+                ? ''
+                : typedBioUrl;
       }
       await dio.put('/api/personal/identidade', data: body);
       if (plano.toUpperCase() == 'ENTERPRISE') {
@@ -378,6 +423,8 @@ class _IdentidadeVisualScreenState
     final nomePersonal = perfil?.nome ?? '';
     final heroPhotoUrl = _heroImageCtrl.text.trim();
     final heroPhotoReady = heroPhotoUrl.isNotEmpty;
+    final bioPhotoUrl = _bioImageCtrl.text.trim();
+    final bioPhotoReady = bioPhotoUrl.isNotEmpty;
     final servicesCount = _buildServicosPayload().length;
     final packagesCount = _buildPacotesPayload().length;
     final faqCount = _buildFaqPayload().length;
@@ -956,6 +1003,60 @@ class _IdentidadeVisualScreenState
                     const SizedBox(height: 16),
                     _LandingEditorCard(
                       isDark: isDark,
+                      title: 'Foto pessoal da bio',
+                      subtitle:
+                          'Suba uma foto sua separada para a secao Sobre. Ideal: retrato profissional, voce atendendo aluno ou imagem de autoridade, sem repetir a foto de capa.',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _BioPhotoPreview(
+                            isDark: isDark,
+                            url: bioPhotoUrl,
+                            primary: _corPrimaria,
+                            name: nomePersonal,
+                          ),
+                          const SizedBox(height: 12),
+                          OutlinedButton.icon(
+                            onPressed:
+                                isEnterprise && !_uploadingBioPhoto
+                                    ? () => _pickBioPhoto(plano)
+                                    : null,
+                            icon:
+                                _uploadingBioPhoto
+                                    ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                    : const Icon(Icons.person_pin_outlined),
+                            label: Text(
+                              _uploadingBioPhoto
+                                  ? 'Enviando foto...'
+                                  : bioPhotoReady
+                                  ? 'Trocar foto da bio'
+                                  : 'Subir foto da bio',
+                            ),
+                          ),
+                          if (bioPhotoReady) ...[
+                            const SizedBox(height: 10),
+                            _LandingMediaStatusCard(
+                              isDark: isDark,
+                              icon: Icons.person_outline,
+                              title: 'Foto conectada a bio',
+                              subtitle:
+                                  'A secao Sobre usa esta foto separada para contar quem e o personal sem repetir a capa.',
+                              url: bioPhotoUrl,
+                              showUrl: false,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _LandingEditorCard(
+                      isDark: isDark,
                       title: 'Publicacao e campanha',
                       subtitle:
                           'Use tracking para saber de onde veio o aluno. O dominio customizado fica acima, junto da marca.',
@@ -983,6 +1084,7 @@ class _IdentidadeVisualScreenState
                       slogan: _sloganCtrl.text.trim(),
                       specialty: _espCtrl.text.trim(),
                       heroPhotoReady: heroPhotoReady,
+                      bioPhotoReady: bioPhotoReady,
                       videoReady: _videoCtrl.text.trim().isNotEmpty,
                       aboutReady: _descCtrl.text.trim().isNotEmpty,
                       servicesCount: servicesCount,
@@ -1291,6 +1393,117 @@ class _HeroPhotoPreview extends StatelessWidget {
   }
 }
 
+class _BioPhotoPreview extends StatelessWidget {
+  final bool isDark;
+  final String url;
+  final Color primary;
+  final String name;
+
+  const _BioPhotoPreview({
+    required this.isDark,
+    required this.url,
+    required this.primary,
+    required this.name,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasPhoto = url.trim().isNotEmpty;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.paper,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: primary.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: SizedBox(
+              width: 94,
+              height: 118,
+              child:
+                  hasPhoto
+                      ? Image.network(
+                        url,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (_, __, ___) => _BioPhotoFallback(primary: primary),
+                      )
+                      : _BioPhotoFallback(primary: primary),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  hasPhoto ? 'BIO COM FOTO PROPRIA' : 'FOTO DE BIO PENDENTE',
+                  style: TextStyle(
+                    color: primary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  name.isNotEmpty ? name : 'Seu nome na landing',
+                  style: TextStyle(
+                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  hasPhoto
+                      ? 'A secao Sobre vai usar este retrato, separado da foto de capa.'
+                      : 'Use uma foto pessoal para a bio nao repetir o hero da landing.',
+                  style: TextStyle(
+                    color:
+                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    fontSize: 12.5,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BioPhotoFallback extends StatelessWidget {
+  final Color primary;
+
+  const _BioPhotoFallback({required this.primary});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [primary.withValues(alpha: 0.28), const Color(0xFF111827)],
+        ),
+      ),
+      child: Icon(
+        Icons.person_pin_outlined,
+        color: Colors.white.withValues(alpha: 0.72),
+        size: 34,
+      ),
+    );
+  }
+}
+
 class _PremiumHeroPreviewCanvas extends StatelessWidget {
   final Color primary;
   final Color secondary;
@@ -1398,6 +1611,7 @@ class _LandingPremiumPlanner extends StatelessWidget {
   final String slogan;
   final String specialty;
   final bool heroPhotoReady;
+  final bool bioPhotoReady;
   final bool videoReady;
   final bool aboutReady;
   final int servicesCount;
@@ -1412,6 +1626,7 @@ class _LandingPremiumPlanner extends StatelessWidget {
     required this.slogan,
     required this.specialty,
     required this.heroPhotoReady,
+    required this.bioPhotoReady,
     required this.videoReady,
     required this.aboutReady,
     required this.servicesCount,
@@ -1441,6 +1656,15 @@ class _LandingPremiumPlanner extends StatelessWidget {
                 : 'Suba uma foto sua, do estudio ou de um atendimento real.',
         done: heroPhotoReady,
         icon: Icons.photo_camera_back_outlined,
+      ),
+      _PlannerItem(
+        title: 'Foto pessoal da bio',
+        detail:
+            bioPhotoReady
+                ? 'Retrato conectado a secao Sobre.'
+                : 'Suba um retrato separado para nao repetir a capa.',
+        done: bioPhotoReady,
+        icon: Icons.person_pin_outlined,
       ),
       _PlannerItem(
         title: 'Video de apresentacao',

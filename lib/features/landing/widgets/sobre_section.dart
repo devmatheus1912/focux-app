@@ -9,7 +9,7 @@ class SobreSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = Theme.of(context).colorScheme.primary;
-    final portrait = LandingDesign.firstImageUrl(data);
+    final portrait = LandingDesign.bioImageUrl(data);
     final aboutCopy = LandingDesign.aboutCopy(data);
     final specialty = LandingDesign.primarySpecialty(data);
     final years = LandingDesign.yearsExperience(data);

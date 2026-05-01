@@ -2,12 +2,17 @@ class PublicDepoimentoItem {
   final String nomeAluno;
   final String texto;
   final int nota;
-  const PublicDepoimentoItem({required this.nomeAluno, required this.texto, required this.nota});
-  factory PublicDepoimentoItem.fromJson(Map<String, dynamic> j) => PublicDepoimentoItem(
-    nomeAluno: j['nomeAluno'] as String? ?? '',
-    texto: j['texto'] as String? ?? '',
-    nota: j['nota'] as int? ?? 5,
-  );
+  const PublicDepoimentoItem({
+    required this.nomeAluno,
+    required this.texto,
+    required this.nota,
+  });
+  factory PublicDepoimentoItem.fromJson(Map<String, dynamic> j) =>
+      PublicDepoimentoItem(
+        nomeAluno: j['nomeAluno'] as String? ?? '',
+        texto: j['texto'] as String? ?? '',
+        nota: j['nota'] as int? ?? 5,
+      );
 }
 
 class PublicLandingServiceItem {
@@ -49,10 +54,7 @@ class PublicLandingPackageItem {
 class PublicLandingFaqItem {
   final String pergunta;
   final String resposta;
-  const PublicLandingFaqItem({
-    required this.pergunta,
-    required this.resposta,
-  });
+  const PublicLandingFaqItem({required this.pergunta, required this.resposta});
 
   factory PublicLandingFaqItem.fromJson(Map<String, dynamic> j) =>
       PublicLandingFaqItem(
@@ -78,6 +80,7 @@ class PublicPersonalData {
   final String? trackingId;
   final String? heroPrompt;
   final String? heroImageUrl;
+  final String? bioImageUrl;
   final String? generatedHeroImageUrl;
   final String? heroImageStatus;
   final String? heroImageBrief;
@@ -104,6 +107,7 @@ class PublicPersonalData {
     this.trackingId,
     this.heroPrompt,
     this.heroImageUrl,
+    this.bioImageUrl,
     this.generatedHeroImageUrl,
     this.heroImageStatus,
     this.heroImageBrief,
@@ -114,40 +118,57 @@ class PublicPersonalData {
     this.fotos = const [],
   });
 
-  factory PublicPersonalData.fromJson(Map<String, dynamic> j) => PublicPersonalData(
-        nomePersonal: j['nomePersonal'] as String? ?? '',
-        slogan: j['slogan'] as String?,
-        logoUrl: j['logoUrl'] as String?,
-        corPrimaria: j['corPrimaria'] as String?,
-        corSecundaria: j['corSecundaria'] as String?,
-        descricaoProfissional: j['descricaoProfissional'] as String?,
-        especialidades: j['especialidades'] as String?,
-        instagram: j['instagram'] as String?,
-        cref: j['cref'] as String?,
-        totalAlunos: j['totalAlunos'] as int? ?? 0,
-        anoCriacao: j['anoCriacao'] as int? ?? DateTime.now().year,
-        plano: j['plano'] as String? ?? 'PREMIUM',
-        videoUrl: j['videoUrl'] as String?,
-        trackingId: j['trackingId'] as String?,
-        heroPrompt: j['heroPrompt'] as String?,
-        heroImageUrl: j['heroImageUrl'] as String?,
-        generatedHeroImageUrl: j['generatedHeroImageUrl'] as String?,
-        heroImageStatus: j['heroImageStatus'] as String?,
-        heroImageBrief: j['heroImageBrief'] as String?,
-        servicos: (j['servicos'] as List<dynamic>? ?? [])
-            .map((e) => PublicLandingServiceItem.fromJson(e as Map<String, dynamic>))
+  factory PublicPersonalData.fromJson(
+    Map<String, dynamic> j,
+  ) => PublicPersonalData(
+    nomePersonal: j['nomePersonal'] as String? ?? '',
+    slogan: j['slogan'] as String?,
+    logoUrl: j['logoUrl'] as String?,
+    corPrimaria: j['corPrimaria'] as String?,
+    corSecundaria: j['corSecundaria'] as String?,
+    descricaoProfissional: j['descricaoProfissional'] as String?,
+    especialidades: j['especialidades'] as String?,
+    instagram: j['instagram'] as String?,
+    cref: j['cref'] as String?,
+    totalAlunos: j['totalAlunos'] as int? ?? 0,
+    anoCriacao: j['anoCriacao'] as int? ?? DateTime.now().year,
+    plano: j['plano'] as String? ?? 'PREMIUM',
+    videoUrl: j['videoUrl'] as String?,
+    trackingId: j['trackingId'] as String?,
+    heroPrompt: j['heroPrompt'] as String?,
+    heroImageUrl: j['heroImageUrl'] as String?,
+    bioImageUrl: j['bioImageUrl'] as String?,
+    generatedHeroImageUrl: j['generatedHeroImageUrl'] as String?,
+    heroImageStatus: j['heroImageStatus'] as String?,
+    heroImageBrief: j['heroImageBrief'] as String?,
+    servicos:
+        (j['servicos'] as List<dynamic>? ?? [])
+            .map(
+              (e) =>
+                  PublicLandingServiceItem.fromJson(e as Map<String, dynamic>),
+            )
             .toList(),
-        pacotes: (j['pacotes'] as List<dynamic>? ?? [])
-            .map((e) => PublicLandingPackageItem.fromJson(e as Map<String, dynamic>))
+    pacotes:
+        (j['pacotes'] as List<dynamic>? ?? [])
+            .map(
+              (e) =>
+                  PublicLandingPackageItem.fromJson(e as Map<String, dynamic>),
+            )
             .toList(),
-        faq: (j['faq'] as List<dynamic>? ?? [])
-            .map((e) => PublicLandingFaqItem.fromJson(e as Map<String, dynamic>))
+    faq:
+        (j['faq'] as List<dynamic>? ?? [])
+            .map(
+              (e) => PublicLandingFaqItem.fromJson(e as Map<String, dynamic>),
+            )
             .toList(),
-        depoimentos: (j['depoimentos'] as List<dynamic>? ?? [])
-            .map((e) => PublicDepoimentoItem.fromJson(e as Map<String, dynamic>))
+    depoimentos:
+        (j['depoimentos'] as List<dynamic>? ?? [])
+            .map(
+              (e) => PublicDepoimentoItem.fromJson(e as Map<String, dynamic>),
+            )
             .toList(),
-        fotos: (j['fotos'] as List<dynamic>? ?? []).cast<String>(),
-      );
+    fotos: (j['fotos'] as List<dynamic>? ?? []).cast<String>(),
+  );
 
   bool get isEnterprise => plano == 'ENTERPRISE';
   bool get isPremiumOrAbove => plano == 'PREMIUM' || plano == 'ENTERPRISE';

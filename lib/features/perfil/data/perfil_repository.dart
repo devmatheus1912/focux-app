@@ -5,10 +5,7 @@ class LandingServiceItem {
   final String titulo;
   final String descricao;
 
-  const LandingServiceItem({
-    required this.titulo,
-    required this.descricao,
-  });
+  const LandingServiceItem({required this.titulo, required this.descricao});
 
   factory LandingServiceItem.fromJson(Map<String, dynamic> json) =>
       LandingServiceItem(
@@ -16,10 +13,7 @@ class LandingServiceItem {
         descricao: json['descricao'] as String? ?? '',
       );
 
-  Map<String, dynamic> toJson() => {
-        'titulo': titulo,
-        'descricao': descricao,
-      };
+  Map<String, dynamic> toJson() => {'titulo': titulo, 'descricao': descricao};
 }
 
 class LandingPackageItem {
@@ -44,32 +38,25 @@ class LandingPackageItem {
       );
 
   Map<String, dynamic> toJson() => {
-        'nome': nome,
-        'descricao': descricao,
-        'preco': preco,
-        'cta': cta,
-      };
+    'nome': nome,
+    'descricao': descricao,
+    'preco': preco,
+    'cta': cta,
+  };
 }
 
 class LandingFaqItem {
   final String pergunta;
   final String resposta;
 
-  const LandingFaqItem({
-    required this.pergunta,
-    required this.resposta,
-  });
+  const LandingFaqItem({required this.pergunta, required this.resposta});
 
-  factory LandingFaqItem.fromJson(Map<String, dynamic> json) =>
-      LandingFaqItem(
-        pergunta: json['pergunta'] as String? ?? '',
-        resposta: json['resposta'] as String? ?? '',
-      );
+  factory LandingFaqItem.fromJson(Map<String, dynamic> json) => LandingFaqItem(
+    pergunta: json['pergunta'] as String? ?? '',
+    resposta: json['resposta'] as String? ?? '',
+  );
 
-  Map<String, dynamic> toJson() => {
-        'pergunta': pergunta,
-        'resposta': resposta,
-      };
+  Map<String, dynamic> toJson() => {'pergunta': pergunta, 'resposta': resposta};
 }
 
 class PerfilPersonal {
@@ -88,6 +75,7 @@ class PerfilPersonal {
   final String? trackingId;
   final String? heroPrompt;
   final String? heroImageUrl;
+  final String? bioImageUrl;
   final String? generatedHeroImageUrl;
   final String? heroImageStatus;
   final String? heroImageBrief;
@@ -125,6 +113,7 @@ class PerfilPersonal {
     this.trackingId,
     this.heroPrompt,
     this.heroImageUrl,
+    this.bioImageUrl,
     this.generatedHeroImageUrl,
     this.heroImageStatus,
     this.heroImageBrief,
@@ -146,46 +135,53 @@ class PerfilPersonal {
   });
 
   factory PerfilPersonal.fromJson(Map<String, dynamic> json) => PerfilPersonal(
-        id: json['id'] as int,
-        nome: json['nome'] as String,
-        email: json['email'] as String,
-        cref: json['cref'] as String?,
-        especialidade: json['especialidade'] as String?,
-        logoUrl: json['logoUrl'] as String?,
-        corPrimaria: json['corPrimaria'] as String?,
-        corSecundaria: json['corSecundaria'] as String?,
-        slogan: json['slogan'] as String?,
-        slug: json['slug'] as String?,
-        dominioCustomizado: json['dominioCustomizado'] as String?,
-        videoUrl: json['videoUrl'] as String?,
-        trackingId: json['trackingId'] as String?,
-        heroPrompt: json['heroPrompt'] as String?,
-        heroImageUrl: json['heroImageUrl'] as String?,
-        generatedHeroImageUrl: json['generatedHeroImageUrl'] as String?,
-        heroImageStatus: json['heroImageStatus'] as String?,
-        heroImageBrief: json['heroImageBrief'] as String?,
-        trialUsed: json['trialUsed'] as bool?,
-        trialEndsAt: json['trialEndsAt'] != null ? DateTime.tryParse(json['trialEndsAt'].toString()) : null,
-        plano: json['plano'] as String,
-        isAdmin: json['isAdmin'] as bool? ?? false,
-        chavePix: json['chavePix'] as String?,
-        tipoChavePix: json['tipoChavePix'] as String?,
-        banco: json['banco'] as String?,
-        agencia: json['agencia'] as String?,
-        conta: json['conta'] as String?,
-        descricaoProfissional: json['descricaoProfissional'] as String?,
-        especialidades: json['especialidades'] as String?,
-        instagram: json['instagram'] as String?,
-        servicos: (json['servicos'] as List<dynamic>? ?? [])
+    id: json['id'] as int,
+    nome: json['nome'] as String,
+    email: json['email'] as String,
+    cref: json['cref'] as String?,
+    especialidade: json['especialidade'] as String?,
+    logoUrl: json['logoUrl'] as String?,
+    corPrimaria: json['corPrimaria'] as String?,
+    corSecundaria: json['corSecundaria'] as String?,
+    slogan: json['slogan'] as String?,
+    slug: json['slug'] as String?,
+    dominioCustomizado: json['dominioCustomizado'] as String?,
+    videoUrl: json['videoUrl'] as String?,
+    trackingId: json['trackingId'] as String?,
+    heroPrompt: json['heroPrompt'] as String?,
+    heroImageUrl: json['heroImageUrl'] as String?,
+    bioImageUrl: json['bioImageUrl'] as String?,
+    generatedHeroImageUrl: json['generatedHeroImageUrl'] as String?,
+    heroImageStatus: json['heroImageStatus'] as String?,
+    heroImageBrief: json['heroImageBrief'] as String?,
+    trialUsed: json['trialUsed'] as bool?,
+    trialEndsAt:
+        json['trialEndsAt'] != null
+            ? DateTime.tryParse(json['trialEndsAt'].toString())
+            : null,
+    plano: json['plano'] as String,
+    isAdmin: json['isAdmin'] as bool? ?? false,
+    chavePix: json['chavePix'] as String?,
+    tipoChavePix: json['tipoChavePix'] as String?,
+    banco: json['banco'] as String?,
+    agencia: json['agencia'] as String?,
+    conta: json['conta'] as String?,
+    descricaoProfissional: json['descricaoProfissional'] as String?,
+    especialidades: json['especialidades'] as String?,
+    instagram: json['instagram'] as String?,
+    servicos:
+        (json['servicos'] as List<dynamic>? ?? [])
             .map((e) => LandingServiceItem.fromJson(e as Map<String, dynamic>))
             .toList(),
-        pacotes: (json['pacotes'] as List<dynamic>? ?? [])
+    pacotes:
+        (json['pacotes'] as List<dynamic>? ?? [])
             .map((e) => LandingPackageItem.fromJson(e as Map<String, dynamic>))
             .toList(),
-        faq: (json['faq'] as List<dynamic>? ?? [])
+    faq:
+        (json['faq'] as List<dynamic>? ?? [])
             .map((e) => LandingFaqItem.fromJson(e as Map<String, dynamic>))
             .toList(),
-      );
+  );
 }
 
 class PerfilRepository {
@@ -208,21 +204,27 @@ class PerfilRepository {
     String? especialidades,
     String? instagram,
   }) async {
-    final response = await _dio.put('/api/personal/perfil', data: {
-      if (nome != null) 'nome': nome,
-      if (cref != null) 'cref': cref,
-      if (especialidade != null) 'especialidade': especialidade,
-      if (logoUrl != null) 'logoUrl': logoUrl,
-      if (corPrimaria != null) 'corPrimaria': corPrimaria,
-      if (descricaoProfissional != null) 'descricaoProfissional': descricaoProfissional,
-      if (especialidades != null) 'especialidades': especialidades,
-      if (instagram != null) 'instagram': instagram,
-    });
+    final response = await _dio.put(
+      '/api/personal/perfil',
+      data: {
+        if (nome != null) 'nome': nome,
+        if (cref != null) 'cref': cref,
+        if (especialidade != null) 'especialidade': especialidade,
+        if (logoUrl != null) 'logoUrl': logoUrl,
+        if (corPrimaria != null) 'corPrimaria': corPrimaria,
+        if (descricaoProfissional != null)
+          'descricaoProfissional': descricaoProfissional,
+        if (especialidades != null) 'especialidades': especialidades,
+        if (instagram != null) 'instagram': instagram,
+      },
+    );
     return PerfilPersonal.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// Atualiza os dados de wallet (PIX, banco, agência, conta) do personal.
-  Future<Map<String, dynamic>> atualizarWallet(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> atualizarWallet(
+    Map<String, dynamic> data,
+  ) async {
     final response = await _dio.put('/api/personal/wallet', data: data);
     return response.data as Map<String, dynamic>;
   }
