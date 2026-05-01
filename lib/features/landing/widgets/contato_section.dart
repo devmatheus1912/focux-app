@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/public_personal_data.dart';
+import 'landing_design_helpers.dart';
 
 class ContatoSection extends StatelessWidget {
   final PublicPersonalData data;
@@ -77,7 +78,7 @@ class ContatoSection extends StatelessWidget {
                       ),
                     );
                   },
-                  child: const Text('Copiar'),
+                  child: Text(LandingDesign.contactCta(data)),
                 ),
               ],
             ),

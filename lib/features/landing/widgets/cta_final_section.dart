@@ -18,16 +18,23 @@ class CtaFinalSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primeiroPacote = data.pacotes.isNotEmpty ? data.pacotes.first : null;
+    final packages = LandingDesign.packages(data);
+    final featuredPackage =
+        packages.isNotEmpty
+            ? packages[LandingDesign.featuredIndex(
+              data.featuredPackageIndex,
+              packages.length,
+            )]
+            : null;
     final accent =
         data.isEnterprise
             ? primaryColor
             : Theme.of(context).colorScheme.primary;
     final firstName = LandingDesign.firstName(data);
     final price =
-        primeiroPacote == null
+        featuredPackage == null
             ? 'uma avaliacao'
-            : LandingDesign.formatPrice(primeiroPacote.preco);
+            : LandingDesign.formatPrice(featuredPackage.preco);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -50,7 +57,7 @@ class CtaFinalSection extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            primeiroPacote != null
+            featuredPackage != null
                 ? 'Comece com $price em um plano com direcao.'
                 : 'Converse com $firstName e entenda o melhor caminho.',
             style: const TextStyle(
@@ -95,9 +102,12 @@ class CtaFinalSection extends StatelessWidget {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
-                'Quero comecar agora',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+              child: Text(
+                LandingDesign.finalCta(data),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),

@@ -89,6 +89,12 @@ class PublicPersonalData {
   final String? primaryCta;
   final List<String> sectionOrder;
   final List<String> hiddenSections;
+  final int? featuredPackageIndex;
+  final int? featuredTestimonialIndex;
+  final int? featuredPhotoIndex;
+  final String? offerCta;
+  final String? finalCta;
+  final String? contactCta;
   final List<PublicLandingServiceItem> servicos;
   final List<PublicLandingPackageItem> pacotes;
   final List<PublicLandingFaqItem> faq;
@@ -121,6 +127,12 @@ class PublicPersonalData {
     this.primaryCta,
     this.sectionOrder = const [],
     this.hiddenSections = const [],
+    this.featuredPackageIndex,
+    this.featuredTestimonialIndex,
+    this.featuredPhotoIndex,
+    this.offerCta,
+    this.finalCta,
+    this.contactCta,
     this.servicos = const [],
     this.pacotes = const [],
     this.faq = const [],
@@ -157,6 +169,12 @@ class PublicPersonalData {
     sectionOrder: (j['sectionOrder'] as List<dynamic>? ?? []).cast<String>(),
     hiddenSections:
         (j['hiddenSections'] as List<dynamic>? ?? []).cast<String>(),
+    featuredPackageIndex: j['featuredPackageIndex'] as int?,
+    featuredTestimonialIndex: j['featuredTestimonialIndex'] as int?,
+    featuredPhotoIndex: j['featuredPhotoIndex'] as int?,
+    offerCta: j['offerCta'] as String?,
+    finalCta: j['finalCta'] as String?,
+    contactCta: j['contactCta'] as String?,
     servicos:
         (j['servicos'] as List<dynamic>? ?? [])
             .map(

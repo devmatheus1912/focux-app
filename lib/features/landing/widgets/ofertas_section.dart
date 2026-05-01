@@ -20,6 +20,10 @@ class OfertasSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final services = LandingDesign.services(data);
     final packages = LandingDesign.packages(data);
+    final featuredIndex = LandingDesign.featuredIndex(
+      data.featuredPackageIndex,
+      packages.length,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -92,7 +96,11 @@ class OfertasSection extends StatelessWidget {
                             width: serviceWidth,
                             child: _PackageTile(
                               pacote: packages[i],
-                              featured: i == 0,
+                              featured: i == featuredIndex,
+                              ctaLabel: LandingDesign.offerCta(
+                                data,
+                                packages[i],
+                              ),
                               primaryColor: primaryColor,
                               onTap: () {
                                 final path = landingRegisterPath(
@@ -206,12 +214,14 @@ class _ServiceTile extends StatelessWidget {
 class _PackageTile extends StatelessWidget {
   final PublicLandingPackageItem pacote;
   final bool featured;
+  final String ctaLabel;
   final Color primaryColor;
   final VoidCallback onTap;
 
   const _PackageTile({
     required this.pacote,
     required this.featured,
+    required this.ctaLabel,
     required this.primaryColor,
     required this.onTap,
   });
@@ -324,7 +334,7 @@ class _PackageTile extends StatelessWidget {
                 elevation: 0,
               ),
               child: Text(
-                pacote.cta.trim().isNotEmpty ? pacote.cta : 'Quero esse plano',
+                ctaLabel,
                 style: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),

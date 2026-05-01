@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/public_personal_data.dart';
+import 'landing_design_helpers.dart';
 
 class GaleriaSection extends StatelessWidget {
   final PublicPersonalData data;
@@ -11,7 +12,11 @@ class GaleriaSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final accent = Theme.of(context).colorScheme.primary;
-    final photos = data.fotos.take(6).toList();
+    final photos =
+        LandingDesign.prioritize(
+          data.fotos,
+          data.featuredPhotoIndex,
+        ).take(6).toList();
 
     return LayoutBuilder(
       builder: (context, constraints) {

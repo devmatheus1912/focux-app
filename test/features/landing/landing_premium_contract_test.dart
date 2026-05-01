@@ -24,6 +24,12 @@ void main() {
       'primaryCta': 'Quero minha avaliacao',
       'sectionOrder': ['ofertas', 'prova', 'sobre'],
       'hiddenSections': ['galeria'],
+      'featuredPackageIndex': 1,
+      'featuredTestimonialIndex': 2,
+      'featuredPhotoIndex': 3,
+      'offerCta': 'Quero esse plano',
+      'finalCta': 'Comecar avaliacao',
+      'contactCta': 'Copiar Instagram',
       'faq': [
         {
           'pergunta': 'Preciso treinar todos os dias?',
@@ -44,6 +50,12 @@ void main() {
     expect(data.primaryCta, 'Quero minha avaliacao');
     expect(data.sectionOrder.first, 'ofertas');
     expect(data.hiddenSections.single, 'galeria');
+    expect(data.featuredPackageIndex, 1);
+    expect(data.featuredTestimonialIndex, 2);
+    expect(data.featuredPhotoIndex, 3);
+    expect(data.offerCta, 'Quero esse plano');
+    expect(data.finalCta, 'Comecar avaliacao');
+    expect(data.contactCta, 'Copiar Instagram');
     expect(data.faq.single.pergunta, contains('treinar'));
   });
 
@@ -65,6 +77,12 @@ void main() {
       'primaryCta': 'Entrar no plano',
       'sectionOrder': ['metodo', 'ofertas'],
       'hiddenSections': ['faq'],
+      'featuredPackageIndex': 2,
+      'featuredTestimonialIndex': 1,
+      'featuredPhotoIndex': 4,
+      'offerCta': 'Entrar no acompanhamento',
+      'finalCta': 'Agendar avaliacao',
+      'contactCta': 'Copiar contato',
       'faq': [
         {'pergunta': 'Como funciona?', 'resposta': 'Com acompanhamento.'},
       ],
@@ -82,6 +100,12 @@ void main() {
     expect(perfil.primaryCta, 'Entrar no plano');
     expect(perfil.sectionOrder, ['metodo', 'ofertas']);
     expect(perfil.hiddenSections, ['faq']);
+    expect(perfil.featuredPackageIndex, 2);
+    expect(perfil.featuredTestimonialIndex, 1);
+    expect(perfil.featuredPhotoIndex, 4);
+    expect(perfil.offerCta, 'Entrar no acompanhamento');
+    expect(perfil.finalCta, 'Agendar avaliacao');
+    expect(perfil.contactCta, 'Copiar contato');
     expect(perfil.faq.single.resposta, 'Com acompanhamento.');
   });
 
@@ -176,9 +200,15 @@ void main() {
     expect(identidade, contains('_BioPhotoPreview'));
     expect(identidade, contains('_LandingPremiumPlanner'));
     expect(identidade, contains('_LandingEditorialControls'));
+    expect(identidade, contains('_LandingConversionHighlights'));
     expect(identidade, contains("'heroTitle': _heroTitleCtrl.text.trim()"));
     expect(identidade, contains("'sectionOrder': _sectionOrder"));
     expect(identidade, contains("'hiddenSections': _hiddenSections.toList()"));
+    expect(
+      identidade,
+      contains("'featuredPackageIndex': _featuredPackageIndex"),
+    );
+    expect(identidade, contains("'offerCta': _offerCtaCtrl.text.trim()"));
     expect(identidade, contains('_PremiumLandingPreviewCard'));
     expect(identidade, contains('_PremiumHeroPreviewCanvas'));
     expect(identidade, isNot(contains('webHtmlElementStrategy')));
@@ -227,5 +257,28 @@ void main() {
     expect(LandingDesign.bioImageUrl(data), endsWith('bio.jpg'));
     expect(LandingDesign.formatPrice(data.pacotes.single.preco), 'R\$ 250/mes');
     expect(LandingDesign.faq(data).length, greaterThanOrEqualTo(3));
+  });
+
+  test('landing conversion helpers prioritize offer proof and CTA copy', () {
+    final data = PublicPersonalData.fromJson({
+      'nomePersonal': 'Matheus Focux',
+      'totalAlunos': 12,
+      'anoCriacao': 2021,
+      'plano': 'ENTERPRISE',
+      'offerCta': 'Quero entrar',
+      'finalCta': 'Agendar agora',
+      'contactCta': 'Copiar perfil',
+      'featuredPackageIndex': 10,
+      'pacotes': [
+        {'nome': 'Base', 'preco': '200'},
+        {'nome': 'Premium', 'preco': '400'},
+      ],
+    });
+
+    expect(LandingDesign.offerCta(data, data.pacotes.first), 'Quero entrar');
+    expect(LandingDesign.finalCta(data), 'Agendar agora');
+    expect(LandingDesign.contactCta(data), 'Copiar perfil');
+    expect(LandingDesign.featuredIndex(data.featuredPackageIndex, 2), 1);
+    expect(LandingDesign.prioritize(['a', 'b', 'c'], 2), ['c', 'a', 'b']);
   });
 }

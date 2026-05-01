@@ -84,6 +84,12 @@ class PerfilPersonal {
   final String? primaryCta;
   final List<String> sectionOrder;
   final List<String> hiddenSections;
+  final int? featuredPackageIndex;
+  final int? featuredTestimonialIndex;
+  final int? featuredPhotoIndex;
+  final String? offerCta;
+  final String? finalCta;
+  final String? contactCta;
   final bool? trialUsed;
   final DateTime? trialEndsAt;
   final String plano;
@@ -127,6 +133,12 @@ class PerfilPersonal {
     this.primaryCta,
     this.sectionOrder = const [],
     this.hiddenSections = const [],
+    this.featuredPackageIndex,
+    this.featuredTestimonialIndex,
+    this.featuredPhotoIndex,
+    this.offerCta,
+    this.finalCta,
+    this.contactCta,
     this.trialUsed,
     this.trialEndsAt,
     required this.plano,
@@ -170,6 +182,12 @@ class PerfilPersonal {
     sectionOrder: (json['sectionOrder'] as List<dynamic>? ?? []).cast<String>(),
     hiddenSections:
         (json['hiddenSections'] as List<dynamic>? ?? []).cast<String>(),
+    featuredPackageIndex: json['featuredPackageIndex'] as int?,
+    featuredTestimonialIndex: json['featuredTestimonialIndex'] as int?,
+    featuredPhotoIndex: json['featuredPhotoIndex'] as int?,
+    offerCta: json['offerCta'] as String?,
+    finalCta: json['finalCta'] as String?,
+    contactCta: json['contactCta'] as String?,
     trialUsed: json['trialUsed'] as bool?,
     trialEndsAt:
         json['trialEndsAt'] != null

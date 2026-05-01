@@ -76,6 +76,9 @@ class _IdentidadeVisualScreenState
   final _heroTitleCtrl = TextEditingController();
   final _heroSubtitleCtrl = TextEditingController();
   final _primaryCtaCtrl = TextEditingController();
+  final _offerCtaCtrl = TextEditingController();
+  final _finalCtaCtrl = TextEditingController();
+  final _contactCtaCtrl = TextEditingController();
   final _serviceTitleCtrls = List.generate(3, (_) => TextEditingController());
   final _serviceDescCtrls = List.generate(3, (_) => TextEditingController());
   final _packageNameCtrls = List.generate(3, (_) => TextEditingController());
@@ -95,6 +98,9 @@ class _IdentidadeVisualScreenState
   String? _logoUrl;
   late List<String> _sectionOrder = _defaultSectionOrder();
   final Set<String> _hiddenSections = {};
+  int _featuredPackageIndex = 0;
+  int _featuredTestimonialIndex = 0;
+  int _featuredPhotoIndex = 0;
 
   static List<String> _defaultSectionOrder() =>
       _landingSectionCatalog.map((item) => item.key).toList();
@@ -123,6 +129,15 @@ class _IdentidadeVisualScreenState
     _heroTitleCtrl.text = perfil.heroTitle ?? '';
     _heroSubtitleCtrl.text = perfil.heroSubtitle ?? '';
     _primaryCtaCtrl.text = perfil.primaryCta ?? '';
+    _offerCtaCtrl.text = perfil.offerCta ?? '';
+    _finalCtaCtrl.text = perfil.finalCta ?? '';
+    _contactCtaCtrl.text = perfil.contactCta ?? '';
+    _featuredPackageIndex = (perfil.featuredPackageIndex ?? 0).clamp(0, 2);
+    _featuredTestimonialIndex = (perfil.featuredTestimonialIndex ?? 0).clamp(
+      0,
+      9,
+    );
+    _featuredPhotoIndex = (perfil.featuredPhotoIndex ?? 0).clamp(0, 11);
     final savedOrder = perfil.sectionOrder.where(_isKnownSection).toList();
     _sectionOrder =
         savedOrder.isEmpty
@@ -225,6 +240,9 @@ class _IdentidadeVisualScreenState
     _heroTitleCtrl.dispose();
     _heroSubtitleCtrl.dispose();
     _primaryCtaCtrl.dispose();
+    _offerCtaCtrl.dispose();
+    _finalCtaCtrl.dispose();
+    _contactCtaCtrl.dispose();
     for (final controller in _serviceTitleCtrls) {
       controller.dispose();
     }
@@ -402,6 +420,12 @@ class _IdentidadeVisualScreenState
         'primaryCta': _primaryCtaCtrl.text.trim(),
         'sectionOrder': _sectionOrder,
         'hiddenSections': _hiddenSections.toList(),
+        'featuredPackageIndex': _featuredPackageIndex,
+        'featuredTestimonialIndex': _featuredTestimonialIndex,
+        'featuredPhotoIndex': _featuredPhotoIndex,
+        'offerCta': _offerCtaCtrl.text.trim(),
+        'finalCta': _finalCtaCtrl.text.trim(),
+        'contactCta': _contactCtaCtrl.text.trim(),
       };
       if (plano.toUpperCase() == 'ENTERPRISE') {
         body['corPrimaria'] =
@@ -737,6 +761,34 @@ class _IdentidadeVisualScreenState
                               const SizedBox(height: 16),
                           ],
                         ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _LandingEditorCard(
+                      isDark: isDark,
+                      title: 'Destaques de conversao',
+                      subtitle:
+                          'Escolha o plano, depoimento e foto que devem aparecer como prioridade. Ajuste tambem os botoes das etapas principais.',
+                      child: _LandingConversionHighlights(
+                        isPremiumOrAbove: isPremiumOrAbove,
+                        isDark: isDark,
+                        primary: themePrimary,
+                        featuredPackageIndex: _featuredPackageIndex,
+                        featuredTestimonialIndex: _featuredTestimonialIndex,
+                        featuredPhotoIndex: _featuredPhotoIndex,
+                        offerCtaCtrl: _offerCtaCtrl,
+                        finalCtaCtrl: _finalCtaCtrl,
+                        contactCtaCtrl: _contactCtaCtrl,
+                        onPackageChanged:
+                            (value) =>
+                                setState(() => _featuredPackageIndex = value),
+                        onTestimonialChanged:
+                            (value) => setState(
+                              () => _featuredTestimonialIndex = value,
+                            ),
+                        onPhotoChanged:
+                            (value) =>
+                                setState(() => _featuredPhotoIndex = value),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -1353,6 +1405,184 @@ class _LandingEditorialControls extends StatelessWidget {
           if (i != orderedOptions.length - 1) const SizedBox(height: 8),
         ],
       ],
+    );
+  }
+}
+
+class _LandingConversionHighlights extends StatelessWidget {
+  final bool isPremiumOrAbove;
+  final bool isDark;
+  final Color primary;
+  final int featuredPackageIndex;
+  final int featuredTestimonialIndex;
+  final int featuredPhotoIndex;
+  final TextEditingController offerCtaCtrl;
+  final TextEditingController finalCtaCtrl;
+  final TextEditingController contactCtaCtrl;
+  final ValueChanged<int> onPackageChanged;
+  final ValueChanged<int> onTestimonialChanged;
+  final ValueChanged<int> onPhotoChanged;
+
+  const _LandingConversionHighlights({
+    required this.isPremiumOrAbove,
+    required this.isDark,
+    required this.primary,
+    required this.featuredPackageIndex,
+    required this.featuredTestimonialIndex,
+    required this.featuredPhotoIndex,
+    required this.offerCtaCtrl,
+    required this.finalCtaCtrl,
+    required this.contactCtaCtrl,
+    required this.onPackageChanged,
+    required this.onTestimonialChanged,
+    required this.onPhotoChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _IndexSelector(
+          title: 'Plano principal',
+          subtitle: 'Recebe selo, borda forte e alimenta o CTA final.',
+          value: featuredPackageIndex,
+          count: 3,
+          primary: primary,
+          enabled: isPremiumOrAbove,
+          onChanged: onPackageChanged,
+        ),
+        const SizedBox(height: 12),
+        _IndexSelector(
+          title: 'Depoimento principal',
+          subtitle: 'Aparece primeiro e com mais peso visual.',
+          value: featuredTestimonialIndex,
+          count: 5,
+          primary: primary,
+          enabled: isPremiumOrAbove,
+          onChanged: onTestimonialChanged,
+        ),
+        const SizedBox(height: 12),
+        _IndexSelector(
+          title: 'Foto principal da galeria',
+          subtitle: 'Vira a primeira cena dos bastidores reais.',
+          value: featuredPhotoIndex,
+          count: 6,
+          primary: primary,
+          enabled: isPremiumOrAbove,
+          onChanged: onPhotoChanged,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Textos dos botoes',
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Use chamadas curtas, especificas e sem promessa exagerada.',
+          style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: offerCtaCtrl,
+          enabled: isPremiumOrAbove,
+          maxLength: 36,
+          decoration: const InputDecoration(
+            labelText: 'Botao dos planos',
+            hintText: 'Ex: Quero esse acompanhamento',
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: finalCtaCtrl,
+          enabled: isPremiumOrAbove,
+          maxLength: 36,
+          decoration: const InputDecoration(
+            labelText: 'Botao do CTA final',
+            hintText: 'Ex: Comecar com avaliacao',
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: contactCtaCtrl,
+          enabled: isPremiumOrAbove,
+          maxLength: 28,
+          decoration: const InputDecoration(
+            labelText: 'Botao do contato',
+            hintText: 'Ex: Copiar Instagram',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _IndexSelector extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final int value;
+  final int count;
+  final Color primary;
+  final bool enabled;
+  final ValueChanged<int> onChanged;
+
+  const _IndexSelector({
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.count,
+    required this.primary,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: isDark ? 0.12 : 0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: primary.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(color: ink, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: TextStyle(color: mute, fontSize: 12, height: 1.35),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (var i = 0; i < count; i++)
+                ChoiceChip(
+                  label: Text('${i + 1}'),
+                  selected: value == i,
+                  selectedColor: primary.withValues(alpha: 0.18),
+                  labelStyle: TextStyle(
+                    color: value == i ? primary : ink,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  onSelected: enabled ? (_) => onChanged(i) : null,
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

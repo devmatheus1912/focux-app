@@ -70,6 +70,40 @@ class LandingDesign {
     return 'Quero treinar com ${firstName(data)}';
   }
 
+  static String offerCta(
+    PublicPersonalData data,
+    PublicLandingPackageItem item,
+  ) {
+    final custom = clean(data.offerCta);
+    if (custom != null) return custom;
+    return clean(item.cta) ?? 'Quero esse plano';
+  }
+
+  static String finalCta(PublicPersonalData data) {
+    return clean(data.finalCta) ?? 'Quero comecar agora';
+  }
+
+  static String contactCta(PublicPersonalData data) {
+    return clean(data.contactCta) ?? 'Copiar';
+  }
+
+  static int featuredIndex(int? index, int length) {
+    if (length <= 0) return 0;
+    final value = index ?? 0;
+    if (value < 0) return 0;
+    if (value >= length) return length - 1;
+    return value;
+  }
+
+  static List<T> prioritize<T>(List<T> items, int? featuredIndex) {
+    if (items.length < 2) return items;
+    final index = LandingDesign.featuredIndex(featuredIndex, items.length);
+    if (index == 0) return items;
+    final result = [...items];
+    final featured = result.removeAt(index);
+    return [featured, ...result];
+  }
+
   static bool _isGenericSlogan(String slogan) {
     final normalized = _plain(slogan.toLowerCase());
     return normalized.contains('transformando vida') ||
