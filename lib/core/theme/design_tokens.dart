@@ -36,6 +36,11 @@ abstract class EagleTokens {
   static const Color bad         = Color(0xFF9E2B2B);
   static const Color badSoft     = Color(0xFFF7E3E3);
 
+  // Special
+  static const Color gold        = Color(0xFFFFD37A);
+  static const Color goldSoft    = Color(0xFFFFF9E8);
+  static const Color purple      = Color(0xFF6B46C1);
+
   // ── Adapters de Compatibilidade com Código Legado ─────────────────────
   static const Color primary = brand;
   static const Color danger  = bad;
@@ -60,6 +65,7 @@ abstract class EagleTokens {
   static const double radiusLg  = 20;
   static const double radiusXl  = 24;
   static const double radius2xl = 28;
+  static const double radiusPill = 999;
 
   // ── Hero Gradients ────────────────────────────────────────────────────
   static const List<Color> heroGradientLight = [
