@@ -190,7 +190,6 @@ class _PerfilBody extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: Container(
-              height: 340,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,

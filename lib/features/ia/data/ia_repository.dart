@@ -20,14 +20,20 @@ class IaOperationalException implements Exception {
     final rawMessage = payload is Map
         ? (payload['erro'] ?? payload['message'])?.toString()
         : null;
-    final message = rawMessage?.trim().isNotEmpty == true
+    final fullMessage = rawMessage?.trim().isNotEmpty == true
         ? rawMessage!.trim()
         : status == 429
             ? 'Limite de IA atingido agora. Tente novamente em instantes.'
             : status == null
                 ? 'Sem conexao com a IA agora.'
                 : 'IA temporariamente indisponivel.';
-    final reference = _extractReference(message);
+    final reference = _extractReference(fullMessage);
+    // Strip "Ref: <id>" from message body so UI layer can render it once.
+    final message = reference == null
+        ? fullMessage
+        : fullMessage
+            .replaceAll(RegExp(r'\s*Ref:\s*[a-zA-Z0-9-]+\.?'), '')
+            .trim();
     final retryable =
         status == null || status == 408 || status == 429 || status >= 500;
     return IaOperationalException(
@@ -120,9 +126,16 @@ class IaRepository {
     });
   }
 
-  Future<List<Map<String, dynamic>>> insights() async {
+  Future<List<Map<String, dynamic>>> insights({int? alunoId, String? mode}) async {
     return _withIaErrorContext(() async {
-      final r = await _dio.get('/api/ia/copiloto/insights', options: _iaOpts);
+      final r = await _dio.get(
+        '/api/ia/copiloto/insights',
+        options: _iaOpts,
+        queryParameters: {
+          if (alunoId != null) 'alunoId': alunoId,
+          if (mode != null && mode.isNotEmpty) 'mode': mode,
+        },
+      );
       return (r.data as List)
           .map((item) => Map<String, dynamic>.from(item as Map))
           .toList();

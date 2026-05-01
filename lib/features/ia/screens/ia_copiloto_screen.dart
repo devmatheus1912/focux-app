@@ -16,10 +16,25 @@ final resumoSemanalProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   return IaRepository(ref.read(apiClientProvider)).resumoSemanal();
 });
 
-final insightsProvider = FutureProvider<List<Map<String, dynamic>>>((
-  ref,
-) async {
-  return IaRepository(ref.read(apiClientProvider)).insights();
+/// Parameters for the insights provider.
+/// Equality + hashCode ensure Riverpod dedupes by (alunoId, mode).
+class InsightsQuery {
+  final int? alunoId;
+  final String? mode;
+  const InsightsQuery({this.alunoId, this.mode});
+
+  @override
+  bool operator ==(Object other) =>
+      other is InsightsQuery && other.alunoId == alunoId && other.mode == mode;
+
+  @override
+  int get hashCode => Object.hash(alunoId, mode);
+}
+
+final insightsProvider = FutureProvider.family<
+    List<Map<String, dynamic>>, InsightsQuery>((ref, query) async {
+  return IaRepository(ref.read(apiClientProvider))
+      .insights(alunoId: query.alunoId, mode: query.mode);
 });
 
 final proximaAcaoProvider = FutureProvider.family<Map<String, dynamic>, int>((
@@ -117,9 +132,13 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
         ProductEvents.iaInsightRequested,
         props: {'mode': _modes[_modeIdx], 'alunoId': _selectedAlunoId},
       );
-      ref.invalidate(insightsProvider);
+      final query = InsightsQuery(
+        alunoId: _selectedAlunoId,
+        mode: _modes[_modeIdx],
+      );
+      ref.invalidate(insightsProvider(query));
       ref.invalidate(resumoSemanalProvider);
-      await ref.read(insightsProvider.future);
+      await ref.read(insightsProvider(query).future);
       _proximaAcao = await ref.read(
         proximaAcaoProvider(_selectedAlunoId!).future,
       );
@@ -686,7 +705,11 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
             ] else if (_gerado) ...[
               Consumer(
                 builder: (context, ref, _) {
-                  final insightsAsync = ref.watch(insightsProvider);
+                  final query = InsightsQuery(
+                    alunoId: _selectedAlunoId,
+                    mode: _modes[_modeIdx],
+                  );
+                  final insightsAsync = ref.watch(insightsProvider(query));
                   return insightsAsync.when(
                     loading:
                         () => const Padding(
@@ -723,8 +746,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                   ),
                                 ),
                                 TextButton(
-                                  onPressed:
-                                      () => ref.invalidate(insightsProvider),
+                                  onPressed: () =>
+                                      ref.invalidate(insightsProvider(query)),
                                   child: const Text('Recarregar'),
                                 ),
                               ],

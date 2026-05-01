@@ -59,7 +59,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
     }
 
     try {
-      final fresh = await _repo.getPlanoFeaturesFresh();
+      final fresh = await _fetchWithRetry();
       state = AsyncData(fresh);
     } catch (error, stack) {
       if (previous != null) {
@@ -85,5 +85,25 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
     } finally {
       _refreshing = false;
     }
+  }
+
+  /// Cold-start cases (Railway free tier, mobile data flaky) often need a
+  /// couple of attempts before /planos/me responds. Retry up to 3 times
+  /// with 1s/2s backoff before surfacing a hard error.
+  Future<PlanoFeatures> _fetchWithRetry() async {
+    Object? lastError;
+    StackTrace? lastStack;
+    for (int attempt = 0; attempt < 3; attempt++) {
+      try {
+        return await _repo.getPlanoFeaturesFresh();
+      } catch (error, stack) {
+        lastError = error;
+        lastStack = stack;
+        if (attempt < 2) {
+          await Future<void>.delayed(Duration(seconds: 1 << attempt));
+        }
+      }
+    }
+    Error.throwWithStackTrace(lastError!, lastStack!);
   }
 }
