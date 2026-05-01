@@ -50,14 +50,14 @@ class LandingDesign {
     final slogan = clean(data.slogan);
     final specialty = primarySpecialty(data) ?? 'treino';
     if (slogan != null && !_isGenericSlogan(slogan)) return slogan;
-    return 'Treino de $specialty com acompanhamento real.';
+    return 'Plano de $specialty com acompanhamento profissional.';
   }
 
   static String heroSupport(PublicPersonalData data) {
     final description = clean(data.descricaoProfissional);
     if (description != null) return _withPeriod(description);
     final name = firstName(data);
-    return '$name organiza treino, progresso e acompanhamento em uma experiencia clara antes, durante e depois da aula.';
+    return '$name organiza treino, progresso e comunicacao em uma experiencia clara do primeiro contato ao ajuste final.';
   }
 
   static bool _isGenericSlogan(String slogan) {
@@ -71,25 +71,25 @@ class LandingDesign {
 
   static String _plain(String value) {
     return value
-        .replaceAll('á', 'a')
-        .replaceAll('à', 'a')
-        .replaceAll('â', 'a')
-        .replaceAll('ã', 'a')
-        .replaceAll('é', 'e')
-        .replaceAll('ê', 'e')
-        .replaceAll('í', 'i')
-        .replaceAll('ó', 'o')
-        .replaceAll('ô', 'o')
-        .replaceAll('õ', 'o')
-        .replaceAll('ú', 'u')
-        .replaceAll('ç', 'c');
+        .replaceAll('\u00e1', 'a')
+        .replaceAll('\u00e0', 'a')
+        .replaceAll('\u00e2', 'a')
+        .replaceAll('\u00e3', 'a')
+        .replaceAll('\u00e9', 'e')
+        .replaceAll('\u00ea', 'e')
+        .replaceAll('\u00ed', 'i')
+        .replaceAll('\u00f3', 'o')
+        .replaceAll('\u00f4', 'o')
+        .replaceAll('\u00f5', 'o')
+        .replaceAll('\u00fa', 'u')
+        .replaceAll('\u00e7', 'c');
   }
 
   static String aboutCopy(PublicPersonalData data) {
     final description = clean(data.descricaoProfissional);
     if (description != null) return _withPeriod(description);
     final specialty = primarySpecialty(data) ?? 'treinamento personalizado';
-    return 'A proposta combina $specialty, acompanhamento pelo app e ajustes reais para o aluno saber o que fazer em cada etapa.';
+    return 'A proposta combina $specialty, app, check-ins e ajustes claros para o aluno saber o que fazer em cada etapa.';
   }
 
   static bool showStudentCount(PublicPersonalData data) {
@@ -160,7 +160,7 @@ class LandingDesign {
         const LandingProofItem(
           icon: Icons.groups_2_outlined,
           title: 'Acompanhamento proximo',
-          subtitle: 'menos volume, mais atencao por aluno',
+          subtitle: 'menos volume, mais atencao individual',
         ),
       );
     }
@@ -229,7 +229,7 @@ class LandingDesign {
                 titulo: clean(item.titulo)!,
                 descricao:
                     clean(item.descricao) ??
-                    'Acompanhamento com orientacao clara e ajustes conforme sua rotina.',
+                    'Orientacao clara, rotina estruturada e ajustes conforme progresso.',
               ),
             )
             .toList();
@@ -241,14 +241,13 @@ class LandingDesign {
             'Plano criado para objetivo, rotina, nivel atual e disponibilidade real.',
       ),
       PublicLandingServiceItem(
-        titulo: 'Acompanhamento pelo app',
+        titulo: 'Acompanhamento no app',
         descricao:
-            'Treinos, progresso, check-ins e comunicacao organizados em um unico lugar.',
+            'Treinos, progresso, check-ins e mensagens em um unico lugar.',
       ),
       PublicLandingServiceItem(
-        titulo: 'Ajustes de evolucao',
-        descricao:
-            'Carga, volume e frequencia revisados para o aluno continuar progredindo.',
+        titulo: 'Ajustes de performance',
+        descricao: 'Carga, volume e frequencia revisados com criterio.',
       ),
     ];
   }
@@ -262,7 +261,7 @@ class LandingDesign {
                 nome: clean(item.nome)!,
                 descricao:
                     clean(item.descricao) ??
-                    'Acompanhamento personalizado com rotina, suporte e ajustes.',
+                    'Rotina estruturada, suporte e ajustes de progresso.',
                 preco: clean(item.preco) ?? '',
                 cta: clean(item.cta) ?? 'Quero esse acompanhamento',
               ),
@@ -272,8 +271,7 @@ class LandingDesign {
     return const [
       PublicLandingPackageItem(
         nome: 'Acompanhamento personalizado',
-        descricao:
-            'Entre para uma rotina com treino estruturado, check-ins e suporte direto.',
+        descricao: 'Rotina com treino estruturado, check-ins e suporte direto.',
         preco: '',
         cta: 'Quero uma avaliacao',
       ),
@@ -295,12 +293,12 @@ class LandingDesign {
   static List<String> packageBenefits(PublicLandingPackageItem item) {
     final description = clean(item.descricao) ?? '';
     final benefits = <String>[
-      'Treino organizado por fase e prioridade',
-      'Ajustes conforme rotina e resposta do aluno',
-      'Contato e acompanhamento dentro do app',
+      'Treino por fase e prioridade',
+      'Ajustes por rotina e resposta do aluno',
+      'Contato e acompanhamento no app',
     ];
     if (description.toLowerCase().contains('presencial')) {
-      benefits[0] = 'Encontro presencial com direcao tecnica';
+      benefits[0] = 'Atendimento presencial com direcao tecnica';
     }
     if (description.toLowerCase().contains('online')) {
       benefits[0] = 'Rotina online com execucao guiada';
@@ -331,12 +329,12 @@ class LandingDesign {
       PublicLandingFaqItem(
         pergunta: 'Preciso ja estar treinando?',
         resposta:
-            'Nao. O plano parte do seu nivel atual e evolui com seguranca, sem copiar ficha pronta.',
+            'Nao. O plano parte do seu nivel atual e evolui com seguranca, sem modelo pronto.',
       ),
       PublicLandingFaqItem(
         pergunta: 'O contato acontece por onde?',
         resposta:
-            'O app organiza treino, check-ins, historico e mensagens para o acompanhamento nao se perder em conversas soltas.',
+            'O app centraliza treino, check-ins, historico e mensagens para manter o acompanhamento organizado.',
       ),
     ];
     final result = [...real];

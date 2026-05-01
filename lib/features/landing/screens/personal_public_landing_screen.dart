@@ -27,7 +27,7 @@ import '../widgets/faq_section.dart';
 
 final _publicPersonalProvider = FutureProvider.autoDispose
     .family<PublicPersonalData, String>((ref, slug) async {
-      // Public endpoint — no auth needed. Use raw http.
+      // Public endpoint: no auth needed. Use raw http.
       final baseUrl = Env.apiUrl;
       final response = await http.get(
         Uri.parse('$baseUrl/api/public/personal/$slug'),
@@ -73,7 +73,7 @@ Future<void> _abrirStore(BuildContext context) async {
   if (!ok && context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Não foi possível abrir a loja. Tente novamente.'),
+        content: Text('Nao foi possivel abrir a loja. Tente novamente.'),
       ),
     );
   }
@@ -150,7 +150,7 @@ class _NotAvailableView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Esta página não está disponível.',
+                'Esta pagina nao esta disponivel.',
                 style: TextStyle(color: Colors.white70, fontSize: 16),
                 textAlign: TextAlign.center,
               ),

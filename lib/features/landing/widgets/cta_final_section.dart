@@ -51,7 +51,7 @@ class CtaFinalSection extends StatelessWidget {
         children: [
           Text(
             primeiroPacote != null
-                ? 'Comece com $price e tenha um plano com direcao.'
+                ? 'Comece com $price em um plano com direcao.'
                 : 'Converse com $firstName e entenda o melhor caminho.',
             style: const TextStyle(
               color: Colors.white,
@@ -63,7 +63,7 @@ class CtaFinalSection extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           const Text(
-            'Cadastro rapido, acompanhamento organizado e proximo passo claro.',
+            'Cadastro simples. Acompanhamento organizado. Proximo passo claro.',
             style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
             textAlign: TextAlign.center,
           ),

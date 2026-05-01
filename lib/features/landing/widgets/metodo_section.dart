@@ -21,18 +21,15 @@ class MetodoSection extends StatelessWidget {
       ),
       (
         titulo: 'Treino personalizado',
-        descricao:
-            'Fases, carga, frequencia e progressao deixam de ser chute e viram decisao.',
+        descricao: 'Fases, carga, frequencia e progressao viram criterio.',
       ),
       (
         titulo: 'Acompanhamento de perto',
-        descricao:
-            'Feedback, check-ins e chat mantem o aluno orientado sem depender de mensagem perdida.',
+        descricao: 'Feedback, check-ins e chat mantem orientacao clara.',
       ),
       (
         titulo: 'Consistencia e resultado',
-        descricao:
-            'A evolucao fica visivel para o aluno continuar treinando com clareza.',
+        descricao: 'A evolucao fica visivel para manter progresso com clareza.',
       ),
     ];
 
@@ -65,7 +62,7 @@ class MetodoSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Um metodo que parece acompanhamento, nao ficha solta.',
+                    'Processo claro. Acompanhamento de verdade.',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 28,
@@ -75,7 +72,7 @@ class MetodoSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Cada etapa mostra para o aluno por que ele esta treinando, o que precisa executar e quando o plano muda.',
+                    'Cada etapa mostra o que fazer, quando ajustar e como medir progresso.',
                     style: const TextStyle(
                       color: Color(0xFF94A3B8),
                       fontSize: 15,

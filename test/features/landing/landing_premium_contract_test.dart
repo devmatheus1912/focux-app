@@ -193,7 +193,7 @@ void main() {
     expect(LandingDesign.hasValidCref(data), isFalse);
     expect(
       LandingDesign.heroHeadline(data),
-      'Treino de Hipertrofia com acompanhamento real.',
+      'Plano de Hipertrofia com acompanhamento profissional.',
     );
     expect(LandingDesign.heroPills(data).first.value, 'Vagas');
     expect(LandingDesign.firstImageUrl(data), endsWith('hero.jpg'));

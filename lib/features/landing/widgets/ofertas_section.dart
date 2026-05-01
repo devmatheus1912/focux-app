@@ -44,7 +44,7 @@ class OfertasSection extends StatelessWidget {
                     _SectionEyebrow('SERVICOS', color: primaryColor),
                     const SizedBox(height: 8),
                     const Text(
-                      'O aluno precisa entender exatamente o que esta comprando.',
+                      'O aluno entende o que recebe antes de entrar.',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -74,7 +74,7 @@ class OfertasSection extends StatelessWidget {
                     _SectionEyebrow('PLANOS E VALORES', color: primaryColor),
                     const SizedBox(height: 8),
                     const Text(
-                      'Escolha o nivel de acompanhamento e comece com clareza.',
+                      'Escolha o nivel de acompanhamento ideal.',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,

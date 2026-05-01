@@ -48,7 +48,7 @@ class GaleriaSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Fotos que fazem a pagina parecer humana, nao template.',
+                    'Fotos reais para a pagina ter presenca humana.',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 28,

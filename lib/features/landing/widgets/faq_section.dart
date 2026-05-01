@@ -32,7 +32,7 @@ class FaqSection extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               const Text(
-                'Antes de chamar, o aluno ja precisa sentir seguranca.',
+                'Duvidas principais antes de comecar.',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,

@@ -16,10 +16,10 @@ class TecnologiaSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final itens = [
-      'Treino organizado por fase, dia e prioridade.',
-      'Check-ins e progresso para acompanhar evolucao de verdade.',
-      'Chat direto no app para tirar duvidas sem bagunca.',
-      'Experiencia personalizada com a identidade do personal.',
+      'Treino estruturado por fase, dia e prioridade.',
+      'Check-ins e progresso para medir evolucao real.',
+      'Chat direto no app para reduzir ruido.',
+      'Experiencia com a identidade do personal.',
     ];
 
     return Padding(
@@ -43,7 +43,7 @@ class TecnologiaSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'APP E ACOMPANHAMENTO',
+              'APP E ROTINA',
               style: TextStyle(
                 color: Color(0xFFCBD5E1),
                 fontSize: 11,
@@ -53,7 +53,7 @@ class TecnologiaSection extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Seu treino tambem vive no app.',
+              'O treino tambem vive no app.',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,
@@ -63,7 +63,7 @@ class TecnologiaSection extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Voce nao recebe um PDF esquecido no WhatsApp. Recebe uma rotina acompanhada, com contexto, historico e ajuste continuo.',
+              'Sem PDF perdido em conversa. O aluno recebe rotina acompanhada, historico claro e ajustes continuos.',
               style: TextStyle(
                 color: Color(0xFFD1D5DB),
                 fontSize: 14,
@@ -200,10 +200,7 @@ class _FeatureMiniCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: const TextStyle(
-              color: Color(0xFFCBD5E1),
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 12),
           ),
         ],
       ),

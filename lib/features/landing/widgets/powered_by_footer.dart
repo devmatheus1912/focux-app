@@ -16,7 +16,7 @@ class PoweredByFooter extends StatelessWidget {
           const Divider(color: Color(0xFF1F2937)),
           const SizedBox(height: 12),
           Text(
-            'Powered by Focux Personal • ${DateTime.now().year}',
+            'Powered by Focux Personal - ${DateTime.now().year}',
             style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
             textAlign: TextAlign.center,
           ),

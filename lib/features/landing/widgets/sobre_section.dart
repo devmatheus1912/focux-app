@@ -70,8 +70,8 @@ class SobreSection extends StatelessWidget {
                         const SizedBox(height: 12),
                         Text(
                           specialty == null
-                              ? 'Metodo, presenca e clareza antes do aluno decidir.'
-                              : 'Especialista em $specialty com rotina que o aluno entende.',
+                              ? 'Metodo, autoridade e direcao antes da decisao.'
+                              : 'Especialista em $specialty com rotina clara para o aluno.',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 30,
@@ -103,7 +103,7 @@ class SobreSection extends StatelessWidget {
                               subtitle:
                                   LandingDesign.showStudentCount(data)
                                       ? 'Historico de acompanhamento real'
-                                      : 'Menos aluno perdido, mais direcao individual',
+                                      : 'Direcao individual e rotina acompanhada',
                               color: accent,
                             ),
                             if (LandingDesign.validCref(data) != null)
@@ -117,7 +117,7 @@ class SobreSection extends StatelessWidget {
                               _CredentialRow(
                                 icon: Icons.bolt_outlined,
                                 title: specialty,
-                                subtitle: 'Especialidade em destaque',
+                                subtitle: 'Especialidade principal',
                                 color: accent,
                               ),
                           ],
