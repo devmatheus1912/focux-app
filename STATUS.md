@@ -14,7 +14,7 @@
 | Backend (53 módulos) | 🟢 Robusto | 9/10 |
 | Frontend (41 features) | 🟡 Quase pronto | 7.5/10 |
 | App Store Readiness | 🟢 Blockers resolvidos | 8/10 |
-| Performance & UX | 🟡 Precisa polish | 6.5/10 |
+| Performance & UX | 🟢 Polish aplicado | 8/10 |
 | Testes | 🔴 Insuficiente | 3/10 |
 | Diferencial competitivo | 🟡 Precisa mais | 7/10 |
 | Compliance (LGPD/Apple) | 🟢 Completo | 9/10 |
@@ -293,8 +293,8 @@
 | 4 | Conta demo para Apple Review | P0 | 1h | ⬜ |
 | 5 | Audit + Fix ListView performance | P1 | 4h | ✅ |
 | 6 | Error handling global (remover catch vazio) | P1 | 6h | ✅ |
-| 7 | Shimmer loading em telas principais | P1 | 4h | ⬜ |
-| 8 | Pull-to-refresh em todas as listas | P1 | 3h | ⬜ |
+| 7 | Shimmer loading em telas principais | P1 | 4h | ✅ |
+| 8 | Pull-to-refresh em todas as listas | P1 | 3h | ✅ |
 | 9 | Testes backend: Auth + Treinos + Check-in | P1 | 12h | ⬜ |
 | 10 | Testes frontend: Login + Dashboard + Treinos | P1 | 8h | ⬜ |
 | 11 | Screenshots App Store (6.7" + 5.5") | P0 | 3h | ⬜ |
@@ -410,7 +410,7 @@
 
 > Atualize esta seção a cada task concluída e faça git commit.
 
-### Sprint 1 Progress: 5/12 ✅✅✅✅✅⬜⬜⬜⬜⬜⬜⬜
+### Sprint 1 Progress: 7/12 ✅✅✅✅✅✅✅⬜⬜⬜⬜⬜
 ### Sprint 2 Progress: 0/8 ⬜⬜⬜⬜⬜⬜⬜⬜
 ### Sprint 3 Progress: 0/8 ⬜⬜⬜⬜⬜⬜⬜⬜
 ### Sprint 4 Progress: 0/7 ⬜⬜⬜⬜⬜⬜⬜
