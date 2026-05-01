@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../data/landing_tracking.dart';
 import '../models/public_personal_data.dart';
+import 'landing_design_helpers.dart';
 
 class OfertasSection extends StatelessWidget {
   final PublicPersonalData data;
@@ -17,9 +18,8 @@ class OfertasSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (data.servicos.isEmpty && data.pacotes.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    final services = LandingDesign.services(data);
+    final packages = LandingDesign.packages(data);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -40,14 +40,24 @@ class OfertasSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (data.servicos.isNotEmpty) ...[
+                  if (services.isNotEmpty) ...[
                     _SectionEyebrow('SERVICOS', color: primaryColor),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'O aluno precisa entender exatamente o que esta comprando.',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        height: 1.12,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
                       children: [
-                        for (final servico in data.servicos)
+                        for (final servico in services)
                           SizedBox(
                             width: serviceWidth,
                             child: _ServiceTile(
@@ -60,18 +70,28 @@ class OfertasSection extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                   ],
-                  if (data.pacotes.isNotEmpty) ...[
+                  if (packages.isNotEmpty) ...[
                     _SectionEyebrow('PLANOS E VALORES', color: primaryColor),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Escolha o nivel de acompanhamento e comece com clareza.',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        height: 1.12,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
                       children: [
-                        for (var i = 0; i < data.pacotes.length; i++)
+                        for (var i = 0; i < packages.length; i++)
                           SizedBox(
                             width: serviceWidth,
                             child: _PackageTile(
-                              pacote: data.pacotes[i],
+                              pacote: packages[i],
                               featured: i == 0,
                               primaryColor: primaryColor,
                               onTap: () {
@@ -148,7 +168,15 @@ class _ServiceTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.check_circle, color: primaryColor, size: 18),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.check_circle, color: primaryColor, size: 18),
+          ),
           const SizedBox(height: 12),
           Text(
             title,
@@ -190,8 +218,10 @@ class _PackageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final price = LandingDesign.formatPrice(pacote.preco);
+    final benefits = LandingDesign.packageBenefits(pacote);
     return Container(
-      constraints: const BoxConstraints(minHeight: 250),
+      constraints: const BoxConstraints(minHeight: 310),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: featured ? const Color(0xFF121D31) : const Color(0xFF101827),
@@ -202,6 +232,16 @@ class _PackageTile extends StatelessWidget {
                   ? primaryColor.withValues(alpha: 0.46)
                   : Colors.white.withValues(alpha: 0.08),
         ),
+        boxShadow:
+            featured
+                ? [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.18),
+                    blurRadius: 34,
+                    offset: const Offset(0, 16),
+                  ),
+                ]
+                : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,17 +266,15 @@ class _PackageTile extends StatelessWidget {
               fontWeight: FontWeight.w900,
             ),
           ),
-          if (pacote.preco.trim().isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Text(
-              pacote.preco,
-              style: TextStyle(
-                color: primaryColor,
-                fontSize: 26,
-                fontWeight: FontWeight.w900,
-              ),
+          const SizedBox(height: 10),
+          Text(
+            price,
+            style: TextStyle(
+              color: primaryColor,
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
             ),
-          ],
+          ),
           if (pacote.descricao.trim().isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
@@ -248,6 +286,28 @@ class _PackageTile extends StatelessWidget {
               ),
             ),
           ],
+          const SizedBox(height: 16),
+          for (final benefit in benefits)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.done_rounded, color: primaryColor, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      benefit,
+                      style: const TextStyle(
+                        color: Color(0xFFE5E7EB),
+                        fontSize: 12,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,

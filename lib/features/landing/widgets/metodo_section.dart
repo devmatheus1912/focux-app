@@ -17,22 +17,22 @@ class MetodoSection extends StatelessWidget {
       (
         titulo: 'Diagnostico inicial',
         descricao:
-            'Entendemos objetivo, rotina, restricoes e historico para montar um plano com contexto.',
+            'Objetivo, rotina, restricoes e historico entram no plano antes da primeira serie.',
       ),
       (
         titulo: 'Treino personalizado',
         descricao:
-            'Cada fase respeita seu nivel atual e ajusta carga, frequencia e progressao.',
+            'Fases, carga, frequencia e progressao deixam de ser chute e viram decisao.',
       ),
       (
         titulo: 'Acompanhamento de perto',
         descricao:
-            'Feedback, ajustes e comunicacao no app para nao deixar voce treinar no escuro.',
+            'Feedback, check-ins e chat mantem o aluno orientado sem depender de mensagem perdida.',
       ),
       (
         titulo: 'Consistencia e resultado',
         descricao:
-            'O foco deixa de ser motivacao passageira e vira rotina com direcao clara.',
+            'A evolucao fica visivel para o aluno continuar treinando com clareza.',
       ),
     ];
 
@@ -65,7 +65,7 @@ class MetodoSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'A jornada nao parece uma ficha. Parece um acompanhamento.',
+                    'Um metodo que parece acompanhamento, nao ficha solta.',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 28,
@@ -75,9 +75,7 @@ class MetodoSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    data.slogan?.trim().isNotEmpty == true
-                        ? data.slogan!
-                        : 'Sem improviso, sem planilha solta e sem acompanhamento generico.',
+                    'Cada etapa mostra para o aluno por que ele esta treinando, o que precisa executar e quando o plano muda.',
                     style: const TextStyle(
                       color: Color(0xFF94A3B8),
                       fontSize: 15,
@@ -127,8 +125,8 @@ class _MetodoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minHeight: 190),
-      padding: const EdgeInsets.all(18),
+      constraints: const BoxConstraints(minHeight: 142),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF101827),
         borderRadius: BorderRadius.circular(8),
@@ -137,25 +135,49 @@ class _MetodoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '0$index',
-            style: TextStyle(
-              color: primaryColor,
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              height: 1,
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: primaryColor.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: primaryColor.withValues(alpha: 0.30),
+                  ),
+                ),
+                child: Text(
+                  '0$index',
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    height: 1,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  color: Colors.white.withValues(alpha: 0.08),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Text(
             title,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 7),
           Text(
             description,
             style: const TextStyle(

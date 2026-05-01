@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/landing/models/public_personal_data.dart';
+import 'package:focux_app/features/landing/widgets/landing_design_helpers.dart';
 import 'package:focux_app/features/perfil/data/perfil_repository.dart';
 
 void main() {
@@ -81,6 +82,10 @@ void main() {
         File(
           'lib/features/landing/widgets/cta_final_section.dart',
         ).readAsStringSync();
+    final designHelpers =
+        File(
+          'lib/features/landing/widgets/landing_design_helpers.dart',
+        ).readAsStringSync();
     final tracking =
         File(
           'lib/features/landing/data/landing_tracking.dart',
@@ -92,7 +97,9 @@ void main() {
 
     expect(landing, contains('FaqSection(data: data'));
     expect(landing, contains("eventType: 'landing_view'"));
-    expect(hero, contains('data.heroImageUrl'));
+    expect(hero, contains('LandingDesign.firstImageUrl'));
+    expect(hero, contains('LandingDesign.heroPills'));
+    expect(hero, contains('BoxFit.cover'));
     expect(hero, isNot(contains('data.generatedHeroImageUrl')));
     expect(hero, contains('_LandingBrandCanvas'));
     expect(hero, contains('_LandingSignature'));
@@ -109,9 +116,19 @@ void main() {
     expect(ofertas, contains('_ServiceTile'));
     expect(ofertas, contains('_PackageTile'));
     expect(ofertas, contains('MAIS PROCURADO'));
+    expect(ofertas, contains('LandingDesign.formatPrice'));
+    expect(ofertas, contains('LandingDesign.services'));
+    expect(ofertas, contains('LandingDesign.packages'));
     expect(metodo, contains('METODO PREMIUM'));
     expect(metodo, contains('_MetodoCard'));
     expect(cta, contains("source: 'landing_cta'"));
+    expect(cta, contains('LandingDesign.formatPrice'));
+    expect(designHelpers, contains('showStudentCount'));
+    expect(designHelpers, contains('yearsExperience'));
+    expect(designHelpers, contains('hasValidCref'));
+    expect(designHelpers, contains('123456'));
+    expect(designHelpers, contains('Vagas'));
+    expect(designHelpers, contains('static List<PublicLandingFaqItem> faq'));
     expect(tracking, contains(r'/api/public/personal/$slug/eventos'));
     expect(tracking, contains('landingRegisterPath'));
     expect(tracking, contains('eventType'));
@@ -137,5 +154,37 @@ void main() {
     expect(identidade, contains('Subir video de apresentacao'));
     expect(identidade, contains('Trocar video de apresentacao'));
     expect(identidade, contains('_LandingMediaStatusCard'));
+  });
+
+  test('premium landing design hides weak proof and formats offers', () {
+    final data = PublicPersonalData.fromJson({
+      'nomePersonal': 'Matheus Focux',
+      'totalAlunos': 2,
+      'anoCriacao': DateTime.now().year,
+      'cref': '123456-G/SP',
+      'especialidades': 'Hipertrofia',
+      'slogan': 'Transformando vida através de movimento',
+      'pacotes': [
+        {
+          'nome': 'Plano Mensal',
+          'preco': '250',
+          'descricao': 'Treino personalizado ajustes semanais.',
+        },
+      ],
+      'faq': [
+        {'pergunta': 'Preciso treinar todos dias?', 'resposta': 'Nao.'},
+      ],
+    });
+
+    expect(LandingDesign.showStudentCount(data), isFalse);
+    expect(LandingDesign.yearsExperience(data), 0);
+    expect(LandingDesign.hasValidCref(data), isFalse);
+    expect(
+      LandingDesign.heroHeadline(data),
+      'Treino de Hipertrofia com acompanhamento real.',
+    );
+    expect(LandingDesign.heroPills(data).first.value, 'Vagas');
+    expect(LandingDesign.formatPrice(data.pacotes.single.preco), 'R\$ 250/mes');
+    expect(LandingDesign.faq(data).length, greaterThanOrEqualTo(3));
   });
 }

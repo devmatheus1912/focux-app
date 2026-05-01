@@ -25,33 +25,38 @@ import '../widgets/faq_section.dart';
 // Provider
 // ---------------------------------------------------------------------------
 
-final _publicPersonalProvider =
-    FutureProvider.autoDispose.family<PublicPersonalData, String>((ref, slug) async {
-  // Public endpoint — no auth needed. Use raw http.
-  final baseUrl = Env.apiUrl;
-  final response = await http.get(Uri.parse('$baseUrl/api/public/personal/$slug'));
-  if (response.statusCode == 403 || response.statusCode == 404) {
-    throw Exception('NOT_AVAILABLE');
-  }
-  if (response.statusCode != 200) {
-    throw Exception('Error ${response.statusCode}');
-  }
-  return PublicPersonalData.fromJson(
-    jsonDecode(response.body) as Map<String, dynamic>,
-  );
-});
+final _publicPersonalProvider = FutureProvider.autoDispose
+    .family<PublicPersonalData, String>((ref, slug) async {
+      // Public endpoint — no auth needed. Use raw http.
+      final baseUrl = Env.apiUrl;
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/public/personal/$slug'),
+      );
+      if (response.statusCode == 403 || response.statusCode == 404) {
+        throw Exception('NOT_AVAILABLE');
+      }
+      if (response.statusCode != 200) {
+        throw Exception('Error ${response.statusCode}');
+      }
+      return PublicPersonalData.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    });
 
 // ---------------------------------------------------------------------------
 // Store launcher
 // ---------------------------------------------------------------------------
 
-const String _kAndroidStoreUrl = 'https://play.google.com/store/apps/details?id=com.focux.personal';
-const String _kIosStoreUrl = 'https://apps.apple.com/app/focux-personal/id0000000000';
+const String _kAndroidStoreUrl =
+    'https://play.google.com/store/apps/details?id=com.focux.personal';
+const String _kIosStoreUrl =
+    'https://apps.apple.com/app/focux-personal/id0000000000';
 const String _kFallbackUrl = 'https://focux.app/baixar';
 
 Future<void> _abrirStore(BuildContext context) async {
   final platform = Theme.of(context).platform;
-  final url = platform == TargetPlatform.iOS ? _kIosStoreUrl : _kAndroidStoreUrl;
+  final url =
+      platform == TargetPlatform.iOS ? _kIosStoreUrl : _kAndroidStoreUrl;
   final uri = Uri.parse(url);
   bool ok = false;
   try {
@@ -59,12 +64,17 @@ Future<void> _abrirStore(BuildContext context) async {
   } catch (_) {}
   if (!ok) {
     try {
-      ok = await launchUrl(Uri.parse(_kFallbackUrl), mode: LaunchMode.externalApplication);
+      ok = await launchUrl(
+        Uri.parse(_kFallbackUrl),
+        mode: LaunchMode.externalApplication,
+      );
     } catch (_) {}
   }
   if (!ok && context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Não foi possível abrir a loja. Tente novamente.')),
+      const SnackBar(
+        content: Text('Não foi possível abrir a loja. Tente novamente.'),
+      ),
     );
   }
 }
@@ -133,7 +143,10 @@ class _NotAvailableView extends StatelessWidget {
               const Text(
                 'Focux Personal',
                 style: TextStyle(
-                    color: Colors.white, fontSize: 28, fontWeight: FontWeight.w700),
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 12),
               const Text(
@@ -147,10 +160,13 @@ class _NotAvailableView extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primary,
                   foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: const Text('Baixar o app Focux Personal'),
               ),
@@ -192,23 +208,62 @@ class _LandingContentState extends State<_LandingContent> {
   Widget build(BuildContext context) {
     final data = widget.data;
     final slug = widget.slug;
-    final primaryColor = _hexColor(data.corPrimaria, Theme.of(context).colorScheme.primary);
-    final secondaryColor = _hexColor(data.corSecundaria, const Color(0xFF0097A7));
+    final primaryColor = _hexColor(
+      data.corPrimaria,
+      Theme.of(context).colorScheme.primary,
+    );
+    final secondaryColor = _hexColor(
+      data.corSecundaria,
+      const Color(0xFF0097A7),
+    );
 
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(child: HeroSection(data: data, slug: slug, primaryColor: primaryColor, secondaryColor: secondaryColor)),
+        SliverToBoxAdapter(
+          child: HeroSection(
+            data: data,
+            slug: slug,
+            primaryColor: primaryColor,
+            secondaryColor: secondaryColor,
+          ),
+        ),
         SliverToBoxAdapter(child: SocialProofSection(data: data)),
-        SliverToBoxAdapter(child: MetodoSection(data: data, primaryColor: primaryColor)),
+        SliverToBoxAdapter(
+          child: MetodoSection(data: data, primaryColor: primaryColor),
+        ),
         SliverToBoxAdapter(child: SobreSection(data: data)),
-        SliverToBoxAdapter(child: EspecialidadesSection(data: data, primaryColor: primaryColor)),
-        SliverToBoxAdapter(child: TecnologiaSection(data: data, primaryColor: primaryColor, secondaryColor: secondaryColor)),
-        SliverToBoxAdapter(child: OfertasSection(data: data, slug: slug, primaryColor: primaryColor)),
-        SliverToBoxAdapter(child: FaqSection(data: data, primaryColor: primaryColor)),
-        SliverToBoxAdapter(child: ContatoSection(data: data)),
-        SliverToBoxAdapter(child: DepoimentosSection(data: data, primaryColor: primaryColor)),
+        SliverToBoxAdapter(
+          child: OfertasSection(
+            data: data,
+            slug: slug,
+            primaryColor: primaryColor,
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: DepoimentosSection(data: data, primaryColor: primaryColor),
+        ),
+        SliverToBoxAdapter(
+          child: TecnologiaSection(
+            data: data,
+            primaryColor: primaryColor,
+            secondaryColor: secondaryColor,
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: EspecialidadesSection(data: data, primaryColor: primaryColor),
+        ),
+        SliverToBoxAdapter(
+          child: FaqSection(data: data, primaryColor: primaryColor),
+        ),
         SliverToBoxAdapter(child: GaleriaSection(data: data)),
-        SliverToBoxAdapter(child: CtaFinalSection(data: data, slug: slug, primaryColor: primaryColor)),
+        SliverToBoxAdapter(
+          child: CtaFinalSection(
+            data: data,
+            slug: slug,
+            primaryColor: primaryColor,
+          ),
+        ),
+        SliverToBoxAdapter(child: ContatoSection(data: data)),
         SliverToBoxAdapter(child: PoweredByFooter(data: data)),
       ],
     );

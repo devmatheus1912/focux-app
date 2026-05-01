@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import '../data/landing_tracking.dart';
 import '../models/public_personal_data.dart';
+import 'landing_design_helpers.dart';
 
 class HeroSection extends StatelessWidget {
   final PublicPersonalData data;
@@ -20,33 +21,18 @@ class HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final firstName = data.nomePersonal.split(' ').first;
-    final customHero = data.heroImageUrl?.trim();
-    final heroImage =
-        customHero != null &&
-                customHero.isNotEmpty &&
-                !_isAiGeneratedHeroUrl(customHero)
-            ? customHero
-            : data.fotos.isNotEmpty
-            ? data.fotos.first
-            : (data.logoUrl != null && data.logoUrl!.isNotEmpty
-                ? data.logoUrl
-                : null);
+    final firstName = LandingDesign.firstName(data);
+    final heroImage = LandingDesign.firstImageUrl(data);
+    assert(heroImage == null || !_isAiGeneratedHeroUrl(heroImage));
     final compact = MediaQuery.of(context).size.width < 640;
     final signature = _signatureVariant(slug, data.nomePersonal);
     final composition = _compositionVariant(slug, data.nomePersonal);
-    final minHeight = (MediaQuery.of(context).size.height * 0.86).clamp(
-      620.0,
-      820.0,
-    );
-    final headline =
-        data.slogan?.trim().isNotEmpty == true
-            ? data.slogan!.trim()
-            : data.nomePersonal;
-    final support =
-        data.descricaoProfissional?.trim().isNotEmpty == true
-            ? data.descricaoProfissional!.trim()
-            : 'Treinamento personalizado, acompanhamento proximo e plano feito para sua rotina.';
+    final minHeight = (MediaQuery.of(context).size.height *
+            (compact ? 0.94 : 0.88))
+        .clamp(compact ? 700.0 : 620.0, compact ? 900.0 : 820.0);
+    final headline = LandingDesign.heroHeadline(data);
+    final support = LandingDesign.heroSupport(data);
+    final heroPills = LandingDesign.heroPills(data);
     final alignRight = !compact && composition == _LandingComposition.editorial;
 
     return Container(
@@ -146,7 +132,7 @@ class HeroSection extends StatelessWidget {
                         Flexible(
                           child: _SignatureBadge(
                             label:
-                                '${data.nomePersonal} · ${signature.label} ${composition.label}',
+                                '${data.nomePersonal} - ${signature.label} ${composition.label}',
                             primary: primaryColor,
                           ),
                         ),
@@ -176,9 +162,7 @@ class HeroSection extends StatelessWidget {
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 620),
                     child: Text(
-                      headline == data.nomePersonal
-                          ? support
-                          : '$support Com $firstName, o acompanhamento fica mais humano, claro e consistente.',
+                      support,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.84),
                         fontSize: compact ? 16 : 19,
@@ -253,18 +237,15 @@ class HeroSection extends StatelessWidget {
                             : alignRight
                             ? WrapAlignment.end
                             : WrapAlignment.start,
-                    children: [
-                      _HeroPill(value: '${data.totalAlunos}+', label: 'alunos'),
-                      _HeroPill(
-                        value: 'Desde ${data.anoCriacao}',
-                        label: 'experiencia',
-                      ),
-                      if (data.especialidades?.trim().isNotEmpty == true)
-                        _HeroPill(
-                          value: data.especialidades!.split(',').first.trim(),
-                          label: 'foco',
-                        ),
-                    ],
+                    children:
+                        heroPills
+                            .map(
+                              (item) => _HeroPill(
+                                value: item.value,
+                                label: item.label,
+                              ),
+                            )
+                            .toList(),
                   ),
                   if (data.videoUrl?.trim().isNotEmpty == true) ...[
                     const SizedBox(height: 22),
@@ -303,22 +284,35 @@ class _PresentationVideoCard extends StatelessWidget {
     if (!_isDirectVideoUrl(url)) {
       return const SizedBox.shrink();
     }
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 620),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.36),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
-        ),
-        child: _InlinePresentationVideo(
-          url: url,
-          brand: primaryColor,
-          slug: slug,
-          trackingId: trackingId,
-        ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 520;
+        return ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.42),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.30),
+                  blurRadius: 34,
+                  offset: const Offset(0, 18),
+                ),
+              ],
+            ),
+            child: _InlinePresentationVideo(
+              url: url,
+              brand: primaryColor,
+              slug: slug,
+              trackingId: trackingId,
+              compact: compact,
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -328,12 +322,14 @@ class _InlinePresentationVideo extends StatefulWidget {
   final Color brand;
   final String slug;
   final String? trackingId;
+  final bool compact;
 
   const _InlinePresentationVideo({
     required this.url,
     required this.brand,
     required this.slug,
     required this.trackingId,
+    required this.compact,
   });
 
   @override
@@ -362,22 +358,33 @@ class _InlinePresentationVideoState extends State<_InlinePresentationVideo> {
 
   @override
   Widget build(BuildContext context) {
+    final frameHeight = widget.compact ? 245.0 : 320.0;
     if (!_ready) {
-      return const SizedBox(
-        height: 190,
-        child: Center(child: CircularProgressIndicator(color: Colors.white)),
+      return SizedBox(
+        height: frameHeight,
+        child: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
       );
     }
+    final videoSize = _controller.value.size;
+    final videoWidth = videoSize.width == 0 ? 16.0 : videoSize.width;
+    final videoHeight = videoSize.height == 0 ? 9.0 : videoSize.height;
     return Column(
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(18),
-          child: AspectRatio(
-            aspectRatio:
-                _controller.value.aspectRatio == 0
-                    ? 16 / 9
-                    : _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
+          child: SizedBox(
+            height: frameHeight,
+            width: double.infinity,
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: videoWidth,
+                height: videoHeight,
+                child: VideoPlayer(_controller),
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -408,10 +415,12 @@ class _InlinePresentationVideoState extends State<_InlinePresentationVideo> {
               ),
             ),
             const SizedBox(width: 8),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Video de apresentacao',
-                style: TextStyle(
+                widget.compact
+                    ? 'Apresentacao do personal'
+                    : 'Assista antes de decidir',
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                 ),

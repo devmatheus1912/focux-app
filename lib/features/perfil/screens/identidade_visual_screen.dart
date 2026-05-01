@@ -445,7 +445,7 @@ class _IdentidadeVisualScreenState
                 'Escolha uma promessa clara: emagrecimento, performance, hipertrofia ou saude.',
                 'Use fotos e videos reais para passar confianca antes do aluno chamar.',
                 'Deixe preco, servicos e duvidas frequentes simples de comparar.',
-                'Use o briefing de IA como direcao criativa: a landing fica unica pelas cores, assinatura visual, video real e promessa do personal.',
+                'Escolha uma direcao editorial: a landing fica unica pela foto real, promessa, cores, video e oferta do personal.',
               ],
             ),
             const SizedBox(height: 12),

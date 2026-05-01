@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../data/landing_tracking.dart';
 import '../models/public_personal_data.dart';
+import 'landing_design_helpers.dart';
 
 class CtaFinalSection extends StatelessWidget {
   final PublicPersonalData data;
@@ -18,27 +19,52 @@ class CtaFinalSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primeiroPacote = data.pacotes.isNotEmpty ? data.pacotes.first : null;
-    final accent = data.isEnterprise ? primaryColor : Theme.of(context).colorScheme.primary;
+    final accent =
+        data.isEnterprise
+            ? primaryColor
+            : Theme.of(context).colorScheme.primary;
+    final firstName = LandingDesign.firstName(data);
+    final price =
+        primeiroPacote == null
+            ? 'uma avaliacao'
+            : LandingDesign.formatPrice(primeiroPacote.preco);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: accent,
-        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [accent, Color.lerp(accent, const Color(0xFF050814), 0.36)!],
+        ),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: 0.22),
+            blurRadius: 34,
+            offset: const Offset(0, 18),
+          ),
+        ],
       ),
       child: Column(
         children: [
           Text(
-            primeiroPacote != null && primeiroPacote.preco.trim().isNotEmpty
-                ? 'Comece com ${primeiroPacote.preco}.\nConstrua sua rotina com suporte real.'
-                : 'Comece hoje.\nSeu personal esta esperando.',
+            primeiroPacote != null
+                ? 'Comece com $price e tenha um plano com direcao.'
+                : 'Converse com $firstName e entenda o melhor caminho.',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              height: 1.3,
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              height: 1.18,
             ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Cadastro rapido, acompanhamento organizado e proximo passo claro.',
+            style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),

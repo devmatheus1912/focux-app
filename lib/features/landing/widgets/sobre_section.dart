@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/public_personal_data.dart';
+import 'landing_design_helpers.dart';
 
 class SobreSection extends StatelessWidget {
   final PublicPersonalData data;
@@ -7,19 +8,13 @@ class SobreSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (data.descricaoProfissional == null ||
-        data.descricaoProfissional!.isEmpty) {
-      return const SizedBox.shrink();
-    }
     final accent = Theme.of(context).colorScheme.primary;
-    final portrait =
-        data.fotos.length > 1
-            ? data.fotos[1]
-            : data.fotos.isNotEmpty
-            ? data.fotos.first
-            : (data.heroImageUrl?.trim().isNotEmpty == true
-                ? data.heroImageUrl!.trim()
-                : data.logoUrl);
+    final portrait = LandingDesign.firstImageUrl(data);
+    final aboutCopy = LandingDesign.aboutCopy(data);
+    final specialty = LandingDesign.primarySpecialty(data);
+    final years = LandingDesign.yearsExperience(data);
+    final badgeValue = years >= 2 ? '$years+' : 'APP';
+    final badgeLabel = years >= 2 ? 'ANOS' : 'GUIADO';
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -54,7 +49,8 @@ class SobreSection extends StatelessWidget {
                     child: _SobreMediaCard(
                       imageUrl: portrait,
                       accent: accent,
-                      year: data.anoCriacao,
+                      badgeValue: badgeValue,
+                      badgeLabel: badgeLabel,
                     ),
                   ),
                   SizedBox(
@@ -72,8 +68,10 @@ class SobreSection extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        const Text(
-                          'Metodo, presenca e clareza antes do aluno decidir.',
+                        Text(
+                          specialty == null
+                              ? 'Metodo, presenca e clareza antes do aluno decidir.'
+                              : 'Especialista em $specialty com rotina que o aluno entende.',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 30,
@@ -83,7 +81,7 @@ class SobreSection extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          data.descricaoProfissional!,
+                          aboutCopy,
                           style: const TextStyle(
                             color: Color(0xFFCBD5E1),
                             fontSize: 15,
@@ -94,26 +92,31 @@ class SobreSection extends StatelessWidget {
                         Column(
                           children: [
                             _CredentialRow(
-                              icon: Icons.people_outline,
-                              title: '${data.totalAlunos}+ alunos',
-                              subtitle: 'Historico de acompanhamento real',
+                              icon:
+                                  LandingDesign.showStudentCount(data)
+                                      ? Icons.people_outline
+                                      : Icons.groups_2_outlined,
+                              title:
+                                  LandingDesign.showStudentCount(data)
+                                      ? '${data.totalAlunos}+ alunos'
+                                      : 'Acompanhamento proximo',
+                              subtitle:
+                                  LandingDesign.showStudentCount(data)
+                                      ? 'Historico de acompanhamento real'
+                                      : 'Menos aluno perdido, mais direcao individual',
                               color: accent,
                             ),
-                            if (data.cref?.trim().isNotEmpty == true)
+                            if (LandingDesign.validCref(data) != null)
                               _CredentialRow(
                                 icon: Icons.verified_outlined,
                                 title: 'CREF ativo',
-                                subtitle: data.cref!.trim(),
+                                subtitle: LandingDesign.validCref(data)!,
                                 color: accent,
                               ),
-                            if (data.especialidades?.trim().isNotEmpty == true)
+                            if (specialty != null)
                               _CredentialRow(
                                 icon: Icons.bolt_outlined,
-                                title:
-                                    data.especialidades!
-                                        .split(',')
-                                        .first
-                                        .trim(),
+                                title: specialty,
                                 subtitle: 'Especialidade em destaque',
                                 color: accent,
                               ),
@@ -135,18 +138,19 @@ class SobreSection extends StatelessWidget {
 class _SobreMediaCard extends StatelessWidget {
   final String? imageUrl;
   final Color accent;
-  final int year;
+  final String badgeValue;
+  final String badgeLabel;
 
   const _SobreMediaCard({
     required this.imageUrl,
     required this.accent,
-    required this.year,
+    required this.badgeValue,
+    required this.badgeLabel,
   });
 
   @override
   Widget build(BuildContext context) {
     final hasImage = imageUrl != null && imageUrl!.trim().isNotEmpty;
-    final years = (DateTime.now().year - year).clamp(0, 99);
     return AspectRatio(
       aspectRatio: 0.82,
       child: Stack(
@@ -201,7 +205,7 @@ class _SobreMediaCard extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    '$years+',
+                    badgeValue,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -210,9 +214,9 @@ class _SobreMediaCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 3),
-                  const Text(
-                    'ANOS',
-                    style: TextStyle(
+                  Text(
+                    badgeLabel,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 9,
                       fontWeight: FontWeight.w900,
