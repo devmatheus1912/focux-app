@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/loading_shimmer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -39,11 +41,32 @@ class BuscaGlobalResult {
       );
 
   bool get isEmpty => alunos.isEmpty && treinos.isEmpty && cobrancas.isEmpty;
+  int get totalCount => alunos.length + treinos.length + cobrancas.length;
 }
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
+// ─── Filter Model ─────────────────────────────────────────────────────────────
+
+enum BuscaTipo { todos, aluno, treino, cobranca }
+
+extension BuscaTipoExt on BuscaTipo {
+  String get label => switch (this) {
+        BuscaTipo.todos => 'Todos',
+        BuscaTipo.aluno => 'Alunos',
+        BuscaTipo.treino => 'Treinos',
+        BuscaTipo.cobranca => 'Cobranças',
+      };
+  IconData get icon => switch (this) {
+        BuscaTipo.todos => Icons.search,
+        BuscaTipo.aluno => Icons.person,
+        BuscaTipo.treino => Icons.fitness_center,
+        BuscaTipo.cobranca => Icons.attach_money,
+      };
+}
+
+// ─── Providers ────────────────────────────────────────────────────────────────
 
 final buscaQueryProvider = StateProvider<String>((ref) => '');
+final buscaFilterProvider = StateProvider<BuscaTipo>((ref) => BuscaTipo.todos);
 
 final buscaResultadoProvider = FutureProvider.autoDispose<BuscaGlobalResult?>((ref) async {
   final query = ref.watch(buscaQueryProvider);
@@ -57,7 +80,6 @@ final buscaResultadoProvider = FutureProvider.autoDispose<BuscaGlobalResult?>((r
 
 class BuscaGlobalScreen extends ConsumerStatefulWidget {
   const BuscaGlobalScreen({super.key});
-
   @override
   ConsumerState<BuscaGlobalScreen> createState() => _BuscaGlobalScreenState();
 }
@@ -66,86 +88,106 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
   final _ctrl = TextEditingController();
 
   @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+
+  Widget _buildFilterChips() {
+    final selected = ref.watch(buscaFilterProvider);
+    return SizedBox(
+      height: 40,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: BuscaTipo.values.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (ctx, i) {
+          final tipo = BuscaTipo.values[i];
+          final isSelected = tipo == selected;
+          return FilterChip(
+            selected: isSelected,
+            label: Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(tipo.icon, size: 14, color: isSelected ? Colors.white : EagleTokens.inkMute),
+              const SizedBox(width: 4),
+              Text(tipo.label),
+            ]),
+            selectedColor: Theme.of(context).colorScheme.primary,
+            checkmarkColor: Colors.white,
+            labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+              color: isSelected ? Colors.white : EagleTokens.ink),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? EagleTokens.surfaceDark : const Color(0xFFF3F4F6),
+            side: BorderSide.none,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            onSelected: (_) {
+              HapticFeedback.selectionClick();
+              ref.read(buscaFilterProvider.notifier).state = tipo;
+            },
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildSection(String titulo, List<BuscaItem> items) {
     if (items.isEmpty) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(titulo,
-              style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF717171),
-                  letterSpacing: 1)),
-        ),
-        ...items.map((item) => _BuscaItemTile(item: item, onTap: () => _abrirItem(item))),
-      ],
-    );
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        child: Row(children: [
+          Text(titulo, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold,
+              color: Color(0xFF717171), letterSpacing: 1)),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10)),
+            child: Text('${items.length}', style: TextStyle(fontSize: 11,
+                fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+          ),
+        ]),
+      ),
+      ...items.map((item) => _BuscaItemTile(item: item, onTap: () => _abrirItem(item))),
+    ]);
   }
 
-  /// Whitelist of internal route prefixes the app is allowed to deep-link to from
-  /// search results. Anything coming from the backend that does NOT match one of
-  /// these prefixes is treated as untrusted and routed via [url_launcher] (with
-  /// confirmation) instead of being navigated into the app shell.
+  List<BuscaItem> _filterByTipo(BuscaGlobalResult result, BuscaTipo filter) => switch (filter) {
+    BuscaTipo.todos => [...result.alunos, ...result.treinos, ...result.cobrancas],
+    BuscaTipo.aluno => result.alunos,
+    BuscaTipo.treino => result.treinos,
+    BuscaTipo.cobranca => result.cobrancas,
+  };
+
   static const _allowedInternalPrefixes = <String>[
-    '/alunos/',
-    '/treinos/',
-    '/financeiro/',
-    '/agenda/',
-    '/checkin/',
-    '/chat/',
-    '/leads/',
-    '/perfil/',
+    '/alunos/', '/treinos/', '/financeiro/', '/agenda/',
+    '/checkin/', '/chat/', '/leads/', '/perfil/',
   ];
 
   Future<void> _abrirItem(BuscaItem item) async {
     final raw = item.url.trim();
-    if (raw.isEmpty) {
-      _showError('Item sem destino válido.');
-      return;
-    }
+    if (raw.isEmpty) { _showError('Item sem destino válido.'); return; }
 
-    // Internal deep link: must start with a whitelisted prefix to avoid arbitrary
-    // route injection (e.g. backend returning '/admin/system' or 'https://evil/...').
     if (raw.startsWith('/')) {
       final normalized = _normalizePath(raw);
       final isAllowed = _allowedInternalPrefixes.any(normalized.startsWith);
-      if (!isAllowed) {
-        _showError('Destino não permitido.');
-        return;
-      }
+      if (!isAllowed) { _showError('Destino não permitido.'); return; }
       if (!mounted) return;
       context.push(normalized);
       return;
     }
 
-    // Absolute URL: only http(s), and only after explicit user confirmation.
     Uri? uri;
     try { uri = Uri.parse(raw); } catch (_) { uri = null; }
     if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) {
-      _showError('Destino não suportado.');
-      return;
+      _showError('Destino não suportado.'); return;
     }
-
     if (!mounted) return;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: const Text('Abrir link externo?'),
-        content: Text(uri.toString()),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogCtx, false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(dialogCtx, true), child: const Text('Abrir')),
-        ],
-      ),
-    );
+    final ok = await showDialog<bool>(context: context, builder: (dialogCtx) => AlertDialog(
+      title: const Text('Abrir link externo?'), content: Text(uri.toString()),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(dialogCtx, false), child: const Text('Cancelar')),
+        TextButton(onPressed: () => Navigator.pop(dialogCtx, true), child: const Text('Abrir')),
+      ],
+    ));
     if (ok != true) return;
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && mounted) _showError('Não foi possível abrir este link.');
@@ -153,9 +195,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
 
   String _normalizePath(String path) {
     var p = path;
-    while (p.contains('//')) {
-      p = p.replaceAll('//', '/');
-    }
+    while (p.contains('//')) { p = p.replaceAll('//', '/'); }
     return p;
   }
 
@@ -168,79 +208,77 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
   Widget build(BuildContext context) {
     final resultAsync = ref.watch(buscaResultadoProvider);
     final query = ref.watch(buscaQueryProvider);
+    final filter = ref.watch(buscaFilterProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).brightness == Brightness.dark
-          ? EagleTokens.darkBg
-          : EagleTokens.paper,
+          ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        backgroundColor: Colors.transparent, elevation: 0,
         title: TextField(
-          controller: _ctrl,
-          autofocus: true,
+          controller: _ctrl, autofocus: true,
           style: const TextStyle(fontSize: 16),
           decoration: const InputDecoration(
             hintText: 'Buscar alunos, treinos, cobranças...',
             border: InputBorder.none,
             hintStyle: TextStyle(color: Color(0xFF717171)),
           ),
-          onChanged: (v) {
-            ref.read(buscaQueryProvider.notifier).state = v;
-          },
+          onChanged: (v) => ref.read(buscaQueryProvider.notifier).state = v,
         ),
         actions: [
-          if (query.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                _ctrl.clear();
-                ref.read(buscaQueryProvider.notifier).state = '';
-              },
-            ),
+          if (query.isNotEmpty) IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () { _ctrl.clear(); ref.read(buscaQueryProvider.notifier).state = ''; },
+          ),
         ],
       ),
-      body: resultAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-            child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad))),
-        data: (result) {
-          if (query.trim().length < 2) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.search, size: 64, color: Color(0xFFD1D5DB)),
-                  const SizedBox(height: 16),
-                  Text('Digite ao menos 2 caracteres',
-                      style: TextStyle(color: EagleTokens.inkMute)),
-                ],
-              ),
-            );
-          }
-          if (result == null || result.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.search_off, size: 64, color: Color(0xFFD1D5DB)),
-                  const SizedBox(height: 16),
-                  Text('Nenhum resultado para "$query"',
-                      style: TextStyle(color: EagleTokens.inkMute)),
-                ],
-              ),
-            );
-          }
-          return ListView(
-            children: [
+      body: Column(children: [
+        _buildFilterChips(),
+        const SizedBox(height: 8),
+        Expanded(child: resultAsync.when(
+          loading: () => const ShimmerListLoading(itemCount: 6, itemHeight: 64),
+          error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad))),
+          data: (result) {
+            if (query.trim().length < 2) {
+              return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(Icons.search, size: 64, color: Color(0xFFD1D5DB)),
+                const SizedBox(height: 16),
+                Text('Digite ao menos 2 caracteres', style: TextStyle(color: EagleTokens.inkMute)),
+              ]));
+            }
+            if (result == null || result.isEmpty) {
+              return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(Icons.search_off, size: 64, color: Color(0xFFD1D5DB)),
+                const SizedBox(height: 16),
+                Text('Nenhum resultado para "$query"', style: TextStyle(color: EagleTokens.inkMute)),
+              ]));
+            }
+            if (filter != BuscaTipo.todos) {
+              final items = _filterByTipo(result, filter);
+              if (items.isEmpty) {
+                return Center(child: Text('Nenhum resultado em ${filter.label}',
+                    style: TextStyle(color: EagleTokens.inkMute)));
+              }
+              return ListView(children: [
+                Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: Text('${items.length} resultado${items.length > 1 ? 's' : ''} em ${filter.label}',
+                    style: TextStyle(fontSize: 13, color: EagleTokens.inkMute))),
+                ...items.map((item) => _BuscaItemTile(item: item, onTap: () => _abrirItem(item))),
+                const SizedBox(height: 32),
+              ]);
+            }
+            return ListView(children: [
+              Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Text('${result.totalCount} resultado${result.totalCount > 1 ? 's' : ''}',
+                  style: TextStyle(fontSize: 13, color: EagleTokens.inkMute))),
               _buildSection('ALUNOS', result.alunos),
               _buildSection('TREINOS', result.treinos),
               _buildSection('COBRANÇAS', result.cobrancas),
               const SizedBox(height: 32),
-            ],
-          );
-        },
-      ),
+            ]);
+          },
+        )),
+      ]),
     );
   }
 }
@@ -248,22 +286,16 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
 class _BuscaItemTile extends StatelessWidget {
   final BuscaItem item;
   final VoidCallback onTap;
-
   const _BuscaItemTile({required this.item, required this.onTap});
 
   IconData _iconForTipo(String tipo) => switch (tipo) {
-        'ALUNO' => Icons.person,
-        'TREINO' => Icons.fitness_center,
-        'COBRANCA' => Icons.attach_money,
-        _ => Icons.search,
-      };
-
+    'ALUNO' => Icons.person, 'TREINO' => Icons.fitness_center,
+    'COBRANCA' => Icons.attach_money, _ => Icons.search,
+  };
   Color _colorForTipo(String tipo) => switch (tipo) {
-        'ALUNO' => const Color(0xFF2B4A9E),
-        'TREINO' => const Color(0xFF22C55E),
-        'COBRANCA' => const Color(0xFFF59E0B),
-        _ => EagleTokens.inkMute,
-      };
+    'ALUNO' => const Color(0xFF2B4A9E), 'TREINO' => const Color(0xFF22C55E),
+    'COBRANCA' => const Color(0xFFF59E0B), _ => EagleTokens.inkMute,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -271,12 +303,10 @@ class _BuscaItemTile extends StatelessWidget {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: cor.withValues(alpha: 0.1),
-        child: Icon(_iconForTipo(item.tipo), color: cor, size: 20),
-      ),
+        child: Icon(_iconForTipo(item.tipo), color: cor, size: 20)),
       title: Text(item.titulo, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: item.subtitulo != null
-          ? Text(item.subtitulo!, maxLines: 1, overflow: TextOverflow.ellipsis)
-          : null,
+          ? Text(item.subtitulo!, maxLines: 1, overflow: TextOverflow.ellipsis) : null,
       trailing: const Icon(Icons.chevron_right, size: 20),
       onTap: onTap,
     );
