@@ -61,6 +61,8 @@ dependencies:
   path_provider: ^2.1.5
   record: ^5.2.1
   http: ^1.2.2
+  health: ^11.1.0
+  home_widget: ^0.7.0
 
 dev_dependencies:
   flutter_test:

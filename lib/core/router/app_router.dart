@@ -38,6 +38,8 @@ import '../../features/ia/screens/ia_chat_screen.dart';
 import '../../features/leads/screens/leads_list_screen.dart';
 import '../../features/alertas/screens/alertas_screen.dart';
 import '../../features/evolucao/screens/evolucao_screen.dart';
+import '../../features/evolucao/screens/evolucao_fotos_screen.dart';
+import '../../features/health/screens/health_dashboard_screen.dart';
 import '../../features/ia/screens/ia_copiloto_screen.dart';
 import '../../features/ia/screens/progressao_aceitar_screen.dart';
 import '../../features/alunos/screens/editar_aluno_screen.dart';
@@ -270,6 +272,19 @@ class AppRouter {
           alunoId: _intPathParam(state, 'id')!,
           alunoNome: _stringExtra(state) ?? 'Aluno',
         ),
+      ),
+      GoRoute(
+        path: '/alunos/:id/fotos',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/alunos' : null,
+        builder: (context, state) => EvolucaoFotosScreen(
+          alunoId: _intPathParam(state, 'id')!,
+          alunoNome: _stringExtra(state) ?? 'Aluno',
+        ),
+      ),
+      GoRoute(
+        path: '/saude',
+        builder: (context, state) => const HealthDashboardScreen(),
       ),
       GoRoute(
         path: '/alunos/:id/anamnese',

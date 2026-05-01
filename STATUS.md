@@ -131,10 +131,11 @@
 ## 🟡 IMPORTANTES (P2 — Sprint 2-3)
 
 ### I1. Integração Apple Health / Google Fit
-- **Status:** ❌ Zero integração wearable
-- **Impacto:** Tendência #1 do mercado fitness 2025/2026. Todos concorrentes premium têm
-- **Ação:** Package `health` do Flutter → sincronizar passos, FC, sono, calorias
-- **Estimativa:** 16h
+- **Status:** ✅ IMPLEMENTADO
+- **Package:** `health: ^11.1.0` — leitura de Steps, Heart Rate, Calories, Sleep, Weight
+- **Core:** `HealthService` — autorização, daily summary, revoke, getHealthData por período
+- **Frontend:** `HealthDashboardScreen` com cards (passos/calorias/FC/sono), pull-to-refresh
+- **Rota:** `/saude` — registrada no GoRouter
 
 ### I2. Modo Escuro Completo
 - **Status:** ✅ Implementado (`AppTheme.buildDarkTheme`)
@@ -194,14 +195,17 @@
 - **UX:** Conta regressiva visual, haptic feedback ao finalizar, integrado ao fluxo de check-in
 
 ### K2. Comparativo de Evolução (Before/After)
-- **Impacto:** Feature mais pedida por alunos. Fotos lado a lado com mesma pose
-- **Ação:** Galeria com fotos de evolução + slider de comparação + share para stories
-- **Estimativa:** 12h
+- **Status:** ✅ IMPLEMENTADO
+- **Frontend:** `EvolucaoFotosScreen` — galeria de fotos com slider de comparação interativo
+- **Features:** Câmera/galeria via `image_picker`, grid de seleção, data badges, haptic feedback
+- **Rota:** `/alunos/:id/fotos` — registrada no GoRouter com null-guard
 
 ### K3. Widget iOS / Android na Home
-- **Impacto:** Aluno vê treino do dia SEM abrir o app. Retenção absurda
-- **Ação:** Widget nativo com `home_widget` package
-- **Estimativa:** 12h
+- **Status:** ✅ IMPLEMENTADO
+- **Package:** `home_widget: ^0.7.0` — push de dados do treino do dia
+- **Core:** `HomeWidgetService` — updateTreinoDoDia, clear, registerInteractivity
+- **Dados:** treino_nome, total_exercicios, concluidos, progresso_pct, proximo exercício
+- **Obs:** Widget nativo (Swift/Kotlin) precisa ser criado no Xcode/Android Studio
 
 ### K4. Relatório PDF Premium para Aluno
 - **Status:** ✅ IMPLEMENTADO
@@ -317,9 +321,9 @@
 
 | # | Task | Prioridade | Tempo | Status |
 |---|------|-----------|-------|--------|
-| 21 | Apple Health / Google Fit | P2 | 16h | ⬜ |
-| 22 | Comparativo evolução (Before/After) | P3 | 12h | ⬜ |
-| 23 | Widget iOS/Android na Home | P3 | 12h | ⬜ |
+| 21 | Apple Health / Google Fit | P2 | 16h | ✅ |
+| 22 | Comparativo evolução (Before/After) | P3 | 12h | ✅ |
+| 23 | Widget iOS/Android na Home | P3 | 12h | ✅ |
 | 24 | Relatório PDF premium | P3 | 8h | ✅ |
 | 25 | Modo treino presencial (tela grande) | P3 | 12h | ⬜ |
 | 26 | Analytics preditivo (risco churn) | P3 | 8h | ✅ |
@@ -385,7 +389,7 @@
 | Notificações spam | ❌ | ❌ | ⚠️ | ✅ FCM contextual |
 | Sem IA real | ❌ | ❌ | ❌ | ✅ Claude API |
 | Preço abusivo | ⚠️ | ❌ | ❌ | ✅ Modelo justo |
-| Sem wearables | ❌ | ❌ | ⚠️ | 🔜 Sprint 3 |
+| Sem wearables | ❌ | ❌ | ⚠️ | ✅ Apple Health + Google Fit |
 | Sem gamificação | ❌ | ❌ | ❌ | ✅ Badges+Streaks |
 | Sem white-label | 💰 | 💰 | 💰 | ✅ Desde Premium |
 | Sem chat nativo | ❌ | ❌ | ⚠️ | ✅ WebSocket |
@@ -410,7 +414,7 @@
 
 ### Sprint 1 Progress: 11/12 ✅✅✅✅✅✅✅✅✅✅✅⬜
 ### Sprint 2 Progress: 8/8 ✅✅✅✅✅✅✅✅ ✅ COMPLETO!
-### Sprint 3 Progress: 4/8 ✅✅✅✅⬜⬜⬜⬜
+### Sprint 3 Progress: 7/8 ✅✅✅✅✅✅✅⬜
 ### Sprint 4 Progress: 6/7 ✅✅✅✅✅✅⬜
 
 ---
