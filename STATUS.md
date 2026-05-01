@@ -335,7 +335,7 @@
 |---|------|-----------|-------|--------|
 | 29 | i18n (pt-BR + en-US + es-ES) | P2 | 16h | ⬜ |
 | 30 | ASO (App Store Optimization) | P2 | 4h | ✅ |
-| 31 | Testes de carga backend (1000+ req/s) | P2 | 8h | ⬜ |
+| 31 | Testes de carga backend (1000+ req/s) | P2 | 8h | ✅ |
 | 32 | CDN para assets estáticos | P2 | 4h | ✅ |
 | 33 | Rate limiting refinado | P2 | 4h | ✅ |
 | 34 | Monitoring dashboard (Grafana) | P2 | 6h | ✅ |
@@ -413,7 +413,7 @@
 ### Sprint 1 Progress: 11/12 ✅✅✅✅✅✅✅✅✅✅✅⬜
 ### Sprint 2 Progress: 8/8 ✅✅✅✅✅✅✅✅ ✅ COMPLETO!
 ### Sprint 3 Progress: 4/8 ✅✅✅✅⬜⬜⬜⬜
-### Sprint 4 Progress: 5/7 ✅✅✅✅✅⬜⬜
+### Sprint 4 Progress: 6/7 ✅✅✅✅✅✅⬜
 
 ---
 
