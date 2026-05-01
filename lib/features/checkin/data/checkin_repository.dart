@@ -92,6 +92,36 @@ class ExecucaoExercicio {
             .toList(),
       );
 
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'treinoExercicioId': treinoExercicioId,
+    'exercicioNome': exercicioNome,
+    'gifUrl': gifUrl,
+    'thumbnailUrl': thumbnailUrl,
+    'videoUrl': videoUrl,
+    'videoSource': videoSource,
+    'licenseStatus': licenseStatus,
+    'errosComuns': errosComuns,
+    'contraindicacoes': contraindicacoes,
+    'substitutos': substitutos,
+    'series': series,
+    'repeticoes': repeticoes,
+    'cargaKg': cargaKg,
+    'descansoSegundos': descansoSegundos,
+    'observacoes': observacoes,
+    'seriesFeitas': seriesFeitas,
+    'concluido': concluido,
+    'feedback': feedback,
+    'rpe': rpe,
+    'dor': dor,
+    'cargaAnteriorKg': cargaAnteriorKg,
+    'seriesFeitasAnterior': seriesFeitasAnterior,
+    'feedbackAnterior': feedbackAnterior,
+    'rpeAnterior': rpeAnterior,
+    'dorAnterior': dorAnterior,
+    'seriesDetalhes': seriesDetalhes.map((s) => s.toJson()).toList(),
+  };
+
   ExecucaoExercicio copyWith({
     int? seriesFeitas,
     bool? concluido,
@@ -161,6 +191,17 @@ class ExecucaoSerie {
         dor: json['dor'] as bool? ?? false,
         criadoEm: json['criadoEm'] as String?,
       );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'numero': numero,
+    'cargaKg': cargaKg,
+    'repeticoes': repeticoes,
+    'feedback': feedback,
+    'rpe': rpe,
+    'dor': dor,
+    'criadoEm': criadoEm,
+  };
 }
 
 double? _toDouble(dynamic value) {
@@ -211,6 +252,18 @@ class ExecucaoTreino {
                     EvolucaoPerformance.fromJson(e as Map<String, dynamic>))
                 .toList(),
       );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'treinoId': treinoId,
+    'treinoNome': treinoNome,
+    'status': status,
+    'iniciadoEm': iniciadoEm,
+    'concluidoEm': concluidoEm,
+    'exercicios': exercicios.map((e) => e.toJson()).toList(),
+    'evolucoesCarga': [],
+    'evolucoesPerformance': [],
+  };
 }
 
 class EvolucaoCarga {
