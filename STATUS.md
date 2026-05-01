@@ -306,13 +306,13 @@
 | # | Task | Prioridade | Tempo | Status |
 |---|------|-----------|-------|--------|
 | 13 | Cache offline (treino do dia + exercícios) | P1 | 16h | ⬜ |
-| 14 | Onboarding wizard (4 passos) | P1 | 8h | ⬜ |
+| 14 | Onboarding wizard (4 passos) | P1 | 8h | ✅ |
 | 15 | Notificações inteligentes contextuais | P2 | 8h | ⬜ |
 | 16 | Cache de vídeos de exercícios | P2 | 6h | ⬜ |
-| 17 | Haptic feedback + micro-animações | P2 | 4h | ⬜ |
-| 18 | Timer de descanso no treino | P3 | 8h | ⬜ |
-| 19 | Deep links universais (AASA + App Links) | P2 | 3h | ⬜ |
-| 20 | Testes: Financeiro + Chat + Gamificação | P1 | 12h | ⬜ |
+| 17 | Haptic feedback + micro-animações | P2 | 4h | ✅ |
+| 18 | Timer de descanso no treino | P3 | 8h | ✅ |
+| 19 | Deep links universais (AASA + App Links) | P2 | 3h | ✅ |
+| 20 | Testes: Financeiro + Chat + Gamificação | P1 | 12h | ✅ |
 
 ### 🟢 SPRINT 3 — "Killer Features" (Semana 5-8)
 > **Meta:** Features que nenhum concorrente tem
@@ -326,7 +326,7 @@
 | 25 | Modo treino presencial (tela grande) | P3 | 12h | ⬜ |
 | 26 | Analytics preditivo (risco churn) | P3 | 8h | ⬜ |
 | 27 | Programa referral aprimorado | P3 | 6h | ⬜ |
-| 28 | Botão WhatsApp contextual | P3 | 2h | ⬜ |
+| 28 | Botão WhatsApp contextual | P3 | 2h | ✅ |
 
 ### 🔵 SPRINT 4 — "Escala Nacional" (Semana 9-12)
 > **Meta:** Pronto para marketing agressivo
@@ -350,11 +350,11 @@
 - [x] Botão restaurar compras presente
 - [x] Política de privacidade linkada no app
 - [x] Termos de uso linkados no app
-- [ ] Credenciais demo para reviewer
+- [x] Credenciais demo para reviewer
 - [ ] Screenshots para todos os tamanhos obrigatórios
 - [ ] Nenhum texto placeholder/lorem ipsum
 - [ ] Todas as permissões têm purpose strings (✅ já feito)
-- [ ] Deep links funcionando
+- [x] Deep links funcionando
 - [ ] IAP testado em sandbox
 - [ ] App Icon sem transparência (✅ já feito)
 - [ ] Sem APIs privadas
@@ -411,8 +411,8 @@
 > Atualize esta seção a cada task concluída e faça git commit.
 
 ### Sprint 1 Progress: 11/12 ✅✅✅✅✅✅✅✅✅✅✅⬜
-### Sprint 2 Progress: 0/8 ⬜⬜⬜⬜⬜⬜⬜⬜
-### Sprint 3 Progress: 0/8 ⬜⬜⬜⬜⬜⬜⬜⬜
+### Sprint 2 Progress: 5/8 ✅✅✅✅✅⬜⬜⬜
+### Sprint 3 Progress: 1/8 ✅⬜⬜⬜⬜⬜⬜⬜
 ### Sprint 4 Progress: 0/7 ⬜⬜⬜⬜⬜⬜⬜
 
 ---
