@@ -84,6 +84,11 @@ class PublicPersonalData {
   final String? generatedHeroImageUrl;
   final String? heroImageStatus;
   final String? heroImageBrief;
+  final String? heroTitle;
+  final String? heroSubtitle;
+  final String? primaryCta;
+  final List<String> sectionOrder;
+  final List<String> hiddenSections;
   final List<PublicLandingServiceItem> servicos;
   final List<PublicLandingPackageItem> pacotes;
   final List<PublicLandingFaqItem> faq;
@@ -111,6 +116,11 @@ class PublicPersonalData {
     this.generatedHeroImageUrl,
     this.heroImageStatus,
     this.heroImageBrief,
+    this.heroTitle,
+    this.heroSubtitle,
+    this.primaryCta,
+    this.sectionOrder = const [],
+    this.hiddenSections = const [],
     this.servicos = const [],
     this.pacotes = const [],
     this.faq = const [],
@@ -141,6 +151,12 @@ class PublicPersonalData {
     generatedHeroImageUrl: j['generatedHeroImageUrl'] as String?,
     heroImageStatus: j['heroImageStatus'] as String?,
     heroImageBrief: j['heroImageBrief'] as String?,
+    heroTitle: j['heroTitle'] as String?,
+    heroSubtitle: j['heroSubtitle'] as String?,
+    primaryCta: j['primaryCta'] as String?,
+    sectionOrder: (j['sectionOrder'] as List<dynamic>? ?? []).cast<String>(),
+    hiddenSections:
+        (j['hiddenSections'] as List<dynamic>? ?? []).cast<String>(),
     servicos:
         (j['servicos'] as List<dynamic>? ?? [])
             .map(

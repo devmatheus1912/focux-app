@@ -21,7 +21,6 @@ class HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final firstName = LandingDesign.firstName(data);
     final heroImage = LandingDesign.firstImageUrl(data);
     assert(heroImage == null || !_isAiGeneratedHeroUrl(heroImage));
     final compact = MediaQuery.of(context).size.width < 640;
@@ -32,6 +31,7 @@ class HeroSection extends StatelessWidget {
         .clamp(compact ? 700.0 : 620.0, compact ? 900.0 : 820.0);
     final headline = LandingDesign.heroHeadline(data);
     final support = LandingDesign.heroSupport(data);
+    final ctaLabel = LandingDesign.heroCta(data);
     final heroPills = LandingDesign.heroPills(data);
     final alignRight = !compact && composition == _LandingComposition.editorial;
 
@@ -218,7 +218,7 @@ class HeroSection extends StatelessWidget {
                           elevation: 0,
                         ),
                         child: Text(
-                          'Quero treinar com $firstName',
+                          ctaLabel,
                           style: const TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,

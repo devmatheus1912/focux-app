@@ -19,6 +19,11 @@ void main() {
       'generatedHeroImageUrl': 'https://image.pollinations.ai/prompt/studio',
       'heroImageStatus': 'MANUAL',
       'heroImageBrief': 'studio premium functional training',
+      'heroTitle': 'Treino forte sem perder rotina',
+      'heroSubtitle': 'Acompanhamento claro para evoluir com criterio.',
+      'primaryCta': 'Quero minha avaliacao',
+      'sectionOrder': ['ofertas', 'prova', 'sobre'],
+      'hiddenSections': ['galeria'],
       'faq': [
         {
           'pergunta': 'Preciso treinar todos os dias?',
@@ -34,6 +39,11 @@ void main() {
     expect(data.generatedHeroImageUrl, contains('pollinations'));
     expect(data.heroImageStatus, 'MANUAL');
     expect(data.heroImageBrief, contains('studio premium'));
+    expect(data.heroTitle, 'Treino forte sem perder rotina');
+    expect(data.heroSubtitle, contains('Acompanhamento claro'));
+    expect(data.primaryCta, 'Quero minha avaliacao');
+    expect(data.sectionOrder.first, 'ofertas');
+    expect(data.hiddenSections.single, 'galeria');
     expect(data.faq.single.pergunta, contains('treinar'));
   });
 
@@ -50,6 +60,11 @@ void main() {
       'generatedHeroImageUrl': 'https://image.pollinations.ai/prompt/unique',
       'heroImageStatus': 'AI_GENERATED_URL',
       'heroImageBrief': 'unique hero image',
+      'heroTitle': 'Metodo para treinar melhor',
+      'heroSubtitle': 'Mais clareza para cada fase.',
+      'primaryCta': 'Entrar no plano',
+      'sectionOrder': ['metodo', 'ofertas'],
+      'hiddenSections': ['faq'],
       'faq': [
         {'pergunta': 'Como funciona?', 'resposta': 'Com acompanhamento.'},
       ],
@@ -62,6 +77,11 @@ void main() {
     expect(perfil.generatedHeroImageUrl, contains('pollinations'));
     expect(perfil.heroImageStatus, 'AI_GENERATED_URL');
     expect(perfil.heroImageBrief, 'unique hero image');
+    expect(perfil.heroTitle, 'Metodo para treinar melhor');
+    expect(perfil.heroSubtitle, 'Mais clareza para cada fase.');
+    expect(perfil.primaryCta, 'Entrar no plano');
+    expect(perfil.sectionOrder, ['metodo', 'ofertas']);
+    expect(perfil.hiddenSections, ['faq']);
     expect(perfil.faq.single.resposta, 'Com acompanhamento.');
   });
 
@@ -100,9 +120,12 @@ void main() {
         ).readAsStringSync();
 
     expect(landing, contains('FaqSection(data: data'));
+    expect(landing, contains('_orderedSections'));
+    expect(landing, contains('hiddenSections'));
     expect(landing, contains("eventType: 'landing_view'"));
     expect(hero, contains('LandingDesign.firstImageUrl'));
     expect(hero, contains('LandingDesign.heroPills'));
+    expect(hero, contains('LandingDesign.heroCta'));
     expect(hero, contains('BoxFit.cover'));
     expect(hero, isNot(contains('data.generatedHeroImageUrl')));
     expect(hero, contains('_LandingBrandCanvas'));
@@ -152,6 +175,10 @@ void main() {
     expect(identidade, contains('_HeroPhotoPreview'));
     expect(identidade, contains('_BioPhotoPreview'));
     expect(identidade, contains('_LandingPremiumPlanner'));
+    expect(identidade, contains('_LandingEditorialControls'));
+    expect(identidade, contains("'heroTitle': _heroTitleCtrl.text.trim()"));
+    expect(identidade, contains("'sectionOrder': _sectionOrder"));
+    expect(identidade, contains("'hiddenSections': _hiddenSections.toList()"));
     expect(identidade, contains('_PremiumLandingPreviewCard'));
     expect(identidade, contains('_PremiumHeroPreviewCanvas'));
     expect(identidade, isNot(contains('webHtmlElementStrategy')));

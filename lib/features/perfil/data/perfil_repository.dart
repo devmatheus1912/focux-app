@@ -79,6 +79,11 @@ class PerfilPersonal {
   final String? generatedHeroImageUrl;
   final String? heroImageStatus;
   final String? heroImageBrief;
+  final String? heroTitle;
+  final String? heroSubtitle;
+  final String? primaryCta;
+  final List<String> sectionOrder;
+  final List<String> hiddenSections;
   final bool? trialUsed;
   final DateTime? trialEndsAt;
   final String plano;
@@ -117,6 +122,11 @@ class PerfilPersonal {
     this.generatedHeroImageUrl,
     this.heroImageStatus,
     this.heroImageBrief,
+    this.heroTitle,
+    this.heroSubtitle,
+    this.primaryCta,
+    this.sectionOrder = const [],
+    this.hiddenSections = const [],
     this.trialUsed,
     this.trialEndsAt,
     required this.plano,
@@ -154,6 +164,12 @@ class PerfilPersonal {
     generatedHeroImageUrl: json['generatedHeroImageUrl'] as String?,
     heroImageStatus: json['heroImageStatus'] as String?,
     heroImageBrief: json['heroImageBrief'] as String?,
+    heroTitle: json['heroTitle'] as String?,
+    heroSubtitle: json['heroSubtitle'] as String?,
+    primaryCta: json['primaryCta'] as String?,
+    sectionOrder: (json['sectionOrder'] as List<dynamic>? ?? []).cast<String>(),
+    hiddenSections:
+        (json['hiddenSections'] as List<dynamic>? ?? []).cast<String>(),
     trialUsed: json['trialUsed'] as bool?,
     trialEndsAt:
         json['trialEndsAt'] != null

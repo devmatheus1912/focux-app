@@ -47,6 +47,8 @@ class LandingDesign {
   }
 
   static String heroHeadline(PublicPersonalData data) {
+    final customTitle = clean(data.heroTitle);
+    if (customTitle != null) return customTitle;
     final slogan = clean(data.slogan);
     final specialty = primarySpecialty(data) ?? 'treino';
     if (slogan != null && !_isGenericSlogan(slogan)) return slogan;
@@ -54,10 +56,18 @@ class LandingDesign {
   }
 
   static String heroSupport(PublicPersonalData data) {
+    final customSubtitle = clean(data.heroSubtitle);
+    if (customSubtitle != null) return _withPeriod(customSubtitle);
     final description = clean(data.descricaoProfissional);
     if (description != null) return _withPeriod(description);
     final name = firstName(data);
     return '$name organiza treino, progresso e comunicacao em uma experiencia clara do primeiro contato ao ajuste final.';
+  }
+
+  static String heroCta(PublicPersonalData data) {
+    final custom = clean(data.primaryCta);
+    if (custom != null) return custom;
+    return 'Quero treinar com ${firstName(data)}';
   }
 
   static bool _isGenericSlogan(String slogan) {

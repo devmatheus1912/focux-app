@@ -192,6 +192,20 @@ class _LandingContent extends StatefulWidget {
 }
 
 class _LandingContentState extends State<_LandingContent> {
+  static const _defaultSectionOrder = [
+    'prova',
+    'metodo',
+    'sobre',
+    'ofertas',
+    'depoimentos',
+    'app',
+    'especialidades',
+    'faq',
+    'galeria',
+    'cta',
+    'contato',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -217,6 +231,21 @@ class _LandingContentState extends State<_LandingContent> {
       const Color(0xFF0097A7),
     );
 
+    final bodySections =
+        _orderedSections(data)
+            .map(
+              (section) => SliverToBoxAdapter(
+                child: _buildSection(
+                  section,
+                  data,
+                  slug,
+                  primaryColor,
+                  secondaryColor,
+                ),
+              ),
+            )
+            .toList();
+
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
@@ -227,45 +256,75 @@ class _LandingContentState extends State<_LandingContent> {
             secondaryColor: secondaryColor,
           ),
         ),
-        SliverToBoxAdapter(child: SocialProofSection(data: data)),
-        SliverToBoxAdapter(
-          child: MetodoSection(data: data, primaryColor: primaryColor),
-        ),
-        SliverToBoxAdapter(child: SobreSection(data: data)),
-        SliverToBoxAdapter(
-          child: OfertasSection(
-            data: data,
-            slug: slug,
-            primaryColor: primaryColor,
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: DepoimentosSection(data: data, primaryColor: primaryColor),
-        ),
-        SliverToBoxAdapter(
-          child: TecnologiaSection(
-            data: data,
-            primaryColor: primaryColor,
-            secondaryColor: secondaryColor,
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: EspecialidadesSection(data: data, primaryColor: primaryColor),
-        ),
-        SliverToBoxAdapter(
-          child: FaqSection(data: data, primaryColor: primaryColor),
-        ),
-        SliverToBoxAdapter(child: GaleriaSection(data: data)),
-        SliverToBoxAdapter(
-          child: CtaFinalSection(
-            data: data,
-            slug: slug,
-            primaryColor: primaryColor,
-          ),
-        ),
-        SliverToBoxAdapter(child: ContatoSection(data: data)),
+        ...bodySections,
         SliverToBoxAdapter(child: PoweredByFooter(data: data)),
       ],
     );
+  }
+
+  List<String> _orderedSections(PublicPersonalData data) {
+    final hidden = data.hiddenSections.map((item) => item.trim()).toSet();
+    final ordered = <String>[];
+    for (final section in data.sectionOrder) {
+      final clean = section.trim();
+      if (_defaultSectionOrder.contains(clean) &&
+          !hidden.contains(clean) &&
+          !ordered.contains(clean)) {
+        ordered.add(clean);
+      }
+    }
+    for (final section in _defaultSectionOrder) {
+      if (!hidden.contains(section) && !ordered.contains(section)) {
+        ordered.add(section);
+      }
+    }
+    return ordered;
+  }
+
+  Widget _buildSection(
+    String section,
+    PublicPersonalData data,
+    String slug,
+    Color primaryColor,
+    Color secondaryColor,
+  ) {
+    switch (section) {
+      case 'prova':
+        return SocialProofSection(data: data);
+      case 'metodo':
+        return MetodoSection(data: data, primaryColor: primaryColor);
+      case 'sobre':
+        return SobreSection(data: data);
+      case 'ofertas':
+        return OfertasSection(
+          data: data,
+          slug: slug,
+          primaryColor: primaryColor,
+        );
+      case 'depoimentos':
+        return DepoimentosSection(data: data, primaryColor: primaryColor);
+      case 'app':
+        return TecnologiaSection(
+          data: data,
+          primaryColor: primaryColor,
+          secondaryColor: secondaryColor,
+        );
+      case 'especialidades':
+        return EspecialidadesSection(data: data, primaryColor: primaryColor);
+      case 'faq':
+        return FaqSection(data: data, primaryColor: primaryColor);
+      case 'galeria':
+        return GaleriaSection(data: data);
+      case 'cta':
+        return CtaFinalSection(
+          data: data,
+          slug: slug,
+          primaryColor: primaryColor,
+        );
+      case 'contato':
+        return ContatoSection(data: data);
+      default:
+        return const SizedBox.shrink();
+    }
   }
 }

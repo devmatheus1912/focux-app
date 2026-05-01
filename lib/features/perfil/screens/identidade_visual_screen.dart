@@ -27,6 +27,32 @@ const _coresPredefinidas = [
   Color(0xFF9D174D),
 ];
 
+const _landingSectionCatalog = [
+  _LandingSectionOption('prova', 'Prova social', Icons.verified_outlined),
+  _LandingSectionOption('metodo', 'Metodo', Icons.route_outlined),
+  _LandingSectionOption('sobre', 'Bio do personal', Icons.person_outline),
+  _LandingSectionOption('ofertas', 'Servicos e planos', Icons.sell_outlined),
+  _LandingSectionOption('depoimentos', 'Depoimentos', Icons.reviews_outlined),
+  _LandingSectionOption('app', 'App e rotina', Icons.phone_iphone_outlined),
+  _LandingSectionOption(
+    'especialidades',
+    'Especialidades',
+    Icons.workspace_premium_outlined,
+  ),
+  _LandingSectionOption('faq', 'FAQ', Icons.help_outline),
+  _LandingSectionOption('galeria', 'Galeria', Icons.photo_library_outlined),
+  _LandingSectionOption('cta', 'CTA final', Icons.ads_click_outlined),
+  _LandingSectionOption('contato', 'Contato', Icons.chat_bubble_outline),
+];
+
+class _LandingSectionOption {
+  final String key;
+  final String label;
+  final IconData icon;
+
+  const _LandingSectionOption(this.key, this.label, this.icon);
+}
+
 class IdentidadeVisualScreen extends ConsumerStatefulWidget {
   final bool isSetup;
   const IdentidadeVisualScreen({super.key, this.isSetup = false});
@@ -47,6 +73,9 @@ class _IdentidadeVisualScreenState
   final _trackingCtrl = TextEditingController();
   final _heroImageCtrl = TextEditingController();
   final _bioImageCtrl = TextEditingController();
+  final _heroTitleCtrl = TextEditingController();
+  final _heroSubtitleCtrl = TextEditingController();
+  final _primaryCtaCtrl = TextEditingController();
   final _serviceTitleCtrls = List.generate(3, (_) => TextEditingController());
   final _serviceDescCtrls = List.generate(3, (_) => TextEditingController());
   final _packageNameCtrls = List.generate(3, (_) => TextEditingController());
@@ -64,6 +93,11 @@ class _IdentidadeVisualScreenState
   bool _perfilLoaded = false;
   final bool _showManualVideoUrl = false;
   String? _logoUrl;
+  late List<String> _sectionOrder = _defaultSectionOrder();
+  final Set<String> _hiddenSections = {};
+
+  static List<String> _defaultSectionOrder() =>
+      _landingSectionCatalog.map((item) => item.key).toList();
 
   @override
   void initState() {
@@ -86,6 +120,17 @@ class _IdentidadeVisualScreenState
         _isAiGeneratedHeroUrl(heroImageUrl) ? '' : heroImageUrl;
     final bioImageUrl = perfil.bioImageUrl?.trim() ?? '';
     _bioImageCtrl.text = _isAiGeneratedHeroUrl(bioImageUrl) ? '' : bioImageUrl;
+    _heroTitleCtrl.text = perfil.heroTitle ?? '';
+    _heroSubtitleCtrl.text = perfil.heroSubtitle ?? '';
+    _primaryCtaCtrl.text = perfil.primaryCta ?? '';
+    final savedOrder = perfil.sectionOrder.where(_isKnownSection).toList();
+    _sectionOrder =
+        savedOrder.isEmpty
+            ? _defaultSectionOrder()
+            : _mergeSectionOrder(savedOrder);
+    _hiddenSections
+      ..clear()
+      ..addAll(perfil.hiddenSections.where(_isKnownSection));
     _logoUrl = perfil.logoUrl;
     if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
       final hex = int.tryParse(perfil.corPrimaria!.replaceFirst('#', '0xFF'));
@@ -152,6 +197,20 @@ class _IdentidadeVisualScreenState
     return items;
   }
 
+  List<String> _mergeSectionOrder(List<String> savedOrder) {
+    final result = <String>[];
+    for (final key in savedOrder) {
+      if (_isKnownSection(key) && !result.contains(key)) result.add(key);
+    }
+    for (final option in _landingSectionCatalog) {
+      if (!result.contains(option.key)) result.add(option.key);
+    }
+    return result;
+  }
+
+  bool _isKnownSection(String key) =>
+      _landingSectionCatalog.any((option) => option.key == key);
+
   @override
   void dispose() {
     _descCtrl.dispose();
@@ -163,6 +222,9 @@ class _IdentidadeVisualScreenState
     _trackingCtrl.dispose();
     _heroImageCtrl.dispose();
     _bioImageCtrl.dispose();
+    _heroTitleCtrl.dispose();
+    _heroSubtitleCtrl.dispose();
+    _primaryCtaCtrl.dispose();
     for (final controller in _serviceTitleCtrls) {
       controller.dispose();
     }
@@ -335,6 +397,11 @@ class _IdentidadeVisualScreenState
         'servicos': _buildServicosPayload(),
         'pacotes': _buildPacotesPayload(),
         'faq': _buildFaqPayload(),
+        'heroTitle': _heroTitleCtrl.text.trim(),
+        'heroSubtitle': _heroSubtitleCtrl.text.trim(),
+        'primaryCta': _primaryCtaCtrl.text.trim(),
+        'sectionOrder': _sectionOrder,
+        'hiddenSections': _hiddenSections.toList(),
       };
       if (plano.toUpperCase() == 'ENTERPRISE') {
         body['corPrimaria'] =
@@ -400,6 +467,27 @@ class _IdentidadeVisualScreenState
         clean.endsWith('.webm') ||
         clean.endsWith('.mov') ||
         clean.endsWith('.m4v');
+  }
+
+  void _moveSection(String key, int delta) {
+    final index = _sectionOrder.indexOf(key);
+    if (index < 0) return;
+    final next = (index + delta).clamp(0, _sectionOrder.length - 1);
+    if (next == index) return;
+    setState(() {
+      final item = _sectionOrder.removeAt(index);
+      _sectionOrder.insert(next, item);
+    });
+  }
+
+  void _toggleSection(String key, bool visible) {
+    setState(() {
+      if (visible) {
+        _hiddenSections.remove(key);
+      } else {
+        _hiddenSections.add(key);
+      }
+    });
   }
 
   @override
@@ -594,6 +682,25 @@ class _IdentidadeVisualScreenState
                       ),
                     ),
                     const SizedBox(height: 20),
+                    _LandingEditorCard(
+                      isDark: isDark,
+                      title: 'Controle editorial',
+                      subtitle:
+                          'Personalize a primeira dobra e escolha a ordem das secoes para sua landing nao parecer template.',
+                      child: _LandingEditorialControls(
+                        isPremiumOrAbove: isPremiumOrAbove,
+                        isDark: isDark,
+                        primary: themePrimary,
+                        heroTitleCtrl: _heroTitleCtrl,
+                        heroSubtitleCtrl: _heroSubtitleCtrl,
+                        primaryCtaCtrl: _primaryCtaCtrl,
+                        sectionOrder: _sectionOrder,
+                        hiddenSections: _hiddenSections,
+                        onMove: _moveSection,
+                        onToggle: _toggleSection,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     _LandingEditorCard(
                       isDark: isDark,
                       title: 'Servicos em destaque',
@@ -1139,6 +1246,186 @@ class _IdentidadeVisualScreenState
             const SizedBox(height: 16),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LandingEditorialControls extends StatelessWidget {
+  final bool isPremiumOrAbove;
+  final bool isDark;
+  final Color primary;
+  final TextEditingController heroTitleCtrl;
+  final TextEditingController heroSubtitleCtrl;
+  final TextEditingController primaryCtaCtrl;
+  final List<String> sectionOrder;
+  final Set<String> hiddenSections;
+  final void Function(String key, int delta) onMove;
+  final void Function(String key, bool visible) onToggle;
+
+  const _LandingEditorialControls({
+    required this.isPremiumOrAbove,
+    required this.isDark,
+    required this.primary,
+    required this.heroTitleCtrl,
+    required this.heroSubtitleCtrl,
+    required this.primaryCtaCtrl,
+    required this.sectionOrder,
+    required this.hiddenSections,
+    required this.onMove,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final optionsByKey = {
+      for (final option in _landingSectionCatalog) option.key: option,
+    };
+    final orderedOptions =
+        sectionOrder
+            .where(optionsByKey.containsKey)
+            .map((key) => optionsByKey[key]!)
+            .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextFormField(
+          controller: heroTitleCtrl,
+          enabled: isPremiumOrAbove,
+          maxLength: 90,
+          decoration: const InputDecoration(
+            labelText: 'Titulo principal do hero',
+            hintText: 'Ex: O corpo forte que combina com sua rotina',
+            helperText: 'Se ficar vazio, a Focux cria uma headline pelo nicho.',
+            helperMaxLines: 2,
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: heroSubtitleCtrl,
+          enabled: isPremiumOrAbove,
+          maxLines: 3,
+          maxLength: 320,
+          decoration: const InputDecoration(
+            labelText: 'Texto de apoio',
+            hintText:
+                'Ex: Treino, check-ins e ajustes para evoluir com clareza.',
+            alignLabelWithHint: true,
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: primaryCtaCtrl,
+          enabled: isPremiumOrAbove,
+          maxLength: 36,
+          decoration: const InputDecoration(
+            labelText: 'Botao principal',
+            hintText: 'Ex: Quero minha avaliacao',
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Ordem e visibilidade',
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Hero e rodape ficam fixos. Reordene o restante para destacar o que mais vende seu trabalho.',
+          style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+        ),
+        const SizedBox(height: 10),
+        for (var i = 0; i < orderedOptions.length; i++) ...[
+          _LandingSectionControlTile(
+            option: orderedOptions[i],
+            index: i,
+            total: orderedOptions.length,
+            visible: !hiddenSections.contains(orderedOptions[i].key),
+            primary: primary,
+            isDark: isDark,
+            enabled: isPremiumOrAbove,
+            onMove: onMove,
+            onToggle: onToggle,
+          ),
+          if (i != orderedOptions.length - 1) const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+}
+
+class _LandingSectionControlTile extends StatelessWidget {
+  final _LandingSectionOption option;
+  final int index;
+  final int total;
+  final bool visible;
+  final Color primary;
+  final bool isDark;
+  final bool enabled;
+  final void Function(String key, int delta) onMove;
+  final void Function(String key, bool visible) onToggle;
+
+  const _LandingSectionControlTile({
+    required this.option,
+    required this.index,
+    required this.total,
+    required this.visible,
+    required this.primary,
+    required this.isDark,
+    required this.enabled,
+    required this.onMove,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: isDark ? 0.12 : 0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: primary.withValues(alpha: 0.16)),
+      ),
+      child: Row(
+        children: [
+          Icon(option.icon, color: visible ? primary : mute, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              option.label,
+              style: TextStyle(
+                color: visible ? ink : mute,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Subir',
+            onPressed:
+                enabled && index > 0 ? () => onMove(option.key, -1) : null,
+            icon: const Icon(Icons.keyboard_arrow_up),
+            visualDensity: VisualDensity.compact,
+          ),
+          IconButton(
+            tooltip: 'Descer',
+            onPressed:
+                enabled && index < total - 1
+                    ? () => onMove(option.key, 1)
+                    : null,
+            icon: const Icon(Icons.keyboard_arrow_down),
+            visualDensity: VisualDensity.compact,
+          ),
+          Switch.adaptive(
+            value: visible,
+            activeColor: primary,
+            onChanged: enabled ? (value) => onToggle(option.key, value) : null,
+          ),
+        ],
       ),
     );
   }
