@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -45,16 +48,18 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
 
   Future<void> _iniciar() async {
     try {
-      final execucao =
-          await ref.read(checkinRepositoryProvider).iniciar(widget.treinoId);
+      final execucao = await ref
+          .read(checkinRepositoryProvider)
+          .iniciar(widget.treinoId);
       if (!mounted) return;
       setState(() {
         _execucao = execucao;
         _loading = false;
       });
-      final startedAt = execucao.iniciadoEm == null
-          ? DateTime.now()
-          : DateTime.parse(execucao.iniciadoEm!).toLocal();
+      final startedAt =
+          execucao.iniciadoEm == null
+              ? DateTime.now()
+              : DateTime.parse(execucao.iniciadoEm!).toLocal();
       _duration = DateTime.now().difference(startedAt);
       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
         if (!mounted) return;
@@ -67,7 +72,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       setState(() {
         _loading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       safePopOrGo(context, '/checkin/treinos');
     }
   }
@@ -77,7 +84,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     final next = seriesFeitas.clamp(0, ee.series ?? 999);
     try {
       HapticFeedback.selectionClick();
-      final updated = await ref.read(checkinRepositoryProvider).marcarExercicio(
+      final updated = await ref
+          .read(checkinRepositoryProvider)
+          .marcarExercicio(
             _execucao!.id!,
             ee.treinoExercicioId,
             next,
@@ -96,14 +105,17 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           concluidoEm: _execucao!.concluidoEm,
           evolucoesCarga: _execucao!.evolucoesCarga,
           evolucoesPerformance: _execucao!.evolucoesPerformance,
-          exercicios: _execucao!.exercicios
-              .map((e) => e.id == updated.id ? updated : e)
-              .toList(),
+          exercicios:
+              _execucao!.exercicios
+                  .map((e) => e.id == updated.id ? updated : e)
+                  .toList(),
         );
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     }
   }
@@ -121,20 +133,23 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _SerieDetailSheet(
-        title: 'Serie $safeNumero',
-        initialCargaKg: serie?.cargaKg ?? ee.cargaKg,
-        initialRepeticoes: serie?.repeticoes ?? ee.repeticoes,
-        initialFeedback: serie?.feedback ?? ee.feedback,
-        initialRpe: serie?.rpe ?? ee.rpe,
-        initialDor: serie?.dor ?? ee.dor,
-      ),
+      builder:
+          (context) => _SerieDetailSheet(
+            title: 'Serie $safeNumero',
+            initialCargaKg: serie?.cargaKg ?? ee.cargaKg,
+            initialRepeticoes: serie?.repeticoes ?? ee.repeticoes,
+            initialFeedback: serie?.feedback ?? ee.feedback,
+            initialRpe: serie?.rpe ?? ee.rpe,
+            initialDor: serie?.dor ?? ee.dor,
+          ),
     );
     if (payload == null) return;
 
     try {
       HapticFeedback.selectionClick();
-      final updated = await ref.read(checkinRepositoryProvider).registrarSerie(
+      final updated = await ref
+          .read(checkinRepositoryProvider)
+          .registrarSerie(
             _execucao!.id!,
             ee.treinoExercicioId,
             numero: safeNumero,
@@ -155,9 +170,10 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           concluidoEm: _execucao!.concluidoEm,
           evolucoesCarga: _execucao!.evolucoesCarga,
           evolucoesPerformance: _execucao!.evolucoesPerformance,
-          exercicios: _execucao!.exercicios
-              .map((e) => e.id == updated.id ? updated : e)
-              .toList(),
+          exercicios:
+              _execucao!.exercicios
+                  .map((e) => e.id == updated.id ? updated : e)
+                  .toList(),
         );
       });
       if (safeNumero > ee.seriesFeitas) {
@@ -165,7 +181,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     }
   }
@@ -178,7 +196,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     final nextRpe = selected ? null : _rpeForFeedback(value);
     final nextDor = !selected && value == 'DOR';
     try {
-      final updated = await ref.read(checkinRepositoryProvider).marcarExercicio(
+      final updated = await ref
+          .read(checkinRepositoryProvider)
+          .marcarExercicio(
             _execucao!.id!,
             ee.treinoExercicioId,
             ee.seriesFeitas,
@@ -197,14 +217,17 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           concluidoEm: _execucao!.concluidoEm,
           evolucoesCarga: _execucao!.evolucoesCarga,
           evolucoesPerformance: _execucao!.evolucoesPerformance,
-          exercicios: _execucao!.exercicios
-              .map((e) => e.id == updated.id ? updated : e)
-              .toList(),
+          exercicios:
+              _execucao!.exercicios
+                  .map((e) => e.id == updated.id ? updated : e)
+                  .toList(),
         );
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     }
   }
@@ -247,28 +270,30 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       _concluindo = true;
     });
     try {
-      final concluida =
-          await ref.read(checkinRepositoryProvider).concluir(_execucao!.id!);
+      final concluida = await ref
+          .read(checkinRepositoryProvider)
+          .concluir(_execucao!.id!);
       ref.invalidate(historicoCheckinProvider);
       ref.invalidate(meusTreinosProvider);
       if (!mounted) return;
-      final evolucoes = concluida.evolucoesPerformance.isNotEmpty
-          ? concluida.evolucoesPerformance
-          : concluida.evolucoesCarga
-              .map(
-                (e) => EvolucaoPerformance(
-                  tipo: 'CARGA',
-                  exercicioId: e.exercicioId,
-                  exercicioNome: e.exercicioNome,
-                  valorAnterior: e.cargaAnteriorKg,
-                  valorAtual: e.cargaAtualKg,
-                  diferenca: e.diferencaKg,
-                  percentual: e.percentual,
-                  unidade: 'kg',
-                  mensagem: e.mensagem,
-                ),
-              )
-              .toList();
+      final evolucoes =
+          concluida.evolucoesPerformance.isNotEmpty
+              ? concluida.evolucoesPerformance
+              : concluida.evolucoesCarga
+                  .map(
+                    (e) => EvolucaoPerformance(
+                      tipo: 'CARGA',
+                      exercicioId: e.exercicioId,
+                      exercicioNome: e.exercicioNome,
+                      valorAnterior: e.cargaAnteriorKg,
+                      valorAtual: e.cargaAtualKg,
+                      diferenca: e.diferencaKg,
+                      percentual: e.percentual,
+                      unidade: 'kg',
+                      mensagem: e.mensagem,
+                    ),
+                  )
+                  .toList();
       if (evolucoes.isNotEmpty) {
         await _showEvolucaoPerformance(evolucoes);
         if (!mounted) return;
@@ -282,7 +307,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       safePopOrGo(context, '/checkin/treinos');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     } finally {
       if (mounted) {
@@ -300,47 +327,54 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     await showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Evolucao registrada'),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Voce evoluiu neste treino. A mensagem tambem ficou salva no chat com seu personal.',
-              ),
-              const SizedBox(height: 14),
-              for (final evolucao in evolucoes.take(4))
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.trending_up_rounded, color: primary, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '${_labelEvolucao(evolucao.tipo)} em ${evolucao.exercicioNome}: '
-                          '${_fmtValor(evolucao.valorAnterior, evolucao.unidade)} -> ${_fmtValor(evolucao.valorAtual, evolucao.unidade)}'
-                          '${evolucao.percentual == null ? '' : ' (+${evolucao.percentual}%)'}',
-                          style: const TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ],
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Evolucao registrada'),
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Voce evoluiu neste treino. A mensagem tambem ficou salva no chat com seu personal.',
                   ),
-                ),
+                  const SizedBox(height: 14),
+                  for (final evolucao in evolucoes.take(4))
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.trending_up_rounded,
+                            color: primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${_labelEvolucao(evolucao.tipo)} em ${evolucao.exercicioNome}: '
+                              '${_fmtValor(evolucao.valorAnterior, evolucao.unidade)} -> ${_fmtValor(evolucao.valorAtual, evolucao.unidade)}'
+                              '${evolucao.percentual == null ? '' : ' (+${evolucao.percentual}%)'}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Continuar'),
+              ),
             ],
           ),
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Continuar'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -372,12 +406,18 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   }
 
   String _fmtKg(double value) {
-    final fixed = value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 1);
+    final fixed = value.toStringAsFixed(
+      value.truncateToDouble() == value ? 0 : 1,
+    );
     return fixed.replaceAll('.', ',');
   }
 
   String _nextExerciseLabel(List<ExecucaoExercicio> exercicios) {
-    final next = exercicios.where((e) => !e.concluido).cast<ExecucaoExercicio?>().firstOrNull;
+    final next =
+        exercicios
+            .where((e) => !e.concluido)
+            .cast<ExecucaoExercicio?>()
+            .firstOrNull;
     return next?.exercicioNome ?? 'Finalizar treino';
   }
 
@@ -403,8 +443,14 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
 
     final exercicios = _execucao?.exercicios ?? [];
     final concluidos = exercicios.where((e) => e.concluido).length;
-    final totalSeries = exercicios.fold<int>(0, (sum, e) => sum + (e.series ?? 0));
-    final doneSeries = exercicios.fold<int>(0, (sum, e) => sum + e.seriesFeitas);
+    final totalSeries = exercicios.fold<int>(
+      0,
+      (sum, e) => sum + (e.series ?? 0),
+    );
+    final doneSeries = exercicios.fold<int>(
+      0,
+      (sum, e) => sum + e.seriesFeitas,
+    );
     final progresso = exercicios.isEmpty ? 0.0 : concluidos / exercicios.length;
 
     return Scaffold(
@@ -455,11 +501,12 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                       feedback: item.feedback,
                       onFeedback: (value) => _setFeedback(item, value),
                       onMarcar: (s) => _marcar(item, s),
-                      onSerieDetalhada: (numero, serie) => _registrarSerieDetalhada(
-                        item,
-                        numero: numero,
-                        serie: serie,
-                      ),
+                      onSerieDetalhada:
+                          (numero, serie) => _registrarSerieDetalhada(
+                            item,
+                            numero: numero,
+                            serie: serie,
+                          ),
                     );
                   },
                 ),
@@ -473,12 +520,18 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                     dark: dark,
                     onApply: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Sugestao registrada para a proxima serie.')),
+                        const SnackBar(
+                          content: Text(
+                            'Sugestao registrada para a proxima serie.',
+                          ),
+                        ),
                       );
                     },
                     onSkip: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Sugestao ignorada neste exercicio.')),
+                        const SnackBar(
+                          content: Text('Sugestao ignorada neste exercicio.'),
+                        ),
                       );
                     },
                   ),
@@ -489,13 +542,17 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
                   child: FilledButton.icon(
                     onPressed: _concluindo ? null : _concluir,
-                    icon: _concluindo
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Icon(Icons.flag_rounded),
+                    icon:
+                        _concluindo
+                            ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : const Icon(Icons.flag_rounded),
                     label: const Text('Finalizar treino'),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(54),
@@ -506,7 +563,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.2,
                       ),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                   ),
                 ),
@@ -515,18 +574,26 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           ),
           if (_showRestTimer)
             Positioned(
-              left: 16,
-              right: 16,
-              bottom: 88,
-              child: _RestTimerDock(
-                seconds: _restSeconds,
-                totalSeconds: _restTotalSeconds,
-                onSkip: () {
-                  _restTimer?.cancel();
-                  setState(() {
-                    _showRestTimer = false;
-                  });
-                },
+              left: 0,
+              right: 0,
+              bottom: 100,
+              child: Center(
+                child: _RestTimerDock(
+                  seconds: _restSeconds,
+                  totalSeconds: _restTotalSeconds,
+                  brand: brand,
+                  dark: dark,
+                  cardBg: cardBg,
+                  ink: ink,
+                  mute: mute,
+                  line: line,
+                  onSkip: () {
+                    _restTimer?.cancel();
+                    setState(() {
+                      _showRestTimer = false;
+                    });
+                  },
+                ),
               ),
             ),
         ],
@@ -634,39 +701,18 @@ class _WorkoutHeader extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: EagleTokens.bad.withValues(alpha: dark ? 0.22 : 0.12),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _PulseDot(color: EagleTokens.bad),
-                    const SizedBox(width: 6),
-                    const Text(
-                      'AO VIVO',
-                      style: TextStyle(
-                        color: EagleTokens.bad,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const _LiveBadge(),
             ],
           ),
           const SizedBox(height: 20),
           Text(
             duration,
-            style: TextStyle(
+            style: GoogleFonts.spaceGrotesk(
               color: ink,
-              fontSize: 58,
-              fontWeight: FontWeight.w800,
+              fontSize: 56,
+              fontWeight: FontWeight.w600,
               height: 0.96,
-              letterSpacing: -1.0,
+              letterSpacing: -2,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
@@ -676,7 +722,8 @@ class _WorkoutHeader extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 8,
-              backgroundColor: dark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+              backgroundColor:
+                  dark ? EagleTokens.darkLine : EagleTokens.lineSoft,
               valueColor: AlwaysStoppedAnimation(brand),
             ),
           ),
@@ -697,7 +744,10 @@ class _WorkoutHeader extends StatelessWidget {
               Expanded(
                 child: _HeaderMetric(
                   label: 'Series',
-                  value: totalSeries == 0 ? '$doneSeries' : '$doneSeries/$totalSeries',
+                  value:
+                      totalSeries == 0
+                          ? '$doneSeries'
+                          : '$doneSeries/$totalSeries',
                   ink: ink,
                   mute: mute,
                   cardBg: cardBg,
@@ -790,9 +840,23 @@ class _HeaderMetric extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(label, style: TextStyle(color: mute, fontSize: 11, fontWeight: FontWeight.w700)),
+          Text(
+            label,
+            style: TextStyle(
+              color: mute,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(height: 3),
-          Text(value, style: TextStyle(color: ink, fontSize: 16, fontWeight: FontWeight.w900)),
+          Text(
+            value,
+            style: TextStyle(
+              color: ink,
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
         ],
       ),
     );
@@ -833,13 +897,18 @@ class _SerieCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final targetSeries = ee.series ?? 0;
-    final progress = targetSeries == 0 ? 0.0 : (ee.seriesFeitas / targetSeries).clamp(0.0, 1.0);
+    final progress =
+        targetSeries == 0
+            ? 0.0
+            : (ee.seriesFeitas / targetSeries).clamp(0.0, 1.0);
     final hasMedia = ee.gifUrl?.isNotEmpty == true;
     final hasVideo = ee.videoUrl?.isNotEmpty == true;
     final hasThumbnail = !hasVideo && ee.thumbnailUrl?.isNotEmpty == true;
     final loadText = _formatKg(ee.cargaKg);
-    final restText = ee.descansoSegundos == null ? null : '${ee.descansoSegundos}s';
-    final hasPrevious = ee.cargaAnteriorKg != null ||
+    final restText =
+        ee.descansoSegundos == null ? null : '${ee.descansoSegundos}s';
+    final hasPrevious =
+        ee.cargaAnteriorKg != null ||
         ee.seriesFeitasAnterior != null ||
         ee.feedbackAnterior != null ||
         ee.rpeAnterior != null;
@@ -863,9 +932,10 @@ class _SerieCard extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: ee.concluido
-                ? EagleTokens.good.withValues(alpha: 0.12)
-                : brand.withValues(alpha: dark ? 0.18 : 0.10),
+            color:
+                ee.concluido
+                    ? EagleTokens.good.withValues(alpha: 0.12)
+                    : brand.withValues(alpha: dark ? 0.18 : 0.10),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Icon(
@@ -889,7 +959,11 @@ class _SerieCard extends StatelessWidget {
           padding: const EdgeInsets.only(top: 4),
           child: Text(
             '$index/$total  |  ${ee.series ?? '-'} series x ${ee.repeticoes ?? '-'} reps',
-            style: TextStyle(color: mute, fontSize: 12, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: mute,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         children: [
@@ -900,7 +974,11 @@ class _SerieCard extends StatelessWidget {
               children: [
                 if (hasVideo) ...[
                   const SizedBox(height: 4),
-                  _ExerciseVideoPreview(url: ee.videoUrl!, brand: brand, dark: dark),
+                  _ExerciseVideoPreview(
+                    url: ee.videoUrl!,
+                    brand: brand,
+                    dark: dark,
+                  ),
                   const SizedBox(height: 14),
                 ] else if (hasThumbnail) ...[
                   const SizedBox(height: 4),
@@ -914,7 +992,11 @@ class _SerieCard extends StatelessWidget {
                   const SizedBox(height: 14),
                 ] else if (hasMedia) ...[
                   const SizedBox(height: 4),
-                  _ExerciseMediaPreview(url: ee.gifUrl!, brand: brand, dark: dark),
+                  _ExerciseMediaPreview(
+                    url: ee.gifUrl!,
+                    brand: brand,
+                    dark: dark,
+                  ),
                   const SizedBox(height: 14),
                 ],
                 if (loadText != null || restText != null) ...[
@@ -929,7 +1011,12 @@ class _SerieCard extends StatelessWidget {
                   const SizedBox(height: 12),
                 ],
                 if (ee.observacoes?.trim().isNotEmpty == true) ...[
-                  _ExerciseNote(text: ee.observacoes!.trim(), mute: mute, line: line, dark: dark),
+                  _ExerciseNote(
+                    text: ee.observacoes!.trim(),
+                    mute: mute,
+                    line: line,
+                    dark: dark,
+                  ),
                   const SizedBox(height: 12),
                 ],
                 if (ee.errosComuns?.trim().isNotEmpty == true) ...[
@@ -971,8 +1058,15 @@ class _SerieCard extends StatelessWidget {
                 if (hasPrevious) ...[
                   _PreviousPerformance(
                     loadText: _formatKg(ee.cargaAnteriorKg),
-                    seriesText: ee.seriesFeitasAnterior == null ? null : '${ee.seriesFeitasAnterior} series',
-                    feedbackText: _formatFeedback(ee.feedbackAnterior, ee.rpeAnterior, ee.dorAnterior),
+                    seriesText:
+                        ee.seriesFeitasAnterior == null
+                            ? null
+                            : '${ee.seriesFeitasAnterior} series',
+                    feedbackText: _formatFeedback(
+                      ee.feedbackAnterior,
+                      ee.rpeAnterior,
+                      ee.dorAnterior,
+                    ),
                     ink: ink,
                     mute: mute,
                     line: line,
@@ -1001,7 +1095,10 @@ class _SerieCard extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: progress,
                           minHeight: 8,
-                          backgroundColor: dark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                          backgroundColor:
+                              dark
+                                  ? EagleTokens.darkLine
+                                  : EagleTokens.lineSoft,
                           valueColor: AlwaysStoppedAnimation(
                             ee.concluido ? EagleTokens.good : brand,
                           ),
@@ -1026,20 +1123,28 @@ class _SerieCard extends StatelessWidget {
                   children: [
                     Text(
                       'Series feitas',
-                      style: TextStyle(color: mute, fontSize: 13, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.06)
-                            : EagleTokens.lineSoft,
+                        color:
+                            dark
+                                ? Colors.white.withValues(alpha: 0.06)
+                                : EagleTokens.lineSoft,
                         borderRadius: BorderRadius.circular(24),
                       ),
                       child: Row(
                         children: [
                           IconButton(
                             icon: const Icon(Icons.remove_rounded, size: 18),
-                            onPressed: ee.seriesFeitas > 0 ? () => onMarcar(ee.seriesFeitas - 1) : null,
+                            onPressed:
+                                ee.seriesFeitas > 0
+                                    ? () => onMarcar(ee.seriesFeitas - 1)
+                                    : null,
                           ),
                           SizedBox(
                             width: 30,
@@ -1050,15 +1155,22 @@ class _SerieCard extends StatelessWidget {
                                 color: ink,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w900,
-                                fontFeatures: const [FontFeature.tabularFigures()],
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
                               ),
                             ),
                           ),
                           IconButton(
                             icon: const Icon(Icons.add_rounded, size: 18),
-                            onPressed: ee.seriesFeitas < targetSeries || targetSeries == 0
-                                ? () => onSerieDetalhada(ee.seriesFeitas + 1, null)
-                                : null,
+                            onPressed:
+                                ee.seriesFeitas < targetSeries ||
+                                        targetSeries == 0
+                                    ? () => onSerieDetalhada(
+                                      ee.seriesFeitas + 1,
+                                      null,
+                                    )
+                                    : null,
                           ),
                         ],
                       ),
@@ -1069,21 +1181,32 @@ class _SerieCard extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: ee.seriesFeitas <= 0
-                        ? () => onSerieDetalhada(1, null)
-                        : () {
-                            final last = ee.seriesDetalhes
-                                .where((serie) => serie.numero == ee.seriesFeitas)
-                                .cast<ExecucaoSerie?>()
-                                .firstOrNull;
-                            onSerieDetalhada(ee.seriesFeitas, last);
-                          },
+                    onPressed:
+                        ee.seriesFeitas <= 0
+                            ? () => onSerieDetalhada(1, null)
+                            : () {
+                              final last =
+                                  ee.seriesDetalhes
+                                      .where(
+                                        (serie) =>
+                                            serie.numero == ee.seriesFeitas,
+                                      )
+                                      .cast<ExecucaoSerie?>()
+                                      .firstOrNull;
+                              onSerieDetalhada(ee.seriesFeitas, last);
+                            },
                     icon: const Icon(Icons.tune_rounded, size: 18),
-                    label: Text(ee.seriesFeitas <= 0 ? 'Registrar serie detalhada' : 'Editar ultima serie'),
+                    label: Text(
+                      ee.seriesFeitas <= 0
+                          ? 'Registrar serie detalhada'
+                          : 'Editar ultima serie',
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: brand,
                       side: BorderSide(color: brand.withValues(alpha: 0.45)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                   ),
@@ -1091,17 +1214,41 @@ class _SerieCard extends StatelessWidget {
                 const SizedBox(height: 14),
                 Text(
                   'Como foi?',
-                  style: TextStyle(color: mute, fontSize: 12, fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _FeedbackChip(label: 'Facil', selected: feedback == 'FACIL', color: brand, onTap: () => onFeedback('FACIL')),
-                    _FeedbackChip(label: 'Ok', selected: feedback == 'OK', color: brand, onTap: () => onFeedback('OK')),
-                    _FeedbackChip(label: 'Dificil', selected: feedback == 'DIFICIL', color: brand, onTap: () => onFeedback('DIFICIL')),
-                    _FeedbackChip(label: 'Dor', selected: feedback == 'DOR', color: EagleTokens.bad, onTap: () => onFeedback('DOR')),
+                    _FeedbackChip(
+                      label: 'Facil',
+                      selected: feedback == 'FACIL',
+                      color: brand,
+                      onTap: () => onFeedback('FACIL'),
+                    ),
+                    _FeedbackChip(
+                      label: 'Ok',
+                      selected: feedback == 'OK',
+                      color: brand,
+                      onTap: () => onFeedback('OK'),
+                    ),
+                    _FeedbackChip(
+                      label: 'Dificil',
+                      selected: feedback == 'DIFICIL',
+                      color: brand,
+                      onTap: () => onFeedback('DIFICIL'),
+                    ),
+                    _FeedbackChip(
+                      label: 'Dor',
+                      selected: feedback == 'DOR',
+                      color: EagleTokens.bad,
+                      onTap: () => onFeedback('DOR'),
+                    ),
                   ],
                 ),
               ],
@@ -1114,7 +1261,10 @@ class _SerieCard extends StatelessWidget {
 
   String? _formatKg(double? value) {
     if (value == null) return null;
-    final rounded = value.roundToDouble() == value ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
+    final rounded =
+        value.roundToDouble() == value
+            ? value.toStringAsFixed(0)
+            : value.toStringAsFixed(1);
     return '$rounded kg';
   }
 
@@ -1158,9 +1308,25 @@ class _ExerciseMetaRow extends StatelessWidget {
       runSpacing: 8,
       children: [
         if (loadText != null)
-          _TinyMetric(icon: Icons.scale_rounded, label: 'Carga', value: loadText!, ink: ink, mute: mute, line: line, dark: dark),
+          _TinyMetric(
+            icon: Icons.scale_rounded,
+            label: 'Carga',
+            value: loadText!,
+            ink: ink,
+            mute: mute,
+            line: line,
+            dark: dark,
+          ),
         if (restText != null)
-          _TinyMetric(icon: Icons.timer_rounded, label: 'Descanso', value: restText!, ink: ink, mute: mute, line: line, dark: dark),
+          _TinyMetric(
+            icon: Icons.timer_rounded,
+            label: 'Descanso',
+            value: restText!,
+            ink: ink,
+            mute: mute,
+            line: line,
+            dark: dark,
+          ),
       ],
     );
   }
@@ -1185,13 +1351,19 @@ class _ExerciseNote extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: dark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.lineSoft,
+        color:
+            dark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.lineSoft,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: line),
       ),
       child: Text(
         text,
-        style: TextStyle(color: mute, fontSize: 12.5, fontWeight: FontWeight.w700, height: 1.35),
+        style: TextStyle(
+          color: mute,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          height: 1.35,
+        ),
       ),
     );
   }
@@ -1235,9 +1407,23 @@ class _ExecutionGuidanceCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(color: ink, fontSize: 12.5, fontWeight: FontWeight.w900)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(text, style: TextStyle(color: ink.withValues(alpha: 0.82), fontSize: 12.3, height: 1.35)),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: ink.withValues(alpha: 0.82),
+                    fontSize: 12.3,
+                    height: 1.35,
+                  ),
+                ),
               ],
             ),
           ),
@@ -1283,15 +1469,33 @@ class _PreviousPerformance extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.history_rounded, size: 18, color: dark ? Colors.white70 : EagleTokens.ink),
+          Icon(
+            Icons.history_rounded,
+            size: 18,
+            color: dark ? Colors.white70 : EagleTokens.ink,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Ultima execucao', style: TextStyle(color: mute, fontSize: 11, fontWeight: FontWeight.w800)),
+                Text(
+                  'Ultima execucao',
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(details, style: TextStyle(color: ink, fontSize: 12.5, fontWeight: FontWeight.w800)),
+                Text(
+                  details,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ],
             ),
           ),
@@ -1335,7 +1539,14 @@ class _SeriesHistory extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Series registradas', style: TextStyle(color: mute, fontSize: 11, fontWeight: FontWeight.w900)),
+          Text(
+            'Series registradas',
+            style: TextStyle(
+              color: mute,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
           const SizedBox(height: 8),
           ...series.map((serie) {
             final details = [
@@ -1358,14 +1569,22 @@ class _SeriesHistory extends StatelessWidget {
                     ),
                     child: Text(
                       serie.numero.toString(),
-                      style: const TextStyle(color: EagleTokens.good, fontSize: 11, fontWeight: FontWeight.w900),
+                      style: const TextStyle(
+                        color: EagleTokens.good,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       details.isEmpty ? 'Serie registrada' : details,
-                      style: TextStyle(color: ink, fontSize: 12.5, fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -1432,8 +1651,12 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
   @override
   void initState() {
     super.initState();
-    _cargaController = TextEditingController(text: _formatInitialKg(widget.initialCargaKg));
-    _repsController = TextEditingController(text: widget.initialRepeticoes ?? '');
+    _cargaController = TextEditingController(
+      text: _formatInitialKg(widget.initialCargaKg),
+    );
+    _repsController = TextEditingController(
+      text: widget.initialRepeticoes ?? '',
+    );
     _feedback = widget.initialFeedback;
     _rpe = widget.initialRpe ?? 7;
     _useRpe = widget.initialRpe != null;
@@ -1490,7 +1713,11 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
                   Expanded(
                     child: Text(
                       widget.title,
-                      style: TextStyle(color: ink, fontSize: 20, fontWeight: FontWeight.w900),
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -1509,8 +1736,12 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
                       label: 'Carga',
                       suffix: 'kg',
                       icon: Icons.scale_rounded,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
+                      ],
                       ink: ink,
                       mute: mute,
                       line: line,
@@ -1534,23 +1765,53 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
                 ],
               ),
               const SizedBox(height: 16),
-              Text('Sensacao', style: TextStyle(color: mute, fontSize: 12, fontWeight: FontWeight.w900)),
+              Text(
+                'Sensacao',
+                style: TextStyle(
+                  color: mute,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _FeedbackChip(label: 'Facil', selected: _feedback == 'FACIL', color: brand, onTap: () => _toggleFeedback('FACIL')),
-                  _FeedbackChip(label: 'Ok', selected: _feedback == 'OK', color: brand, onTap: () => _toggleFeedback('OK')),
-                  _FeedbackChip(label: 'Dificil', selected: _feedback == 'DIFICIL', color: brand, onTap: () => _toggleFeedback('DIFICIL')),
-                  _FeedbackChip(label: 'Dor', selected: _feedback == 'DOR', color: EagleTokens.bad, onTap: () => _toggleFeedback('DOR')),
+                  _FeedbackChip(
+                    label: 'Facil',
+                    selected: _feedback == 'FACIL',
+                    color: brand,
+                    onTap: () => _toggleFeedback('FACIL'),
+                  ),
+                  _FeedbackChip(
+                    label: 'Ok',
+                    selected: _feedback == 'OK',
+                    color: brand,
+                    onTap: () => _toggleFeedback('OK'),
+                  ),
+                  _FeedbackChip(
+                    label: 'Dificil',
+                    selected: _feedback == 'DIFICIL',
+                    color: brand,
+                    onTap: () => _toggleFeedback('DIFICIL'),
+                  ),
+                  _FeedbackChip(
+                    label: 'Dor',
+                    selected: _feedback == 'DOR',
+                    color: EagleTokens.bad,
+                    onTap: () => _toggleFeedback('DOR'),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: dark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.lineSoft,
+                  color:
+                      dark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : EagleTokens.lineSoft,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: line),
                 ),
@@ -1559,7 +1820,13 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
                     Row(
                       children: [
                         Expanded(
-                          child: Text('RPE ${_useRpe ? _rpe : "-"}', style: TextStyle(color: ink, fontWeight: FontWeight.w900)),
+                          child: Text(
+                            'RPE ${_useRpe ? _rpe : "-"}',
+                            style: TextStyle(
+                              color: ink,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
                         ),
                         Switch.adaptive(
                           value: _useRpe,
@@ -1575,7 +1842,10 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
                       divisions: 9,
                       activeColor: brand,
                       label: 'RPE $_rpe',
-                      onChanged: _useRpe ? (value) => setState(() => _rpe = value.round()) : null,
+                      onChanged:
+                          _useRpe
+                              ? (value) => setState(() => _rpe = value.round())
+                              : null,
                     ),
                   ],
                 ),
@@ -1585,16 +1855,23 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
                 contentPadding: EdgeInsets.zero,
                 activeColor: EagleTokens.bad,
                 value: _dor,
-                onChanged: (value) => setState(() {
-                  _dor = value;
-                  if (value) {
-                    _feedback = 'DOR';
-                    _useRpe = true;
-                    _rpe = _rpe < 8 ? 8 : _rpe;
-                  }
-                }),
-                title: Text('Senti dor nesta serie', style: TextStyle(color: ink, fontWeight: FontWeight.w800)),
-                subtitle: Text('Marca alerta para o personal acompanhar.', style: TextStyle(color: mute, fontSize: 12)),
+                onChanged:
+                    (value) => setState(() {
+                      _dor = value;
+                      if (value) {
+                        _feedback = 'DOR';
+                        _useRpe = true;
+                        _rpe = _rpe < 8 ? 8 : _rpe;
+                      }
+                    }),
+                title: Text(
+                  'Senti dor nesta serie',
+                  style: TextStyle(color: ink, fontWeight: FontWeight.w800),
+                ),
+                subtitle: Text(
+                  'Marca alerta para o personal acompanhar.',
+                  style: TextStyle(color: mute, fontSize: 12),
+                ),
               ),
               const SizedBox(height: 14),
               SizedBox(
@@ -1607,7 +1884,9 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
                     backgroundColor: brand,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                 ),
               ),
@@ -1644,7 +1923,9 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
 
   String _formatInitialKg(double? value) {
     if (value == null) return '';
-    return value.roundToDouble() == value ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
+    return value.roundToDouble() == value
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(1);
   }
 
   double? _parseKg(String value) {
@@ -1698,14 +1979,18 @@ class _SerieField extends StatelessWidget {
         suffixStyle: TextStyle(color: mute, fontWeight: FontWeight.w800),
         prefixIcon: Icon(icon, color: mute, size: 18),
         filled: true,
-        fillColor: dark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.lineSoft,
+        fillColor:
+            dark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.lineSoft,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: line),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.4),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 1.4,
+          ),
         ),
       ),
     );
@@ -1745,8 +2030,22 @@ class _TinyMetric extends StatelessWidget {
         children: [
           Icon(icon, size: 15, color: mute),
           const SizedBox(width: 6),
-          Text('$label: ', style: TextStyle(color: mute, fontSize: 11.5, fontWeight: FontWeight.w800)),
-          Text(value, style: TextStyle(color: ink, fontSize: 11.5, fontWeight: FontWeight.w900)),
+          Text(
+            '$label: ',
+            style: TextStyle(
+              color: mute,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: ink,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
         ],
       ),
     );
@@ -1792,12 +2091,13 @@ class _ExerciseThumbnailPreview extends StatelessWidget {
             height: 168,
             width: double.infinity,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
-              height: 120,
-              color: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
-              alignment: Alignment.center,
-              child: Icon(Icons.play_circle_outline_rounded, color: brand),
-            ),
+            errorBuilder:
+                (_, __, ___) => Container(
+                  height: 120,
+                  color: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+                  alignment: Alignment.center,
+                  child: Icon(Icons.play_circle_outline_rounded, color: brand),
+                ),
           ),
           Positioned.fill(
             child: DecoratedBox(
@@ -1867,12 +2167,13 @@ class _ExerciseMediaPreview extends StatelessWidget {
             height: 168,
             width: double.infinity,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
-              height: 120,
-              color: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
-              alignment: Alignment.center,
-              child: Icon(Icons.play_circle_outline_rounded, color: brand),
-            ),
+            errorBuilder:
+                (_, __, ___) => Container(
+                  height: 120,
+                  color: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+                  alignment: Alignment.center,
+                  child: Icon(Icons.play_circle_outline_rounded, color: brand),
+                ),
           ),
           Positioned.fill(
             child: DecoratedBox(
@@ -1904,7 +2205,11 @@ class _ExerciseMediaPreview extends StatelessWidget {
                   SizedBox(width: 4),
                   Text(
                     'Tecnica do exercicio',
-                    style: TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w800),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ],
               ),
@@ -1940,13 +2245,15 @@ class _ExerciseVideoPreviewState extends State<_ExerciseVideoPreview> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
-      ..initialize().then((_) {
-        if (!mounted) return;
-        _controller.setLooping(true);
-        setState(() => _ready = true);
-      }).catchError((_) {
-        if (mounted) setState(() => _failed = true);
-      });
+      ..initialize()
+          .then((_) {
+            if (!mounted) return;
+            _controller.setLooping(true);
+            setState(() => _ready = true);
+          })
+          .catchError((_) {
+            if (mounted) setState(() => _failed = true);
+          });
   }
 
   @override
@@ -1980,7 +2287,10 @@ class _ExerciseVideoPreviewState extends State<_ExerciseVideoPreview> {
         alignment: Alignment.center,
         children: [
           AspectRatio(
-            aspectRatio: _controller.value.aspectRatio == 0 ? 16 / 9 : _controller.value.aspectRatio,
+            aspectRatio:
+                _controller.value.aspectRatio == 0
+                    ? 16 / 9
+                    : _controller.value.aspectRatio,
             child: VideoPlayer(_controller),
           ),
           Positioned.fill(
@@ -2000,10 +2310,16 @@ class _ExerciseVideoPreviewState extends State<_ExerciseVideoPreview> {
           IconButton.filled(
             onPressed: () {
               setState(() {
-                _controller.value.isPlaying ? _controller.pause() : _controller.play();
+                _controller.value.isPlaying
+                    ? _controller.pause()
+                    : _controller.play();
               });
             },
-            icon: Icon(_controller.value.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
+            icon: Icon(
+              _controller.value.isPlaying
+                  ? Icons.pause_rounded
+                  : Icons.play_arrow_rounded,
+            ),
             style: IconButton.styleFrom(
               backgroundColor: Colors.black.withValues(alpha: 0.46),
               foregroundColor: Colors.white,
@@ -2025,7 +2341,11 @@ class _ExerciseVideoPreviewState extends State<_ExerciseVideoPreview> {
                   SizedBox(width: 5),
                   Text(
                     'Video do personal',
-                    style: TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w800),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ],
               ),
@@ -2041,10 +2361,7 @@ class _VideoFallback extends StatelessWidget {
   final Color brand;
   final bool dark;
 
-  const _VideoFallback({
-    required this.brand,
-    required this.dark,
-  });
+  const _VideoFallback({required this.brand, required this.dark});
 
   @override
   Widget build(BuildContext context) {
@@ -2064,7 +2381,11 @@ class _VideoFallback extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'Video proprio do personal disponivel',
-            style: TextStyle(color: brand, fontSize: 12.5, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: brand,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ],
       ),
@@ -2095,7 +2416,9 @@ class _FeedbackChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? color : color.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: color.withValues(alpha: selected ? 0.0 : 0.22)),
+          border: Border.all(
+            color: color.withValues(alpha: selected ? 0.0 : 0.22),
+          ),
         ),
         child: Text(
           label,
@@ -2132,7 +2455,8 @@ class _LiveCoachingCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: dark ? [brandDeep, const Color(0xFF0F1A3C)] : [brand, brandDeep],
+          colors:
+              dark ? [brandDeep, const Color(0xFF0F1A3C)] : [brand, brandDeep],
         ),
         borderRadius: BorderRadius.circular(24),
       ),
@@ -2149,7 +2473,11 @@ class _LiveCoachingCard extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 15),
+                child: const Icon(
+                  Icons.auto_awesome_rounded,
+                  color: Colors.white,
+                  size: 15,
+                ),
               ),
               const SizedBox(width: 8),
               const Text(
@@ -2183,7 +2511,9 @@ class _LiveCoachingCard extends StatelessWidget {
                     backgroundColor: Colors.white,
                     foregroundColor: brand,
                     minimumSize: const Size.fromHeight(44),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: const Text('Registrar ajuste'),
                 ),
@@ -2195,7 +2525,9 @@ class _LiveCoachingCard extends StatelessWidget {
                   foregroundColor: Colors.white,
                   side: BorderSide(color: Colors.white.withValues(alpha: 0.32)),
                   minimumSize: const Size(92, 44),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: const Text('Ignorar'),
               ),
@@ -2210,84 +2542,186 @@ class _LiveCoachingCard extends StatelessWidget {
 class _RestTimerDock extends StatelessWidget {
   final int seconds;
   final int totalSeconds;
+  final Color brand;
+  final bool dark;
+  final Color cardBg;
+  final Color ink;
+  final Color mute;
+  final Color line;
   final VoidCallback onSkip;
 
   const _RestTimerDock({
     required this.seconds,
     required this.totalSeconds,
+    required this.brand,
+    required this.dark,
+    required this.cardBg,
+    required this.ink,
+    required this.mute,
+    required this.line,
     required this.onSkip,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      decoration: BoxDecoration(
-        color: const Color(0xEB141A2C),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 40, offset: Offset(0, 12)),
-        ],
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 46,
-            height: 46,
-            child: Stack(
-              children: [
-                CircularProgressIndicator(
-                  value: totalSeconds <= 0 ? 0 : seconds / totalSeconds,
-                  strokeWidth: 3,
-                  backgroundColor: Colors.white24,
-                  valueColor: const AlwaysStoppedAnimation(Color(0xFF7AD19B)),
+    final fraction = totalSeconds <= 0 ? 0.0 : seconds / totalSeconds;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          width: 160,
+          height: 160,
+          decoration: BoxDecoration(
+            color: cardBg.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: line),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 36,
+                offset: Offset(0, 14),
+              ),
+            ],
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CustomPaint(
+                size: const Size(160, 160),
+                painter: _RestRingPainter(
+                  fraction: fraction.clamp(0.0, 1.0),
+                  color: brand,
                 ),
-                Center(
-                  child: Text(
-                    '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'DESCANSO',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: mute,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 14),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'DESCANSO',
-                  style: TextStyle(
-                    color: Color(0xB3FFFFFF),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
+                  Text(
+                    '$seconds',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 42,
+                      fontWeight: FontWeight.w600,
+                      color: ink,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  'Respira e prepara a proxima serie',
-                  style: TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
+                  Text('seg', style: TextStyle(fontSize: 12, color: mute)),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: onSkip,
+                    style: TextButton.styleFrom(
+                      foregroundColor: brand,
+                      visualDensity: VisualDensity.compact,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text('Pular'),
+                  ),
+                ],
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: onSkip,
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: Colors.white.withValues(alpha: 0.12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: const Text('Pular'),
+        ),
+      ),
+    );
+  }
+}
+
+class _RestRingPainter extends CustomPainter {
+  final double fraction;
+  final Color color;
+
+  const _RestRingPainter({required this.fraction, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final r = (size.width / 2) - 6;
+    final trackPaint =
+        Paint()
+          ..color = color.withValues(alpha: 0.2)
+          ..strokeWidth = 5
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+    final activePaint =
+        Paint()
+          ..color = color
+          ..strokeWidth = 5
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, r, trackPaint);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: r),
+      -math.pi / 2,
+      2 * math.pi * fraction,
+      false,
+      activePaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_RestRingPainter old) => old.fraction != fraction;
+}
+
+class _LiveBadge extends StatefulWidget {
+  const _LiveBadge();
+
+  @override
+  State<_LiveBadge> createState() => _LiveBadgeState();
+}
+
+class _LiveBadgeState extends State<_LiveBadge>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _anim = Tween<double>(
+      begin: 1.0,
+      end: 0.3,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _anim,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: EagleTokens.bad,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: const Text(
+          'AO VIVO',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
           ),
-        ],
+        ),
       ),
     );
   }
@@ -2301,7 +2735,8 @@ class _PulseDot extends StatefulWidget {
   State<_PulseDot> createState() => _PulseDotState();
 }
 
-class _PulseDotState extends State<_PulseDot> with SingleTickerProviderStateMixin {
+class _PulseDotState extends State<_PulseDot>
+    with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
 
   @override
