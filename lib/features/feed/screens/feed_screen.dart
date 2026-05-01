@@ -25,12 +25,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final posts = await FeedRepository(ref.read(apiClientProvider)).listarPersonal();
+      final posts =
+          await FeedRepository(ref.read(apiClientProvider)).listarPersonal();
       setState(() {
         _posts = posts;
         _loading = false;
       });
-    } catch (e) { debugPrint('[Focux] Error: $e');
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
       setState(() => _loading = false);
     }
   }
@@ -41,7 +43,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     }
   }
@@ -52,7 +56,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao fixar: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao fixar: $e')));
       }
     }
   }
@@ -71,142 +77,207 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 24,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-          ),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'Nova Publicação',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(ctx).pop(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: tipoSelecionado,
-                  decoration: const InputDecoration(
-                    labelText: 'Tipo de Post',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.category),
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setModalState) => Padding(
+                  padding: EdgeInsets.only(
+                    left: 24,
+                    right: 24,
+                    top: 24,
+                    bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'TEXTO', child: Text('Texto')),
-                    DropdownMenuItem(value: 'IMAGEM', child: Text('Imagem')),
-                    DropdownMenuItem(value: 'VIDEO', child: Text('Vídeo')),
-                    DropdownMenuItem(value: 'ENQUETE', child: Text('Enquete')),
-                    DropdownMenuItem(value: 'DICA', child: Text('Dica Rápida')),
-                  ],
-                  onChanged: (v) {
-                    if (v != null) setModalState(() => tipoSelecionado = v);
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: tituloCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Título',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.title),
-                  ),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Informe o título' : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: conteudoCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Conteúdo',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.text_fields),
-                    alignLabelWithHint: true,
-                  ),
-                  maxLines: 4,
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Informe o conteúdo' : null,
-                ),
-                if (tipoSelecionado == 'IMAGEM' || tipoSelecionado == 'VIDEO') ...[
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: midiaUrlCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'URL da Mídia (Cloudinary)',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.link),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: salvando
-                      ? null
-                      : () async {
-                          if (!formKey.currentState!.validate()) return;
-                          setModalState(() => salvando = true);
-                          try {
-                            await FeedRepository(ref.read(apiClientProvider)).criar(
-                              tituloCtrl.text.trim(),
-                              conteudoCtrl.text.trim(),
-                              tipoPost: tipoSelecionado,
-                              midiaUrl: midiaUrlCtrl.text.trim().isEmpty ? null : midiaUrlCtrl.text.trim(),
-                            );
-                            if (ctx.mounted) Navigator.of(ctx).pop();
-                            _load();
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Publicação criada com sucesso!')),
-                              );
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'Nova Publicação',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => Navigator.of(ctx).pop(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: tipoSelecionado,
+                          decoration: const InputDecoration(
+                            labelText: 'Tipo de Post',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.category),
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'TEXTO',
+                              child: Text('Texto'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'IMAGEM',
+                              child: Text('Imagem'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'VIDEO',
+                              child: Text('Vídeo'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'ENQUETE',
+                              child: Text('Enquete'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'DICA',
+                              child: Text('Dica Rápida'),
+                            ),
+                          ],
+                          onChanged: (v) {
+                            if (v != null) {
+                              setModalState(() => tipoSelecionado = v);
                             }
-                          } catch (e) {
-                            setModalState(() => salvando = false);
-                            if (ctx.mounted) {
-                              ScaffoldMessenger.of(ctx).showSnackBar(
-                                SnackBar(content: Text('Erro: $e')),
-                              );
-                            }
-                          }
-                        },
-                  icon: salvando
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: EagleTokens.darkInk),
-                        )
-                      : const Icon(Icons.send),
-                  label: Text(salvando ? 'Publicando...' : 'Publicar'),
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: tituloCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Título',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.title),
+                          ),
+                          validator:
+                              (v) =>
+                                  (v == null || v.trim().isEmpty)
+                                      ? 'Informe o título'
+                                      : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: conteudoCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Conteúdo',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.text_fields),
+                            alignLabelWithHint: true,
+                          ),
+                          maxLines: 4,
+                          validator:
+                              (v) =>
+                                  (v == null || v.trim().isEmpty)
+                                      ? 'Informe o conteúdo'
+                                      : null,
+                        ),
+                        if (tipoSelecionado == 'IMAGEM' ||
+                            tipoSelecionado == 'VIDEO') ...[
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: midiaUrlCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'URL da Mídia (Cloudinary)',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.link),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        FilledButton.icon(
+                          onPressed:
+                              salvando
+                                  ? null
+                                  : () async {
+                                    if (!formKey.currentState!.validate()) {
+                                      return;
+                                    }
+                                    setModalState(() => salvando = true);
+                                    try {
+                                      await FeedRepository(
+                                        ref.read(apiClientProvider),
+                                      ).criar(
+                                        tituloCtrl.text.trim(),
+                                        conteudoCtrl.text.trim(),
+                                        tipoPost: tipoSelecionado,
+                                        midiaUrl:
+                                            midiaUrlCtrl.text.trim().isEmpty
+                                                ? null
+                                                : midiaUrlCtrl.text.trim(),
+                                      );
+                                      if (ctx.mounted) Navigator.of(ctx).pop();
+                                      _load();
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Publicação criada com sucesso!',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      setModalState(() => salvando = false);
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text('Erro: $e')),
+                                        );
+                                      }
+                                    }
+                                  },
+                          icon:
+                              salvando
+                                  ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: EagleTokens.darkInk,
+                                    ),
+                                  )
+                                  : const Icon(Icons.send),
+                          label: Text(salvando ? 'Publicando...' : 'Publicar'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ],
-            ),
           ),
-        ),
-      ),
     );
   }
 
   IconData _getIconForTipo(String? tipo) {
     switch (tipo) {
-      case 'IMAGEM': return Icons.image;
-      case 'VIDEO': return Icons.play_circle_fill;
-      case 'ENQUETE': return Icons.poll;
-      case 'DICA': return Icons.lightbulb;
-      default: return Icons.article;
+      case 'IMAGEM':
+        return Icons.image;
+      case 'VIDEO':
+        return Icons.play_circle_fill;
+      case 'ENQUETE':
+        return Icons.poll;
+      case 'DICA':
+        return Icons.lightbulb;
+      default:
+        return Icons.article;
+    }
+  }
+
+  Color _feedBadgeColor(String? tipo, Color primary) {
+    switch (tipo?.toUpperCase()) {
+      case 'DICA':
+        return EagleTokens.warn;
+      case 'IMAGEM':
+        return EagleTokens.good;
+      case 'ENQUETE':
+        return EagleTokens.purple;
+      default:
+        return primary;
     }
   }
 
@@ -214,21 +285,34 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final primaryDeep = BrandPalette.deep(primary);
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
-        title: Text('Feed de Conteúdo', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
-        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
+        title: Text(
+          'Feed de Conteúdo',
+          style: TextStyle(
+            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        iconTheme: IconThemeData(
+          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+        ),
       ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: [primary, primaryDeep]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: primary.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [
+            BoxShadow(
+              color: primary.withValues(alpha: 0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: FloatingActionButton(
           onPressed: _abrirFormulario,
@@ -238,144 +322,322 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           child: const Icon(Icons.add, color: EagleTokens.darkInk),
         ),
       ),
-      body: _loading
-          ? Center(child: CircularProgressIndicator(color: primary))
-          : _posts.isEmpty
-              ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Container(width: 64, height: 64, decoration: BoxDecoration(color: primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(Icons.article_outlined, color: primary, size: 28)),
-                  const SizedBox(height: 14),
-                  Text('Nenhuma publicação', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 17, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 6),
-                  Text('Crie a primeira publicação!', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 14)),
-                ]))
+      body:
+          _loading
+              ? Center(child: CircularProgressIndicator(color: primary))
+              : _posts.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.article_outlined,
+                        color: primary,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'Nenhuma publicação',
+                      style: TextStyle(
+                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Crie a primeira publicação!',
+                      style: TextStyle(
+                        color:
+                            isDark
+                                ? EagleTokens.darkInkMute
+                                : EagleTokens.inkMute,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              )
               : RefreshIndicator(
-                  color: primary,
-                  onRefresh: _load,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _posts.length,
-                    itemBuilder: (_, i) {
-                      final p = _posts[i];
-                      final mUrl = p.midiaUrl ?? p.imagemUrl;
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: p.fixado ? BorderSide(color: primary, width: 2) : BorderSide.none,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  if (p.fixado) ...[
-                                    Icon(Icons.push_pin, color: primary, size: 18),
-                                    const SizedBox(width: 8),
-                                  ],
-                                  Icon(_getIconForTipo(p.tipoPost), size: 20, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+                color: primary,
+                onRefresh: _load,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _posts.length,
+                  itemBuilder: (_, i) {
+                    final p = _posts[i];
+                    final mUrl = p.midiaUrl ?? p.imagemUrl;
+                    final badgeColor = _feedBadgeColor(p.tipoPost, primary);
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side:
+                            p.fixado
+                                ? BorderSide(color: primary, width: 2)
+                                : BorderSide(
+                                  color:
+                                      isDark
+                                          ? EagleTokens.darkLine
+                                          : EagleTokens.line,
+                                ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                if (p.fixado) ...[
+                                  Icon(
+                                    Icons.push_pin,
+                                    color: primary,
+                                    size: 18,
+                                  ),
                                   const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      p.titulo,
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ],
+                                Icon(
+                                  _getIconForTipo(p.tipoPost),
+                                  size: 20,
+                                  color: badgeColor,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    p.titulo,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  PopupMenuButton<String>(
-                                    onSelected: (val) {
-                                      if (val == 'fixar') _toggleFixar(p.id);
-                                      if (val == 'excluir') {
-                                        showDialog(
-                                          context: context,
-                                          builder: (ctx) => AlertDialog(
-                                            title: const Text('Excluir publicação?'),
-                                            content: const Text('Esta ação não pode ser desfeita.'),
-                                            actions: [
-                                              TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancelar')),
-                                              TextButton(
-                                                onPressed: () { Navigator.of(ctx).pop(); _deletar(p.id); },
-                                                child: const Text('Excluir', style: TextStyle(color: EagleTokens.bad)),
+                                ),
+                                PopupMenuButton<String>(
+                                  onSelected: (val) {
+                                    if (val == 'fixar') _toggleFixar(p.id);
+                                    if (val == 'excluir') {
+                                      showDialog(
+                                        context: context,
+                                        builder:
+                                            (ctx) => AlertDialog(
+                                              title: const Text(
+                                                'Excluir publicação?',
+                                              ),
+                                              content: const Text(
+                                                'Esta ação não pode ser desfeita.',
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed:
+                                                      () =>
+                                                          Navigator.of(
+                                                            ctx,
+                                                          ).pop(),
+                                                  child: const Text('Cancelar'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(ctx).pop();
+                                                    _deletar(p.id);
+                                                  },
+                                                  child: const Text(
+                                                    'Excluir',
+                                                    style: TextStyle(
+                                                      color: EagleTokens.bad,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                      );
+                                    }
+                                  },
+                                  itemBuilder:
+                                      (ctx) => [
+                                        PopupMenuItem(
+                                          value: 'fixar',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                p.fixado
+                                                    ? Icons.push_pin_outlined
+                                                    : Icons.push_pin,
+                                                size: 20,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                p.fixado
+                                                    ? 'Desafixar'
+                                                    : 'Fixar no topo',
                                               ),
                                             ],
                                           ),
-                                        );
-                                      }
-                                    },
-                                    itemBuilder: (ctx) => [
-                                      PopupMenuItem(
-                                        value: 'fixar',
-                                        child: Row(children: [
-                                          Icon(p.fixado ? Icons.push_pin_outlined : Icons.push_pin, size: 20),
-                                          const SizedBox(width: 8),
-                                          Text(p.fixado ? 'Desafixar' : 'Fixar no topo'),
-                                        ]),
-                                      ),
-                                      const PopupMenuItem(
-                                        value: 'excluir',
-                                        child: Row(children: [
-                                          Icon(Icons.delete_outline, color: EagleTokens.bad, size: 20),
-                                          SizedBox(width: 8),
-                                          Text('Excluir', style: TextStyle(color: EagleTokens.bad)),
-                                        ]),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              if (p.tipoPost != null && p.tipoPost != 'TEXTO') ...[
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: primarySoft,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    p.tipoPost!,
-                                    style: TextStyle(fontSize: 10, color: primary, fontWeight: FontWeight.bold),
-                                  ),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'excluir',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.delete_outline,
+                                                color: EagleTokens.bad,
+                                                size: 20,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                'Excluir',
+                                                style: TextStyle(
+                                                  color: EagleTokens.bad,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                 ),
                               ],
-                              const SizedBox(height: 8),
-                              Text(p.conteudo, style: const TextStyle(fontSize: 14)),
-                              if (mUrl != null && mUrl.isNotEmpty) ...[
-                                const SizedBox(height: 12),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    mUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => const SizedBox(),
+                            ),
+                            if (p.tipoPost != null) ...[
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: badgeColor.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  p.tipoPost!.toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: badgeColor,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                              ],
-                              const SizedBox(height: 12),
-                              const Divider(height: 1),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(Icons.thumb_up_alt_outlined, size: 16, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-                                  const SizedBox(width: 4),
-                                  Text('${p.totalCurtidas}', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute)),
-                                  const SizedBox(width: 16),
-                                  Icon(Icons.comment_outlined, size: 16, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-                                  const SizedBox(width: 4),
-                                  Text('${p.totalComentarios}', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute)),
-                                  const Spacer(),
-                                  Text(
-                                    p.criadoEm.length >= 10 ? p.criadoEm.substring(0, 10) : p.criadoEm,
-                                    style: TextStyle(fontSize: 12, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-                                  ),
-                                ],
                               ),
                             ],
-                          ),
+                            const SizedBox(height: 8),
+                            Text(
+                              p.conteudo,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            if (mUrl != null && mUrl.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  mUrl,
+                                  fit: BoxFit.cover,
+                                  height: 130,
+                                  width: double.infinity,
+                                  errorBuilder:
+                                      (_, __, ___) =>
+                                          _ImagePlaceholder(primary: primary),
+                                ),
+                              ),
+                            ] else if (p.tipoPost == 'IMAGEM') ...[
+                              const SizedBox(height: 12),
+                              _ImagePlaceholder(primary: primary),
+                            ],
+                            const SizedBox(height: 12),
+                            const Divider(height: 1),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.thumb_up_alt_outlined,
+                                  size: 16,
+                                  color:
+                                      isDark
+                                          ? EagleTokens.darkInkMute
+                                          : EagleTokens.inkMute,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${p.totalCurtidas}',
+                                  style: TextStyle(
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkInkMute
+                                            : EagleTokens.inkMute,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Icon(
+                                  Icons.comment_outlined,
+                                  size: 16,
+                                  color:
+                                      isDark
+                                          ? EagleTokens.darkInkMute
+                                          : EagleTokens.inkMute,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${p.totalComentarios}',
+                                  style: TextStyle(
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkInkMute
+                                            : EagleTokens.inkMute,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  p.criadoEm.length >= 10
+                                      ? p.criadoEm.substring(0, 10)
+                                      : p.criadoEm,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkInkMute
+                                            : EagleTokens.inkMute,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
+              ),
+    );
+  }
+}
+
+class _ImagePlaceholder extends StatelessWidget {
+  final Color primary;
+
+  const _ImagePlaceholder({required this.primary});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 130,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          colors: [
+            primary.withValues(alpha: 0.18),
+            BrandPalette.deep(primary).withValues(alpha: 0.08),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Icon(Icons.image_outlined, color: primary, size: 28),
     );
   }
 }
