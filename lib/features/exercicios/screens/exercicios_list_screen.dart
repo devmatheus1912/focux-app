@@ -140,9 +140,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       backgroundColor: bg,
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [primary, primaryDeep],
-          ),
+          gradient: LinearGradient(colors: [primary, primaryDeep]),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -311,7 +309,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   ),
                   IconButton(
                     icon: Icon(Icons.arrow_back, color: mute),
-                    onPressed: () => safePopOrGo(context, '/dashboard/personal'),
+                    onPressed:
+                        () => safePopOrGo(context, '/dashboard/personal'),
                   ),
                 ],
               ),
@@ -885,9 +884,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                             'O backend so libera automaticamente itens completos com video, thumbnail, licenca e orientacao.',
                           ),
                           onChanged:
-                              (value) => setModalState(
-                                () => aprovarEditorial = value,
-                              ),
+                              (value) =>
+                                  setModalState(() => aprovarEditorial = value),
                         ),
                         TextField(
                           controller: editorialNotesCtrl,
@@ -1018,7 +1016,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                     );
                   }
                   if (snapshot.hasError) {
-                    return Text('Erro ao carregar historico: ${snapshot.error}');
+                    return Text(
+                      'Erro ao carregar historico: ${snapshot.error}',
+                    );
                   }
                   final batches = snapshot.data ?? [];
                   if (batches.isEmpty) {
@@ -1111,201 +1111,196 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                     ),
                   ],
                 ),
-                  content: SizedBox(
-                    width: dialogWidth,
-                    child: FutureBuilder<List<ExercicioEditorialQueue>>(
-                      key: ValueKey(refreshToken),
-                      future: loadQueues(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const SizedBox(
-                            height: 180,
-                            child: Center(child: CircularProgressIndicator()),
+                content: SizedBox(
+                  width: dialogWidth,
+                  child: FutureBuilder<List<ExercicioEditorialQueue>>(
+                    key: ValueKey(refreshToken),
+                    future: loadQueues(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SizedBox(
+                          height: 180,
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return Text('Erro ao carregar fila: ${snapshot.error}');
+                      }
+
+                      final queues = snapshot.data ?? [];
+                      final pending =
+                          queues.isNotEmpty
+                              ? queues[0]
+                              : ExercicioEditorialQueue(
+                                total: 0,
+                                items: const [],
+                              );
+                      final rejected =
+                          queues.length > 1
+                              ? queues[1]
+                              : ExercicioEditorialQueue(
+                                total: 0,
+                                items: const [],
+                              );
+                      final approvedTotal =
+                          queues.length > 2 ? queues[2].total : 0;
+                      final activeQueue =
+                          status == 'REJECTED' ? rejected : pending;
+
+                      Future<void> review(
+                        Exercicio exercicio,
+                        String nextStatus,
+                      ) async {
+                        await ref
+                            .read(exercicioRepositoryProvider)
+                            .atualizarCuradoriaEditorial(
+                              id: exercicio.id,
+                              status: nextStatus,
+                              notes:
+                                  nextStatus == 'APPROVED'
+                                      ? 'Aprovado pela fila editorial.'
+                                      : 'Reprovado pela fila editorial.',
+                            );
+                        ref.invalidate(exerciciosFilteredProvider);
+                        ref.invalidate(exerciciosCuradoriaProvider);
+                        setModalState(() => refreshToken++);
+                      }
+
+                      Future<void> bulkReview(String nextStatus) async {
+                        if (selectedIds.isEmpty) return;
+                        final count = await ref
+                            .read(exercicioRepositoryProvider)
+                            .atualizarCuradoriaEditorialLote(
+                              ids: selectedIds.toList(),
+                              status: nextStatus,
+                              notes:
+                                  nextStatus == 'APPROVED'
+                                      ? 'Aprovado em lote pela fila editorial.'
+                                      : 'Reprovado em lote pela fila editorial.',
+                            );
+                        selectedIds.clear();
+                        ref.invalidate(exerciciosFilteredProvider);
+                        ref.invalidate(exerciciosCuradoriaProvider);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('$count exercicios atualizados.'),
+                            ),
                           );
                         }
-                        if (snapshot.hasError) {
-                          return Text('Erro ao carregar fila: ${snapshot.error}');
-                        }
+                        setModalState(() => refreshToken++);
+                      }
 
-                        final queues = snapshot.data ?? [];
-                        final pending =
-                            queues.isNotEmpty
-                                ? queues[0]
-                                : ExercicioEditorialQueue(
-                                  total: 0,
-                                  items: const [],
-                                );
-                        final rejected =
-                            queues.length > 1
-                                ? queues[1]
-                                : ExercicioEditorialQueue(
-                                  total: 0,
-                                  items: const [],
-                                );
-                        final approvedTotal =
-                            queues.length > 2 ? queues[2].total : 0;
-                        final activeQueue =
-                            status == 'REJECTED' ? rejected : pending;
-
-                        Future<void> review(
-                          Exercicio exercicio,
-                          String nextStatus,
-                        ) async {
-                          await ref
-                              .read(exercicioRepositoryProvider)
-                              .atualizarCuradoriaEditorial(
-                                id: exercicio.id,
-                                status: nextStatus,
-                                notes:
-                                    nextStatus == 'APPROVED'
-                                        ? 'Aprovado pela fila editorial.'
-                                        : 'Reprovado pela fila editorial.',
-                              );
-                          ref.invalidate(exerciciosFilteredProvider);
-                          ref.invalidate(exerciciosCuradoriaProvider);
-                          setModalState(() => refreshToken++);
-                        }
-
-                        Future<void> bulkReview(String nextStatus) async {
-                          if (selectedIds.isEmpty) return;
-                          final count = await ref
-                              .read(exercicioRepositoryProvider)
-                              .atualizarCuradoriaEditorialLote(
-                                ids: selectedIds.toList(),
-                                status: nextStatus,
-                                notes:
-                                    nextStatus == 'APPROVED'
-                                        ? 'Aprovado em lote pela fila editorial.'
-                                        : 'Reprovado em lote pela fila editorial.',
-                              );
-                          selectedIds.clear();
-                          ref.invalidate(exerciciosFilteredProvider);
-                          ref.invalidate(exerciciosCuradoriaProvider);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('$count exercicios atualizados.'),
-                              ),
-                            );
-                          }
-                          setModalState(() => refreshToken++);
-                        }
-
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                ChoiceChip(
-                                  label: Text('Pendentes ${pending.total}'),
-                                  selected: status == 'PENDING_REVIEW',
-                                  onSelected:
-                                      (_) => setModalState(
-                                        () {
-                                          status = 'PENDING_REVIEW';
-                                          selectedIds.clear();
-                                        },
-                                      ),
-                                ),
-                                ChoiceChip(
-                                  label: Text('Reprovados ${rejected.total}'),
-                                  selected: status == 'REJECTED',
-                                  onSelected:
-                                      (_) => setModalState(
-                                        () {
-                                          status = 'REJECTED';
-                                          selectedIds.clear();
-                                        },
-                                      ),
-                                ),
-                                Chip(
-                                  avatar: const Icon(
-                                    Icons.verified_rounded,
-                                    size: 16,
-                                  ),
-                                  label: Text('Aprovados $approvedTotal'),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            if (activeQueue.items.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 28),
-                                child: Text('Nada para revisar nesta fila.'),
-                              )
-                            else ...[
-                              _EditorialQueueBulkBar(
-                                selectedCount: selectedIds.length,
-                                allSelected:
-                                    selectedIds.length ==
-                                    activeQueue.items.length,
-                                onToggleAll:
-                                    () => setModalState(() {
-                                      if (selectedIds.length ==
-                                          activeQueue.items.length) {
-                                        selectedIds.clear();
-                                      } else {
-                                        selectedIds
-                                          ..clear()
-                                          ..addAll(
-                                            activeQueue.items.map(
-                                              (item) => item.id,
-                                            ),
-                                          );
-                                      }
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              ChoiceChip(
+                                label: Text('Pendentes ${pending.total}'),
+                                selected: status == 'PENDING_REVIEW',
+                                onSelected:
+                                    (_) => setModalState(() {
+                                      status = 'PENDING_REVIEW';
+                                      selectedIds.clear();
                                     }),
-                                onApprove:
-                                    selectedIds.isEmpty
-                                        ? null
-                                        : () => bulkReview('APPROVED'),
-                                onReject:
-                                    selectedIds.isEmpty
-                                        ? null
-                                        : () => bulkReview('REJECTED'),
                               ),
-                              const SizedBox(height: 8),
-                              ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxHeight: maxListHeight,
+                              ChoiceChip(
+                                label: Text('Reprovados ${rejected.total}'),
+                                selected: status == 'REJECTED',
+                                onSelected:
+                                    (_) => setModalState(() {
+                                      status = 'REJECTED';
+                                      selectedIds.clear();
+                                    }),
+                              ),
+                              Chip(
+                                avatar: const Icon(
+                                  Icons.verified_rounded,
+                                  size: 16,
                                 ),
-                                child: ListView.separated(
-                                  shrinkWrap: true,
-                                  itemCount: activeQueue.items.length,
-                                  separatorBuilder:
-                                      (_, __) => const Divider(height: 20),
-                                  itemBuilder: (context, index) {
-                                    final exercicio = activeQueue.items[index];
-                                    return _EditorialQueueTile(
-                                      exercicio: exercicio,
-                                      selected: selectedIds.contains(
-                                        exercicio.id,
-                                      ),
-                                      onSelectedChanged:
-                                          (checked) => setModalState(() {
-                                            if (checked == true) {
-                                              selectedIds.add(exercicio.id);
-                                            } else {
-                                              selectedIds.remove(exercicio.id);
-                                            }
-                                          }),
-                                      onApprove:
-                                          () => review(exercicio, 'APPROVED'),
-                                      onReject:
-                                          () => review(exercicio, 'REJECTED'),
-                                    );
-                                  },
-                                ),
+                                label: Text('Aprovados $approvedTotal'),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 12),
+                          if (activeQueue.items.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 28),
+                              child: Text('Nada para revisar nesta fila.'),
+                            )
+                          else ...[
+                            _EditorialQueueBulkBar(
+                              selectedCount: selectedIds.length,
+                              allSelected:
+                                  selectedIds.length ==
+                                  activeQueue.items.length,
+                              onToggleAll:
+                                  () => setModalState(() {
+                                    if (selectedIds.length ==
+                                        activeQueue.items.length) {
+                                      selectedIds.clear();
+                                    } else {
+                                      selectedIds
+                                        ..clear()
+                                        ..addAll(
+                                          activeQueue.items.map(
+                                            (item) => item.id,
+                                          ),
+                                        );
+                                    }
+                                  }),
+                              onApprove:
+                                  selectedIds.isEmpty
+                                      ? null
+                                      : () => bulkReview('APPROVED'),
+                              onReject:
+                                  selectedIds.isEmpty
+                                      ? null
+                                      : () => bulkReview('REJECTED'),
+                            ),
+                            const SizedBox(height: 8),
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: maxListHeight,
+                              ),
+                              child: ListView.separated(
+                                shrinkWrap: true,
+                                itemCount: activeQueue.items.length,
+                                separatorBuilder:
+                                    (_, __) => const Divider(height: 20),
+                                itemBuilder: (context, index) {
+                                  final exercicio = activeQueue.items[index];
+                                  return _EditorialQueueTile(
+                                    exercicio: exercicio,
+                                    selected: selectedIds.contains(
+                                      exercicio.id,
+                                    ),
+                                    onSelectedChanged:
+                                        (checked) => setModalState(() {
+                                          if (checked == true) {
+                                            selectedIds.add(exercicio.id);
+                                          } else {
+                                            selectedIds.remove(exercicio.id);
+                                          }
+                                        }),
+                                    onApprove:
+                                        () => review(exercicio, 'APPROVED'),
+                                    onReject:
+                                        () => review(exercicio, 'REJECTED'),
+                                  );
+                                },
+                              ),
+                            ),
                           ],
-                        );
-                      },
-                    ),
+                        ],
+                      );
+                    },
                   ),
+                ),
                 actions: const [],
               );
             },
@@ -1797,9 +1792,7 @@ class _EditorialQueueBulkBar extends StatelessWidget {
         final select = OutlinedButton.icon(
           onPressed: onToggleAll,
           icon: Icon(
-            allSelected
-                ? Icons.check_box_rounded
-                : Icons.select_all_rounded,
+            allSelected ? Icons.check_box_rounded : Icons.select_all_rounded,
           ),
           label: Text(allSelected ? 'Limpar' : 'Todos'),
         );
@@ -2016,6 +2009,7 @@ class _ExercicioTile extends ConsumerWidget {
             : null;
     final licensed = exercicio.licenseStatus == 'LICENSED';
     final approved = exercicio.editorialStatus == 'APPROVED';
+    final nivelColor = _nivelColor(exercicio.nivel);
 
     return Material(
       color: card,
@@ -2058,6 +2052,12 @@ class _ExercicioTile extends ConsumerWidget {
                 spacing: 6,
                 runSpacing: 4,
                 children: [
+                  if (exercicio.nivel?.isNotEmpty == true)
+                    _MiniMediaBadge(
+                      icon: Icons.signal_cellular_alt_rounded,
+                      label: exercicio.nivel!,
+                      color: nivelColor,
+                    ),
                   _MiniMediaBadge(
                     icon:
                         approved
@@ -2094,7 +2094,12 @@ class _ExercicioTile extends ConsumerWidget {
             IconButton(
               icon: Icon(
                 exercicio.favoritado ? Icons.star : Icons.star_border,
-                color: exercicio.favoritado ? EagleTokens.warn : null,
+                color:
+                    exercicio.favoritado
+                        ? EagleTokens.gold
+                        : (isDark
+                            ? EagleTokens.darkInkMute
+                            : EagleTokens.inkMute),
               ),
               tooltip:
                   exercicio.favoritado
@@ -2115,6 +2120,15 @@ class _ExercicioTile extends ConsumerWidget {
       'FOCUX_LIBRARY' => 'Focux',
       'PERSONAL_UPLOAD' => 'Personal',
       _ => value.replaceAll('_', ' '),
+    };
+  }
+
+  Color _nivelColor(String? value) {
+    return switch (value?.toUpperCase()) {
+      'INICIANTE' => EagleTokens.good,
+      'INTERMEDIARIO' => EagleTokens.warn,
+      'AVANCADO' => EagleTokens.bad,
+      _ => EagleTokens.inkMute,
     };
   }
 }
@@ -2164,5 +2178,3 @@ class _MiniMediaBadge extends StatelessWidget {
     );
   }
 }
-
-
