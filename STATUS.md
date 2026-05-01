@@ -351,11 +351,11 @@
 - [x] Política de privacidade linkada no app
 - [x] Termos de uso linkados no app
 - [x] Credenciais demo para reviewer
-- [ ] Screenshots para todos os tamanhos obrigatórios
+- [ ] Screenshots para todos os tamanhos obrigatórios ⚠️ **Requer Apple Developer Account**
 - [x] Nenhum texto placeholder/lorem ipsum
 - [x] Todas as permissões têm purpose strings (✅ já feito)
 - [x] Deep links funcionando
-- [ ] IAP testado em sandbox
+- [ ] IAP testado em sandbox ⚠️ **Requer Apple Developer Account + App Store Connect**
 - [x] App Icon sem transparência (✅ já feito)
 - [x] Sem APIs privadas
 - [x] Performance aceitável em iPhone SE (2nd gen)
@@ -384,7 +384,7 @@
 |---------------|------|----------|--------|-----------|
 | App trava/lento | ⚠️ | ❌ | ⚠️ | ✅ Flutter nativo |
 | Sem modo offline | ❌ | ❌ | ❌ | ✅ Cache offline |
-| Notificações spam | ❌ | ❌ | ⚠️ | 🔜 Sprint 2 |
+| Notificações spam | ❌ | ❌ | ⚠️ | ✅ FCM contextual |
 | Sem IA real | ❌ | ❌ | ❌ | ✅ Claude API |
 | Preço abusivo | ⚠️ | ❌ | ❌ | ✅ Modelo justo |
 | Sem wearables | ❌ | ❌ | ⚠️ | 🔜 Sprint 3 |
@@ -402,7 +402,7 @@
 2. `EngajamentoJob.java:37` — "TODO: alertasService.criarAlerta(...) para que apareça no dashboard também"
 
 ### Frontend
-- Sem TODOs explícitos, mas vários `catch (_) {}` silenciosos que precisam tratamento
+- 5 `catch (_) {}` silenciosos (analytics, launch_url) — **aceitáveis** em operações non-critical
 
 ---
 
@@ -417,5 +417,85 @@
 
 ---
 
+## 🍎 TAREFAS QUE PRECISAM DA APPLE DEVELOPER ACCOUNT ($99/ano)
+
+> Essas tarefas SÓ podem ser feitas APÓS adquirir a conta em https://developer.apple.com/programs/
+
+| Tarefa | O que precisa | Tempo |
+|--------|---------------|-------|
+| Screenshots (#11) | Xcode Simulator + device real com provisioning | 2-3h |
+| IAP Sandbox | App Store Connect + StoreKit Configuration | 2-4h |
+| Push Notifications (APNs prod) | Certificado APNs no Firebase Console | 1h |
+| TestFlight Beta | Upload .ipa via Xcode → TestFlight | 1-2h |
+| App Store Submission | Preencher ficha no App Store Connect | 2-3h |
+| Apple Health (#21) | HealthKit entitlement no provisioning profile | 16h |
+| iOS Widget (#23) | WidgetKit extension com provisioning | 12h |
+
+---
+
+## ✅ TAREFAS MANUAIS QUE VOCÊ PODE FAZER AGORA (SEM CONTA APPLE)
+
+### 1. 🧪 Rodar Load Test no backend de produção
+```bash
+# Instalar k6 (https://k6.io/docs/get-started/installation/)
+choco install k6   # ou baixe em https://github.com/grafana/k6/releases
+
+# Rodar contra produção
+cd d:\Projetos\Focux Personal\focux-backend
+k6 run --vus 50 --duration 30s load_test.js -e BASE_URL=https://SEU-BACKEND.railway.app -e JWT_TOKEN=SEU_TOKEN
+```
+
+### 2. 📱 Testar app em device Android real (USB Debug)
+```bash
+# Conecte o Android via USB com depuração ativada
+cd d:\Projetos\Focux Personal\focux-app
+flutter run --release
+```
+> Teste TODAS as telas manualmente: login, dashboard, alunos, treinos, check-in, chat, IA, financeiro, perfil
+
+### 3. 🔐 Testar fluxo de segurança completo
+- [ ] Login com email/senha → Dashboard carrega
+- [ ] Logout → volta para login, não acessa rota protegida
+- [ ] Token expirado → refresh automático (espere 24h ou force no backend)
+- [ ] Registro de personal → onboarding → dashboard
+- [ ] Registro de aluno com convite → dashboard aluno
+- [ ] Excluir conta → dados anonimizados (LGPD)
+
+### 4. 🌐 Testar Swagger/API Docs
+```
+Acesse: https://SEU-BACKEND.railway.app/swagger-ui.html
+```
+- [ ] Swagger UI carrega
+- [ ] Endpoints listados corretamente
+- [ ] Botão "Authorize" aceita JWT Bearer token
+- [ ] Testar GET /api/auth/capabilities sem token → 200
+
+### 5. 🧪 Testar backend na máquina local
+```bash
+cd d:\Projetos\Focux Personal\focux-backend
+.\gradlew.bat test
+# Esperado: BUILD SUCCESSFUL
+```
+
+### 6. 📊 Verificar Monitoring
+```
+Acesse: https://SEU-BACKEND.railway.app/actuator/health
+# Esperado: {"status":"UP"}
+
+Acesse: https://SEU-BACKEND.railway.app/actuator/prometheus
+# Esperado: métricas Prometheus em formato text
+```
+
+### 7. 🔗 Testar Deep Links
+- [ ] Abrir `https://focux.app/p/SEU-SLUG` no browser → abre landing page
+- [ ] Compartilhar link de convite → aluno consegue se registrar
+
+### 8. 💬 Testar Chat em tempo real
+- [ ] Abrir 2 sessões (personal + aluno)
+- [ ] Enviar mensagem de um → aparece no outro em < 2s
+- [ ] Indicadores de não-lido funcionam
+
+---
+
 *Documento gerado pela equipe de engenharia Focux — Mai/2026*
-*Próxima revisão: após conclusão Sprint 1*
+*Última atualização: 01/Mai/2026 — Auditoria completa de produção*
