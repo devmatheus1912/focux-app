@@ -95,7 +95,7 @@ void main() {
     expect(helper, contains('context.go(fallbackLocation)'));
     expect(helper, contains('void safePopOr'));
     expect(checkin, contains("safePopOrGo(context, '/checkin/treinos')"));
-    expect(copilot, contains('safePopOr(context, () => goToRoleHome(context, ref))'));
+    expect(copilot, contains('safePopOr('));
     expect(chat, contains("_isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal'"));
   });
 

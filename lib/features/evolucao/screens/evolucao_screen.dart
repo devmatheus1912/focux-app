@@ -502,6 +502,7 @@ class _CardRecorde extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
@@ -533,15 +534,15 @@ class _CardRecorde extends StatelessWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: EagleTokens.brandSoft,
+            color: primary.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(999),
           ),
-          child: const Text(
+          child: Text(
             'NOVO PR',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: EagleTokens.brand,
+              color: primary,
             ),
           ),
         ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/brand_palette.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOCUX PERSONAL — FxIntroSlides (Onboarding)
@@ -25,7 +26,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       title: 'Seus alunos,\nsua gestão.',
       subtitle:
           'Cadastre alunos, monte treinos e acompanhe a evolução de cada um em tempo real.',
-      accent: EagleTokens.brandAccent,
+      accent: Color(0xFF80C8FF),
     ),
     _OBData(
       icon: Icons.auto_awesome_rounded,
@@ -180,7 +181,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               gradient: LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [primary, EagleTokens.brandDeep],
+                                colors: [primary, BrandPalette.deep(primary)],
                               ),
                               boxShadow: [
                                 BoxShadow(

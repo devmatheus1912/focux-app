@@ -971,7 +971,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color:
-                      dark ? EagleTokens.darkCardHi : EagleTokens.brandSofter,
+                      dark ? EagleTokens.darkCardHi : BrandPalette.softer(brand),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: brand.withValues(alpha: 0.18)),
                 ),

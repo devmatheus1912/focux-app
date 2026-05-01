@@ -1186,7 +1186,7 @@ class _ModuleTile extends StatelessWidget {
 
     final bg =
         highlight
-            ? (isDark ? EagleTokens.darkCardHi : EagleTokens.brandSoft)
+            ? (isDark ? EagleTokens.darkCardHi : BrandPalette.soft(primary))
             : cardBg;
     final border = Border.all(
       color: highlight ? primary.withValues(alpha: 0.2) : line,
