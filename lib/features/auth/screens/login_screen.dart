@@ -40,13 +40,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _loadCapabilities() async {
     try {
-      final status =
-          await ref.read(authRepositoryProvider).environmentStatus();
+      final status = await ref.read(authRepositoryProvider).environmentStatus();
       if (!mounted) return;
       final appClientConfigured = Env.googleWebClientId.isNotEmpty;
       setState(() {
-        _googleEnabled =
-            status.googleSignInReady && appClientConfigured;
+        _googleEnabled = status.googleSignInReady && appClientConfigured;
         if (_googleEnabled) {
           _googleStatusTitle = null;
           _googleStatusNote = null;
@@ -60,9 +58,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         } else {
           final issue = status.firstIssueFor('google');
           _googleStatusTitle = issue?.title ?? 'Google pendente no ambiente';
-          _googleStatusNote = issue?.detail.isNotEmpty == true
-              ? issue!.detail
-              : 'Login Google ainda nao esta pronto neste ambiente.';
+          _googleStatusNote =
+              issue?.detail.isNotEmpty == true
+                  ? issue!.detail
+                  : 'Login Google ainda nao esta pronto neste ambiente.';
           _googleStatusAction = issue?.action;
         }
       });
@@ -88,35 +87,45 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     HapticFeedback.mediumImpact();
 
     try {
       if (_isAluno) {
         // BUG-39: aluno uses dedicated endpoint
-        await ref.read(authProvider.notifier).loginAluno(
-          _emailController.text.trim(), _passwordController.text,
-        );
+        await ref
+            .read(authProvider.notifier)
+            .loginAluno(_emailController.text.trim(), _passwordController.text);
         if (!mounted) return;
         // BUG-40: redirect based on role + requiresPasswordChange
-        final requiresChange = ref.read(authProvider.notifier).requiresPasswordChange;
+        final requiresChange =
+            ref.read(authProvider.notifier).requiresPasswordChange;
         context.go(
           requiresChange
               ? '/aluno/definir-senha'
               : _postLoginRedirect(context, isAluno: true),
         );
       } else {
-        await ref.read(authProvider.notifier).login(
-          _emailController.text.trim(), _passwordController.text,
-        );
+        await ref
+            .read(authProvider.notifier)
+            .login(_emailController.text.trim(), _passwordController.text);
         if (!mounted) return;
         context.go(_postLoginRedirect(context, isAluno: false));
       }
     } catch (error) {
       HapticFeedback.heavyImpact();
-      setState(() { _error = _mapError(error); });
+      setState(() {
+        _error = _mapError(error);
+      });
     } finally {
-      if (mounted) setState(() { _loading = false; });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -140,10 +149,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (idToken == null || idToken.isEmpty) {
         throw StateError('Google nao retornou idToken.');
       }
-      await ref.read(authProvider.notifier).loginGoogle(
-            idToken: idToken,
-            isAluno: _isAluno,
-          );
+      await ref
+          .read(authProvider.notifier)
+          .loginGoogle(idToken: idToken, isAluno: _isAluno);
       if (!mounted) return;
       context.go(_postLoginRedirect(context, isAluno: _isAluno));
     } catch (error) {
@@ -240,42 +248,84 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               color: Colors.white.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Row(children: [
-                              Expanded(child: GestureDetector(
-                                onTap: () => setState(() => _isAluno = false),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 180),
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: !_isAluno ? Colors.white.withValues(alpha: 0.18) : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(10),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap:
+                                        () => setState(() => _isAluno = false),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 180,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 10,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            !_isAluno
+                                                ? Colors.white.withValues(
+                                                  alpha: 0.18,
+                                                )
+                                                : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        'Personal',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: !_isAluno ? 1.0 : 0.5,
+                                          ),
+                                          fontWeight:
+                                              !_isAluno
+                                                  ? FontWeight.w700
+                                                  : FontWeight.w500,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  child: Text('Personal', textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(alpha: !_isAluno ? 1.0 : 0.5),
-                                      fontWeight: !_isAluno ? FontWeight.w700 : FontWeight.w500,
-                                      fontSize: 13,
-                                    )),
                                 ),
-                              )),
-                              Expanded(child: GestureDetector(
-                                onTap: () => setState(() => _isAluno = true),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 180),
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: _isAluno ? Colors.white.withValues(alpha: 0.18) : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(10),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap:
+                                        () => setState(() => _isAluno = true),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 180,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 10,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            _isAluno
+                                                ? Colors.white.withValues(
+                                                  alpha: 0.18,
+                                                )
+                                                : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        'Aluno',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: _isAluno ? 1.0 : 0.5,
+                                          ),
+                                          fontWeight:
+                                              _isAluno
+                                                  ? FontWeight.w700
+                                                  : FontWeight.w500,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  child: Text('Aluno', textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(alpha: _isAluno ? 1.0 : 0.5),
-                                      fontWeight: _isAluno ? FontWeight.w700 : FontWeight.w500,
-                                      fontSize: 13,
-                                    )),
                                 ),
-                              )),
-                            ]),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 18),
                           AuthField(
@@ -352,18 +402,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             onPressed: _submit,
                             isLoading: _loading,
                           ),
-                          if (_googleEnabled) ...[
+                          if (_googleEnabled || _googleStatusNote != null) ...[
                             const SizedBox(height: 12),
+                            const _AuthDivider(label: 'ou continue com'),
+                            const SizedBox(height: 12),
+                          ],
+                          if (_googleEnabled) ...[
                             AuthSecondaryButton(
                               label: 'Continuar com Google',
                               icon: Icons.g_mobiledata_rounded,
                               onPressed: _loadingGoogle ? null : _submitGoogle,
                             ),
                           ] else if (_googleStatusNote != null) ...[
-                            const SizedBox(height: 12),
                             AuthOperationalNotice(
                               icon: Icons.g_mobiledata_rounded,
-                              title: _googleStatusTitle ??
+                              title:
+                                  _googleStatusTitle ??
                                   'Google pendente no ambiente',
                               text: _googleStatusNote!,
                               action: _googleStatusAction,
@@ -402,6 +456,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AuthDivider extends StatelessWidget {
+  final String label;
+
+  const _AuthDivider({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.4),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
+        ),
+      ],
     );
   }
 }
