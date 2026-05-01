@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../data/notificacoes_repository.dart';
 
@@ -39,12 +38,13 @@ class NotificacoesScreen extends ConsumerWidget {
         onRefresh: reload,
         child: async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => ListView(
-            padding: const EdgeInsets.all(20),
-            children: const [
-              Text('Nao foi possivel carregar suas notificacoes agora.'),
-            ],
-          ),
+          error:
+              (_, __) => ListView(
+                padding: const EdgeInsets.all(20),
+                children: const [
+                  Text('Nao foi possivel carregar suas notificacoes agora.'),
+                ],
+              ),
           data: (items) {
             if (items.isEmpty) {
               return ListView(
@@ -56,17 +56,19 @@ class NotificacoesScreen extends ConsumerWidget {
                       color: isDark ? EagleTokens.darkCard : EagleTokens.card,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: isDark
-                            ? EagleTokens.darkLine
-                            : EagleTokens.lineSoft,
+                        color:
+                            isDark
+                                ? EagleTokens.darkLine
+                                : EagleTokens.lineSoft,
                       ),
                     ),
                     child: Text(
                       'Quando houver PR, mensagem importante ou alerta operacional, tudo aparece aqui.',
                       style: TextStyle(
-                        color: isDark
-                            ? EagleTokens.darkInkMute
-                            : EagleTokens.inkMute,
+                        color:
+                            isDark
+                                ? EagleTokens.darkInkMute
+                                : EagleTokens.inkMute,
                         height: 1.45,
                       ),
                     ),
@@ -81,20 +83,46 @@ class NotificacoesScreen extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final item = items[index];
-                return _NotificationTile(
-                  item: item,
-                  isDark: isDark,
-                  primary: primary,
-                  onTap: () async {
-                    if (!item.lida) {
-                      await repo.marcarLida(item.id);
-                      await reload();
-                    }
-                    final route = item.route;
-                    if (route != null && route.startsWith('/') && context.mounted) {
-                      context.push(route);
-                    }
-                  },
+                final group = _groupLabel(item.criadaEm);
+                final previousGroup =
+                    index == 0 ? null : _groupLabel(items[index - 1].criadaEm);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (index == 0 || group != previousGroup)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
+                        child: Text(
+                          group.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color:
+                                isDark
+                                    ? EagleTokens.darkInkMute
+                                    : EagleTokens.inkMute,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ),
+                    _NotificationTile(
+                      item: item,
+                      isDark: isDark,
+                      primary: primary,
+                      onTap: () async {
+                        if (!item.lida) {
+                          await repo.marcarLida(item.id);
+                          await reload();
+                        }
+                        final route = item.route;
+                        if (route != null &&
+                            route.startsWith('/') &&
+                            context.mounted) {
+                          context.push(route);
+                        }
+                      },
+                    ),
+                  ],
                 );
               },
             );
@@ -102,6 +130,35 @@ class NotificacoesScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+String _groupLabel(DateTime? date) {
+  if (date == null) return 'Anteriores';
+  final now = DateTime.now();
+  final local = date.toLocal();
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(local.year, local.month, local.day);
+  if (day == today) return 'Hoje';
+  if (day == today.subtract(const Duration(days: 1))) return 'Ontem';
+  return 'Anteriores';
+}
+
+Color _notifColor(String tipo, Color primary) {
+  switch (tipo.toLowerCase()) {
+    case 'risco':
+    case 'alerta':
+      return EagleTokens.bad;
+    case 'pag':
+    case 'pagamento':
+      return EagleTokens.good;
+    case 'ai':
+    case 'ia':
+      return EagleTokens.purple;
+    case 'feed':
+      return EagleTokens.warn;
+    default:
+      return primary;
   }
 }
 
@@ -124,79 +181,91 @@ class _NotificationTile extends StatelessWidget {
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final tipoColor = _notifColor(item.tipo, primary);
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: item.lida ? line : primary.withValues(alpha: 0.55),
-          ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: BrandPalette.soft(primary, dark: isDark),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(_iconFor(item.tipo), color: primary, size: 20),
+    return Opacity(
+      opacity: item.lida ? 0.75 : 1.0,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: item.lida ? line : tipoColor.withValues(alpha: 0.55),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.titulo,
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 15,
-                            fontWeight:
-                                item.lida ? FontWeight.w600 : FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      if (!item.lida)
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: primary,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                    ],
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: tipoColor.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _iconFor(item.tipo),
+                      color: tipoColor,
+                      size: 20,
+                    ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    item.mensagem,
-                    style: TextStyle(color: mute, height: 1.4),
-                  ),
-                  if (item.ctaLabel != null && item.ctaLabel!.isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    Text(
-                      item.ctaLabel!,
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w700,
+                  if (!item.lida)
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        width: 9,
+                        height: 9,
+                        decoration: BoxDecoration(
+                          color: tipoColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: cardBg, width: 2),
+                        ),
                       ),
                     ),
-                  ],
                 ],
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.titulo,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 15,
+                        fontWeight:
+                            item.lida ? FontWeight.w400 : FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      item.mensagem,
+                      style: TextStyle(color: mute, height: 1.4),
+                    ),
+                    if (item.ctaLabel != null && item.ctaLabel!.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        item.ctaLabel!,
+                        style: TextStyle(
+                          color: tipoColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
