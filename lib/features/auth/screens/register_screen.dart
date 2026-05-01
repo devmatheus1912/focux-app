@@ -267,16 +267,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                         ? 0
                                         : 8,
                               ),
-                              child: AuthPlanCard(
-                                title: plan.title,
-                                subtitle: plan.subtitle,
-                                price: plan.price,
-                                selected: _selectedPlan == plan,
-                                onTap: () {
-                                  setState(() {
-                                    _selectedPlan = plan;
-                                  });
-                                },
+                              child: Column(
+                                children: [
+                                  AuthPlanCard(
+                                    title: plan.title,
+                                    subtitle: plan.subtitle,
+                                    price: plan.price,
+                                    selected: _selectedPlan == plan,
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedPlan = plan;
+                                      });
+                                    },
+                                  ),
+                                  if (plan != _RegistrationPlan.free)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 6),
+                                      child: Text(
+                                        '5 dias grÃ¡tis',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.6,
+                                          ),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
                           );
