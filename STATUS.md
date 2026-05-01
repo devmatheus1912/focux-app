@@ -305,10 +305,10 @@
 
 | # | Task | Prioridade | Tempo | Status |
 |---|------|-----------|-------|--------|
-| 13 | Cache offline (treino do dia + exercícios) | P1 | 16h | ⬜ |
+| 13 | Cache offline (treino do dia + exercícios) | P1 | 16h | ✅ |
 | 14 | Onboarding wizard (4 passos) | P1 | 8h | ✅ |
-| 15 | Notificações inteligentes contextuais | P2 | 8h | ⬜ |
-| 16 | Cache de vídeos de exercícios | P2 | 6h | ⬜ |
+| 15 | Notificações inteligentes contextuais | P2 | 8h | ✅ |
+| 16 | Cache de vídeos de exercícios | P2 | 6h | ✅ |
 | 17 | Haptic feedback + micro-animações | P2 | 4h | ✅ |
 | 18 | Timer de descanso no treino | P3 | 8h | ✅ |
 | 19 | Deep links universais (AASA + App Links) | P2 | 3h | ✅ |
@@ -322,10 +322,10 @@
 | 21 | Apple Health / Google Fit | P2 | 16h | ⬜ |
 | 22 | Comparativo evolução (Before/After) | P3 | 12h | ⬜ |
 | 23 | Widget iOS/Android na Home | P3 | 12h | ⬜ |
-| 24 | Relatório PDF premium | P3 | 8h | ⬜ |
+| 24 | Relatório PDF premium | P3 | 8h | ✅ |
 | 25 | Modo treino presencial (tela grande) | P3 | 12h | ⬜ |
-| 26 | Analytics preditivo (risco churn) | P3 | 8h | ⬜ |
-| 27 | Programa referral aprimorado | P3 | 6h | ⬜ |
+| 26 | Analytics preditivo (risco churn) | P3 | 8h | ✅ |
+| 27 | Programa referral aprimorado | P3 | 6h | ✅ |
 | 28 | Botão WhatsApp contextual | P3 | 2h | ✅ |
 
 ### 🔵 SPRINT 4 — "Escala Nacional" (Semana 9-12)
@@ -334,33 +334,33 @@
 | # | Task | Prioridade | Tempo | Status |
 |---|------|-----------|-------|--------|
 | 29 | i18n (pt-BR + en-US + es-ES) | P2 | 16h | ⬜ |
-| 30 | ASO (App Store Optimization) | P2 | 4h | ⬜ |
+| 30 | ASO (App Store Optimization) | P2 | 4h | ✅ |
 | 31 | Testes de carga backend (1000+ req/s) | P2 | 8h | ⬜ |
-| 32 | CDN para assets estáticos | P2 | 4h | ⬜ |
-| 33 | Rate limiting refinado | P2 | 4h | ⬜ |
-| 34 | Monitoring dashboard (Grafana) | P2 | 6h | ⬜ |
-| 35 | Documentação API (Swagger/OpenAPI) | P2 | 8h | ⬜ |
+| 32 | CDN para assets estáticos | P2 | 4h | ✅ |
+| 33 | Rate limiting refinado | P2 | 4h | ✅ |
+| 34 | Monitoring dashboard (Grafana) | P2 | 6h | ✅ |
+| 35 | Documentação API (Swagger/OpenAPI) | P2 | 8h | ✅ |
 
 ---
 
 ## 📱 CHECKLIST FINAL APPLE APP STORE
 
-- [ ] App não crasha em nenhuma tela
+- [x] App não crasha em nenhuma tela
 - [x] Tela de exclusão de conta funcional
 - [x] Botão restaurar compras presente
 - [x] Política de privacidade linkada no app
 - [x] Termos de uso linkados no app
 - [x] Credenciais demo para reviewer
 - [ ] Screenshots para todos os tamanhos obrigatórios
-- [ ] Nenhum texto placeholder/lorem ipsum
-- [ ] Todas as permissões têm purpose strings (✅ já feito)
+- [x] Nenhum texto placeholder/lorem ipsum
+- [x] Todas as permissões têm purpose strings (✅ já feito)
 - [x] Deep links funcionando
 - [ ] IAP testado em sandbox
-- [ ] App Icon sem transparência (✅ já feito)
-- [ ] Sem APIs privadas
-- [ ] Performance aceitável em iPhone SE (2nd gen)
-- [ ] Dark mode sem bugs visuais
-- [ ] Content moderation no feed/comunidade
+- [x] App Icon sem transparência (✅ já feito)
+- [x] Sem APIs privadas
+- [x] Performance aceitável em iPhone SE (2nd gen)
+- [x] Dark mode sem bugs visuais
+- [x] Content moderation no feed/comunidade
 
 ---
 
@@ -383,7 +383,7 @@
 | Dor do Mercado | MFIT | Wiki4Fit | Vedius | **FOCUX** |
 |---------------|------|----------|--------|-----------|
 | App trava/lento | ⚠️ | ❌ | ⚠️ | ✅ Flutter nativo |
-| Sem modo offline | ❌ | ❌ | ❌ | 🔜 Sprint 2 |
+| Sem modo offline | ❌ | ❌ | ❌ | ✅ Cache offline |
 | Notificações spam | ❌ | ❌ | ⚠️ | 🔜 Sprint 2 |
 | Sem IA real | ❌ | ❌ | ❌ | ✅ Claude API |
 | Preço abusivo | ⚠️ | ❌ | ❌ | ✅ Modelo justo |
@@ -391,7 +391,7 @@
 | Sem gamificação | ❌ | ❌ | ❌ | ✅ Badges+Streaks |
 | Sem white-label | 💰 | 💰 | 💰 | ✅ Desde Premium |
 | Sem chat nativo | ❌ | ❌ | ⚠️ | ✅ WebSocket |
-| Onboarding ruim | ❌ | ❌ | ⚠️ | 🔜 Sprint 2 |
+| Onboarding ruim | ❌ | ❌ | ⚠️ | ✅ 3-page wizard |
 
 ---
 
@@ -411,9 +411,9 @@
 > Atualize esta seção a cada task concluída e faça git commit.
 
 ### Sprint 1 Progress: 11/12 ✅✅✅✅✅✅✅✅✅✅✅⬜
-### Sprint 2 Progress: 5/8 ✅✅✅✅✅⬜⬜⬜
-### Sprint 3 Progress: 1/8 ✅⬜⬜⬜⬜⬜⬜⬜
-### Sprint 4 Progress: 0/7 ⬜⬜⬜⬜⬜⬜⬜
+### Sprint 2 Progress: 8/8 ✅✅✅✅✅✅✅✅ ✅ COMPLETO!
+### Sprint 3 Progress: 4/8 ✅✅✅✅⬜⬜⬜⬜
+### Sprint 4 Progress: 5/7 ✅✅✅✅✅⬜⬜
 
 ---
 
