@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,13 +36,14 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
 
     setState(() => _uploadingPhoto = true);
     try {
-      final logoUrl = await MediaUploadService(ref.read(apiClientProvider))
-          .uploadBytes(
-            bytes: await file.readAsBytes(),
-            filename: file.name,
-            folder: 'perfil',
-            resourceType: 'image',
-          );
+      final logoUrl = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        folder: 'perfil',
+        resourceType: 'image',
+      );
 
       await ref.read(perfilRepositoryProvider).atualizar(logoUrl: logoUrl);
       ref.invalidate(perfilProvider);
@@ -52,9 +55,9 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao enviar foto: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao enviar foto: $error')));
     } finally {
       if (mounted) {
         setState(() => _uploadingPhoto = false);
@@ -83,44 +86,46 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     final dashboardAsync = ref.watch(dashboardProvider);
 
     return perfilAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, _) => Scaffold(
-        body: Center(child: Text('Erro: $error')),
-      ),
-      data: (perfil) => dashboardAsync.when(
-        loading: () => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
-        error: (_, __) => _PerfilBody(
-          perfil: perfil,
-          dashboard: DashboardData(
-            totalAlunos: 0,
-            alunosAtivos: 0,
-            planoAtual: perfil.plano,
-            limiteAlunos: 0,
-            nomePersonal: perfil.nome,
-            logoUrl: perfil.logoUrl,
-            corPrimaria: perfil.corPrimaria,
-            corSecundaria: perfil.corSecundaria,
-            descricaoProfissional: perfil.descricaoProfissional,
-            instagram: perfil.instagram,
+      loading:
+          () =>
+              const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, _) => Scaffold(body: Center(child: Text('Erro: $error'))),
+      data:
+          (perfil) => dashboardAsync.when(
+            loading:
+                () => const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                ),
+            error:
+                (_, __) => _PerfilBody(
+                  perfil: perfil,
+                  dashboard: DashboardData(
+                    totalAlunos: 0,
+                    alunosAtivos: 0,
+                    planoAtual: perfil.plano,
+                    limiteAlunos: 0,
+                    nomePersonal: perfil.nome,
+                    logoUrl: perfil.logoUrl,
+                    corPrimaria: perfil.corPrimaria,
+                    corSecundaria: perfil.corSecundaria,
+                    descricaoProfissional: perfil.descricaoProfissional,
+                    instagram: perfil.instagram,
+                  ),
+                  uploadingPhoto: _uploadingPhoto,
+                  onPickPhoto: _pickAndUploadPhoto,
+                  onEditPerfil: () => _openEditPerfil(perfil),
+                  onLogout: _logout,
+                ),
+            data:
+                (dashboard) => _PerfilBody(
+                  perfil: perfil,
+                  dashboard: dashboard,
+                  uploadingPhoto: _uploadingPhoto,
+                  onPickPhoto: _pickAndUploadPhoto,
+                  onEditPerfil: () => _openEditPerfil(perfil),
+                  onLogout: _logout,
+                ),
           ),
-          uploadingPhoto: _uploadingPhoto,
-          onPickPhoto: _pickAndUploadPhoto,
-          onEditPerfil: () => _openEditPerfil(perfil),
-          onLogout: _logout,
-        ),
-        data: (dashboard) => _PerfilBody(
-          perfil: perfil,
-          dashboard: dashboard,
-          uploadingPhoto: _uploadingPhoto,
-          onPickPhoto: _pickAndUploadPhoto,
-          onEditPerfil: () => _openEditPerfil(perfil),
-          onLogout: _logout,
-        ),
-      ),
     );
   }
 }
@@ -164,12 +169,9 @@ class _PerfilBody extends StatelessWidget {
 
     final stats = [
       ('Alunos', dashboard.totalAlunos.toString()),
-      ('Ativos', dashboard.alunosAtivos.toString()),
-      (
-        'Limite',
-        dashboard.limiteAlunos > 0 ? dashboard.limiteAlunos.toString() : 'Livre',
-      ),
-      ('Plano', _formatPlanLabel(dashboard.planoAtual)),
+      ('Treinos', '0'),
+      ('Meses', '0'),
+      ('Avaliação', '5.0'),
     ];
 
     final swatches = <Color>[
@@ -186,22 +188,23 @@ class _PerfilBody extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: Container(
+              height: 280,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: isDark
-                      ? const [Color(0xFF1C3273), Color(0xFF060D28)]
-                      : [primaryColor, secondaryColor],
+                  transform: const GradientRotation(160 * math.pi / 180),
+                  colors:
+                      isDark
+                          ? const [Color(0xFF1C3273), Color(0xFF060D28)]
+                          : [primaryColor, secondaryColor],
                 ),
               ),
               child: Stack(
                 children: [
                   Positioned.fill(
                     child: IgnorePointer(
-                      child: CustomPaint(
-                        painter: _GridTexturePainter(),
-                      ),
+                      child: CustomPaint(painter: _GridTexturePainter()),
                     ),
                   ),
                   SafeArea(
@@ -215,7 +218,11 @@ class _PerfilBody extends StatelessWidget {
                             children: [
                               _HeroAction(
                                 icon: Icons.arrow_back_ios_new,
-                                onTap: () => safePopOrGo(context, '/dashboard/personal'),
+                                onTap:
+                                    () => safePopOrGo(
+                                      context,
+                                      '/dashboard/personal',
+                                    ),
                               ),
                               Text(
                                 'Perfil',
@@ -265,21 +272,32 @@ class _PerfilBody extends StatelessWidget {
                         const SizedBox(height: 10),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 6,
+                            horizontal: 12,
+                            vertical: 4,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(999),
                           ),
-                          child: Text(
-                            'PLANO ${_formatPlanLabel(perfil.plano)}',
-                            style: const TextStyle(
-                              color: Color(0xFFFFD37A),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.6,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.star_rounded,
+                                color: EagleTokens.gold,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'PLANO ${_formatProfilePlan(perfil.plano)}',
+                                style: const TextStyle(
+                                  color: EagleTokens.gold,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 22),
@@ -302,14 +320,16 @@ class _PerfilBody extends StatelessWidget {
                                     horizontal: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    border: index < stats.length - 1
-                                        ? Border(
-                                            right: BorderSide(
-                                              color: Colors.white
-                                                  .withValues(alpha: 0.10),
-                                            ),
-                                          )
-                                        : null,
+                                    border:
+                                        index < stats.length - 1
+                                            ? Border(
+                                              right: BorderSide(
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.10,
+                                                ),
+                                              ),
+                                            )
+                                            : null,
                                   ),
                                   child: Column(
                                     children: [
@@ -351,176 +371,170 @@ class _PerfilBody extends StatelessWidget {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
             sliver: SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  _CardSection(
-                    title: 'Identidade visual',
-                    trailingLabel: 'Editar',
-                    onTap: () => context.push('/identidade-visual'),
-                    isDark: isDark,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: [
-                            ...swatches.map(
-                              (color) => _ColorSwatch(
-                                color: color,
-                                borderColor: line,
-                              ),
-                            ),
-                            _AddSwatch(borderColor: line, mute: mute),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Cores aplicadas na sua marca, landing page e experiencia white-label.',
-                          style: TextStyle(
-                            color: mute,
-                            fontSize: 13,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _CardSection(
-                    title: 'Informacoes',
-                    isDark: isDark,
-                    child: Column(
-                      children: [
-                        _InfoTile(
-                          icon: Icons.email_outlined,
-                          label: 'Email',
-                          value: perfil.email,
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                        ),
-                        _InfoTile(
-                          icon: Icons.badge_outlined,
-                          label: 'CREF',
-                          value: perfil.cref ?? 'Nao informado',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                        ),
-                        _InfoTile(
-                          icon: Icons.trending_up_outlined,
-                          label: 'Especialidade',
-                          value: perfil.especialidades ??
-                              perfil.especialidade ??
-                              'Nao informada',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                        ),
-                        _InfoTile(
-                          icon: Icons.alternate_email,
-                          label: 'Instagram',
-                          value: _formatInstagram(
-                            perfil.instagram ?? dashboard.instagram,
-                          ),
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          showDivider: false,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if ((perfil.descricaoProfissional ??
-                              dashboard.descricaoProfissional ??
-                              '')
-                          .trim()
-                          .isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    _CardSection(
-                      title: 'Bio profissional',
-                      isDark: isDark,
-                      child: Text(
-                        perfil.descricaoProfissional ??
-                            dashboard.descricaoProfissional ??
-                            '',
-                        style: TextStyle(
-                          color: ink,
-                          height: 1.55,
-                        ),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  _CardSection(
-                    title: 'Conta e plano',
-                    isDark: isDark,
-                    child: Column(
-                      children: [
-                        _ActionTile(
-                          icon: Icons.auto_awesome_outlined,
-                          label: 'Copiloto IA',
-                          value: '${_formatPlanLabel(perfil.plano)} ativo',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          onTap: () => context.go('/ia/copiloto'),
-                        ),
-                        _ActionTile(
-                          icon: Icons.workspace_premium_outlined,
-                          label: 'Planos e assinatura',
-                          value: 'Gerenciar',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          onTap: () => context.push('/planos'),
-                        ),
-                        _ActionTile(
-                          icon: Icons.bolt_outlined,
-                          label: 'Migracao Magica',
-                          value: 'Abrir ferramenta',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          onTap: () => context.push('/migracao-magica'),
-                        ),
-                        _ActionTile(
-                          icon: Icons.logout,
-                          label: 'Sair da conta',
-                          value: '',
-                          accent: EagleTokens.bad,
-                          mute: mute,
-                          line: line,
-                          danger: true,
-                          showDivider: false,
-                          onTap: onLogout,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
+              delegate: SliverChildListDelegate([
+                _CardSection(
+                  title: 'Identidade visual',
+                  trailingLabel: 'Editar',
+                  onTap: () => context.push('/identidade-visual'),
+                  isDark: isDark,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: onEditPerfil,
-                          icon: const Icon(Icons.edit_outlined),
-                          label: const Text('Editar perfil'),
-                        ),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          ...swatches.map(
+                            (color) =>
+                                _ColorSwatch(color: color, borderColor: line),
+                          ),
+                          _AddSwatch(borderColor: line, mute: mute),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: () => context.push('/paywall'),
-                          icon: const Icon(Icons.north_east),
-                          label: const Text('Ver upgrades'),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Cores aplicadas na sua marca, landing page e experiencia white-label.',
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 13,
+                          height: 1.4,
                         ),
                       ),
                     ],
                   ),
+                ),
+                const SizedBox(height: 12),
+                _CardSection(
+                  title: 'Informacoes',
+                  isDark: isDark,
+                  child: Column(
+                    children: [
+                      _InfoTile(
+                        icon: Icons.email_outlined,
+                        label: 'Email',
+                        value: perfil.email,
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                      ),
+                      _InfoTile(
+                        icon: Icons.badge_outlined,
+                        label: 'CREF',
+                        value: perfil.cref ?? 'Nao informado',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                      ),
+                      _InfoTile(
+                        icon: Icons.trending_up_outlined,
+                        label: 'Especialidade',
+                        value:
+                            perfil.especialidades ??
+                            perfil.especialidade ??
+                            'Nao informada',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                      ),
+                      _InfoTile(
+                        icon: Icons.alternate_email,
+                        label: 'Instagram',
+                        value: _formatInstagram(
+                          perfil.instagram ?? dashboard.instagram,
+                        ),
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        showDivider: false,
+                      ),
+                    ],
+                  ),
+                ),
+                if ((perfil.descricaoProfissional ??
+                        dashboard.descricaoProfissional ??
+                        '')
+                    .trim()
+                    .isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _CardSection(
+                    title: 'Bio profissional',
+                    isDark: isDark,
+                    child: Text(
+                      perfil.descricaoProfissional ??
+                          dashboard.descricaoProfissional ??
+                          '',
+                      style: TextStyle(color: ink, height: 1.55),
+                    ),
+                  ),
                 ],
-              ),
+                const SizedBox(height: 12),
+                _CardSection(
+                  title: 'Conta e plano',
+                  isDark: isDark,
+                  child: Column(
+                    children: [
+                      _ActionTile(
+                        icon: Icons.auto_awesome_outlined,
+                        label: 'Copiloto IA',
+                        value: '${_formatPlanLabel(perfil.plano)} ativo',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => context.go('/ia/copiloto'),
+                      ),
+                      _ActionTile(
+                        icon: Icons.workspace_premium_outlined,
+                        label: 'Planos e assinatura',
+                        value: 'Gerenciar',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => context.push('/planos'),
+                      ),
+                      _ActionTile(
+                        icon: Icons.bolt_outlined,
+                        label: 'Migracao Magica',
+                        value: 'Abrir ferramenta',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => context.push('/migracao-magica'),
+                      ),
+                      _ActionTile(
+                        icon: Icons.logout,
+                        label: 'Sair da conta',
+                        value: '',
+                        accent: EagleTokens.bad,
+                        mute: mute,
+                        line: line,
+                        danger: true,
+                        showDivider: false,
+                        onTap: onLogout,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: onEditPerfil,
+                        icon: const Icon(Icons.edit_outlined),
+                        label: const Text('Editar perfil'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () => context.push('/paywall'),
+                        icon: const Icon(Icons.north_east),
+                        label: const Text('Ver upgrades'),
+                      ),
+                    ),
+                  ],
+                ),
+              ]),
             ),
           ),
         ],
@@ -577,17 +591,20 @@ class _Avatar extends StatelessWidget {
           radius: 44,
           backgroundColor: Colors.white,
           backgroundImage:
-              logoUrl != null && logoUrl!.isNotEmpty ? NetworkImage(logoUrl!) : null,
-          child: logoUrl == null || logoUrl!.isEmpty
-              ? Text(
-                  _initials(nome),
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: primaryColor,
-                  ),
-                )
-              : null,
+              logoUrl != null && logoUrl!.isNotEmpty
+                  ? NetworkImage(logoUrl!)
+                  : null,
+          child:
+              logoUrl == null || logoUrl!.isEmpty
+                  ? Text(
+                    _initials(nome),
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
+                      color: primaryColor,
+                    ),
+                  )
+                  : null,
         ),
         Positioned(
           right: 0,
@@ -596,26 +613,23 @@ class _Avatar extends StatelessWidget {
             onTap: loading ? null : onTap,
             borderRadius: BorderRadius.circular(26),
             child: Container(
-              width: 28,
-              height: 28,
+              width: 26,
+              height: 26,
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(color: primaryColor, width: 2),
               ),
-              child: loading
-                  ? Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: primaryColor,
-                      ),
-                    )
-                  : Icon(
-                      Icons.camera_alt_outlined,
-                      size: 14,
-                      color: primaryColor,
-                    ),
+              child:
+                  loading
+                      ? Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: primaryColor,
+                        ),
+                      )
+                      : Icon(Icons.edit, size: 14, color: primaryColor),
             ),
           ),
         ),
@@ -663,9 +677,9 @@ class _CardSection extends StatelessWidget {
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: ink,
-                        ),
+                      fontWeight: FontWeight.w700,
+                      color: ink,
+                    ),
                   ),
                 ),
                 if (trailingLabel != null)
@@ -695,10 +709,7 @@ class _ColorSwatch extends StatelessWidget {
   final Color color;
   final Color borderColor;
 
-  const _ColorSwatch({
-    required this.color,
-    required this.borderColor,
-  });
+  const _ColorSwatch({required this.color, required this.borderColor});
 
   @override
   Widget build(BuildContext context) {
@@ -728,10 +739,7 @@ class _AddSwatch extends StatelessWidget {
   final Color borderColor;
   final Color mute;
 
-  const _AddSwatch({
-    required this.borderColor,
-    required this.mute,
-  });
+  const _AddSwatch({required this.borderColor, required this.mute});
 
   @override
   Widget build(BuildContext context) {
@@ -773,17 +781,19 @@ class _InfoTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 13),
       decoration: BoxDecoration(
-        border: showDivider
-            ? Border(bottom: BorderSide(color: line, width: 0.5))
-            : null,
+        border:
+            showDivider
+                ? Border(bottom: BorderSide(color: line, width: 0.5))
+                : null,
       ),
       child: Row(
         children: [
           _LeadingIcon(
             icon: icon,
-            background: isDark
-                ? accent.withValues(alpha: 0.14)
-                : BrandPalette.soft(accent),
+            background:
+                isDark
+                    ? accent.withValues(alpha: 0.14)
+                    : BrandPalette.soft(accent),
             color: accent,
           ),
           const SizedBox(width: 12),
@@ -843,30 +853,31 @@ class _ActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = danger
-        ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
-        : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+    final ink =
+        danger
+            ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
+            : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
 
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 13),
         decoration: BoxDecoration(
-          border: showDivider
-              ? Border(bottom: BorderSide(color: line, width: 0.5))
-              : null,
+          border:
+              showDivider
+                  ? Border(bottom: BorderSide(color: line, width: 0.5))
+                  : null,
         ),
         child: Row(
           children: [
             _LeadingIcon(
               icon: icon,
-              background: danger
-                  ? (isDark
-                      ? const Color(0x24FF8B8B)
-                      : EagleTokens.badSoft)
-                  : (isDark
-                      ? Colors.white.withValues(alpha: 0.06)
-                      : EagleTokens.lineSoft),
+              background:
+                  danger
+                      ? (isDark ? const Color(0x24FF8B8B) : EagleTokens.badSoft)
+                      : (isDark
+                          ? Colors.white.withValues(alpha: 0.06)
+                          : EagleTokens.lineSoft),
               color: danger ? ink : accent,
             ),
             const SizedBox(width: 12),
@@ -928,9 +939,10 @@ class _LeadingIcon extends StatelessWidget {
 class _GridTexturePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.06)
-      ..strokeWidth = 0.5;
+    final paint =
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.06)
+          ..strokeWidth = 0.5;
 
     const step = 26.0;
     for (double x = 0; x < size.width; x += step) {
@@ -966,6 +978,11 @@ String _formatPlanLabel(String value) {
   }
 }
 
+String _formatProfilePlan(String value) {
+  final label = _formatPlanLabel(value);
+  return label == 'PREMIUM' ? 'PRO' : label;
+}
+
 String _formatInstagram(String? value) {
   if (value == null || value.trim().isEmpty) {
     return 'Nao informado';
@@ -975,7 +992,10 @@ String _formatInstagram(String? value) {
 }
 
 String _initials(String nome) {
-  final parts = nome.trim().split(RegExp(r'\s+')).where((item) => item.isNotEmpty);
+  final parts = nome
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((item) => item.isNotEmpty);
   if (parts.isEmpty) return 'FP';
   if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
   return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
