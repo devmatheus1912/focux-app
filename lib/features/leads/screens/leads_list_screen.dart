@@ -8,22 +8,6 @@ import 'lead_detail_screen.dart';
 import 'add_lead_screen.dart';
 import 'leads_kanban_screen.dart';
 
-const _statusLabels = {
-  'LEAD': 'Lead',
-  'TESTE': 'Teste',
-  'ATIVO': 'Ativo',
-  'INADIMPLENTE': 'Inadimplente',
-  'CANCELADO': 'Cancelado',
-};
-
-Color _statusColor(String status, Color fallback) {
-  if (status == 'LEAD') return fallback;
-  if (status == 'TESTE') return EagleTokens.warn;
-  if (status == 'ATIVO') return EagleTokens.good;
-  if (status == 'INADIMPLENTE') return EagleTokens.bad;
-  return EagleTokens.inkMute;
-}
-
 class LeadsListScreen extends ConsumerStatefulWidget {
   const LeadsListScreen({super.key});
 
@@ -47,8 +31,14 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     try {
       final repo = LeadRepository(ref.read(apiClientProvider));
       final leads = await repo.listar(status: _filtroStatus);
-      if (mounted) setState(() { _leads = leads; _loading = false; });
-    } catch (e) { debugPrint('[Focux] Error: $e');
+      if (mounted) {
+        setState(() {
+          _leads = leads;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -57,153 +47,325 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final primaryDeep = BrandPalette.deep(primary);
+    final leadLeads = _leads.where((lead) => lead.status == 'LEAD').toList();
+    final testeLeads = _leads.where((lead) => lead.status == 'TESTE').toList();
+    final ativoLeads = _leads.where((lead) => lead.status == 'ATIVO').toList();
+    Future<void> openLead(Lead lead) async {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => LeadDetailScreen(lead: lead)),
+      );
+      _load();
+    }
+
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
-        title: Text('Funil de Leads', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
-        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
+        title: Text(
+          'Funil de Leads',
+          style: TextStyle(
+            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        iconTheme: IconThemeData(
+          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.view_column, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+            icon: Icon(
+              Icons.view_column,
+              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            ),
             tooltip: 'Visão Kanban',
             onPressed: () async {
-              await Navigator.push(context, MaterialPageRoute(builder: (_) => const LeadsKanbanScreen()));
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LeadsKanbanScreen()),
+              );
               _load();
             },
           ),
-          IconButton(icon: Icon(Icons.refresh, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), onPressed: _load),
+          IconButton(
+            icon: Icon(
+              Icons.refresh,
+              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            ),
+            onPressed: _load,
+          ),
         ],
       ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: [primary, primaryDeep]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: primary.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [
+            BoxShadow(
+              color: primary.withValues(alpha: 0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: FloatingActionButton.extended(
           onPressed: () async {
-            await Navigator.push(context, MaterialPageRoute(builder: (_) => const AddLeadScreen()));
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddLeadScreen()),
+            );
             _load();
           },
           backgroundColor: Colors.transparent,
           elevation: 0,
           icon: const Icon(Icons.person_add, color: Colors.white),
-          label: const Text('Novo Lead', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+          label: const Text(
+            'Novo Lead',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          ),
         ),
       ),
-      body: Column(children: [
-        Container(
-          width: double.infinity,
-          margin: const EdgeInsets.fromLTRB(12, 12, 12, 4),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: primarySoft,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: primary.withValues(alpha: 0.18)),
-          ),
-          child: Text(
-            'Funil de Vendas: qualifique contatos, acompanhe testes e converta alunos.',
-            style: TextStyle(
-              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-            ),
-          ),
-        ),
-        _FiltroBar(
-          selecionado: _filtroStatus,
-          onChanged: (s) { setState(() => _filtroStatus = s); _load(); },
-        ),
-        Expanded(
-          child: _loading
+      body:
+          _loading
               ? Center(child: CircularProgressIndicator(color: primary))
               : _leads.isEmpty
-                  ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      Container(width: 56, height: 56, decoration: BoxDecoration(color: primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(Icons.person_search, color: primary, size: 28)),
-                      const SizedBox(height: 12),
-                      Text(_filtroStatus != null ? 'Nenhum lead "${_statusLabels[_filtroStatus]}"' : 'Nenhum lead cadastrado', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 14)),
-                    ]))
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(12, 4, 12, 80),
-                      itemCount: _leads.length,
-                      itemBuilder: (_, i) => _LeadCard(
-                        lead: _leads[i],
-                        onTap: () async {
-                          await Navigator.push(context, MaterialPageRoute(
-                            builder: (_) => LeadDetailScreen(lead: _leads[i]),
-                          ));
-                          _load();
-                        },
+              ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.person_search,
+                        color: primary,
+                        size: 28,
                       ),
                     ),
-        ),
-      ]),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Nenhum lead cadastrado',
+                      style: TextStyle(
+                        color:
+                            isDark
+                                ? EagleTokens.darkInkMute
+                                : EagleTokens.inkMute,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+              : SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _KanbanColumn(
+                      title: 'LEAD',
+                      color: primary,
+                      leads: leadLeads,
+                      isDark: isDark,
+                      onTap: openLead,
+                    ),
+                    const SizedBox(width: 12),
+                    _KanbanColumn(
+                      title: 'TESTE',
+                      color: EagleTokens.warn,
+                      leads: testeLeads,
+                      isDark: isDark,
+                      onTap: openLead,
+                    ),
+                    const SizedBox(width: 12),
+                    _KanbanColumn(
+                      title: 'ATIVO',
+                      color: EagleTokens.good,
+                      leads: ativoLeads,
+                      isDark: isDark,
+                      onTap: openLead,
+                    ),
+                  ],
+                ),
+              ),
     );
   }
 }
 
-class _FiltroBar extends StatelessWidget {
-  final String? selecionado;
-  final ValueChanged<String?> onChanged;
-  const _FiltroBar({required this.selecionado, required this.onChanged});
+class _KanbanColumn extends StatelessWidget {
+  final String title;
+  final Color color;
+  final List<Lead> leads;
+  final bool isDark;
+  final ValueChanged<Lead> onTap;
 
-  @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    child: Row(children: [
-      FilterChip(
-        label: const Text('Todos'),
-        selected: selecionado == null,
-        onSelected: (_) => onChanged(null),
-      ),
-      const SizedBox(width: 8),
-      ..._statusLabels.entries.map((e) => Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: FilterChip(
-          label: Text(e.value),
-          selected: selecionado == e.key,
-          selectedColor: _statusColor(e.key, Theme.of(context).colorScheme.primary).withValues(alpha: 0.2),
-          onSelected: (_) => onChanged(selecionado == e.key ? null : e.key),
-        ),
-      )),
-    ]),
-  );
-}
-
-class _LeadCard extends StatelessWidget {
-  final Lead lead;
-  final VoidCallback onTap;
-  const _LeadCard({required this.lead, required this.onTap});
+  const _KanbanColumn({
+    required this.title,
+    required this.color,
+    required this.leads,
+    required this.isDark,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColor(lead.status, Theme.of(context).colorScheme.primary);
-    return Card(
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final border = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return SizedBox(
+      width: 240,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '${leads.length}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ...leads.map(
+            (lead) => _KanbanCard(
+              lead: lead,
+              color: color,
+              isDark: isDark,
+              onTap: () => onTap(lead),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(top: 6),
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: border, width: 1.5),
+            ),
+            child: Center(
+              child: Text(
+                '+ Adicionar',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: mute,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _KanbanCard extends StatelessWidget {
+  final Lead lead;
+  final Color color;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _KanbanCard({
+    required this.lead,
+    required this.color,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
       margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border(left: BorderSide(color: color, width: 3)),
+        boxShadow:
+            isDark
+                ? null
+                : [
+                  const BoxShadow(
+                    color: Color(0x0A000000),
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+      ),
       child: ListTile(
         onTap: onTap,
-        leading: CircleAvatar(
-          backgroundColor: color.withValues(alpha: 0.15),
-          child: Text(lead.nome[0].toUpperCase(),
-              style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+        contentPadding: const EdgeInsets.fromLTRB(12, 4, 8, 4),
+        title: Text(
+          lead.nome,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: ink,
+          ),
         ),
-        title: Text(lead.nome, style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text([
-          if (lead.telefone != null) lead.telefone!,
-          if (lead.origem != null) lead.origem!,
-          'desde ${lead.criadoEm}',
-        ].join(' · ')),
-        trailing: Chip(
-          label: Text(_statusLabels[lead.status] ?? lead.status,
-              style: const TextStyle(fontSize: 11)),
-          backgroundColor: color.withValues(alpha: 0.15),
-          labelStyle: TextStyle(color: color),
-          padding: EdgeInsets.zero,
+        subtitle: Text(
+          lead.objetivo ?? lead.origem ?? '',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 11, color: mute),
+        ),
+        trailing: Wrap(
+          spacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            if (lead.telefone != null && lead.telefone!.isNotEmpty)
+              Icon(
+                Icons.chat_bubble_outline,
+                size: 16,
+                color: EagleTokens.good,
+              ),
+            Icon(Icons.chevron_right_rounded, size: 18, color: mute),
+          ],
         ),
       ),
     );
