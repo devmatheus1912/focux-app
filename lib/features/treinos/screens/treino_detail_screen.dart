@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -20,13 +22,20 @@ class TreinoDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       body: treinoAsync.when(
-        loading: () => Center(
-          child: CircularProgressIndicator(
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
+        loading:
+            () => Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
         error: (e, _) => Center(child: Text('Erro: $e')),
-        data: (treino) => _TreinoDetailBody(treino: treino, treinoId: treinoId, isDark: isDark, ref: ref),
+        data:
+            (treino) => _TreinoDetailBody(
+              treino: treino,
+              treinoId: treinoId,
+              isDark: isDark,
+              ref: ref,
+            ),
       ),
     );
   }
@@ -37,7 +46,12 @@ class _TreinoDetailBody extends StatelessWidget {
   final int treinoId;
   final bool isDark;
   final WidgetRef ref;
-  const _TreinoDetailBody({required this.treino, required this.treinoId, required this.isDark, required this.ref});
+  const _TreinoDetailBody({
+    required this.treino,
+    required this.treinoId,
+    required this.isDark,
+    required this.ref,
+  });
 
   Future<void> _openMenu(BuildContext context) async {
     final action = await showModalBottomSheet<String>(
@@ -105,7 +119,9 @@ class _TreinoDetailBody extends StatelessWidget {
 
     switch (action) {
       case 'add':
-        final added = await context.push<bool>('/treinos/$treinoId/exercicios/add');
+        final added = await context.push<bool>(
+          '/treinos/$treinoId/exercicios/add',
+        );
         if (added == true) {
           ref.invalidate(treinoProvider(treinoId));
         }
@@ -132,9 +148,7 @@ class _TreinoDetailBody extends StatelessWidget {
           await repo.salvarComoTemplate(treinoId);
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Treino salvo como template.'),
-              ),
+              const SnackBar(content: Text('Treino salvo como template.')),
             );
           }
         } catch (e) {
@@ -160,7 +174,10 @@ class _TreinoDetailBody extends StatelessWidget {
     // Group by muscle
     final grouped = <String, List<TreinoExercicioItem>>{};
     for (final te in treino.exercicios) {
-      final group = te.exercicio.musculoAlvo?.isNotEmpty == true ? te.exercicio.musculoAlvo! : 'Outros';
+      final group =
+          te.exercicio.musculoAlvo?.isNotEmpty == true
+              ? te.exercicio.musculoAlvo!
+              : 'Outros';
       grouped.putIfAbsent(group, () => []).add(te);
     }
 
@@ -184,7 +201,14 @@ class _TreinoDetailBody extends StatelessWidget {
                 children: [
                   Icon(Icons.auto_awesome, size: 12, color: Colors.white),
                   SizedBox(width: 4),
-                  Text('Sugestão IA', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                  Text(
+                    'Sugestão IA',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -199,9 +223,11 @@ class _TreinoDetailBody extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: isDark
-                          ? [primaryDeep, const Color(0xFF0A0F1E)]
-                          : [primary, primaryDeep],
+                      transform: const GradientRotation(160 * math.pi / 180),
+                      colors:
+                          isDark
+                              ? [primaryDeep, const Color(0xFF0A0F1E)]
+                              : [primary, primaryDeep],
                       stops: const [0.0, 0.85],
                     ),
                   ),
@@ -210,109 +236,211 @@ class _TreinoDetailBody extends StatelessWidget {
                 CustomPaint(painter: const _GridTexturePainter()),
                 // Content
                 Container(
-              padding: const EdgeInsets.fromLTRB(22, 100, 22, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  // Cover tile & Info
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                  padding: const EdgeInsets.fromLTRB(22, 100, 22, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Container(
-                        width: 108, height: 108,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 30, offset: Offset(0, 12))],
-                        ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Icon(Icons.fitness_center, size: 56, color: Colors.white.withValues(alpha: 0.9)),
-                            Positioned(
-                              bottom: 8, left: 10,
-                              child: Text('TREINO', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.0)),
+                      // Cover tile & Info
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            width: 108,
+                            height: 108,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 30,
+                                  offset: Offset(0, 12),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('ALUNO FOCO', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
-                              const SizedBox(height: 2),
-                              Text(treino.nome, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: -0.5, height: 1.1)),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  const Icon(Icons.timer_outlined, size: 13, color: Colors.white70),
-                                  const SizedBox(width: 4),
-                                  Text('45min', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
-                                  const SizedBox(width: 8),
-                                  Text('·', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
-                                  const SizedBox(width: 8),
-                                  Text('${treino.exercicios.length} ex.', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 22),
-                  
-                  // Action row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: InkWell(
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            context.push('/checkin/executar', extra: treinoId);
-                          },
-                          borderRadius: BorderRadius.circular(14),
-                          child: Container(
-                            height: 48,
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            child: Stack(
+                              alignment: Alignment.center,
                               children: [
-                                Icon(Icons.play_arrow_rounded, color: primary, size: 20),
-                                const SizedBox(width: 6),
-                                Text('Iniciar treino', style: TextStyle(color: primary, fontSize: 14, fontWeight: FontWeight.bold)),
+                                Icon(
+                                  Icons.fitness_center,
+                                  size: 56,
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ),
+                                Positioned(
+                                  bottom: 8,
+                                  left: 10,
+                                  child: Text(
+                                    'TREINO',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'ALUNO FOCO',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.8,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    treino.nome,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: -0.5,
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.timer_outlined,
+                                        size: 13,
+                                        color: Colors.white70,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '45min',
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '·',
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '${treino.exercicios.length} ex.',
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      Container(
-                        width: 48, height: 48,
-                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
-                        child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                      const SizedBox(height: 22),
+
+                      // Action row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                HapticFeedback.mediumImpact();
+                                context.push(
+                                  '/checkin/executar',
+                                  extra: treinoId,
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(14),
+                              child: Container(
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.play_arrow_rounded,
+                                      color: primary,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Iniciar treino',
+                                      style: TextStyle(
+                                        color: primary,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: const Icon(
+                              Icons.send_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          InkWell(
+                            onTap: () => _openMenu(context),
+                            borderRadius: BorderRadius.circular(14),
+                            child: Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(
+                                Icons.more_horiz,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      InkWell(
-                        onTap: () => _openMenu(context),
-                        borderRadius: BorderRadius.circular(14),
-                        child: Container(
-                          width: 48, height: 48,
-                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
-                          child: const Icon(Icons.more_horiz, color: Colors.white, size: 20),
-                        ),
-                      ),
+                      const SizedBox(height: 26),
                     ],
                   ),
-                  const SizedBox(height: 26),
-                ],
-              ),
-            ),
+                ),
               ],
             ),
           ),
@@ -322,34 +450,45 @@ class _TreinoDetailBody extends StatelessWidget {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
-            child: Builder(builder: (context) {
-              // Estimated duration: 3–4 min per exercise (rough)
-              final durMin = (treino.exercicios.length * 3.5).round();
-              // Volume: sum of series × (int from repeticoes) × cargaKg
-              double vol = 0;
-              for (final te in treino.exercicios) {
-                final reps = int.tryParse(
-                        te.repeticoes.split('x').last.trim()) ??
-                    int.tryParse(te.repeticoes) ??
-                    0;
-                vol += te.series * reps * (te.cargaKg ?? 0);
-              }
-              return Row(
-                children: [
-                  _MiniMetric(label: 'Duração', value: '~${durMin}min', isDark: isDark),
-                  const SizedBox(width: 8),
-                  _MiniMetric(label: 'Exercícios', value: '${treino.exercicios.length}', isDark: isDark),
-                  const SizedBox(width: 8),
-                  _MiniMetric(
-                    label: 'Volume',
-                    value: vol > 0
-                        ? '${(vol / 1000).toStringAsFixed(1)}t'
-                        : '${grouped.keys.length} ${grouped.keys.length == 1 ? 'grupo' : 'grupos'}',
-                    isDark: isDark,
-                  ),
-                ],
-              );
-            }),
+            child: Builder(
+              builder: (context) {
+                // Estimated duration: 3–4 min per exercise (rough)
+                final durMin = (treino.exercicios.length * 3.5).round();
+                // Volume: sum of series × (int from repeticoes) × cargaKg
+                double vol = 0;
+                for (final te in treino.exercicios) {
+                  final reps =
+                      int.tryParse(te.repeticoes.split('x').last.trim()) ??
+                      int.tryParse(te.repeticoes) ??
+                      0;
+                  vol += te.series * reps * (te.cargaKg ?? 0);
+                }
+                return Row(
+                  children: [
+                    _MiniMetric(
+                      label: 'Duração',
+                      value: '~${durMin}min',
+                      isDark: isDark,
+                    ),
+                    const SizedBox(width: 8),
+                    _MiniMetric(
+                      label: 'Exercícios',
+                      value: '${treino.exercicios.length}',
+                      isDark: isDark,
+                    ),
+                    const SizedBox(width: 8),
+                    _MiniMetric(
+                      label: 'Volume',
+                      value:
+                          vol > 0
+                              ? '${(vol / 1000).toStringAsFixed(1)}t'
+                              : '${grouped.keys.length} ${grouped.keys.length == 1 ? 'grupo' : 'grupos'}',
+                      isDark: isDark,
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
 
@@ -360,17 +499,36 @@ class _TreinoDetailBody extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Exercícios', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.darkInk : EagleTokens.ink, letterSpacing: -0.5)),
+                Text(
+                  'Exercícios',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    letterSpacing: -0.5,
+                  ),
+                ),
                 InkWell(
                   onTap: () async {
-                    final adicionado = await context.push<bool>('/treinos/$treinoId/exercicios/add');
-                    if (adicionado == true) ref.invalidate(treinoProvider(treinoId));
+                    final adicionado = await context.push<bool>(
+                      '/treinos/$treinoId/exercicios/add',
+                    );
+                    if (adicionado == true) {
+                      ref.invalidate(treinoProvider(treinoId));
+                    }
                   },
                   child: Row(
                     children: [
                       Icon(Icons.add, size: 14, color: primary),
                       const SizedBox(width: 4),
-                      Text('Adicionar', style: TextStyle(color: primary, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                      Text(
+                        'Adicionar',
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -380,7 +538,9 @@ class _TreinoDetailBody extends StatelessWidget {
         ),
 
         if (treino.exercicios.isEmpty)
-          const SliverFillRemaining(child: Center(child: Text('Nenhum exercício no treino.')))
+          const SliverFillRemaining(
+            child: Center(child: Text('Nenhum exercício no treino.')),
+          )
         else ...[
           SliverToBoxAdapter(
             child: _DraggableExerciseOrderPanel(
@@ -391,110 +551,199 @@ class _TreinoDetailBody extends StatelessWidget {
               ref: ref,
             ),
           ),
-          ...grouped.entries.map((entry) => SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(4, 4, 4, 10),
-                        child: Row(
-                          children: [
-                            Text(entry.key.toUpperCase(), style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
-                            const SizedBox(width: 8),
-                            Expanded(child: Container(height: 0.5, color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-                            const SizedBox(width: 8),
-                            Text('${entry.value.length} ex.', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 11, fontWeight: FontWeight.w500)),
-                          ],
+          ...grouped.entries.map(
+            (entry) => SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 0,
+                ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 4, 4, 10),
+                      child: Row(
+                        children: [
+                          Text(
+                            entry.key.toUpperCase(),
+                            style: TextStyle(
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkInkMute
+                                      : EagleTokens.inkMute,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Container(
+                              height: 0.5,
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkLine
+                                      : EagleTokens.line,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${entry.value.length} ex.',
+                            style: TextStyle(
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkInkMute
+                                      : EagleTokens.inkMute,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      decoration: BoxDecoration(
+                        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color:
+                              isDark ? EagleTokens.darkLine : EagleTokens.line,
                         ),
                       ),
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 14),
-                        decoration: BoxDecoration(
-                          color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
-                        ),
-                        child: Column(
-                          children: entry.value.asMap().entries.map((e) {
-                            final i = e.key;
-                            final te = e.value;
-                            final globalIndex = orderedExercises.indexWhere((item) => item.id == te.id);
-                            Future<void> reorder(int direction) async {
-                              final ids = orderedExercises.map((item) => item.id).toList();
-                              final targetIndex = globalIndex + direction;
-                              if (globalIndex < 0 || targetIndex < 0 || targetIndex >= ids.length) return;
-                              final current = ids.removeAt(globalIndex);
-                              ids.insert(targetIndex, current);
-                              try {
-                                await repo.reordenarExercicios(treinoId, ids);
-                                ref.invalidate(treinoProvider(treinoId));
-                              } catch (error) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Erro ao reordenar: $error')),
-                                  );
+                      child: Column(
+                        children:
+                            entry.value.asMap().entries.map((e) {
+                              final i = e.key;
+                              final te = e.value;
+                              final globalIndex = orderedExercises.indexWhere(
+                                (item) => item.id == te.id,
+                              );
+                              Future<void> reorder(int direction) async {
+                                final ids =
+                                    orderedExercises
+                                        .map((item) => item.id)
+                                        .toList();
+                                final targetIndex = globalIndex + direction;
+                                if (globalIndex < 0 ||
+                                    targetIndex < 0 ||
+                                    targetIndex >= ids.length) {
+                                  return;
                                 }
-                              }
-                            }
-                            return _ExercicioRow(
-                              te: te,
-                              index: globalIndex + 1,
-                              isDark: isDark,
-                              primary: primary,
-                              primarySoft: primarySoft,
-                              isLast: i == entry.value.length - 1,
-                              canMoveUp: globalIndex > 0,
-                              canMoveDown: globalIndex < orderedExercises.length - 1,
-                              onMoveUp: () => reorder(-1),
-                              onMoveDown: () => reorder(1),
-                              onDuplicate: () async {
+                                final current = ids.removeAt(globalIndex);
+                                ids.insert(targetIndex, current);
                                 try {
-                                  await repo.duplicarExercicio(treinoId, te.id);
+                                  await repo.reordenarExercicios(treinoId, ids);
                                   ref.invalidate(treinoProvider(treinoId));
                                 } catch (error) {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Erro ao duplicar: $error')),
+                                      SnackBar(
+                                        content: Text(
+                                          'Erro ao reordenar: $error',
+                                        ),
+                                      ),
                                     );
                                   }
                                 }
-                              },
-                              onRemove: () async {
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    title: const Text('Remover exercício'),
-                                    content: Text('Remover "${te.exercicio.nome}" do treino?'),
-                                    actions: [
-                                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-                                      FilledButton(style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad), onPressed: () => Navigator.pop(ctx, true), child: const Text('Remover')),
-                                    ],
-                                  ),
-                                );
-                                if (confirm == true && context.mounted) {
+                              }
+
+                              return _ExercicioRow(
+                                te: te,
+                                index: globalIndex + 1,
+                                isDark: isDark,
+                                primary: primary,
+                                primarySoft: primarySoft,
+                                isLast: i == entry.value.length - 1,
+                                canMoveUp: globalIndex > 0,
+                                canMoveDown:
+                                    globalIndex < orderedExercises.length - 1,
+                                onMoveUp: () => reorder(-1),
+                                onMoveDown: () => reorder(1),
+                                onDuplicate: () async {
                                   try {
-                                    await repo.removerExercicio(treinoId, te.id);
+                                    await repo.duplicarExercicio(
+                                      treinoId,
+                                      te.id,
+                                    );
                                     ref.invalidate(treinoProvider(treinoId));
-                                  } catch (e) {
-                                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+                                  } catch (error) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Erro ao duplicar: $error',
+                                          ),
+                                        ),
+                                      );
+                                    }
                                   }
-                                }
-                              },
-                            );
-                          }).toList(),
-                        ),
+                                },
+                                onRemove: () async {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder:
+                                        (ctx) => AlertDialog(
+                                          title: const Text(
+                                            'Remover exercício',
+                                          ),
+                                          content: Text(
+                                            'Remover "${te.exercicio.nome}" do treino?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed:
+                                                  () =>
+                                                      Navigator.pop(ctx, false),
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            FilledButton(
+                                              style: FilledButton.styleFrom(
+                                                backgroundColor:
+                                                    EagleTokens.bad,
+                                              ),
+                                              onPressed:
+                                                  () =>
+                                                      Navigator.pop(ctx, true),
+                                              child: const Text('Remover'),
+                                            ),
+                                          ],
+                                        ),
+                                  );
+                                  if (confirm == true && context.mounted) {
+                                    try {
+                                      await repo.removerExercicio(
+                                        treinoId,
+                                        te.id,
+                                      );
+                                      ref.invalidate(treinoProvider(treinoId));
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(content: Text('Erro: $e')),
+                                        );
+                                      }
+                                    }
+                                  }
+                                },
+                              );
+                            }).toList(),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              )),
+              ),
+            ),
+          ),
         ],
         const SliverToBoxAdapter(child: SizedBox(height: 80)),
       ],
     );
   }
-
 }
 
 class _DraggableExerciseOrderPanel extends StatelessWidget {
@@ -525,13 +774,15 @@ class _DraggableExerciseOrderPanel extends StatelessWidget {
     ids.insert(newIndex, moved);
 
     try {
-      await ref.read(treinoRepositoryProvider).reordenarExercicios(treinoId, ids);
+      await ref
+          .read(treinoRepositoryProvider)
+          .reordenarExercicios(treinoId, ids);
       ref.invalidate(treinoProvider(treinoId));
     } catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao reordenar: $error')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao reordenar: $error')));
       }
     }
   }
@@ -592,8 +843,9 @@ class _DraggableExerciseOrderPanel extends StatelessWidget {
                   child: child,
                 );
               },
-              onReorder: (oldIndex, newIndex) =>
-                  _persistOrder(context, oldIndex, newIndex),
+              onReorder:
+                  (oldIndex, newIndex) =>
+                      _persistOrder(context, oldIndex, newIndex),
               itemCount: exercises.length,
               itemBuilder: (context, index) {
                 final item = exercises[index];
@@ -642,7 +894,8 @@ class _DraggableOrderTile extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        border: isLast ? null : Border(bottom: BorderSide(color: line, width: 0.5)),
+        border:
+            isLast ? null : Border(bottom: BorderSide(color: line, width: 0.5)),
       ),
       padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
       child: Row(
@@ -724,16 +977,11 @@ class _MenuActionTile extends StatelessWidget {
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       leading: Icon(icon, color: ink),
       title: Text(
         label,
-        style: TextStyle(
-          color: ink,
-          fontWeight: FontWeight.w600,
-        ),
+        style: TextStyle(color: ink, fontWeight: FontWeight.w600),
       ),
       trailing: Icon(Icons.chevron_right, color: ink),
       tileColor: Colors.transparent,
@@ -751,7 +999,11 @@ class _MiniMetric extends StatelessWidget {
   final String value;
   final bool isDark;
 
-  const _MiniMetric({required this.label, required this.value, required this.isDark});
+  const _MiniMetric({
+    required this.label,
+    required this.value,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -761,13 +1013,30 @@ class _MiniMetric extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDark ? EagleTokens.darkCard : EagleTokens.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+          border: Border.all(
+            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+          ),
         ),
         child: Column(
           children: [
-            Text(label, style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 11, fontWeight: FontWeight.w500)),
+            Text(
+              label,
+              style: TextStyle(
+                color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             const SizedBox(height: 2),
-            Text(value, style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: -0.2)),
+            Text(
+              value,
+              style: TextStyle(
+                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.2,
+              ),
+            ),
           ],
         ),
       ),
@@ -816,42 +1085,92 @@ class _ExercicioRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
       decoration: BoxDecoration(
-        border: isLast ? null : Border(bottom: BorderSide(color: line, width: 0.5)),
+        border:
+            isLast ? null : Border(bottom: BorderSide(color: line, width: 0.5)),
       ),
       child: Row(
         children: [
           Container(
-            width: 36, height: 36,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
               color: primarySoft,
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
-            child: Text('$index', style: TextStyle(color: primary, fontSize: 14, fontWeight: FontWeight.w700)),
+            child: Text(
+              '$index',
+              style: TextStyle(
+                color: primary,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(te.exercicio.nome, style: TextStyle(color: ink, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0)),
+                Text(
+                  te.exercicio.nome,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text('${te.series}×${te.repeticoes}', style: TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.w600)),
+                    Text(
+                      '${te.series}×${te.repeticoes}',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Container(width: 3, height: 3, decoration: BoxDecoration(color: mute, shape: BoxShape.circle)),
+                    Container(
+                      width: 3,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: mute,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Text('${te.cargaKg ?? 0}kg', style: TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.w600)),
+                    Text(
+                      '${te.cargaKg ?? 0}kg',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Container(width: 3, height: 3, decoration: BoxDecoration(color: mute, shape: BoxShape.circle)),
+                    Container(
+                      width: 3,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: mute,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                     const SizedBox(width: 8),
                     Icon(Icons.timer_outlined, size: 11, color: mute),
                     const SizedBox(width: 3),
-                    Text('${te.descansoSegundos ?? 60}s', style: TextStyle(color: mute, fontSize: 11.5)),
+                    Text(
+                      '${te.descansoSegundos ?? 60}s',
+                      style: TextStyle(color: mute, fontSize: 11.5),
+                    ),
                   ],
                 ),
-                if (isAdvanced || hasMedia || te.observacoes?.trim().isNotEmpty == true) ...[
+                if (isAdvanced ||
+                    hasMedia ||
+                    te.observacoes?.trim().isNotEmpty == true) ...[
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -864,15 +1183,18 @@ class _ExercicioRow extends StatelessWidget {
                       ),
                       if (isAdvanced)
                         _ExerciseMeta(
-                          icon: te.tipoSerie == 'SUPERSET'
-                              ? Icons.link_rounded
-                              : Icons.trending_down_rounded,
-                          text: te.tipoSerie == 'SUPERSET'
-                              ? 'superset ${te.grupoSuperset ?? '-'}'
-                              : 'drop set',
-                          color: te.tipoSerie == 'SUPERSET'
-                              ? primary
-                              : EagleTokens.warn,
+                          icon:
+                              te.tipoSerie == 'SUPERSET'
+                                  ? Icons.link_rounded
+                                  : Icons.trending_down_rounded,
+                          text:
+                              te.tipoSerie == 'SUPERSET'
+                                  ? 'superset ${te.grupoSuperset ?? '-'}'
+                                  : 'drop set',
+                          color:
+                              te.tipoSerie == 'SUPERSET'
+                                  ? primary
+                                  : EagleTokens.warn,
                         ),
                       if (te.observacoes?.trim().isNotEmpty == true)
                         _ExerciseMeta(
@@ -895,23 +1217,30 @@ class _ExercicioRow extends StatelessWidget {
               if (val == 'duplicate') onDuplicate();
               if (val == 'remove') onRemove();
             },
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: 'up',
-                enabled: canMoveUp,
-                child: const Text('Mover para cima'),
-              ),
-              PopupMenuItem(
-                value: 'down',
-                enabled: canMoveDown,
-                child: const Text('Mover para baixo'),
-              ),
-              const PopupMenuItem(
-                value: 'duplicate',
-                child: Text('Duplicar item'),
-              ),
-              const PopupMenuItem(value: 'remove', child: Text('Remover', style: TextStyle(color: EagleTokens.bad))),
-            ],
+            itemBuilder:
+                (_) => [
+                  PopupMenuItem(
+                    value: 'up',
+                    enabled: canMoveUp,
+                    child: const Text('Mover para cima'),
+                  ),
+                  PopupMenuItem(
+                    value: 'down',
+                    enabled: canMoveDown,
+                    child: const Text('Mover para baixo'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'duplicate',
+                    child: Text('Duplicar item'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'remove',
+                    child: Text(
+                      'Remover',
+                      style: TextStyle(color: EagleTokens.bad),
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
@@ -931,9 +1260,10 @@ Color _trustColor(Exercicio exercicio, Color primary) {
 
 IconData _trustIcon(Exercicio exercicio) {
   return switch (exercicio.mediaTrustLevel) {
-    'READY' => exercicio.isPersonalUpload
-        ? Icons.workspace_premium_rounded
-        : Icons.verified_rounded,
+    'READY' =>
+      exercicio.isPersonalUpload
+          ? Icons.workspace_premium_rounded
+          : Icons.verified_rounded,
     'NO_VIDEO' => Icons.videocam_off_outlined,
     _ => Icons.rate_review_outlined,
   };
@@ -944,11 +1274,7 @@ class _ExerciseMeta extends StatelessWidget {
   final String text;
   final Color color;
 
-  const _ExerciseMeta({
-    this.icon,
-    required this.text,
-    required this.color,
-  });
+  const _ExerciseMeta({this.icon, required this.text, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -982,10 +1308,11 @@ class _GridTexturePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.06)
-      ..strokeWidth = 0.5
-      ..style = PaintingStyle.stroke;
+    final paint =
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.06)
+          ..strokeWidth = 0.5
+          ..style = PaintingStyle.stroke;
 
     for (double x = 0; x <= size.width; x += 26) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
