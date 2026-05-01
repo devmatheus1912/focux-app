@@ -46,6 +46,39 @@ void main() async {
     // Firebase ainda não está configurado em todos os ambientes.
   }
 
+  // ── Global Red-Screen killer ──────────────────────────────────
+  // Replaces Flutter's red error screen with a friendly message in release/profile.
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    if (kDebugMode) return ErrorWidget(details.exception);
+    return Material(
+      color: const Color(0xFF0A0F1E),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64, height: 64,
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.error_outline, color: Colors.redAccent, size: 30),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Algo deu errado nesta tela.\nVolte e tente novamente.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5, decoration: TextDecoration.none),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  };
+
   runApp(const ProviderScope(child: FocuxApp()));
 }
 

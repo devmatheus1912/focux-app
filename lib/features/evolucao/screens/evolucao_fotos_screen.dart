@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -148,5 +149,4 @@ class _Foto {
   String get dataFmt { try { final d = DateTime.parse(data); return '${d.day.toString().padLeft(2,'0')}/${d.month.toString().padLeft(2,'0')}/${d.year}'; } catch (_) { return data.length > 10 ? data.substring(0, 10) : data; } }
 }
 
-class MultipartFile { final List<int> bytes; final String filename; MultipartFile.fromBytes(this.bytes, {required this.filename}); }
-class FormData { final Map<String, dynamic> fields; FormData.fromMap(this.fields); }
+

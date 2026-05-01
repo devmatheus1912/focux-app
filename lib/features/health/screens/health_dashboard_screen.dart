@@ -26,32 +26,49 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   }
 
   Future<void> _checkAuth() async {
-    final auth = await HealthService.isAuthorized();
-    if (auth) {
-      await _loadData();
-    } else {
+    try {
+      final auth = await HealthService.isAuthorized();
+      if (auth) {
+        await _loadData();
+      } else {
+        if (mounted) setState(() => _loading = false);
+      }
+    } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _requestAccess() async {
     setState(() => _loading = true);
-    final granted = await HealthService.requestAuthorization();
-    if (granted) {
-      await _loadData();
-    } else {
-      if (mounted) setState(() { _loading = false; });
+    try {
+      final granted = await HealthService.requestAuthorization();
+      if (granted) {
+        await _loadData();
+      } else {
+        if (mounted) setState(() { _loading = false; });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() { _loading = false; });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Saúde não disponível neste dispositivo')),
+        );
+      }
     }
   }
 
   Future<void> _loadData() async {
-    final summary = await HealthService.getTodaySummary();
-    if (mounted) {
-      setState(() {
-        _authorized = true;
-        _summary = summary;
-        _loading = false;
-      });
+    try {
+      final summary = await HealthService.getTodaySummary();
+      if (mounted) {
+        setState(() {
+          _authorized = true;
+          _summary = summary;
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() { _loading = false; });
     }
   }
 
