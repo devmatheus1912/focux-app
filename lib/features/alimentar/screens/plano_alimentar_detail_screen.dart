@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,7 +38,10 @@ class _PlanoAlimentarDetailScreenState
       final repo = AlimentarRepository(ref.read(apiClientProvider));
       final lista = await repo.listarRefeicoes(widget.alunoId, widget.plano.id);
       if (!mounted) return;
-      setState(() { _refeicoes = lista; _loading = false; });
+      setState(() {
+        _refeicoes = lista;
+        _loading = false;
+      });
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
@@ -54,15 +58,15 @@ class _PlanoAlimentarDetailScreenState
       await repo.excluirRefeicao(widget.alunoId, widget.plano.id, r.id);
       if (mounted) {
         setState(() => _refeicoes.removeWhere((x) => x.id == r.id));
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Refeição removida.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Refeição removida.')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao remover: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao remover: $e')));
       }
     }
   }
@@ -74,11 +78,12 @@ class _PlanoAlimentarDetailScreenState
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _NovaRefeicaoSheet(
-        alunoId: widget.alunoId,
-        planoId: widget.plano.id,
-        onSalvo: _load,
-      ),
+      builder:
+          (_) => _NovaRefeicaoSheet(
+            alunoId: widget.alunoId,
+            planoId: widget.plano.id,
+            onSalvo: _load,
+          ),
     );
   }
 
@@ -90,35 +95,61 @@ class _PlanoAlimentarDetailScreenState
 
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, set) => AlertDialog(
-          title: Row(children: [
-            Icon(Icons.auto_awesome, color: primary),
-            const SizedBox(width: 8),
-            const Text('Gerar Dieta com IA')
-          ]),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('A IA vai criar refeições estruturadas e adicionar diretamente neste plano.'),
-              const SizedBox(height: 16),
-              TextField(controller: objetivoCtrl, decoration: const InputDecoration(labelText: 'Objetivo (ex: Hipertrofia)')),
-              const SizedBox(height: 8),
-              TextField(controller: calCtrl, decoration: const InputDecoration(labelText: 'Calorias Alvo'), keyboardType: TextInputType.number),
-              const SizedBox(height: 8),
-              TextField(controller: refCtrl, decoration: const InputDecoration(labelText: 'Nº de Refeições'), keyboardType: TextInputType.number),
-            ],
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, set) => AlertDialog(
+                  title: Row(
+                    children: [
+                      Icon(Icons.auto_awesome, color: primary),
+                      const SizedBox(width: 8),
+                      const Text('Gerar Dieta com IA'),
+                    ],
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'A IA vai criar refeições estruturadas e adicionar diretamente neste plano.',
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: objetivoCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Objetivo (ex: Hipertrofia)',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: calCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Calorias Alvo',
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: refCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Nº de Refeições',
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancelar'),
+                    ),
+                    FilledButton.icon(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      icon: const Icon(Icons.auto_awesome),
+                      label: const Text('Gerar'),
+                    ),
+                  ],
+                ),
           ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-            FilledButton.icon(
-              onPressed: () => Navigator.pop(ctx, true),
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text('Gerar'),
-            ),
-          ],
-        ),
-      ),
     );
 
     if (confirm != true) return;
@@ -134,11 +165,17 @@ class _PlanoAlimentarDetailScreenState
       );
       if (!mounted) return;
       await _load();
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dieta gerada com sucesso!')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Dieta gerada com sucesso!')),
+        );
+      }
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro na IA: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro na IA: $e')));
       }
     }
   }
@@ -147,18 +184,25 @@ class _PlanoAlimentarDetailScreenState
   Widget build(BuildContext context) {
     final p = widget.plano;
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark
+              ? EagleTokens.darkBg
+              : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
+          onPressed:
+              () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
         ),
         title: Text(p.nome),
         actions: [
           IconButton(
-            icon: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.primary),
+            icon: Icon(
+              Icons.auto_awesome,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             tooltip: 'Gerar Dieta IA',
             onPressed: _abrirGerarIa,
           ),
@@ -180,36 +224,57 @@ class _PlanoAlimentarDetailScreenState
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 4,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (p.caloriasDia != null)
-                    _MacroChip('${p.caloriasDia} kcal', EagleTokens.warn),
-                  if (p.proteinaG != null)
-                    _MacroChip('${p.proteinaG}g prot', EagleTokens.bad),
-                  if (p.carboidratoG != null)
-                    _MacroChip('${p.carboidratoG}g carbo', EagleTokens.warn),
-                  if (p.gorduraG != null)
-                    _MacroChip('${p.gorduraG}g gord', Colors.yellow.shade700),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      if (p.caloriasDia != null)
+                        _MacroChip('${p.caloriasDia} kcal', EagleTokens.warn),
+                      if (p.proteinaG != null)
+                        _MacroChip('${p.proteinaG}g prot', EagleTokens.bad),
+                      if (p.carboidratoG != null)
+                        _MacroChip(
+                          '${p.carboidratoG}g carbo',
+                          EagleTokens.warn,
+                        ),
+                      if (p.gorduraG != null)
+                        _MacroChip(
+                          '${p.gorduraG}g gord',
+                          Colors.yellow.shade700,
+                        ),
+                    ],
+                  ),
+                  _MacroBar(
+                    proteinaG: p.proteinaG,
+                    carboidratoG: p.carboidratoG,
+                    gorduraG: p.gorduraG,
+                  ),
                 ],
               ),
             ),
           Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _refeicoes.isEmpty
+            child:
+                _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _refeicoes.isEmpty
                     ? const Center(
-                        child: Text('Nenhuma refeição cadastrada.\nToque em + para adicionar.',
-                            textAlign: TextAlign.center))
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),
-                        itemCount: _refeicoes.length,
-                        itemBuilder: (_, i) => _RefeicaoCard(
-                          refeicao: _refeicoes[i],
-                          onDelete: () => _excluir(_refeicoes[i]),
-                        ),
+                      child: Text(
+                        'Nenhuma refeição cadastrada.\nToque em + para adicionar.',
+                        textAlign: TextAlign.center,
                       ),
+                    )
+                    : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),
+                      itemCount: _refeicoes.length,
+                      itemBuilder:
+                          (_, i) => _RefeicaoCard(
+                            refeicao: _refeicoes[i],
+                            onDelete: () => _excluir(_refeicoes[i]),
+                          ),
+                    ),
           ),
         ],
       ),
@@ -224,11 +289,65 @@ class _MacroChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Chip(
-        label: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
-        backgroundColor: color.withValues(alpha: 0.12),
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      );
+    label: Text(
+      label,
+      style: TextStyle(color: color, fontWeight: FontWeight.w600),
+    ),
+    backgroundColor: color.withValues(alpha: 0.12),
+    padding: const EdgeInsets.symmetric(horizontal: 4),
+    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  );
+}
+
+class _MacroBar extends StatelessWidget {
+  final int? proteinaG;
+  final int? carboidratoG;
+  final int? gorduraG;
+
+  const _MacroBar({
+    required this.proteinaG,
+    required this.carboidratoG,
+    required this.gorduraG,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final proteinKcal = (proteinaG ?? 0) * 4;
+    final carbKcal = (carboidratoG ?? 0) * 4;
+    final fatKcal = (gorduraG ?? 0) * 9;
+    final totalKcal = proteinKcal + carbKcal + fatKcal;
+
+    if (totalKcal <= 0) return const SizedBox.shrink();
+
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        height: 8,
+        margin: const EdgeInsets.only(top: 6),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+        child: Row(
+          children: [
+            if (proteinKcal > 0)
+              Flexible(
+                flex: proteinKcal,
+                child: Container(color: const Color(0xFFEF4444)),
+              ),
+            if (carbKcal > 0)
+              Flexible(
+                flex: carbKcal,
+                child: Container(color: EagleTokens.warn),
+              ),
+            if (fatKcal > 0)
+              Flexible(
+                flex: fatKcal,
+                child: Container(color: const Color(0xFFEAB308)),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _RefeicaoCard extends StatelessWidget {
@@ -262,27 +381,42 @@ class _RefeicaoCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(r.nomeRefeicao,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 15)),
+                    child: Text(
+                      r.nomeRefeicao,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
                   if (r.horario != null)
-                    Row(children: [
-                      const Icon(Icons.access_time, size: 14, color: EagleTokens.inkMute),
-                      const SizedBox(width: 4),
-                      Text(r.horario!,
-                          style: const TextStyle(color: EagleTokens.inkMute, fontSize: 13)),
-                    ]),
+                    SizedBox(
+                      width: 52,
+                      child: Text(
+                        r.horario!,
+                        textAlign: TextAlign.right,
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
                 ],
               ),
               if (r.calorias != null) ...[
                 const SizedBox(height: 6),
-                Text('${r.calorias} kcal',
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w600)),
+                Text(
+                  '${r.calorias} kcal',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
-              if (r.proteinaG != null || r.carboG != null || r.gorduraG != null) ...[
+              if (r.proteinaG != null ||
+                  r.carboG != null ||
+                  r.gorduraG != null) ...[
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 8,
@@ -300,8 +434,10 @@ class _RefeicaoCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 const Divider(height: 1),
                 const SizedBox(height: 8),
-                Text(r.alimentos!,
-                    style: const TextStyle(fontSize: 13, color: Colors.black87)),
+                Text(
+                  r.alimentos!,
+                  style: const TextStyle(fontSize: 13, color: Colors.black87),
+                ),
               ],
             ],
           ),
@@ -375,9 +511,9 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     }
     if (mounted) setState(() => _saving = false);
@@ -393,8 +529,10 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Nova Refeição',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Nova Refeição',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             _field(_nome, 'Nome da refeição *'),
             _field(_horario, 'Horário (ex: 07:30)'),
@@ -406,11 +544,17 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
             const SizedBox(height: 16),
             FilledButton(
               onPressed: _saving ? null : _salvar,
-              child: _saving
-                  ? const SizedBox(
-                      height: 18, width: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Adicionar Refeição'),
+              child:
+                  _saving
+                      ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                      : const Text('Adicionar Refeição'),
             ),
           ],
         ),
@@ -428,13 +572,12 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
         ),
       );
 
-  Widget _num(TextEditingController c, String label) =>
-      Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: TextFormField(
-          controller: c,
-          decoration: InputDecoration(labelText: label),
-          keyboardType: TextInputType.number,
-        ),
-      );
+  Widget _num(TextEditingController c, String label) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: TextFormField(
+      controller: c,
+      decoration: InputDecoration(labelText: label),
+      keyboardType: TextInputType.number,
+    ),
+  );
 }
