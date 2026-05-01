@@ -1627,10 +1627,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             Icons.arrow_back,
             color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
           ),
-          onPressed: () => safePopOrGo(
-            context,
-            _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal',
-          ),
+          onPressed:
+              () => safePopOrGo(
+                context,
+                _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal',
+              ),
         ),
         titleSpacing: 0,
         title: Row(
@@ -1780,13 +1781,31 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
                           itemCount:
                               _msgs.length +
-                              (_hasMoreMessages || _loadingOlder ? 1 : 0),
+                              (_hasMoreMessages || _loadingOlder ? 1 : 0) +
+                              (_sending || _uploading ? 1 : 0),
                           itemBuilder: (_, index) {
                             final hasLoader = _hasMoreMessages || _loadingOlder;
                             if (hasLoader && index == 0) {
                               return _OlderMessagesLoader(
                                 loading: _loadingOlder,
                                 onTap: _loadOlderMessages,
+                              );
+                            }
+                            final typingIndex =
+                                _msgs.length + (hasLoader ? 1 : 0);
+                            if ((_sending || _uploading) &&
+                                index == typingIndex) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: _TypingIndicator(
+                                    isDark: isDark,
+                                    accentColor: primary,
+                                  ),
+                                ),
                               );
                             }
                             final msgIndex = hasLoader ? index - 1 : index;
@@ -1945,9 +1964,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                     ),
                                     IconButton(
                                       onPressed: _showEmojiSheet,
-                                      icon: const Icon(
-                                        Icons.emoji_emotions_outlined,
-                                      ),
+                                      icon: const Icon(Icons.auto_awesome),
                                       color: EagleTokens.inkMute,
                                     ),
                                     if (_composerHasText || _sending)
@@ -2177,11 +2194,7 @@ class _ConversationErrorState extends StatelessWidget {
                 color: accentColor.withValues(alpha: 0.10),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.wifi_off_rounded,
-                color: accentColor,
-                size: 28,
-              ),
+              child: Icon(Icons.wifi_off_rounded, color: accentColor, size: 28),
             ),
             const SizedBox(height: 12),
             Text(
@@ -2315,7 +2328,7 @@ class _DeliveryStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     final read = msg.readAt != null;
     final delivered = msg.deliveredAt != null;
-    final iconColor = read ? const Color(0xFFAED6FF) : color;
+    final iconColor = read ? const Color(0xFF60A5FA) : color;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -2339,6 +2352,78 @@ class _DeliveryStatus extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _TypingIndicator extends StatefulWidget {
+  final bool isDark;
+  final Color accentColor;
+
+  const _TypingIndicator({required this.isDark, required this.accentColor});
+
+  @override
+  State<_TypingIndicator> createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<_TypingIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = widget.isDark ? EagleTokens.darkCardHi : EagleTokens.card;
+    final border = widget.isDark ? EagleTokens.darkLine : EagleTokens.line;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(18),
+          topRight: Radius.circular(18),
+          bottomLeft: Radius.circular(4),
+          bottomRight: Radius.circular(18),
+        ),
+        border: Border.all(color: border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(3, (i) {
+          return AnimatedBuilder(
+            animation: _ctrl,
+            builder: (_, __) {
+              final t = ((_ctrl.value + (i / 3)) % 1.0);
+              final opacity = t < 0.5 ? 0.3 + t * 1.4 : 1.0 - (t - 0.5) * 1.4;
+              return Container(
+                width: 7,
+                height: 7,
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.accentColor.withValues(
+                    alpha: opacity.clamp(0.3, 1.0),
+                  ),
+                ),
+              );
+            },
+          );
+        }),
+      ),
     );
   }
 }
@@ -2450,10 +2535,7 @@ class _ChatBackdrop extends StatelessWidget {
         ),
       ),
       child: CustomPaint(
-        painter: _ChatBackdropPainter(
-          isDark: isDark,
-          accentColor: accentColor,
-        ),
+        painter: _ChatBackdropPainter(isDark: isDark, accentColor: accentColor),
         child: const SizedBox.expand(),
       ),
     );
@@ -2464,10 +2546,7 @@ class _ChatBackdropPainter extends CustomPainter {
   final bool isDark;
   final Color accentColor;
 
-  const _ChatBackdropPainter({
-    required this.isDark,
-    required this.accentColor,
-  });
+  const _ChatBackdropPainter({required this.isDark, required this.accentColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -2554,10 +2633,10 @@ class _Bubble extends StatelessWidget {
                     ? null
                     : (isDark ? EagleTokens.darkCardHi : EagleTokens.card),
             borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(20),
-              topRight: const Radius.circular(20),
-              bottomLeft: Radius.circular(mine ? 20 : 8),
-              bottomRight: Radius.circular(mine ? 8 : 20),
+              topLeft: const Radius.circular(18),
+              topRight: const Radius.circular(18),
+              bottomLeft: Radius.circular(mine ? 18 : 4),
+              bottomRight: Radius.circular(mine ? 4 : 18),
             ),
             border: Border.all(
               color:
@@ -2638,9 +2717,7 @@ class _Bubble extends StatelessWidget {
                               reaction.mine
                                   ? (mine
                                       ? Colors.white.withValues(alpha: 0.18)
-                                      : accentColor.withValues(
-                                        alpha: 0.12,
-                                      ))
+                                      : accentColor.withValues(alpha: 0.12))
                                   : (mine
                                       ? Colors.white.withValues(alpha: 0.10)
                                       : (isDark
