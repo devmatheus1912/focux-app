@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/brand_palette.dart';
@@ -83,7 +84,10 @@ class FxDock extends StatelessWidget {
                 return Expanded(
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () => onTap(i),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      onTap(i);
+                    },
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
