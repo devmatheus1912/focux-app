@@ -49,7 +49,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         'id': 1,
         'nome': 'PREMIUM',
         'preco': '79,00',
-        'trial': 7,
+        'trial': 5,
         'cor': null,
         'tag': 'MAIS POPULAR',
         'sub': 'Para consultores sérios',
@@ -67,7 +67,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         'id': 2,
         'nome': 'ENTERPRISE',
         'preco': '149,90',
-        'trial': 7,
+        'trial': 5,
         'cor': const Color(0xFFC49A2A),
         'tag': 'ESCALA TOTAL',
         'sub': 'Para quem quer crescer',
@@ -86,7 +86,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
   Color _planAccent(SubscriptionPlan plan, Color primary, bool isDark) {
     return switch (plan) {
-      SubscriptionPlan.FREE => isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+      SubscriptionPlan.FREE =>
+        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
       SubscriptionPlan.PREMIUM => primary,
       SubscriptionPlan.ENTERPRISE => const Color(0xFFC49A2A),
     };
@@ -105,14 +106,17 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       return;
     }
 
-    AnalyticsService.instance.track(ProductEvents.paywallCtaTapped, props: {
-      'plan': selectedPlan.apiName,
-      'trialUsed': trialUsed,
-    });
+    AnalyticsService.instance.track(
+      ProductEvents.paywallCtaTapped,
+      props: {'plan': selectedPlan.apiName, 'trialUsed': trialUsed},
+    );
 
     if (selectedPlan == SubscriptionPlan.PREMIUM) {
       if (!mounted) return;
-      await context.push('/assinatura', extra: SubscriptionPlan.PREMIUM.apiName);
+      await context.push(
+        '/assinatura',
+        extra: SubscriptionPlan.PREMIUM.apiName,
+      );
       return;
     }
 
@@ -120,23 +124,22 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       setState(() => _submitting = true);
       try {
         await repo.startTrial(
-          payload: buildLocalSubscriptionMetadata(
-            productId: 'focux_enterprise_trial',
-          ).toTrialPayload(),
+          payload:
+              buildLocalSubscriptionMetadata(
+                productId: 'focux_enterprise_trial',
+              ).toTrialPayload(),
         );
         ref.invalidate(perfilProvider);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Trial Enterprise ativado por 7 dias.'),
-          ),
+          const SnackBar(content: Text('Trial Enterprise ativado por 5 dias.')),
         );
         Navigator.of(context).pop();
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao ativar trial: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao ativar trial: $e')));
       } finally {
         if (mounted) setState(() => _submitting = false);
       }
@@ -144,7 +147,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     }
 
     if (!mounted) return;
-    await context.push('/assinatura', extra: SubscriptionPlan.ENTERPRISE.apiName);
+    await context.push(
+      '/assinatura',
+      extra: SubscriptionPlan.ENTERPRISE.apiName,
+    );
   }
 
   @override
@@ -182,7 +188,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     } else if (selectedPlan == SubscriptionPlan.PREMIUM) {
       ctaLabel = 'Assinar Premium';
     } else if (!trialUsed) {
-      ctaLabel = 'Começar 7 dias grátis';
+      ctaLabel = 'Começar 5 dias grátis';
     } else {
       ctaLabel = 'Assinar Enterprise';
     }
@@ -226,7 +232,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '7 dias grátis e cancelamento quando quiser',
+                    '5 dias grátis e cancelamento quando quiser',
                     style: TextStyle(fontSize: 14, color: mute, height: 1.5),
                   ),
                 ],
@@ -235,66 +241,74 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
               child: Row(
-                children: _planos.map((p) {
-                  final isSelected = _selected == p['id'];
-                  final cColor = _planAccent(
-                    p['plan'] as SubscriptionPlan,
-                    brand,
-                    isDark,
-                  );
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selected = p['id'] as int),
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? cColor
-                              : (isDark
-                                  ? Colors.white.withValues(alpha: 0.05)
-                                  : Colors.white),
-                          borderRadius: BorderRadius.circular(14),
-                          border: isSelected ? null : Border.all(color: line),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: cColor.withValues(alpha: 0.27),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
+                children:
+                    _planos.map((p) {
+                      final isSelected = _selected == p['id'];
+                      final cColor = _planAccent(
+                        p['plan'] as SubscriptionPlan,
+                        brand,
+                        isDark,
+                      );
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap:
+                              () => setState(() => _selected = p['id'] as int),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color:
+                                  isSelected
+                                      ? cColor
+                                      : (isDark
+                                          ? Colors.white.withValues(alpha: 0.05)
+                                          : Colors.white),
+                              borderRadius: BorderRadius.circular(14),
+                              border:
+                                  isSelected ? null : Border.all(color: line),
+                              boxShadow:
+                                  isSelected
+                                      ? [
+                                        BoxShadow(
+                                          color: cColor.withValues(alpha: 0.27),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
+                                      : [],
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  p['nome'] as String,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: isSelected ? Colors.white : ink,
+                                    letterSpacing: 0.4,
                                   ),
-                                ]
-                              : [],
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              p['nome'] as String,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: isSelected ? Colors.white : ink,
-                                letterSpacing: 0.4,
-                              ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  p['preco'] != null
+                                      ? 'R\$ ${p['preco']}'
+                                      : 'Grátis',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color:
+                                        isSelected
+                                            ? Colors.white.withValues(
+                                              alpha: 0.75,
+                                            )
+                                            : mute,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              p['preco'] != null
-                                  ? 'R\$ ${p['preco']}'
-                                  : 'Grátis',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: isSelected
-                                    ? Colors.white.withValues(alpha: 0.75)
-                                    : mute,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
               ),
             ),
             Padding(
@@ -318,25 +332,28 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     Container(
                       padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
                       decoration: BoxDecoration(
-                        borderRadius:
-                            const BorderRadius.vertical(top: Radius.circular(26)),
-                        color: pl['id'] == 0
-                            ? (isDark
-                                ? EagleTokens.darkCard
-                                : const Color(0xFFF8F8F6))
-                            : null,
-                        gradient: pl['id'] > 0
-                            ? LinearGradient(
-                                colors: [
-                                  plCor.withValues(alpha: 0.93),
-                                  pl['id'] == 1
-                                      ? brandDeep
-                                      : const Color(0xFF3A2600),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              )
-                            : null,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(26),
+                        ),
+                        color:
+                            pl['id'] == 0
+                                ? (isDark
+                                    ? EagleTokens.darkCard
+                                    : const Color(0xFFF8F8F6))
+                                : null,
+                        gradient:
+                            pl['id'] > 0
+                                ? LinearGradient(
+                                  colors: [
+                                    plCor.withValues(alpha: 0.93),
+                                    pl['id'] == 1
+                                        ? brandDeep
+                                        : const Color(0xFF3A2600),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
+                                : null,
                       ),
                       child: Stack(
                         children: [
@@ -402,9 +419,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                 pl['sub'] as String,
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: pl['id'] > 0
-                                      ? Colors.white.withValues(alpha: 0.7)
-                                      : mute,
+                                  color:
+                                      pl['id'] > 0
+                                          ? Colors.white.withValues(alpha: 0.7)
+                                          : mute,
                                 ),
                               ),
                               if (pl['preco'] != null)
@@ -430,8 +448,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                         '/mês',
                                         style: TextStyle(
                                           fontSize: 13,
-                                          color: Colors.white
-                                              .withValues(alpha: 0.6),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.6,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -452,13 +471,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       const Icon(
-                                        Icons.check_circle_outline,
+                                        Icons.access_time,
                                         color: Colors.white,
-                                        size: 14,
+                                        size: 13,
                                       ),
                                       const SizedBox(width: 5),
                                       Text(
-                                        '${pl['trial']} dias grátis para começar',
+                                        '${pl['trial']} dias grátis',
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: Colors.white,
@@ -476,71 +495,63 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     Container(
                       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
                       decoration: const BoxDecoration(
-                        borderRadius:
-                            BorderRadius.vertical(bottom: Radius.circular(26)),
+                        borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(26),
+                        ),
                       ),
                       child: Column(
-                        children: (pl['features'] as List<dynamic>)
-                            .asMap()
-                            .entries
-                            .map((entry) {
-                          final i = entry.key;
-                          final f = entry.value as Map<String, dynamic>;
-                          final isOk = f['ok'] as bool;
-                          return Container(
-                            padding: const EdgeInsets.symmetric(vertical: 9),
-                            decoration: BoxDecoration(
-                              border: i < (pl['features'] as List).length - 1
-                                  ? Border(
-                                      bottom:
-                                          BorderSide(color: line, width: 0.5),
-                                    )
-                                  : null,
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 24,
-                                  height: 24,
-                                  decoration: BoxDecoration(
-                                    color: isOk
-                                        ? (isDark
-                                            ? const Color(0x266FE296)
-                                            : EagleTokens.goodSoft)
-                                        : (isDark
-                                            ? Colors.white
-                                                .withValues(alpha: 0.04)
-                                            : EagleTokens.lineSoft),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Icon(
-                                    isOk ? Icons.check : Icons.close,
-                                    size: 14,
-                                    color: isOk
-                                        ? (isDark
-                                            ? const Color(0xFF6FE296)
-                                            : EagleTokens.good)
-                                        : mute,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    f['label'] as String,
-                                    style: TextStyle(
-                                      fontSize: 13.5,
-                                      color: isOk ? ink : mute,
-                                      fontWeight: isOk
-                                          ? FontWeight.w500
-                                          : FontWeight.w400,
+                        children:
+                            (pl['features'] as List<dynamic>)
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                                  final f = entry.value as Map<String, dynamic>;
+                                  final isOk = f['ok'] as bool;
+                                  return Container(
+                                    height: 52,
+                                    margin: const EdgeInsets.symmetric(
+                                      vertical: 2,
                                     ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          isOk
+                                              ? (isDark
+                                                  ? EagleTokens.goodSoft
+                                                      .withValues(alpha: 0.15)
+                                                  : EagleTokens.goodSoft)
+                                              : (isDark
+                                                  ? EagleTokens.darkCardHi
+                                                  : EagleTokens.lineSoft),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          isOk
+                                              ? Icons.check_circle
+                                              : Icons.cancel,
+                                          size: 18,
+                                          color: isOk ? EagleTokens.good : mute,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            f['label'] as String,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: isOk ? ink : mute,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                })
+                                .toList(),
                       ),
                     ),
                   ],
@@ -556,9 +567,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     Container(
                       height: 52,
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : EagleTokens.lineSoft,
+                        color:
+                            isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : EagleTokens.lineSoft,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: line),
                       ),
@@ -579,19 +591,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         height: 52,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
-                          gradient: selectedPlan == SubscriptionPlan.ENTERPRISE
-                              ? const LinearGradient(
-                                  colors: [
-                                    Color(0xFFC49A2A),
-                                    Color(0xFF7A5C0A),
-                                  ],
-                                )
-                              : LinearGradient(
-                                  colors: [
-                                    brand,
-                                    brandDeep,
-                                  ],
-                                ),
+                          gradient:
+                              selectedPlan == SubscriptionPlan.ENTERPRISE
+                                  ? const LinearGradient(
+                                    colors: [
+                                      Color(0xFFC49A2A),
+                                      Color(0xFF7A5C0A),
+                                    ],
+                                  )
+                                  : LinearGradient(colors: [brand, brandDeep]),
                           boxShadow: [
                             BoxShadow(
                               color: plCor.withValues(alpha: 0.4),
@@ -601,34 +609,35 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           ],
                         ),
                         alignment: Alignment.center,
-                        child: _submitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.star_border,
+                        child:
+                            _submitting
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
                                     color: Colors.white,
-                                    size: 18,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    ctaLabel,
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
+                                )
+                                : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.star_border,
                                       color: Colors.white,
+                                      size: 18,
                                     ),
-                                  ),
-                                ],
-                              ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      ctaLabel,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                       ),
                     ),
                   if (selectedPlan != SubscriptionPlan.FREE)

@@ -23,21 +23,26 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
     setState(() => _startingTrial = true);
     try {
       await PlanosRepository(ref.read(apiClientProvider)).startTrial(
-        payload: buildLocalSubscriptionMetadata(
-          productId: 'focux_enterprise_trial',
-        ).toTrialPayload(),
+        payload:
+            buildLocalSubscriptionMetadata(
+              productId: 'focux_enterprise_trial',
+            ).toTrialPayload(),
       );
       ref.invalidate(perfilProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Trial Enterprise ativado. Você já pode usar os recursos avançados.')),
+        const SnackBar(
+          content: Text(
+            'Trial Enterprise ativado. Você já pode usar os recursos avançados.',
+          ),
+        ),
       );
       context.go('/dashboard/personal');
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao ativar trial: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao ativar trial: $error')));
     } finally {
       if (mounted) setState(() => _startingTrial = false);
     }
@@ -46,14 +51,15 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg     = isDark ? EagleTokens.darkBg   : EagleTokens.paper;
-    final mute   = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
-    final perfil      = ref.watch(perfilProvider).valueOrNull;
+    final perfil = ref.watch(perfilProvider).valueOrNull;
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
-    final trialUsed   = perfil?.trialUsed ?? false;
+    final trialUsed = perfil?.trialUsed ?? false;
     final trialEndsAt = perfil?.trialEndsAt;
-    final trialAtivo  = trialEndsAt != null && trialEndsAt.isAfter(DateTime.now());
+    final trialAtivo =
+        trialEndsAt != null && trialEndsAt.isAfter(DateTime.now());
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
@@ -71,7 +77,9 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
             // ── Header ──────────────────────────────────────────────────
             Text(
               'Escolha o plano ideal',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
             Text(
@@ -92,20 +100,23 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
               isDark: isDark,
               name: 'FREE',
               price: 'Grátis',
-              accentColor: isDark ? EagleTokens.darkInkMute : const Color(0xFF6B7280),
+              accentColor:
+                  isDark ? EagleTokens.darkInkMute : const Color(0xFF6B7280),
               isCurrent: currentPlan == SubscriptionPlan.FREE,
               features: const [
-                _Feature('Até 5 alunos',         included: true),
+                _Feature('Até 5 alunos', included: true),
                 _Feature('Treinos e agenda básicos', included: true),
-                _Feature('IA avançada',           included: false),
-                _Feature('Financeiro e CRM',      included: false),
-                _Feature('White-label',           included: false),
-                _Feature('Landing page',          included: false),
+                _Feature('IA avançada', included: false),
+                _Feature('Financeiro e CRM', included: false),
+                _Feature('White-label', included: false),
+                _Feature('Landing page', included: false),
               ],
-              cta: currentPlan == SubscriptionPlan.FREE
-                  ? null // já está no plano
-                  : null, // downgrade não é feito aqui
-              ctaLabel: currentPlan == SubscriptionPlan.FREE ? 'Plano atual' : null,
+              cta:
+                  currentPlan == SubscriptionPlan.FREE
+                      ? null // já está no plano
+                      : null, // downgrade não é feito aqui
+              ctaLabel:
+                  currentPlan == SubscriptionPlan.FREE ? 'Plano atual' : null,
             ),
 
             const SizedBox(height: 16),
@@ -117,24 +128,37 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
               price: 'R\$ 79,00/mês',
               accentColor: primary,
               isCurrent: currentPlan == SubscriptionPlan.PREMIUM,
-              badge: !trialUsed && currentPlan == SubscriptionPlan.FREE
-                  ? _PlanBadge(label: '7 dias grátis', color: EagleTokens.good)
-                  : null,
+              badge:
+                  !trialUsed && currentPlan == SubscriptionPlan.FREE
+                      ? _PlanBadge(
+                        label: '5 dias grátis',
+                        color: EagleTokens.good,
+                      )
+                      : null,
               features: const [
-                _Feature('Até 20 alunos',         included: true),
-                _Feature('Financeiro e CRM',       included: true),
-                _Feature('Migração Mágica IA',     included: true),
-                _Feature('Landing page Focux',     included: true),
-                _Feature('White-label',            included: false),
-                _Feature('IA ilimitada + RAG',     included: false),
+                _Feature('Até 20 alunos', included: true),
+                _Feature('Financeiro e CRM', included: true),
+                _Feature('Migração Mágica IA', included: true),
+                _Feature('Landing page Focux', included: true),
+                _Feature('White-label', included: false),
+                _Feature('IA ilimitada + RAG', included: false),
               ],
-              cta: currentPlan != SubscriptionPlan.PREMIUM && currentPlan.level < SubscriptionPlan.PREMIUM.level
-                  ? _PrimaryButton(
-                      label: 'Assinar Premium',
-                      onTap: () => context.push('/assinatura', extra: SubscriptionPlan.PREMIUM.apiName),
-                    )
-                  : null,
-              ctaLabel: currentPlan == SubscriptionPlan.PREMIUM ? 'Plano atual' : null,
+              cta:
+                  currentPlan != SubscriptionPlan.PREMIUM &&
+                          currentPlan.level < SubscriptionPlan.PREMIUM.level
+                      ? _PrimaryButton(
+                        label: 'Assinar Premium',
+                        onTap:
+                            () => context.push(
+                              '/assinatura',
+                              extra: SubscriptionPlan.PREMIUM.apiName,
+                            ),
+                      )
+                      : null,
+              ctaLabel:
+                  currentPlan == SubscriptionPlan.PREMIUM
+                      ? 'Plano atual'
+                      : null,
             ),
 
             const SizedBox(height: 16),
@@ -147,7 +171,11 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
               trialAtivo: trialAtivo,
               startingTrial: _startingTrial,
               onTrial: _startTrial,
-              onAssinar: () => context.push('/assinatura', extra: SubscriptionPlan.ENTERPRISE.apiName),
+              onAssinar:
+                  () => context.push(
+                    '/assinatura',
+                    extra: SubscriptionPlan.ENTERPRISE.apiName,
+                  ),
             ),
           ],
         ),
@@ -182,7 +210,10 @@ class _TrialActiveBanner extends StatelessWidget {
               children: [
                 Text(
                   'Trial Enterprise ativo até ${_fmtDate(endsAt)}.',
-                  style: const TextStyle(color: EagleTokens.good, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    color: EagleTokens.good,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 Text(
                   '$remaining dias restantes. Sem cobrança até o término.',
@@ -224,9 +255,9 @@ class _PlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line   = isDark ? EagleTokens.darkLine  : EagleTokens.line;
-    final ink    = isDark ? EagleTokens.darkInk   : EagleTokens.ink;
-    final mute   = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -255,19 +286,24 @@ class _PlanCard extends StatelessWidget {
                 ),
               ),
               if (badge != null) ...[badge!, const SizedBox(width: 6)],
-              if (isCurrent)
-                _ChipBadge(label: 'Atual', color: accentColor),
+              if (isCurrent) _ChipBadge(label: 'Atual', color: accentColor),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             price,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: accentColor),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: accentColor,
+            ),
           ),
           const SizedBox(height: 14),
 
           // Feature list
-          ...features.map((f) => _FeatureRow(feature: f, accent: accentColor, mute: mute)),
+          ...features.map(
+            (f) => _FeatureRow(feature: f, accent: accentColor, mute: mute),
+          ),
 
           // CTA
           if (cta != null) ...[const SizedBox(height: 16), cta!],
@@ -276,7 +312,11 @@ class _PlanCard extends StatelessWidget {
             Center(
               child: Text(
                 ctaLabel!,
-                style: TextStyle(color: mute, fontSize: 12.5, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  color: mute,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],
@@ -307,8 +347,8 @@ class _EnterpriseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line   = isDark ? EagleTokens.darkLine  : EagleTokens.line;
-    final mute   = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
       decoration: BoxDecoration(
@@ -327,7 +367,10 @@ class _EnterpriseCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: isCurrent ? _accent : line, width: isCurrent ? 2 : 1),
+          border: Border.all(
+            color: isCurrent ? _accent : line,
+            width: isCurrent ? 2 : 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,11 +381,18 @@ class _EnterpriseCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'ENTERPRISE',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _accent),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: _accent,
+                    ),
                   ),
                 ),
                 if (!trialUsed && !isCurrent)
-                  const _PlanBadge(label: '7 dias grátis', color: EagleTokens.good),
+                  const _PlanBadge(
+                    label: '5 dias grátis',
+                    color: EagleTokens.good,
+                  ),
                 if (!trialUsed && !isCurrent) const SizedBox(width: 6),
                 if (isCurrent) const _ChipBadge(label: 'Atual', color: _accent),
               ],
@@ -350,18 +400,22 @@ class _EnterpriseCard extends StatelessWidget {
             const SizedBox(height: 4),
             const Text(
               'R\$ 149,90/mês',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _accent),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: _accent,
+              ),
             ),
             const SizedBox(height: 14),
 
             // Features
             ...[
-              const _Feature('Alunos ilimitados',      included: true),
-              const _Feature('IA ilimitada + RAG',     included: true),
-              const _Feature('White-label completo',   included: true),
-              const _Feature('Domínio customizado',    included: true),
+              const _Feature('Alunos ilimitados', included: true),
+              const _Feature('IA ilimitada + RAG', included: true),
+              const _Feature('White-label completo', included: true),
+              const _Feature('Domínio customizado', included: true),
               const _Feature('Landing page + prova social', included: true),
-              const _Feature('Suporte prioritário',    included: true),
+              const _Feature('Suporte prioritário', included: true),
             ].map((f) => _FeatureRow(feature: f, accent: _accent, mute: mute)),
 
             // CTA section
@@ -373,33 +427,56 @@ class _EnterpriseCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: EagleTokens.goodSoft.withValues(alpha: isDark ? 0.08 : 1),
+                    color: EagleTokens.goodSoft.withValues(
+                      alpha: isDark ? 0.08 : 1,
+                    ),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: EagleTokens.good.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: EagleTokens.good.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(children: [
-                        const Icon(Icons.card_giftcard_outlined, color: EagleTokens.good, size: 16),
-                        const SizedBox(width: 6),
-                        Text(
-                          '7 dias grátis disponíveis',
-                          style: const TextStyle(color: EagleTokens.good, fontWeight: FontWeight.w700, fontSize: 13),
-                        ),
-                      ]),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.card_giftcard_outlined,
+                            color: EagleTokens.good,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '5 dias grátis disponíveis',
+                            style: const TextStyle(
+                              color: EagleTokens.good,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 8),
-                      _TrialInfoRow(icon: Icons.credit_card_outlined,
-                        text: 'É obrigatório cadastrar um cartão de crédito para ativar o período gratuito.'),
+                      _TrialInfoRow(
+                        icon: Icons.credit_card_outlined,
+                        text:
+                            'É obrigatório cadastrar um cartão de crédito para ativar o período gratuito.',
+                      ),
                       const SizedBox(height: 4),
-                      _TrialInfoRow(icon: Icons.lock_outline,
-                        text: 'Nenhuma cobrança até o término dos 7 dias. Cancele antes sem custo.'),
+                      _TrialInfoRow(
+                        icon: Icons.lock_outline,
+                        text:
+                            'Nenhuma cobrança até o término dos 5 dias. Cancele antes sem custo.',
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 12),
                 _PrimaryButton(
-                  label: startingTrial ? 'Ativando...' : 'Experimentar 7 dias grátis',
+                  label:
+                      startingTrial
+                          ? 'Ativando...'
+                          : 'Experimentar 5 dias grátis',
                   loading: startingTrial,
                   onTap: startingTrial ? null : onTrial,
                 ),
@@ -418,7 +495,10 @@ class _EnterpriseCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: (isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft),
+                    color:
+                        (isDark
+                            ? EagleTokens.darkCardHi
+                            : EagleTokens.lineSoft),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
@@ -428,7 +508,11 @@ class _EnterpriseCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           'Período gratuito já utilizado. A cobrança começa imediatamente ao assinar.',
-                          style: TextStyle(color: mute, fontSize: 12.5, height: 1.4),
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12.5,
+                            height: 1.4,
+                          ),
                         ),
                       ),
                     ],
@@ -474,26 +558,43 @@ class _Feature {
 class _FeatureRow extends StatelessWidget {
   final _Feature feature;
   final Color accent, mute;
-  const _FeatureRow({required this.feature, required this.accent, required this.mute});
+  const _FeatureRow({
+    required this.feature,
+    required this.accent,
+    required this.mute,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 7),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      height: 52,
+      margin: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color:
+            feature.included
+                ? (isDark
+                    ? EagleTokens.goodSoft.withValues(alpha: 0.15)
+                    : EagleTokens.goodSoft)
+                : (isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft),
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Row(
         children: [
           Icon(
-            feature.included ? Icons.check_circle_outline : Icons.remove_circle_outline,
-            size: 16,
-            color: feature.included ? accent : mute,
+            feature.included ? Icons.check_circle : Icons.cancel,
+            size: 18,
+            color: feature.included ? EagleTokens.good : mute,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               feature.label,
               style: TextStyle(
                 fontSize: 13,
                 color: feature.included ? null : mute,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -517,9 +618,20 @@ class _PlanBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
-      child: Text(
-        label,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.access_time, size: 13, color: color),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -538,7 +650,14 @@ class _ChipBadge extends StatelessWidget {
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
     );
   }
 }
@@ -563,12 +682,20 @@ class _PrimaryButton extends StatelessWidget {
           disabledBackgroundColor: EagleTokens.darkCardHi,
           disabledForegroundColor: EagleTokens.darkInkMute,
         ),
-        child: loading
-            ? const SizedBox(
-                width: 20, height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-              )
-            : Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+        child:
+            loading
+                ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+                : Text(
+                  label,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
       ),
     );
   }
@@ -587,7 +714,14 @@ class _TrialInfoRow extends StatelessWidget {
         Icon(icon, size: 13, color: EagleTokens.good),
         const SizedBox(width: 6),
         Expanded(
-          child: Text(text, style: const TextStyle(color: EagleTokens.good, fontSize: 11.5, height: 1.4)),
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: EagleTokens.good,
+              fontSize: 11.5,
+              height: 1.4,
+            ),
+          ),
         ),
       ],
     );
