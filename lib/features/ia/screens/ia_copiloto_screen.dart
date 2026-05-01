@@ -67,26 +67,25 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       showDragHandle: true,
       builder:
           (ctx) => SafeArea(
-            child: ListView(
+            child: ListView.builder(
               shrinkWrap: true,
-              children:
-                  alunos
-                      .map(
-                        (a) => ListTile(
-                          leading: const Icon(Icons.person_outline),
-                          title: Text(a.nome),
-                          subtitle: Text(a.objetivo ?? 'Sem objetivo definido'),
-                          trailing:
-                              _selectedAlunoId == a.id
-                                  ? const Icon(
-                                    Icons.check_circle,
-                                    color: Color(0xFF2BB673),
-                                  )
-                                  : null,
-                          onTap: () => Navigator.of(ctx).pop(a.id),
-                        ),
-                      )
-                      .toList(),
+              itemCount: alunos.length,
+              itemBuilder: (ctx, index) {
+                final a = alunos[index];
+                return ListTile(
+                  leading: const Icon(Icons.person_outline),
+                  title: Text(a.nome),
+                  subtitle: Text(a.objetivo ?? 'Sem objetivo definido'),
+                  trailing:
+                      _selectedAlunoId == a.id
+                          ? const Icon(
+                            Icons.check_circle,
+                            color: Color(0xFF2BB673),
+                          )
+                          : null,
+                  onTap: () => Navigator.of(ctx).pop(a.id),
+                );
+              },
             ),
           ),
     );
