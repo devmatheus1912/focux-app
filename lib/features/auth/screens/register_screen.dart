@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
@@ -327,11 +329,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           height: 1.5,
                         ),
                         children: [
-                          TextSpan(text: 'Ao criar, você concorda com os '),
+                          const TextSpan(text: 'Ao criar, você concorda com os '),
                           TextSpan(
                             text: 'Termos de uso',
                             style: TextStyle(color: primary),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => launchUrl(
+                                    Uri.parse(
+                                        'https://focux-backend-production.up.railway.app/termos.html'),
+                                    mode: LaunchMode.externalApplication,
+                                  ),
                           ),
+                          const TextSpan(text: ' e a '),
+                          TextSpan(
+                            text: 'Política de privacidade',
+                            style: TextStyle(color: primary),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => launchUrl(
+                                    Uri.parse(
+                                        'https://focux-backend-production.up.railway.app/privacidade.html'),
+                                    mode: LaunchMode.externalApplication,
+                                  ),
+                          ),
+                          const TextSpan(text: '.'),
                         ],
                       ),
                       textAlign: TextAlign.center,

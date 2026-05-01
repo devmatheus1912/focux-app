@@ -374,6 +374,11 @@ class PlanosRepository {
     );
     return EnterpriseActivationResult.fromJson(r.data as Map<String, dynamic>);
   }
+
+  /// Restore purchases — re-syncs subscription state from backend.
+  Future<PlanoFeatures> syncSubscription() async {
+    return getPlanoFeaturesFresh();
+  }
 }
 
 DateTime? _parseDateTime(dynamic value) {

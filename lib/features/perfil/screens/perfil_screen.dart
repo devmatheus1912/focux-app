@@ -2,9 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/api/api_client.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -501,6 +503,30 @@ class _PerfilBody extends StatelessWidget {
                         onTap: () => context.push('/migracao-magica'),
                       ),
                       _ActionTile(
+                        icon: Icons.description_outlined,
+                        label: 'Termos de uso',
+                        value: '',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => launchUrl(
+                          Uri.parse('https://focux-backend-production.up.railway.app/termos.html'),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                      ),
+                      _ActionTile(
+                        icon: Icons.privacy_tip_outlined,
+                        label: 'Politica de privacidade',
+                        value: '',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => launchUrl(
+                          Uri.parse('https://focux-backend-production.up.railway.app/privacidade.html'),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                      ),
+                      _ActionTile(
                         icon: Icons.logout,
                         label: 'Sair da conta',
                         value: '',
@@ -508,8 +534,18 @@ class _PerfilBody extends StatelessWidget {
                         mute: mute,
                         line: line,
                         danger: true,
-                        showDivider: false,
                         onTap: onLogout,
+                      ),
+                      _ActionTile(
+                        icon: Icons.delete_forever_outlined,
+                        label: 'Excluir minha conta',
+                        value: '',
+                        accent: EagleTokens.bad,
+                        mute: mute,
+                        line: line,
+                        danger: true,
+                        showDivider: false,
+                        onTap: () => _showDeleteAccountDialog(context),
                       ),
                     ],
                   ),
@@ -955,6 +991,48 @@ class _GridTexturePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+void _showDeleteAccountDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Excluir conta'),
+      content: const Text(
+        'Esta ação é irreversível. Todos os seus dados pessoais serão anonimizados '
+        'conforme a LGPD (Art. 18). Dados financeiros serão mantidos por 5 anos '
+        'conforme legislação fiscal.\n\n'
+        'Deseja realmente excluir sua conta?',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
+          onPressed: () async {
+            Navigator.of(ctx).pop();
+            try {
+              final dio = ApiClient().dio;
+              await dio.delete('/api/lgpd/me/delete');
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Conta excluída com sucesso.')),
+              );
+              GoRouter.of(context).go('/login');
+            } catch (e) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Erro ao excluir: $e')),
+              );
+            }
+          },
+          child: const Text('Excluir definitivamente'),
+        ),
+      ],
+    ),
+  );
 }
 
 String _buildSubtitle(PerfilPersonal perfil) {

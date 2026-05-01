@@ -652,6 +652,45 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         textAlign: TextAlign.center,
                       ),
                     ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: TextButton(
+                      onPressed: () async {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Verificando compras anteriores...'),
+                          ),
+                        );
+                        // IAP restore handled by store
+                        try {
+                          final repo = PlanosRepository(ref.read(apiClientProvider));
+                          await repo.syncSubscription();
+                          ref.invalidate(perfilProvider);
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Compras restauradas com sucesso.'),
+                            ),
+                          );
+                        } catch (_) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Nenhuma compra anterior encontrada.'),
+                            ),
+                          );
+                        }
+                      },
+                      child: Text(
+                        'Restaurar compras',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: mute,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
