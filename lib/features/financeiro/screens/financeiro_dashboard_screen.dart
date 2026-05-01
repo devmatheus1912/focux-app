@@ -10,10 +10,12 @@ class FinanceiroDashboardScreen extends ConsumerStatefulWidget {
   const FinanceiroDashboardScreen({super.key});
 
   @override
-  ConsumerState<FinanceiroDashboardScreen> createState() => _FinanceiroDashboardScreenState();
+  ConsumerState<FinanceiroDashboardScreen> createState() =>
+      _FinanceiroDashboardScreenState();
 }
 
-class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardScreen> {
+class _FinanceiroDashboardScreenState
+    extends ConsumerState<FinanceiroDashboardScreen> {
   FinanceiroDashboard? _data;
   bool _loading = true;
 
@@ -45,11 +47,17 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_data == null) {
       return Center(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('Erro ao carregar dashboard.'),
-          const SizedBox(height: 12),
-          FilledButton(onPressed: _load, child: const Text('Tentar novamente')),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Erro ao carregar dashboard.'),
+            const SizedBox(height: 12),
+            FilledButton(
+              onPressed: _load,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        ),
       );
     }
 
@@ -58,7 +66,7 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final primaryDeep = BrandPalette.deep(primary);
-    
+
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView(
@@ -67,13 +75,13 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
           const SizedBox(height: 16),
           // Hero — ring with received amount
           _HeroRing(data: d, isDark: isDark),
-          
+
           // Tri-grid metrics
           _TriGrid(data: d, isDark: isDark),
-          
+
           // Evolução — bar chart
           _EvolucaoChart(items: d.evolucaoMensal, isDark: isDark),
-          
+
           // Vencimentos próximos
           if (d.vencimentosProximos.isNotEmpty) ...[
             Padding(
@@ -81,24 +89,50 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Vencimentos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.darkInk : EagleTokens.ink, letterSpacing: -0.2)),
-                  Text('Cobrar todos →', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: primary)),
+                  Text(
+                    'Vencimentos',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  Text(
+                    'Cobrar todos →',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: primary,
+                    ),
+                  ),
                 ],
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
-                children: d.vencimentosProximos.map((v) => _VencimentoRow(item: v, isDark: isDark)).toList(),
+                children:
+                    d.vencimentosProximos
+                        .map((v) => _VencimentoRow(item: v, isDark: isDark))
+                        .toList(),
               ),
             ),
           ],
-          
+
           // Top alunos
           if (d.topAlunos.isNotEmpty) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 22, 20, 10),
-              child: Text('Top alunos · acumulado', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.darkInk : EagleTokens.ink, letterSpacing: -0.2)),
+              child: Text(
+                'Top alunos · acumulado',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                  letterSpacing: -0.2,
+                ),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -106,43 +140,107 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
                 decoration: BoxDecoration(
                   color: isDark ? EagleTokens.darkCard : EagleTokens.card,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+                  border: Border.all(
+                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                  ),
                 ),
                 child: Column(
-                  children: d.topAlunos.asMap().entries.map((e) {
-                    final rank = e.key + 1;
-                    final t = e.value;
-                    final isLast = rank == d.topAlunos.length;
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      decoration: BoxDecoration(
-                        border: isLast ? null : Border(bottom: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line, width: 0.5)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 26, height: 26,
-                            decoration: BoxDecoration(
-                              color: isDark ? primary.withValues(alpha: 0.18) : primarySoft,
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text('$rank', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primary)),
+                  children:
+                      d.topAlunos.asMap().entries.map((e) {
+                        final rank = e.key + 1;
+                        final t = e.value;
+                        final isLast = rank == d.topAlunos.length;
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
                           ),
-                          const SizedBox(width: 10),
-                          Container(
-                            width: 32, height: 32,
-                            decoration: BoxDecoration(color: isDark ? primaryDeep : primary, shape: BoxShape.circle),
-                            alignment: Alignment.center,
-                            child: Text(t.alunoNome.isNotEmpty ? t.alunoNome[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                          decoration: BoxDecoration(
+                            border:
+                                isLast
+                                    ? null
+                                    : Border(
+                                      bottom: BorderSide(
+                                        color:
+                                            isDark
+                                                ? EagleTokens.darkLine
+                                                : EagleTokens.line,
+                                        width: 0.5,
+                                      ),
+                                    ),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(child: Text(t.alunoNome, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500, color: isDark ? EagleTokens.darkInk : EagleTokens.ink), overflow: TextOverflow.ellipsis)),
-                          Text('R\$ ${(t.totalPago / 1000).toStringAsFixed(1)}k', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? EagleTokens.darkInk : EagleTokens.ink)),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 26,
+                                height: 26,
+                                decoration: BoxDecoration(
+                                  color:
+                                      isDark
+                                          ? primary.withValues(alpha: 0.18)
+                                          : primarySoft,
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '$rank',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: primary,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: isDark ? primaryDeep : primary,
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  t.alunoNome.isNotEmpty
+                                      ? t.alunoNome[0].toUpperCase()
+                                      : '?',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  t.alunoNome,
+                                  style: TextStyle(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkInk
+                                            : EagleTokens.ink,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Text(
+                                'R\$ ${(t.totalPago / 1000).toStringAsFixed(1)}k',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      isDark
+                                          ? EagleTokens.darkInk
+                                          : EagleTokens.ink,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                 ),
               ),
             ),
@@ -157,7 +255,7 @@ class _FinanceiroDashboardScreenState extends ConsumerState<FinanceiroDashboardS
 class _HeroRing extends StatelessWidget {
   final FinanceiroDashboard data;
   final bool isDark;
-  
+
   const _HeroRing({required this.data, required this.isDark});
 
   @override
@@ -168,9 +266,12 @@ class _HeroRing extends StatelessWidget {
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    
-    final perc = data.previsaoReceita > 0 ? (data.receitaMes / data.previsaoReceita) : 0.0;
-    
+
+    final perc =
+        data.previsaoReceita > 0
+            ? (data.receitaMes / data.previsaoReceita)
+            : 0.0;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
       child: Container(
@@ -184,32 +285,43 @@ class _HeroRing extends StatelessWidget {
           children: [
             // Ring
             SizedBox(
-              width: 120, height: 120,
+              width: 120,
+              height: 120,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  SizedBox(
-                    width: 120, height: 120,
-                    child: CircularProgressIndicator(
-                      value: 1.0,
-                      strokeWidth: 8,
-                      color: isDark ? Colors.white.withValues(alpha: 0.08) : primarySoft,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 120, height: 120,
-                    child: CircularProgressIndicator(
-                      value: perc.clamp(0.0, 1.0),
-                      strokeWidth: 8,
-                      strokeCap: StrokeCap.round,
-                      color: primary,
+                  CustomPaint(
+                    size: const Size(120, 120),
+                    painter: _RingChartPainter(
+                      fraction: perc,
+                      activeColor: primary,
+                      trackColor:
+                          isDark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : primarySoft,
                     ),
                   ),
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('RECEBIDO', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 1.0, color: ink)),
-                      Text('${(perc * 100).round()}%', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: -0.5, color: ink)),
+                      Text(
+                        'RECEBIDO',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.0,
+                          color: ink,
+                        ),
+                      ),
+                      Text(
+                        '${(perc * 100).round()}%',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                          color: ink,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -220,28 +332,83 @@ class _HeroRing extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('RECEBIDO NESTE MÊS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 0.8, color: mute)),
+                  Text(
+                    'RECEBIDO NESTE MÊS',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.8,
+                      color: mute,
+                    ),
+                  ),
                   const SizedBox(height: 3),
-                  Text('R\$ ${data.receitaMes.toStringAsFixed(2).replaceAll('.', ',')}', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: -0.5, color: ink, height: 1.1)),
+                  Text(
+                    'R\$ ${data.receitaMes.toStringAsFixed(2).replaceAll('.', ',')}',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.5,
+                      color: ink,
+                      height: 1.1,
+                    ),
+                  ),
                   const SizedBox(height: 6),
-                  Text.rich(TextSpan(children: [
-                    TextSpan(text: 'Previsto ', style: TextStyle(fontSize: 12.5, color: mute)),
-                    TextSpan(text: 'R\$ ${data.previsaoReceita.toStringAsFixed(2).replaceAll('.', ',')}', style: TextStyle(fontSize: 12.5, color: ink, fontWeight: FontWeight.w600)),
-                  ])),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Previsto ',
+                          style: TextStyle(fontSize: 12.5, color: mute),
+                        ),
+                        TextSpan(
+                          text:
+                              'R\$ ${data.previsaoReceita.toStringAsFixed(2).replaceAll('.', ',')}',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: ink,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   if (data.totalInadimplentes > 0)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0x1FFF8B8B) : EagleTokens.badSoft,
+                        color:
+                            isDark
+                                ? const Color(0x1FFF8B8B)
+                                : EagleTokens.badSoft,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.warning_amber_rounded, size: 12, color: isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad),
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            size: 12,
+                            color:
+                                isDark
+                                    ? const Color(0xFFFF8B8B)
+                                    : EagleTokens.bad,
+                          ),
                           const SizedBox(width: 6),
-                          Text('${data.totalInadimplentes} inadimpl.', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)),
+                          Text(
+                            '${data.totalInadimplentes} inadimpl.',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  isDark
+                                      ? const Color(0xFFFF8B8B)
+                                      : EagleTokens.bad,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -253,6 +420,52 @@ class _HeroRing extends StatelessWidget {
       ),
     );
   }
+}
+
+class _RingChartPainter extends CustomPainter {
+  final double fraction;
+  final Color activeColor;
+  final Color trackColor;
+
+  const _RingChartPainter({
+    required this.fraction,
+    required this.activeColor,
+    required this.trackColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    const radius = 48.0;
+    const strokeWidth = 10.0;
+    final trackPaint =
+        Paint()
+          ..color = trackColor
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+    final activePaint =
+        Paint()
+          ..color = activeColor
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, trackPaint);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2,
+      2 * math.pi * fraction.clamp(0.0, 1.0),
+      false,
+      activePaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_RingChartPainter oldDelegate) =>
+      oldDelegate.fraction != fraction ||
+      oldDelegate.activeColor != activeColor ||
+      oldDelegate.trackColor != trackColor;
 }
 
 class _TriGrid extends StatelessWidget {
@@ -269,16 +482,34 @@ class _TriGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     // Pendente = Previsão - Recebido (approx)
     final pendente = math.max(0.0, data.previsaoReceita - data.receitaMes);
-    
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 22),
       child: Row(
         children: [
-          Expanded(child: _MiniMetric(label: 'Pendente', value: 'R\$ ${_formatK(pendente)}', isDark: isDark)),
+          Expanded(
+            child: _MiniMetric(
+              label: 'Pendente',
+              value: 'R\$ ${_formatK(pendente)}',
+              isDark: isDark,
+            ),
+          ),
           const SizedBox(width: 8),
-          Expanded(child: _MiniMetric(label: 'Ticket', value: 'R\$ ${data.ticketMedio.toStringAsFixed(0)}', isDark: isDark)),
+          Expanded(
+            child: _MiniMetric(
+              label: 'Ticket',
+              value: 'R\$ ${data.ticketMedio.toStringAsFixed(0)}',
+              isDark: isDark,
+            ),
+          ),
           const SizedBox(width: 8),
-          Expanded(child: _MiniMetric(label: 'Acumul.', value: 'R\$ ${_formatK(data.receitaAcumulada)}', isDark: isDark)),
+          Expanded(
+            child: _MiniMetric(
+              label: 'Acumul.',
+              value: 'R\$ ${_formatK(data.receitaAcumulada)}',
+              isDark: isDark,
+            ),
+          ),
         ],
       ),
     );
@@ -289,7 +520,11 @@ class _MiniMetric extends StatelessWidget {
   final String label;
   final String value;
   final bool isDark;
-  const _MiniMetric({required this.label, required this.value, required this.isDark});
+  const _MiniMetric({
+    required this.label,
+    required this.value,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -317,7 +552,15 @@ class _MiniMetric extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(value, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, letterSpacing: -0.5, color: ink)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.5,
+              color: ink,
+            ),
+          ),
         ],
       ),
     );
@@ -332,7 +575,7 @@ class _EvolucaoChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
-    
+
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -341,7 +584,7 @@ class _EvolucaoChart extends StatelessWidget {
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final primaryDeep = BrandPalette.deep(primary);
     final primaryAccent = BrandPalette.accent(primary);
-    
+
     final maxV = items.map((e) => e.recebido).reduce(math.max);
     final chartMax = maxV <= 0 ? 100.0 : maxV;
 
@@ -361,18 +604,31 @@ class _EvolucaoChart extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                Text('Evolução · 6 meses', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2, color: ink)),
+                Text(
+                  'Evolução · 6 meses',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.2,
+                    color: ink,
+                  ),
+                ),
                 if (items.length > 1)
-                  Builder(builder: (_) {
-                    final prev = items[items.length - 2].recebido;
-                    final curr = items.last.recebido;
-                    if (prev > 0) {
-                      final diff = ((curr - prev) / prev * 100).round();
-                      final sign = diff > 0 ? '+' : '';
-                      return Text('$sign$diff% vs ${items[items.length - 2].mes.substring(5)}', style: TextStyle(fontSize: 11, color: mute));
-                    }
-                    return const SizedBox.shrink();
-                  }),
+                  Builder(
+                    builder: (_) {
+                      final prev = items[items.length - 2].recebido;
+                      final curr = items.last.recebido;
+                      if (prev > 0) {
+                        final diff = ((curr - prev) / prev * 100).round();
+                        final sign = diff > 0 ? '+' : '';
+                        return Text(
+                          '$sign$diff% vs ${items[items.length - 2].mes.substring(5)}',
+                          style: TextStyle(fontSize: 11, color: mute),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
               ],
             ),
             const SizedBox(height: 16),
@@ -380,46 +636,88 @@ class _EvolucaoChart extends StatelessWidget {
               height: 130,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: items.asMap().entries.map((e) {
-                  final isLast = e.key == items.length - 1;
-                  final h = (e.value.recebido / chartMax).clamp(0.05, 1.0);
-                  
-                  final mes = e.value.mes;
-                  final label = mes.length >= 7 ? mes.substring(5) : mes; // get just month number or string
-                  
-                  return Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text('${(e.value.recebido / 1000).toStringAsFixed(1)}k', style: TextStyle(fontSize: 9.5, color: isLast ? ink : mute, fontWeight: isLast ? FontWeight.w600 : FontWeight.w400)),
-                        const SizedBox(height: 6),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: FractionallySizedBox(
-                              heightFactor: h,
-                              widthFactor: 0.7,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6), bottom: Radius.circular(2)),
-                                  gradient: isLast
-                                      ? LinearGradient(
-                                          begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                                          colors: isDark ? [primaryAccent, primary] : [primary, primaryDeep],
-                                        )
-                                      : null,
-                                  color: !isLast ? (isDark ? Colors.white.withValues(alpha: 0.08) : primarySoft) : null,
+                children:
+                    items.asMap().entries.map((e) {
+                      final isLast = e.key == items.length - 1;
+                      final h = (e.value.recebido / chartMax).clamp(0.05, 1.0);
+
+                      final mes = e.value.mes;
+                      final label =
+                          mes.length >= 7
+                              ? mes.substring(5)
+                              : mes; // get just month number or string
+
+                      return Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${(e.value.recebido / 1000).toStringAsFixed(1)}k',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                color: isLast ? ink : mute,
+                                fontWeight:
+                                    isLast ? FontWeight.w600 : FontWeight.w400,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: FractionallySizedBox(
+                                  heightFactor: h,
+                                  widthFactor: 0.7,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(6),
+                                        bottom: Radius.circular(2),
+                                      ),
+                                      gradient:
+                                          isLast
+                                              ? LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors:
+                                                    isDark
+                                                        ? [
+                                                          primaryAccent,
+                                                          primary,
+                                                        ]
+                                                        : [
+                                                          primary,
+                                                          primaryDeep,
+                                                        ],
+                                              )
+                                              : null,
+                                      color:
+                                          !isLast
+                                              ? (isDark
+                                                  ? Colors.white.withValues(
+                                                    alpha: 0.08,
+                                                  )
+                                                  : primarySoft)
+                                              : null,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                            const SizedBox(height: 6),
+                            Text(
+                              label,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: isLast ? ink : mute,
+                                fontWeight:
+                                    isLast ? FontWeight.w600 : FontWeight.w500,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 6),
-                        Text(label, style: TextStyle(fontSize: 10, color: isLast ? ink : mute, fontWeight: isLast ? FontWeight.w600 : FontWeight.w500, letterSpacing: 0.4)),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
               ),
             ),
           ],
@@ -443,10 +741,13 @@ class _VencimentoRow extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final primaryDeep = BrandPalette.deep(primary);
-    
+
     final isAtrasado = item.status == 'ATRASADO';
-    final color = isAtrasado ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad) : (isDark ? const Color(0xFFE2B46F) : EagleTokens.warn);
-    
+    final color =
+        isAtrasado
+            ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
+            : (isDark ? const Color(0xFFE2B46F) : EagleTokens.warn);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -458,24 +759,59 @@ class _VencimentoRow extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 38, height: 38,
-            decoration: BoxDecoration(color: isDark ? primaryDeep : primary, shape: BoxShape.circle),
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: isDark ? primaryDeep : primary,
+              shape: BoxShape.circle,
+            ),
             alignment: Alignment.center,
-            child: Text(item.alunoNome.isNotEmpty ? item.alunoNome[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            child: Text(
+              item.alunoNome.isNotEmpty ? item.alunoNome[0].toUpperCase() : '?',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.alunoNome, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: ink)),
+                Text(
+                  item.alunoNome,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                    color: ink,
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    Container(width: 5, height: 5, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                     const SizedBox(width: 5),
-                    Text(isAtrasado ? 'Atrasado' : 'Vencendo', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: color)),
-                    Text(' · ${item.mesReferencia.substring(0, 7)}', style: TextStyle(fontSize: 11.5, color: mute)),
+                    Text(
+                      isAtrasado ? 'Atrasado' : 'Vencendo',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                      ),
+                    ),
+                    Text(
+                      ' · ${item.mesReferencia.substring(0, 7)}',
+                      style: TextStyle(fontSize: 11.5, color: mute),
+                    ),
                   ],
                 ),
               ],
@@ -484,15 +820,36 @@ class _VencimentoRow extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('R\$ ${item.valor.toStringAsFixed(0)}', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: ink, letterSpacing: -0.2)),
+              Text(
+                'R\$ ${item.valor.toStringAsFixed(0)}',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: ink,
+                  letterSpacing: -0.2,
+                ),
+              ),
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.1) : primarySoft,
+                  color:
+                      isDark
+                          ? Colors.white.withValues(alpha: 0.1)
+                          : primarySoft,
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Text('Cobrar', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: primary)),
+                child: Text(
+                  'Cobrar',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: primary,
+                  ),
+                ),
               ),
             ],
           ),
