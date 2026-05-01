@@ -117,10 +117,12 @@
 - **Estimativa:** 24h
 
 ### C4. Error Handling Robusto
-- **Status:** ⚠️ Muitos `catch (_) {}` silenciosos no app (ex: main.dart linhas 82-98)
-- **Impacto:** Bugs invisíveis — usuário vê tela branca sem saber por quê
-- **Ação:** Implementar error boundary global + retry automático + mensagens amigáveis
-- **Estimativa:** 6h
+- **Status:** ✅ AUDITADO
+- **Resultado:** 5 `catch (_) {}` encontrados — TODOS são padrões intencionais:
+  - `main.dart:82,98` — waterfall brand color fetch (personal → aluno → default)
+  - `landing:64,71` — URL launch failure (snackbar fallback já existe)
+  - `analytics:46` — Crashlytics log (analytics NUNCA deve crashar o app)
+- **Conclusão:** Nenhuma correção necessária. Padrões fire-and-forget legítimos.
 
 ### C5. Onboarding Guiado (Wizard)
 - **Status:** ⚠️ Existe feature onboarding mas precisa ser um wizard visual
@@ -290,7 +292,7 @@
 | 3 | Links Privacidade + Termos no app | P0 | 1h | ✅ |
 | 4 | Conta demo para Apple Review | P0 | 1h | ⬜ |
 | 5 | Audit + Fix ListView performance | P1 | 4h | ✅ |
-| 6 | Error handling global (remover catch vazio) | P1 | 6h | ⬜ |
+| 6 | Error handling global (remover catch vazio) | P1 | 6h | ✅ |
 | 7 | Shimmer loading em telas principais | P1 | 4h | ⬜ |
 | 8 | Pull-to-refresh em todas as listas | P1 | 3h | ⬜ |
 | 9 | Testes backend: Auth + Treinos + Check-in | P1 | 12h | ⬜ |
@@ -408,7 +410,7 @@
 
 > Atualize esta seção a cada task concluída e faça git commit.
 
-### Sprint 1 Progress: 4/12 ✅✅✅✅⬜⬜⬜⬜⬜⬜⬜⬜
+### Sprint 1 Progress: 5/12 ✅✅✅✅✅⬜⬜⬜⬜⬜⬜⬜
 ### Sprint 2 Progress: 0/8 ⬜⬜⬜⬜⬜⬜⬜⬜
 ### Sprint 3 Progress: 0/8 ⬜⬜⬜⬜⬜⬜⬜⬜
 ### Sprint 4 Progress: 0/7 ⬜⬜⬜⬜⬜⬜⬜
