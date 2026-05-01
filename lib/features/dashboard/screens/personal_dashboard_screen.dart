@@ -50,9 +50,10 @@ class _PersonalDashboardScreenState
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    _counterAnim = Tween<double>(begin: 0, end: 0).animate(
-      CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut),
-    );
+    _counterAnim = Tween<double>(
+      begin: 0,
+      end: 0,
+    ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
     _loadFin();
   }
 
@@ -110,200 +111,211 @@ class _PersonalDashboardScreenState
       body: dashboardAsync.when(
         loading: () => _buildShimmerLoading(context),
         error: (e, _) => Center(child: Text('Erro ao carregar: $e')),
-        data:
-            (data) {
-              // Computed values for hero card
-              final monthNames = [
-                'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-                'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
-              ];
-              final mes = monthNames[DateTime.now().month - 1];
-              final pendente = ((_finData?.previsaoReceita ?? 0) -
-                      (_finData?.receitaMes ?? 0))
-                  .clamp(0.0, double.infinity);
+        data: (data) {
+          // Computed values for hero card
+          final monthNames = [
+            'janeiro',
+            'fevereiro',
+            'março',
+            'abril',
+            'maio',
+            'junho',
+            'julho',
+            'agosto',
+            'setembro',
+            'outubro',
+            'novembro',
+            'dezembro',
+          ];
+          final mes = monthNames[DateTime.now().month - 1];
+          final pendente = ((_finData?.previsaoReceita ?? 0) -
+                  (_finData?.receitaMes ?? 0))
+              .clamp(0.0, double.infinity);
 
-              final alunosAtivos = alunosAsync.maybeWhen(
-                data: (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
-                orElse: () => data.alunosAtivos,
-              );
-              final totalAlunos = alunosAsync.maybeWhen(
-                data: (alunos) => alunos.length,
-                orElse: () => data.totalAlunos,
-              );
-              final riscoAlto = alunosAsync.maybeWhen(
-                data: (alunos) => alunos.where((a) => a.emRisco).length,
-                orElse: () => 0,
-              );
+          final alunosAtivos = alunosAsync.maybeWhen(
+            data: (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
+            orElse: () => data.alunosAtivos,
+          );
+          final totalAlunos = alunosAsync.maybeWhen(
+            data: (alunos) => alunos.length,
+            orElse: () => data.totalAlunos,
+          );
+          final riscoAlto = alunosAsync.maybeWhen(
+            data: (alunos) => alunos.where((a) => a.emRisco).length,
+            orElse: () => 0,
+          );
 
-              // BUG-07: aderência média real dos top-3 alunos
-              final aderenciaMediaStr = aderenciaAsync.maybeWhen(
-                data: (lista) {
-                  if (lista.isEmpty) return '—';
-                  final media = lista
+          // BUG-07: aderência média real dos top-3 alunos
+          final aderenciaMediaStr = aderenciaAsync.maybeWhen(
+            data: (lista) {
+              if (lista.isEmpty) return '—';
+              final media =
+                  lista
                       .map((a) => a.aderenciaPercent)
-                      .reduce((a, b) => a + b) ~/ lista.length;
-                  return '$media%';
-                },
-                orElse: () => '—',
-              );
+                      .reduce((a, b) => a + b) ~/
+                  lista.length;
+              return '$media%';
+            },
+            orElse: () => '—',
+          );
 
-              final hoje = DateTime.now();
-              final checkinsHoje = historicoCheckinsAsync.maybeWhen(
-                data: (items) {
-                  bool sameDay(DateTime a, DateTime b) =>
-                      a.year == b.year && a.month == b.month && a.day == b.day;
-                  return items.where((e) {
-                    final concluded = DateTime.tryParse(e.concluidoEm ?? '');
-                    if (concluded == null) return false;
-                    return sameDay(concluded.toLocal(), hoje);
-                  }).length;
-                },
-                orElse: () => 0,
-              );
+          final hoje = DateTime.now();
+          final checkinsHoje = historicoCheckinsAsync.maybeWhen(
+            data: (items) {
+              bool sameDay(DateTime a, DateTime b) =>
+                  a.year == b.year && a.month == b.month && a.day == b.day;
+              return items.where((e) {
+                final concluded = DateTime.tryParse(e.concluidoEm ?? '');
+                if (concluded == null) return false;
+                return sameDay(concluded.toLocal(), hoje);
+              }).length;
+            },
+            orElse: () => 0,
+          );
 
-              return RefreshIndicator(
-              onRefresh: () async {
-                ref.invalidate(dashboardProvider);
-                ref.invalidate(commandCenterProvider);
-                ref.invalidate(alunosProvider);
-                ref.invalidate(historicoCheckinProvider);
-                ref.invalidate(notificacoesProvider);
-                ref.invalidate(notificacoesNaoLidasProvider);
-                await _loadFin();
-              },
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverSafeArea(
-                    bottom: false,
-                    sliver: SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                FxLogo(
-                                  iconSize: 28,
-                                  showLabel: true,
-                                  horizontal: true,
-                                  light: isDark,
-                                ),
-                                const SizedBox(height: 10),
-                                Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      const TextSpan(text: 'Hoje · '),
-                                      TextSpan(
-                                        text:
-                                            'Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
-                                        style: TextStyle(
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkInk
-                                                  : EagleTokens.ink,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(dashboardProvider);
+              ref.invalidate(commandCenterProvider);
+              ref.invalidate(alunosProvider);
+              ref.invalidate(historicoCheckinProvider);
+              ref.invalidate(notificacoesProvider);
+              ref.invalidate(notificacoesNaoLidasProvider);
+              await _loadFin();
+            },
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverSafeArea(
+                  bottom: false,
+                  sliver: SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              FxLogo(
+                                iconSize: 28,
+                                showLabel: true,
+                                horizontal: true,
+                                light: isDark,
+                              ),
+                              const SizedBox(height: 10),
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    const TextSpan(text: 'Hoje · '),
+                                    TextSpan(
+                                      text:
+                                          'Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
+                                      style: TextStyle(
+                                        color:
+                                            isDark
+                                                ? EagleTokens.darkInk
+                                                : EagleTokens.ink,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                    ],
-                                  ),
-                                  style: TextStyle(
-                                    fontSize: 12,
+                                    ),
+                                  ],
+                                ),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color:
+                                      isDark
+                                          ? EagleTokens.darkInkMute
+                                          : EagleTokens.inkMute,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  final currentMode = ref.read(
+                                    themeModeProvider,
+                                  );
+                                  ref.read(themeModeProvider.notifier).state =
+                                      currentMode == ThemeMode.dark
+                                          ? ThemeMode.light
+                                          : ThemeMode.dark;
+                                },
+                                borderRadius: BorderRadius.circular(18),
+                                child: Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
                                     color:
                                         isDark
-                                            ? EagleTokens.darkInkMute
-                                            : EagleTokens.inkMute,
-                                    fontWeight: FontWeight.w500,
+                                            ? Colors.white.withValues(
+                                              alpha: 0.05,
+                                            )
+                                            : Colors.white,
+                                    border:
+                                        isDark
+                                            ? null
+                                            : Border.all(
+                                              color: EagleTokens.line,
+                                            ),
+                                  ),
+                                  child: Icon(
+                                    isDark
+                                        ? Icons.light_mode_outlined
+                                        : Icons.dark_mode_outlined,
+                                    size: 20,
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkInk
+                                            : EagleTokens.ink,
                                   ),
                                 ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    final currentMode = ref.read(
-                                      themeModeProvider,
-                                    );
-                                    ref.read(themeModeProvider.notifier).state =
-                                        currentMode == ThemeMode.dark
-                                            ? ThemeMode.light
-                                            : ThemeMode.dark;
-                                  },
-                                  borderRadius: BorderRadius.circular(18),
-                                  child: Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          isDark
-                                              ? Colors.white.withValues(
-                                                alpha: 0.05,
-                                              )
-                                              : Colors.white,
-                                      border:
-                                          isDark
-                                              ? null
-                                              : Border.all(
-                                                color: EagleTokens.line,
-                                              ),
-                                    ),
-                                    child: Icon(
-                                      isDark
-                                          ? Icons.light_mode_outlined
-                                          : Icons.dark_mode_outlined,
-                                      size: 20,
-                                      color:
-                                          isDark
-                                              ? EagleTokens.darkInk
-                                              : EagleTokens.ink,
-                                    ),
+                              ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap:
+                                    () => context.push(
+                                      '/notificacoes',
+                                    ), // Rota de notificações
+                                borderRadius: BorderRadius.circular(18),
+                                child: Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color:
+                                        isDark
+                                            ? Colors.white.withValues(
+                                              alpha: 0.05,
+                                            )
+                                            : Colors.white,
+                                    border:
+                                        isDark
+                                            ? null
+                                            : Border.all(
+                                              color: EagleTokens.line,
+                                            ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                InkWell(
-                                  onTap:
-                                      () => context.push(
-                                        '/notificacoes',
-                                      ), // Rota de notificações
-                                  borderRadius: BorderRadius.circular(18),
-                                  child: Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          isDark
-                                              ? Colors.white.withValues(
-                                                alpha: 0.05,
-                                              )
-                                              : Colors.white,
-                                      border:
-                                          isDark
-                                              ? null
-                                              : Border.all(
-                                                color: EagleTokens.line,
-                                              ),
-                                    ),
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        FxIcon(
-                                          name: 'bell',
-                                          size: 20,
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkInk
-                                                  : EagleTokens.ink,
-                                          strokeWidth: 1.9,
-                                        ),
-                                        if (notificacoesNaoLidas > 0)
-                                          Positioned(
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      FxIcon(
+                                        name: 'bell',
+                                        size: 20,
+                                        color:
+                                            isDark
+                                                ? EagleTokens.darkInk
+                                                : EagleTokens.ink,
+                                        strokeWidth: 1.9,
+                                      ),
+                                      if (notificacoesNaoLidas > 0)
+                                        Positioned(
                                           top: 8,
                                           right: 9,
                                           child: Container(
@@ -322,394 +334,397 @@ class _PersonalDashboardScreenState
                                             ),
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                InkWell(
-                                  onTap:
-                                      () => context.push(
-                                        '/perfil',
-                                      ), // Rota de perfil do personal
-                                  borderRadius: BorderRadius.circular(18),
-                                  child:
-                                      data.logoUrl != null &&
-                                              data.logoUrl!.isNotEmpty
-                                          ? CircleAvatar(
-                                            backgroundImage: NetworkImage(
-                                              data.logoUrl!,
+                              ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap:
+                                    () => context.push(
+                                      '/perfil',
+                                    ), // Rota de perfil do personal
+                                borderRadius: BorderRadius.circular(18),
+                                child:
+                                    data.logoUrl != null &&
+                                            data.logoUrl!.isNotEmpty
+                                        ? CircleAvatar(
+                                          backgroundImage: NetworkImage(
+                                            data.logoUrl!,
+                                          ),
+                                          radius: 18,
+                                        )
+                                        : CircleAvatar(
+                                          radius: 18,
+                                          backgroundColor: primary,
+                                          child: Text(
+                                            fxInitials(
+                                              data.nomePersonal ?? 'F',
                                             ),
-                                            radius: 18,
-                                          )
-                                          : CircleAvatar(
-                                            radius: 18,
-                                            backgroundColor: primary,
-                                            child: Text(
-                                              fxInitials(data.nomePersonal ?? 'F'),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
-                                              ),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
                                             ),
                                           ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                                        ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                ),
 
-                  // HERO CARD
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: AnimatedBuilder(
-                        animation: _gradientCtrl,
-                        builder: (ctx, _) {
-                          final angle =
-                              _gradientCtrl.value * 2 * math.pi;
-                          final begin = Alignment(
-                            -math.cos(angle),
-                            -math.sin(angle),
-                          );
-                          final end = Alignment(
-                            math.cos(angle),
-                            math.sin(angle),
-                          );
-                          return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28),
-                          gradient: LinearGradient(
-                            colors:
-                                isDark
-                                    ? const [
-                                      Color(0xFF1C3273),
-                                      Color(0xFF0F1E4A),
-                                    ]
-                                    : [
-                                      primary,
-                                      primaryDeep,
-                                    ],
-                            begin: begin,
-                            end: end,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(
-                                0xFF2B4A9E,
-                              ).withValues(alpha: 0.4),
-                              blurRadius: 40,
-                              offset: const Offset(0, 20),
-                              spreadRadius: -20,
+                // HERO CARD
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: AnimatedBuilder(
+                      animation: _gradientCtrl,
+                      builder: (ctx, _) {
+                        final angle = _gradientCtrl.value * 2 * math.pi;
+                        final begin = Alignment(
+                          -math.cos(angle),
+                          -math.sin(angle),
+                        );
+                        final end = Alignment(math.cos(angle), math.sin(angle));
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(28),
+                            gradient: LinearGradient(
+                              colors:
+                                  isDark
+                                      ? const [
+                                        Color(0xFF1C3273),
+                                        Color(0xFF0F1E4A),
+                                      ]
+                                      : [primary, primaryDeep],
+                              begin: begin,
+                              end: end,
                             ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Receita · $mes',
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.12,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(
+                                  0xFF2B4A9E,
+                                ).withValues(alpha: 0.4),
+                                blurRadius: 40,
+                                offset: const Offset(0, 20),
+                                spreadRadius: -20,
                               ),
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
+                            ],
+                          ),
+                          padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+                          child: CustomPaint(
+                            foregroundPainter: _HeroGridPainter(),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _loadingFin
-                                    ? const SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                    : AnimatedBuilder(
-                                      animation: _counterAnim,
-                                      builder:
-                                          (ctx, _) => Text(
-                                            'R\$ ${_counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 44,
-                                              fontWeight: FontWeight.w600,
-                                              letterSpacing: -1,
-                                              height: 1,
-                                            ),
-                                          ),
-                                    ),
-                                const SizedBox(width: 6),
                                 Text(
-                                  '/ R\$ ${_finData?.previsaoReceita.toStringAsFixed(0) ?? '--'}',
+                                  'Receita · $mes',
                                   style: const TextStyle(
-                                    color: Colors.white54,
-                                    fontSize: 13,
+                                    color: Colors.white70,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.12,
                                   ),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 14),
-                            Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              alignment: Alignment.centerLeft,
-                              child: FractionallySizedBox(
-                                widthFactor: (_finData == null ||
-                                        (_finData!.previsaoReceita) == 0)
-                                    ? 0.0
-                                    : (_finData!.receitaMes /
-                                            _finData!.previsaoReceita)
-                                        .clamp(0.0, 1.0),
-                                child: Container(
+                                const SizedBox(height: 6),
+                                Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    _loadingFin
+                                        ? const SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                        : AnimatedBuilder(
+                                          animation: _counterAnim,
+                                          builder:
+                                              (ctx, _) => Text(
+                                                'R\$ ${_counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 44,
+                                                  fontWeight: FontWeight.w600,
+                                                  letterSpacing: -1,
+                                                  height: 1,
+                                                ),
+                                              ),
+                                        ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '/ R\$ ${_finData?.previsaoReceita.toStringAsFixed(0) ?? '--'}',
+                                      style: const TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 14),
+                                Container(
+                                  height: 6,
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: Colors.white.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
+                                  alignment: Alignment.centerLeft,
+                                  child: FractionallySizedBox(
+                                    widthFactor:
+                                        (_finData == null ||
+                                                (_finData!.previsaoReceita) ==
+                                                    0)
+                                            ? 0.0
+                                            : (_finData!.receitaMes /
+                                                    _finData!.previsaoReceita)
+                                                .clamp(0.0, 1.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _HeroMiniStat(
-                                  label: 'PENDENTE',
-                                  value:
-                                      'R\$ ${pendente.toInt()}',
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 30,
-                                  color: Colors.white.withValues(alpha: 0.15),
-                                ),
-                                _HeroMiniStat(
-                                  label: 'INADIMPL.',
-                                  value: '${_finData?.totalInadimplentes ?? 0}',
-                                  suffix: ' alunos',
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 30,
-                                  color: Colors.white.withValues(alpha: 0.15),
-                                ),
-                                _HeroMiniStat(
-                                  label: 'TICKET',
-                                  value:
-                                      'R\$ ${_finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _HeroMiniStat(
+                                      label: 'PENDENTE',
+                                      value: 'R\$ ${pendente.toInt()}',
+                                    ),
+                                    Container(
+                                      width: 1,
+                                      height: 30,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                    ),
+                                    _HeroMiniStat(
+                                      label: 'INADIMPL.',
+                                      value:
+                                          '${_finData?.totalInadimplentes ?? 0}',
+                                      suffix: ' alunos',
+                                    ),
+                                    Container(
+                                      width: 1,
+                                      height: 30,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                    ),
+                                    _HeroMiniStat(
+                                      label: 'TICKET',
+                                      value:
+                                          'R\$ ${_finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                // GRID METRICAS
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                    child: GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 1.5,
+                      children: [
+                        _QuickTile(
+                          icon: Icons.people,
+                          label: 'Alunos ativos',
+                          value: alunosAtivos.toString(),
+                          sub:
+                              '${math.max(0, totalAlunos - alunosAtivos)} inativos',
+                          accent: primary,
+                          isDark: isDark,
                         ),
+                        _QuickTile(
+                          icon: Icons.check_circle_outline,
+                          label: 'Check-ins hoje',
+                          value: checkinsHoje.toString(),
+                          sub: 'histórico de treinos',
+                          accent: EagleTokens.good,
+                          isDark: isDark,
+                        ),
+                        _QuickTile(
+                          icon: Icons.warning_amber_rounded,
+                          label: 'Risco alto',
+                          value: riscoAlto.toString(),
+                          sub: 'precisam atenção',
+                          accent: EagleTokens.warn,
+                          isDark: isDark,
+                        ),
+                        _QuickTile(
+                          icon: Icons.local_fire_department_outlined,
+                          label: 'Aderência média',
+                          value: aderenciaMediaStr,
+                          sub: 'últimos 7 dias',
+                          accent: primary,
+                          isDark: isDark,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // CENTRAL DE COMANDO
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    child: _CommandCenterSection(
+                      isDark: isDark,
+                      primary: primary,
+                      finData: _finData,
+                    ),
+                  ),
+                ),
+
+                // ONBOARDING WIDGET (Atualizado visualmente dentro dele se necessário, aqui chamamos)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: SetupOnboardingWidget(),
+                  ),
+                ),
+
+                // SECTION: PRECISA DE ATENÇÃO
+                if (_finData != null &&
+                    _finData!.vencimentosProximos.isNotEmpty) ...[
+                  const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                  SliverToBoxAdapter(
+                    child: _SectionTitle(
+                      title: 'Precisa de atenção',
+                      action: 'Ver tudo',
+                      isDark: isDark,
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 160,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _finData!.vencimentosProximos.take(3).length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final v = _finData!.vencimentosProximos[index];
+                          return _AttentionCard(
+                            nome: v.alunoNome,
+                            tipo: 'overdue',
+                            titulo: 'Inadimplente',
+                            subt: 'R\$ ${v.valor.toStringAsFixed(0)} pendente',
+                            acao: 'Cobrar',
+                            isDark: isDark,
                           );
                         },
                       ),
                     ),
                   ),
-
-                  // GRID METRICAS
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-                      child: GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                        childAspectRatio: 1.5,
-                        children: [
-                          _QuickTile(
-                            icon: Icons.people,
-                            label: 'Alunos ativos',
-                            value: alunosAtivos.toString(),
-                            sub:
-                                '${math.max(0, totalAlunos - alunosAtivos)} inativos',
-                            accent: primary,
-                            isDark: isDark,
-                          ),
-                          _QuickTile(
-                            icon: Icons.check_circle_outline,
-                            label: 'Check-ins hoje',
-                            value: checkinsHoje.toString(),
-                            sub: 'histórico de treinos',
-                            accent: EagleTokens.good,
-                            isDark: isDark,
-                          ),
-                          _QuickTile(
-                            icon: Icons.warning_amber_rounded,
-                            label: 'Risco alto',
-                            value: riscoAlto.toString(),
-                            sub: 'precisam atenção',
-                            accent: EagleTokens.warn,
-                            isDark: isDark,
-                          ),
-                          _QuickTile(
-                            icon: Icons.local_fire_department_outlined,
-                            label: 'Aderência média',
-                            value: aderenciaMediaStr,
-                            sub: 'últimos 7 dias',
-                            accent: primary,
-                            isDark: isDark,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // CENTRAL DE COMANDO
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                      child: _CommandCenterSection(
-                        isDark: isDark,
-                        primary: primary,
-                        finData: _finData,
-                      ),
-                    ),
-                  ),
-
-                  // ONBOARDING WIDGET (Atualizado visualmente dentro dele se necessário, aqui chamamos)
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: SetupOnboardingWidget(),
-                    ),
-                  ),
-
-                  // SECTION: PRECISA DE ATENÇÃO
-                  if (_finData != null &&
-                      _finData!.vencimentosProximos.isNotEmpty) ...[
-                    const SliverToBoxAdapter(child: SizedBox(height: 24)),
-                    SliverToBoxAdapter(
-                      child: _SectionTitle(
-                        title: 'Precisa de atenção',
-                        action: 'Ver tudo',
-                        isDark: isDark,
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 160,
-                        child: ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          scrollDirection: Axis.horizontal,
-                          itemCount:
-                              _finData!.vencimentosProximos.take(3).length,
-                          separatorBuilder:
-                              (_, __) => const SizedBox(width: 12),
-                          itemBuilder: (context, index) {
-                            final v = _finData!.vencimentosProximos[index];
-                            return _AttentionCard(
-                              nome: v.alunoNome,
-                              tipo: 'overdue',
-                              titulo: 'Inadimplente',
-                              subt:
-                                  'R\$ ${v.valor.toStringAsFixed(0)} pendente',
-                              acao: 'Cobrar',
-                              isDark: isDark,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-
-                  // SEUS ALUNOS (ADERÊNCIA DA SEMANA)
-                  const SliverToBoxAdapter(child: SizedBox(height: 28)),
-                  SliverToBoxAdapter(
-                    child: _SectionTitle(
-                      title: 'Aderência da semana',
-                      action: 'Relatório',
-                      isDark: isDark,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: _AderenciaSemanaWidget(isDark: isDark),
-                    ),
-                  ),
-
-                  // ATALHOS — 6 quick action shortcuts (design spec)
-                  const SliverToBoxAdapter(child: SizedBox(height: 28)),
-                  SliverToBoxAdapter(
-                    child: _SectionTitle(title: 'Atalhos', isDark: isDark),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        16,
-                        0,
-                        16,
-                        MediaQuery.of(context).padding.bottom + 90,
-                      ),
-                      child: GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 3,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                        childAspectRatio: 0.9,
-                        children: [
-                          _ShortcutBtn(
-                            icon: 'spark',
-                            label: 'IA Copiloto',
-                            isDark: isDark,
-                            onTap: () => context.go('/ia/copiloto'),
-                          ),
-                          _ShortcutBtn(
-                            icon: 'plus',
-                            label: 'Novo aluno',
-                            isDark: isDark,
-                            onTap: () => context.push('/alunos/novo'),
-                          ),
-                          _ShortcutBtn(
-                            icon: 'calendar',
-                            label: 'Agenda',
-                            isDark: isDark,
-                            onTap: () => context.go('/agenda'),
-                          ),
-                          _ShortcutBtn(
-                            icon: 'chat',
-                            label: 'Mensagens',
-                            isDark: isDark,
-                            onTap: () => context.push('/chat/inbox'),
-                          ),
-                          _ShortcutBtn(
-                            icon: 'pix',
-                            label: 'Financeiro',
-                            isDark: isDark,
-                            onTap: () => context.go('/financeiro'),
-                          ),
-                          _ShortcutBtn(
-                            icon: 'trend',
-                            label: 'Leads',
-                            isDark: isDark,
-                            onTap: () => context.push('/leads'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
-              ),
-            );
-            },
+
+                // SEUS ALUNOS (ADERÊNCIA DA SEMANA)
+                const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                SliverToBoxAdapter(
+                  child: _SectionTitle(
+                    title: 'Aderência da semana',
+                    action: 'Relatório',
+                    isDark: isDark,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _AderenciaSemanaWidget(isDark: isDark),
+                  ),
+                ),
+
+                // ATALHOS — 6 quick action shortcuts (design spec)
+                const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                SliverToBoxAdapter(
+                  child: _SectionTitle(title: 'Atalhos', isDark: isDark),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      0,
+                      16,
+                      MediaQuery.of(context).padding.bottom + 90,
+                    ),
+                    child: GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 3,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 0.9,
+                      children: [
+                        _ShortcutBtn(
+                          icon: 'spark',
+                          label: 'IA Copiloto',
+                          isDark: isDark,
+                          onTap: () => context.go('/ia/copiloto'),
+                        ),
+                        _ShortcutBtn(
+                          icon: 'plus',
+                          label: 'Novo aluno',
+                          isDark: isDark,
+                          onTap: () => context.push('/alunos/novo'),
+                        ),
+                        _ShortcutBtn(
+                          icon: 'calendar',
+                          label: 'Agenda',
+                          isDark: isDark,
+                          onTap: () => context.go('/agenda'),
+                        ),
+                        _ShortcutBtn(
+                          icon: 'chat',
+                          label: 'Mensagens',
+                          isDark: isDark,
+                          onTap: () => context.push('/chat/inbox'),
+                        ),
+                        _ShortcutBtn(
+                          icon: 'pix',
+                          label: 'Financeiro',
+                          isDark: isDark,
+                          onTap: () => context.go('/financeiro'),
+                        ),
+                        _ShortcutBtn(
+                          icon: 'trend',
+                          label: 'Leads',
+                          isDark: isDark,
+                          onTap: () => context.push('/leads'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -801,7 +816,6 @@ class _PersonalDashboardScreenState
       ),
     );
   }
-
 }
 
 class _HeroMiniStat extends StatelessWidget {
@@ -893,11 +907,7 @@ class _QuickTile extends StatelessWidget {
               color: primarySoft,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              size: 16,
-              color: accent,
-            ),
+            child: Icon(icon, size: 16, color: accent),
           ),
           const SizedBox(height: 10),
           Text(
@@ -1116,8 +1126,10 @@ class _ShortcutBtn extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(16),
-          border:
-              Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line, width: 1),
+          border: Border.all(
+            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1179,9 +1191,10 @@ class _CommandCenterSection extends ConsumerWidget {
       data: (items) => items.length,
       orElse: () => 0,
     );
-    final chatSubtitle = unreadCount > 0
-        ? '$unreadCount não lida${unreadCount == 1 ? '' : 's'}'
-        : '$totalConversas conversa${totalConversas == 1 ? '' : 's'}';
+    final chatSubtitle =
+        unreadCount > 0
+            ? '$unreadCount não lida${unreadCount == 1 ? '' : 's'}'
+            : '$totalConversas conversa${totalConversas == 1 ? '' : 's'}';
 
     // Alunos — active student count (already in parent but we watch again for isolation)
     final alunosAsync = ref.watch(alunosProvider);
@@ -1196,15 +1209,14 @@ class _CommandCenterSection extends ConsumerWidget {
       data: (cc) => cc.agendaHoje.length,
       orElse: () => 0,
     );
-    final agendaSubtitle = agendaHoje > 0
-        ? '$agendaHoje hoje'
-        : 'Sem agenda';
+    final agendaSubtitle = agendaHoje > 0 ? '$agendaHoje hoje' : 'Sem agenda';
 
     // Financeiro — monthly revenue from already-loaded _finData
     final receitaMes = finData?.receitaMes ?? 0;
-    final finSubtitle = receitaMes > 0
-        ? 'R\$ ${receitaMes.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}'
-        : 'Ver finanças';
+    final finSubtitle =
+        receitaMes > 0
+            ? 'R\$ ${receitaMes.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}'
+            : 'Ver finanças';
 
     final alunosRisco = commandAsync.maybeWhen(
       data: (cc) => cc.alunosEmRisco.length,
@@ -1250,17 +1262,17 @@ class _CommandCenterSection extends ConsumerWidget {
           icon: Icons.bolt_rounded,
           title: 'Executar proxima acao',
           subtitle: filaAcoes.first.descricao,
-          route: filaAcoes.first.acaoUrl.startsWith('/')
-              ? filaAcoes.first.acaoUrl
-              : '/dashboard/personal',
+          route:
+              filaAcoes.first.acaoUrl.startsWith('/')
+                  ? filaAcoes.first.acaoUrl
+                  : '/dashboard/personal',
           tone: _CommandActionTone.primary,
         ),
       if (agendaHoje > 0)
         _CommandActionItem(
           icon: Icons.today_rounded,
           title: 'Preparar agenda',
-          subtitle:
-              '$agendaHoje compromisso${agendaHoje == 1 ? '' : 's'} hoje',
+          subtitle: '$agendaHoje compromisso${agendaHoje == 1 ? '' : 's'} hoje',
           route: '/agenda',
           tone: _CommandActionTone.primary,
         ),
@@ -1392,6 +1404,26 @@ class _CommandCenterSection extends ConsumerWidget {
       ],
     );
   }
+}
+
+class _HeroGridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.06)
+          ..strokeWidth = 0.5;
+
+    for (double x = 0; x <= size.width; x += 24) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y <= size.height; y += 24) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 enum _CommandActionTone { primary, hot, money }
@@ -1571,35 +1603,40 @@ class _AderenciaSemanaWidget extends StatelessWidget {
       builder: (context, ref, _) {
         final async = ref.watch(aderenciaTop3Provider);
         return async.when(
-          loading: () => Container(
-            height: 180,
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                width: 1,
+          loading:
+              () => Container(
+                height: 180,
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                    width: 1,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
               ),
-            ),
-            alignment: Alignment.center,
-            child: const SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          ),
-          error: (e, _) => Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                width: 1,
+          error:
+              (e, _) => Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  'Erro ao carregar aderência: $e',
+                  style: TextStyle(color: mute),
+                ),
               ),
-            ),
-            child: Text('Erro ao carregar aderência: $e', style: TextStyle(color: mute)),
-          ),
           data: (items) {
             if (items.isEmpty) {
               return Container(
@@ -1612,7 +1649,10 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-                child: Text('Sem dados de check-in na semana.', style: TextStyle(color: mute)),
+                child: Text(
+                  'Sem dados de check-in na semana.',
+                  style: TextStyle(color: mute),
+                ),
               );
             }
 
@@ -1629,16 +1669,23 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                 children: List.generate(items.length, (index) {
                   final a = items[index];
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
-                      border: index < items.length - 1
-                          ? Border(
-                              bottom: BorderSide(
-                                color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                                width: 0.5,
-                              ),
-                            )
-                          : null,
+                      border:
+                          index < items.length - 1
+                              ? Border(
+                                bottom: BorderSide(
+                                  color:
+                                      isDark
+                                          ? EagleTokens.darkLine
+                                          : EagleTokens.line,
+                                  width: 0.5,
+                                ),
+                              )
+                              : null,
                     ),
                     child: Row(
                       children: [
