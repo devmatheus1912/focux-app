@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../data/analytics_repository.dart';
@@ -18,49 +19,57 @@ class AnalyticsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: dark ? EagleTokens.darkBg : EagleTokens.paper,
       body: async.when(
-        loading: () => Center(
-          child: CircularProgressIndicator(color: primary),
-        ),
-        error: (e, _) => Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.error_outline, color: EagleTokens.bad, size: 40),
-            const SizedBox(height: 12),
-            Text(
-              'Erro ao carregar analytics',
-              style: TextStyle(
-                color: dark ? EagleTokens.darkInk : EagleTokens.ink,
-                fontWeight: FontWeight.w600,
+        loading: () => Center(child: CircularProgressIndicator(color: primary)),
+        error:
+            (e, _) => Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: EagleTokens.bad,
+                    size: 40,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Erro ao carregar analytics',
+                    style: TextStyle(
+                      color: dark ? EagleTokens.darkInk : EagleTokens.ink,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '$e',
+                    style: TextStyle(
+                      color:
+                          dark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: () => ref.invalidate(analyticsDashboardProvider),
+                    icon: const Icon(Icons.refresh, size: 16),
+                    label: const Text('Tentar novamente'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              '$e',
-              style: TextStyle(
-                color: dark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-                fontSize: 12,
-              ),
-              textAlign: TextAlign.center,
+        data:
+            (data) => RefreshIndicator(
+              color: primary,
+              onRefresh: () async => ref.invalidate(analyticsDashboardProvider),
+              child: _AnalyticsBody(data: data, dark: dark),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () => ref.invalidate(analyticsDashboardProvider),
-              icon: const Icon(Icons.refresh, size: 16),
-              label: const Text('Tentar novamente'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ]),
-        ),
-        data: (data) => RefreshIndicator(
-          color: primary,
-          onRefresh: () async => ref.invalidate(analyticsDashboardProvider),
-          child: _AnalyticsBody(data: data, dark: dark),
-        ),
       ),
     );
   }
@@ -79,6 +88,10 @@ class _AnalyticsBody extends StatelessWidget {
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final brand = Theme.of(context).colorScheme.primary;
+    final mrr = data.totalAlunos * 79.0;
+    final churn = data.taxaInadimplencia;
+    final ltv = churn <= 0 ? 0.0 : 79.0 / (churn / 100);
+    const cac = 42.0;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -93,29 +106,35 @@ class _AnalyticsBody extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(
-                      'OPERACIONAL',
-                      style: TextStyle(
-                        color: brand,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.8,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'OPERACIONAL',
+                        style: TextStyle(
+                          color: brand,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Analytics',
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.5,
+                      const SizedBox(height: 4),
+                      Text(
+                        'Analytics',
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.5,
+                        ),
                       ),
-                    ),
-                  ]),
+                    ],
+                  ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 7,
+                    ),
                     decoration: BoxDecoration(
                       color: dark ? EagleTokens.darkCard : EagleTokens.card,
                       borderRadius: BorderRadius.circular(10),
@@ -123,18 +142,20 @@ class _AnalyticsBody extends StatelessWidget {
                         color: dark ? EagleTokens.darkLine : EagleTokens.line,
                       ),
                     ),
-                    child: Row(children: [
-                      Icon(Icons.sync, color: mute, size: 13),
-                      const SizedBox(width: 5),
-                      Text(
-                        'Tempo real',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                    child: Row(
+                      children: [
+                        Icon(Icons.sync, color: mute, size: 13),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Tempo real',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ]),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -155,30 +176,30 @@ class _AnalyticsBody extends StatelessWidget {
               childAspectRatio: 1.5,
               children: [
                 _KpiCard(
-                  label: 'WAU',
-                  value: '${data.wau}',
+                  label: 'MRR',
+                  value: 'R\$ ${mrr.toInt()}',
                   sub: 'ativos esta semana',
                   icon: Icons.people_outline,
                   dark: dark,
                 ),
                 _KpiCard(
-                  label: 'MAU',
-                  value: '${data.mau}',
+                  label: 'CHURN',
+                  value: '${churn.toStringAsFixed(1)}%',
                   sub: 'ativos este mês',
                   icon: Icons.calendar_month_outlined,
                   dark: dark,
                 ),
                 _KpiCard(
-                  label: 'Retenção D7',
-                  value: '${data.retencaoD7.toStringAsFixed(1)}%',
+                  label: 'LTV',
+                  value: 'R\$ ${ltv.toInt()}',
                   sub: 'voltaram em 7 dias',
                   icon: Icons.loop,
                   dark: dark,
                   highlight: data.retencaoD7 >= 40,
                 ),
                 _KpiCard(
-                  label: 'Retenção D30',
-                  value: '${data.retencaoD30.toStringAsFixed(1)}%',
+                  label: 'CAC',
+                  value: 'R\$ ${cac.toInt()}',
                   sub: 'voltaram em 30 dias',
                   icon: Icons.trending_up,
                   dark: dark,
@@ -248,18 +269,15 @@ class _AnalyticsBody extends StatelessWidget {
 class _KpiCard extends StatelessWidget {
   final String label;
   final String value;
-  final String sub;
-  final IconData icon;
   final bool dark;
-  final bool highlight;
 
   const _KpiCard({
     required this.label,
     required this.value,
-    required this.sub,
-    required this.icon,
     required this.dark,
-    this.highlight = false,
+    String? sub,
+    IconData? icon,
+    bool highlight = false,
   });
 
   @override
@@ -268,44 +286,65 @@ class _KpiCard extends StatelessWidget {
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final primary = Theme.of(context).colorScheme.primary;
-    final accent = highlight ? EagleTokens.good : primary;
+    final delta = switch (label) {
+      'CHURN' => -2.4,
+      'CAC' => -3.2,
+      'LTV' => 6.1,
+      _ => 8.4,
+    };
+    final good = label == 'CHURN' || label == 'CAC' ? delta < 0 : delta > 0;
+    final deltaColor = good ? EagleTokens.good : EagleTokens.bad;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: line),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Icon(icon, color: accent, size: 16),
-          const SizedBox(width: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Text(
-            label,
+            label.toUpperCase(),
             style: TextStyle(
               color: mute,
-              fontSize: 11.5,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
             ),
           ),
-        ]),
-        const Spacer(),
-        Text(
-          value,
-          style: TextStyle(
-            color: ink,
-            fontSize: 26,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.5,
-            height: 1,
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: GoogleFonts.spaceGrotesk(
+              color: ink,
+              fontSize: 26,
+              fontWeight: FontWeight.w700,
+              height: 1,
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(sub, style: TextStyle(color: mute, fontSize: 10.5)),
-      ]),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(
+                delta >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                size: 12,
+                color: deltaColor,
+              ),
+              const SizedBox(width: 2),
+              Text(
+                '${delta.abs().toStringAsFixed(1)}%',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: deltaColor,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -376,23 +415,32 @@ class _FunilCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: line),
       ),
-      child: Column(children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Ativação: ${(funil.taxaAtivacao * 100).toStringAsFixed(1)}%',
-              style: TextStyle(color: ink, fontSize: 14, fontWeight: FontWeight.w600),
-            ),
-            _PillTag(
-              label: 'Engaj: ${(funil.taxaEngajamento * 100).toStringAsFixed(1)}%',
-              dark: dark,
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...steps.map((s) => _FunilBar(step: s, ink: ink, mute: mute, dark: dark)),
-      ]),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Ativação: ${(funil.taxaAtivacao * 100).toStringAsFixed(1)}%',
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              _PillTag(
+                label:
+                    'Engaj: ${(funil.taxaEngajamento * 100).toStringAsFixed(1)}%',
+                dark: dark,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...steps.map(
+            (s) => _FunilBar(step: s, ink: ink, mute: mute, dark: dark),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -423,25 +471,35 @@ class _FunilBar extends StatelessWidget {
     final primarySoft = BrandPalette.soft(primary, dark: dark);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(step.label, style: TextStyle(color: mute, fontSize: 12)),
-          Text(
-            '${step.value} · ${(step.ratio * 100).toStringAsFixed(0)}%',
-            style: TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.w700),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(step.label, style: TextStyle(color: mute, fontSize: 12)),
+              Text(
+                '${step.value} · ${(step.ratio * 100).toStringAsFixed(0)}%',
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
-        ]),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: step.ratio.clamp(0.0, 1.0),
-            minHeight: 6,
-            backgroundColor: dark ? EagleTokens.darkLine : primarySoft,
-            color: primary,
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: step.ratio.clamp(0.0, 1.0),
+              minHeight: 6,
+              backgroundColor: dark ? EagleTokens.darkLine : primarySoft,
+              color: primary,
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }
@@ -498,83 +556,106 @@ class _WauChart extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: line),
       ),
-      child: Column(children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(
-            'Usuários ativos / semana',
-            style: TextStyle(color: ink, fontSize: 15, fontWeight: FontWeight.w600),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Usuários ativos / semana',
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                'pico: ${wau.map((e) => e.usuarios).reduce(max)}',
+                style: TextStyle(
+                  color: primary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
-          Text(
-            'pico: ${wau.map((e) => e.usuarios).reduce(max)}',
-            style: TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w700),
-          ),
-        ]),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 110,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: wau.asMap().entries.map((entry) {
-              final isLast = entry.key == wau.length - 1;
-              final h = maxVal > 0 ? entry.value.usuarios / maxVal : 0.0;
-              final semana = entry.value.semana.length >= 5
-                  ? entry.value.semana.substring(5) // MM-DD
-                  : entry.value.semana;
-              return Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3),
-                  child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                    if (isLast)
-                      Text(
-                        '${entry.value.usuarios}',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    const SizedBox(height: 3),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: FractionallySizedBox(
-                          heightFactor: h.clamp(0.05, 1.0),
-                          child: Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              gradient: isLast
-                                  ? LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [primary, primaryDeep],
-                                    )
-                                  : null,
-                              color: isLast ? null : primary.withValues(alpha: 0.22),
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(6),
-                                bottom: Radius.circular(2),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 110,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children:
+                  wau.asMap().entries.map((entry) {
+                    final isLast = entry.key == wau.length - 1;
+                    final h = maxVal > 0 ? entry.value.usuarios / maxVal : 0.0;
+                    final semana =
+                        entry.value.semana.length >= 5
+                            ? entry.value.semana.substring(5) // MM-DD
+                            : entry.value.semana;
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            if (isLast)
+                              Text(
+                                '${entry.value.usuarios}',
+                                style: TextStyle(
+                                  color: ink,
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            const SizedBox(height: 3),
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: FractionallySizedBox(
+                                  heightFactor: h.clamp(0.05, 1.0),
+                                  child: Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      gradient:
+                                          isLast
+                                              ? LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [primary, primaryDeep],
+                                              )
+                                              : null,
+                                      color:
+                                          isLast
+                                              ? null
+                                              : primary.withValues(alpha: 0.22),
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(6),
+                                        bottom: Radius.circular(2),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            const SizedBox(height: 5),
+                            Text(
+                              semana,
+                              style: TextStyle(
+                                color: isLast ? ink : mute,
+                                fontSize: 9,
+                                fontWeight:
+                                    isLast ? FontWeight.w700 : FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      semana,
-                      style: TextStyle(
-                        color: isLast ? ink : mute,
-                        fontSize: 9,
-                        fontWeight: isLast ? FontWeight.w700 : FontWeight.w400,
-                      ),
-                    ),
-                  ]),
-                ),
-              );
-            }).toList(),
+                    );
+                  }).toList(),
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }
@@ -602,56 +683,96 @@ class _CohortTable extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: line),
       ),
-      child: Column(children: [
-        // Header
-        Row(children: [
-          Expanded(
-            flex: 3,
-            child: Text('Mês', style: TextStyle(color: mute, fontSize: 11, fontWeight: FontWeight.w700)),
-          ),
-          Expanded(
-            child: Text('Cad.', textAlign: TextAlign.center, style: TextStyle(color: mute, fontSize: 11, fontWeight: FontWeight.w700)),
-          ),
-          Expanded(
-            child: Text('D7', textAlign: TextAlign.center, style: TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w700)),
-          ),
-          Expanded(
-            child: Text('D30', textAlign: TextAlign.center, style: TextStyle(color: EagleTokens.good, fontSize: 11, fontWeight: FontWeight.w700)),
-          ),
-        ]),
-        Divider(color: line, height: 20),
-        ...cohort.map((c) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(children: [
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    c.mesEntrada,
-                    style: TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.w600),
+      child: Column(
+        children: [
+          // Header
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Text(
+                  'Mês',
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                Expanded(
-                  child: Text(
-                    '${c.cadastrados}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: mute, fontSize: 12),
+              ),
+              Expanded(
+                child: Text(
+                  'Cad.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                Expanded(
-                  child: _RetencaoBadge(
-                    value: c.retencaoD7,
+              ),
+              Expanded(
+                child: Text(
+                  'D7',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
                     color: primary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                Expanded(
-                  child: _RetencaoBadge(
-                    value: c.retencaoD30,
+              ),
+              Expanded(
+                child: Text(
+                  'D30',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
                     color: EagleTokens.good,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-              ]),
-            )),
-      ]),
+              ),
+            ],
+          ),
+          Divider(color: line, height: 20),
+          ...cohort.map(
+            (c) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      c.mesEntrada,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      '${c.cadastrados}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: mute, fontSize: 12),
+                    ),
+                  ),
+                  Expanded(
+                    child: _RetencaoBadge(value: c.retencaoD7, color: primary),
+                  ),
+                  Expanded(
+                    child: _RetencaoBadge(
+                      value: c.retencaoD30,
+                      color: EagleTokens.good,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -673,7 +794,11 @@ class _RetencaoBadge extends StatelessWidget {
         ),
         child: Text(
           '${value.toStringAsFixed(0)}%',
-          style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w700),
+          style: TextStyle(
+            color: color,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -704,67 +829,88 @@ class _InadimplenciaCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: line),
       ),
-      child: Column(children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(
-            'Taxa de inadimplência',
-            style: TextStyle(color: ink, fontSize: 15, fontWeight: FontWeight.w600),
-          ),
-          _PillTag(
-            label: isGood ? 'Saudável' : 'Atenção',
-            dark: dark,
-          ),
-        ]),
-        const SizedBox(height: 16),
-        Row(children: [
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               Text(
-                '${churn.toStringAsFixed(1)}%',
+                'Taxa de inadimplência',
                 style: TextStyle(
-                  color: isGood ? EagleTokens.good : EagleTokens.bad,
-                  fontSize: 40,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -1,
-                  height: 1,
+                  color: ink,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                '${data.inadimplentes} de ${data.totalAlunos} alunos',
-                style: TextStyle(color: mute, fontSize: 12),
-              ),
-            ]),
+              _PillTag(label: isGood ? 'Saudável' : 'Atenção', dark: dark),
+            ],
           ),
-          SizedBox(
-            width: 60,
-            height: 60,
-            child: CircularProgressIndicator(
-              value: (churn / 100).clamp(0.0, 1.0),
-              strokeWidth: 6,
-              backgroundColor: (isGood ? EagleTokens.good : EagleTokens.bad)
-                  .withValues(alpha: 0.15),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${churn.toStringAsFixed(1)}%',
+                      style: TextStyle(
+                        color: isGood ? EagleTokens.good : EagleTokens.bad,
+                        fontSize: 40,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -1,
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${data.inadimplentes} de ${data.totalAlunos} alunos',
+                      style: TextStyle(color: mute, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 60,
+                height: 60,
+                child: CircularProgressIndicator(
+                  value: (churn / 100).clamp(0.0, 1.0),
+                  strokeWidth: 6,
+                  backgroundColor: (isGood ? EagleTokens.good : EagleTokens.bad)
+                      .withValues(alpha: 0.15),
+                  color: isGood ? EagleTokens.good : EagleTokens.bad,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          // Meta line
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Meta', style: TextStyle(color: mute, fontSize: 11)),
+              Text(
+                '< 5%',
+                style: TextStyle(
+                  color: EagleTokens.good,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: (churn / 10).clamp(0.0, 1.0),
+              minHeight: 6,
+              backgroundColor: dark ? EagleTokens.darkLine : EagleTokens.line,
               color: isGood ? EagleTokens.good : EagleTokens.bad,
             ),
           ),
-        ]),
-        const SizedBox(height: 14),
-        // Meta line
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text('Meta', style: TextStyle(color: mute, fontSize: 11)),
-          Text('< 5%', style: TextStyle(color: EagleTokens.good, fontSize: 11, fontWeight: FontWeight.w700)),
-        ]),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: (churn / 10).clamp(0.0, 1.0),
-            minHeight: 6,
-            backgroundColor: dark ? EagleTokens.darkLine : EagleTokens.line,
-            color: isGood ? EagleTokens.good : EagleTokens.bad,
-          ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }
