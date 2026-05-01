@@ -422,83 +422,57 @@
 
 ---
 
-## 🍎 TAREFAS QUE PRECISAM DA APPLE DEVELOPER ACCOUNT ($99/ano)
+## 🍎 TAREFAS PENDENTES — REQUEREM APPLE DEVELOPER ACCOUNT ($99/ano)
 
-> Essas tarefas SÓ podem ser feitas APÓS adquirir a conta em https://developer.apple.com/programs/
+> Adquira em https://developer.apple.com/programs/
+> Após aprovação (pode levar 24-48h), siga os passos abaixo **na ordem**.
 
-| Tarefa | O que precisa | Tempo |
-|--------|---------------|-------|
-| Screenshots (#11) | Xcode Simulator + device real com provisioning | 2-3h |
-| IAP Sandbox | App Store Connect + StoreKit Configuration | 2-4h |
-| Push Notifications (APNs prod) | Certificado APNs no Firebase Console | 1h |
-| TestFlight Beta | Upload .ipa via Xcode → TestFlight | 1-2h |
-| App Store Submission | Preencher ficha no App Store Connect | 2-3h |
-| Apple Health (#21) | HealthKit entitlement no provisioning profile | 16h |
-| iOS Widget (#23) | WidgetKit extension com provisioning | 12h |
+### Passo 1: Configurar Conta e Certificates
+- [ ] Comprar Apple Developer Account ($99/ano)
+- [ ] Aguardar aprovação (24-48h)
+- [ ] Criar **Distribution Certificate** no portal (Certificates, IDs & Profiles)
+- [ ] Criar **App ID** (`app.focux.personal`) com capabilities: Push Notifications, HealthKit, In-App Purchase
+- [ ] Criar **Provisioning Profile** (Distribution) vinculado ao App ID
 
----
+### Passo 2: Screenshots (#11)
+- [ ] Abrir projeto no Xcode
+- [ ] Rodar em simulador **iPhone 15 Pro Max** (6.7") → capturar 5-6 telas principais
+- [ ] Rodar em simulador **iPhone SE 3rd** (4.7") → capturar mesmas telas
+- [ ] Salvar screenshots em `assets/store/`
 
-## ✅ TAREFAS MANUAIS QUE VOCÊ PODE FAZER AGORA (SEM CONTA APPLE)
+### Passo 3: Push Notifications (APNs Produção)
+- [ ] No portal Apple: criar **APNs Key** (Keys → + → Apple Push Notifications service)
+- [ ] Baixar arquivo `.p8`
+- [ ] No **Firebase Console** → Project Settings → Cloud Messaging → Apple app → Upload `.p8`
+- [ ] Testar push em device real via Firebase Console → Send test message
 
-### 1. 🧪 Rodar Load Test no backend de produção
-```bash
-# Instalar k6 (https://k6.io/docs/get-started/installation/)
-choco install k6   # ou baixe em https://github.com/grafana/k6/releases
+### Passo 4: IAP Sandbox (In-App Purchase)
+- [ ] No **App Store Connect** → My Apps → Focux → In-App Purchases
+- [ ] Criar assinatura: `focux.premium.monthly` (R$29,90/mês)
+- [ ] Criar assinatura: `focux.enterprise.monthly` (R$79,90/mês)
+- [ ] Criar **Sandbox Tester** em Users & Access → Sandbox
+- [ ] No iPhone: Settings → App Store → Sandbox Account → logar com sandbox tester
+- [ ] Abrir app → Assinatura → Comprar → Verificar fluxo completo
 
-# Rodar contra produção
-cd d:\Projetos\Focux Personal\focux-backend
-k6 run --vus 50 --duration 30s load_test.js -e BASE_URL=https://SEU-BACKEND.railway.app -e JWT_TOKEN=SEU_TOKEN
-```
+### Passo 5: TestFlight Beta
+- [ ] No Xcode: Product → Archive
+- [ ] Upload para App Store Connect via Xcode Organizer
+- [ ] No App Store Connect: TestFlight → aguardar processamento (~30min)
+- [ ] Adicionar testadores internos (seu email)
+- [ ] Instalar via TestFlight no device real e testar tudo
 
-### 2. 📱 Testar app em device Android real (USB Debug)
-```bash
-# Conecte o Android via USB com depuração ativada
-cd d:\Projetos\Focux Personal\focux-app
-flutter run --release
-```
-> Teste TODAS as telas manualmente: login, dashboard, alunos, treinos, check-in, chat, IA, financeiro, perfil
-
-### 3. 🔐 Testar fluxo de segurança completo
-- [ ] Login com email/senha → Dashboard carrega
-- [ ] Logout → volta para login, não acessa rota protegida
-- [ ] Token expirado → refresh automático (espere 24h ou force no backend)
-- [ ] Registro de personal → onboarding → dashboard
-- [ ] Registro de aluno com convite → dashboard aluno
-- [ ] Excluir conta → dados anonimizados (LGPD)
-
-### 4. 🌐 Testar Swagger/API Docs
-```
-Acesse: https://SEU-BACKEND.railway.app/swagger-ui.html
-```
-- [ ] Swagger UI carrega
-- [ ] Endpoints listados corretamente
-- [ ] Botão "Authorize" aceita JWT Bearer token
-- [ ] Testar GET /api/auth/capabilities sem token → 200
-
-### 5. 🧪 Testar backend na máquina local
-```bash
-cd d:\Projetos\Focux Personal\focux-backend
-.\gradlew.bat test
-# Esperado: BUILD SUCCESSFUL
-```
-
-### 6. 📊 Verificar Monitoring
-```
-Acesse: https://SEU-BACKEND.railway.app/actuator/health
-# Esperado: {"status":"UP"}
-
-Acesse: https://SEU-BACKEND.railway.app/actuator/prometheus
-# Esperado: métricas Prometheus em formato text
-```
-
-### 7. 🔗 Testar Deep Links
-- [ ] Abrir `https://focux.app/p/SEU-SLUG` no browser → abre landing page
-- [ ] Compartilhar link de convite → aluno consegue se registrar
-
-### 8. 💬 Testar Chat em tempo real
-- [ ] Abrir 2 sessões (personal + aluno)
-- [ ] Enviar mensagem de um → aparece no outro em < 2s
-- [ ] Indicadores de não-lido funcionam
+### Passo 6: App Store Submission
+- [ ] Preencher ficha no App Store Connect:
+  - Nome: "Focux Personal"
+  - Subtítulo: "Gestão para Personal Trainers"
+  - Descrição, keywords, categoria (Health & Fitness)
+  - Screenshots de cada tamanho
+  - Privacy Policy URL: `https://focux.app/privacy`
+  - Support URL
+  - Credenciais de demo para revisão Apple
+- [ ] Selecionar build do TestFlight
+- [ ] Submit for Review
+- [ ] Aguardar revisão (1-3 dias úteis)
 
 ---
 
