@@ -10,6 +10,7 @@ import '../providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 
 enum AlunoFiltro { todos, ativos, inadimplentes, risco, novos }
 
@@ -128,7 +129,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     return Scaffold(
       backgroundColor: bg,
       body: alunosAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonList(count: 6),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (alunos) {
           final filtrados = _filtrarAlunos(alunos);

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 
 class TreinosListScreen extends ConsumerWidget {
   final int? alunoId;
@@ -46,7 +47,7 @@ class TreinosListScreen extends ConsumerWidget {
         ),
       ),
       body: treinosAsync.when(
-        loading: () => Center(child: CircularProgressIndicator(color: primary)),
+        loading: () => const SkeletonList(count: 5),
         error: (e, _) => Center(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Icon(Icons.error_outline, size: 48, color: mute),

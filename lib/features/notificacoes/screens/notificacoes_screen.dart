@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
 
 class NotificacoesScreen extends ConsumerWidget {
@@ -37,7 +38,7 @@ class NotificacoesScreen extends ConsumerWidget {
       body: RefreshIndicator(
         onRefresh: reload,
         child: async.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const SkeletonList(count: 5),
           error:
               (_, __) => ListView(
                 padding: const EdgeInsets.all(20),

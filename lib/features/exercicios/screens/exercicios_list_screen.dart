@@ -11,6 +11,7 @@ import '../data/exercicio_repository.dart';
 import '../data/exercise_media_file_io_stub.dart'
     if (dart.library.html) '../data/exercise_media_file_io_web.dart';
 import '../providers/exercicios_provider.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 
 // ---------------------------------------------------------------------------
 // Seed import provider (simple FutureProvider for one-shot call)
@@ -440,7 +441,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
             ),
             Expanded(
               child: exerciciosAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const SkeletonList(count: 6),
                 error: (e, _) => Center(child: Text('Erro: $e')),
                 data: (exercicios) {
                   if (exercicios.isEmpty) {

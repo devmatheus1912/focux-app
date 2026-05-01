@@ -18,7 +18,6 @@ class SkeletonLoader extends StatefulWidget {
 
 class _SkeletonLoaderState extends State<SkeletonLoader> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<Color?> _colorAnimation;
 
   @override
   void initState() {
@@ -27,11 +26,6 @@ class _SkeletonLoaderState extends State<SkeletonLoader> with SingleTickerProvid
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
-
-    _colorAnimation = ColorTween(
-      begin: Colors.grey.shade300,
-      end: Colors.grey.shade100,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -42,14 +36,22 @@ class _SkeletonLoaderState extends State<SkeletonLoader> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorTween = ColorTween(
+      begin: isDark ? const Color(0xFF2A2A2A) : Colors.grey.shade300,
+      end: isDark ? const Color(0xFF3A3A3A) : Colors.grey.shade100,
+    );
+
     return AnimatedBuilder(
-      animation: _colorAnimation,
+      animation: _controller,
       builder: (context, child) {
         return Container(
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
-            color: _colorAnimation.value,
+            color: colorTween.evaluate(
+              CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+            ),
             borderRadius: BorderRadius.circular(widget.borderRadius),
           ),
         );

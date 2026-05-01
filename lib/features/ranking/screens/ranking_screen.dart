@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 
 class RankingItem {
   final int personalId;
@@ -52,7 +53,7 @@ class RankingScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Ranking de Personais')),
       body: rankingAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonList(count: 5),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (ranking) {
           final top3 = ranking.where((r) => r.posicao <= 3).toList();
