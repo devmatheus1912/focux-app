@@ -23,20 +23,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _OBData(
       icon: Icons.fitness_center_rounded,
       title: 'Seus alunos,\nsua gestão.',
-      subtitle: 'Cadastre alunos, monte treinos e acompanhe a evolução de cada um em tempo real.',
-      accent: Colors.white,
+      subtitle:
+          'Cadastre alunos, monte treinos e acompanhe a evolução de cada um em tempo real.',
+      accent: EagleTokens.brandAccent,
     ),
     _OBData(
       icon: Icons.auto_awesome_rounded,
       title: 'IA que\nentende treino.',
-      subtitle: 'Gere treinos e dietas personalizados em segundos. A IA aprende com o histórico de cada aluno.',
-      accent: Colors.white,
+      subtitle:
+          'Gere treinos e dietas personalizados em segundos. A IA aprende com o histórico de cada aluno.',
+      accent: Color(0xFFA0CCFF),
     ),
     _OBData(
       icon: Icons.attach_money_rounded,
       title: 'Financeiro\nsem complicação.',
-      subtitle: 'Cobranças, inadimplências e relatórios automatizados. Você foca no que importa: resultados.',
-      accent: Colors.white,
+      subtitle:
+          'Cobranças, inadimplências e relatórios automatizados. Você foca no que importa: resultados.',
+      accent: Color(0xFFB8D9FF),
     ),
   ];
 
@@ -50,8 +53,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     HapticFeedback.selectionClick();
     if (_current < _pages.length - 1) {
       _page.nextPage(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut);
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     } else {
       context.go('/login');
     }
@@ -106,20 +110,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   // Skip Header
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
                           onPressed: () => context.go('/login'),
                           style: TextButton.styleFrom(
-                            foregroundColor: EagleTokens.darkInk.withValues(alpha: 0.5),
+                            foregroundColor: EagleTokens.darkInk.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
-                          child: const Text('Pular',
-                              style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                              )),
+                          child: const Text(
+                            'Pular',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -143,20 +154,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       children: List.generate(
                         _pages.length,
                         (i) => GestureDetector(
-                          onTap: () => _page.animateToPage(i, duration: const Duration(milliseconds: 300), curve: Curves.ease),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.ease,
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: _current == i ? 28 : 7,
-                            height: 7,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(7),
-                              color: _current == i
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.3),
-                            ),
-                          ),
+                          onTap:
+                              () => _page.animateToPage(
+                                i,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.ease,
+                              ),
+                          child: _SlideDot(active: _current == i),
                         ),
                       ),
                     ),
@@ -170,25 +174,54 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         SizedBox(
                           width: double.infinity,
                           height: 54,
-                          child: ElevatedButton(
-                            onPressed: _next,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primary,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              shadowColor: primary.withValues(alpha: 0.6),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(_current < 2 ? 'Próximo →' : 'Começar agora',
-                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                                if (_current == 2) ...[
-                                  const SizedBox(width: 8),
-                                  const Icon(Icons.chevron_right_rounded, size: 20),
-                                ],
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [primary, EagleTokens.brandDeep],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: primary.withValues(alpha: 0.4),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
+                                ),
                               ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: _next,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shadowColor: primary.withValues(alpha: 0.6),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    _current < 2
+                                        ? 'Próximo →'
+                                        : 'Começar agora',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  if (_current == 2) ...[
+                                    const SizedBox(width: 8),
+                                    const Icon(
+                                      Icons.chevron_right_rounded,
+                                      size: 20,
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -244,6 +277,27 @@ class _OBData {
   });
 }
 
+class _SlideDot extends StatelessWidget {
+  final bool active;
+
+  const _SlideDot({required this.active});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      width: active ? 28 : 7,
+      height: 7,
+      margin: const EdgeInsets.symmetric(horizontal: 3),
+      decoration: BoxDecoration(
+        color: active ? Colors.white : Colors.white.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(7),
+      ),
+    );
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // PAGE WIDGET
 // ═══════════════════════════════════════════════════════════════════════════
@@ -265,13 +319,14 @@ class _OBPageWidget extends StatelessWidget {
             height: 120,
             margin: const EdgeInsets.only(bottom: 32, top: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.07),
+              color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(36),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
               boxShadow: [
                 BoxShadow(
-                  color: data.accent.withValues(alpha: 0.20),
-                  blurRadius: 60,
+                  color: data.accent.withValues(alpha: 0.32),
+                  blurRadius: 32,
+                  spreadRadius: -8,
                 ),
               ],
             ),
@@ -343,10 +398,11 @@ class _OBPageWidget extends StatelessWidget {
 class _AuthGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final p = Paint()
-      ..color = Colors.white.withValues(alpha: 0.05)
-      ..strokeWidth = 0.5
-      ..style = PaintingStyle.stroke;
+    final p =
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.05)
+          ..strokeWidth = 0.5
+          ..style = PaintingStyle.stroke;
     for (double x = 0; x < size.width; x += 30) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), p);
     }
