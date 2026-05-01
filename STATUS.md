@@ -12,11 +12,11 @@
 | Área | Status | Nota |
 |------|--------|------|
 | Backend (53 módulos) | 🟢 Robusto | 10/10 |
-| Frontend (41 features) | 🟢 Completo | 9.5/10 |
+| Frontend (41+ features) | 🟢 Completo | 10/10 |
 | App Store Readiness | 🟢 Submission ready | 9.5/10 |
-| Performance & UX | 🟢 Polish aplicado | 9.5/10 |
+| Performance & UX | 🟢 Polish aplicado | 10/10 |
 | Testes | 🟢 143 backend + 67 frontend | 9/10 |
-| Diferencial competitivo | 🟢 Líder de mercado | 9.5/10 |
+| Diferencial competitivo | 🟢 Líder de mercado | 10/10 |
 | Compliance (LGPD/Apple) | 🟢 Completo | 10/10 |
 
 ---
@@ -175,9 +175,11 @@
 - **Router:** `DeepLinkController` + GoRouter com redirect e path validation
 
 ### I9. Internacionalização (i18n)
-- **Status:** ❌ App é pt-BR hardcoded. Localizations configuradas mas sem .arb files
-- **Ação:** Extrair strings para .arb, suportar pt-BR + en-US + es-ES
-- **Estimativa:** 16h (pode ser pós-lançamento)
+- **Status:** ✅ IMPLEMENTADO
+- **Config:** `l10n.yaml` + `generate: true` no pubspec.yaml
+- **Idiomas:** pt-BR (template) + en-US + es-ES — 100+ strings cada
+- **ARB files:** `lib/l10n/app_pt.arb`, `app_en.arb`, `app_es.arb`
+- **Cobertura:** Auth, dashboard, treinos, exercícios, saúde, evolução, gamificação, compliance
 
 ### I10. Haptic Feedback & Micro-Animações
 - **Status:** ✅ IMPLEMENTADO
@@ -218,9 +220,10 @@
 - **Backend:** Mensagem pré-formatada com deep link de convite
 
 ### K6. Modo Treino Presencial (Personal Acompanhando)
-- **Impacto:** Personal acompanha check-in em tempo real lado do aluno
-- **Ação:** Tela simplificada de treino com botões grandes, cronômetro, feedback rápido
-- **Estimativa:** 12h
+- **Status:** ✅ IMPLEMENTADO
+- **Frontend:** `ModoPresencialScreen` — landscape lock, immersive mode, botões grandes
+- **Features:** Timer global, rest timer com vibração, série tracker visual, navegação por exercício
+- **Rota:** `/treino-presencial/:id` — registrada no GoRouter
 
 ### K7. Analytics Preditivo (IA)
 - **Status:** ✅ IMPLEMENTADO
@@ -325,7 +328,7 @@
 | 22 | Comparativo evolução (Before/After) | P3 | 12h | ✅ |
 | 23 | Widget iOS/Android na Home | P3 | 12h | ✅ |
 | 24 | Relatório PDF premium | P3 | 8h | ✅ |
-| 25 | Modo treino presencial (tela grande) | P3 | 12h | ⬜ |
+| 25 | Modo treino presencial (tela grande) | P3 | 12h | ✅ |
 | 26 | Analytics preditivo (risco churn) | P3 | 8h | ✅ |
 | 27 | Programa referral aprimorado | P3 | 6h | ✅ |
 | 28 | Botão WhatsApp contextual | P3 | 2h | ✅ |
@@ -335,7 +338,7 @@
 
 | # | Task | Prioridade | Tempo | Status |
 |---|------|-----------|-------|--------|
-| 29 | i18n (pt-BR + en-US + es-ES) | P2 | 16h | ⬜ |
+| 29 | i18n (pt-BR + en-US + es-ES) | P2 | 16h | ✅ |
 | 30 | ASO (App Store Optimization) | P2 | 4h | ✅ |
 | 31 | Testes de carga backend (1000+ req/s) | P2 | 8h | ✅ |
 | 32 | CDN para assets estáticos | P2 | 4h | ✅ |
@@ -414,8 +417,8 @@
 
 ### Sprint 1 Progress: 11/12 ✅✅✅✅✅✅✅✅✅✅✅⬜
 ### Sprint 2 Progress: 8/8 ✅✅✅✅✅✅✅✅ ✅ COMPLETO!
-### Sprint 3 Progress: 7/8 ✅✅✅✅✅✅✅⬜
-### Sprint 4 Progress: 6/7 ✅✅✅✅✅✅⬜
+### Sprint 3 Progress: 8/8 ✅✅✅✅✅✅✅✅ ✅ COMPLETO!
+### Sprint 4 Progress: 7/7 ✅✅✅✅✅✅✅ ✅ COMPLETO!
 
 ---
 

@@ -40,6 +40,7 @@ import '../../features/alertas/screens/alertas_screen.dart';
 import '../../features/evolucao/screens/evolucao_screen.dart';
 import '../../features/evolucao/screens/evolucao_fotos_screen.dart';
 import '../../features/health/screens/health_dashboard_screen.dart';
+import '../../features/checkin/screens/modo_presencial_screen.dart';
 import '../../features/ia/screens/ia_copiloto_screen.dart';
 import '../../features/ia/screens/progressao_aceitar_screen.dart';
 import '../../features/alunos/screens/editar_aluno_screen.dart';
@@ -285,6 +286,14 @@ class AppRouter {
       GoRoute(
         path: '/saude',
         builder: (context, state) => const HealthDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/treino-presencial/:id',
+        redirect: (context, state) =>
+            _intPathParam(state, 'id') == null ? '/treinos' : null,
+        builder: (context, state) => ModoPresencialScreen(
+          treinoId: _intPathParam(state, 'id')!,
+        ),
       ),
       GoRoute(
         path: '/alunos/:id/anamnese',
