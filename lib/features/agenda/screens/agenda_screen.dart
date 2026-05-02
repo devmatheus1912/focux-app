@@ -559,13 +559,27 @@ class _NovoAgendamentoScreenState
 
   Future<void> _salvar() async {
     final alunoId = int.tryParse(_alunoId.text);
-    if (alunoId == null || _inicio == null || _fim == null) return;
+    if (alunoId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Informe o ID do aluno.')),
+      );
+      return;
+    }
+    final fallbackInicio = DateTime.now().add(const Duration(hours: 1));
+    final inicio = _inicio ?? fallbackInicio;
+    final fim = _fim ?? inicio.add(const Duration(hours: 1));
+    if (!fim.isAfter(inicio)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Fim deve ser apos inicio.')),
+      );
+      return;
+    }
     setState(() => _saving = true);
     try {
       await AgendaRepository(ref.read(apiClientProvider)).criar(
         alunoId,
-        _inicio!,
-        _fim!,
+        inicio,
+        fim,
         _titulo.text.isEmpty ? null : _titulo.text,
       );
       if (mounted) safePopOrGo(context, '/agenda');

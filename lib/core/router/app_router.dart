@@ -170,6 +170,10 @@ class AppRouter {
         path: '/notificacoes',
         builder: (context, state) => const NotificacoesScreen(),
       ),
+      GoRoute(
+        path: '/evolucao',
+        redirect: (context, state) => '/dashboard/aluno',
+      ),
 
       // ── Personal trainer main shell — 5 tabs with FxDock ─────────────────────
       StatefulShellRoute.indexedStack(
@@ -239,6 +243,10 @@ class AppRouter {
       GoRoute(
         path: '/alunos/acoes-massa',
         builder: (context, state) => const AcoesMassaScreen(),
+      ),
+      GoRoute(
+        path: '/kanban',
+        redirect: (context, state) => '/alunos/acoes-massa',
       ),
       GoRoute(
         path: '/alunos/:id',
@@ -495,6 +503,10 @@ class AppRouter {
         builder: (context, state) => const PerfilScreen(),
       ),
       GoRoute(
+        path: '/configuracoes',
+        builder: (context, state) => const PerfilScreen(),
+      ),
+      GoRoute(
         path: '/perfil/editar',
         redirect:
             (context, state) =>
@@ -529,6 +541,10 @@ class AppRouter {
       GoRoute(
         path: '/ia/aluno',
         builder: (context, state) => const IaAlunoScreen(),
+      ),
+      GoRoute(
+        path: '/ia/checkin',
+        redirect: (context, state) => '/ia/copiloto',
       ),
       GoRoute(
         path: '/ia/progressao/aceitar',
@@ -617,6 +633,14 @@ class AppRouter {
       GoRoute(
         path: '/migracao-magica',
         builder: (context, state) => const MigracaoMagicaScreen(),
+      ),
+      GoRoute(
+        path: '/growth/migracao',
+        redirect: (context, state) => '/migracao-magica',
+      ),
+      GoRoute(
+        path: '/growth/link-bio',
+        redirect: (context, state) => '/landing-config',
       ),
       GoRoute(
         path: '/promo-enterprise',

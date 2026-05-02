@@ -280,6 +280,19 @@ class PlanoFeatures {
     iaCopiloto: false,
     iaIlimitada: false,
   );
+
+  static const optimisticEnterprise = PlanoFeatures(
+    plano: SubscriptionPlan.ENTERPRISE,
+    fromCache: true,
+    syncWarning:
+        'Nao foi possivel confirmar o plano agora. Acesso liberado em modo seguro enquanto sincroniza.',
+    financeiro: true,
+    agenda: true,
+    relatorios: true,
+    whiteLabel: true,
+    iaCopiloto: true,
+    iaIlimitada: true,
+  );
 }
 
 class PlanosRepository {

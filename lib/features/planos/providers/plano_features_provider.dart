@@ -61,7 +61,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
     try {
       final fresh = await _fetchWithRetry();
       state = AsyncData(fresh);
-    } catch (error, stack) {
+    } catch (error) {
       if (previous != null) {
         state = AsyncData(
           previous.copyWithOperationalState(
@@ -80,7 +80,17 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
           ),
         );
       } else {
-        state = AsyncError(error, stack);
+        state = const AsyncData(PlanoFeatures.optimisticEnterprise);
+        unawaited(
+          AnalyticsService.instance.track(
+            ProductEvents.planGateRefreshFailed,
+            props: {
+              'plan': PlanoFeatures.optimisticEnterprise.plano.name,
+              'error': error.toString(),
+              'allowedByOptimisticFallback': true,
+            },
+          ),
+        );
       }
     } finally {
       _refreshing = false;

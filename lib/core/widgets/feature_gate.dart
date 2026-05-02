@@ -42,10 +42,10 @@ class FeatureGate extends ConsumerWidget {
     // Usuário pagante não pode ser bloqueado por falha de rede.
     // Mostra tela de retry em vez de "Acesso Restrito".
     if (featuresAsync.hasError) {
-      return _ErrorRetryScreen(
-        onRetry: () => ref
-            .read(planoFeaturesProvider.notifier)
-            .refresh(forceLoading: true),
+      return _PlanSyncBannerShell(
+        features: PlanoFeatures.optimisticEnterprise,
+        onRefresh: () => ref.read(planoFeaturesProvider.notifier).refresh(),
+        child: child,
       );
     }
 
@@ -121,6 +121,7 @@ class FeatureGate extends ConsumerWidget {
 
 // ── Tela de erro de rede ────────────────────────────────────────────────────
 
+// ignore: unused_element
 class _ErrorRetryScreen extends StatelessWidget {
   final VoidCallback onRetry;
 
