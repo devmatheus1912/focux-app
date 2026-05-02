@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/api/media_upload_service.dart';
@@ -60,6 +61,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
   bool _loaded = false;
   bool _saving = false;
   bool _uploading = false;
+  bool _deleting = false;
 
   @override
   void dispose() {
@@ -105,9 +107,10 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
           await AnamneseRepository(ref.read(apiClientProvider)).buscarMinha();
       if (!mounted) return;
       setState(() {
-        _objetivo.text = _objetivo.text.trim().isNotEmpty
-            ? _objetivo.text
-            : (anamnese.objetivo ?? '');
+        _objetivo.text =
+            _objetivo.text.trim().isNotEmpty
+                ? _objetivo.text
+                : (anamnese.objetivo ?? '');
         _nivelAtividade = anamnese.nivelAtividade;
         _lesoes.text = anamnese.lesoes ?? '';
         _medicamentos.text = anamnese.medicamentos ?? '';
@@ -135,7 +138,9 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     if (file == null) return;
     setState(() => _uploading = true);
     try {
-      final url = await MediaUploadService(ref.read(apiClientProvider)).uploadBytes(
+      final url = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
         bytes: await file.readAsBytes(),
         filename: file.name,
         folder: 'alunos/fotos',
@@ -146,9 +151,9 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       await _save(silent: true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao enviar foto: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao enviar foto: $e')));
       }
     } finally {
       if (mounted) {
@@ -198,13 +203,60 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao salvar: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao salvar: $e')));
       }
     } finally {
       if (mounted) {
         setState(() => _saving = false);
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Excluir conta'),
+            content: const Text(
+              'Esta acao e irreversivel. Seus dados pessoais serao anonimizados conforme a LGPD. Historico financeiro ou operacional pode ser mantido pelo prazo legal.\n\n'
+              'Deseja realmente excluir sua conta?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: const Text('Excluir definitivamente'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _deleting = true);
+    try {
+      await ref.read(apiClientProvider).dio.delete('/api/lgpd/me/delete');
+      await ref.read(authProvider.notifier).logout();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Conta excluida com sucesso.')),
+      );
+      context.go('/login');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao excluir conta: $e')));
+    } finally {
+      if (mounted) {
+        setState(() => _deleting = false);
       }
     }
   }
@@ -289,9 +341,12 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
   }
 
   String _variacaoPeso(List<MedidaCorporal> medidas) {
-    final comPeso = medidas.where((item) => item.peso != null).toList()
-      ..sort((a, b) => a.data.compareTo(b.data));
-    if (comPeso.length < 2) return 'Registre pelo menos 2 pesos para ver a variacao.';
+    final comPeso =
+        medidas.where((item) => item.peso != null).toList()
+          ..sort((a, b) => a.data.compareTo(b.data));
+    if (comPeso.length < 2) {
+      return 'Registre pelo menos 2 pesos para ver a variacao.';
+    }
     final diff = comPeso.last.peso! - comPeso.first.peso!;
     final sinal = diff > 0 ? '+' : '';
     return '$sinal${diff.toStringAsFixed(1)} kg desde a primeira medida';
@@ -324,8 +379,9 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
               if (file == null) return;
               setModalState(() => uploading = true);
               try {
-                final url = await MediaUploadService(ref.read(apiClientProvider))
-                    .uploadBytes(
+                final url = await MediaUploadService(
+                  ref.read(apiClientProvider),
+                ).uploadBytes(
                   bytes: await file.readAsBytes(),
                   filename: file.name,
                   folder: 'alunos/evolucao',
@@ -335,7 +391,9 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erro ao enviar foto da evolucao: $e')),
+                    SnackBar(
+                      content: Text('Erro ao enviar foto da evolucao: $e'),
+                    ),
                   );
                 }
               } finally {
@@ -420,16 +478,16 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                       Text(
                         'Registrar progresso',
                         style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         'Atualize peso, medidas e uma foto opcional para acompanhar sua evolucao sem depender do personal.',
                         style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                              height: 1.4,
-                            ),
+                          color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                          height: 1.4,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       _Field(
@@ -482,13 +540,16 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                       const SizedBox(height: 4),
                       OutlinedButton.icon(
                         onPressed: uploading ? null : selecionarFoto,
-                        icon: uploading
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.add_a_photo_outlined),
+                        icon:
+                            uploading
+                                ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : const Icon(Icons.add_a_photo_outlined),
                         label: Text(
                           fotoUrl == null
                               ? 'Adicionar foto de progresso'
@@ -501,10 +562,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                           borderRadius: BorderRadius.circular(18),
                           child: AspectRatio(
                             aspectRatio: 1.15,
-                            child: Image.network(
-                              fotoUrl!,
-                              fit: BoxFit.cover,
-                            ),
+                            child: Image.network(fotoUrl!, fit: BoxFit.cover),
                           ),
                         ),
                       ],
@@ -513,13 +571,16 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                         width: double.infinity,
                         child: FilledButton.icon(
                           onPressed: saving ? null : salvar,
-                          icon: saving
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Icon(Icons.check_circle_outline),
+                          icon:
+                              saving
+                                  ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : const Icon(Icons.check_circle_outline),
                           label: const Text('Salvar medida'),
                         ),
                       ),
@@ -555,13 +616,14 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
         actions: [
           TextButton(
             onPressed: _saving ? null : _save,
-            child: _saving
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Salvar'),
+            child:
+                _saving
+                    ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : const Text('Salvar'),
           ),
         ],
       ),
@@ -584,9 +646,10 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: isDark
-                            ? const [Color(0xFF132344), Color(0xFF0C1731)]
-                            : const [Color(0xFFF2F6FF), Color(0xFFFFFFFF)],
+                        colors:
+                            isDark
+                                ? const [Color(0xFF132344), Color(0xFF0C1731)]
+                                : const [Color(0xFFF2F6FF), Color(0xFFFFFFFF)],
                       ),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(color: line),
@@ -605,35 +668,37 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                           ? NetworkImage(_fotoUrl!)
                                           : null,
                                   backgroundColor: BrandPalette.soft(primary),
-                                  child: _fotoUrl == null || _fotoUrl!.isEmpty
-                                      ? Text(
-                                          aluno.nome.isNotEmpty
-                                              ? aluno.nome[0].toUpperCase()
-                                              : 'A',
-                                          style: const TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        )
-                                      : null,
+                                  child:
+                                      _fotoUrl == null || _fotoUrl!.isEmpty
+                                          ? Text(
+                                            aluno.nome.isNotEmpty
+                                                ? aluno.nome[0].toUpperCase()
+                                                : 'A',
+                                            style: const TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          )
+                                          : null,
                                 ),
                                 Positioned(
                                   right: -4,
                                   bottom: -4,
                                   child: IconButton.filled(
                                     onPressed: _uploading ? null : _pickFoto,
-                                    icon: _uploading
-                                        ? const SizedBox(
-                                            width: 15,
-                                            height: 15,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
+                                    icon:
+                                        _uploading
+                                            ? const SizedBox(
+                                              width: 15,
+                                              height: 15,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                            : const Icon(
+                                              Icons.camera_alt,
+                                              size: 16,
                                             ),
-                                          )
-                                        : const Icon(
-                                            Icons.camera_alt,
-                                            size: 16,
-                                          ),
                                   ),
                                 ),
                               ],
@@ -692,8 +757,12 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                     child: LinearProgressIndicator(
                                       value: completion / 100,
                                       minHeight: 9,
-                                      backgroundColor: BrandPalette.soft(primary),
-                                      valueColor: AlwaysStoppedAnimation(primary),
+                                      backgroundColor: BrandPalette.soft(
+                                        primary,
+                                      ),
+                                      valueColor: AlwaysStoppedAnimation(
+                                        primary,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -783,7 +852,8 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                   const SizedBox(height: 14),
                   _SectionCard(
                     title: 'Corpo e metas',
-                    subtitle: 'O que o aluno quer construir e de onde esta partindo.',
+                    subtitle:
+                        'O que o aluno quer construir e de onde esta partindo.',
                     isDark: isDark,
                     children: [
                       _Field(
@@ -839,36 +909,49 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                     ),
                     children: [
                       medidasAsync.when(
-                        loading: () => const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Center(child: CircularProgressIndicator()),
-                        ),
-                        error: (e, _) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            'Nao foi possivel carregar sua evolucao: $e',
-                            style: TextStyle(color: mute, height: 1.4),
-                          ),
-                        ),
+                        loading:
+                            () => const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                        error:
+                            (e, _) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                'Nao foi possivel carregar sua evolucao: $e',
+                                style: TextStyle(color: mute, height: 1.4),
+                              ),
+                            ),
                         data: (medidas) {
-                          final ultima = medidas.isNotEmpty ? medidas.first : null;
+                          final ultima =
+                              medidas.isNotEmpty ? medidas.first : null;
                           final cards = <Widget>[
                             _MetricHighlightCard(
                               label: 'Ultimo peso',
-                              value: ultima?.peso != null
-                                  ? '${ultima!.peso!.toStringAsFixed(1)} kg'
-                                  : 'Sem registro',
-                              helper: ultima != null
-                                  ? 'Atualizado em ${_formatarDataCurta(ultima.data)}'
-                                  : 'Registre a primeira medida',
+                              value:
+                                  ultima?.peso != null
+                                      ? '${ultima!.peso!.toStringAsFixed(1)} kg'
+                                      : 'Sem registro',
+                              helper:
+                                  ultima != null
+                                      ? 'Atualizado em ${_formatarDataCurta(ultima.data)}'
+                                      : 'Registre a primeira medida',
                               icon: Icons.monitor_weight_outlined,
                               isDark: isDark,
                             ),
                             _MetricHighlightCard(
                               label: 'Variacao',
-                              value: medidas.where((item) => item.peso != null).length >= 2
-                                  ? _variacaoPeso(medidas).split(' desde').first
-                                  : '--',
+                              value:
+                                  medidas
+                                              .where(
+                                                (item) => item.peso != null,
+                                              )
+                                              .length >=
+                                          2
+                                      ? _variacaoPeso(
+                                        medidas,
+                                      ).split(' desde').first
+                                      : '--',
                               helper: _variacaoPeso(medidas),
                               icon: Icons.show_chart,
                               isDark: isDark,
@@ -876,9 +959,10 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                             _MetricHighlightCard(
                               label: 'Entradas',
                               value: '${medidas.length}',
-                              helper: medidas.isEmpty
-                                  ? 'Nenhuma atualizacao ainda'
-                                  : 'Historico pronto para comparar',
+                              helper:
+                                  medidas.isEmpty
+                                      ? 'Nenhuma atualizacao ainda'
+                                      : 'Historico pronto para comparar',
                               icon: Icons.timeline,
                               isDark: isDark,
                             ),
@@ -896,9 +980,12 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: isDark
-                                        ? Colors.white.withValues(alpha: 0.04)
-                                        : BrandPalette.softer(primary),
+                                    color:
+                                        isDark
+                                            ? Colors.white.withValues(
+                                              alpha: 0.04,
+                                            )
+                                            : BrandPalette.softer(primary),
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   child: Text(
@@ -910,25 +997,26 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                     ),
                                   ),
                                 )
-                              else
-                                ...[
-                                  Text(
-                                    'Ultimas atualizacoes',
-                                    style: TextStyle(
-                                      color: ink,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                              else ...[
+                                Text(
+                                  'Ultimas atualizacoes',
+                                  style: TextStyle(
+                                    color: ink,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
                                   ),
-                                  const SizedBox(height: 10),
-                                  ...medidas.take(3).map(
-                                    (medida) => _ProgressEntryCard(
-                                      medida: medida,
-                                      isDark: isDark,
-                                      formatarData: _formatarDataCurta,
+                                ),
+                                const SizedBox(height: 10),
+                                ...medidas
+                                    .take(3)
+                                    .map(
+                                      (medida) => _ProgressEntryCard(
+                                        medida: medida,
+                                        isDark: isDark,
+                                        formatarData: _formatarDataCurta,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                              ],
                             ],
                           );
                         },
@@ -938,7 +1026,8 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                   const SizedBox(height: 14),
                   _SectionCard(
                     title: 'Saude e restricoes',
-                    subtitle: 'Informacoes que deixam treino e dieta mais seguros.',
+                    subtitle:
+                        'Informacoes que deixam treino e dieta mais seguros.',
                     isDark: isDark,
                     children: [
                       DropdownButtonFormField<String>(
@@ -947,16 +1036,17 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                           labelText: 'Nivel de atividade',
                           prefixIcon: Icon(Icons.insights_outlined),
                         ),
-                        items: _niveisAtividade
-                            .map(
-                              (item) => DropdownMenuItem<String>(
-                                value: item.$1,
-                                child: Text(item.$2),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) =>
-                            setState(() => _nivelAtividade = value),
+                        items:
+                            _niveisAtividade
+                                .map(
+                                  (item) => DropdownMenuItem<String>(
+                                    value: item.$1,
+                                    child: Text(item.$2),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged:
+                            (value) => setState(() => _nivelAtividade = value),
                       ),
                       const SizedBox(height: 12),
                       _Field(
@@ -1000,7 +1090,8 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                   const SizedBox(height: 14),
                   _SectionCard(
                     title: 'Rotina de treino',
-                    subtitle: 'Preferencias e disponibilidade para o plano fazer sentido.',
+                    subtitle:
+                        'Preferencias e disponibilidade para o plano fazer sentido.',
                     isDark: isDark,
                     children: [
                       Text(
@@ -1025,9 +1116,10 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                           ButtonSegment(value: 6, label: Text('6')),
                           ButtonSegment(value: 7, label: Text('7')),
                         ],
-                        onSelectionChanged: (values) => setState(
-                          () => _disponibilidadeSemanal = values.first,
-                        ),
+                        onSelectionChanged:
+                            (values) => setState(
+                              () => _disponibilidadeSemanal = values.first,
+                            ),
                       ),
                       const SizedBox(height: 12),
                       _Field(
@@ -1054,6 +1146,23 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: EagleTokens.bad,
+                      side: const BorderSide(color: EagleTokens.bad),
+                    ),
+                    onPressed: _deleting ? null : _confirmDeleteAccount,
+                    icon:
+                        _deleting
+                            ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Icon(Icons.delete_forever_outlined),
+                    label: const Text('Excluir minha conta'),
                   ),
                   const SizedBox(height: 14),
                   Text(
@@ -1113,10 +1222,7 @@ class _SectionCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (trailing != null) ...[
-                const SizedBox(width: 12),
-                trailing!,
-              ],
+              if (trailing != null) ...[const SizedBox(width: 12), trailing!],
             ],
           ),
           const SizedBox(height: 4),
@@ -1153,9 +1259,10 @@ class _ProfileChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.06)
-            : BrandPalette.softer(primary),
+        color:
+            isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : BrandPalette.softer(primary),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -1198,9 +1305,10 @@ class _MetricHighlightCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.04)
-            : BrandPalette.softer(primary),
+        color:
+            isDark
+                ? Colors.white.withValues(alpha: 0.04)
+                : BrandPalette.softer(primary),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
@@ -1226,7 +1334,8 @@ class _MetricHighlightCard extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    color:
+                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1246,7 +1355,8 @@ class _MetricHighlightCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    color:
+                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
                     fontSize: 11.5,
                     height: 1.35,
                   ),
@@ -1275,10 +1385,26 @@ class _ProgressEntryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final chips = <Widget>[
-      if (medida.peso != null) _MiniValueChip(label: 'Peso', value: '${medida.peso!.toStringAsFixed(1)} kg'),
-      if (medida.cintura != null) _MiniValueChip(label: 'Cintura', value: '${medida.cintura!.toStringAsFixed(1)} cm'),
-      if (medida.quadril != null) _MiniValueChip(label: 'Quadril', value: '${medida.quadril!.toStringAsFixed(1)} cm'),
-      if (medida.braco != null) _MiniValueChip(label: 'Braco', value: '${medida.braco!.toStringAsFixed(1)} cm'),
+      if (medida.peso != null)
+        _MiniValueChip(
+          label: 'Peso',
+          value: '${medida.peso!.toStringAsFixed(1)} kg',
+        ),
+      if (medida.cintura != null)
+        _MiniValueChip(
+          label: 'Cintura',
+          value: '${medida.cintura!.toStringAsFixed(1)} cm',
+        ),
+      if (medida.quadril != null)
+        _MiniValueChip(
+          label: 'Quadril',
+          value: '${medida.quadril!.toStringAsFixed(1)} cm',
+        ),
+      if (medida.braco != null)
+        _MiniValueChip(
+          label: 'Braco',
+          value: '${medida.braco!.toStringAsFixed(1)} cm',
+        ),
     ];
 
     return Container(
@@ -1306,7 +1432,10 @@ class _ProgressEntryCard extends StatelessWidget {
               const Spacer(),
               if (medida.fotoUrl != null && medida.fotoUrl!.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: BrandPalette.soft(primary, dark: isDark),
                     borderRadius: BorderRadius.circular(999),
@@ -1324,21 +1453,14 @@ class _ProgressEntryCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (chips.isNotEmpty)
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: chips,
-            ),
+            Wrap(spacing: 8, runSpacing: 8, children: chips),
           if (medida.fotoUrl != null && medida.fotoUrl!.isNotEmpty) ...[
             const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(18),
               child: AspectRatio(
                 aspectRatio: 1.4,
-                child: Image.network(
-                  medida.fotoUrl!,
-                  fit: BoxFit.cover,
-                ),
+                child: Image.network(medida.fotoUrl!, fit: BoxFit.cover),
               ),
             ),
           ],
@@ -1352,10 +1474,7 @@ class _MiniValueChip extends StatelessWidget {
   final String label;
   final String value;
 
-  const _MiniValueChip({
-    required this.label,
-    required this.value,
-  });
+  const _MiniValueChip({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -1379,10 +1498,7 @@ class _MiniValueChip extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
           ),
         ],
       ),
@@ -1415,14 +1531,14 @@ class _Field extends StatelessWidget {
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboardType,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon),
-        ),
-        validator: requiredField
-            ? (value) =>
-                value == null || value.trim().isEmpty ? 'Obrigatorio.' : null
-            : null,
+        decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon)),
+        validator:
+            requiredField
+                ? (value) =>
+                    value == null || value.trim().isEmpty
+                        ? 'Obrigatorio.'
+                        : null
+                : null,
       ),
     );
   }

@@ -706,6 +706,12 @@ class _PersonalDashboardScreenState
                           onTap: () => context.push('/chat/inbox'),
                         ),
                         _ShortcutBtn(
+                          icon: 'article',
+                          label: 'Feed',
+                          isDark: isDark,
+                          onTap: () => context.push('/feed'),
+                        ),
+                        _ShortcutBtn(
                           icon: 'pix',
                           label: 'Financeiro',
                           isDark: isDark,
@@ -716,6 +722,12 @@ class _PersonalDashboardScreenState
                           label: 'Leads',
                           isDark: isDark,
                           onTap: () => context.push('/leads'),
+                        ),
+                        _ShortcutBtn(
+                          icon: 'spark',
+                          label: 'Qualidade',
+                          isDark: isDark,
+                          onTap: () => context.push('/dashboard/qualidade'),
                         ),
                       ],
                     ),

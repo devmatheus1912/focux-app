@@ -7,5 +7,7 @@
 		<string>applinks:focux.app</string>
 		<string>applinks:www.focux.app</string>
 	</array>
+	<key>com.apple.developer.healthkit</key>
+	<true/>
 </dict>
 </plist>

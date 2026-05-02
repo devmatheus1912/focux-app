@@ -52,6 +52,11 @@
 	<!-- Reconhecimento de voz para o Copiloto IA -->
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>O Copiloto IA usa reconhecimento de voz para que você possa ditar comandos e registrar treinos sem digitar.</string>
+	<!-- HealthKit -->
+	<key>NSHealthShareUsageDescription</key>
+	<string>Usado para ler dados de saude e acompanhar sua evolucao no Focux.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Usado para registrar dados de saude relacionados aos seus treinos no Focux.</string>
 	<!-- FCM background notifications -->
 	<key>UIBackgroundModes</key>
 	<array>

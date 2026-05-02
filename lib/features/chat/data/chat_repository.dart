@@ -381,6 +381,42 @@ class ChatRepository {
     return ChatMsg.fromJson(r.data);
   }
 
+  // ── Fase 2: WhatsApp-level conversation management ─────────────────────────
+
+  /// Pin, unpin, archive, unarchive, mute, unmute, or clear a conversation
+  Future<Map<String, dynamic>> conversationAction(int alunoId, String action) async {
+    final r = await _dio.post('/api/chat/conversas/$alunoId/action', data: {'action': action});
+    return r.data as Map<String, dynamic>;
+  }
+
+  /// Get conversation state (pinned/archived/muted)
+  Future<Map<String, dynamic>> conversationState(int alunoId) async {
+    final r = await _dio.get('/api/chat/conversas/$alunoId/state');
+    return r.data as Map<String, dynamic>;
+  }
+
+  /// List archived conversations
+  Future<List<ChatInboxItem>> inboxArchived() async {
+    final r = await _dio.get('/api/chat/inbox/archived');
+    return (r.data as List)
+        .map((e) => ChatInboxItem.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Global search across all conversations
+  Future<List<ChatMsg>> globalSearch(String query) async {
+    final r = await _dio.get('/api/chat/inbox/search', queryParameters: {'q': query});
+    return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
+  }
+
+  /// Inbox with unread-only filter
+  Future<List<ChatInboxItem>> inboxUnread() async {
+    final r = await _dio.get('/api/chat/inbox/unread');
+    return (r.data as List)
+        .map((e) => ChatInboxItem.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   String _clientMessageId() {
     final now = DateTime.now().microsecondsSinceEpoch;
     return 'app-$now-${identityHashCode(this)}';

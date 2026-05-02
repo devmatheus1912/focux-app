@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/ia_safety_disclaimer.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -124,7 +125,14 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
   Widget build(BuildContext context) => Column(children: [
     Expanded(
       child: _msgs.isEmpty
-          ? const Center(child: Text('Pergunte sobre treino, dieta ou saúde!'))
+          ? const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Pergunte sobre treino, dieta ou saúde!'),
+                SizedBox(height: 16),
+                IaSafetyDisclaimer(),
+              ],
+            )
           : ListView.builder(
               controller: _scroll,
               padding: const EdgeInsets.all(12),
@@ -228,6 +236,8 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
         'Gere recomendações personalizadas de progressão de carga com base no seu histórico de treinos.',
         style: TextStyle(color: EagleTokens.inkMute),
       ),
+      const SizedBox(height: 8),
+      const IaSafetyDisclaimer(compact: true),
       const SizedBox(height: 20),
       FilledButton.icon(
         onPressed: _loading ? null : _gerarProgressao,

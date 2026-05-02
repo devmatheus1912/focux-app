@@ -22,8 +22,11 @@ void main() {
       'student-workouts',
     ]));
 
+    // Fase 1: expanded coverage
+    expect(qaSmokeRoutes.length, greaterThanOrEqualTo(30),
+        reason: 'Catalog must cover at least 30 routes');
     expect(qaPublicRoutes.length, greaterThanOrEqualTo(6));
-    expect(qaPrivateRoutes.length, greaterThanOrEqualTo(6));
+    expect(qaPrivateRoutes.length, greaterThanOrEqualTo(20));
 
     for (final route in qaPrivateRoutes) {
       expect(
@@ -86,6 +89,9 @@ void main() {
     final ids = qaSmokeEndpoints.map((endpoint) => endpoint.id).toSet();
 
     expect(ids.length, qaSmokeEndpoints.length);
+    // Fase 1: expanded endpoint coverage
+    expect(qaSmokeEndpoints.length, greaterThanOrEqualTo(25),
+        reason: 'Must cover at least 25 API endpoints');
     expect(ids, containsAll([
       'health',
       'auth-capabilities',
@@ -97,6 +103,14 @@ void main() {
       'notifications',
       'workouts',
       'exercises',
+      // Fase 1 new routes
+      'chat-inbox',
+      'chat-inbox-search',
+      'feed-list',
+      'planos-me',
+      'qualidade',
+      'onboarding-status',
+      'backup-create',
     ]));
 
     for (final endpoint in qaPublicEndpoints) {
@@ -108,5 +122,30 @@ void main() {
       expect(endpoint.expectedAnonymousStatus, 403);
       expect(endpoint.path, startsWith('/api/'));
     }
+  });
+
+  test('Fase 1: QA catalog has no duplicate IDs', () {
+    final routeIds = qaSmokeRoutes.map((r) => r.id).toList();
+    expect(routeIds.toSet().length, routeIds.length,
+        reason: 'Route IDs must be unique');
+
+    final endpointIds = qaSmokeEndpoints.map((e) => e.id).toList();
+    expect(endpointIds.toSet().length, endpointIds.length,
+        reason: 'Endpoint IDs must be unique');
+  });
+
+  test('Fase 1: Every module area has at least one route or endpoint', () {
+    final areas = <String>{};
+    for (final r in qaSmokeRoutes) {
+      areas.add(r.area);
+    }
+    for (final e in qaSmokeEndpoints) {
+      areas.add(e.area);
+    }
+
+    expect(areas, containsAll([
+      'auth', 'personal', 'alunos', 'treinos', 'financeiro',
+      'chat', 'ia', 'feed', 'growth', 'notificacoes',
+    ]));
   });
 }

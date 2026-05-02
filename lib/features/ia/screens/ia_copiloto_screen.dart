@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/widgets/ia_safety_disclaimer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -522,6 +523,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         .toList(),
               ),
             ),
+
+            // Safety disclaimer
+            const IaSafetyDisclaimer(compact: true),
+            const SizedBox(height: 4),
 
             // Generate button / progress
             Padding(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
 
@@ -108,7 +109,9 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
+        const IaSafetyDisclaimer(compact: true),
+        const SizedBox(height: 12),
         FilledButton.icon(
           onPressed: _loading ? null : _gerar,
           icon: _loading

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 
 class _IaMsg {
@@ -64,7 +65,14 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
     body: Column(children: [
       Expanded(
         child: _msgs.isEmpty
-            ? const Center(child: Text('Pergunte ao seu assistente de fitness!'))
+            ? const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Pergunte ao seu assistente de fitness!'),
+                  SizedBox(height: 16),
+                  IaSafetyDisclaimer(),
+                ],
+              )
             : ListView.builder(
                 controller: _scroll,
                 padding: const EdgeInsets.all(12),
@@ -97,6 +105,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                 },
               ),
       ),
+      if (_msgs.isNotEmpty) const IaSafetyDisclaimer(compact: true),
       const Divider(height: 1),
       Padding(
         padding: EdgeInsets.only(

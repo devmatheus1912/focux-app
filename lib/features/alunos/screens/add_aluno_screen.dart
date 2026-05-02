@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:dio/dio.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,7 +77,26 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       }
     } catch (e) {
       HapticFeedback.heavyImpact();
-      setState(() { _error = 'Erro ao cadastrar aluno. Verifique os dados.'; });
+      String errorMsg = 'Erro ao cadastrar aluno. Verifique os dados.';
+      String? requestId;
+      // Fase 2/3: Extract specific error from backend response
+      if (e is DioException && e.response?.data is Map) {
+        final data = e.response!.data as Map;
+        if (data.containsKey('erro')) {
+          errorMsg = data['erro'].toString();
+        }
+        if (data.containsKey('detalhes') && data['detalhes'] is Map) {
+          final details = (data['detalhes'] as Map).entries
+              .map((e) => '${e.key}: ${e.value}')
+              .join('\n');
+          errorMsg = '$errorMsg\n$details';
+        }
+        requestId = data['requestId']?.toString();
+      }
+      if (requestId != null) {
+        errorMsg = '$errorMsg\n\nRef: $requestId';
+      }
+      setState(() { _error = errorMsg; });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }

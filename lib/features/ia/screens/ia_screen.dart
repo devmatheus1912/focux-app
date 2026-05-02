@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/ia_safety_disclaimer.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
@@ -128,6 +129,8 @@ class _GerarTreinoTabState extends ConsumerState<_GerarTreinoTab> {
   Widget build(BuildContext context) => SingleChildScrollView(
     padding: const EdgeInsets.all(16),
     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const IaSafetyDisclaimer(),
+      const SizedBox(height: 8),
       _field(_objetivo, 'Objetivo (ex: hipertrofia, emagrecimento)'),
       const SizedBox(height: 12),
       DropdownButtonFormField<String>(
@@ -263,6 +266,8 @@ class _GerarDietaTabState extends ConsumerState<_GerarDietaTab> {
   Widget build(BuildContext context) => SingleChildScrollView(
     padding: const EdgeInsets.all(16),
     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const IaSafetyDisclaimer(),
+      const SizedBox(height: 8),
       _field(_objetivo, 'Objetivo (ex: hipertrofia, emagrecimento, saúde)'),
       const SizedBox(height: 8),
       Row(children: [

@@ -8,7 +8,9 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/planos/data/planos_repository.dart';
+import '../../../features/planos/providers/plano_features_provider.dart';
 import '../models/subscription_plan.dart';
+import '../services/iap_service.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key});
@@ -19,6 +21,7 @@ class PaywallScreen extends ConsumerStatefulWidget {
 
 class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   bool _submitting = false;
+  bool _restoringPurchases = false;
   late final List<Map<String, dynamic>> _planos;
   int _selected = 1;
 
@@ -151,6 +154,65 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       '/assinatura',
       extra: SubscriptionPlan.ENTERPRISE.apiName,
     );
+  }
+
+  Future<void> _restorePurchases() async {
+    if (_restoringPurchases) return;
+
+    setState(() => _restoringPurchases = true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Verificando compras anteriores...')),
+    );
+
+    try {
+      final result = await ref
+          .read(iapServiceProvider)
+          .restoreAndVerifyPurchases(
+            onVerified: (_, __) async {
+              ref.invalidate(perfilProvider);
+              ref.invalidate(planoFeaturesProvider);
+            },
+          );
+
+      ref.invalidate(perfilProvider);
+      ref.invalidate(planoFeaturesProvider);
+
+      if (!mounted) return;
+
+      if (!result.storeAvailable) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('A loja do dispositivo nao esta disponivel.'),
+          ),
+        );
+        return;
+      }
+
+      if (result.hasVerifiedPurchases) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Compras restauradas com sucesso.')),
+        );
+        return;
+      }
+
+      if (result.errors.isNotEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(result.errors.first.message)));
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nenhuma compra anterior encontrada.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao restaurar compras: $error')),
+      );
+    } finally {
+      if (mounted) setState(() => _restoringPurchases = false);
+    }
   }
 
   @override
@@ -655,32 +717,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: TextButton(
-                      onPressed: () async {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Verificando compras anteriores...'),
-                          ),
-                        );
-                        // IAP restore handled by store
-                        try {
-                          final repo = PlanosRepository(ref.read(apiClientProvider));
-                          await repo.syncSubscription();
-                          ref.invalidate(perfilProvider);
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Compras restauradas com sucesso.'),
-                            ),
-                          );
-                        } catch (_) {
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Nenhuma compra anterior encontrada.'),
-                            ),
-                          );
-                        }
-                      },
+                      onPressed: _restoringPurchases ? null : _restorePurchases,
                       child: Text(
                         'Restaurar compras',
                         style: TextStyle(

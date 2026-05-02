@@ -11,7 +11,9 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/planos/data/planos_repository.dart';
+import '../../../features/planos/providers/plano_features_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
+import '../../../features/subscription/services/iap_service.dart';
 
 import '../data/assinatura_repository.dart';
 import '../providers/assinatura_provider.dart';
@@ -70,8 +72,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   Future<void> _loadTrialStatus() async {
     if (mounted) setState(() => _loadingTrial = true);
     try {
-      final status = await PlanosRepository(ref.read(apiClientProvider)).getTrialStatus();
-      if (mounted) setState(() { _trialStatus = status; _loadingTrial = false; });
+      final status =
+          await PlanosRepository(ref.read(apiClientProvider)).getTrialStatus();
+      if (mounted) {
+        setState(() {
+          _trialStatus = status;
+          _loadingTrial = false;
+        });
+      }
     } catch (_) {
       if (mounted) setState(() => _loadingTrial = false);
     }
@@ -116,7 +124,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             );
             break;
           case PurchaseStatus.canceled:
-            if (mounted) setState(() { _loadingCheckout = false; _syncingPurchase = false; });
+            if (mounted) {
+              setState(() {
+                _loadingCheckout = false;
+                _syncingPurchase = false;
+              });
+            }
             break;
           case PurchaseStatus.purchased:
           case PurchaseStatus.restored:
@@ -157,20 +170,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
 
     try {
-      if (purchasedPlan == SubscriptionPlan.ENTERPRISE) {
-        final repo = PlanosRepository(ref.read(apiClientProvider));
-        final preview = await repo.previewEnterpriseUpgrade();
-        final metadata = _metadataFromPurchase(purchase);
-        final billingCycleEndsAt = _estimateBillingCycleEnd(purchase);
-
-        await repo.activateEnterprise(
-          metadata.toEnterpriseActivationPayload(billingCycleEndsAt: billingCycleEndsAt),
-        );
-
-        if (mounted) setState(() => _enterprisePreview = preview);
-      }
+      await ref.read(iapServiceProvider).verifyPurchase(purchase);
 
       ref.invalidate(perfilProvider);
+      ref.invalidate(planoFeaturesProvider);
       ref.invalidate(planosProvider);
 
       if (!mounted) return;
@@ -187,32 +190,18 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
       if (mounted) safePopOrGo(context, '/planos');
     } catch (error) {
-      _finishPurchaseFlowWithError('Não foi possível sincronizar a assinatura: $error');
+      _handledPurchases.remove(purchaseKey);
+      _finishPurchaseFlowWithError(
+        'Não foi possível sincronizar a assinatura: $error',
+      );
     } finally {
-      if (mounted) setState(() { _syncingPurchase = false; _loadingCheckout = false; });
+      if (mounted) {
+        setState(() {
+          _syncingPurchase = false;
+          _loadingCheckout = false;
+        });
+      }
     }
-  }
-
-  SubscriptionMetadata _metadataFromPurchase(PurchaseDetails purchase) {
-    final now = DateTime.now();
-    final rawToken = purchase.verificationData.serverVerificationData.trim();
-    final purchaseId = purchase.purchaseID?.trim();
-    return SubscriptionMetadata(
-      platform: inferPlatformName(),
-      productId: purchase.productID,
-      subscriptionToken: rawToken.isNotEmpty
-          ? rawToken
-          : 'purchase-${purchaseId ?? now.millisecondsSinceEpoch}',
-      transactionId: purchaseId?.isNotEmpty == true ? purchaseId! : 'txn-${now.microsecondsSinceEpoch}',
-    );
-  }
-
-  DateTime _estimateBillingCycleEnd(PurchaseDetails purchase) {
-    final transactionDateMs = int.tryParse(purchase.transactionDate ?? '');
-    final start = transactionDateMs != null
-        ? DateTime.fromMillisecondsSinceEpoch(transactionDateMs)
-        : DateTime.now();
-    return start.add(const Duration(days: 30));
   }
 
   SubscriptionPlan? _planForProductId(String productId) {
@@ -235,7 +224,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
   Future<void> _loadEnterprisePreview() async {
     try {
-      final preview = await PlanosRepository(ref.read(apiClientProvider)).previewEnterpriseUpgrade();
+      final preview =
+          await PlanosRepository(
+            ref.read(apiClientProvider),
+          ).previewEnterpriseUpgrade();
       if (!mounted) return;
       setState(() => _enterprisePreview = preview);
     } catch (_) {
@@ -250,7 +242,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     if (kIsWeb) {
       setState(() => _loadingCheckout = true);
       try {
-        final checkoutUrl = await AssinaturaRepository(ref.read(apiClientProvider)).criarPreferencia(planId);
+        final checkoutUrl = await AssinaturaRepository(
+          ref.read(apiClientProvider),
+        ).criarPreferencia(planId);
         final uri = Uri.parse(checkoutUrl);
         await launchUrl(uri, webOnlyWindowName: '_self');
       } catch (error) {
@@ -260,26 +254,36 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
 
     if (!_storeAvailable) {
-      _finishPurchaseFlowWithError('A loja de aplicativos não está disponível neste dispositivo.');
+      _finishPurchaseFlowWithError(
+        'A loja de aplicativos não está disponível neste dispositivo.',
+      );
       return;
     }
 
     final productId = _productIds[plan];
     if (productId == null) {
-      _finishPurchaseFlowWithError('Plano selecionado não possui produto válido.');
+      _finishPurchaseFlowWithError(
+        'Plano selecionado não possui produto válido.',
+      );
       return;
     }
 
     ProductDetails? product = _productDetails[productId];
     if (product == null) {
-      final response = await InAppPurchase.instance.queryProductDetails({productId});
+      final response = await InAppPurchase.instance.queryProductDetails({
+        productId,
+      });
       if (!mounted) return;
       if (response.productDetails.isEmpty) {
-        _finishPurchaseFlowWithError('Produto ainda não configurado na loja para este plano.');
+        _finishPurchaseFlowWithError(
+          'Produto ainda não configurado na loja para este plano.',
+        );
         return;
       }
       product = response.productDetails.first;
-      setState(() => _productDetails = {..._productDetails, productId: product!});
+      setState(
+        () => _productDetails = {..._productDetails, productId: product!},
+      );
     }
 
     setState(() => _loadingCheckout = true);
@@ -295,8 +299,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
   void _finishPurchaseFlowWithError(String message) {
     if (!mounted) return;
-    setState(() { _loadingCheckout = false; _syncingPurchase = false; });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    setState(() {
+      _loadingCheckout = false;
+      _syncingPurchase = false;
+    });
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -314,7 +323,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
     final planosAsync = ref.watch(planosProvider);
 
-    _selectedPlanName ??= widget.initialPlan?.trim().toUpperCase() ?? currentPlan.apiName;
+    _selectedPlanName ??=
+        widget.initialPlan?.trim().toUpperCase() ?? currentPlan.apiName;
 
     return Scaffold(
       backgroundColor: bg,
@@ -332,9 +342,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         error: (error, _) => Center(child: Text('Erro: $error')),
         data: (planos) {
           final sortedPlans = [...planos]..sort(
-              (a, b) => subscriptionPlanFromApi(a.nome).level
-                  .compareTo(subscriptionPlanFromApi(b.nome).level),
-            );
+            (a, b) => subscriptionPlanFromApi(
+              a.nome,
+            ).level.compareTo(subscriptionPlanFromApi(b.nome).level),
+          );
 
           final selectedPlan = subscriptionPlanFromApi(_selectedPlanName);
           final selectedBackendPlan = sortedPlans.firstWhere(
@@ -344,19 +355,21 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
           final isCurrentPlan = selectedPlan == currentPlan;
           final isDowngrade = selectedPlan.level < currentPlan.level;
-          final ctaEnabled = selectedPlan != SubscriptionPlan.FREE &&
+          final ctaEnabled =
+              selectedPlan != SubscriptionPlan.FREE &&
               !isCurrentPlan &&
               !isDowngrade &&
               !_loadingCheckout &&
               !_syncingPurchase;
 
-          final ctaLabel = _syncingPurchase
-              ? 'Sincronizando assinatura...'
-              : selectedPlan == SubscriptionPlan.ENTERPRISE
+          final ctaLabel =
+              _syncingPurchase
+                  ? 'Sincronizando assinatura...'
+                  : selectedPlan == SubscriptionPlan.ENTERPRISE
                   ? 'Assinar Enterprise'
                   : (_trialStatus?.trialUsed == false)
-                      ? 'Iniciar período gratuito'
-                      : 'Assinar Premium';
+                  ? 'Iniciar período gratuito'
+                  : 'Assinar Premium';
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
@@ -364,7 +377,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
               // ── Header ────────────────────────────────────────────────
               Text(
                 'Escolha como você quer escalar o Focux.',
-                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
@@ -383,9 +398,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     plano: plan,
                     currentPlan: currentPlan,
                     selectedPlan: selectedPlan,
-                    productDetails: _productDetails[_productIds[subscriptionPlanFromApi(plan.nome)]],
+                    productDetails:
+                        _productDetails[_productIds[subscriptionPlanFromApi(
+                          plan.nome,
+                        )]],
                     trialStatus: _trialStatus,
-                    onTap: () => _selectPlan(subscriptionPlanFromApi(plan.nome)),
+                    onTap:
+                        () => _selectPlan(subscriptionPlanFromApi(plan.nome)),
                     isDark: isDark,
                   ),
                 ),
@@ -421,11 +440,17 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.receipt_long_outlined, color: primary, size: 18),
+                          Icon(
+                            Icons.receipt_long_outlined,
+                            color: primary,
+                            size: 18,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'Preview da cobrança Enterprise',
-                            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ],
                       ),
@@ -460,16 +485,31 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   children: [
                     Text(
                       'Resumo do plano',
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 10),
-                    _ResumoRow(label: 'Plano atual', value: currentPlan.apiName, ink: ink, mute: mute),
+                    _ResumoRow(
+                      label: 'Plano atual',
+                      value: currentPlan.apiName,
+                      ink: ink,
+                      mute: mute,
+                    ),
                     const SizedBox(height: 4),
-                    _ResumoRow(label: 'Selecionado', value: selectedPlan.apiName, ink: ink, mute: mute),
+                    _ResumoRow(
+                      label: 'Selecionado',
+                      value: selectedPlan.apiName,
+                      ink: ink,
+                      mute: mute,
+                    ),
                     const SizedBox(height: 4),
                     _ResumoRow(
                       label: 'Preço',
-                      value: _formatPrice(selectedBackendPlan, _productDetails[_productIds[selectedPlan]]),
+                      value: _formatPrice(
+                        selectedBackendPlan,
+                        _productDetails[_productIds[selectedPlan]],
+                      ),
                       ink: primary,
                       mute: mute,
                       valueBold: true,
@@ -478,7 +518,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       const SizedBox(height: 10),
                       _InfoBanner(
                         icon: Icons.info_outline,
-                        text: 'Downgrade não está disponível aqui. Entre em contato com o suporte.',
+                        text:
+                            'Downgrade não está disponível aqui. Entre em contato com o suporte.',
                         color: EagleTokens.warn,
                         softColor: EagleTokens.warnSoft,
                         isDark: isDark,
@@ -488,9 +529,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       const SizedBox(height: 10),
                       _InfoBanner(
                         icon: Icons.store_outlined,
-                        text: 'A loja do dispositivo não está disponível nesta sessão. O fluxo de compra real exige App Store ou Google Play.',
+                        text:
+                            'A loja do dispositivo não está disponível nesta sessão. O fluxo de compra real exige App Store ou Google Play.',
                         color: mute,
-                        softColor: isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+                        softColor:
+                            isDark
+                                ? EagleTokens.darkCardHi
+                                : EagleTokens.lineSoft,
                         isDark: isDark,
                       ),
                     ],
@@ -498,9 +543,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       const SizedBox(height: 10),
                       _InfoBanner(
                         icon: Icons.smartphone_outlined,
-                        text: 'A loja do dispositivo não está disponível na versão web. Para assinar, acesse o app no seu celular.',
+                        text:
+                            'A loja do dispositivo não está disponível na versão web. Para assinar, acesse o app no seu celular.',
                         color: mute,
-                        softColor: isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+                        softColor:
+                            isDark
+                                ? EagleTokens.darkCardHi
+                                : EagleTokens.lineSoft,
                         isDark: isDark,
                       ),
                     ],
@@ -514,18 +563,28 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 height: 52,
                 child: FilledButton(
                   style: FilledButton.styleFrom(
-                    disabledBackgroundColor: isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+                    disabledBackgroundColor:
+                        isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
                     disabledForegroundColor: mute,
                   ),
-                  onPressed: ctaEnabled
-                      ? () => _startCheckout(selectedPlan, selectedBackendPlan.id)
-                      : null,
-                  child: _loadingCheckout || _syncingPurchase
-                      ? const SizedBox(
-                          width: 20, height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
-                      : Text(ctaLabel),
+                  onPressed:
+                      ctaEnabled
+                          ? () => _startCheckout(
+                            selectedPlan,
+                            selectedBackendPlan.id,
+                          )
+                          : null,
+                  child:
+                      _loadingCheckout || _syncingPurchase
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : Text(ctaLabel),
                 ),
               ),
               const SizedBox(height: 8),
@@ -533,10 +592,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 isCurrentPlan
                     ? 'Este plano já está ativo na sua conta.'
                     : isDowngrade
-                        ? 'Selecione um plano superior ao atual para continuar.'
-                        : selectedPlan == SubscriptionPlan.FREE
-                            ? 'O plano gratuito não requer assinatura.'
-                            : 'O fechamento da compra acontece pela loja do dispositivo.',
+                    ? 'Selecione um plano superior ao atual para continuar.'
+                    : selectedPlan == SubscriptionPlan.FREE
+                    ? 'O plano gratuito não requer assinatura.'
+                    : 'O fechamento da compra acontece pela loja do dispositivo.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: mute, fontSize: 12.5),
               ),
@@ -586,12 +645,14 @@ class _TrialInfoCard extends StatelessWidget {
     final trialEndsAt = trialStatus?.trialEndsAt;
 
     // Cores
-    final accentColor = trialUsed
-        ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
-        : (isDark ? const Color(0xFF6FE296) : EagleTokens.good);
-    final softColor = trialUsed
-        ? (isDark ? const Color(0x22FF8B8B) : EagleTokens.badSoft)
-        : (isDark ? const Color(0x226FE296) : EagleTokens.goodSoft);
+    final accentColor =
+        trialUsed
+            ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
+            : (isDark ? const Color(0xFF6FE296) : EagleTokens.good);
+    final softColor =
+        trialUsed
+            ? (isDark ? const Color(0x22FF8B8B) : EagleTokens.badSoft)
+            : (isDark ? const Color(0x226FE296) : EagleTokens.goodSoft);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -615,8 +676,8 @@ class _TrialInfoCard extends StatelessWidget {
                 trialAtivo
                     ? 'Período gratuito ativo'
                     : trialUsed
-                        ? 'Período gratuito encerrado'
-                        : 'Período gratuito disponível',
+                    ? 'Período gratuito encerrado'
+                    : 'Período gratuito disponível',
                 style: TextStyle(
                   color: accentColor,
                   fontWeight: FontWeight.w700,
@@ -636,31 +697,36 @@ class _TrialInfoCard extends StatelessWidget {
             const SizedBox(height: 8),
             _TrialRow(
               icon: Icons.credit_card_outlined,
-              text: 'É obrigatório cadastrar um cartão de crédito para ativar o período gratuito.',
+              text:
+                  'É obrigatório cadastrar um cartão de crédito para ativar o período gratuito.',
               accentColor: accentColor,
             ),
             const SizedBox(height: 8),
             _TrialRow(
               icon: Icons.lock_outline,
-              text: 'Não haverá nenhuma cobrança até o encerramento dos 7 dias. Cancele a qualquer momento antes disso sem custo.',
+              text:
+                  'Não haverá nenhuma cobrança até o encerramento dos 7 dias. Cancele a qualquer momento antes disso sem custo.',
               accentColor: accentColor,
             ),
           ] else if (trialAtivo) ...[
             _TrialRow(
               icon: Icons.timer_outlined,
-              text: 'Período gratuito ativo — $diasRestantes dias restantes${trialEndsAt != null ? ' (encerra em ${_formatDate(trialEndsAt)})' : ''}.',
+              text:
+                  'Período gratuito ativo — $diasRestantes dias restantes${trialEndsAt != null ? ' (encerra em ${_formatDate(trialEndsAt)})' : ''}.',
               accentColor: accentColor,
             ),
             const SizedBox(height: 8),
             _TrialRow(
               icon: Icons.credit_card_outlined,
-              text: 'Sua cobrança começará automaticamente ao fim do trial. Cancele antes se não quiser continuar.',
+              text:
+                  'Sua cobrança começará automaticamente ao fim do trial. Cancele antes se não quiser continuar.',
               accentColor: accentColor,
             ),
           ] else ...[
             _TrialRow(
               icon: Icons.info_outline,
-              text: 'Você já utilizou o período gratuito. A cobrança começa imediatamente ao assinar.',
+              text:
+                  'Você já utilizou o período gratuito. A cobrança começa imediatamente ao assinar.',
               accentColor: accentColor,
             ),
           ],
@@ -681,7 +747,11 @@ class _TrialRow extends StatelessWidget {
   final String text;
   final Color accentColor;
 
-  const _TrialRow({required this.icon, required this.text, required this.accentColor});
+  const _TrialRow({
+    required this.icon,
+    required this.text,
+    required this.accentColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -733,13 +803,15 @@ class _PlanoCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
     final accent = switch (plan) {
-      SubscriptionPlan.FREE       => isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-      SubscriptionPlan.PREMIUM    => primary,
+      SubscriptionPlan.FREE =>
+        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+      SubscriptionPlan.PREMIUM => primary,
       SubscriptionPlan.ENTERPRISE => const Color(0xFFC49A2A),
     };
 
     // Trial badge PREMIUM
-    final showTrialBadge = plan == SubscriptionPlan.PREMIUM &&
+    final showTrialBadge =
+        plan == SubscriptionPlan.PREMIUM &&
         (trialStatus == null || !trialStatus!.trialUsed);
 
     return InkWell(
@@ -755,9 +827,16 @@ class _PlanoCard extends StatelessWidget {
             color: isSelected || isCurrent ? accent : line,
             width: isSelected || isCurrent ? 2 : 1,
           ),
-          boxShadow: isSelected
-              ? [BoxShadow(color: accent.withValues(alpha: 0.18), blurRadius: 22, offset: const Offset(0, 8))]
-              : null,
+          boxShadow:
+              isSelected
+                  ? [
+                    BoxShadow(
+                      color: accent.withValues(alpha: 0.18),
+                      blurRadius: 22,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                  : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -768,9 +847,9 @@ class _PlanoCard extends StatelessWidget {
                   child: Text(
                     plan.apiName,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: isSelected || isCurrent ? accent : ink,
-                        ),
+                      fontWeight: FontWeight.w800,
+                      color: isSelected || isCurrent ? accent : ink,
+                    ),
                   ),
                 ),
                 if (showTrialBadge)
@@ -798,21 +877,51 @@ class _PlanoCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               _formatPrice(plano, productDetails),
-              style: TextStyle(color: accent, fontSize: 15, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: accent,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 14),
             _FeatureRow(
-              label: plano.limiteAlunos == null ? 'Alunos ilimitados' : 'Até ${plano.limiteAlunos} alunos',
-              active: true, accent: accent, mute: mute,
+              label:
+                  plano.limiteAlunos == null
+                      ? 'Alunos ilimitados'
+                      : 'Até ${plano.limiteAlunos} alunos',
+              active: true,
+              accent: accent,
+              mute: mute,
             ),
-            _FeatureRow(label: 'White-label',   active: plano.temWhiteLabel,  accent: accent, mute: mute),
-            _FeatureRow(label: 'Financeiro',    active: plano.temFinanceiro,  accent: accent, mute: mute),
-            _FeatureRow(label: 'Agenda',        active: plano.temAgenda,      accent: accent, mute: mute),
-            _FeatureRow(label: 'Relatórios',    active: plano.temRelatorios,  accent: accent, mute: mute),
+            _FeatureRow(
+              label: 'White-label',
+              active: plano.temWhiteLabel,
+              accent: accent,
+              mute: mute,
+            ),
+            _FeatureRow(
+              label: 'Financeiro',
+              active: plano.temFinanceiro,
+              accent: accent,
+              mute: mute,
+            ),
+            _FeatureRow(
+              label: 'Agenda',
+              active: plano.temAgenda,
+              accent: accent,
+              mute: mute,
+            ),
+            _FeatureRow(
+              label: 'Relatórios',
+              active: plano.temRelatorios,
+              accent: accent,
+              mute: mute,
+            ),
             _FeatureRow(
               label: 'IA Copiloto',
               active: plan != SubscriptionPlan.FREE,
-              accent: accent, mute: mute,
+              accent: accent,
+              mute: mute,
             ),
           ],
         ),
@@ -828,7 +937,12 @@ class _FeatureRow extends StatelessWidget {
   final bool active;
   final Color accent, mute;
 
-  const _FeatureRow({required this.label, required this.active, required this.accent, required this.mute});
+  const _FeatureRow({
+    required this.label,
+    required this.active,
+    required this.accent,
+    required this.mute,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -855,16 +969,27 @@ class _Badge extends StatelessWidget {
   final String label;
   final Color background, foreground;
 
-  const _Badge({required this.label, required this.background, required this.foreground});
+  const _Badge({
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+      ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: foreground),
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: foreground,
+        ),
       ),
     );
   }
@@ -930,7 +1055,10 @@ class _InfoBanner extends StatelessWidget {
           Icon(icon, size: 15, color: color),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(text, style: TextStyle(color: color, fontSize: 12.5, height: 1.45)),
+            child: Text(
+              text,
+              style: TextStyle(color: color, fontSize: 12.5, height: 1.45),
+            ),
           ),
         ],
       ),

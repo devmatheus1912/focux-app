@@ -10,6 +10,7 @@ class QueuedRequest {
   final String method;
   final dynamic data;
   final Map<String, dynamic>? queryParameters;
+  final String? idempotencyKey;
   final int attempts;
   final int nextRetryAtMillis;
 
@@ -18,27 +19,30 @@ class QueuedRequest {
     required this.method,
     this.data,
     this.queryParameters,
+    this.idempotencyKey,
     this.attempts = 0,
     this.nextRetryAtMillis = 0,
   });
 
   Map<String, dynamic> toJson() => {
-        'path': path,
-        'method': method,
-        'data': data,
-        'queryParameters': queryParameters,
-        'attempts': attempts,
-        'nextRetryAtMillis': nextRetryAtMillis,
-      };
+    'path': path,
+    'method': method,
+    'data': data,
+    'queryParameters': queryParameters,
+    'idempotencyKey': idempotencyKey,
+    'attempts': attempts,
+    'nextRetryAtMillis': nextRetryAtMillis,
+  };
 
   factory QueuedRequest.fromJson(Map<String, dynamic> json) => QueuedRequest(
-        path: json['path'] as String,
-        method: json['method'] as String,
-        data: json['data'],
-        queryParameters: (json['queryParameters'] as Map?)?.cast<String, dynamic>(),
-        attempts: (json['attempts'] as num?)?.toInt() ?? 0,
-        nextRetryAtMillis: (json['nextRetryAtMillis'] as num?)?.toInt() ?? 0,
-      );
+    path: json['path'] as String,
+    method: json['method'] as String,
+    data: json['data'],
+    queryParameters: (json['queryParameters'] as Map?)?.cast<String, dynamic>(),
+    idempotencyKey: json['idempotencyKey'] as String?,
+    attempts: (json['attempts'] as num?)?.toInt() ?? 0,
+    nextRetryAtMillis: (json['nextRetryAtMillis'] as num?)?.toInt() ?? 0,
+  );
 
   QueuedRequest withRetry() {
     final next = attempts + 1;
@@ -48,6 +52,7 @@ class QueuedRequest {
       method: method,
       data: data,
       queryParameters: queryParameters,
+      idempotencyKey: idempotencyKey,
       attempts: next,
       nextRetryAtMillis: DateTime.now().millisecondsSinceEpoch + delayMs,
     );
@@ -66,7 +71,9 @@ class QueuedRequest {
 
   static int pow3(int n) {
     var r = 1;
-    for (var i = 0; i < n; i++) { r *= 3; }
+    for (var i = 0; i < n; i++) {
+      r *= 3;
+    }
     return r;
   }
 }
@@ -79,13 +86,15 @@ class OfflineSyncService {
   static Future<void> enqueueRequest(RequestOptions options) async {
     final prefs = await SharedPreferences.getInstance();
     final queueStr = prefs.getString(_queueKey);
-    final List<dynamic> queueList = queueStr != null ? jsonDecode(queueStr) : [];
+    final List<dynamic> queueList =
+        queueStr != null ? jsonDecode(queueStr) : [];
 
     final req = QueuedRequest(
       path: options.path,
       method: options.method,
       data: options.data,
       queryParameters: options.queryParameters,
+      idempotencyKey: _readIdempotencyKey(options.headers),
     );
 
     queueList.add(req.toJson());
@@ -126,7 +135,13 @@ class OfflineSyncService {
           req.path,
           data: req.data,
           queryParameters: req.queryParameters,
-          options: Options(method: req.method),
+          options: Options(
+            method: req.method,
+            headers: {
+              if (req.idempotencyKey != null)
+                'Idempotency-Key': req.idempotencyKey,
+            },
+          ),
         );
       } catch (_) {
         if (req.attempts + 1 >= _maxAttempts) {
@@ -143,6 +158,16 @@ class OfflineSyncService {
       await prefs.setString(_queueKey, jsonEncode(remainingList));
     }
   }
+
+  static String? _readIdempotencyKey(Map<String, dynamic> headers) {
+    for (final entry in headers.entries) {
+      if (entry.key.toLowerCase() == 'idempotency-key') {
+        final value = entry.value?.toString();
+        return value == null || value.isEmpty ? null : value;
+      }
+    }
+    return null;
+  }
 }
 
 /// Cache local simples (KV via SharedPreferences) para responses GET.
@@ -153,21 +178,55 @@ class LocalCache {
   static const _prefix = 'fx_cache_v1:';
   static const Duration defaultTtl = Duration(minutes: 30);
 
-  static String _key(String path) => '$_prefix$path';
+  static String keyFor(RequestOptions options) {
+    final query = _canonicalQuery(options.queryParameters);
+    if (query.isEmpty) return options.path;
+    return '${options.path}?$query';
+  }
 
-  static Future<void> put(String path, dynamic data, {Duration? ttl}) async {
+  static String _key(String cacheKey) => '$_prefix$cacheKey';
+
+  static String _canonicalQuery(Map<String, dynamic> params) {
+    if (params.isEmpty) return '';
+    final pairs = <String>[];
+    final keys = params.keys.toList()..sort();
+    for (final key in keys) {
+      final value = params[key];
+      if (value == null) continue;
+      if (value is Iterable) {
+        for (final item in value) {
+          if (item != null) {
+            pairs.add(
+              '${Uri.encodeQueryComponent(key)}=${Uri.encodeQueryComponent(item.toString())}',
+            );
+          }
+        }
+      } else {
+        pairs.add(
+          '${Uri.encodeQueryComponent(key)}=${Uri.encodeQueryComponent(value.toString())}',
+        );
+      }
+    }
+    return pairs.join('&');
+  }
+
+  static Future<void> put(
+    String cacheKey,
+    dynamic data, {
+    Duration? ttl,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final entry = {
       'savedAt': DateTime.now().millisecondsSinceEpoch,
       'ttlMs': (ttl ?? defaultTtl).inMilliseconds,
       'data': data,
     };
-    await prefs.setString(_key(path), jsonEncode(entry));
+    await prefs.setString(_key(cacheKey), jsonEncode(entry));
   }
 
-  static Future<dynamic> get(String path) async {
+  static Future<dynamic> get(String cacheKey) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key(path));
+    final raw = prefs.getString(_key(cacheKey));
     if (raw == null) return null;
     try {
       final entry = jsonDecode(raw) as Map<String, dynamic>;
@@ -181,8 +240,8 @@ class LocalCache {
     }
   }
 
-  static Future<void> invalidate(String path) async {
+  static Future<void> invalidate(String cacheKey) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key(path));
+    await prefs.remove(_key(cacheKey));
   }
 }

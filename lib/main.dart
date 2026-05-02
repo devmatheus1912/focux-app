@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -28,10 +29,13 @@ void main() async {
     ),
   );
 
+  bool crashlyticsReady = false;
+
   try {
     if (!kIsWeb) {
       await Firebase.initializeApp();
       await FcmService.init(ApiClient());
+      crashlyticsReady = true;
 
       FlutterError.onError =
           FirebaseCrashlytics.instance.recordFlutterFatalError;
@@ -42,8 +46,13 @@ void main() async {
       };
     }
   } catch (error) {
-    debugPrint('[Focux] Error: $error');
+    debugPrint('[Focux] Firebase init error: $error');
     // Firebase ainda não está configurado em todos os ambientes.
+    // Fallback: captura erros localmente sem Crashlytics.
+    FlutterError.onError = (FlutterErrorDetails details) {
+      debugPrint('[Focux] FlutterError: ${details.exceptionAsString()}');
+      debugPrint('${details.stack}');
+    };
   }
 
   // ── Global Red-Screen killer ──────────────────────────────────
@@ -79,7 +88,18 @@ void main() async {
     );
   };
 
-  runApp(const ProviderScope(child: FocuxApp()));
+  // ── runZonedGuarded: captura TODOS os erros async nao tratados ──
+  // Sem isso, futures que falham fora de try/catch crasham silenciosamente.
+  runZonedGuarded(
+    () => runApp(const ProviderScope(child: FocuxApp())),
+    (Object error, StackTrace stack) {
+      debugPrint('[Focux] Uncaught async error: $error');
+      debugPrint('$stack');
+      if (crashlyticsReady) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: false);
+      }
+    },
+  );
 }
 
 class FocuxApp extends ConsumerStatefulWidget {
