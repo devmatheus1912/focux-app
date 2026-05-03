@@ -183,57 +183,24 @@ class AlunoDashboardScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 3,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 0.9,
-              children: [
-                _ShortcutBtn(
-                  icon: Icons.fitness_center,
-                  label: 'Meus\nTreinos',
-                  onTap: () => context.push('/checkin/treinos'),
-                  isDark: isDark,
-                ),
-                _ShortcutBtn(
-                  icon: Icons.history,
-                  label: 'Meu\nHistórico',
-                  onTap: () => context.push('/checkin/historico'),
-                  isDark: isDark,
-                ),
-                _ShortcutBtn(
-                  icon: Icons.dynamic_feed,
-                  label: 'Feed\ndo Personal',
-                  onTap: () => context.push('/feed/aluno'),
-                  isDark: isDark,
-                ),
-                _ShortcutBtn(
-                  icon: Icons.chat_bubble_outline,
-                  label: 'Falar\ncom Personal',
-                  onTap: () => context.push('/chat/aluno'),
-                  isDark: isDark,
-                ),
-                _ShortcutBtn(
-                  icon: Icons.smart_toy,
-                  label: 'IA\nAssistente',
-                  onTap: () => context.push('/ia/chat'),
-                  isDark: isDark,
-                ),
-                _ShortcutBtn(
-                  icon: Icons.payments,
-                  label: 'Meu\nFinanceiro',
-                  onTap: () => context.push('/financeiro/aluno'),
-                  isDark: isDark,
-                ),
-                _ShortcutBtn(
-                  icon: Icons.calendar_month,
-                  label: 'Minha\nAgenda',
-                  onTap: () => context.push('/agenda/aluno'),
-                  isDark: isDark,
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                const spacing = 10.0;
+                final btnWidth = (constraints.maxWidth - spacing * 2) / 3;
+                return Wrap(
+                  spacing: spacing,
+                  runSpacing: spacing,
+                  children: [
+                    _ShortcutBtn(icon: Icons.fitness_center, label: 'Meus\nTreinos', onTap: () => context.push('/checkin/treinos'), isDark: isDark, width: btnWidth),
+                    _ShortcutBtn(icon: Icons.history, label: 'Meu\nHistorico', onTap: () => context.push('/checkin/historico'), isDark: isDark, width: btnWidth),
+                    _ShortcutBtn(icon: Icons.dynamic_feed, label: 'Feed\ndo Personal', onTap: () => context.push('/feed/aluno'), isDark: isDark, width: btnWidth),
+                    _ShortcutBtn(icon: Icons.chat_bubble_outline, label: 'Falar\ncom Personal', onTap: () => context.push('/chat/aluno'), isDark: isDark, width: btnWidth),
+                    _ShortcutBtn(icon: Icons.smart_toy, label: 'IA\nAssistente', onTap: () => context.push('/ia/chat'), isDark: isDark, width: btnWidth),
+                    _ShortcutBtn(icon: Icons.payments, label: 'Meu\nFinanceiro', onTap: () => context.push('/financeiro/aluno'), isDark: isDark, width: btnWidth),
+                    _ShortcutBtn(icon: Icons.calendar_month, label: 'Minha\nAgenda', onTap: () => context.push('/agenda/aluno'), isDark: isDark, width: btnWidth),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 20),
             alunoAsync.when(
@@ -2201,12 +2168,14 @@ class _ShortcutBtn extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool isDark;
+  final double width;
 
   const _ShortcutBtn({
     required this.icon,
     required this.label,
     required this.onTap,
     required this.isDark,
+    required this.width,
   });
 
   @override
@@ -2215,35 +2184,44 @@ class _ShortcutBtn extends StatelessWidget {
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
-        decoration: BoxDecoration(
-          color: cardBg,
+    return SizedBox(
+      width: width,
+      child: Material(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line, width: 1),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isDark ? BrandPalette.accent(primary) : primary,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: ink,
-                height: 1.2,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                width: 1,
               ),
             ),
-          ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: isDark ? BrandPalette.accent(primary) : primary,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: ink,
+                    height: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
