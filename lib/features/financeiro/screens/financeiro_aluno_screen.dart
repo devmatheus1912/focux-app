@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
@@ -34,7 +35,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
           .minhasMensalidades();
       if (mounted) setState(() { _mensalidades = result; _loading = false; });
     } catch (e) {
-      if (mounted) setState(() { _erro = e.toString(); _loading = false; });
+      if (mounted) setState(() { _erro = friendlyError(e); _loading = false; });
     }
   }
 

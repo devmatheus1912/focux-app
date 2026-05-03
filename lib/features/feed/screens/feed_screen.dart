@@ -55,7 +55,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
       }
     }
   }
@@ -95,7 +95,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder:
           (ctx) => FeedCommentsSheet(
@@ -280,7 +280,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                               ctx,
                                             ).showSnackBar(
                                               SnackBar(
-                                                content: Text('Erro: $e'),
+                                                content: Text(friendlyError(e)),
                                               ),
                                             );
                                           }
@@ -377,233 +377,242 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                 : _posts.isEmpty
                 ? _EmptyFeed(primary: primary)
                 : RefreshIndicator(
-                color: primary,
-                onRefresh: _load,
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
-                  itemCount: _posts.length + 1,
-                  itemBuilder: (_, i) {
-                    if (i == 0) {
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Feed',
-                                style: TextStyle(
-                                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.5,
+                  color: primary,
+                  onRefresh: _load,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
+                    itemCount: _posts.length + 1,
+                    itemBuilder: (_, i) {
+                      if (i == 0) {
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Feed',
+                                  style: TextStyle(
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkInk
+                                            : EagleTokens.ink,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -0.5,
+                                  ),
                                 ),
                               ),
-                            ),
-                            InkWell(
-                              onTap: _abrirFormulario,
-                              borderRadius: BorderRadius.circular(44),
-                              child: Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(colors: [primary, primaryDeep]),
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: primary.withValues(alpha: 0.38),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 6),
+                              InkWell(
+                                onTap: _abrirFormulario,
+                                borderRadius: BorderRadius.circular(44),
+                                child: Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [primary, primaryDeep],
                                     ),
-                                  ],
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: primary.withValues(alpha: 0.38),
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.add_rounded,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                                child: const Icon(Icons.add_rounded, color: Colors.white),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                    final p = _posts[i - 1];
-                    final mUrl = p.midiaUrl ?? p.imagemUrl;
-                    final badgeColor = _feedBadgeColor(p.tipoPost, primary);
-                    final curtidas = _curtidasLocais[p.id] ?? p.totalCurtidas;
-                    final comentarios =
-                        _comentariosLocais[p.id] ?? p.totalComentarios;
+                            ],
+                          ),
+                        );
+                      }
+                      final p = _posts[i - 1];
+                      final mUrl = p.midiaUrl ?? p.imagemUrl;
+                      final badgeColor = _feedBadgeColor(p.tipoPost, primary);
+                      final curtidas = _curtidasLocais[p.id] ?? p.totalCurtidas;
+                      final comentarios =
+                          _comentariosLocais[p.id] ?? p.totalComentarios;
 
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
                           color:
-                              p.fixado
-                                  ? primary
-                                  : (isDark
-                                      ? EagleTokens.darkLine
-                                      : EagleTokens.line),
-                          width: p.fixado ? 2 : 1,
+                              isDark ? EagleTokens.darkCard : EagleTokens.card,
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(
+                            color:
+                                p.fixado
+                                    ? primary
+                                    : (isDark
+                                        ? EagleTokens.darkLine
+                                        : EagleTokens.line),
+                            width: p.fixado ? 2 : 1,
+                          ),
                         ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                if (p.fixado) ...[
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  if (p.fixado) ...[
+                                    Icon(
+                                      Icons.push_pin,
+                                      color: primary,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
                                   Icon(
-                                    Icons.push_pin,
-                                    color: primary,
-                                    size: 18,
+                                    _getIconForTipo(p.tipoPost),
+                                    size: 20,
+                                    color: badgeColor,
                                   ),
                                   const SizedBox(width: 8),
-                                ],
-                                Icon(
-                                  _getIconForTipo(p.tipoPost),
-                                  size: 20,
-                                  color: badgeColor,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    p.titulo,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                  Expanded(
+                                    child: Text(
+                                      p.titulo,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                PopupMenuButton<String>(
-                                  tooltip: 'Ações',
-                                  onSelected: (val) {
-                                    if (val == 'fixar') _toggleFixar(p.id);
-                                    if (val == 'excluir') {
-                                      _confirmarExclusao(p.id);
-                                    }
-                                  },
-                                  itemBuilder:
-                                      (ctx) => [
-                                        PopupMenuItem(
-                                          value: 'fixar',
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                p.fixado
-                                                    ? Icons.push_pin_outlined
-                                                    : Icons.push_pin,
-                                                size: 20,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                p.fixado
-                                                    ? 'Desafixar'
-                                                    : 'Fixar no topo',
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const PopupMenuItem(
-                                          value: 'excluir',
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                Icons.delete_outline,
-                                                color: EagleTokens.bad,
-                                                size: 20,
-                                              ),
-                                              SizedBox(width: 8),
-                                              Text(
-                                                'Excluir',
-                                                style: TextStyle(
-                                                  color: EagleTokens.bad,
+                                  PopupMenuButton<String>(
+                                    tooltip: 'Ações',
+                                    onSelected: (val) {
+                                      if (val == 'fixar') _toggleFixar(p.id);
+                                      if (val == 'excluir') {
+                                        _confirmarExclusao(p.id);
+                                      }
+                                    },
+                                    itemBuilder:
+                                        (ctx) => [
+                                          PopupMenuItem(
+                                            value: 'fixar',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  p.fixado
+                                                      ? Icons.push_pin_outlined
+                                                      : Icons.push_pin,
+                                                  size: 20,
                                                 ),
-                                              ),
-                                            ],
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  p.fixado
+                                                      ? 'Desafixar'
+                                                      : 'Fixar no topo',
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            _TypeBadge(tipo: p.tipoPost, color: badgeColor),
-                            const SizedBox(height: 8),
-                            Text(
-                              p.conteudo,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            if (mUrl != null && mUrl.isNotEmpty) ...[
-                              const SizedBox(height: 12),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  mUrl,
-                                  fit: BoxFit.cover,
-                                  height: 130,
-                                  width: double.infinity,
-                                  errorBuilder:
-                                      (_, __, ___) =>
-                                          _ImagePlaceholder(primary: primary),
-                                ),
+                                          const PopupMenuItem(
+                                            value: 'excluir',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.delete_outline,
+                                                  color: EagleTokens.bad,
+                                                  size: 20,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  'Excluir',
+                                                  style: TextStyle(
+                                                    color: EagleTokens.bad,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                  ),
+                                ],
                               ),
-                            ] else if (p.tipoPost == 'IMAGEM') ...[
+                              const SizedBox(height: 6),
+                              _TypeBadge(tipo: p.tipoPost, color: badgeColor),
+                              const SizedBox(height: 8),
+                              Text(
+                                p.conteudo,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              if (mUrl != null && mUrl.isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    mUrl,
+                                    fit: BoxFit.cover,
+                                    height: 130,
+                                    width: double.infinity,
+                                    errorBuilder:
+                                        (_, __, ___) =>
+                                            _ImagePlaceholder(primary: primary),
+                                  ),
+                                ),
+                              ] else if (p.tipoPost == 'IMAGEM') ...[
+                                const SizedBox(height: 12),
+                                _ImagePlaceholder(primary: primary),
+                              ],
                               const SizedBox(height: 12),
-                              _ImagePlaceholder(primary: primary),
-                            ],
-                            const SizedBox(height: 12),
-                            const Divider(height: 1),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 4,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                TextButton.icon(
-                                  onPressed: () => _curtir(p.id),
-                                  icon: const Icon(
-                                    Icons.thumb_up_alt_outlined,
-                                    size: 18,
+                              const Divider(height: 1),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 4,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: () => _curtir(p.id),
+                                    icon: const Icon(
+                                      Icons.thumb_up_alt_outlined,
+                                      size: 18,
+                                    ),
+                                    label: Text('$curtidas Curtir'),
                                   ),
-                                  label: Text('$curtidas Curtir'),
-                                ),
-                                TextButton.icon(
-                                  onPressed: () => _abrirComentarios(p.id),
-                                  icon: const Icon(
-                                    Icons.comment_outlined,
-                                    size: 18,
+                                  TextButton.icon(
+                                    onPressed: () => _abrirComentarios(p.id),
+                                    icon: const Icon(
+                                      Icons.comment_outlined,
+                                      size: 18,
+                                    ),
+                                    label: Text('$comentarios Comentar'),
                                   ),
-                                  label: Text('$comentarios Comentar'),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 10,
-                                  ),
-                                  child: Text(
-                                    p.criadoEm.length >= 10
-                                        ? p.criadoEm.substring(0, 10)
-                                        : p.criadoEm,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color:
-                                          isDark
-                                              ? EagleTokens.darkInkMute
-                                              : EagleTokens.inkMute,
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 10,
+                                    ),
+                                    child: Text(
+                                      p.criadoEm.length >= 10
+                                          ? p.criadoEm.substring(0, 10)
+                                          : p.criadoEm,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color:
+                                            isDark
+                                                ? EagleTokens.darkInkMute
+                                                : EagleTokens.inkMute,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
       ),
     );
   }

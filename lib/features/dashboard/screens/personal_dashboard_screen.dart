@@ -651,6 +651,7 @@ class _PersonalDashboardScreenState
                   child: _SectionTitle(
                     title: 'Aderência da semana',
                     action: 'Relatório',
+                    onAction: () => context.push('/relatorios/global'),
                     isDark: isDark,
                   ),
                 ),
@@ -971,8 +972,14 @@ class _QuickTile extends StatelessWidget {
 class _SectionTitle extends StatelessWidget {
   final String title;
   final String? action;
+  final VoidCallback? onAction;
   final bool isDark;
-  const _SectionTitle({required this.title, this.action, required this.isDark});
+  const _SectionTitle({
+    required this.title,
+    this.action,
+    this.onAction,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -995,12 +1002,19 @@ class _SectionTitle extends StatelessWidget {
             ),
           ),
           if (action != null)
-            Text(
-              '$action →',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isDark ? primaryAccent : primary,
+            InkWell(
+              borderRadius: BorderRadius.circular(999),
+              onTap: onAction,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Text(
+                  '$action →',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? primaryAccent : primary,
+                  ),
+                ),
               ),
             ),
         ],

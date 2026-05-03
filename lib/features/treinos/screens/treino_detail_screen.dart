@@ -6,6 +6,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../alunos/providers/alunos_provider.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
@@ -96,6 +97,11 @@ class _TreinoDetailBody extends StatelessWidget {
                   onTap: () => Navigator.pop(sheetContext, 'add'),
                 ),
                 _MenuActionTile(
+                  icon: Icons.person_add_alt_1_outlined,
+                  label: 'Atribuir a aluno',
+                  onTap: () => Navigator.pop(sheetContext, 'assign'),
+                ),
+                _MenuActionTile(
                   icon: Icons.copy_outlined,
                   label: 'Duplicar treino',
                   onTap: () => Navigator.pop(sheetContext, 'duplicate'),
@@ -104,6 +110,12 @@ class _TreinoDetailBody extends StatelessWidget {
                   icon: Icons.bookmark_border,
                   label: 'Salvar como template',
                   onTap: () => Navigator.pop(sheetContext, 'template'),
+                ),
+                _MenuActionTile(
+                  icon: Icons.delete_outline,
+                  label: 'Excluir treino',
+                  color: EagleTokens.bad,
+                  onTap: () => Navigator.pop(sheetContext, 'delete'),
                 ),
               ],
             ),
@@ -127,6 +139,75 @@ class _TreinoDetailBody extends StatelessWidget {
           ref.invalidate(treinoProvider(treinoId));
         }
         break;
+      case 'assign':
+        try {
+          final alunos = await ref.read(alunosProvider.future);
+          if (!context.mounted) return;
+          int? alunoId = alunos.isEmpty ? null : alunos.first.id;
+          final selected = await showDialog<int>(
+            context: context,
+            builder:
+                (dialogContext) => StatefulBuilder(
+                  builder:
+                      (dialogContext, setDialogState) => AlertDialog(
+                        title: const Text('Atribuir treino'),
+                        content:
+                            alunos.isEmpty
+                                ? const Text(
+                                  'Nenhum aluno cadastrado encontrado.',
+                                )
+                                : DropdownButtonFormField<int>(
+                                  value: alunoId,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Aluno',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  items:
+                                      alunos
+                                          .map(
+                                            (aluno) => DropdownMenuItem<int>(
+                                              value: aluno.id,
+                                              child: Text(aluno.nome),
+                                            ),
+                                          )
+                                          .toList(),
+                                  onChanged:
+                                      (value) =>
+                                          setDialogState(() => alunoId = value),
+                                ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(dialogContext),
+                            child: const Text('Cancelar'),
+                          ),
+                          FilledButton(
+                            onPressed:
+                                alunoId == null
+                                    ? null
+                                    : () =>
+                                        Navigator.pop(dialogContext, alunoId),
+                            child: const Text('Atribuir'),
+                          ),
+                        ],
+                      ),
+                ),
+          );
+          if (selected == null) return;
+          await repo.atribuirAluno(treinoId, selected);
+          ref.invalidate(treinoProvider(treinoId));
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Treino atribuido ao aluno.')),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          }
+        }
+        break;
       case 'duplicate':
         try {
           await repo.duplicar(treinoId);
@@ -138,9 +219,9 @@ class _TreinoDetailBody extends StatelessWidget {
           }
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(friendlyError(e))),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
           }
         }
         break;
@@ -154,9 +235,51 @@ class _TreinoDetailBody extends StatelessWidget {
           }
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(friendlyError(e))),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          }
+        }
+        break;
+      case 'delete':
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder:
+              (dialogContext) => AlertDialog(
+                title: const Text('Excluir treino?'),
+                content: const Text(
+                  'Essa acao remove o treino e seus vinculos. Ela nao pode ser desfeita.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext, false),
+                    child: const Text('Cancelar'),
+                  ),
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: EagleTokens.bad,
+                    ),
+                    onPressed: () => Navigator.pop(dialogContext, true),
+                    child: const Text('Excluir'),
+                  ),
+                ],
+              ),
+        );
+        if (confirm != true) break;
+        try {
+          await repo.excluirTreino(treinoId);
+          ref.invalidate(treinosProvider);
+          if (context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Treino excluido.')));
+            context.pop(true);
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
           }
         }
         break;
@@ -963,18 +1086,20 @@ class _DraggableOrderTile extends StatelessWidget {
 class _MenuActionTile extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color? color;
   final VoidCallback onTap;
 
   const _MenuActionTile({
     required this.icon,
     required this.label,
+    this.color,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final ink = color ?? (isDark ? EagleTokens.darkInk : EagleTokens.ink);
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 4),

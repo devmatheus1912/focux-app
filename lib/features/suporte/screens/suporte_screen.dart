@@ -779,7 +779,7 @@ class _MeusTicketsTabState extends ConsumerState<_MeusTicketsTab> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _erro = e.toString();
+          _erro = friendlyError(e);
           _loading = false;
         });
       }

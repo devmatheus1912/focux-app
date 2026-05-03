@@ -534,6 +534,10 @@ bool _isAlunoPath(String path) {
       path == '/feed/aluno' ||
       path == '/agenda/aluno' ||
       path == '/ia/aluno' ||
+      path == '/depoimentos-aluno' ||
+      path == '/gamificacao' ||
+      path == '/notificacoes' ||
+      path == '/suporte' ||
       path == '/checkin/treinos' ||
       path == '/checkin/executar' ||
       path == '/checkin/historico';

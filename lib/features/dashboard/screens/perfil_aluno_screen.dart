@@ -267,7 +267,6 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       _nome.text,
       _email.text,
       _objetivo.text,
-      _fotoUrl ?? '',
       _whatsapp.text,
       _peso.text,
       _altura.text,
@@ -391,11 +390,9 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                 setModalState(() => fotoUrl = url);
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(friendlyError(e)),
-                    ),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
                 }
               } finally {
                 if (ctx.mounted) {
@@ -437,9 +434,9 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                 );
               } catch (e) {
                 if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(friendlyError(e))),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
               } finally {
                 if (ctx.mounted) {
                   setModalState(() => saving = false);
@@ -905,6 +902,9 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                     isDark: isDark,
                     trailing: FilledButton.tonalIcon(
                       onPressed: _registrarMedida,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(0, 44),
+                      ),
                       icon: const Icon(Icons.add_chart),
                       label: const Text('Registrar'),
                     ),

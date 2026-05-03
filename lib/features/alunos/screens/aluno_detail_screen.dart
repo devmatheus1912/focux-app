@@ -548,7 +548,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                     ? 'Em atraso'
                                     : 'Em dia',
                             isDark: isDark,
-                            onTap: () => context.push('/financeiro/aluno'),
+                            onTap: () => context.push('/financeiro'),
                           ),
                           _ModuleTile(
                             icon: Icons.chat,

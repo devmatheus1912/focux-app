@@ -440,7 +440,20 @@ class AppRouter {
       // Treinos sub-routes
       GoRoute(
         path: '/treinos/novo',
-        builder: (context, state) => const CreateTreinoScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          int? alunoId;
+          String? alunoNome;
+          if (extra is Map) {
+            final rawAlunoId = extra['alunoId'];
+            alunoId =
+                rawAlunoId is int
+                    ? rawAlunoId
+                    : int.tryParse(rawAlunoId?.toString() ?? '');
+            alunoNome = extra['alunoNome']?.toString();
+          }
+          return CreateTreinoScreen(alunoId: alunoId, alunoNome: alunoNome);
+        },
       ),
       GoRoute(
         path: '/treinos/:id',
@@ -727,12 +740,21 @@ Future<String?> _authRedirect(GoRouterState state) async {
   }
 
   final token = (await SecureStorage.getToken())?.trim();
-  if (token != null && token.isNotEmpty) {
-    return null;
+  if (token == null || token.isEmpty) {
+    final from = Uri.encodeComponent(state.uri.toString());
+    return from.isEmpty ? '/login' : '/login?from=$from';
   }
 
-  final from = Uri.encodeComponent(state.uri.toString());
-  return from.isEmpty ? '/login' : '/login?from=$from';
+  final role = await SecureStorage.getRole();
+  final path = state.uri.path;
+  if (role == 'ALUNO' && _isPersonalOnlyLocation(path)) {
+    return '/dashboard/aluno';
+  }
+  if (role == 'PERSONAL' && _isAlunoOnlyLocation(path)) {
+    return '/dashboard/personal';
+  }
+
+  return null;
 }
 
 bool _isPublicLocation(String path) {
@@ -749,6 +771,79 @@ bool _isPublicLocation(String path) {
       path.startsWith('/p/') ||
       // QA routes — only accessible in debug mode (automatically disabled in release builds)
       (kDebugMode && path.startsWith('/qa/'));
+}
+
+bool _isAlunoOnlyLocation(String path) {
+  const alunoOnly = {
+    '/dashboard/aluno',
+    '/aluno',
+    '/aluno/ativacao',
+    '/aluno/perfil',
+    '/aluno/definir-senha',
+    '/evolucao',
+    '/chat/aluno',
+    '/financeiro/aluno',
+    '/feed/aluno',
+    '/agenda/aluno',
+    '/ia/aluno',
+    '/depoimentos-aluno',
+    '/checkin/treinos',
+    '/checkin/executar',
+    '/checkin/historico',
+  };
+  return alunoOnly.contains(path);
+}
+
+bool _isPersonalOnlyLocation(String path) {
+  const personalOnly = {
+    '/personal',
+    '/dashboard/personal',
+    '/dashboard/qualidade',
+    '/ia',
+    '/ia/copiloto',
+    '/ia/chat',
+    '/ia/checkin',
+    '/ia/progressao/aceitar',
+    '/alunos',
+    '/treinos',
+    '/agenda',
+    '/financeiro',
+    '/feed',
+    '/broadcasts',
+    '/leads',
+    '/alertas',
+    '/relatorios/global',
+    '/convites',
+    '/perfil',
+    '/configuracoes',
+    '/perfil/editar',
+    '/perfil/wallet',
+    '/identidade-visual',
+    '/white-label',
+    '/setup/identidade',
+    '/landing-config',
+    '/planos',
+    '/paywall',
+    '/assinatura',
+    '/migracao-magica',
+    '/growth/migracao',
+    '/growth/link-bio',
+    '/promo-enterprise',
+    '/ranking',
+    '/galeria',
+    '/feedback-videos',
+    '/busca',
+    '/analytics',
+    '/admin/rbac',
+  };
+  if (personalOnly.contains(path)) {
+    return true;
+  }
+
+  return path.startsWith('/alunos/') ||
+      path.startsWith('/treinos/') ||
+      path.startsWith('/exercicios') ||
+      path.startsWith('/alertas/');
 }
 
 String? _stringExtra(GoRouterState state) {

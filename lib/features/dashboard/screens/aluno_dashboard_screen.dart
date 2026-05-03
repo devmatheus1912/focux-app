@@ -195,7 +195,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
                     _ShortcutBtn(icon: Icons.history, label: 'Meu\nHistorico', onTap: () => context.push('/checkin/historico'), isDark: isDark, width: btnWidth),
                     _ShortcutBtn(icon: Icons.dynamic_feed, label: 'Feed\ndo Personal', onTap: () => context.push('/feed/aluno'), isDark: isDark, width: btnWidth),
                     _ShortcutBtn(icon: Icons.chat_bubble_outline, label: 'Falar\ncom Personal', onTap: () => context.push('/chat/aluno'), isDark: isDark, width: btnWidth),
-                    _ShortcutBtn(icon: Icons.smart_toy, label: 'IA\nAssistente', onTap: () => context.push('/ia/chat'), isDark: isDark, width: btnWidth),
+                    _ShortcutBtn(icon: Icons.smart_toy, label: 'IA\nAssistente', onTap: () => context.push('/ia/aluno'), isDark: isDark, width: btnWidth),
                     _ShortcutBtn(icon: Icons.payments, label: 'Meu\nFinanceiro', onTap: () => context.push('/financeiro/aluno'), isDark: isDark, width: btnWidth),
                     _ShortcutBtn(icon: Icons.calendar_month, label: 'Minha\nAgenda', onTap: () => context.push('/agenda/aluno'), isDark: isDark, width: btnWidth),
                   ],
@@ -898,6 +898,7 @@ class _ProgressCheckpointCard extends StatelessWidget {
               const SizedBox(width: 12),
               FilledButton.tonalIcon(
                 onPressed: () => context.push('/aluno/perfil'),
+                style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
                 icon: const Icon(Icons.arrow_forward),
                 label: const Text('Abrir'),
               ),

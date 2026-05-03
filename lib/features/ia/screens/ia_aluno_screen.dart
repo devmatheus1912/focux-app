@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/chat/data/chat_repository.dart';
 import '../data/ia_repository.dart';
 
@@ -33,6 +35,14 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen>
   }
 
   Future<void> _resolverAlunoId() async {
+    try {
+      final aluno = await ref.read(alunoMeProvider.future);
+      if (mounted) {
+        setState(() => _alunoId = aluno.id);
+      }
+      return;
+    } catch (_) {}
+
     try {
       final msgs = await ChatRepository(ref.read(apiClientProvider)).historicoAluno();
       final id = msgs.isNotEmpty ? msgs.first.alunoId : null;
@@ -108,7 +118,9 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
       final resposta = await repo.chat(text, alunoId: widget.alunoId);
       if (mounted) setState(() => _msgs.add(_IaMsg(texto: resposta, isUser: false)));
     } catch (e) {
-      if (mounted) setState(() => _msgs.add(_IaMsg(texto: 'Erro: $e', isUser: false)));
+      if (mounted) {
+        setState(() => _msgs.add(_IaMsg(texto: friendlyError(e), isUser: false)));
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
       _scrollToBottom();
@@ -207,16 +219,22 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
   String? _resultado;
 
   Future<void> _gerarProgressao() async {
+    final id = widget.alunoId;
+    if (id == null || id <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nao foi possivel identificar seu perfil de aluno.')),
+      );
+      return;
+    }
     setState(() { _loading = true; _resultado = null; });
     try {
       final repo = IaRepository(ref.read(apiClientProvider));
-      final id = widget.alunoId ?? 0;
       final r = await repo.progressaoCarga(id);
       if (mounted) setState(() => _resultado = r);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: $e')),
+          SnackBar(content: Text(friendlyError(e))),
         );
       }
     }

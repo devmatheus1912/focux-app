@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../core/theme/brand_palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -523,7 +524,7 @@ class _NovoAgendamentoScreen extends ConsumerStatefulWidget {
 class _NovoAgendamentoScreenState
     extends ConsumerState<_NovoAgendamentoScreen> {
   final _titulo = TextEditingController();
-  final _alunoId = TextEditingController();
+  int? _alunoId;
   DateTime? _inicio;
   DateTime? _fim;
   bool _saving = false;
@@ -558,11 +559,11 @@ class _NovoAgendamentoScreenState
   }
 
   Future<void> _salvar() async {
-    final alunoId = int.tryParse(_alunoId.text);
+    final alunoId = _alunoId;
     if (alunoId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Informe o ID do aluno.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Selecione um aluno.')));
       return;
     }
     final fallbackInicio = DateTime.now().add(const Duration(hours: 1));
@@ -576,12 +577,9 @@ class _NovoAgendamentoScreenState
     }
     setState(() => _saving = true);
     try {
-      await AgendaRepository(ref.read(apiClientProvider)).criar(
-        alunoId,
-        inicio,
-        fim,
-        _titulo.text.isEmpty ? null : _titulo.text,
-      );
+      await AgendaRepository(
+        ref.read(apiClientProvider),
+      ).criar(alunoId, inicio, fim, _titulo.text.isEmpty ? null : _titulo.text);
       if (mounted) safePopOrGo(context, '/agenda');
     } catch (e) {
       if (mounted) {
@@ -611,11 +609,36 @@ class _NovoAgendamentoScreenState
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          TextFormField(
-            controller: _alunoId,
-            decoration: const InputDecoration(labelText: 'ID do Aluno *'),
-            keyboardType: TextInputType.number,
-          ),
+          ref
+              .watch(alunosProvider)
+              .when(
+                loading: () => const LinearProgressIndicator(),
+                error:
+                    (e, _) => Text(
+                      'Nao foi possivel carregar alunos.',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                data:
+                    (alunos) => DropdownButtonFormField<int>(
+                      value: _alunoId,
+                      decoration: const InputDecoration(
+                        labelText: 'Aluno *',
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                      items:
+                          alunos
+                              .map(
+                                (a) => DropdownMenuItem<int>(
+                                  value: a.id,
+                                  child: Text(a.nome),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (value) => setState(() => _alunoId = value),
+                    ),
+              ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _titulo,

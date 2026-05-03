@@ -6,6 +6,7 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/feature_gate.dart';
+import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/financeiro_repository.dart';
@@ -22,6 +23,14 @@ class FinanceiroScreen extends ConsumerStatefulWidget {
 class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  String _periodFilter = 'agora';
+
+  static const Map<String, String> _periodLabels = {
+    'agora': 'agora',
+    'mes_atual': 'este mes',
+    'mes_anterior': 'mes anterior',
+    'ano': 'ano',
+  };
 
   @override
   void initState() {
@@ -73,42 +82,94 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       InkWell(
-                        onTap: () => safePopOrGo(context, '/dashboard/personal'),
+                        onTap:
+                            () => safePopOrGo(context, '/dashboard/personal'),
                         child: Padding(
                           padding: const EdgeInsets.only(right: 12, bottom: 4),
-                          child: Icon(Icons.arrow_back_ios_new, size: 20, color: ink),
+                          child: Icon(
+                            Icons.arrow_back_ios_new,
+                            size: 20,
+                            color: ink,
+                          ),
                         ),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'ESTE MÊS',
-                            style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+                            'ESTE MES',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: mute,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.2,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             'Financeiro',
-                            style: TextStyle(fontSize: 32, color: ink, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+                            style: TextStyle(
+                              fontSize: 32,
+                              color: ink,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: -0.5,
+                            ),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: line),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('agora', style: TextStyle(fontSize: 12, color: ink, fontWeight: FontWeight.w600)),
-                        const SizedBox(width: 6),
-                        Icon(Icons.keyboard_arrow_down, size: 16, color: mute),
-                      ],
+                  PopupMenuButton<String>(
+                    initialValue: _periodFilter,
+                    tooltip: 'Filtrar periodo',
+                    onSelected: (value) {
+                      setState(() => _periodFilter = value);
+                      if (value == 'ano') {
+                        _tabController.animateTo(2);
+                      }
+                    },
+                    itemBuilder:
+                        (context) =>
+                            _periodLabels.entries
+                                .map(
+                                  (entry) => PopupMenuItem<String>(
+                                    value: entry.key,
+                                    child: Text(entry.value),
+                                  ),
+                                )
+                                .toList(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            isDark
+                                ? Colors.white.withValues(alpha: 0.05)
+                                : Colors.white,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: line),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _periodLabels[_periodFilter] ?? 'agora',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: ink,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            size: 16,
+                            color: mute,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -123,8 +184,11 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
               dividerColor: Colors.transparent,
               tabs: const [
                 Tab(icon: Icon(Icons.dashboard_outlined), text: 'Resumo'),
-                Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Mensalidades'),
-                Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Métricas'),
+                Tab(
+                  icon: Icon(Icons.receipt_long_outlined),
+                  text: 'Mensalidades',
+                ),
+                Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Metricas'),
               ],
             ),
             Expanded(
@@ -180,14 +244,25 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     }
     _debounce = Timer(const Duration(milliseconds: 500), () async {
       try {
-        final results = await FinanceiroRepository(ref.read(apiClientProvider)).listarPorNome(query);
+        final results = await FinanceiroRepository(
+          ref.read(apiClientProvider),
+        ).listarPorNome(query);
         if (mounted) setState(() => _filtered = results);
-      } catch (e) { debugPrint('[Focux] Error: $e');
+      } catch (e) {
+        debugPrint('[Focux] Error: $e');
         // fallback: filter locally
         if (mounted) {
-          setState(() => _filtered = _mensalidades
-              .where((m) => m.alunoNome.toLowerCase().contains(query.toLowerCase()))
-              .toList());
+          setState(
+            () =>
+                _filtered =
+                    _mensalidades
+                        .where(
+                          (m) => m.alunoNome.toLowerCase().contains(
+                            query.toLowerCase(),
+                          ),
+                        )
+                        .toList(),
+          );
         }
       }
     });
@@ -196,27 +271,36 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final r = await FinanceiroRepository(ref.read(apiClientProvider)).listar();
+      final r =
+          await FinanceiroRepository(ref.read(apiClientProvider)).listar();
       setState(() {
         _mensalidades = r;
         _filtered = r;
         _loading = false;
       });
-    } catch (e) { debugPrint('[Focux] Error: $e'); setState(() => _loading = false); }
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
+      setState(() => _loading = false);
+    }
   }
 
   Color _statusColor(String s) {
     switch (s) {
-      case 'PAGO': return EagleTokens.good;
-      case 'ATRASADO': return EagleTokens.bad;
-      default: return EagleTokens.warn;
+      case 'PAGO':
+        return EagleTokens.good;
+      case 'ATRASADO':
+        return EagleTokens.bad;
+      default:
+        return EagleTokens.warn;
     }
   }
 
   Future<void> _editarMensalidade(Mensalidade m) async {
     const statuses = ['PENDENTE', 'PAGO', 'ATRASADO'];
     final valorCtrl = TextEditingController(text: m.valor.toStringAsFixed(2));
-    final mesReferenciaCtrl = TextEditingController(text: m.mesReferencia.length >= 7 ? m.mesReferencia : m.mesReferencia);
+    final mesReferenciaCtrl = TextEditingController(
+      text: m.mesReferencia.length >= 7 ? m.mesReferencia : m.mesReferencia,
+    );
     String selectedStatus = m.status;
     bool salvando = false;
     final formKey = GlobalKey<FormState>();
@@ -225,130 +309,216 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            left: 24, right: 24, top: 24,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-          ),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(children: [
-                  const Expanded(child: Text('Editar Mensalidade',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(ctx).pop()),
-                ]),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: valorCtrl,
-                  decoration: const InputDecoration(
-                      labelText: 'Valor (R\$)',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.attach_money)),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Informe o valor';
-                    final parsed = double.tryParse(v.trim().replaceAll(',', '.'));
-                    if (parsed == null || parsed <= 0) return 'Valor inválido';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: mesReferenciaCtrl,
-                  decoration: const InputDecoration(
-                      labelText: 'Mês Referência',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.calendar_month),
-                      hintText: '2026-04-01'),
-                  readOnly: true,
-                  onTap: () async {
-                    final now = DateTime.now();
-                    final picked = await showDatePicker(
-                      context: ctx,
-                      initialDate: DateTime.tryParse(mesReferenciaCtrl.text) ?? DateTime(now.year, now.month, 1),
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(now.year + 5),
-                      selectableDayPredicate: (day) => day.day == 1,
-                    );
-                    if (picked != null) {
-                      final mes = picked.month.toString().padLeft(2, '0');
-                      mesReferenciaCtrl.text = '${picked.year}-$mes-01';
-                    }
-                  },
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Selecione o mês de referência';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: selectedStatus,
-                  decoration: const InputDecoration(
-                      labelText: 'Status',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.flag)),
-                  items: statuses.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-                  onChanged: (v) => setModalState(() => selectedStatus = v ?? selectedStatus),
-                ),
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: salvando ? null : () async {
-                    if (!formKey.currentState!.validate()) return;
-                    setModalState(() => salvando = true);
-                    try {
-                      final valor = double.parse(valorCtrl.text.trim().replaceAll(',', '.'));
-                      await FinanceiroRepository(ref.read(apiClientProvider)).editarMensalidade(
-                        m.id,
-                        valor: valor,
-                        mesReferencia: mesReferenciaCtrl.text.trim(),
-                        status: selectedStatus,
-                      );
-                      if (ctx.mounted) Navigator.of(ctx).pop();
-                      _load();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Mensalidade atualizada!')));
-                      }
-                    } catch (e) {
-                      setModalState(() => salvando = false);
-                      if (ctx.mounted) {
-                        ScaffoldMessenger.of(ctx).showSnackBar(
-                          SnackBar(content: Text(friendlyError(e))));
-                      }
-                    }
-                  },
-                  icon: salvando
-                      ? const SizedBox(width: 18, height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Icon(Icons.save),
-                  label: Text(salvando ? 'Salvando...' : 'Salvar'),
-                ),
-              ],
-            ),
-          ),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setModalState) => Padding(
+                  padding: EdgeInsets.only(
+                    left: 24,
+                    right: 24,
+                    top: 24,
+                    bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+                  ),
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'Editar Mensalidade',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => Navigator.of(ctx).pop(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: valorCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Valor (R\$)',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.attach_money),
+                          ),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,2}'),
+                            ),
+                          ],
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Informe o valor';
+                            }
+                            final parsed = double.tryParse(
+                              v.trim().replaceAll(',', '.'),
+                            );
+                            if (parsed == null || parsed <= 0) {
+                              return 'Valor inválido';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: mesReferenciaCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Mês Referência',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.calendar_month),
+                            hintText: '2026-04-01',
+                          ),
+                          readOnly: true,
+                          onTap: () async {
+                            final now = DateTime.now();
+                            final picked = await showDatePicker(
+                              context: ctx,
+                              initialDate:
+                                  DateTime.tryParse(mesReferenciaCtrl.text) ??
+                                  DateTime(now.year, now.month, 1),
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime(now.year + 5),
+                              selectableDayPredicate: (day) => day.day == 1,
+                            );
+                            if (picked != null) {
+                              final mes = picked.month.toString().padLeft(
+                                2,
+                                '0',
+                              );
+                              mesReferenciaCtrl.text = '${picked.year}-$mes-01';
+                            }
+                          },
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Selecione o mês de referência';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: selectedStatus,
+                          decoration: const InputDecoration(
+                            labelText: 'Status',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.flag),
+                          ),
+                          items:
+                              statuses
+                                  .map(
+                                    (s) => DropdownMenuItem(
+                                      value: s,
+                                      child: Text(s),
+                                    ),
+                                  )
+                                  .toList(),
+                          onChanged:
+                              (v) => setModalState(
+                                () => selectedStatus = v ?? selectedStatus,
+                              ),
+                        ),
+                        const SizedBox(height: 24),
+                        FilledButton.icon(
+                          onPressed:
+                              salvando
+                                  ? null
+                                  : () async {
+                                    if (!formKey.currentState!.validate()) {
+                                      return;
+                                    }
+                                    setModalState(() => salvando = true);
+                                    try {
+                                      final valor = double.parse(
+                                        valorCtrl.text.trim().replaceAll(
+                                          ',',
+                                          '.',
+                                        ),
+                                      );
+                                      await FinanceiroRepository(
+                                        ref.read(apiClientProvider),
+                                      ).editarMensalidade(
+                                        m.id,
+                                        valor: valor,
+                                        mesReferencia:
+                                            mesReferenciaCtrl.text.trim(),
+                                        status: selectedStatus,
+                                      );
+                                      if (ctx.mounted) Navigator.of(ctx).pop();
+                                      _load();
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Mensalidade atualizada!',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      setModalState(() => salvando = false);
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(
+                                            content: Text(friendlyError(e)),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                          icon:
+                              salvando
+                                  ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : const Icon(Icons.save),
+                          label: Text(salvando ? 'Salvando...' : 'Salvar'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+          ),
     );
   }
 
-
   Future<void> _atualizarAtrasos() async {
     try {
-      await FinanceiroRepository(ref.read(apiClientProvider)).atualizarAtrasos();
+      await FinanceiroRepository(
+        ref.read(apiClientProvider),
+      ).atualizarAtrasos();
       _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mensalidades atualizadas!')));
+          const SnackBar(content: Text('Mensalidades atualizadas!')),
+        );
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
     }
   }
 
@@ -359,40 +529,71 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
 
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, set) => AlertDialog(
-          title: const Text('Registrar Contato'),
-          content: Column(mainAxisSize: MainAxisSize.min, children: [
-            DropdownButtonFormField<String>(
-              value: tipoSelecionado,
-              decoration: const InputDecoration(labelText: 'Tipo', border: OutlineInputBorder()),
-              items: tipos.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-              onChanged: (v) => set(() => tipoSelecionado = v),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: obsCtrl,
-              decoration: const InputDecoration(labelText: 'Observação (opcional)', border: OutlineInputBorder()),
-              maxLines: 2,
-            ),
-          ]),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Registrar')),
-          ],
-        ),
-      ),
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, set) => AlertDialog(
+                  title: const Text('Registrar Contato'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        value: tipoSelecionado,
+                        decoration: const InputDecoration(
+                          labelText: 'Tipo',
+                          border: OutlineInputBorder(),
+                        ),
+                        items:
+                            tipos
+                                .map(
+                                  (t) => DropdownMenuItem(
+                                    value: t,
+                                    child: Text(t),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged: (v) => set(() => tipoSelecionado = v),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: obsCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Observacao (opcional)',
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 2,
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancelar'),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Registrar'),
+                    ),
+                  ],
+                ),
+          ),
     );
     if (confirm != true || tipoSelecionado == null) return;
     try {
-      await FinanceiroRepository(ref.read(apiClientProvider))
-          .registrarContato(m.id, tipoSelecionado!, obsCtrl.text.trim());
+      await FinanceiroRepository(
+        ref.read(apiClientProvider),
+      ).registrarContato(m.id, tipoSelecionado!, obsCtrl.text.trim());
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Contato registrado!')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Contato registrado!')));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
     }
   }
 
@@ -401,7 +602,11 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
       await FinanceiroRepository(ref.read(apiClientProvider)).pagar(id);
       _load();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
     }
   }
 
@@ -413,171 +618,298 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          if (carregando && pix == null && erro == null) {
-            FinanceiroRepository(ref.read(apiClientProvider))
-                .gerarPix(id)
-                .then((p) {
-              setDialogState(() { pix = p; carregando = false; });
-            }).catchError((e) {
-              setDialogState(() { erro = e.toString(); carregando = false; });
-            });
-          }
+      builder:
+          (ctx) => StatefulBuilder(
+            builder: (ctx, setDialogState) {
+              if (carregando && pix == null && erro == null) {
+                FinanceiroRepository(ref.read(apiClientProvider))
+                    .gerarPix(id)
+                    .then((p) {
+                      setDialogState(() {
+                        pix = p;
+                        carregando = false;
+                      });
+                    })
+                    .catchError((e) {
+                      setDialogState(() {
+                        erro = e.toString();
+                        carregando = false;
+                      });
+                    });
+              }
 
-          return AlertDialog(
-            title: const Text('PIX — Escaneie ou copie'),
-            content: carregando
-                ? const SizedBox(height: 80, child: Center(child: CircularProgressIndicator()))
-                : erro != null
-                    ? Text('Erro ao gerar PIX: $erro')
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.memory(base64Decode(pix!.qrCodeBase64), width: 200, height: 200),
-                          const SizedBox(height: 16),
-                          TextButton.icon(
-                            icon: const Icon(Icons.copy),
-                            label: const Text('Copiar código PIX'),
-                            onPressed: () {
-                              Clipboard.setData(ClipboardData(text: pix!.pixCopiaECola));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Código PIX copiado!')));
-                            },
-                          ),
-                        ],
-                      ),
-            actions: [
-              TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Fechar')),
-            ],
-          );
-        },
-      ),
+              return AlertDialog(
+                title: const Text('PIX - Escaneie ou copie'),
+                content:
+                    carregando
+                        ? const SizedBox(
+                          height: 80,
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                        : erro != null
+                        ? Text('Erro ao gerar PIX: $erro')
+                        : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Image.memory(
+                              base64Decode(pix!.qrCodeBase64),
+                              width: 200,
+                              height: 200,
+                            ),
+                            const SizedBox(height: 16),
+                            TextButton.icon(
+                              icon: const Icon(Icons.copy),
+                              label: const Text('Copiar codigo PIX'),
+                              onPressed: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: pix!.pixCopiaECola),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Codigo PIX copiado!'),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text('Fechar'),
+                  ),
+                ],
+              );
+            },
+          ),
     );
   }
 
   void _abrirFormularioNovaMensalidade() {
     final formKey = GlobalKey<FormState>();
-    final alunoIdCtrl = TextEditingController();
     final valorCtrl = TextEditingController();
     final mesReferenciaCtrl = TextEditingController();
+    int? alunoSelecionadoId;
     bool salvando = false;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            left: 24, right: 24, top: 24,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-          ),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(children: [
-                  const Expanded(child: Text('Nova Mensalidade',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(ctx).pop()),
-                ]),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: alunoIdCtrl,
-                  decoration: const InputDecoration(labelText: 'ID do Aluno',
-                    border: OutlineInputBorder(), prefixIcon: Icon(Icons.person)),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Informe o ID do aluno';
-                    if (int.tryParse(v.trim()) == null) return 'ID inválido';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: valorCtrl,
-                  decoration: const InputDecoration(labelText: 'Valor (R\$)',
-                    border: OutlineInputBorder(), prefixIcon: Icon(Icons.attach_money)),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Informe o valor';
-                    final parsed = double.tryParse(v.trim().replaceAll(',', '.'));
-                    if (parsed == null || parsed <= 0) return 'Valor inválido';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: mesReferenciaCtrl,
-                  decoration: const InputDecoration(labelText: 'Mês Referência',
-                    border: OutlineInputBorder(), prefixIcon: Icon(Icons.calendar_month),
-                    hintText: '2026-04-01'),
-                  readOnly: true,
-                  onTap: () async {
-                    final now = DateTime.now();
-                    final picked = await showDatePicker(
-                      context: ctx,
-                      initialDate: DateTime(now.year, now.month, 1),
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(now.year + 5),
-                      helpText: 'Selecione o mês de referência',
-                      fieldLabelText: 'Mês/Ano',
-                      initialEntryMode: DatePickerEntryMode.calendarOnly,
-                      selectableDayPredicate: (day) => day.day == 1,
-                    );
-                    if (picked != null) {
-                      final mes = picked.month.toString().padLeft(2, '0');
-                      mesReferenciaCtrl.text = '${picked.year}-$mes-01';
-                    }
-                  },
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Selecione o mês de referência';
-                    if (!RegExp(r'^\d{4}-\d{2}-01$').hasMatch(v.trim())) return 'Formato inválido';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: salvando ? null : () async {
-                    if (!formKey.currentState!.validate()) return;
-                    setModalState(() => salvando = true);
-                    try {
-                      final alunoId = int.parse(alunoIdCtrl.text.trim());
-                      final valor = double.parse(valorCtrl.text.trim().replaceAll(',', '.'));
-                      final mesReferencia = mesReferenciaCtrl.text.trim();
-                      await FinanceiroRepository(ref.read(apiClientProvider))
-                          .criar(alunoId, valor, mesReferencia);
-                      if (ctx.mounted) Navigator.of(ctx).pop();
-                      _load();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Mensalidade lançada com sucesso!')));
-                      }
-                    } catch (e) {
-                      setModalState(() => salvando = false);
-                      if (ctx.mounted) {
-                        ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(content: Text(friendlyError(e))));
-                      }
-                    }
-                  },
-                  icon: salvando
-                      ? const SizedBox(width: 18, height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Icon(Icons.check),
-                  label: Text(salvando ? 'Salvando...' : 'Lançar Mensalidade'),
-                ),
-              ],
-            ),
-          ),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setModalState) => Padding(
+                  padding: EdgeInsets.only(
+                    left: 24,
+                    right: 24,
+                    top: 24,
+                    bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+                  ),
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'Nova Mensalidade',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => Navigator.of(ctx).pop(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        ref
+                            .watch(alunosProvider)
+                            .when(
+                              loading: () => const LinearProgressIndicator(),
+                              error:
+                                  (e, _) => Text(
+                                    'Nao foi possivel carregar alunos.',
+                                    style: TextStyle(
+                                      color: Theme.of(ctx).colorScheme.error,
+                                    ),
+                                  ),
+                              data:
+                                  (alunos) => DropdownButtonFormField<int>(
+                                    value: alunoSelecionadoId,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Aluno',
+                                      border: OutlineInputBorder(),
+                                      prefixIcon: Icon(Icons.person),
+                                    ),
+                                    items:
+                                        alunos
+                                            .map(
+                                              (a) => DropdownMenuItem<int>(
+                                                value: a.id,
+                                                child: Text(a.nome),
+                                              ),
+                                            )
+                                            .toList(),
+                                    onChanged:
+                                        (value) => setModalState(
+                                          () => alunoSelecionadoId = value,
+                                        ),
+                                    validator:
+                                        (value) =>
+                                            value == null
+                                                ? 'Selecione um aluno'
+                                                : null,
+                                  ),
+                            ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: valorCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Valor (R\$)',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.attach_money),
+                          ),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,2}'),
+                            ),
+                          ],
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Informe o valor';
+                            }
+                            final parsed = double.tryParse(
+                              v.trim().replaceAll(',', '.'),
+                            );
+                            if (parsed == null || parsed <= 0) {
+                              return 'Valor invalido';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: mesReferenciaCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Mes Referencia',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.calendar_month),
+                            hintText: '2026-04-01',
+                          ),
+                          readOnly: true,
+                          onTap: () async {
+                            final now = DateTime.now();
+                            final picked = await showDatePicker(
+                              context: ctx,
+                              initialDate: DateTime(now.year, now.month, 1),
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime(now.year + 5),
+                              helpText: 'Selecione o mes de referencia',
+                              fieldLabelText: 'Mes/Ano',
+                              initialEntryMode:
+                                  DatePickerEntryMode.calendarOnly,
+                              selectableDayPredicate: (day) => day.day == 1,
+                            );
+                            if (picked != null) {
+                              final mes = picked.month.toString().padLeft(
+                                2,
+                                '0',
+                              );
+                              mesReferenciaCtrl.text = '${picked.year}-$mes-01';
+                            }
+                          },
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Selecione o mes de referencia';
+                            }
+                            if (!RegExp(
+                              r'^\d{4}-\d{2}-01$',
+                            ).hasMatch(v.trim())) {
+                              return 'Formato invalido';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        FilledButton.icon(
+                          onPressed:
+                              salvando
+                                  ? null
+                                  : () async {
+                                    if (!formKey.currentState!.validate()) {
+                                      return;
+                                    }
+                                    setModalState(() => salvando = true);
+                                    try {
+                                      final alunoId = alunoSelecionadoId!;
+                                      final valor = double.parse(
+                                        valorCtrl.text.trim().replaceAll(
+                                          ',',
+                                          '.',
+                                        ),
+                                      );
+                                      final mesReferencia =
+                                          mesReferenciaCtrl.text.trim();
+                                      await FinanceiroRepository(
+                                        ref.read(apiClientProvider),
+                                      ).criar(alunoId, valor, mesReferencia);
+                                      if (ctx.mounted) Navigator.of(ctx).pop();
+                                      _load();
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Mensalidade lancada com sucesso!',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      setModalState(() => salvando = false);
+                                      if (ctx.mounted) {
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(
+                                            content: Text(friendlyError(e)),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                          icon:
+                              salvando
+                                  ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : const Icon(Icons.check),
+                          label: Text(
+                            salvando ? 'Salvando...' : 'Lancar Mensalidade',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+          ),
     );
   }
 
@@ -610,15 +942,16 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
             decoration: InputDecoration(
               hintText: 'Buscar por nome do aluno...',
               prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchCtrl.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchCtrl.clear();
-                        setState(() => _filtered = _mensalidades);
-                      },
-                    )
-                  : null,
+              suffixIcon:
+                  _searchCtrl.text.isNotEmpty
+                      ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          setState(() => _filtered = _mensalidades);
+                        },
+                      )
+                      : null,
               border: const OutlineInputBorder(),
               isDense: true,
             ),
@@ -627,49 +960,70 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Text(
-            'HISTÓRICO DE TRANSAÇÕES',
+            'HISTORICO DE TRANSACOES',
             style: TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? EagleTokens.darkInkMute
-                  : EagleTokens.inkMute,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
+              color:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? EagleTokens.darkInkMute
+                      : EagleTokens.inkMute,
             ),
           ),
         ),
         Expanded(
-          child: _loading
-              ? const Center(child: CircularProgressIndicator())
-              : _filtered.isEmpty
+          child:
+              _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _filtered.isEmpty
                   ? const Center(child: Text('Nenhuma mensalidade encontrada.'))
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
-                      itemCount: _filtered.length,
-                      itemBuilder: (_, i) {
-                        final m = _filtered[i];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: ListTile(
-                            title: Text(m.alunoNome),
-                            subtitle: Text('${m.mesReferencia.substring(0, 7)} • R\$ ${m.valor.toStringAsFixed(2)}'),
-                            trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+                    itemCount: _filtered.length,
+                    itemBuilder: (_, i) {
+                      final m = _filtered[i];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          title: Text(m.alunoNome),
+                          subtitle: Text(
+                            '${m.mesReferencia.substring(0, 7)} - R\$ ${m.valor.toStringAsFixed(2)}',
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
                               Chip(
                                 label: Text(m.status),
-                                backgroundColor: _statusColor(m.status).withValues(alpha: 0.15),
-                                labelStyle: TextStyle(color: _statusColor(m.status), fontSize: 12),
+                                backgroundColor: _statusColor(
+                                  m.status,
+                                ).withValues(alpha: 0.15),
+                                labelStyle: TextStyle(
+                                  color: _statusColor(m.status),
+                                  fontSize: 12,
+                                ),
                               ),
                               IconButton(
                                 icon: const Icon(Icons.edit, size: 20),
                                 tooltip: 'Editar mensalidade',
                                 onPressed: () => _editarMensalidade(m),
                               ),
-                              if (m.status == 'PENDENTE' || m.status == 'ATRASADO') ...[
+                              if (m.status == 'PENDENTE' ||
+                                  m.status == 'ATRASADO') ...[
                                 IconButton(
-                                  icon: const Icon(Icons.phone_in_talk, size: 20),
+                                  icon: const Icon(
+                                    Icons.phone_in_talk,
+                                    size: 20,
+                                  ),
                                   tooltip: 'Registrar contato',
                                   onPressed: () => _registrarContato(m),
                                 ),
                                 IconButton(
-                                  icon: Icon(Icons.pix, color: Theme.of(context).colorScheme.primary),
+                                  icon: Icon(
+                                    Icons.pix,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
                                   onPressed: () => _mostrarPix(m.id),
                                   tooltip: 'Gerar PIX',
                                 ),
@@ -678,11 +1032,12 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                   onPressed: () => _pagar(m.id),
                                 ),
                               ],
-                            ]),
+                            ],
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
+                  ),
         ),
       ],
     ),

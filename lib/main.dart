@@ -13,6 +13,7 @@ import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
 import 'core/fcm/fcm_service.dart';
 import 'core/router/app_router.dart';
+import 'core/storage/secure_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/design_tokens.dart';
 import 'core/theme/theme_provider.dart';
@@ -122,6 +123,15 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
   }
 
   Future<void> _loadCustomTheme() async {
+    final token = (await SecureStorage.getToken())?.trim();
+    if (token == null || token.isEmpty) return;
+
+    final role = await SecureStorage.getRole();
+    if (role == 'ALUNO') {
+      await _loadAlunoTheme();
+      return;
+    }
+
     try {
       // Use direct dio.get with no-invalidation flags to avoid clearing
       // the aluno session when /api/personal/perfil returns 401 (expected)
@@ -143,6 +153,11 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       return;
     } catch (_) {}
 
+    if (role == 'PERSONAL') return;
+    await _loadAlunoTheme();
+  }
+
+  Future<void> _loadAlunoTheme() async {
     try {
       final dio = ApiClient().dio;
       // Mark as no-retry and no-invalidation to avoid clearing the aluno session

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../data/feed_repository.dart';
 
 class FeedCommentsSheet extends StatefulWidget {
@@ -69,32 +70,56 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
       setState(() => _sending = false);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     return SafeArea(
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.72,
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.12),
+                blurRadius: 24,
+                offset: const Offset(0, -8),
+              ),
+            ],
           ),
           child: Column(
             children: [
+              const SizedBox(height: 10),
+              Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: line,
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+                padding: const EdgeInsets.fromLTRB(20, 14, 10, 12),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Comentários',
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          color: ink,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
                         ),
                       ),
                     ),
@@ -106,7 +131,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                   ],
                 ),
               ),
-              const Divider(height: 1),
+              Divider(height: 1, color: line),
               Expanded(
                 child:
                     _loading
@@ -118,7 +143,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                           child: Text('Seja o primeiro a comentar!'),
                         )
                         : ListView.builder(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
                           itemCount: _comentarios.length,
                           itemBuilder: (ctx, i) {
                             final c = _comentarios[i];
@@ -142,26 +167,32 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                                   Expanded(
                                     child: DecoratedBox(
                                       decoration: BoxDecoration(
-                                        color: EagleTokens.line.withValues(
-                                          alpha: 0.55,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
+                                        color:
+                                            isDark
+                                                ? EagleTokens.darkBg
+                                                : EagleTokens.paper,
+                                        borderRadius: BorderRadius.circular(18),
+                                        border: Border.all(color: line),
                                       ),
                                       child: Padding(
-                                        padding: const EdgeInsets.all(12),
+                                        padding: const EdgeInsets.all(14),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               c.alunoNome,
-                                              style: const TextStyle(
+                                              style: TextStyle(
+                                                color: ink,
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 13,
                                               ),
                                             ),
                                             const SizedBox(height: 4),
-                                            Text(c.texto),
+                                            Text(
+                                              c.texto,
+                                              style: TextStyle(color: ink),
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -173,9 +204,14 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                           },
                         ),
               ),
-              const Divider(height: 1),
+              Divider(height: 1, color: line),
               Padding(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  10,
+                  16,
+                  MediaQuery.of(context).viewInsets.bottom + 12,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -185,10 +221,25 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                         maxLines: 3,
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) => _enviar(),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Escreva um comentário...',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
+                          hintStyle: TextStyle(color: mute),
+                          filled: true,
+                          fillColor:
+                              isDark ? EagleTokens.darkBg : EagleTokens.paper,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide(color: line),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide(color: line),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide(color: primary, width: 1.4),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 8,
                           ),

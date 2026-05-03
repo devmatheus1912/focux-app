@@ -69,7 +69,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder:
           (ctx) => FeedCommentsSheet(
@@ -119,188 +119,192 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       body: SafeArea(
         child:
             _loading
-              ? Center(child: CircularProgressIndicator(color: primary))
-              : _posts.isEmpty
-              ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
+                ? Center(child: CircularProgressIndicator(color: primary))
+                : _posts.isEmpty
+                ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.article_outlined,
+                          color: primary,
+                          size: 28,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.article_outlined,
-                        color: primary,
-                        size: 28,
+                      const SizedBox(height: 14),
+                      Text(
+                        'Nenhuma publicação disponível.',
+                        style: TextStyle(
+                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Nenhuma publicação disponível.',
-                      style: TextStyle(
-                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-              : RefreshIndicator(
-                color: primary,
-                onRefresh: _load,
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
-                  itemCount: _posts.length + 1,
-                  itemBuilder: (_, i) {
-                    if (i == 0) {
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
-                        child: Text(
-                          'Feed',
-                          style: TextStyle(
-                            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.5,
+                    ],
+                  ),
+                )
+                : RefreshIndicator(
+                  color: primary,
+                  onRefresh: _load,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
+                    itemCount: _posts.length + 1,
+                    itemBuilder: (_, i) {
+                      if (i == 0) {
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
+                          child: Text(
+                            'Feed',
+                            style: TextStyle(
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkInk
+                                      : EagleTokens.ink,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                        );
+                      }
+                      final p = _posts[i - 1];
+                      final mUrl = p.midiaUrl ?? p.imagemUrl;
+                      final badgeColor = _feedBadgeColor(p.tipoPost, primary);
+                      final curtidas = _curtidasLocais[p.id] ?? p.totalCurtidas;
+                      final comentarios =
+                          _comentariosLocais[p.id] ?? p.totalComentarios;
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color:
+                              isDark ? EagleTokens.darkCard : EagleTokens.card,
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(
+                            color:
+                                p.fixado
+                                    ? primary
+                                    : (isDark
+                                        ? EagleTokens.darkLine
+                                        : EagleTokens.line),
+                            width: p.fixado ? 2 : 1,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  if (p.fixado) ...[
+                                    Icon(
+                                      Icons.push_pin,
+                                      color: primary,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  Icon(
+                                    _getIconForTipo(p.tipoPost),
+                                    size: 20,
+                                    color: badgeColor,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      p.titulo,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              _TypeBadge(tipo: p.tipoPost, color: badgeColor),
+                              const SizedBox(height: 8),
+                              Text(
+                                p.conteudo,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              if (mUrl != null && mUrl.isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    mUrl,
+                                    fit: BoxFit.cover,
+                                    height: 130,
+                                    width: double.infinity,
+                                    errorBuilder:
+                                        (_, __, ___) =>
+                                            _ImagePlaceholder(primary: primary),
+                                  ),
+                                ),
+                              ] else if (p.tipoPost == 'IMAGEM') ...[
+                                const SizedBox(height: 12),
+                                _ImagePlaceholder(primary: primary),
+                              ],
+                              const SizedBox(height: 12),
+                              const Divider(height: 1),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 4,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: () => _curtir(p.id),
+                                    icon: const Icon(
+                                      Icons.thumb_up_alt_outlined,
+                                      size: 18,
+                                    ),
+                                    label: Text('$curtidas Curtir'),
+                                  ),
+                                  TextButton.icon(
+                                    onPressed: () => _abrirComentarios(p.id),
+                                    icon: const Icon(
+                                      Icons.comment_outlined,
+                                      size: 18,
+                                    ),
+                                    label: Text('$comentarios Comentar'),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 10,
+                                    ),
+                                    child: Text(
+                                      p.criadoEm.length >= 10
+                                          ? p.criadoEm.substring(0, 10)
+                                          : p.criadoEm,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color:
+                                            isDark
+                                                ? EagleTokens.darkInkMute
+                                                : EagleTokens.inkMute,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       );
-                    }
-                    final p = _posts[i - 1];
-                    final mUrl = p.midiaUrl ?? p.imagemUrl;
-                    final badgeColor = _feedBadgeColor(p.tipoPost, primary);
-                    final curtidas = _curtidasLocais[p.id] ?? p.totalCurtidas;
-                    final comentarios =
-                        _comentariosLocais[p.id] ?? p.totalComentarios;
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(
-                          color:
-                              p.fixado
-                                  ? primary
-                                  : (isDark
-                                      ? EagleTokens.darkLine
-                                      : EagleTokens.line),
-                          width: p.fixado ? 2 : 1,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                if (p.fixado) ...[
-                                  Icon(
-                                    Icons.push_pin,
-                                    color: primary,
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 8),
-                                ],
-                                Icon(
-                                  _getIconForTipo(p.tipoPost),
-                                  size: 20,
-                                  color: badgeColor,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    p.titulo,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            _TypeBadge(tipo: p.tipoPost, color: badgeColor),
-                            const SizedBox(height: 8),
-                            Text(
-                              p.conteudo,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            if (mUrl != null && mUrl.isNotEmpty) ...[
-                              const SizedBox(height: 12),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  mUrl,
-                                  fit: BoxFit.cover,
-                                  height: 130,
-                                  width: double.infinity,
-                                  errorBuilder:
-                                      (_, __, ___) =>
-                                          _ImagePlaceholder(primary: primary),
-                                ),
-                              ),
-                            ] else if (p.tipoPost == 'IMAGEM') ...[
-                              const SizedBox(height: 12),
-                              _ImagePlaceholder(primary: primary),
-                            ],
-                            const SizedBox(height: 12),
-                            const Divider(height: 1),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 4,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                TextButton.icon(
-                                  onPressed: () => _curtir(p.id),
-                                  icon: const Icon(
-                                    Icons.thumb_up_alt_outlined,
-                                    size: 18,
-                                  ),
-                                  label: Text('$curtidas Curtir'),
-                                ),
-                                TextButton.icon(
-                                  onPressed: () => _abrirComentarios(p.id),
-                                  icon: const Icon(
-                                    Icons.comment_outlined,
-                                    size: 18,
-                                  ),
-                                  label: Text('$comentarios Comentar'),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 10,
-                                  ),
-                                  child: Text(
-                                    p.criadoEm.length >= 10
-                                        ? p.criadoEm.substring(0, 10)
-                                        : p.criadoEm,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color:
-                                          isDark
-                                              ? EagleTokens.darkInkMute
-                                              : EagleTokens.inkMute,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                    },
+                  ),
                 ),
-              ),
       ),
     );
   }

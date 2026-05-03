@@ -58,7 +58,7 @@ class FeedComentario {
     id: json['id'],
     alunoId: json['alunoId'],
     alunoNome: json['alunoNome'],
-    texto: json['texto'],
+    texto: json['texto'] ?? json['conteudo'] ?? '',
     criadoEm: json['criadoEm'] ?? '',
   );
 }
@@ -110,7 +110,7 @@ class FeedRepository {
   Future<FeedComentario> comentar(int postId, String texto) async {
     final r = await _client.dio.post(
       '/api/feed/$postId/comentarios',
-      data: {'texto': texto},
+      data: {'conteudo': texto, 'texto': texto},
     );
     return FeedComentario.fromJson(r.data);
   }

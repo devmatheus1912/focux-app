@@ -25,27 +25,76 @@ class MeusTreinosScreen extends ConsumerWidget {
       body: SafeArea(
         bottom: false,
         child: treinosAsync.when(
-          loading: () => Center(child: CircularProgressIndicator(color: primary)),
-          error: (e, _) => _TrainingEmptyState(
-            title: 'Nao foi possivel carregar',
-            message: 'Toque para tentar novamente.',
-            icon: Icons.wifi_off_rounded,
-            isDark: isDark,
-            onTap: () => ref.invalidate(meusTreinosProvider),
-          ),
+          loading:
+              () => Column(
+                children: [
+                  _TrainingHeader(
+                    ink: ink,
+                    mute: mute,
+                    primary: primary,
+                    onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+                    onRefresh: () => ref.invalidate(meusTreinosProvider),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: CircularProgressIndicator(color: primary),
+                    ),
+                  ),
+                ],
+              ),
+          error:
+              (e, _) => Column(
+                children: [
+                  _TrainingHeader(
+                    ink: ink,
+                    mute: mute,
+                    primary: primary,
+                    onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+                    onRefresh: () => ref.invalidate(meusTreinosProvider),
+                  ),
+                  Expanded(
+                    child: _TrainingEmptyState(
+                      title: 'Nao foi possivel carregar',
+                      message: 'Toque para tentar novamente.',
+                      icon: Icons.wifi_off_rounded,
+                      isDark: isDark,
+                      onTap: () => ref.invalidate(meusTreinosProvider),
+                    ),
+                  ),
+                ],
+              ),
           data: (treinos) {
             if (treinos.isEmpty) {
-              return _TrainingEmptyState(
-                title: 'Nenhum treino atribuido',
-                message:
-                    'Assim que seu personal liberar um treino, ele aparece aqui com execucao guiada.',
-                icon: Icons.fitness_center_outlined,
-                isDark: isDark,
+              return Column(
+                children: [
+                  _TrainingHeader(
+                    ink: ink,
+                    mute: mute,
+                    primary: primary,
+                    onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+                    onRefresh: () => ref.invalidate(meusTreinosProvider),
+                  ),
+                  const Spacer(),
+                  _TrainingEmptyState(
+                    title: 'Nenhum treino atribuido',
+                    message:
+                        'Assim que seu personal liberar um treino, ele aparece aqui com execucao guiada.',
+                    icon: Icons.fitness_center_outlined,
+                    isDark: isDark,
+                  ),
+                  const Spacer(flex: 2),
+                ],
               );
             }
 
-            final ativos = treinos.where((t) => t.status.toUpperCase() != 'CONCLUIDO').length;
-            final totalExercicios = treinos.fold<int>(0, (sum, t) => sum + t.exercicios.length);
+            final ativos =
+                treinos
+                    .where((t) => t.status.toUpperCase() != 'CONCLUIDO')
+                    .length;
+            final totalExercicios = treinos.fold<int>(
+              0,
+              (sum, t) => sum + t.exercicios.length,
+            );
             final totalConcluidos = treinos.fold<int>(
               0,
               (sum, t) => sum + t.exercicios.where((e) => e.concluido).length,
@@ -58,47 +107,12 @@ class MeusTreinosScreen extends ConsumerWidget {
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            onPressed: () => safePopOrGo(context, '/dashboard/aluno'),
-                            icon: Icon(Icons.arrow_back_rounded, color: ink),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'TREINOS',
-                                  style: TextStyle(
-                                    color: primary,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 1.2,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Sua rotina',
-                                  style: TextStyle(
-                                    color: ink,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w800,
-                                    height: 1,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () => ref.invalidate(meusTreinosProvider),
-                            icon: Icon(Icons.refresh_rounded, color: mute),
-                          ),
-                        ],
-                      ),
+                    child: _TrainingHeader(
+                      ink: ink,
+                      mute: mute,
+                      primary: primary,
+                      onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+                      onRefresh: () => ref.invalidate(meusTreinosProvider),
                     ),
                   ),
                   SliverToBoxAdapter(
@@ -118,14 +132,16 @@ class MeusTreinosScreen extends ConsumerWidget {
                     sliver: SliverList.separated(
                       itemCount: treinos.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) => _TrainingPlanCard(
-                        treino: treinos[index],
-                        isDark: isDark,
-                        onStart: () => context.push(
-                          '/checkin/executar',
-                          extra: treinos[index].treinoId,
-                        ),
-                      ),
+                      itemBuilder:
+                          (context, index) => _TrainingPlanCard(
+                            treino: treinos[index],
+                            isDark: isDark,
+                            onStart:
+                                () => context.push(
+                                  '/checkin/executar',
+                                  extra: treinos[index].treinoId,
+                                ),
+                          ),
                     ),
                   ),
                 ],
@@ -133,6 +149,68 @@ class MeusTreinosScreen extends ConsumerWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _TrainingHeader extends StatelessWidget {
+  final Color ink;
+  final Color mute;
+  final Color primary;
+  final VoidCallback onBack;
+  final VoidCallback onRefresh;
+
+  const _TrainingHeader({
+    required this.ink,
+    required this.mute,
+    required this.primary,
+    required this.onBack,
+    required this.onRefresh,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: onBack,
+            icon: Icon(Icons.arrow_back_rounded, color: ink),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'TREINOS',
+                  style: TextStyle(
+                    color: primary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Sua rotina',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    height: 1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onRefresh,
+            icon: Icon(Icons.refresh_rounded, color: mute),
+          ),
+        ],
       ),
     );
   }
@@ -157,7 +235,8 @@ class _TrainingHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
-    final progresso = totalExercicios == 0 ? 0.0 : totalConcluidos / totalExercicios;
+    final progresso =
+        totalExercicios == 0 ? 0.0 : totalConcluidos / totalExercicios;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -262,8 +341,10 @@ class _TrainingPlanCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final done = treino.exercicios.where((e) => e.concluido).length;
-    final progress = treino.exercicios.isEmpty ? 0.0 : done / treino.exercicios.length;
-    final mediaCount = treino.exercicios.where((e) => e.gifUrl?.isNotEmpty == true).length;
+    final progress =
+        treino.exercicios.isEmpty ? 0.0 : done / treino.exercicios.length;
+    final mediaCount =
+        treino.exercicios.where((e) => e.gifUrl?.isNotEmpty == true).length;
     final status = treino.status.toUpperCase();
     final concluido = status == 'CONCLUIDO';
 
@@ -275,7 +356,10 @@ class _TrainingPlanCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: card,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: concluido ? EagleTokens.good : line, width: concluido ? 1.4 : 1),
+          border: Border.all(
+            color: concluido ? EagleTokens.good : line,
+            width: concluido ? 1.4 : 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,13 +370,16 @@ class _TrainingPlanCard extends StatelessWidget {
                   width: 54,
                   height: 54,
                   decoration: BoxDecoration(
-                    color: concluido
-                        ? EagleTokens.good.withValues(alpha: 0.12)
-                        : BrandPalette.soft(primary, dark: isDark),
+                    color:
+                        concluido
+                            ? EagleTokens.good.withValues(alpha: 0.12)
+                            : BrandPalette.soft(primary, dark: isDark),
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Icon(
-                    concluido ? Icons.check_rounded : Icons.fitness_center_rounded,
+                    concluido
+                        ? Icons.check_rounded
+                        : Icons.fitness_center_rounded,
                     color: concluido ? EagleTokens.good : primary,
                   ),
                 ),
@@ -316,10 +403,23 @@ class _TrainingPlanCard extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 6,
                         children: [
-                          _PlanMeta(icon: Icons.list_alt_rounded, text: '${treino.exercicios.length} exercicios', color: mute),
+                          _PlanMeta(
+                            icon: Icons.list_alt_rounded,
+                            text: '${treino.exercicios.length} exercicios',
+                            color: mute,
+                          ),
                           if (mediaCount > 0)
-                            _PlanMeta(icon: Icons.play_circle_outline_rounded, text: '$mediaCount videos', color: mute),
-                          _PlanMeta(icon: Icons.timer_outlined, text: '~${(treino.exercicios.length * 4).clamp(8, 90)}min', color: mute),
+                            _PlanMeta(
+                              icon: Icons.play_circle_outline_rounded,
+                              text: '$mediaCount videos',
+                              color: mute,
+                            ),
+                          _PlanMeta(
+                            icon: Icons.timer_outlined,
+                            text:
+                                '~${(treino.exercicios.length * 4).clamp(8, 90)}min',
+                            color: mute,
+                          ),
                         ],
                       ),
                     ],
@@ -334,8 +434,11 @@ class _TrainingPlanCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 7,
-                backgroundColor: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-                valueColor: AlwaysStoppedAnimation(concluido ? EagleTokens.good : primary),
+                backgroundColor:
+                    isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                valueColor: AlwaysStoppedAnimation(
+                  concluido ? EagleTokens.good : primary,
+                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -346,8 +449,8 @@ class _TrainingPlanCard extends StatelessWidget {
                     concluido
                         ? 'Treino finalizado. Historico salvo.'
                         : done == 0
-                            ? 'Pronto para iniciar com registro de series.'
-                            : '$done de ${treino.exercicios.length} exercicios ja marcados.',
+                        ? 'Pronto para iniciar com registro de series.'
+                        : '$done de ${treino.exercicios.length} exercicios ja marcados.',
                     style: TextStyle(
                       color: mute,
                       fontSize: 12.5,
@@ -357,7 +460,10 @@ class _TrainingPlanCard extends StatelessWidget {
                 ),
                 FilledButton.icon(
                   onPressed: onStart,
-                  icon: Icon(concluido ? Icons.replay_rounded : Icons.play_arrow_rounded, size: 18),
+                  icon: Icon(
+                    concluido ? Icons.replay_rounded : Icons.play_arrow_rounded,
+                    size: 18,
+                  ),
                   label: Text(concluido ? 'Rever' : 'Iniciar'),
                 ),
               ],
@@ -443,7 +549,11 @@ class _TrainingEmptyState extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: ink, fontSize: 18, fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
