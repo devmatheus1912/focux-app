@@ -2233,7 +2233,7 @@ class _ShortcutBtn extends StatelessWidget {
               size: 18,
               color: isDark ? BrandPalette.accent(primary) : primary,
             ),
-            const Spacer(),
+            const SizedBox(height: 10),
             Text(
               label,
               style: TextStyle(
