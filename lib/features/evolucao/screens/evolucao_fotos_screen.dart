@@ -28,7 +28,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
   Future<void> _load() async {
     try {
       final api = ref.read(apiClientProvider);
-      final res = await api.dio.get('/api/evolucao/${widget.alunoId}/fotos');
+      final res = await api.dio.get('/api/alunos/${widget.alunoId}/fotos');
       final list = (res.data as List? ?? []).map((e) => _Foto.fromJson(e as Map<String, dynamic>)).toList();
       if (mounted) setState(() { _fotos = list; _loading = false; });
     } catch (_) { if (mounted) setState(() => _loading = false); }
@@ -50,7 +50,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
       final api = ref.read(apiClientProvider);
       final bytes = await file.readAsBytes();
       final fd = FormData.fromMap({'foto': MultipartFile.fromBytes(bytes, filename: file.name), 'alunoId': widget.alunoId});
-      await api.dio.post('/api/evolucao/${widget.alunoId}/fotos', data: fd);
+      await api.dio.post('/api/alunos/${widget.alunoId}/fotos', data: fd);
       HapticFeedback.mediumImpact();
       await _load();
     } catch (e) {

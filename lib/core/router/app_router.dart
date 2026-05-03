@@ -747,7 +747,7 @@ bool _isPublicLocation(String path) {
       path == '/esqueci-senha' ||
       path == '/resetar-senha' ||
       path.startsWith('/p/') ||
-      // ⚠️ REMOVER ANTES DE PUBLICAR — libera QA sem auth para teste web
+      // QA routes — only accessible in debug mode (automatically disabled in release builds)
       (kDebugMode && path.startsWith('/qa/'));
 }
 
