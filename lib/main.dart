@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
 import 'core/fcm/fcm_service.dart';
 import 'core/router/app_router.dart';
@@ -120,8 +121,14 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
 
   Future<void> _loadCustomTheme() async {
     try {
-      final repo = PerfilRepository(ApiClient());
-      final perfil = await repo.buscar();
+      // Use direct dio.get with no-invalidation flags to avoid clearing
+      // the aluno session when /api/personal/perfil returns 401 (expected)
+      final dio = ApiClient().dio;
+      final r = await dio.get(
+        '/api/personal/perfil',
+        options: Options(extra: {'fxNoRetry': true, 'fxNoInvalidate': true}),
+      );
+      final perfil = PerfilPersonal.fromJson(r.data as Map<String, dynamic>);
       if (!mounted) return;
       if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
         final hex = perfil.corPrimaria!.replaceFirst('#', '0xFF');
@@ -136,7 +143,12 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
 
     try {
       final dio = ApiClient().dio;
-      final response = await dio.get('/api/aluno/personal-brand');
+      // Mark as no-retry and no-invalidation to avoid clearing the aluno session
+      // when this best-effort theme fetch returns 401/403 (expected for aluno role)
+      final response = await dio.get(
+        '/api/aluno/personal-brand',
+        options: Options(extra: {'fxNoRetry': true, 'fxNoInvalidate': true}),
+      );
       final data = response.data as Map<String, dynamic>;
       if (!mounted) return;
       final corPrimaria = data['corPrimaria'] as String?;

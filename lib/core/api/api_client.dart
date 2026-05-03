@@ -135,7 +135,9 @@ class ApiClient {
             _isRefreshing = false;
           }
 
-          if (!_isRefreshing && _shouldInvalidateSession(e)) {
+          if (!_isRefreshing &&
+              _shouldInvalidateSession(e) &&
+              e.requestOptions.extra['fxNoInvalidate'] != true) {
             await SessionInvalidator.invalidate(
               reason:
                   'API ${e.response?.statusCode} em ${e.requestOptions.path}',
