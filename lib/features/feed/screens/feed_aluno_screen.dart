@@ -115,22 +115,9 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        elevation: 0,
-        title: Text(
-          'Meu Feed',
-          style: TextStyle(
-            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        iconTheme: IconThemeData(
-          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-        ),
-      ),
-      body:
-          _loading
+      body: SafeArea(
+        child:
+            _loading
               ? Center(child: CircularProgressIndicator(color: primary))
               : _posts.isEmpty
               ? Center(
@@ -166,29 +153,44 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                 color: primary,
                 onRefresh: _load,
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _posts.length,
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
+                  itemCount: _posts.length + 1,
                   itemBuilder: (_, i) {
-                    final p = _posts[i];
+                    if (i == 0) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
+                        child: Text(
+                          'Feed',
+                          style: TextStyle(
+                            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      );
+                    }
+                    final p = _posts[i - 1];
                     final mUrl = p.midiaUrl ?? p.imagemUrl;
                     final badgeColor = _feedBadgeColor(p.tipoPost, primary);
                     final curtidas = _curtidasLocais[p.id] ?? p.totalCurtidas;
                     final comentarios =
                         _comentariosLocais[p.id] ?? p.totalComentarios;
 
-                    return Card(
+                    return Container(
                       margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side:
-                            p.fixado
-                                ? BorderSide(color: primary, width: 2)
-                                : BorderSide(
-                                  color:
-                                      isDark
-                                          ? EagleTokens.darkLine
-                                          : EagleTokens.line,
-                                ),
+                      decoration: BoxDecoration(
+                        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(
+                          color:
+                              p.fixado
+                                  ? primary
+                                  : (isDark
+                                      ? EagleTokens.darkLine
+                                      : EagleTokens.line),
+                          width: p.fixado ? 2 : 1,
+                        ),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
@@ -298,6 +300,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                   },
                 ),
               ),
+      ),
     );
   }
 }

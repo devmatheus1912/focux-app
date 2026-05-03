@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/broadcast_repository.dart';
-
-// ---------------------------------------------------------------------------
-// Providers
-// ---------------------------------------------------------------------------
 
 final _broadcastRepositoryProvider = Provider<BroadcastRepository>(
   (ref) => BroadcastRepository(ref.read(apiClientProvider)),
@@ -16,11 +13,6 @@ final _broadcastHistoricoProvider = FutureProvider<List<Broadcast>>((ref) {
   return ref.read(_broadcastRepositoryProvider).listar();
 });
 
-// ---------------------------------------------------------------------------
-// Tela principal de broadcasts
-// ---------------------------------------------------------------------------
-
-/// Tela de Central de Mensageria — envia notificações push em massa para alunos.
 class BroadcastScreen extends ConsumerStatefulWidget {
   const BroadcastScreen({super.key});
 
@@ -35,12 +27,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
   String _publicoAlvo = 'TODOS';
   bool _enviando = false;
 
-  static const List<Map<String, String>> _opcoesPublico = [
-    {'valor': 'TODOS', 'label': 'Todos os alunos'},
-    {'valor': 'ONLINE', 'label': 'Online'},
-    {'valor': 'PRESENCIAL', 'label': 'Presencial'},
-    {'valor': 'HIBRIDO', 'label': 'Híbrido'},
-  ];
+  static const _publicos = ['TODOS', 'ONLINE', 'PRESENCIAL', 'HIBRIDO'];
 
   @override
   void dispose() {
@@ -51,41 +38,29 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
 
   Future<void> _enviar() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _enviando = true);
     try {
-      final repo = ref.read(_broadcastRepositoryProvider);
-      final resultado = await repo.enviar(
-        titulo: _tituloCtrl.text.trim(),
-        mensagem: _mensagemCtrl.text.trim(),
-        tipoConsultoriaAlvo: _publicoAlvo == 'TODOS' ? null : _publicoAlvo,
-      );
-
-      // Limpa o formulário e atualiza o histórico
+      final resultado = await ref.read(_broadcastRepositoryProvider).enviar(
+            titulo: _tituloCtrl.text.trim(),
+            mensagem: _mensagemCtrl.text.trim(),
+            tipoConsultoriaAlvo: _publicoAlvo == 'TODOS' ? null : _publicoAlvo,
+          );
       _tituloCtrl.clear();
       _mensagemCtrl.clear();
       setState(() => _publicoAlvo = 'TODOS');
       ref.invalidate(_broadcastHistoricoProvider);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Broadcast enviado para ${resultado.totalEnviados} aluno(s)!',
-            ),
-            backgroundColor: EagleTokens.good,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Enviado para ${resultado.totalEnviados} alunos.'),
+          backgroundColor: EagleTokens.good,
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao enviar: $e'),
-            backgroundColor: EagleTokens.bad,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao enviar: $e')),
+      );
     } finally {
       if (mounted) setState(() => _enviando = false);
     }
@@ -94,205 +69,344 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
   @override
   Widget build(BuildContext context) {
     final historicoAsync = ref.watch(_broadcastHistoricoProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final brand = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,title: const Text('Central de Mensageria')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Formulário de envio
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
+      backgroundColor: bg,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(_broadcastHistoricoProvider),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'CENTRAL DE MENSAGERIA',
+                      style: TextStyle(
+                        color: brand,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Broadcasts',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: line),
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Novo Broadcast',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        'Nova mensagem',
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                      const SizedBox(height: 16),
-
-                      // Título
-                      TextFormField(
+                      const SizedBox(height: 14),
+                      _DesignField(
                         controller: _tituloCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Título *',
-                          hintText: 'Ex.: Treino cancelado hoje',
-                          border: OutlineInputBorder(),
-                        ),
+                        label: 'Titulo',
+                        hint: 'Ex.: Lembrete de treino...',
                         maxLength: 100,
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Informe o título' : null,
+                        validatorText: 'Informe o titulo',
                       ),
                       const SizedBox(height: 12),
-
-                      // Mensagem
-                      TextFormField(
+                      _DesignField(
                         controller: _mensagemCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Mensagem *',
-                          hintText: 'Digite sua mensagem para os alunos...',
-                          border: OutlineInputBorder(),
-                        ),
-                        maxLines: 4,
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Informe a mensagem' : null,
+                        label: 'Mensagem',
+                        hint: 'Digite sua mensagem para os alunos...',
+                        minLines: 3,
+                        validatorText: 'Informe a mensagem',
                       ),
-                      const SizedBox(height: 12),
-
-                      // Público-alvo
-                      DropdownButtonFormField<String>(
-                        value: _publicoAlvo,
-                        decoration: const InputDecoration(
-                          labelText: 'Público-alvo',
-                          border: OutlineInputBorder(),
+                      const SizedBox(height: 14),
+                      Text(
+                        'Publico-alvo',
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
                         ),
-                        items: _opcoesPublico
-                            .map((opcao) => DropdownMenuItem<String>(
-                                  value: opcao['valor'],
-                                  child: Text(opcao['label']!),
-                                ))
-                            .toList(),
-                        onChanged: (v) => setState(() => _publicoAlvo = v ?? 'TODOS'),
                       ),
-                      const SizedBox(height: 20),
-
-                      // Botão enviar
-                      FilledButton.icon(
-                        onPressed: _enviando ? null : _enviar,
-                        icon: _enviando
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.send),
-                        label: Text(
-                          _enviando ? 'Enviando...' : 'Enviar notificação',
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          for (final p in _publicos) ...[
+                            Expanded(
+                              child: _AudienceChip(
+                                label: p,
+                                selected: _publicoAlvo == p,
+                                onTap: () => setState(() => _publicoAlvo = p),
+                              ),
+                            ),
+                            if (p != _publicos.last) const SizedBox(width: 7),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      SizedBox(
+                        height: 48,
+                        child: FilledButton.icon(
+                          onPressed: _enviando ? null : _enviar,
+                          icon: _enviando
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.send_rounded, size: 16),
+                          label: Text(_enviando ? 'Enviando...' : 'Enviar notificacao'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: brand,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-
-            // Histórico
-            Text(
-              'Histórico de Broadcasts',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            historicoAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Text('Erro ao carregar histórico: $e'),
-              data: (lista) {
-                if (lista.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(
-                      child: Text(
-                        'Nenhum broadcast enviado ainda.',
-                        style: TextStyle(color: EagleTokens.inkMute),
-                      ),
-                    ),
+              const SizedBox(height: 22),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  'Historico',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              historicoAsync.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (e, _) => _StateCard(text: 'Erro ao carregar historico: $e'),
+                data: (lista) {
+                  if (lista.isEmpty) {
+                    return const _StateCard(text: 'Nenhum broadcast enviado ainda.');
+                  }
+                  return Column(
+                    children: [
+                      for (final b in lista) ...[
+                        _BroadcastCard(broadcast: b),
+                        const SizedBox(height: 8),
+                      ],
+                    ],
                   );
-                }
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: lista.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (_, index) {
-                    final broadcast = lista[index];
-                    return _BroadcastCard(broadcast: broadcast);
-                  },
-                );
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Card do histórico
-// ---------------------------------------------------------------------------
+class _DesignField extends StatelessWidget {
+  const _DesignField({
+    required this.controller,
+    required this.label,
+    required this.hint,
+    required this.validatorText,
+    this.minLines = 1,
+    this.maxLength,
+  });
 
-class _BroadcastCard extends StatelessWidget {
-  final Broadcast broadcast;
-
-  const _BroadcastCard({required this.broadcast});
+  final TextEditingController controller;
+  final String label;
+  final String hint;
+  final String validatorText;
+  final int minLines;
+  final int? maxLength;
 
   @override
   Widget build(BuildContext context) {
-    final dataFormatada = _formatarData(broadcast.enviadoEm);
-    final publico = broadcast.tipoConsultoriaAlvo != null
-        ? broadcast.tipoConsultoriaAlvo!
-        : 'Todos';
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    broadcast.titulo,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Chip(
-                  label: Text(
-                    '${broadcast.totalEnviados} enviado(s)',
-                    style: const TextStyle(fontSize: 11),
-                  ),
-                  padding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final fill = isDark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.paper;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(color: mute, fontSize: 11.5, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 5),
+        TextFormField(
+          controller: controller,
+          minLines: minLines,
+          maxLines: minLines == 1 ? 1 : 5,
+          maxLength: maxLength,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(color: mute, fontSize: 14),
+            filled: true,
+            fillColor: fill,
+            counterText: '',
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: line),
             ),
-            const SizedBox(height: 4),
-            Text(
-              broadcast.mensagem,
-              style: const TextStyle(color: EagleTokens.inkMute),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: line),
             ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(Icons.people_outline, size: 14, color: EagleTokens.inkMute),
-                const SizedBox(width: 4),
-                Text(
-                  publico,
-                  style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
-                ),
-                const Spacer(),
-                const Icon(Icons.schedule, size: 14, color: EagleTokens.inkMute),
-                const SizedBox(width: 4),
-                Text(
-                  dataFormatada,
-                  style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
-                ),
-              ],
-            ),
-          ],
+          ),
+          validator: (v) => v == null || v.trim().isEmpty ? validatorText : null,
         ),
+      ],
+    );
+  }
+}
+
+class _AudienceChip extends StatelessWidget {
+  const _AudienceChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final brand = Theme.of(context).colorScheme.primary;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        height: 34,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? brand : (isDark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.paper),
+          borderRadius: BorderRadius.circular(10),
+          border: selected ? null : Border.all(color: line),
+          boxShadow: selected
+              ? [BoxShadow(color: brand.withValues(alpha: 0.32), blurRadius: 10, offset: const Offset(0, 4))]
+              : null,
+        ),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: selected ? Colors.white : mute,
+            fontSize: 10.5,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BroadcastCard extends StatelessWidget {
+  const _BroadcastCard({required this.broadcast});
+
+  final Broadcast broadcast;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final brand = Theme.of(context).colorScheme.primary;
+    final publico = broadcast.tipoConsultoriaAlvo ?? 'TODOS';
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  broadcast.titulo,
+                  style: TextStyle(color: ink, fontSize: 14, fontWeight: FontWeight.w800),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: brand.withValues(alpha: isDark ? 0.16 : 0.10),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${broadcast.totalEnviados} alunos',
+                  style: TextStyle(color: brand, fontSize: 11, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            broadcast.mensagem,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: mute, height: 1.4, fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.people_outline_rounded, size: 13, color: mute),
+              const SizedBox(width: 4),
+              Text(publico, style: TextStyle(color: mute, fontSize: 11)),
+              const SizedBox(width: 12),
+              Icon(Icons.schedule_rounded, size: 13, color: mute),
+              const SizedBox(width: 4),
+              Text(_formatarData(broadcast.enviadoEm), style: TextStyle(color: mute, fontSize: 11)),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -302,6 +416,30 @@ class _BroadcastCard extends StatelessWidget {
     final mes = dt.month.toString().padLeft(2, '0');
     final hora = dt.hour.toString().padLeft(2, '0');
     final min = dt.minute.toString().padLeft(2, '0');
-    return '$dia/$mes/${dt.year} $hora:$min';
+    return '$dia/$mes · $hora:$min';
+  }
+}
+
+class _StateCard extends StatelessWidget {
+  const _StateCard({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+      ),
+    );
   }
 }

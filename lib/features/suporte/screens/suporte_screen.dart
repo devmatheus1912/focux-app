@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_logo.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/suporte_repository.dart';
 
@@ -232,12 +233,8 @@ class _SupportHeader extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: primary.withValues(alpha: 0.14),
-                child: Icon(
-                  Icons.support_agent_rounded,
-                  color: primary,
-                  size: 26,
-                ),
+                backgroundColor: primary,
+                child: const FxLogoIcon(size: 34),
               ),
               Positioned(
                 right: 1,
@@ -263,7 +260,7 @@ class _SupportHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Central Ajuda',
+                  'Suporte Focux',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                     color: onSurface,
@@ -273,7 +270,7 @@ class _SupportHeader extends StatelessWidget {
                 Row(
                   children: [
                     const Text(
-                      'online agora',
+                      'online · resposta imediata',
                       style: TextStyle(
                         color: EagleTokens.good,
                         fontSize: 12,
@@ -294,10 +291,24 @@ class _SupportHeader extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            tooltip: 'Meus tickets',
-            onPressed: onTicketsTap,
-            icon: const Icon(Icons.list_alt_rounded),
+          InkWell(
+            onTap: onTicketsTap,
+            borderRadius: BorderRadius.circular(999),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                'Central de Ajuda',
+                style: TextStyle(
+                  color: primary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
           ),
         ],
       ),

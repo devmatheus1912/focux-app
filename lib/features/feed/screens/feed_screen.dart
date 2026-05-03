@@ -349,24 +349,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final primaryDeep = BrandPalette.deep(primary);
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        elevation: 0,
-        title: Text(
-          'Feed de Conteúdo',
-          style: TextStyle(
-            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        iconTheme: IconThemeData(
-          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-        ),
-      ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: [primary, primaryDeep]),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(44),
           boxShadow: [
             BoxShadow(
               color: primary.withValues(alpha: 0.4),
@@ -383,41 +369,84 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           child: const Icon(Icons.add, color: EagleTokens.darkInk),
         ),
       ),
-      body:
-          _loading
-              ? Center(child: CircularProgressIndicator(color: primary))
-              : _posts.isEmpty
-              ? _EmptyFeed(primary: primary)
-              : RefreshIndicator(
+      body: SafeArea(
+        child:
+            _loading
+                ? Center(child: CircularProgressIndicator(color: primary))
+                : _posts.isEmpty
+                ? _EmptyFeed(primary: primary)
+                : RefreshIndicator(
                 color: primary,
                 onRefresh: _load,
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _posts.length,
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
+                  itemCount: _posts.length + 1,
                   itemBuilder: (_, i) {
-                    final p = _posts[i];
+                    if (i == 0) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Feed',
+                                style: TextStyle(
+                                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: _abrirFormulario,
+                              borderRadius: BorderRadius.circular(44),
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(colors: [primary, primaryDeep]),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: primary.withValues(alpha: 0.38),
+                                      blurRadius: 16,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(Icons.add_rounded, color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    final p = _posts[i - 1];
                     final mUrl = p.midiaUrl ?? p.imagemUrl;
                     final badgeColor = _feedBadgeColor(p.tipoPost, primary);
                     final curtidas = _curtidasLocais[p.id] ?? p.totalCurtidas;
                     final comentarios =
                         _comentariosLocais[p.id] ?? p.totalComentarios;
 
-                    return Card(
+                    return Container(
                       margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side:
-                            p.fixado
-                                ? BorderSide(color: primary, width: 2)
-                                : BorderSide(
-                                  color:
-                                      isDark
-                                          ? EagleTokens.darkLine
-                                          : EagleTokens.line,
-                                ),
+                      decoration: BoxDecoration(
+                        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(
+                          color:
+                              p.fixado
+                                  ? primary
+                                  : (isDark
+                                      ? EagleTokens.darkLine
+                                      : EagleTokens.line),
+                          width: p.fixado ? 2 : 1,
+                        ),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -574,6 +603,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   },
                 ),
               ),
+      ),
     );
   }
 
