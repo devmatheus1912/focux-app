@@ -19,86 +19,88 @@ import 'core/theme/theme_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/perfil/data/perfil_repository.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.dark,
-    ),
-  );
-
-  bool crashlyticsReady = false;
-
-  try {
-    if (!kIsWeb) {
-      await Firebase.initializeApp();
-      await FcmService.init(ApiClient());
-      crashlyticsReady = true;
-
-      FlutterError.onError =
-          FirebaseCrashlytics.instance.recordFlutterFatalError;
-
-      PlatformDispatcher.instance.onError = (error, stack) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-        return true;
-      };
-    }
-  } catch (error) {
-    debugPrint('[Focux] Firebase init error: $error');
-    // Firebase ainda não está configurado em todos os ambientes.
-    // Fallback: captura erros localmente sem Crashlytics.
-    FlutterError.onError = (FlutterErrorDetails details) {
-      debugPrint('[Focux] FlutterError: ${details.exceptionAsString()}');
-      debugPrint('${details.stack}');
-    };
-  }
-
-  // ── Global Red-Screen killer ──────────────────────────────────
-  // Replaces Flutter's red error screen with a friendly message in release/profile.
-  ErrorWidget.builder = (FlutterErrorDetails details) {
-    if (kDebugMode) return ErrorWidget(details.exception);
-    return Material(
-      color: const Color(0xFF0A0F1E),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 64, height: 64,
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.error_outline, color: Colors.redAccent, size: 30),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Algo deu errado nesta tela.\nVolte e tente novamente.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5, decoration: TextDecoration.none),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  };
-
+void main() {
   // ── runZonedGuarded: captura TODOS os erros async nao tratados ──
-  // Sem isso, futures que falham fora de try/catch crasham silenciosamente.
+  // IMPORTANT: Both ensureInitialized() and runApp() MUST be in the same zone.
+  // Otherwise Flutter Web throws "Zone mismatch" which cascades into
+  // layout/hit-test failures across the entire widget tree.
   runZonedGuarded(
-    () => runApp(const ProviderScope(child: FocuxApp())),
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+      );
+
+      // ignore: unused_local_variable
+      bool crashlyticsReady = false;
+
+      try {
+        if (!kIsWeb) {
+          await Firebase.initializeApp();
+          await FcmService.init(ApiClient());
+          crashlyticsReady = true;
+
+          FlutterError.onError =
+              FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+          PlatformDispatcher.instance.onError = (error, stack) {
+            FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+            return true;
+          };
+        }
+      } catch (error) {
+        debugPrint('[Focux] Firebase init error: $error');
+        // Firebase ainda não está configurado em todos os ambientes.
+        // Fallback: captura erros localmente sem Crashlytics.
+        FlutterError.onError = (FlutterErrorDetails details) {
+          debugPrint('[Focux] FlutterError: ${details.exceptionAsString()}');
+          debugPrint('${details.stack}');
+        };
+      }
+
+      // ── Global Red-Screen killer ──────────────────────────────────
+      // Replaces Flutter's red error screen with a friendly message in release/profile.
+      ErrorWidget.builder = (FlutterErrorDetails details) {
+        if (kDebugMode) return ErrorWidget(details.exception);
+        return Material(
+          color: const Color(0xFF0A0F1E),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 64, height: 64,
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.error_outline, color: Colors.redAccent, size: 30),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Algo deu errado nesta tela.\nVolte e tente novamente.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5, decoration: TextDecoration.none),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      };
+
+      runApp(const ProviderScope(child: FocuxApp()));
+    },
     (Object error, StackTrace stack) {
       debugPrint('[Focux] Uncaught async error: $error');
       debugPrint('$stack');
-      if (crashlyticsReady) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: false);
-      }
     },
   );
 }
