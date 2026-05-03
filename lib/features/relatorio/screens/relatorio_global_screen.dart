@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
 
@@ -31,142 +32,268 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
     try {
       final repo = RelatorioRepository(ref.read(apiClientProvider));
       final dados = await repo.resumoGlobal();
-      if (mounted) {
-        setState(() {
-          _dados = dados;
-          _loading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _dados = dados;
+        _loading = false;
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _erro = e.toString();
-          _loading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _erro = e.toString();
+        _loading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? EagleTokens.darkBg : EagleTokens.paper;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: background,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: background,
         elevation: 0,
-        title: const Text('Relatório Global'),
+        title: const Text('Relatorio Global'),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
+          IconButton(
+            tooltip: 'Atualizar',
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: _load,
+          ),
         ],
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _erro != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.error_outline,
-                            size: 48, color: theme.colorScheme.error),
-                        const SizedBox(height: 12),
-                        Text('Erro ao carregar: $_erro',
-                            textAlign: TextAlign.center),
-                        const SizedBox(height: 12),
-                        FilledButton(
-                            onPressed: _load,
-                            child: const Text('Tentar novamente')),
-                      ],
-                    ),
-                  ),
-                )
+      body:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _erro != null
+              ? _ErrorState(message: _erro!, onRetry: _load)
               : _dados == null
-                  ? const SizedBox.shrink()
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _HeroCard(dados: _dados!),
-                          const SizedBox(height: 24),
-                          _SectionTitle(
-                            icon: '🏆',
-                            title: 'Mais comprometidos',
-                            color: EagleTokens.good,
-                          ),
-                          const SizedBox(height: 8),
-                          ..._dados!.maisComprometidos
-                              .take(5)
-                              .toList()
-                              .asMap()
-                              .entries
-                              .map((e) => _AlunoRankCard(
-                                    aluno: e.value,
-                                    posicao: e.key + 1,
-                                    tipo: _TipoRank.top,
-                                  )),
-                          const SizedBox(height: 20),
-                          _SectionTitle(
-                            icon: '⚠️',
-                            title: 'Precisam de atenção',
-                            color: EagleTokens.bad,
-                          ),
-                          const SizedBox(height: 8),
-                          ..._dados!.menosComprometidos
-                              .take(5)
-                              .map((a) => _AlunoRankCard(
-                                    aluno: a,
-                                    posicao: -1,
-                                    tipo: _TipoRank.atencao,
-                                  )),
-                        ],
-                      ),
-                    ),
+              ? const SizedBox.shrink()
+              : _ReportContent(dados: _dados!, onRefresh: _load),
+    );
+  }
+}
+
+class _ReportContent extends StatelessWidget {
+  final ResumoGlobal dados;
+  final Future<void> Function() onRefresh;
+
+  const _ReportContent({required this.dados, required this.onRefresh});
+
+  @override
+  Widget build(BuildContext context) {
+    final alunosUnicos =
+        <int, ResumoAluno>{
+          for (final aluno in [
+            ...dados.maisComprometidos,
+            ...dados.menosComprometidos,
+          ])
+            aluno.alunoId: aluno,
+        }.values.toList();
+    final totalPrescritos = alunosUnicos.fold<int>(
+      0,
+      (sum, aluno) => sum + aluno.totalTreinos,
+    );
+    final totalConcluidos = alunosUnicos.fold<int>(
+      0,
+      (sum, aluno) => sum + aluno.treinosConcluidos,
+    );
+    final alunosComTreino =
+        alunosUnicos.where((aluno) => aluno.totalTreinos > 0).length;
+
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+        children: [
+          _HeroCard(dados: dados),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricTile(
+                  icon: Icons.assignment_turned_in_rounded,
+                  label: 'Check-ins',
+                  value: '$totalConcluidos',
+                  tone: EagleTokens.good,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MetricTile(
+                  icon: Icons.fitness_center_rounded,
+                  label: 'Prescritos',
+                  value: '$totalPrescritos',
+                  tone: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _MetricTile(
+            icon: Icons.group_rounded,
+            label: 'Alunos com treino ativo',
+            value: '$alunosComTreino de ${dados.totalAlunos}',
+            tone: EagleTokens.warn,
+          ),
+          const SizedBox(height: 24),
+          const _SectionHeader(
+            icon: Icons.workspace_premium_rounded,
+            title: 'Mais comprometidos',
+            subtitle: 'Alunos com melhor aderencia registrada.',
+            color: EagleTokens.good,
+          ),
+          const SizedBox(height: 10),
+          if (dados.maisComprometidos.isEmpty)
+            const _EmptyList(
+              text: 'Ainda nao ha treinos concluidos no periodo.',
+            )
+          else
+            ...dados.maisComprometidos
+                .take(5)
+                .toList()
+                .asMap()
+                .entries
+                .map(
+                  (entry) => _AlunoRankCard(
+                    aluno: entry.value,
+                    posicao: entry.key + 1,
+                    tipo: _TipoRank.top,
+                  ),
+                ),
+          const SizedBox(height: 24),
+          const _SectionHeader(
+            icon: Icons.report_problem_rounded,
+            title: 'Precisam de atencao',
+            subtitle: 'Priorize contato e ajuste de prescricao.',
+            color: EagleTokens.bad,
+          ),
+          const SizedBox(height: 10),
+          if (dados.menosComprometidos.isEmpty)
+            const _EmptyList(text: 'Nenhum aluno em risco neste recorte.')
+          else
+            ...dados.menosComprometidos
+                .take(5)
+                .map(
+                  (aluno) => _AlunoRankCard(
+                    aluno: aluno,
+                    posicao: -1,
+                    tipo: _TipoRank.atencao,
+                  ),
+                ),
+        ],
+      ),
     );
   }
 }
 
 class _HeroCard extends StatelessWidget {
   final ResumoGlobal dados;
+
   const _HeroCard({required this.dados});
 
   @override
   Widget build(BuildContext context) {
-    final aderencia = dados.aderenciaMediaGeral;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final aderencia = dados.aderenciaMediaGeral.clamp(0, 100).toDouble();
+    final status =
+        aderencia >= 75
+            ? 'Base saudavel'
+            : aderencia >= 50
+            ? 'Acompanhar de perto'
+            : 'Acao imediata';
+
     return Container(
       decoration: BoxDecoration(
         gradient: EagleTokens.heroGradient(dark: isDark),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withValues(alpha: 0.18),
+            blurRadius: 20,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Aderência média geral',
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.insights_rounded, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Performance da base',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Aderencia media geral',
+                      style: TextStyle(color: Colors.white70, fontSize: 12.5),
+                    ),
+                  ],
+                ),
+              ),
+              _HeroPill(text: status),
+            ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
           Text(
             '${aderencia.toStringAsFixed(1)}%',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
+              fontSize: 52,
+              height: 0.95,
+              fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 18),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: aderencia / 100,
+              minHeight: 8,
+              backgroundColor: Colors.white.withValues(alpha: 0.18),
+              valueColor: const AlwaysStoppedAnimation(Colors.white),
+            ),
+          ),
+          const SizedBox(height: 14),
           Row(
             children: [
-              const Icon(Icons.group_outlined, color: Colors.white70, size: 16),
+              const Icon(
+                Icons.people_alt_rounded,
+                color: Colors.white70,
+                size: 16,
+              ),
               const SizedBox(width: 6),
               Text(
-                '${dados.totalAlunos} alunos',
-                style: const TextStyle(color: Colors.white70, fontSize: 13),
+                '${dados.totalAlunos} alunos monitorados',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -176,29 +303,155 @@ class _HeroCard extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String icon;
+class _HeroPill extends StatelessWidget {
+  final String text;
+
+  const _HeroPill({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _MetricTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color tone;
+
+  const _MetricTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.tone,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: tone.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Icon(icon, color: tone, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color:
+                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final IconData icon;
   final String title;
+  final String subtitle;
   final Color color;
 
-  const _SectionTitle({
+  const _SectionHeader({
     required this.icon,
     required this.title,
+    required this.subtitle,
     required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(icon, style: const TextStyle(fontSize: 20)),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: color,
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, size: 18, color: color),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                  fontSize: 12.5,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -218,41 +471,6 @@ class _AlunoRankCard extends StatelessWidget {
     required this.tipo,
   });
 
-  Widget _leadingIcon() {
-    if (tipo == _TipoRank.atencao) {
-      return const CircleAvatar(
-        backgroundColor: Color(0x1FF44336),
-        child: Icon(Icons.warning_amber_rounded, color: EagleTokens.bad, size: 20),
-      );
-    }
-    switch (posicao) {
-      case 1:
-        return const CircleAvatar(
-          backgroundColor: Color(0x33FFC107),
-          child: Text('🥇', style: TextStyle(fontSize: 18)),
-        );
-      case 2:
-        return const CircleAvatar(
-          backgroundColor: Color(0x33B0BEC5),
-          child: Text('🥈', style: TextStyle(fontSize: 18)),
-        );
-      case 3:
-        return const CircleAvatar(
-          backgroundColor: Color(0x33FF7043),
-          child: Text('🥉', style: TextStyle(fontSize: 18)),
-        );
-      default:
-        return CircleAvatar(
-          backgroundColor: EagleTokens.good.withValues(alpha: 0.12),
-          child: Text(
-            '$posicao',
-            style: const TextStyle(
-                color: EagleTokens.good, fontWeight: FontWeight.bold),
-          ),
-        );
-    }
-  }
-
   double get _aderencia {
     if (aluno.totalTreinos == 0) return 0;
     return (aluno.treinosConcluidos / aluno.totalTreinos) * 100;
@@ -260,35 +478,243 @@ class _AlunoRankCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final aderencia = _aderencia;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: _leadingIcon(),
-        title: Text(
-          aluno.alunoNome,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final aderencia = _aderencia.clamp(0, 100).toDouble();
+    final tone =
+        tipo == _TipoRank.top
+            ? EagleTokens.aderenciaColor(aderencia, isDark: isDark)
+            : EagleTokens.bad;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
         ),
-        subtitle: Text(
-          '${aluno.treinosConcluidos} treinos concluídos',
-          style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: tipo == _TipoRank.top
-                ? EagleTokens.good.withValues(alpha: 0.12)
-                : EagleTokens.bad.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            '${aderencia.toStringAsFixed(0)}%',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-              color: tipo == _TipoRank.top ? EagleTokens.good : EagleTokens.bad,
+      ),
+      child: Row(
+        children: [
+          _RankBadge(posicao: posicao, tipo: tipo, tone: tone),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        aluno.alunoNome,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 15.5,
+                        ),
+                      ),
+                    ),
+                    _PercentBadge(value: aderencia, tone: tone),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${aluno.treinosConcluidos} de ${aluno.totalTreinos} treinos concluidos',
+                  style: TextStyle(
+                    color:
+                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: LinearProgressIndicator(
+                    value: aderencia / 100,
+                    minHeight: 6,
+                    backgroundColor:
+                        isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                    valueColor: AlwaysStoppedAnimation(tone),
+                  ),
+                ),
+                if (aluno.ultimoTreino != null &&
+                    aluno.ultimoTreino!.isNotEmpty) ...[
+                  const SizedBox(height: 7),
+                  Text(
+                    'Ultimo: ${aluno.ultimoTreino}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color:
+                          isDark
+                              ? EagleTokens.darkInkMute
+                              : EagleTokens.inkMute,
+                      fontSize: 11.5,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RankBadge extends StatelessWidget {
+  final int posicao;
+  final _TipoRank tipo;
+  final Color tone;
+
+  const _RankBadge({
+    required this.posicao,
+    required this.tipo,
+    required this.tone,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final icon =
+        tipo == _TipoRank.atencao
+            ? Icons.priority_high_rounded
+            : Icons.military_tech_rounded;
+    final text = tipo == _TipoRank.atencao ? null : '$posicao';
+    return Container(
+      width: 46,
+      height: 46,
+      decoration: BoxDecoration(
+        color: tone.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Icon(icon, color: tone, size: 21),
+          if (text != null)
+            Positioned(
+              right: 8,
+              bottom: 6,
+              child: Text(
+                text,
+                style: TextStyle(
+                  color: tone,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PercentBadge extends StatelessWidget {
+  final double value;
+  final Color tone;
+
+  const _PercentBadge({required this.value, required this.tone});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: tone.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        '${value.toStringAsFixed(0)}%',
+        style: TextStyle(
+          color: tone,
+          fontSize: 12,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyList extends StatelessWidget {
+  final String text;
+
+  const _EmptyList({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+        ),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _ErrorState({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              size: 46,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Nao foi possivel carregar o relatorio.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                fontWeight: FontWeight.w900,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                fontSize: 12.5,
+              ),
+            ),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Tentar novamente'),
+            ),
+          ],
         ),
       ),
     );

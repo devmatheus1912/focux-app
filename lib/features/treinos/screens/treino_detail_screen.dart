@@ -195,6 +195,8 @@ class _TreinoDetailBody extends StatelessWidget {
           if (selected == null) return;
           await repo.atribuirAluno(treinoId, selected);
           ref.invalidate(treinoProvider(treinoId));
+          ref.invalidate(treinosProvider);
+          ref.invalidate(treinosDoAlunoProvider(selected));
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Treino atribuido ao aluno.')),

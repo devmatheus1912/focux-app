@@ -460,6 +460,10 @@ class _TrainingPlanCard extends StatelessWidget {
                 ),
                 FilledButton.icon(
                   onPressed: onStart,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   icon: Icon(
                     concluido ? Icons.replay_rounded : Icons.play_arrow_rounded,
                     size: 18,

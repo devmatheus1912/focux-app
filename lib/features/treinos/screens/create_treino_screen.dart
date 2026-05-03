@@ -71,7 +71,10 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
         await ref
             .read(treinoRepositoryProvider)
             .atribuirAluno(treino.id, widget.alunoId!);
+        ref.invalidate(treinosDoAlunoProvider(widget.alunoId!));
       }
+      ref.invalidate(treinosProvider);
+      ref.invalidate(treinoProvider(treino.id));
       if (mounted) {
         HapticFeedback.heavyImpact();
         context.pop(true);
