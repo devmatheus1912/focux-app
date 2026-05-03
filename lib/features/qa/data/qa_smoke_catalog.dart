@@ -78,6 +78,9 @@ const qaSmokeRoutes = <QaSmokeRoute>[
 
   // ── Feed ───────────────────────────────────────────────────────────────────
   QaSmokeRoute(id: 'personal-feed', area: 'feed', label: 'Feed personal', path: '/feed', authMode: 'PERSONAL', expectedAnonymousRedirect: '/login?from=%2Ffeed'),
+  QaSmokeRoute(id: 'personal-exercicios', area: 'exercicios', label: 'Biblioteca de exercicios', path: '/exercicios', authMode: 'PERSONAL', expectedAnonymousRedirect: '/login?from=%2Fexercicios'),
+  QaSmokeRoute(id: 'personal-broadcasts', area: 'broadcasts', label: 'Broadcasts', path: '/broadcasts', authMode: 'PERSONAL', expectedAnonymousRedirect: '/login?from=%2Fbroadcasts'),
+  QaSmokeRoute(id: 'personal-suporte', area: 'suporte', label: 'Suporte Focux', path: '/suporte', authMode: 'PERSONAL', expectedAnonymousRedirect: '/login?from=%2Fsuporte'),
 
   // ── Growth ─────────────────────────────────────────────────────────────────
   QaSmokeRoute(id: 'personal-migracao', area: 'growth', label: 'Migracao Magica', path: '/growth/migracao', authMode: 'PERSONAL', expectedAnonymousRedirect: '/login?from=%2Fgrowth%2Fmigracao'),
@@ -149,6 +152,8 @@ const qaSmokeEndpoints = <QaSmokeEndpoint>[
 
   // ── Feed ───────────────────────────────────────────────────────────────────
   QaSmokeEndpoint(id: 'feed-list', area: 'feed', method: 'GET', path: '/api/feed', authMode: 'PERSONAL', expectedAnonymousStatus: 403),
+  QaSmokeEndpoint(id: 'broadcasts-list', area: 'broadcasts', method: 'GET', path: '/api/broadcasts', authMode: 'PERSONAL', expectedAnonymousStatus: 403),
+  QaSmokeEndpoint(id: 'suporte-tickets', area: 'suporte', method: 'GET', path: '/api/suporte/tickets/meus', authMode: 'PERSONAL', expectedAnonymousStatus: 403),
 
   // ── Financeiro ─────────────────────────────────────────────────────────────
   QaSmokeEndpoint(id: 'financeiro-dashboard', area: 'financeiro', method: 'GET', path: '/api/financeiro/dashboard', authMode: 'PERSONAL', expectedAnonymousStatus: 403),

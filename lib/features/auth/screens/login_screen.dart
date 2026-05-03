@@ -549,9 +549,12 @@ bool _isPersonalPath(String path) {
       path == '/treinos' ||
       path == '/agenda' ||
       path == '/financeiro' ||
+      path == '/feed' ||
+      path == '/broadcasts' ||
       path == '/leads' ||
       path == '/alertas' ||
       path == '/relatorios/global' ||
+      path == '/suporte' ||
       path == '/perfil' ||
       path == '/identidade-visual' ||
       path == '/setup/identidade' ||

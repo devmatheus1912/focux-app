@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feed_repository.dart';
+import '../widgets/feed_comments_sheet.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key});
@@ -13,6 +15,8 @@ class FeedScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedScreenState extends ConsumerState<FeedScreen> {
+  final Map<int, int> _curtidasLocais = {};
+  final Map<int, int> _comentariosLocais = {};
   List<FeedPost> _posts = [];
   bool _loading = true;
 
@@ -27,20 +31,25 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     try {
       final posts =
           await FeedRepository(ref.read(apiClientProvider)).listarPersonal();
+      if (!mounted) return;
       setState(() {
         _posts = posts;
+        for (final p in posts) {
+          _curtidasLocais[p.id] = p.totalCurtidas;
+          _comentariosLocais[p.id] = p.totalComentarios;
+        }
         _loading = false;
       });
     } catch (e) {
       debugPrint('[Focux] Error: $e');
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _deletar(int id) async {
     try {
       await FeedRepository(ref.read(apiClientProvider)).deletar(id);
-      _load();
+      await _load();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -53,7 +62,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   Future<void> _toggleFixar(int id) async {
     try {
       await FeedRepository(ref.read(apiClientProvider)).toggleFixar(id);
-      _load();
+      await _load();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -61,6 +70,41 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         ).showSnackBar(SnackBar(content: Text('Erro ao fixar: $e')));
       }
     }
+  }
+
+  Future<void> _curtir(int postId) async {
+    try {
+      final novoTotal = await FeedRepository(
+        ref.read(apiClientProvider),
+      ).toggleCurtida(postId);
+      if (mounted) {
+        setState(() => _curtidasLocais[postId] = novoTotal);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao curtir: $e')));
+      }
+    }
+  }
+
+  void _abrirComentarios(int postId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder:
+          (ctx) => FeedCommentsSheet(
+            postId: postId,
+            repo: FeedRepository(ref.read(apiClientProvider)),
+            onComentou:
+                (novoTotal) =>
+                    setState(() => _comentariosLocais[postId] = novoTotal),
+          ),
+    );
   }
 
   void _abrirFormulario() {
@@ -84,177 +128,194 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   padding: EdgeInsets.only(
                     left: 24,
                     right: 24,
-                    top: 24,
+                    top: 20,
                     bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
                   ),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
+                  child: SafeArea(
+                    child: SingleChildScrollView(
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Expanded(
-                              child: Text(
-                                'Nova Publicação',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                            Row(
+                              children: [
+                                const Expanded(
+                                  child: Text(
+                                    'Nova Publicação',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  tooltip: 'Fechar',
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () => Navigator.of(ctx).pop(),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            DropdownButtonFormField<String>(
+                              value: tipoSelecionado,
+                              decoration: const InputDecoration(
+                                labelText: 'Tipo de post',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.category),
+                              ),
+                              items: const [
+                                DropdownMenuItem(
+                                  value: 'TEXTO',
+                                  child: Text('Texto'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'IMAGEM',
+                                  child: Text('Imagem'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'VIDEO',
+                                  child: Text('Vídeo'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'ENQUETE',
+                                  child: Text('Enquete'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'DICA',
+                                  child: Text('Dica rápida'),
+                                ),
+                              ],
+                              onChanged: (v) {
+                                if (v != null) {
+                                  setModalState(() => tipoSelecionado = v);
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: tituloCtrl,
+                              decoration: const InputDecoration(
+                                labelText: 'Título',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.title),
+                              ),
+                              validator:
+                                  (v) =>
+                                      (v == null || v.trim().isEmpty)
+                                          ? 'Informe o título'
+                                          : null,
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: conteudoCtrl,
+                              decoration: const InputDecoration(
+                                labelText: 'Conteúdo',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.text_fields),
+                                alignLabelWithHint: true,
+                              ),
+                              maxLines: 4,
+                              validator:
+                                  (v) =>
+                                      (v == null || v.trim().isEmpty)
+                                          ? 'Informe o conteúdo'
+                                          : null,
+                            ),
+                            if (tipoSelecionado == 'IMAGEM' ||
+                                tipoSelecionado == 'VIDEO') ...[
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: midiaUrlCtrl,
+                                decoration: const InputDecoration(
+                                  labelText: 'URL da mídia',
+                                  border: OutlineInputBorder(),
+                                  prefixIcon: Icon(Icons.link),
                                 ),
                               ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () => Navigator.of(ctx).pop(),
+                            ],
+                            const SizedBox(height: 24),
+                            FilledButton.icon(
+                              onPressed:
+                                  salvando
+                                      ? null
+                                      : () async {
+                                        if (!formKey.currentState!.validate()) {
+                                          return;
+                                        }
+                                        setModalState(() => salvando = true);
+                                        try {
+                                          await FeedRepository(
+                                            ref.read(apiClientProvider),
+                                          ).criar(
+                                            tituloCtrl.text.trim(),
+                                            conteudoCtrl.text.trim(),
+                                            tipoPost: tipoSelecionado,
+                                            midiaUrl:
+                                                midiaUrlCtrl.text.trim().isEmpty
+                                                    ? null
+                                                    : midiaUrlCtrl.text.trim(),
+                                          );
+                                          if (ctx.mounted) {
+                                            Navigator.of(ctx).pop();
+                                          }
+                                          await _load();
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Publicação criada com sucesso!',
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        } catch (e) {
+                                          setModalState(() => salvando = false);
+                                          if (ctx.mounted) {
+                                            ScaffoldMessenger.of(
+                                              ctx,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text('Erro: $e'),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      },
+                              icon:
+                                  salvando
+                                      ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: EagleTokens.darkInk,
+                                        ),
+                                      )
+                                      : const Icon(Icons.send),
+                              label: Text(
+                                salvando ? 'Publicando...' : 'Publicar',
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          value: tipoSelecionado,
-                          decoration: const InputDecoration(
-                            labelText: 'Tipo de Post',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.category),
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'TEXTO',
-                              child: Text('Texto'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'IMAGEM',
-                              child: Text('Imagem'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'VIDEO',
-                              child: Text('Vídeo'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'ENQUETE',
-                              child: Text('Enquete'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'DICA',
-                              child: Text('Dica Rápida'),
-                            ),
-                          ],
-                          onChanged: (v) {
-                            if (v != null) {
-                              setModalState(() => tipoSelecionado = v);
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: tituloCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Título',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.title),
-                          ),
-                          validator:
-                              (v) =>
-                                  (v == null || v.trim().isEmpty)
-                                      ? 'Informe o título'
-                                      : null,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: conteudoCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Conteúdo',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.text_fields),
-                            alignLabelWithHint: true,
-                          ),
-                          maxLines: 4,
-                          validator:
-                              (v) =>
-                                  (v == null || v.trim().isEmpty)
-                                      ? 'Informe o conteúdo'
-                                      : null,
-                        ),
-                        if (tipoSelecionado == 'IMAGEM' ||
-                            tipoSelecionado == 'VIDEO') ...[
-                          const SizedBox(height: 12),
-                          TextFormField(
-                            controller: midiaUrlCtrl,
-                            decoration: const InputDecoration(
-                              labelText: 'URL da Mídia (Cloudinary)',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.link),
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 24),
-                        FilledButton.icon(
-                          onPressed:
-                              salvando
-                                  ? null
-                                  : () async {
-                                    if (!formKey.currentState!.validate()) {
-                                      return;
-                                    }
-                                    setModalState(() => salvando = true);
-                                    try {
-                                      await FeedRepository(
-                                        ref.read(apiClientProvider),
-                                      ).criar(
-                                        tituloCtrl.text.trim(),
-                                        conteudoCtrl.text.trim(),
-                                        tipoPost: tipoSelecionado,
-                                        midiaUrl:
-                                            midiaUrlCtrl.text.trim().isEmpty
-                                                ? null
-                                                : midiaUrlCtrl.text.trim(),
-                                      );
-                                      if (ctx.mounted) Navigator.of(ctx).pop();
-                                      _load();
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Publicação criada com sucesso!',
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    } catch (e) {
-                                      setModalState(() => salvando = false);
-                                      if (ctx.mounted) {
-                                        ScaffoldMessenger.of(ctx).showSnackBar(
-                                          SnackBar(content: Text('Erro: $e')),
-                                        );
-                                      }
-                                    }
-                                  },
-                          icon:
-                              salvando
-                                  ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: EagleTokens.darkInk,
-                                    ),
-                                  )
-                                  : const Icon(Icons.send),
-                          label: Text(salvando ? 'Publicando...' : 'Publicar'),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
           ),
-    );
+    ).whenComplete(() {
+      tituloCtrl.dispose();
+      conteudoCtrl.dispose();
+      midiaUrlCtrl.dispose();
+    });
   }
 
   IconData _getIconForTipo(String? tipo) {
-    switch (tipo) {
+    switch (tipo?.toUpperCase()) {
       case 'IMAGEM':
         return Icons.image;
       case 'VIDEO':
@@ -326,46 +387,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           _loading
               ? Center(child: CircularProgressIndicator(color: primary))
               : _posts.isEmpty
-              ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.article_outlined,
-                        color: primary,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Nenhuma publicação',
-                      style: TextStyle(
-                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Crie a primeira publicação!',
-                      style: TextStyle(
-                        color:
-                            isDark
-                                ? EagleTokens.darkInkMute
-                                : EagleTokens.inkMute,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              )
+              ? _EmptyFeed(primary: primary)
               : RefreshIndicator(
                 color: primary,
                 onRefresh: _load,
@@ -376,6 +398,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     final p = _posts[i];
                     final mUrl = p.midiaUrl ?? p.imagemUrl;
                     final badgeColor = _feedBadgeColor(p.tipoPost, primary);
+                    final curtidas = _curtidasLocais[p.id] ?? p.totalCurtidas;
+                    final comentarios =
+                        _comentariosLocais[p.id] ?? p.totalComentarios;
+
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
                       shape: RoundedRectangleBorder(
@@ -421,43 +447,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                   ),
                                 ),
                                 PopupMenuButton<String>(
+                                  tooltip: 'Ações',
                                   onSelected: (val) {
                                     if (val == 'fixar') _toggleFixar(p.id);
                                     if (val == 'excluir') {
-                                      showDialog(
-                                        context: context,
-                                        builder:
-                                            (ctx) => AlertDialog(
-                                              title: const Text(
-                                                'Excluir publicação?',
-                                              ),
-                                              content: const Text(
-                                                'Esta ação não pode ser desfeita.',
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed:
-                                                      () =>
-                                                          Navigator.of(
-                                                            ctx,
-                                                          ).pop(),
-                                                  child: const Text('Cancelar'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(ctx).pop();
-                                                    _deletar(p.id);
-                                                  },
-                                                  child: const Text(
-                                                    'Excluir',
-                                                    style: TextStyle(
-                                                      color: EagleTokens.bad,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                      );
+                                      _confirmarExclusao(p.id);
                                     }
                                   },
                                   itemBuilder:
@@ -504,27 +498,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 ),
                               ],
                             ),
-                            if (p.tipoPost != null) ...[
-                              const SizedBox(height: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: badgeColor.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: Text(
-                                  p.tipoPost!.toUpperCase(),
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: badgeColor,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            const SizedBox(height: 6),
+                            _TypeBadge(tipo: p.tipoPost, color: badgeColor),
                             const SizedBox(height: 8),
                             Text(
                               p.conteudo,
@@ -551,56 +526,43 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                             const SizedBox(height: 12),
                             const Divider(height: 1),
                             const SizedBox(height: 8),
-                            Row(
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 4,
+                              crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.thumb_up_alt_outlined,
-                                  size: 16,
-                                  color:
-                                      isDark
-                                          ? EagleTokens.darkInkMute
-                                          : EagleTokens.inkMute,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${p.totalCurtidas}',
-                                  style: TextStyle(
-                                    color:
-                                        isDark
-                                            ? EagleTokens.darkInkMute
-                                            : EagleTokens.inkMute,
+                                TextButton.icon(
+                                  onPressed: () => _curtir(p.id),
+                                  icon: const Icon(
+                                    Icons.thumb_up_alt_outlined,
+                                    size: 18,
                                   ),
+                                  label: Text('$curtidas Curtir'),
                                 ),
-                                const SizedBox(width: 16),
-                                Icon(
-                                  Icons.comment_outlined,
-                                  size: 16,
-                                  color:
-                                      isDark
-                                          ? EagleTokens.darkInkMute
-                                          : EagleTokens.inkMute,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${p.totalComentarios}',
-                                  style: TextStyle(
-                                    color:
-                                        isDark
-                                            ? EagleTokens.darkInkMute
-                                            : EagleTokens.inkMute,
+                                TextButton.icon(
+                                  onPressed: () => _abrirComentarios(p.id),
+                                  icon: const Icon(
+                                    Icons.comment_outlined,
+                                    size: 18,
                                   ),
+                                  label: Text('$comentarios Comentar'),
                                 ),
-                                const Spacer(),
-                                Text(
-                                  p.criadoEm.length >= 10
-                                      ? p.criadoEm.substring(0, 10)
-                                      : p.criadoEm,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color:
-                                        isDark
-                                            ? EagleTokens.darkInkMute
-                                            : EagleTokens.inkMute,
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 10,
+                                  ),
+                                  child: Text(
+                                    p.criadoEm.length >= 10
+                                        ? p.criadoEm.substring(0, 10)
+                                        : p.criadoEm,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color:
+                                          isDark
+                                              ? EagleTokens.darkInkMute
+                                              : EagleTokens.inkMute,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -612,6 +574,104 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   },
                 ),
               ),
+    );
+  }
+
+  void _confirmarExclusao(int id) {
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Excluir publicação?'),
+            content: const Text('Esta ação não pode ser desfeita.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  _deletar(id);
+                },
+                child: const Text(
+                  'Excluir',
+                  style: TextStyle(color: EagleTokens.bad),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+}
+
+class _EmptyFeed extends StatelessWidget {
+  final Color primary;
+
+  const _EmptyFeed({required this.primary});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.article_outlined, color: primary, size: 28),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Nenhuma publicação',
+            style: TextStyle(
+              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Crie a primeira publicação!',
+            style: TextStyle(
+              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TypeBadge extends StatelessWidget {
+  final String? tipo;
+  final Color color;
+
+  const _TypeBadge({required this.tipo, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = (tipo == null || tipo!.isEmpty) ? 'TEXTO' : tipo!;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: TextStyle(
+          fontSize: 10,
+          color: color,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }

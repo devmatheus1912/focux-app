@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../screens/main_shell.dart';
 import '../../features/auth/screens/splash_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
@@ -56,6 +57,9 @@ import '../../features/alunos/screens/acoes_massa_screen.dart';
 import '../../features/ia/screens/ia_aluno_screen.dart';
 import '../../features/financeiro/screens/financeiro_aluno_screen.dart';
 import '../../features/suporte/screens/suporte_screen.dart';
+import '../../features/broadcasts/screens/broadcast_screen.dart';
+import '../../features/plano_sucesso/plano_sucesso_provider.dart';
+import '../../features/plano_sucesso/plano_sucesso_screen.dart';
 import '../../features/alertas/screens/alerta_detalhe_screen.dart';
 import '../../features/alertas/screens/alertas_config_screen.dart';
 import '../../features/relatorio/screens/relatorio_global_screen.dart';
@@ -289,6 +293,17 @@ class AppRouter {
             (context, state) => EvolucaoScreen(
               alunoId: _intPathParam(state, 'id')!,
               alunoNome: _stringExtra(state) ?? 'Aluno',
+            ),
+      ),
+      GoRoute(
+        path: '/alunos/:id/plano-sucesso',
+        redirect:
+            (context, state) =>
+                _intPathParam(state, 'id') == null ? '/alunos' : null,
+        builder:
+            (context, state) => ChangeNotifierProvider(
+              create: (_) => PlanoSucessoProvider(),
+              child: PlanoSucessoScreen(alunoId: _intPathParam(state, 'id')!),
             ),
       ),
       GoRoute(
@@ -655,6 +670,10 @@ class AppRouter {
       GoRoute(
         path: '/suporte',
         builder: (context, state) => const SuporteScreen(),
+      ),
+      GoRoute(
+        path: '/broadcasts',
+        builder: (context, state) => const BroadcastScreen(),
       ),
       GoRoute(
         path: '/depoimentos-aluno',

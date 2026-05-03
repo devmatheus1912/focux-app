@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feed_repository.dart';
+import '../widgets/feed_comments_sheet.dart';
 
 class FeedAlunoScreen extends ConsumerStatefulWidget {
   const FeedAlunoScreen({super.key});
@@ -13,10 +15,10 @@ class FeedAlunoScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
+  final Map<int, int> _curtidasLocais = {};
+  final Map<int, int> _comentariosLocais = {};
   List<FeedPost> _posts = [];
   bool _loading = true;
-  final Map<int, int> _curtidasLocais = {}; // postId -> total
-  final Map<int, int> _comentariosLocais = {}; // postId -> total
 
   @override
   void initState() {
@@ -27,29 +29,36 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final posts = await FeedRepository(ref.read(apiClientProvider)).listarAluno();
+      final posts =
+          await FeedRepository(ref.read(apiClientProvider)).listarAluno();
+      if (!mounted) return;
       setState(() {
         _posts = posts;
-        for (var p in posts) {
+        for (final p in posts) {
           _curtidasLocais[p.id] = p.totalCurtidas;
           _comentariosLocais[p.id] = p.totalComentarios;
         }
         _loading = false;
       });
-    } catch (e) { debugPrint('[Focux] Error: $e');
-      setState(() => _loading = false);
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _curtir(int postId) async {
     try {
-      final novoTotal = await FeedRepository(ref.read(apiClientProvider)).toggleCurtida(postId);
-      setState(() {
-        _curtidasLocais[postId] = novoTotal;
-      });
+      final novoTotal = await FeedRepository(
+        ref.read(apiClientProvider),
+      ).toggleCurtida(postId);
+      if (mounted) {
+        setState(() => _curtidasLocais[postId] = novoTotal);
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao curtir: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao curtir: $e')));
       }
     }
   }
@@ -58,266 +67,290 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (ctx) => _ComentariosBottomSheet(postId: postId, repo: FeedRepository(ref.read(apiClientProvider)), onComentou: (novoTotal) {
-        setState(() {
-          _comentariosLocais[postId] = novoTotal;
-        });
-      }),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder:
+          (ctx) => FeedCommentsSheet(
+            postId: postId,
+            repo: FeedRepository(ref.read(apiClientProvider)),
+            onComentou:
+                (novoTotal) =>
+                    setState(() => _comentariosLocais[postId] = novoTotal),
+          ),
     );
   }
 
   IconData _getIconForTipo(String? tipo) {
-    switch (tipo) {
-      case 'IMAGEM': return Icons.image;
-      case 'VIDEO': return Icons.play_circle_fill;
-      case 'ENQUETE': return Icons.poll;
-      case 'DICA': return Icons.lightbulb;
-      default: return Icons.article;
+    switch (tipo?.toUpperCase()) {
+      case 'IMAGEM':
+        return Icons.image;
+      case 'VIDEO':
+        return Icons.play_circle_fill;
+      case 'ENQUETE':
+        return Icons.poll;
+      case 'DICA':
+        return Icons.lightbulb;
+      default:
+        return Icons.article;
+    }
+  }
+
+  Color _feedBadgeColor(String? tipo, Color primary) {
+    switch (tipo?.toUpperCase()) {
+      case 'DICA':
+        return EagleTokens.warn;
+      case 'IMAGEM':
+        return EagleTokens.good;
+      case 'ENQUETE':
+        return EagleTokens.purple;
+      default:
+        return primary;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final primarySoft = BrandPalette.soft(primary);
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,title: const Text('Meu Feed')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _posts.isEmpty
-              ? const Center(child: Text('Nenhuma publicação disponível.'))
-              : RefreshIndicator(
-                  onRefresh: _load,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _posts.length,
-                    itemBuilder: (_, i) {
-                      final p = _posts[i];
-                      final mUrl = p.midiaUrl ?? p.imagemUrl;
-                      final curtidas = _curtidasLocais[p.id] ?? p.totalCurtidas;
-                      final comentarios = _comentariosLocais[p.id] ?? p.totalComentarios;
-
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: p.fixado ? BorderSide(color: primary, width: 2) : BorderSide.none,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  if (p.fixado) ...[
-                                    Icon(Icons.push_pin, color: primary, size: 18),
-                                    const SizedBox(width: 8),
-                                  ],
-                                  Icon(_getIconForTipo(p.tipoPost), size: 20, color: const Color(0xFF374151)),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      p.titulo,
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (p.tipoPost != null && p.tipoPost != 'TEXTO') ...[
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: primarySoft,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    p.tipoPost!,
-                                    style: TextStyle(fontSize: 10, color: primary, fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ],
-                              const SizedBox(height: 8),
-                              Text(p.conteudo, style: const TextStyle(fontSize: 14)),
-                              if (mUrl != null && mUrl.isNotEmpty) ...[
-                                const SizedBox(height: 12),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    mUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => const SizedBox(),
-                                  ),
-                                ),
-                              ],
-                              const SizedBox(height: 12),
-                              const Divider(height: 1),
-                              Row(
-                                children: [
-                                  TextButton.icon(
-                                    onPressed: () => _curtir(p.id),
-                                    icon: const Icon(Icons.thumb_up_alt_outlined, size: 18),
-                                    label: Text('$curtidas Curtir', style: const TextStyle(color: EagleTokens.inkMute)),
-                                  ),
-                                  TextButton.icon(
-                                    onPressed: () => _abrirComentarios(p.id),
-                                    icon: const Icon(Icons.comment_outlined, size: 18),
-                                    label: Text('$comentarios Comentar', style: const TextStyle(color: EagleTokens.inkMute)),
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    p.criadoEm.length >= 10 ? p.criadoEm.substring(0, 10) : p.criadoEm,
-                                    style: TextStyle(fontSize: 12, color: const Color(0xFF4B5563)),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-    );
-  }
-}
-
-class _ComentariosBottomSheet extends StatefulWidget {
-  final int postId;
-  final FeedRepository repo;
-  final Function(int) onComentou;
-
-  const _ComentariosBottomSheet({required this.postId, required this.repo, required this.onComentou});
-
-  @override
-  State<_ComentariosBottomSheet> createState() => _ComentariosBottomSheetState();
-}
-
-class _ComentariosBottomSheetState extends State<_ComentariosBottomSheet> {
-  List<FeedComentario> _comentarios = [];
-  bool _loading = true;
-  final _ctrl = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    try {
-      final lista = await widget.repo.listarComentarios(widget.postId);
-      setState(() {
-        _comentarios = lista;
-        _loading = false;
-      });
-    } catch (e) { debugPrint('[Focux] Error: $e');
-      setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _enviar() async {
-    if (_ctrl.text.trim().isEmpty) return;
-    try {
-      final c = await widget.repo.comentar(widget.postId, _ctrl.text.trim());
-      _ctrl.clear();
-      setState(() {
-        _comentarios.insert(0, c);
-      });
-      widget.onComentou(_comentarios.length);
-    } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.7,
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const Text('Comentários', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const Spacer(),
-                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
-              ],
-            ),
+        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        elevation: 0,
+        title: Text(
+          'Meu Feed',
+          style: TextStyle(
+            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+            fontWeight: FontWeight.w700,
           ),
-          const Divider(height: 1),
-          Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _comentarios.isEmpty
-                    ? const Center(child: Text('Seja o primeiro a comentar!'))
-                    : ListView.builder(
+        ),
+        iconTheme: IconThemeData(
+          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+        ),
+      ),
+      body:
+          _loading
+              ? Center(child: CircularProgressIndicator(color: primary))
+              : _posts.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.article_outlined,
+                        color: primary,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'Nenhuma publicação disponível.',
+                      style: TextStyle(
+                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+              : RefreshIndicator(
+                color: primary,
+                onRefresh: _load,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _posts.length,
+                  itemBuilder: (_, i) {
+                    final p = _posts[i];
+                    final mUrl = p.midiaUrl ?? p.imagemUrl;
+                    final badgeColor = _feedBadgeColor(p.tipoPost, primary);
+                    final curtidas = _curtidasLocais[p.id] ?? p.totalCurtidas;
+                    final comentarios =
+                        _comentariosLocais[p.id] ?? p.totalComentarios;
+
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side:
+                            p.fixado
+                                ? BorderSide(color: primary, width: 2)
+                                : BorderSide(
+                                  color:
+                                      isDark
+                                          ? EagleTokens.darkLine
+                                          : EagleTokens.line,
+                                ),
+                      ),
+                      child: Padding(
                         padding: const EdgeInsets.all(16),
-                        itemCount: _comentarios.length,
-                        itemBuilder: (ctx, i) {
-                          final c = _comentarios[i];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                CircleAvatar(child: Text(c.alunoNome.isNotEmpty ? c.alunoNome[0] : 'A')),
-                                const SizedBox(width: 12),
+                                if (p.fixado) ...[
+                                  Icon(
+                                    Icons.push_pin,
+                                    color: primary,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 8),
+                                ],
+                                Icon(
+                                  _getIconForTipo(p.tipoPost),
+                                  size: 20,
+                                  color: badgeColor,
+                                ),
+                                const SizedBox(width: 8),
                                 Expanded(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFE5E7EB),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(c.alunoNome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                                        const SizedBox(height: 4),
-                                        Text(c.texto),
-                                      ],
+                                  child: Text(
+                                    p.titulo,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                          );
-                        },
+                            const SizedBox(height: 6),
+                            _TypeBadge(tipo: p.tipoPost, color: badgeColor),
+                            const SizedBox(height: 8),
+                            Text(
+                              p.conteudo,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            if (mUrl != null && mUrl.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  mUrl,
+                                  fit: BoxFit.cover,
+                                  height: 130,
+                                  width: double.infinity,
+                                  errorBuilder:
+                                      (_, __, ___) =>
+                                          _ImagePlaceholder(primary: primary),
+                                ),
+                              ),
+                            ] else if (p.tipoPost == 'IMAGEM') ...[
+                              const SizedBox(height: 12),
+                              _ImagePlaceholder(primary: primary),
+                            ],
+                            const SizedBox(height: 12),
+                            const Divider(height: 1),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 4,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                TextButton.icon(
+                                  onPressed: () => _curtir(p.id),
+                                  icon: const Icon(
+                                    Icons.thumb_up_alt_outlined,
+                                    size: 18,
+                                  ),
+                                  label: Text('$curtidas Curtir'),
+                                ),
+                                TextButton.icon(
+                                  onPressed: () => _abrirComentarios(p.id),
+                                  icon: const Icon(
+                                    Icons.comment_outlined,
+                                    size: 18,
+                                  ),
+                                  label: Text('$comentarios Comentar'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 10,
+                                  ),
+                                  child: Text(
+                                    p.criadoEm.length >= 10
+                                        ? p.criadoEm.substring(0, 10)
+                                        : p.criadoEm,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color:
+                                          isDark
+                                              ? EagleTokens.darkInkMute
+                                              : EagleTokens.inkMute,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _ctrl,
-                    decoration: const InputDecoration(
-                      hintText: 'Escreva um comentário...',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                  ),
+                    );
+                  },
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: _enviar,
-                  icon: Icon(Icons.send, color: Theme.of(context).colorScheme.primary),
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+    );
+  }
+}
+
+class _TypeBadge extends StatelessWidget {
+  final String? tipo;
+  final Color color;
+
+  const _TypeBadge({required this.tipo, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = (tipo == null || tipo!.isEmpty) ? 'TEXTO' : tipo!;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
       ),
+      child: Text(
+        label.toUpperCase(),
+        style: TextStyle(
+          fontSize: 10,
+          color: color,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _ImagePlaceholder extends StatelessWidget {
+  final Color primary;
+
+  const _ImagePlaceholder({required this.primary});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 130,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          colors: [
+            primary.withValues(alpha: 0.18),
+            BrandPalette.deep(primary).withValues(alpha: 0.08),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Icon(Icons.image_outlined, color: primary, size: 28),
     );
   }
 }

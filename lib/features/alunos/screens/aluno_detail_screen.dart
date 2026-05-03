@@ -501,12 +501,34 @@ class AlunoDetailScreen extends ConsumerWidget {
                           ),
                           _ModuleTile(
                             icon: Icons.show_chart,
-                            label: 'Evolução',
-                            sub: 'Medidas e PRs',
+                            label: 'Evolução · Medidas',
+                            sub: 'Medidas corporais e PRs',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
                                   '/alunos/$alunoId/evolucao',
+                                  extra: aluno.nome,
+                                ),
+                          ),
+                          _ModuleTile(
+                            icon: Icons.assessment_outlined,
+                            label: 'Relatório de Aderência',
+                            sub: 'Check-ins, faltas e PDF',
+                            isDark: isDark,
+                            onTap:
+                                () => context.push(
+                                  '/alunos/$alunoId/relatorio',
+                                  extra: aluno.nome,
+                                ),
+                          ),
+                          _ModuleTile(
+                            icon: Icons.flag_outlined,
+                            label: 'Plano de Sucesso',
+                            sub: 'Onboarding e etapas',
+                            isDark: isDark,
+                            onTap:
+                                () => context.push(
+                                  '/alunos/$alunoId/plano-sucesso',
                                   extra: aluno.nome,
                                 ),
                           ),

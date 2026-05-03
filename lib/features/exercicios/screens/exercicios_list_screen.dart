@@ -167,153 +167,176 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'CATALOGO',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: mute,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
-                          ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact = constraints.maxWidth < 420;
+                  final title = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'BIBLIOTECA',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: mute,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.2,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Exercicios',
-                          style: TextStyle(
-                            fontSize: 32,
-                            color: ink,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      _apenasFavoritos ? Icons.star : Icons.star_border,
-                      color: _apenasFavoritos ? EagleTokens.warn : mute,
-                    ),
-                    tooltip: 'Apenas favoritos',
-                    onPressed:
-                        () => setState(
-                          () => _apenasFavoritos = !_apenasFavoritos,
-                        ),
-                  ),
-                  IconButton(
-                    icon: Badge(
-                      isLabelVisible: _hasAdvancedFilters,
-                      smallSize: 8,
-                      child: Icon(
-                        Icons.tune_rounded,
-                        color:
-                            _hasAdvancedFilters
-                                ? Theme.of(context).colorScheme.primary
-                                : mute,
                       ),
-                    ),
-                    tooltip: 'Filtros avancados',
-                    onPressed: () => _openFilters(context),
-                  ),
-                  PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert_rounded, color: mute),
-                    tooltip: 'Mais opcoes',
-                    onSelected: (value) {
-                      if (value == 'seed_v1') _importarSeedV1(context, ref);
-                      if (value == 'seed_premium_v1') {
-                        _importarSeedPremiumV1(context, ref);
-                      }
-                      if (value == 'curadoria_lote') {
-                        _openCuradoriaLote(context, ref);
-                      }
-                      if (value == 'importar_midias') {
-                        _openImportarMidias(context, ref);
-                      }
-                      if (value == 'historico_midias') {
-                        _openHistoricoMidias(context, ref);
-                      }
-                      if (value == 'fila_editorial') {
-                        _openFilaEditorial(context, ref);
-                      }
-                    },
-                    itemBuilder:
-                        (_) => const [
-                          PopupMenuItem(
-                            value: 'seed_v1',
-                            child: Row(
-                              children: [
-                                Icon(Icons.download_rounded, size: 20),
-                                SizedBox(width: 10),
-                                Text('Importar biblioteca Focux v1'),
-                              ],
+                      const SizedBox(height: 2),
+                      Text(
+                        'Exercicios',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: compact ? 28 : 32,
+                          color: ink,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  );
+                  final actions = Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          _apenasFavoritos ? Icons.star : Icons.star_border,
+                          color: _apenasFavoritos ? EagleTokens.warn : mute,
+                        ),
+                        tooltip: 'Apenas favoritos',
+                        onPressed:
+                            () => setState(
+                              () => _apenasFavoritos = !_apenasFavoritos,
                             ),
+                      ),
+                      IconButton(
+                        icon: Badge(
+                          isLabelVisible: _hasAdvancedFilters,
+                          smallSize: 8,
+                          child: Icon(
+                            Icons.tune_rounded,
+                            color:
+                                _hasAdvancedFilters
+                                    ? Theme.of(context).colorScheme.primary
+                                    : mute,
                           ),
-                          PopupMenuItem(
-                            value: 'seed_premium_v1',
-                            child: Row(
-                              children: [
-                                Icon(Icons.workspace_premium_rounded, size: 20),
-                                SizedBox(width: 10),
-                                Text('Importar seed premium 1500'),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'curadoria_lote',
-                            child: Row(
-                              children: [
-                                Icon(Icons.fact_check_rounded, size: 20),
-                                SizedBox(width: 10),
-                                Text('Curadoria em lote'),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'importar_midias',
-                            child: Row(
-                              children: [
-                                Icon(Icons.video_file_rounded, size: 20),
-                                SizedBox(width: 10),
-                                Text('Importar midias CSV/JSON'),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'historico_midias',
-                            child: Row(
-                              children: [
-                                Icon(Icons.history_rounded, size: 20),
-                                SizedBox(width: 10),
-                                Text('Historico de importacoes'),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'fila_editorial',
-                            child: Row(
-                              children: [
-                                Icon(Icons.rate_review_rounded, size: 20),
-                                SizedBox(width: 10),
-                                Text('Fila editorial'),
-                              ],
-                            ),
-                          ),
-                        ],
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.arrow_back, color: mute),
-                    onPressed:
-                        () => safePopOrGo(context, '/dashboard/personal'),
-                  ),
-                ],
+                        ),
+                        tooltip: 'Filtros avancados',
+                        onPressed: () => _openFilters(context),
+                      ),
+                      PopupMenuButton<String>(
+                        icon: Icon(Icons.more_vert_rounded, color: mute),
+                        tooltip: 'Mais opcoes',
+                        onSelected: (value) {
+                          if (value == 'seed_v1') _importarSeedV1(context, ref);
+                          if (value == 'seed_premium_v1') {
+                            _importarSeedPremiumV1(context, ref);
+                          }
+                          if (value == 'curadoria_lote') {
+                            _openCuradoriaLote(context, ref);
+                          }
+                          if (value == 'importar_midias') {
+                            _openImportarMidias(context, ref);
+                          }
+                          if (value == 'historico_midias') {
+                            _openHistoricoMidias(context, ref);
+                          }
+                          if (value == 'fila_editorial') {
+                            _openFilaEditorial(context, ref);
+                          }
+                        },
+                        itemBuilder:
+                            (_) => const [
+                              PopupMenuItem(
+                                value: 'seed_v1',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.download_rounded, size: 20),
+                                    SizedBox(width: 10),
+                                    Text('Importar biblioteca Focux v1'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'seed_premium_v1',
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.workspace_premium_rounded,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text('Importar seed premium 1500'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'curadoria_lote',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.fact_check_rounded, size: 20),
+                                    SizedBox(width: 10),
+                                    Text('Curadoria em lote'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'importar_midias',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.video_file_rounded, size: 20),
+                                    SizedBox(width: 10),
+                                    Text('Importar midias CSV/JSON'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'historico_midias',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.history_rounded, size: 20),
+                                    SizedBox(width: 10),
+                                    Text('Historico de importacoes'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'fila_editorial',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.rate_review_rounded, size: 20),
+                                    SizedBox(width: 10),
+                                    Text('Fila editorial'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: mute),
+                        onPressed:
+                            () => safePopOrGo(context, '/dashboard/personal'),
+                      ),
+                    ],
+                  );
+
+                  if (compact) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        title,
+                        const SizedBox(height: 8),
+                        Align(alignment: Alignment.centerRight, child: actions),
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [Expanded(child: title), actions],
+                  );
+                },
               ),
             ),
             Padding(

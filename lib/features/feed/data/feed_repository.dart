@@ -26,17 +26,17 @@ class FeedPost {
   });
 
   factory FeedPost.fromJson(Map<String, dynamic> json) => FeedPost(
-        id: json['id'],
-        titulo: json['titulo'],
-        conteudo: json['conteudo'],
-        imagemUrl: json['imagemUrl'],
-        midiaUrl: json['midiaUrl'],
-        tipoPost: json['tipoPost'],
-        fixado: json['fixado'] ?? false,
-        totalCurtidas: json['totalCurtidas'] ?? 0,
-        totalComentarios: json['totalComentarios'] ?? 0,
-        criadoEm: json['criadoEm'] ?? '',
-      );
+    id: json['id'],
+    titulo: json['titulo'],
+    conteudo: json['conteudo'],
+    imagemUrl: json['imagemUrl'],
+    midiaUrl: json['midiaUrl'],
+    tipoPost: json['tipoPost'],
+    fixado: json['fixado'] ?? false,
+    totalCurtidas: json['totalCurtidas'] ?? 0,
+    totalComentarios: json['totalComentarios'] ?? 0,
+    criadoEm: json['criadoEm'] ?? '',
+  );
 }
 
 class FeedComentario {
@@ -55,12 +55,12 @@ class FeedComentario {
   });
 
   factory FeedComentario.fromJson(Map<String, dynamic> json) => FeedComentario(
-        id: json['id'],
-        alunoId: json['alunoId'],
-        alunoNome: json['alunoNome'],
-        texto: json['texto'],
-        criadoEm: json['criadoEm'] ?? '',
-      );
+    id: json['id'],
+    alunoId: json['alunoId'],
+    alunoNome: json['alunoNome'],
+    texto: json['texto'],
+    criadoEm: json['criadoEm'] ?? '',
+  );
 }
 
 class FeedRepository {
@@ -77,13 +77,21 @@ class FeedRepository {
     return (r.data as List).map((e) => FeedPost.fromJson(e)).toList();
   }
 
-  Future<FeedPost> criar(String titulo, String conteudo, {String? tipoPost, String? midiaUrl}) async {
-    final r = await _client.dio.post('/api/feed', data: {
-      'titulo': titulo,
-      'conteudo': conteudo,
-      if (tipoPost != null) 'tipoPost': tipoPost,
-      if (midiaUrl != null) 'midiaUrl': midiaUrl,
-    });
+  Future<FeedPost> criar(
+    String titulo,
+    String conteudo, {
+    String? tipoPost,
+    String? midiaUrl,
+  }) async {
+    final r = await _client.dio.post(
+      '/api/feed',
+      data: {
+        'titulo': titulo,
+        'conteudo': conteudo,
+        if (tipoPost != null) 'tipoPost': tipoPost,
+        if (midiaUrl != null) 'midiaUrl': midiaUrl,
+      },
+    );
     return FeedPost.fromJson(r.data);
   }
 
@@ -100,9 +108,10 @@ class FeedRepository {
   }
 
   Future<FeedComentario> comentar(int postId, String texto) async {
-    final r = await _client.dio.post('/api/feed/$postId/comentarios', data: {
-      'texto': texto,
-    });
+    final r = await _client.dio.post(
+      '/api/feed/$postId/comentarios',
+      data: {'texto': texto},
+    );
     return FeedComentario.fromJson(r.data);
   }
 
