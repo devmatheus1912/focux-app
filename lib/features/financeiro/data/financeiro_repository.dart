@@ -138,11 +138,14 @@ class ResumoMensal {
   });
 
   factory ResumoMensal.fromJson(Map<String, dynamic> j) => ResumoMensal(
-    totalRecebido: (j['totalRecebido'] as num).toDouble(),
-    totalPrevisto: (j['totalPrevisto'] as num).toDouble(),
-    inadimplentes: j['inadimplentes'] as int,
-    ticketMedio: (j['ticketMedio'] as num).toDouble(),
-    acumuladoAnual: (j['acumuladoAnual'] as num).toDouble(),
+    totalRecebido: (j['totalRecebido'] as num? ?? 0).toDouble(),
+    totalPrevisto: (j['totalPrevisto'] as num? ?? 0).toDouble(),
+    inadimplentes: (j['inadimplentes'] as num? ??
+            j['totalInadimplentes'] as num? ??
+            0)
+        .toInt(),
+    ticketMedio: (j['ticketMedio'] as num? ?? 0).toDouble(),
+    acumuladoAnual: (j['acumuladoAnual'] as num? ?? 0).toDouble(),
   );
 }
 
@@ -210,7 +213,10 @@ class FinanceiroRepository {
   }
 
   Future<ResumoMensal> resumoMensal(int ano, int mes) async {
-    final r = await _dio.get('/api/financeiro/resumo-mensal', queryParameters: {'ano': ano, 'mes': mes});
+    final r = await _dio.get(
+      '/api/financeiro/mensalidades/resumo-mensal',
+      queryParameters: {'ano': ano, 'mes': mes},
+    );
     return ResumoMensal.fromJson(r.data as Map<String, dynamic>);
   }
 
