@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -563,7 +564,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       if (context.mounted) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Erro ao importar: $e'),
+            content: Text(friendlyError(e)),
             backgroundColor: EagleTokens.bad,
           ),
         );
@@ -640,7 +641,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       if (context.mounted) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Erro ao importar seed premium: $e'),
+            content: Text(friendlyError(e)),
             backgroundColor: EagleTokens.bad,
           ),
         );
@@ -1012,7 +1013,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao importar midias: $e'),
+            content: Text(friendlyError(e)),
             backgroundColor: EagleTokens.bad,
           ),
         );

@@ -20,6 +20,7 @@ import '../../financeiro/data/financeiro_repository.dart';
 import '../../notificacoes/data/notificacoes_repository.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
 import '../../chat/screens/chat_inbox_screen.dart';
+import '../../../core/utils/friendly_error.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -110,7 +111,7 @@ class _PersonalDashboardScreenState
       backgroundColor: isDark ? EagleTokens.backgroundDark : EagleTokens.paper,
       body: dashboardAsync.when(
         loading: () => _buildShimmerLoading(context),
-        error: (e, _) => Center(child: Text('Erro ao carregar: $e')),
+        error: (e, _) => Center(child: Text(friendlyError(e))),
         data: (data) {
           // Computed values for hero card
           final monthNames = [

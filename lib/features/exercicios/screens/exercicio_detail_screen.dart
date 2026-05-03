@@ -6,6 +6,7 @@ import 'package:video_player/video_player.dart';
 import 'package:image_picker/image_picker.dart';
 import '../data/exercicio_repository.dart';
 import '../providers/exercicios_provider.dart';
+import '../../../core/utils/friendly_error.dart';
 
 class ExercicioDetailScreen extends ConsumerStatefulWidget {
   final int exercicioId;
@@ -69,7 +70,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
       debugPrint('[Focux] Error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao enviar video: $e')),
+          SnackBar(content: Text(friendlyError(e))),
         );
       }
     } finally {
@@ -129,7 +130,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
       debugPrint('[Focux] Error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao salvar curadoria: $e')),
+          SnackBar(content: Text(friendlyError(e))),
         );
       }
     }

@@ -11,6 +11,7 @@ import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/financeiro_repository.dart';
 import 'financeiro_dashboard_screen.dart';
 import 'financeiro_resumo_screen.dart';
+import '../../../core/utils/friendly_error.dart';
 
 class FinanceiroScreen extends ConsumerStatefulWidget {
   const FinanceiroScreen({super.key});
@@ -319,7 +320,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                       setModalState(() => salvando = false);
                       if (ctx.mounted) {
                         ScaffoldMessenger.of(ctx).showSnackBar(
-                          SnackBar(content: Text('Erro ao salvar: $e')));
+                          SnackBar(content: Text(friendlyError(e))));
                       }
                     }
                   },
@@ -562,7 +563,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                       setModalState(() => salvando = false);
                       if (ctx.mounted) {
                         ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(content: Text('Erro ao lançar mensalidade: $e')));
+                        SnackBar(content: Text(friendlyError(e))));
                       }
                     }
                   },

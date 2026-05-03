@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -153,7 +154,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao enviar foto: $e')));
+        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
       }
     } finally {
       if (mounted) {
@@ -205,7 +206,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao salvar: $e')));
+        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
       }
     } finally {
       if (mounted) {
@@ -253,7 +254,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Erro ao excluir conta: $e')));
+      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
     } finally {
       if (mounted) {
         setState(() => _deleting = false);
@@ -392,7 +393,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Erro ao enviar foto da evolucao: $e'),
+                      content: Text(friendlyError(e)),
                     ),
                   );
                 }
@@ -437,7 +438,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
               } catch (e) {
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Erro ao registrar medida: $e')),
+                  SnackBar(content: Text(friendlyError(e))),
                 );
               } finally {
                 if (ctx.mounted) {

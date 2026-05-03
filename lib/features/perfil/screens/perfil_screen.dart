@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/media_upload_service.dart';
@@ -1023,7 +1024,7 @@ void _showDeleteAccountDialog(BuildContext context) {
             } catch (e) {
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Erro ao excluir: $e')),
+                SnackBar(content: Text(friendlyError(e))),
               );
             }
           },

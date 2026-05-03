@@ -11,6 +11,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
+import '../../../core/utils/friendly_error.dart';
 
 const _coresPredefinidas = [
   Color(0xFF3B5FE2),
@@ -323,7 +324,7 @@ class _IdentidadeVisualScreenState
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao enviar video: $e')));
+        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
       }
     } finally {
       if (mounted) setState(() => _uploadingVideo = false);
@@ -358,7 +359,7 @@ class _IdentidadeVisualScreenState
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao enviar foto: $e')));
+        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
       }
     } finally {
       if (mounted) setState(() => _uploadingHeroPhoto = false);
@@ -393,7 +394,7 @@ class _IdentidadeVisualScreenState
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao enviar foto: $e')));
+        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
       }
     } finally {
       if (mounted) setState(() => _uploadingBioPhoto = false);

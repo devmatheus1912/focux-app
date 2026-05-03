@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
+import '../../../core/utils/friendly_error.dart';
 
 class TreinoDetailScreen extends ConsumerWidget {
   final int treinoId;
@@ -138,7 +139,7 @@ class _TreinoDetailBody extends StatelessWidget {
         } catch (e) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Erro ao duplicar treino: $e')),
+              SnackBar(content: Text(friendlyError(e))),
             );
           }
         }
@@ -154,7 +155,7 @@ class _TreinoDetailBody extends StatelessWidget {
         } catch (e) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Erro ao salvar template: $e')),
+              SnackBar(content: Text(friendlyError(e))),
             );
           }
         }

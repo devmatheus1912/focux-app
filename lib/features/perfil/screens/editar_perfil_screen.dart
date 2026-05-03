@@ -7,6 +7,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
+import '../../../core/utils/friendly_error.dart';
 
 // ─── Cloudinary ──────────────────────────────────────────────────────────────
 class EditarPerfilScreen extends ConsumerStatefulWidget {
@@ -78,7 +79,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao enviar foto: $e')),
+          SnackBar(content: Text(friendlyError(e))),
         );
       }
     } finally {

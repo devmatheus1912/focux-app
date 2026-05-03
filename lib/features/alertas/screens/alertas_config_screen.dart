@@ -3,6 +3,7 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
+import '../../../core/utils/friendly_error.dart';
 
 class AlertasConfigScreen extends ConsumerStatefulWidget {
   const AlertasConfigScreen({super.key});
@@ -66,7 +67,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao salvar: $e')),
+          SnackBar(content: Text(friendlyError(e))),
         );
       }
     } finally {

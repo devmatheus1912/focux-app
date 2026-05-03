@@ -6,6 +6,7 @@ import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/utils/friendly_error.dart';
 
 /// Tela de configuração de dados de pagamento (Wallet / PIX).
 class WalletScreen extends ConsumerStatefulWidget {
@@ -78,7 +79,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao salvar: $e')),
+          SnackBar(content: Text(friendlyError(e))),
         );
       }
     } finally {
@@ -97,7 +98,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         elevation: 0,title: const Text('Wallet / Pagamentos')),
       body: perfilAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro ao carregar perfil: $e')),
+        error: (e, _) => Center(child: Text(friendlyError(e))),
         data: (perfil) {
           _preencherDadosAtuais(perfil);
           return SingleChildScrollView(

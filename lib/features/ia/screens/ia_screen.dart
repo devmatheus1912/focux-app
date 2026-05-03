@@ -8,6 +8,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
+import '../../../core/utils/friendly_error.dart';
 
 class IaScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -179,7 +180,7 @@ class _GerarTreinoTabState extends ConsumerState<_GerarTreinoTab> {
                 messenger.showSnackBar(const SnackBar(content: Text('Plano de treino publicado no app do aluno com sucesso!')));
               }
             } catch (e) {
-              messenger.showSnackBar(SnackBar(content: Text('Erro ao publicar: $e')));
+              messenger.showSnackBar(SnackBar(content: Text(friendlyError(e))));
             }
           },
           icon: const Icon(Icons.check_circle),
@@ -308,7 +309,7 @@ class _GerarDietaTabState extends ConsumerState<_GerarDietaTab> {
                 messenger.showSnackBar(const SnackBar(content: Text('Plano alimentar publicado no app do aluno com sucesso!')));
               }
             } catch (e) {
-              messenger.showSnackBar(SnackBar(content: Text('Erro ao publicar: $e')));
+              messenger.showSnackBar(SnackBar(content: Text(friendlyError(e))));
             }
           },
           icon: const Icon(Icons.check_circle),

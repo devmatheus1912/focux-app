@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -142,7 +143,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao ativar trial: $e')));
+        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
       } finally {
         if (mounted) setState(() => _submitting = false);
       }

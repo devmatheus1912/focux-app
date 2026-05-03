@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../chat/data/chat_repository.dart';
@@ -66,7 +67,46 @@ class AlunoActivationScreen extends ConsumerWidget {
       ),
       body: alunoAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: EagleTokens.bad.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Icon(Icons.error_outline_rounded, color: EagleTokens.bad, size: 32),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  friendlyError(e),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: () => ref.invalidate(alunoMeProvider),
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Tentar novamente'),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => context.go('/dashboard/aluno'),
+                  child: const Text('Ir para o dashboard'),
+                ),
+              ],
+            ),
+          ),
+        ),
         data: (aluno) {
           final medidas = medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
           final historico = historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];

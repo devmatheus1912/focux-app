@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_logo.dart';
@@ -618,7 +619,7 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
       setState(() => _enviando = false);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Erro ao criar ticket: $e')));
+      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
     }
   }
 
