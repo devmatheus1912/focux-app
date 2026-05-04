@@ -21,8 +21,8 @@ fun requireKeystoreProperty(name: String): String =
 
 android {
     namespace = "com.focux.focux_app"
-    compileSdk = 35
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 36
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -46,7 +46,7 @@ android {
 
     defaultConfig {
         applicationId = "com.focux.focux_app"
-        minSdk = 21  // Firebase Messaging + video_player requerem SDK 21+
+        minSdk = 26
         targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -66,11 +66,15 @@ android {
     }
 }
 
-gradle.taskGraph.whenReady { taskGraph ->
-    if (!keystorePropertiesFile.exists() && taskGraph.allTasks.any { it.name.contains("Release", ignoreCase = true) }) {
-        throw org.gradle.api.GradleException(
-            "Release signing requires android/key.properties with keyAlias, keyPassword, storeFile, and storePassword. Debug signing fallback is disabled."
-        )
+tasks.configureEach {
+    if (name.contains("Release", ignoreCase = true)) {
+        doFirst {
+            if (!keystorePropertiesFile.exists()) {
+                throw org.gradle.api.GradleException(
+                    "Release signing requires android/key.properties with keyAlias, keyPassword, storeFile, and storePassword. Debug signing fallback is disabled."
+                )
+            }
+        }
     }
 }
 
