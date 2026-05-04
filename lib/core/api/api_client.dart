@@ -180,6 +180,8 @@ class ApiClient {
   static bool _shouldUseIdempotency(RequestOptions options) {
     if (_isAuthPath(options.path)) return false;
     if (options.path == '/api/suporte/analisar-erro') return false;
+    if (options.path == '/api/uploads') return false;
+    if (options.data is FormData) return false;
 
     final normalized = options.method.toUpperCase();
     return normalized == 'POST' ||
