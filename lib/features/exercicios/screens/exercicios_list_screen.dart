@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -74,6 +75,7 @@ class ExerciciosListScreen extends ConsumerStatefulWidget {
 }
 
 class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
+  final _picker = ImagePicker();
   String _categoriaFiltro = 'Todos';
   bool _apenasFavoritos = false;
   final _tagCtrl = TextEditingController();
@@ -135,20 +137,61 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     });
   }
 
-  void _applyReadyFilter() {
-    setState(() {
-      _comVideoFiltro = true;
-      _fonteVideoFiltro = null;
-      _licencaFiltro = 'LICENSED';
-    });
-  }
-
   void _applyReviewFilter() {
     setState(() {
       _comVideoFiltro = false;
       _fonteVideoFiltro = null;
       _licencaFiltro = 'PENDING_REVIEW';
     });
+  }
+
+  void _applyAllFilter() {
+    setState(() {
+      _apenasFavoritos = false;
+      _comVideoFiltro = false;
+      _fonteVideoFiltro = null;
+      _licencaFiltro = null;
+    });
+  }
+
+  Future<void> _pickAndUploadVideoFor(BuildContext context, int id) async {
+    final file = await _picker.pickVideo(source: ImageSource.gallery);
+    if (file == null) return;
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Enviando video do exercicio...')),
+    );
+    try {
+      await ref
+          .read(exercicioRepositoryProvider)
+          .uploadVideo(
+            id: id,
+            bytes: await file.readAsBytes(),
+            filename: file.name,
+          );
+      ref.invalidate(exerciciosFilteredProvider);
+      ref.invalidate(exercicioProvider(id));
+      messenger.clearSnackBars();
+      if (context.mounted) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Video adicionado ao exercicio.'),
+            backgroundColor: EagleTokens.good,
+          ),
+        );
+      }
+    } catch (e) {
+      messenger.clearSnackBars();
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(friendlyError(e)),
+            backgroundColor: EagleTokens.bad,
+          ),
+        );
+      }
+    }
   }
 
   void _applyVideoFilter() {
@@ -179,8 +222,6 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         ),
       ),
     );
-    final curadoriaAsync = ref.watch(exerciciosCuradoriaProvider);
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
@@ -391,10 +432,6 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-              child: _LibraryGuideCard(onOpenFilters: () => _openFilters(context)),
-            ),
-            Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
               child: TextField(
                 controller: _nomeCtrl,
@@ -445,20 +482,23 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                 children: [
                   _QuickFilterChip(
-                    icon: Icons.verified_rounded,
-                    label: 'Prontos',
+                    icon: Icons.format_list_bulleted_rounded,
+                    label: 'Todos',
                     selected:
-                        _comVideoFiltro &&
-                        _licencaFiltro == 'LICENSED' &&
-                        _fonteVideoFiltro == null,
-                    onTap: _applyReadyFilter,
+                        !_apenasFavoritos &&
+                        !_comVideoFiltro &&
+                        _licencaFiltro == null,
+                    onTap: _applyAllFilter,
                   ),
                   const SizedBox(width: 8),
                   _QuickFilterChip(
-                    icon: Icons.rate_review_rounded,
-                    label: 'Revisar',
-                    selected: _licencaFiltro == 'PENDING_REVIEW',
-                    onTap: _applyReviewFilter,
+                    icon: Icons.star_rounded,
+                    label: 'Favoritos',
+                    selected: _apenasFavoritos,
+                    onTap:
+                        () => setState(
+                          () => _apenasFavoritos = !_apenasFavoritos,
+                        ),
                   ),
                   const SizedBox(width: 8),
                   _QuickFilterChip(
@@ -469,10 +509,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   ),
                   const SizedBox(width: 8),
                   _QuickFilterChip(
-                    icon: Icons.star_rounded,
-                    label: 'Favoritos',
-                    selected: _apenasFavoritos,
-                    onTap: () => setState(() => _apenasFavoritos = !_apenasFavoritos),
+                    icon: Icons.rate_review_rounded,
+                    label: 'Revisar',
+                    selected: _licencaFiltro == 'PENDING_REVIEW',
+                    onTap: _applyReviewFilter,
                   ),
                   if (_hasAnyFilter) ...[
                     const SizedBox(width: 8),
@@ -539,15 +579,6 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   ],
                 ),
               ),
-            curadoriaAsync.when(
-              loading: () => const _CuradoriaSkeleton(),
-              error: (_, __) => const SizedBox.shrink(),
-              data:
-                  (resumo) => _CuradoriaCard(
-                    resumo: resumo,
-                    onImportSeed: () => _importarSeedV1(context, ref),
-                  ),
-            ),
             Expanded(
               child: exerciciosAsync.when(
                 loading: () => const SkeletonList(count: 6),
@@ -563,15 +594,34 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                         () async => ref.invalidate(exerciciosFilteredProvider),
                     child: ListView.separated(
                       padding: const EdgeInsets.fromLTRB(12, 2, 12, 96),
-                      itemCount: exercicios.length,
+                      itemCount:
+                          exercicios.length + (_nomeFiltro.isNotEmpty ? 1 : 0),
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder:
-                          (context, i) => _ExercicioTile(
-                            exercicio: exercicios[i],
-                            onFavoritoToggle:
-                                () =>
-                                    ref.invalidate(exerciciosFilteredProvider),
-                          ),
+                      itemBuilder: (context, i) {
+                        if (_nomeFiltro.isNotEmpty && i == exercicios.length) {
+                          return _CreateExerciseSuggestion(
+                            query: _nomeFiltro,
+                            onTap: () async {
+                              final criado = await context.push<bool>(
+                                '/exercicios/novo',
+                              );
+                              if (criado == true) {
+                                ref.invalidate(exerciciosFilteredProvider);
+                              }
+                            },
+                          );
+                        }
+                        return _ExercicioTile(
+                          exercicio: exercicios[i],
+                          onFavoritoToggle:
+                              () => ref.invalidate(exerciciosFilteredProvider),
+                          onUploadVideo:
+                              () => _pickAndUploadVideoFor(
+                                context,
+                                exercicios[i].id,
+                              ),
+                        );
+                      },
                     ),
                   );
                 },
@@ -863,7 +913,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         messenger.showSnackBar(
           SnackBar(
             content: Text(
-              '${result.afetados} exercicios atualizados · ${result.prontosParaAluno} prontos para aluno.',
+              '${result.afetados} exercicios atualizados - ${result.prontosParaAluno} prontos para aluno.',
             ),
             backgroundColor: EagleTokens.good,
           ),
@@ -1085,7 +1135,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '${result.atualizados}/${result.total} midias importadas · ${result.prontosParaAluno} prontas · ${result.naoEncontrados} nao encontradas.',
+              '${result.atualizados}/${result.total} midias importadas - ${result.prontosParaAluno} prontas - ${result.naoEncontrados} nao encontradas.',
             ),
             backgroundColor:
                 result.naoEncontrados == 0
@@ -1160,7 +1210,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                             '${batch.atualizados}/${batch.total} midias aplicadas',
                           ),
                           subtitle: Text(
-                            '$date · ${batch.prontosParaAluno} prontos · '
+                            '$date - ${batch.prontosParaAluno} prontos - '
                             '${batch.naoEncontrados} nao encontradas'
                             '${batch.naoEncontradosKeys.isEmpty ? '' : '\nNao encontradas: ${batch.naoEncontradosKeys.take(3).join(', ')}'}',
                           ),
@@ -1453,7 +1503,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Use quando quiser afinar por músculo, equipamento ou status do vídeo.',
+                    'Use quando quiser afinar por musculo, equipamento ou status do video.',
                     style: TextStyle(
                       color:
                           Theme.of(context).brightness == Brightness.dark
@@ -1566,7 +1616,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                               _comVideoFiltro = comVideo;
                               _fonteVideoFiltro = fonteVideo;
                               _licencaFiltro = licenca;
-                              _tagFiltro = tagCtrl.text.trim().replaceFirst('#', '');
+                              _tagFiltro = tagCtrl.text.trim().replaceFirst(
+                                '#',
+                                '',
+                              );
                               _tagCtrl.text = _tagFiltro;
                             });
                             Navigator.pop(ctx);
@@ -1607,78 +1660,6 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   }
 }
 
-class _LibraryGuideCard extends StatelessWidget {
-  final VoidCallback onOpenFilters;
-
-  const _LibraryGuideCard({required this.onOpenFilters});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final card = isDark ? EagleTokens.darkCardHi : Colors.white;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: card,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: line),
-        boxShadow: [
-          if (!isDark)
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(Icons.auto_awesome_rounded, color: primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Escolha rapido. Edite so quando precisar.',
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Use Prontos para montar treinos. Use Revisar para liberar videos e licencas depois.',
-                  style: TextStyle(color: mute, fontSize: 12.5, height: 1.28),
-                ),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: onOpenFilters,
-            child: const Text('Filtrar'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _QuickFilterChip extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -1712,218 +1693,55 @@ class _QuickFilterChip extends StatelessWidget {
   }
 }
 
-class _CuradoriaCard extends StatelessWidget {
-  final ExercicioCuradoriaResumo resumo;
-  final VoidCallback onImportSeed;
+class _CreateExerciseSuggestion extends StatelessWidget {
+  final String query;
+  final VoidCallback onTap;
 
-  const _CuradoriaCard({required this.resumo, required this.onImportSeed});
+  const _CreateExerciseSuggestion({required this.query, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final card = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
-    final topGroups = resumo.porGrupoMuscular.take(3).toList();
-    final alert =
-        resumo.alertas.isNotEmpty
-            ? resumo.alertas.first
-            : 'Biblioteca pronta para curadoria fina.';
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: card,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: line),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Text(
-                    '${resumo.scoreProntidao}',
-                    style: TextStyle(
-                      color: primary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Status da biblioteca',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${resumo.total}/${resumo.metaPremium} exercicios · ${resumo.prontosParaAluno} prontos para aluno',
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Importar seed',
-                  onPressed: onImportSeed,
-                  icon: Icon(Icons.download_rounded, color: primary),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                minHeight: 7,
-                value: (resumo.scoreProntidao / 100).clamp(0.0, 1.0),
-                backgroundColor: primary.withValues(alpha: 0.10),
-                valueColor: AlwaysStoppedAnimation(primary),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _CuradoriaMetric(
-                  label: 'Video',
-                  value: '${resumo.comVideo}',
-                  color: EagleTokens.good,
-                ),
-                _CuradoriaMetric(
-                  label: 'Liberados',
-                  value: '${resumo.licenciados + resumo.videosProprios}',
+    return Material(
+      color: primary.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
                   color: primary,
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                _CuradoriaMetric(
-                  label: 'Revisar',
-                  value: '${resumo.pendentesLicenca}',
-                  color: EagleTokens.warn,
-                ),
-              ],
-            ),
-            if (topGroups.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  for (final group in topGroups)
-                    Chip(
-                      label: Text(
-                        '${_prettyGroup(group.label)} ${group.total}',
-                      ),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                ],
+                child: const Icon(Icons.add_rounded, color: Colors.white),
               ),
-            ],
-            const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.info_outline_rounded, size: 16, color: mute),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    resumo.prontosParaAluno == 0
-                        ? 'Comece por Revisar: anexe video proprio ou licenciado, depois libere para usar nos treinos.'
-                        : alert,
-                    style: TextStyle(color: mute, fontSize: 12.5, height: 1.25),
-                  ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Nao encontrou?',
+                      style: TextStyle(fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Criar "$query" na sua biblioteca',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _prettyGroup(String value) {
-    if (value == 'NAO_INFORMADO') return 'Sem grupo';
-    return value;
-  }
-}
-
-class _CuradoriaMetric extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-
-  const _CuradoriaMetric({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        '$label $value',
-        style: TextStyle(
-          color: color,
-          fontSize: 11.5,
-          fontWeight: FontWeight.w900,
-        ),
-      ),
-    );
-  }
-}
-
-class _CuradoriaSkeleton extends StatelessWidget {
-  const _CuradoriaSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-      child: Container(
-        height: 96,
-        decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+              ),
+              const Icon(Icons.chevron_right_rounded),
+            ],
           ),
-        ),
-        alignment: Alignment.center,
-        child: const SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(strokeWidth: 2),
         ),
       ),
     );
@@ -1934,35 +1752,35 @@ class _FilterDropdown extends StatelessWidget {
   final String label;
   final String? value;
   final List<String> values;
-  final String? Function(String?)? formatter;
   final ValueChanged<String?> onChanged;
+  final String? Function(String?)? formatter;
 
   const _FilterDropdown({
     required this.label,
     required this.value,
     required this.values,
-    this.formatter,
     required this.onChanged,
+    this.formatter,
   });
 
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
       value: value,
+      isExpanded: true,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
         isDense: true,
       ),
-      items:
-          values
-              .map(
-                (v) => DropdownMenuItem(
-                  value: v,
-                  child: Text(formatter?.call(v) ?? v),
-                ),
-              )
-              .toList(),
+      items: [
+        const DropdownMenuItem<String>(value: null, child: Text('Todos')),
+        for (final item in values)
+          DropdownMenuItem<String>(
+            value: item,
+            child: Text(formatter?.call(item) ?? item),
+          ),
+      ],
       onChanged: onChanged,
     );
   }
@@ -2103,7 +1921,7 @@ class _EditorialQueueTile extends StatelessWidget {
       license,
       if (exercicio.editorialNotes?.trim().isNotEmpty == true)
         exercicio.editorialNotes!.trim(),
-    ].join(' · ');
+    ].join(' - ');
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -2205,9 +2023,11 @@ class _EditorialQueueTile extends StatelessWidget {
 class _ExercicioTile extends ConsumerWidget {
   final Exercicio exercicio;
   final VoidCallback onFavoritoToggle;
+  final VoidCallback onUploadVideo;
   const _ExercicioTile({
     required this.exercicio,
     required this.onFavoritoToggle,
+    required this.onUploadVideo,
   });
 
   Future<void> _toggleFavorito(WidgetRef ref, BuildContext context) async {
@@ -2232,11 +2052,12 @@ class _ExercicioTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final card = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final card = isDark ? EagleTokens.darkCardHi : Colors.white;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final subtitle = [
       exercicio.musculoAlvo,
-      exercicio.categoria,
       exercicio.equipamento,
       exercicio.nivel,
     ].where((s) => s != null && s.isNotEmpty).join(' | ');
@@ -2246,131 +2067,133 @@ class _ExercicioTile extends ConsumerWidget {
             : exercicio.gifUrl?.isNotEmpty == true
             ? exercicio.gifUrl
             : null;
-    final licensed = exercicio.licenseStatus == 'LICENSED';
-    final approved = exercicio.editorialStatus == 'APPROVED';
     final hasVideo = exercicio.videoUrl?.isNotEmpty == true;
-    final readyForStudent = approved && hasVideo;
-    final nivelColor = _nivelColor(exercicio.nivel);
 
     return Material(
       color: card,
-      borderRadius: BorderRadius.circular(14),
-      child: ListTile(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: BorderSide(color: line),
-        ),
-        leading:
-            mediaThumb != null
-                ? ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: Image.network(
-                      mediaThumb,
-                      fit: BoxFit.cover,
-                      errorBuilder:
-                          (_, __, ___) => const Icon(Icons.fitness_center),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => context.push('/exercicios/${exercicio.id}'),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: line),
+          ),
+          child: Row(
+            children: [
+              mediaThumb != null
+                  ? ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: SizedBox(
+                      width: 54,
+                      height: 54,
+                      child: Image.network(
+                        mediaThumb,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (_, __, ___) => const Icon(Icons.fitness_center),
+                      ),
                     ),
-                  ),
-                )
-                : const CircleAvatar(child: Icon(Icons.fitness_center)),
-        title: Text(
-          exercicio.nome,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
-            if (licensed ||
-                exercicio.videoSource?.isNotEmpty == true ||
-                exercicio.editorialStatus.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                children: [
-                  if (exercicio.nivel?.isNotEmpty == true)
-                    _MiniMediaBadge(
-                      icon: Icons.signal_cellular_alt_rounded,
-                      label: exercicio.nivel!,
-                      color: nivelColor,
+                  )
+                  : Container(
+                    width: 54,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                  _MiniMediaBadge(
-                    icon:
-                        readyForStudent
-                            ? Icons.verified_rounded
-                            : Icons.rate_review_rounded,
-                    label: readyForStudent ? 'Pronto' : 'Revisar',
-                    color: readyForStudent ? EagleTokens.good : EagleTokens.warn,
-                  ),
-                  if (licensed)
-                    const _MiniMediaBadge(
-                      icon: Icons.verified_rounded,
-                      label: 'Licenciado',
-                      color: EagleTokens.good,
-                    ),
-                  if (exercicio.videoSource?.isNotEmpty == true)
-                    _MiniMediaBadge(
-                      icon: Icons.video_library_rounded,
-                      label: _formatSource(exercicio.videoSource!),
+                    child: Icon(
+                      Icons.fitness_center_rounded,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                ],
+                  ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      exercicio.nome,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ink,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                      ),
+                    ),
+                    if (subtitle.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: mute, fontSize: 12.5),
+                      ),
+                    ],
+                    const SizedBox(height: 7),
+                    Row(
+                      children: [
+                        _MiniMediaBadge(
+                          icon:
+                              hasVideo
+                                  ? Icons.play_circle_fill_rounded
+                                  : Icons.videocam_off_rounded,
+                          label: hasVideo ? 'Video' : 'Sem video',
+                          color: hasVideo ? EagleTokens.good : EagleTokens.warn,
+                        ),
+                        const SizedBox(width: 6),
+                        if (exercicio.categoria?.isNotEmpty == true)
+                          Flexible(
+                            child: Text(
+                              exercicio.categoria!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: mute,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: hasVideo ? 'Trocar video' : 'Subir video',
+                onPressed: onUploadVideo,
+                icon: Icon(
+                  hasVideo ? Icons.swap_horiz_rounded : Icons.upload_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  exercicio.favoritado ? Icons.star : Icons.star_border,
+                  color:
+                      exercicio.favoritado
+                          ? EagleTokens.gold
+                          : (isDark
+                              ? EagleTokens.darkInkMute
+                              : EagleTokens.inkMute),
+                ),
+                tooltip:
+                    exercicio.favoritado
+                        ? 'Remover dos favoritos'
+                        : 'Adicionar aos favoritos',
+                onPressed: () => _toggleFavorito(ref, context),
               ),
             ],
-          ],
+          ),
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (hasVideo)
-              const Icon(
-                Icons.play_circle_fill_rounded,
-                color: EagleTokens.good,
-              ),
-            IconButton(
-              icon: Icon(
-                exercicio.favoritado ? Icons.star : Icons.star_border,
-                color:
-                    exercicio.favoritado
-                        ? EagleTokens.gold
-                        : (isDark
-                            ? EagleTokens.darkInkMute
-                            : EagleTokens.inkMute),
-              ),
-              tooltip:
-                  exercicio.favoritado
-                      ? 'Remover dos favoritos'
-                      : 'Adicionar aos favoritos',
-              onPressed: () => _toggleFavorito(ref, context),
-            ),
-            const Icon(Icons.chevron_right),
-          ],
-        ),
-        onTap: () => context.push('/exercicios/${exercicio.id}'),
       ),
     );
-  }
-
-  String _formatSource(String value) {
-    return switch (value) {
-      'FOCUX_LIBRARY' => 'Focux',
-      'PERSONAL_UPLOAD' => 'Personal',
-      _ => value.replaceAll('_', ' '),
-    };
-  }
-
-  Color _nivelColor(String? value) {
-    return switch (value?.toUpperCase()) {
-      'INICIANTE' => EagleTokens.good,
-      'INTERMEDIARIO' => EagleTokens.warn,
-      'AVANCADO' => EagleTokens.bad,
-      _ => EagleTokens.inkMute,
-    };
   }
 }
 

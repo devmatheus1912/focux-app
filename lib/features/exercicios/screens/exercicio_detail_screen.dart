@@ -13,7 +13,8 @@ class ExercicioDetailScreen extends ConsumerStatefulWidget {
   const ExercicioDetailScreen({super.key, required this.exercicioId});
 
   @override
-  ConsumerState<ExercicioDetailScreen> createState() => _ExercicioDetailScreenState();
+  ConsumerState<ExercicioDetailScreen> createState() =>
+      _ExercicioDetailScreenState();
 }
 
 class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
@@ -55,7 +56,9 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
 
     setState(() => _uploadingVideo = true);
     try {
-      await ref.read(exercicioRepositoryProvider).uploadVideo(
+      await ref
+          .read(exercicioRepositoryProvider)
+          .uploadVideo(
             id: widget.exercicioId,
             bytes: await file.readAsBytes(),
             filename: file.name,
@@ -69,9 +72,9 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     } catch (e) {
       debugPrint('[Focux] Error: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
       }
     } finally {
       if (mounted) setState(() => _uploadingVideo = false);
@@ -114,7 +117,9 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     if (notes == null) return;
 
     try {
-      await ref.read(exercicioRepositoryProvider).atualizarCuradoriaEditorial(
+      await ref
+          .read(exercicioRepositoryProvider)
+          .atualizarCuradoriaEditorial(
             id: widget.exercicioId,
             status: status,
             notes: notes.isEmpty ? null : notes,
@@ -124,14 +129,18 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
       ref.invalidate(exerciciosCuradoriaProvider);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Curadoria marcada como ${_formatEditorialStatus(status)}.')),
+        SnackBar(
+          content: Text(
+            'Curadoria marcada como ${_formatEditorialStatus(status)}.',
+          ),
+        ),
       );
     } catch (e) {
       debugPrint('[Focux] Error: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
       }
     }
   }
@@ -172,7 +181,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Exercício',
+                        'Exercicio',
                         style: TextStyle(
                           fontSize: 32,
                           color: ink,
@@ -185,14 +194,19 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                   Row(
                     children: [
                       exercicioAsync.when(
-                        data: (ex) => IconButton(
-                          icon: Icon(
-                            ex.favoritado ? Icons.star : Icons.star_border,
-                            color: ex.favoritado ? EagleTokens.warn : mute,
-                          ),
-                          tooltip: ex.favoritado ? 'Remover dos favoritos' : 'Adicionar aos favoritos',
-                          onPressed: () => _toggleFavorito(context, ex.favoritado),
-                        ),
+                        data:
+                            (ex) => IconButton(
+                              icon: Icon(
+                                ex.favoritado ? Icons.star : Icons.star_border,
+                                color: ex.favoritado ? EagleTokens.warn : mute,
+                              ),
+                              tooltip:
+                                  ex.favoritado
+                                      ? 'Remover dos favoritos'
+                                      : 'Adicionar aos favoritos',
+                              onPressed:
+                                  () => _toggleFavorito(context, ex.favoritado),
+                            ),
                         loading: () => const SizedBox.shrink(),
                         error: (_, __) => const SizedBox.shrink(),
                       ),
@@ -207,149 +221,344 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
             ),
             Expanded(
               child: exercicioAsync.when(
-                loading: () => Center(child: CircularProgressIndicator(color: primary)),
+                loading:
+                    () => Center(
+                      child: CircularProgressIndicator(color: primary),
+                    ),
                 error: (e, _) => Center(child: Text('Erro: $e')),
-                data: (ex) => SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (ex.gifUrl != null || ex.thumbnailUrl != null)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            ex.gifUrl ?? ex.thumbnailUrl!,
-                            height: 200,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                          ),
-                        ),
-                      const SizedBox(height: 16),
-                      Text(ex.nome, style: Theme.of(context).textTheme.headlineSmall),
-                      const SizedBox(height: 8),
-                      // Chips de músculo alvo e categoria
-                      Wrap(
-                        spacing: 8,
+                data:
+                    (ex) => SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (ex.musculoAlvo != null && ex.musculoAlvo!.isNotEmpty)
-                            Chip(
-                              avatar: const Icon(Icons.fitness_center, size: 16),
-                              label: Text(ex.musculoAlvo!),
+                          Text(
+                            ex.nome,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: ink,
                             ),
-                          if (ex.categoria != null && ex.categoria!.isNotEmpty)
-                            Chip(
-                              avatar: const Icon(Icons.category, size: 16),
-                              label: Text(ex.categoria!),
+                          ),
+                          const SizedBox(height: 10),
+                          _ExerciseEssentials(exercicio: ex),
+                          const SizedBox(height: 14),
+                          _OwnVideoPanel(
+                            hasVideo: ex.videoUrl?.isNotEmpty == true,
+                            uploading: _uploadingVideo,
+                            onUpload: () => _pickAndUploadVideo(context),
+                          ),
+                          if (ex.videoUrl?.isNotEmpty == true) ...[
+                            const SizedBox(height: 12),
+                            _VideoPlayer(url: ex.videoUrl!),
+                          ] else if (ex.gifUrl != null ||
+                              ex.thumbnailUrl != null) ...[
+                            const SizedBox(height: 12),
+                            _ExercisePreviewImage(
+                              url: ex.gifUrl ?? ex.thumbnailUrl!,
                             ),
-                          if (ex.equipamento != null && ex.equipamento!.isNotEmpty)
-                            Chip(
-                              avatar: const Icon(Icons.construction_rounded, size: 16),
-                              label: Text(ex.equipamento!),
+                          ],
+                          if (ex.descricao?.trim().isNotEmpty == true) ...[
+                            const SizedBox(height: 14),
+                            _SimpleInfoCard(
+                              icon: Icons.menu_book_rounded,
+                              title: 'Como orientar',
+                              text: ex.descricao!.trim(),
                             ),
-                          if (ex.nivel != null && ex.nivel!.isNotEmpty)
-                            Chip(
-                              avatar: const Icon(Icons.trending_up_rounded, size: 16),
-                              label: Text(ex.nivel!),
-                            ),
-                          if (ex.mecanica != null && ex.mecanica!.isNotEmpty)
-                            Chip(
-                              avatar: const Icon(Icons.account_tree_rounded, size: 16),
-                              label: Text(ex.mecanica!),
-                            ),
-                          if (ex.objetivo != null && ex.objetivo!.isNotEmpty)
-                            Chip(
-                              avatar: const Icon(Icons.flag_rounded, size: 16),
-                              label: Text(ex.objetivo!),
-                            ),
+                          ],
+                          if (ex.errosComuns?.trim().isNotEmpty == true ||
+                              ex.contraindicacoes?.trim().isNotEmpty == true ||
+                              ex.substitutos?.trim().isNotEmpty == true) ...[
+                            const SizedBox(height: 12),
+                            _GuidanceExpansion(exercicio: ex),
+                          ],
+                          const SizedBox(height: 12),
+                          _TechnicalDataExpansion(
+                            exercicio: ex,
+                            onChangeEditorial:
+                                (status) => _updateEditorialReview(
+                                  context,
+                                  status,
+                                  ex.editorialNotes,
+                                ),
+                          ),
                         ],
                       ),
-                      // Tags
-                      if (ex.tags != null && ex.tags!.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 6,
-                          children: ex.tags!
-                              .split(',')
-                              .map((t) => t.trim())
-                              .where((t) => t.isNotEmpty)
-                              .map((t) => Chip(
-                                    label: Text(t, style: const TextStyle(fontSize: 12)),
-                                    backgroundColor:
-                                        Theme.of(context).colorScheme.secondaryContainer,
-                                    padding: EdgeInsets.zero,
-                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  ))
-                              .toList(),
-                        ),
-                      ],
-                      const SizedBox(height: 14),
-                      _PrescriptionReadinessPanel(exercicio: ex),
-                      const SizedBox(height: 12),
-                      if (ex.videoSource?.isNotEmpty == true || ex.licenseStatus?.isNotEmpty == true) ...[
-                        _EditorialReviewPanel(
-                          status: ex.editorialStatus,
-                          notes: ex.editorialNotes,
-                          reviewedAt: ex.editorialReviewedAt,
-                          onChange: (status) => _updateEditorialReview(
-                            context,
-                            status,
-                            ex.editorialNotes,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        _MediaMetadataPanel(
-                          source: ex.videoSource,
-                          licenseStatus: ex.licenseStatus,
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                      _OwnVideoPanel(
-                        hasVideo: ex.videoUrl != null && ex.videoUrl!.isNotEmpty,
-                        uploading: _uploadingVideo,
-                        onUpload: () => _pickAndUploadVideo(context),
-                      ),
-                      if (ex.videoUrl != null) ...[
-                        const SizedBox(height: 12),
-                        _VideoPlayer(url: ex.videoUrl!),
-                      ],
-                      if (ex.descricao != null && ex.descricao!.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        Text('Descrição', style: Theme.of(context).textTheme.titleSmall),
-                        const SizedBox(height: 4),
-                        Text(ex.descricao!),
-                      ],
-                      if (ex.errosComuns?.trim().isNotEmpty == true) ...[
-                        const SizedBox(height: 12),
-                        _GuidanceCard(
-                          icon: Icons.report_problem_outlined,
-                          title: 'Erros comuns',
-                          text: ex.errosComuns!.trim(),
-                          color: EagleTokens.warn,
-                        ),
-                      ],
-                      if (ex.contraindicacoes?.trim().isNotEmpty == true) ...[
-                        const SizedBox(height: 12),
-                        _GuidanceCard(
-                          icon: Icons.health_and_safety_outlined,
-                          title: 'Contraindicacoes',
-                          text: ex.contraindicacoes!.trim(),
-                          color: EagleTokens.bad,
-                        ),
-                      ],
-                      if (ex.substitutos?.trim().isNotEmpty == true) ...[
-                        const SizedBox(height: 12),
-                        _GuidanceCard(
-                          icon: Icons.swap_horiz_rounded,
-                          title: 'Substitutos',
-                          text: ex.substitutos!.trim(),
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+                    ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ExerciseEssentials extends StatelessWidget {
+  final Exercicio exercicio;
+
+  const _ExerciseEssentials({required this.exercicio});
+
+  @override
+  Widget build(BuildContext context) {
+    final items =
+        [
+          (Icons.fitness_center_rounded, exercicio.musculoAlvo),
+          (Icons.category_rounded, exercicio.categoria),
+          (Icons.construction_rounded, exercicio.equipamento),
+          (Icons.trending_up_rounded, exercicio.nivel),
+        ].where((item) => item.$2?.trim().isNotEmpty == true).toList();
+
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final item in items)
+          _CompactPill(icon: item.$1, label: item.$2!.trim()),
+      ],
+    );
+  }
+}
+
+class _CompactPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _CompactPill({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: isDark ? 0.18 : 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: primary.withValues(alpha: 0.10)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: primary),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExercisePreviewImage extends StatelessWidget {
+  final String url;
+
+  const _ExercisePreviewImage({required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Image.network(
+        url,
+        height: 190,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      ),
+    );
+  }
+}
+
+class _SimpleInfoCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String text;
+
+  const _SimpleInfoCard({
+    required this.icon,
+    required this.title,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: mute,
+                    height: 1.35,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GuidanceExpansion extends StatelessWidget {
+  final Exercicio exercicio;
+
+  const _GuidanceExpansion({required this.exercicio});
+
+  @override
+  Widget build(BuildContext context) {
+    return _CleanExpansion(
+      icon: Icons.health_and_safety_outlined,
+      title: 'Cuidados e substituicoes',
+      children: [
+        if (exercicio.errosComuns?.trim().isNotEmpty == true)
+          _GuidanceCard(
+            icon: Icons.report_problem_outlined,
+            title: 'Erros comuns',
+            text: exercicio.errosComuns!.trim(),
+            color: EagleTokens.warn,
+          ),
+        if (exercicio.contraindicacoes?.trim().isNotEmpty == true)
+          _GuidanceCard(
+            icon: Icons.health_and_safety_outlined,
+            title: 'Contraindicacoes',
+            text: exercicio.contraindicacoes!.trim(),
+            color: EagleTokens.bad,
+          ),
+        if (exercicio.substitutos?.trim().isNotEmpty == true)
+          _GuidanceCard(
+            icon: Icons.swap_horiz_rounded,
+            title: 'Substitutos',
+            text: exercicio.substitutos!.trim(),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+      ],
+    );
+  }
+}
+
+class _TechnicalDataExpansion extends StatelessWidget {
+  final Exercicio exercicio;
+  final ValueChanged<String> onChangeEditorial;
+
+  const _TechnicalDataExpansion({
+    required this.exercicio,
+    required this.onChangeEditorial,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _CleanExpansion(
+      icon: Icons.tune_rounded,
+      title: 'Dados tecnicos',
+      children: [
+        if (exercicio.tags?.trim().isNotEmpty == true)
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children:
+                exercicio.tags!
+                    .split(',')
+                    .map((t) => t.trim())
+                    .where((t) => t.isNotEmpty)
+                    .map((t) => _CompactPill(icon: Icons.tag_rounded, label: t))
+                    .toList(),
+          ),
+        _PrescriptionReadinessPanel(exercicio: exercicio),
+        if (exercicio.videoSource?.isNotEmpty == true ||
+            exercicio.licenseStatus?.isNotEmpty == true)
+          _MediaMetadataPanel(
+            source: exercicio.videoSource,
+            licenseStatus: exercicio.licenseStatus,
+          ),
+        _EditorialReviewPanel(
+          status: exercicio.editorialStatus,
+          notes: exercicio.editorialNotes,
+          reviewedAt: exercicio.editorialReviewedAt,
+          onChange: onChangeEditorial,
+        ),
+      ],
+    );
+  }
+}
+
+class _CleanExpansion extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final List<Widget> children;
+
+  const _CleanExpansion({
+    required this.icon,
+    required this.title,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+          title: Text(
+            title,
+            style: TextStyle(
+              color: ink,
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14),
+          children: [
+            for (var i = 0; i < children.length; i++) ...[
+              if (i > 0) const SizedBox(height: 10),
+              children[i],
+            ],
           ],
         ),
       ),
@@ -462,9 +671,10 @@ class _ReadinessCheck extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fallback = Theme.of(context).brightness == Brightness.dark
-        ? EagleTokens.darkInkMute
-        : EagleTokens.inkMute;
+    final fallback =
+        Theme.of(context).brightness == Brightness.dark
+            ? EagleTokens.darkInkMute
+            : EagleTokens.inkMute;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
@@ -504,9 +714,10 @@ Color _trustColor(Exercicio exercicio, Color primary) {
 
 IconData _trustIcon(Exercicio exercicio) {
   return switch (exercicio.mediaTrustLevel) {
-    'READY' => exercicio.isPersonalUpload
-        ? Icons.workspace_premium_rounded
-        : Icons.verified_rounded,
+    'READY' =>
+      exercicio.isPersonalUpload
+          ? Icons.workspace_premium_rounded
+          : Icons.verified_rounded,
     'NO_VIDEO' => Icons.videocam_off_outlined,
     _ => Icons.rate_review_outlined,
   };
@@ -590,7 +801,7 @@ class _EditorialReviewPanel extends StatelessWidget {
                       [
                         _formatEditorialStatus(status),
                         if (reviewed != null) 'revisado em $reviewed',
-                      ].join(' · '),
+                      ].join(' - '),
                       style: TextStyle(
                         color: mute,
                         fontSize: 12.5,
@@ -707,9 +918,23 @@ class _GuidanceCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(color: ink, fontSize: 13.5, fontWeight: FontWeight.w800)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(text, style: TextStyle(color: ink.withValues(alpha: 0.82), fontSize: 12.8, height: 1.36)),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: ink.withValues(alpha: 0.82),
+                    fontSize: 12.8,
+                    height: 1.36,
+                  ),
+                ),
               ],
             ),
           ),
@@ -746,7 +971,10 @@ class _MediaMetadataPanel extends StatelessWidget {
         children: [
           Icon(
             licensed ? Icons.verified_rounded : Icons.video_library_rounded,
-            color: licensed ? EagleTokens.good : Theme.of(context).colorScheme.primary,
+            color:
+                licensed
+                    ? EagleTokens.good
+                    : Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -755,15 +983,24 @@ class _MediaMetadataPanel extends StatelessWidget {
               children: [
                 Text(
                   licensed ? 'Video licenciado' : 'Origem do video',
-                  style: TextStyle(color: ink, fontSize: 13.5, fontWeight: FontWeight.w900),
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   [
                     if (source?.isNotEmpty == true) _formatSource(source!),
-                    if (licenseStatus?.isNotEmpty == true) _formatLicense(licenseStatus!),
+                    if (licenseStatus?.isNotEmpty == true)
+                      _formatLicense(licenseStatus!),
                   ].join(' | '),
-                  style: TextStyle(color: mute, fontSize: 12.5, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -833,7 +1070,9 @@ class _VideoPlayerState extends State<_VideoPlayer> {
           color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.18),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.18),
           ),
         ),
         child: Column(
@@ -885,9 +1124,10 @@ class _VideoPlayerState extends State<_VideoPlayer> {
               icon: Icon(
                 _ctrl.value.isPlaying ? Icons.pause : Icons.play_arrow,
               ),
-              onPressed: () => setState(() {
-                _ctrl.value.isPlaying ? _ctrl.pause() : _ctrl.play();
-              }),
+              onPressed:
+                  () => setState(() {
+                    _ctrl.value.isPlaying ? _ctrl.pause() : _ctrl.play();
+                  }),
             ),
           ],
         ),
@@ -944,14 +1184,22 @@ class _OwnVideoPanel extends StatelessWidget {
               children: [
                 Text(
                   hasVideo ? 'Video proprio ativo' : 'Adicionar video proprio',
-                  style: TextStyle(color: ink, fontSize: 14, fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   hasVideo
                       ? 'Use sua demonstracao para gerar mais confianca no aluno.'
                       : 'Suba uma demonstracao sua para diferenciar este exercicio.',
-                  style: TextStyle(color: mute, fontSize: 12.2, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 12.2,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -959,19 +1207,28 @@ class _OwnVideoPanel extends StatelessWidget {
           const SizedBox(width: 10),
           FilledButton.icon(
             onPressed: uploading ? null : onUpload,
-            icon: uploading
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
-                : Icon(hasVideo ? Icons.sync_rounded : Icons.upload_rounded, size: 17),
+            icon:
+                uploading
+                    ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                    : Icon(
+                      hasVideo ? Icons.sync_rounded : Icons.upload_rounded,
+                      size: 17,
+                    ),
             label: Text(hasVideo ? 'Trocar' : 'Enviar'),
             style: FilledButton.styleFrom(
               backgroundColor: primary,
               foregroundColor: Colors.white,
               minimumSize: const Size(92, 42),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ],
