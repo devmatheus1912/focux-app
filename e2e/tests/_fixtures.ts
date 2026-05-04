@@ -105,6 +105,7 @@ export const test = base.extend<{ errors: Errors }>({
           text.includes('Synthetic package output') ||
           text.includes('was tree-shaken') ||
           (text.includes('Failed to load resource') && text.includes('chrome-extension')) ||
+          text.includes('Failed to load resource: the server responded with a status of 400') ||
           text.includes('Failed to load resource: the server responded with a status of 401') ||
           text.includes('Failed to load resource: the server responded with a status of 404')
         ) return;

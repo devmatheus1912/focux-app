@@ -1,20 +1,53 @@
+import type { Page } from '@playwright/test';
 import { test, expect } from '../_fixtures';
 
-test.describe('@p0 @smoke login público', () => {
+async function fillLoginFields(page: Page, email: string, password: string) {
+  const inputs = page.locator('input:not([type="checkbox"]):not([type="hidden"])');
+  const count = await inputs.count();
+
+  if (count >= 2) {
+    await inputs.nth(0).fill(email);
+    await inputs.nth(1).fill(password);
+    return;
+  }
+
+  await page.locator('body').click({ position: { x: 5, y: 5 } });
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await page.keyboard.type(email, { delay: 20 });
+  await page.keyboard.press('Tab');
+  await page.keyboard.type(password, { delay: 20 });
+}
+
+async function submitLogin(page: Page) {
+  const byRole = page.getByRole('button', { name: /entrar/i }).first();
+  if (await byRole.isVisible().catch(() => false)) {
+    await byRole.click();
+    return;
+  }
+
+  const byText = page.getByText(/^Entrar$/).first();
+  if (await byText.isVisible().catch(() => false)) {
+    await byText.click();
+    return;
+  }
+
+  await page.keyboard.press('Enter');
+}
+
+test.describe('@p0 @smoke login publico', () => {
   test('rota /login carrega sem erro', async ({ page }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test('credencial inválida mostra erro amigável (não DioException cru)', async ({ page }) => {
+  test('credencial invalida mostra erro amigavel (nao DioException cru)', async ({ page }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByPlaceholder(/seu@email\.com/i).fill('naoexiste@focux.app');
-    await page.getByPlaceholder(/•+/).fill('senhaerrada123');
-    await page.getByRole('button', { name: /entrar/i }).click();
+    await fillLoginFields(page, 'naoexiste@focux.app', 'senhaerrada123');
+    await submitLogin(page);
 
-    // Should show user-friendly error, not raw exception text
     await expect(page.getByText(/dioexception/i)).toHaveCount(0);
   });
 
@@ -33,7 +66,6 @@ test.describe('@p0 @smoke login público', () => {
   test('rota inexistente cai no fallback HomeRedirect', async ({ page }) => {
     await page.goto('/rota-que-nao-existe');
     await page.waitForLoadState('networkidle');
-    // Router has errorBuilder -> HomeRedirectScreen which redirects to login when no token
     await expect(page).toHaveURL(/(login|dashboard|home)/);
   });
 });
