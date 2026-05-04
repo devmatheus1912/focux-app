@@ -58,9 +58,16 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erro ao enviar foto: $error')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            friendlyError(
+              error,
+              fallback: 'Nao foi possivel enviar a foto agora.',
+            ),
+          ),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _uploadingPhoto = false);

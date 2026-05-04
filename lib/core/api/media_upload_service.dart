@@ -14,9 +14,37 @@ class MediaUploadService {
     final form = FormData.fromMap({
       'folder': folder,
       'resourceType': resourceType,
-      'file': MultipartFile.fromBytes(bytes, filename: filename),
+      'file': MultipartFile.fromBytes(
+        bytes,
+        filename: filename,
+        contentType: _contentTypeFor(filename, resourceType),
+      ),
     });
     final response = await _dio.post('/api/uploads', data: form);
     return response.data['url'] as String;
+  }
+
+  DioMediaType? _contentTypeFor(String filename, String resourceType) {
+    final ext = filename.toLowerCase().split('.').lastOrNull ?? '';
+    return switch (ext) {
+      'jpg' || 'jpeg' => DioMediaType('image', 'jpeg'),
+      'png' => DioMediaType('image', 'png'),
+      'webp' => DioMediaType('image', 'webp'),
+      'gif' => DioMediaType('image', 'gif'),
+      'heic' => DioMediaType('image', 'heic'),
+      'heif' => DioMediaType('image', 'heif'),
+      'mp4' => DioMediaType('video', 'mp4'),
+      'mov' => DioMediaType('video', 'quicktime'),
+      'webm' => DioMediaType('video', 'webm'),
+      'm4a' => DioMediaType('audio', 'mp4'),
+      'mp3' => DioMediaType('audio', 'mpeg'),
+      'wav' => DioMediaType('audio', 'wav'),
+      _ =>
+        resourceType == 'image'
+            ? DioMediaType('image', 'jpeg')
+            : resourceType == 'video'
+            ? DioMediaType('video', 'mp4')
+            : null,
+    };
   }
 }

@@ -12,7 +12,8 @@ String friendlyError(Object error, {String? fallback}) {
 
     // Try to extract a server-provided message
     if (data is Map<String, dynamic>) {
-      final msg = data['message'] ?? data['error'] ?? data['mensagem'];
+      final msg =
+          data['message'] ?? data['error'] ?? data['erro'] ?? data['mensagem'];
       if (msg is String && msg.trim().isNotEmpty) return msg;
     }
     if (data is String && data.trim().isNotEmpty && data.length < 200) {
