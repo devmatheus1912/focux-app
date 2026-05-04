@@ -36,14 +36,18 @@ class FxDock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final bgColor = isDark
-        ? const Color.fromRGBO(20, 26, 48, 0.72)
-        : const Color.fromRGBO(255, 255, 255, 0.78);
-    final borderColor = isDark
-        ? const Color.fromRGBO(255, 255, 255, 0.12)
-        : const Color.fromRGBO(0, 0, 0, 0.06);
-    final inactiveColor =
-        (isDark ? EagleTokens.darkInk : EagleTokens.ink).withValues(alpha: 0.45);
+    final width = MediaQuery.sizeOf(context).width;
+    final compact = width < 390;
+    final bgColor =
+        isDark
+            ? const Color.fromRGBO(20, 26, 48, 0.72)
+            : const Color.fromRGBO(255, 255, 255, 0.78);
+    final borderColor =
+        isDark
+            ? const Color.fromRGBO(255, 255, 255, 0.12)
+            : const Color.fromRGBO(0, 0, 0, 0.06);
+    final inactiveColor = (isDark ? EagleTokens.darkInk : EagleTokens.ink)
+        .withValues(alpha: 0.45);
 
     // Shadow is on the outer container; ClipRRect clips content only.
     return Container(
@@ -74,7 +78,12 @@ class FxDock extends StatelessWidget {
               borderRadius: BorderRadius.circular(28),
               border: Border.all(color: borderColor, width: 0.5),
             ),
-            padding: const EdgeInsets.fromLTRB(6, 10, 6, 14),
+            padding: EdgeInsets.fromLTRB(
+              6,
+              compact ? 8 : 10,
+              6,
+              compact ? 10 : 14,
+            ),
             child: Row(
               children: List.generate(_items.length, (i) {
                 final item = _items[i];
@@ -93,19 +102,22 @@ class FxDock extends StatelessWidget {
                       children: [
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
-                          width: 44,
-                          height: 30,
+                          width: compact ? 38 : 44,
+                          height: compact ? 28 : 30,
                           decoration: BoxDecoration(
-                            color: active
-                                ? BrandPalette.soft(primary, dark: isDark)
-                                    .withValues(alpha: isDark ? 0.42 : 0.72)
-                                : Colors.transparent,
+                            color:
+                                active
+                                    ? BrandPalette.soft(
+                                      primary,
+                                      dark: isDark,
+                                    ).withValues(alpha: isDark ? 0.42 : 0.72)
+                                    : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Center(
                             child: FxIcon(
                               name: item.icon,
-                              size: 22,
+                              size: compact ? 20 : 22,
                               color: color,
                               strokeWidth: active ? 2.2 : 1.8,
                             ),
@@ -115,11 +127,13 @@ class FxDock extends StatelessWidget {
                         Text(
                           item.label,
                           style: GoogleFonts.spaceGrotesk(
-                            fontSize: 10,
+                            fontSize: compact ? 9 : 10,
                             fontWeight: FontWeight.w600,
                             color: color,
                             height: 1,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),

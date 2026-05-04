@@ -19,8 +19,9 @@ import '../../evolucao/data/evolucao_repository.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import 'progresso_semanal_widget.dart';
 
-final minhasMedidasDashboardProvider =
-    FutureProvider<List<MedidaCorporal>>((ref) async {
+final minhasMedidasDashboardProvider = FutureProvider<List<MedidaCorporal>>((
+  ref,
+) async {
   final repo = EvolucaoRepository(ref.read(apiClientProvider));
   return repo.listarMinhasMedidas();
 });
@@ -54,11 +55,15 @@ class AlunoDashboardScreen extends ConsumerWidget {
         backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
         leading: Builder(
-          builder: (ctx) => IconButton(
-            icon: Icon(Icons.menu, color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
-            onPressed: () => Scaffold.of(ctx).openDrawer(),
-            tooltip: 'Menu',
-          ),
+          builder:
+              (ctx) => IconButton(
+                icon: Icon(
+                  Icons.menu,
+                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                ),
+                onPressed: () => Scaffold.of(ctx).openDrawer(),
+                tooltip: 'Menu',
+              ),
         ),
         title: Text(
           'Meu Treino',
@@ -67,7 +72,9 @@ class AlunoDashboardScreen extends ConsumerWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
+        iconTheme: IconThemeData(
+          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+        ),
         actions: [
           NotificacaoBadgeButton(isDark: isDark),
           IconButton(
@@ -78,11 +85,16 @@ class AlunoDashboardScreen extends ConsumerWidget {
             onPressed: () {
               final currentMode = ref.read(themeModeProvider);
               ref.read(themeModeProvider.notifier).state =
-                  currentMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+                  currentMode == ThemeMode.dark
+                      ? ThemeMode.light
+                      : ThemeMode.dark;
             },
           ),
           IconButton(
-            icon: Icon(Icons.logout, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+            icon: Icon(
+              Icons.logout,
+              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            ),
             onPressed: () async {
               await ref.read(authProvider.notifier).logout();
               if (context.mounted) context.go('/login');
@@ -96,39 +108,44 @@ class AlunoDashboardScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             brandAsync.when(
-              data: (brand) => alunoAsync.when(
-                data: (aluno) => _AlunoHeroCard(
-                  aluno: aluno,
-                  brand: brand,
-                  isDark: isDark,
-                ),
-                loading: () => _HeroCardSkeleton(isDark: isDark),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
+              data:
+                  (brand) => alunoAsync.when(
+                    data:
+                        (aluno) => _AlunoHeroCard(
+                          aluno: aluno,
+                          brand: brand,
+                          isDark: isDark,
+                        ),
+                    loading: () => _HeroCardSkeleton(isDark: isDark),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
               loading: () => _HeroCardSkeleton(isDark: isDark),
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 16),
             treinosAsync.when(
-              data: (treinos) => alunoAsync.when(
-                data: (aluno) => _TodayFocusCard(
-                  aluno: aluno,
-                  treinos: treinos,
-                  isDark: isDark,
-                ),
-                loading: () => _FocusCardSkeleton(isDark: isDark),
-                error: (_, __) => _FocusCardSkeleton(isDark: isDark),
-              ),
+              data:
+                  (treinos) => alunoAsync.when(
+                    data:
+                        (aluno) => _TodayFocusCard(
+                          aluno: aluno,
+                          treinos: treinos,
+                          isDark: isDark,
+                        ),
+                    loading: () => _FocusCardSkeleton(isDark: isDark),
+                    error: (_, __) => _FocusCardSkeleton(isDark: isDark),
+                  ),
               loading: () => _FocusCardSkeleton(isDark: isDark),
               error: (_, __) => _FocusCardSkeleton(isDark: isDark),
             ),
             const SizedBox(height: 16),
             alunoAsync.when(
-              data: (aluno) => _StudentStatsRow(
-                aluno: aluno,
-                treinos: treinosAsync.valueOrNull ?? const [],
-                isDark: isDark,
-              ),
+              data:
+                  (aluno) => _StudentStatsRow(
+                    aluno: aluno,
+                    treinos: treinosAsync.valueOrNull ?? const [],
+                    isDark: isDark,
+                  ),
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
             ),
@@ -141,24 +158,26 @@ class AlunoDashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             alunoAsync.when(
-              data: (aluno) => _ProgressCheckpointCard(
-                aluno: aluno,
-                medidasAsync: medidasAsync,
-                isDark: isDark,
-              ),
+              data:
+                  (aluno) => _ProgressCheckpointCard(
+                    aluno: aluno,
+                    medidasAsync: medidasAsync,
+                    isDark: isDark,
+                  ),
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 16),
             alunoAsync.when(
-              data: (aluno) => _StudentJourneyCard(
-                aluno: aluno,
-                treinos: treinosAsync.valueOrNull ?? const [],
-                medidasAsync: medidasAsync,
-                historicoAsync: historicoAsync,
-                chatAsync: chatAsync,
-                isDark: isDark,
-              ),
+              data:
+                  (aluno) => _StudentJourneyCard(
+                    aluno: aluno,
+                    treinos: treinosAsync.valueOrNull ?? const [],
+                    medidasAsync: medidasAsync,
+                    historicoAsync: historicoAsync,
+                    chatAsync: chatAsync,
+                    isDark: isDark,
+                  ),
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
             ),
@@ -191,13 +210,55 @@ class AlunoDashboardScreen extends ConsumerWidget {
                   spacing: spacing,
                   runSpacing: spacing,
                   children: [
-                    _ShortcutBtn(icon: Icons.fitness_center, label: 'Meus\nTreinos', onTap: () => context.push('/checkin/treinos'), isDark: isDark, width: btnWidth),
-                    _ShortcutBtn(icon: Icons.history, label: 'Meu\nHistorico', onTap: () => context.push('/checkin/historico'), isDark: isDark, width: btnWidth),
-                    _ShortcutBtn(icon: Icons.dynamic_feed, label: 'Feed\ndo Personal', onTap: () => context.push('/feed/aluno'), isDark: isDark, width: btnWidth),
-                    _ShortcutBtn(icon: Icons.chat_bubble_outline, label: 'Falar\ncom Personal', onTap: () => context.push('/chat/aluno'), isDark: isDark, width: btnWidth),
-                    _ShortcutBtn(icon: Icons.smart_toy, label: 'IA\nAssistente', onTap: () => context.push('/ia/aluno'), isDark: isDark, width: btnWidth),
-                    _ShortcutBtn(icon: Icons.payments, label: 'Meu\nFinanceiro', onTap: () => context.push('/financeiro/aluno'), isDark: isDark, width: btnWidth),
-                    _ShortcutBtn(icon: Icons.calendar_month, label: 'Minha\nAgenda', onTap: () => context.push('/agenda/aluno'), isDark: isDark, width: btnWidth),
+                    _ShortcutBtn(
+                      icon: Icons.fitness_center,
+                      label: 'Meus\nTreinos',
+                      onTap: () => context.push('/checkin/treinos'),
+                      isDark: isDark,
+                      width: btnWidth,
+                    ),
+                    _ShortcutBtn(
+                      icon: Icons.history,
+                      label: 'Meu\nHistorico',
+                      onTap: () => context.push('/checkin/historico'),
+                      isDark: isDark,
+                      width: btnWidth,
+                    ),
+                    _ShortcutBtn(
+                      icon: Icons.dynamic_feed,
+                      label: 'Feed\ndo Personal',
+                      onTap: () => context.push('/feed/aluno'),
+                      isDark: isDark,
+                      width: btnWidth,
+                    ),
+                    _ShortcutBtn(
+                      icon: Icons.chat_bubble_outline,
+                      label: 'Falar\ncom Personal',
+                      onTap: () => context.push('/chat/aluno'),
+                      isDark: isDark,
+                      width: btnWidth,
+                    ),
+                    _ShortcutBtn(
+                      icon: Icons.smart_toy,
+                      label: 'IA\nAssistente',
+                      onTap: () => context.push('/ia/aluno'),
+                      isDark: isDark,
+                      width: btnWidth,
+                    ),
+                    _ShortcutBtn(
+                      icon: Icons.payments,
+                      label: 'Meu\nFinanceiro',
+                      onTap: () => context.push('/financeiro/aluno'),
+                      isDark: isDark,
+                      width: btnWidth,
+                    ),
+                    _ShortcutBtn(
+                      icon: Icons.calendar_month,
+                      label: 'Minha\nAgenda',
+                      onTap: () => context.push('/agenda/aluno'),
+                      isDark: isDark,
+                      width: btnWidth,
+                    ),
                   ],
                 );
               },
@@ -231,9 +292,10 @@ class _AlunoHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firstName = aluno.nome.split(' ').first;
-    final slogan = brand.slogan?.trim().isNotEmpty == true
-        ? brand.slogan!
-        : 'Seu treino organizado para hoje.';
+    final slogan =
+        brand.slogan?.trim().isNotEmpty == true
+            ? brand.slogan!
+            : 'Seu treino organizado para hoje.';
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -258,17 +320,18 @@ class _AlunoHeroCard extends StatelessWidget {
                 backgroundColor: Colors.white.withValues(alpha: 0.16),
                 backgroundImage:
                     brand.logoUrl != null ? NetworkImage(brand.logoUrl!) : null,
-                child: brand.logoUrl == null
-                    ? Text(
-                        brand.nomePersonal.isNotEmpty
-                            ? brand.nomePersonal[0].toUpperCase()
-                            : 'P',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      )
-                    : null,
+                child:
+                    brand.logoUrl == null
+                        ? Text(
+                          brand.nomePersonal.isNotEmpty
+                              ? brand.nomePersonal[0].toUpperCase()
+                              : 'P',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        )
+                        : null,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -320,7 +383,6 @@ class _AlunoHeroCard extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class _HeroPill extends StatelessWidget {
@@ -352,10 +414,7 @@ class _HeroPill extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 11,
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 11),
               ),
               Text(
                 value,
@@ -386,16 +445,17 @@ class _TodayFocusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final next = treinos.isEmpty ? null : treinos.first;
-    final completedFields = [
-      aluno.telefone,
-      aluno.whatsapp,
-      aluno.objetivo,
-      aluno.genero,
-      aluno.peso?.toString(),
-      aluno.altura?.toString(),
-      aluno.dataNascimento,
-      aluno.fotoUrl,
-    ].where((e) => e != null && e.toString().trim().isNotEmpty).length;
+    final completedFields =
+        [
+          aluno.telefone,
+          aluno.whatsapp,
+          aluno.objetivo,
+          aluno.genero,
+          aluno.peso?.toString(),
+          aluno.altura?.toString(),
+          aluno.dataNascimento,
+          aluno.fotoUrl,
+        ].where((e) => e != null && e.toString().trim().isNotEmpty).length;
     final profileCompletion = (completedFields / 8 * 100).round();
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -434,7 +494,8 @@ class _TodayFocusCard extends StatelessWidget {
               subtitle:
                   '${next.exercicios.length} exercicios para seguir seu plano com clareza.',
               cta: 'Treinar agora',
-              onTap: () => context.push('/checkin/executar', extra: next.treinoId),
+              onTap:
+                  () => context.push('/checkin/executar', extra: next.treinoId),
             )
           else
             _PrimaryActionCard(
@@ -497,10 +558,7 @@ class _PrimaryActionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 6),
           Text(subtitle, style: const TextStyle(height: 1.45)),
@@ -527,11 +585,9 @@ class _MiniMetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark
-            ? EagleTokens.darkCardHi
-            : BrandPalette.softer(primary),
+        color: isDark ? EagleTokens.darkCardHi : BrandPalette.softer(primary),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -540,14 +596,20 @@ class _MiniMetricCard extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
+              height: 1.05,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
-          Text(label, style: const TextStyle(fontSize: 12)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 11.5, height: 1.15),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
@@ -568,24 +630,41 @@ class _StudentStatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cards = [
-      ('Objetivo', aluno.objetivo?.trim().isNotEmpty == true ? aluno.objetivo! : 'Definir'),
-      ('Consultoria', aluno.tipoConsultoria?.trim().isNotEmpty == true ? aluno.tipoConsultoria! : 'Padrao'),
+      (
+        'Objetivo',
+        aluno.objetivo?.trim().isNotEmpty == true ? aluno.objetivo! : 'Definir',
+      ),
+      (
+        'Consultoria',
+        aluno.tipoConsultoria?.trim().isNotEmpty == true
+            ? aluno.tipoConsultoria!
+            : 'Padrao',
+      ),
       ('Proximos', '${treinos.length}'),
     ];
 
-    return Row(
-      children: [
-        for (var i = 0; i < cards.length; i++) ...[
-          Expanded(
-            child: _MiniMetricCard(
-              label: cards[i].$1,
-              value: cards[i].$2,
-              isDark: isDark,
-            ),
-          ),
-          if (i != cards.length - 1) const SizedBox(width: 10),
-        ],
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoColumns = constraints.maxWidth < 360;
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (final card in cards)
+              SizedBox(
+                width:
+                    twoColumns
+                        ? (constraints.maxWidth - 10) / 2
+                        : (constraints.maxWidth - 20) / 3,
+                child: _MiniMetricCard(
+                  label: card.$1,
+                  value: card.$2,
+                  isDark: isDark,
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -615,20 +694,26 @@ class _PerformanceEvolutionCard extends StatelessWidget {
         border: Border.all(color: line),
       ),
       child: historicoAsync.when(
-        loading: () => const SizedBox(
-          height: 96,
-          child: Center(child: CircularProgressIndicator()),
-        ),
-        error: (_, __) => Text(
-          'Sua evolucao de performance vai aparecer aqui assim que o historico carregar.',
-          style: TextStyle(color: mute, height: 1.45),
-        ),
+        loading:
+            () => const SizedBox(
+              height: 96,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+        error:
+            (_, __) => Text(
+              'Sua evolucao de performance vai aparecer aqui assim que o historico carregar.',
+              style: TextStyle(color: mute, height: 1.45),
+            ),
         data: (historico) {
-          final treinosConcluidos = historico
-              .where((treino) => treino.status == 'CONCLUIDO')
-              .toList();
+          final treinosConcluidos =
+              historico
+                  .where((treino) => treino.status == 'CONCLUIDO')
+                  .toList();
           final ultimaEvolucao = _ultimaEvolucao(treinosConcluidos);
-          final volumeSemana = _volumePeriodo(treinosConcluidos, _inicioSemana());
+          final volumeSemana = _volumePeriodo(
+            treinosConcluidos,
+            _inicioSemana(),
+          );
           final volumeMes = _volumePeriodo(treinosConcluidos, _inicioMes());
 
           return Column(
@@ -676,9 +761,10 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   Expanded(
                     child: _MiniMetricCard(
                       label: 'Ultimo PR',
-                      value: ultimaEvolucao == null
-                          ? '--'
-                          : _labelEvolucao(ultimaEvolucao.tipo),
+                      value:
+                          ultimaEvolucao == null
+                              ? '--'
+                              : _labelEvolucao(ultimaEvolucao.tipo),
                       isDark: isDark,
                     ),
                   ),
@@ -706,9 +792,10 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.04)
-                        : BrandPalette.softer(primary),
+                    color:
+                        isDark
+                            ? Colors.white.withValues(alpha: 0.04)
+                            : BrandPalette.softer(primary),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
@@ -814,9 +901,10 @@ class _PerformanceEvolutionCard extends StatelessWidget {
   }
 
   String _fmtValor(double value, String unidade) {
-    final formatted = value == value.roundToDouble()
-        ? value.toStringAsFixed(0)
-        : value.toStringAsFixed(1);
+    final formatted =
+        value == value.roundToDouble()
+            ? value.toStringAsFixed(0)
+            : value.toStringAsFixed(1);
     if (unidade.isEmpty) return formatted;
     return '$formatted $unidade';
   }
@@ -842,16 +930,21 @@ class _ProgressCheckpointCard extends StatelessWidget {
   }
 
   int _profileCompletion() {
-    final filled = [
-      aluno.telefone,
-      aluno.whatsapp,
-      aluno.objetivo,
-      aluno.genero,
-      aluno.peso?.toString(),
-      aluno.altura?.toString(),
-      aluno.dataNascimento,
-      aluno.fotoUrl,
-    ].where((value) => value != null && value.toString().trim().isNotEmpty).length;
+    final filled =
+        [
+              aluno.telefone,
+              aluno.whatsapp,
+              aluno.objetivo,
+              aluno.genero,
+              aluno.peso?.toString(),
+              aluno.altura?.toString(),
+              aluno.dataNascimento,
+              aluno.fotoUrl,
+            ]
+            .where(
+              (value) => value != null && value.toString().trim().isNotEmpty,
+            )
+            .length;
     return (filled / 8 * 100).round();
   }
 
@@ -907,17 +1000,20 @@ class _ProgressCheckpointCard extends StatelessWidget {
           const SizedBox(height: 16),
           medidasAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => Text(
-              'Seu progresso corporal vai aparecer aqui assim que o app conseguir buscar as medidas.',
-              style: TextStyle(color: mute, height: 1.45),
-            ),
+            error:
+                (_, __) => Text(
+                  'Seu progresso corporal vai aparecer aqui assim que o app conseguir buscar as medidas.',
+                  style: TextStyle(color: mute, height: 1.45),
+                ),
             data: (medidas) {
               final ultima = medidas.isNotEmpty ? medidas.first : null;
-              final pesos = medidas.where((item) => item.peso != null).toList()
-                ..sort((a, b) => a.data.compareTo(b.data));
-              final diff = pesos.length >= 2
-                  ? pesos.last.peso! - pesos.first.peso!
-                  : null;
+              final pesos =
+                  medidas.where((item) => item.peso != null).toList()
+                    ..sort((a, b) => a.data.compareTo(b.data));
+              final diff =
+                  pesos.length >= 2
+                      ? pesos.last.peso! - pesos.first.peso!
+                      : null;
 
               return Column(
                 children: [
@@ -934,9 +1030,10 @@ class _ProgressCheckpointCard extends StatelessWidget {
                       Expanded(
                         child: _MiniMetricCard(
                           label: 'Ultimo peso',
-                          value: ultima?.peso != null
-                              ? '${ultima!.peso!.toStringAsFixed(1)} kg'
-                              : 'Sem peso',
+                          value:
+                              ultima?.peso != null
+                                  ? '${ultima!.peso!.toStringAsFixed(1)} kg'
+                                  : 'Sem peso',
                           isDark: isDark,
                         ),
                       ),
@@ -944,9 +1041,10 @@ class _ProgressCheckpointCard extends StatelessWidget {
                       Expanded(
                         child: _MiniMetricCard(
                           label: 'Variacao',
-                          value: diff == null
-                              ? '--'
-                              : '${diff > 0 ? '+' : ''}${diff.toStringAsFixed(1)} kg',
+                          value:
+                              diff == null
+                                  ? '--'
+                                  : '${diff > 0 ? '+' : ''}${diff.toStringAsFixed(1)} kg',
                           isDark: isDark,
                         ),
                       ),
@@ -957,9 +1055,10 @@ class _ProgressCheckpointCard extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.04)
-                          : BrandPalette.softer(primary),
+                      color:
+                          isDark
+                              ? Colors.white.withValues(alpha: 0.04)
+                              : BrandPalette.softer(primary),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -1002,7 +1101,8 @@ class _StudentJourneyCard extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<_StudentJourneyCard> createState() => _StudentJourneyCardState();
+  ConsumerState<_StudentJourneyCard> createState() =>
+      _StudentJourneyCardState();
 }
 
 class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
@@ -1017,7 +1117,8 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
     final mute = widget.isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     final medidas = widget.medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
-    final historico = widget.historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
+    final historico =
+        widget.historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
     final mensagens = widget.chatAsync.valueOrNull ?? const <ChatMsg>[];
 
     final plan = buildAlunoAutonomyPlan(
@@ -1068,7 +1169,10 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
               ),
               const SizedBox(width: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: BrandPalette.soft(primary, dark: widget.isDark),
                   borderRadius: BorderRadius.circular(16),
@@ -1088,7 +1192,8 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
-              value: plan.tasks.isEmpty ? 1 : plan.doneCount / plan.tasks.length,
+              value:
+                  plan.tasks.isEmpty ? 1 : plan.doneCount / plan.tasks.length,
               minHeight: 9,
               backgroundColor: BrandPalette.soft(primary, dark: widget.isDark),
               valueColor: AlwaysStoppedAnimation(primary),
@@ -1108,9 +1213,10 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
             width: double.infinity,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: widget.isDark
-                  ? Colors.white.withValues(alpha: 0.04)
-                  : BrandPalette.softer(primary),
+              color:
+                  widget.isDark
+                      ? Colors.white.withValues(alpha: 0.04)
+                      : BrandPalette.softer(primary),
               borderRadius: BorderRadius.circular(16),
             ),
             child: _NextBestTaskPanel(
@@ -1133,7 +1239,10 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
     );
   }
 
-  void _trackVisibleTasks(List<AlunoAutonomyTask> tasks, int profileCompletion) {
+  void _trackVisibleTasks(
+    List<AlunoAutonomyTask> tasks,
+    int profileCompletion,
+  ) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       for (final task in tasks) {
@@ -1246,24 +1355,18 @@ class _NextBestTaskPanel extends StatelessWidget {
             task!.description,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: mute,
-              fontSize: 12,
-              height: 1.3,
-            ),
+            style: TextStyle(color: mute, fontSize: 12, height: 1.3),
           ),
         ],
       ],
     );
-    final action = task == null
-        ? null
-        : FilledButton.tonal(
-            onPressed: onTap,
-            child: Text(
-              task!.cta,
-              overflow: TextOverflow.ellipsis,
-            ),
-          );
+    final action =
+        task == null
+            ? null
+            : FilledButton.tonal(
+              onPressed: onTap,
+              child: Text(task!.cta, overflow: TextOverflow.ellipsis),
+            );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1349,9 +1452,10 @@ class _AutonomyTaskTile extends StatelessWidget {
       width: 38,
       height: 38,
       decoration: BoxDecoration(
-        color: task.done
-            ? EagleTokens.good.withValues(alpha: 0.14)
-            : BrandPalette.soft(primary, dark: isDark),
+        color:
+            task.done
+                ? EagleTokens.good.withValues(alpha: 0.14)
+                : BrandPalette.soft(primary, dark: isDark),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(
@@ -1378,11 +1482,7 @@ class _AutonomyTaskTile extends StatelessWidget {
           task.description,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: mute,
-            fontSize: 12.5,
-            height: 1.4,
-          ),
+          style: TextStyle(color: mute, fontSize: 12.5, height: 1.4),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -1401,29 +1501,27 @@ class _AutonomyTaskTile extends StatelessWidget {
         ),
       ],
     );
-    final action = task.done
-        ? Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: EagleTokens.good.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: const Text(
-              'Feito',
-              style: TextStyle(
-                color: EagleTokens.good,
-                fontSize: 11.5,
-                fontWeight: FontWeight.w700,
+    final action =
+        task.done
+            ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: EagleTokens.good.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(999),
               ),
-            ),
-          )
-        : TextButton(
-            onPressed: onTap,
-            child: Text(
-              task.cta,
-              overflow: TextOverflow.ellipsis,
-            ),
-          );
+              child: const Text(
+                'Feito',
+                style: TextStyle(
+                  color: EagleTokens.good,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            )
+            : TextButton(
+              onPressed: onTap,
+              child: Text(task.cta, overflow: TextOverflow.ellipsis),
+            );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1437,41 +1535,42 @@ class _AutonomyTaskTile extends StatelessWidget {
               color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
             ),
           ),
-          child: compact
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        icon,
-                        const SizedBox(width: 12),
-                        Expanded(child: copy),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 180),
+          child:
+              compact
+                  ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          icon,
+                          const SizedBox(width: 12),
+                          Expanded(child: copy),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 180),
+                          child: action,
+                        ),
+                      ),
+                    ],
+                  )
+                  : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      icon,
+                      const SizedBox(width: 12),
+                      Expanded(child: copy),
+                      const SizedBox(width: 12),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 132),
                         child: action,
                       ),
-                    ),
-                  ],
-                )
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    icon,
-                    const SizedBox(width: 12),
-                    Expanded(child: copy),
-                    const SizedBox(width: 12),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 132),
-                      child: action,
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
         );
       },
     );
@@ -1482,10 +1581,7 @@ class _AutonomyTaskPill extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _AutonomyTaskPill({
-    required this.label,
-    required this.color,
-  });
+  const _AutonomyTaskPill({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -1704,9 +1800,10 @@ class _AlunoProfileCard extends StatelessWidget {
         border: Border.all(color: lineColor),
         boxShadow: [
           BoxShadow(
-            color: isDark
-                ? Colors.black.withValues(alpha: 0.3)
-                : Colors.black.withValues(alpha: 0.06),
+            color:
+                isDark
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : Colors.black.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1727,16 +1824,17 @@ class _AlunoProfileCard extends StatelessWidget {
                 radius: 30,
                 backgroundColor: BrandPalette.soft(primary, dark: false),
                 backgroundImage: hasFoto ? NetworkImage(aluno.fotoUrl!) : null,
-                child: hasFoto
-                    ? null
-                    : Text(
-                        _initials(aluno.nome),
-                        style: TextStyle(
-                          color: primary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 18,
+                child:
+                    hasFoto
+                        ? null
+                        : Text(
+                          _initials(aluno.nome),
+                          style: TextStyle(
+                            color: primary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                          ),
                         ),
-                      ),
               ),
             ),
             const SizedBox(width: 14),
@@ -1822,9 +1920,7 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final bg = isDark
-        ? EagleTokens.darkCardHi
-        : BrandPalette.softer(primary);
+    final bg = isDark ? EagleTokens.darkCardHi : BrandPalette.softer(primary);
     final fg = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
@@ -1842,7 +1938,11 @@ class _Chip extends StatelessWidget {
           ],
           Text(
             label,
-            style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              color: fg,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -1859,9 +1959,7 @@ class _ProfileCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shimmer = isDark
-        ? EagleTokens.darkCardHi
-        : EagleTokens.lineSoft;
+    final shimmer = isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft;
 
     return Container(
       height: 88,
@@ -1887,9 +1985,23 @@ class _ProfileCardSkeleton extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(height: 14, width: 140, decoration: BoxDecoration(color: shimmer, borderRadius: BorderRadius.circular(6))),
+                  Container(
+                    height: 14,
+                    width: 140,
+                    decoration: BoxDecoration(
+                      color: shimmer,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Container(height: 10, width: 90, decoration: BoxDecoration(color: shimmer, borderRadius: BorderRadius.circular(6))),
+                  Container(
+                    height: 10,
+                    width: 90,
+                    decoration: BoxDecoration(
+                      color: shimmer,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1924,7 +2036,8 @@ class _AlunoDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final drawerBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final headerBg = isDark ? EagleTokens.darkCardHi : BrandPalette.soft(primary);
+    final headerBg =
+        isDark ? EagleTokens.darkCardHi : BrandPalette.soft(primary);
     final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final dividerColor = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final hasFoto = aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty;
@@ -1958,17 +2071,19 @@ class _AlunoDrawer extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 28,
                     backgroundColor: BrandPalette.soft(primary, dark: false),
-                    backgroundImage: hasFoto ? NetworkImage(aluno.fotoUrl!) : null,
-                    child: hasFoto
-                        ? null
-                        : Text(
-                            _initials(aluno.nome),
-                            style: TextStyle(
-                              color: primary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
+                    backgroundImage:
+                        hasFoto ? NetworkImage(aluno.fotoUrl!) : null,
+                    child:
+                        hasFoto
+                            ? null
+                            : Text(
+                              _initials(aluno.nome),
+                              style: TextStyle(
+                                color: primary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
                   ),
                 ),
                 const SizedBox(width: 14),

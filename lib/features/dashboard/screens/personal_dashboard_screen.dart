@@ -113,6 +113,12 @@ class _PersonalDashboardScreenState
         loading: () => _buildShimmerLoading(context),
         error: (e, _) => Center(child: Text(friendlyError(e))),
         data: (data) {
+          final screenWidth = MediaQuery.sizeOf(context).width;
+          final isCompactPhone = screenWidth < 390;
+          final metricAspectRatio = isCompactPhone ? 1.18 : 1.28;
+          final shortcutAspectRatio = isCompactPhone ? 0.88 : 0.96;
+          final commandAspectRatio = isCompactPhone ? 1.7 : 2.0;
+
           // Computed values for hero card
           final monthNames = [
             'janeiro',
@@ -550,7 +556,7 @@ class _PersonalDashboardScreenState
                       crossAxisCount: 2,
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 10,
-                      childAspectRatio: 1.5,
+                      childAspectRatio: metricAspectRatio,
                       children: [
                         _QuickTile(
                           icon: Icons.people,
@@ -598,6 +604,7 @@ class _PersonalDashboardScreenState
                       isDark: isDark,
                       primary: primary,
                       finData: _finData,
+                      cardAspectRatio: commandAspectRatio,
                     ),
                   ),
                 ),
@@ -681,7 +688,7 @@ class _PersonalDashboardScreenState
                       crossAxisCount: 3,
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 10,
-                      childAspectRatio: 0.9,
+                      childAspectRatio: shortcutAspectRatio,
                       children: [
                         _ShortcutBtn(
                           icon: 'spark',
@@ -920,7 +927,7 @@ class _QuickTile extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(18),
@@ -933,36 +940,45 @@ class _QuickTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 30,
-            height: 30,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
               color: primarySoft,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 16, color: accent),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
-              fontSize: 28,
+              fontSize: 24,
               fontWeight: FontWeight.w600,
               color: ink,
               height: 1,
-              letterSpacing: -0.5,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
+          const Spacer(),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11.5,
+              fontSize: 11,
               fontWeight: FontWeight.w500,
               color: ink,
+              height: 1.1,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 1),
-          Text(sub, style: TextStyle(fontSize: 11, color: mute)),
+          const SizedBox(height: 2),
+          Text(
+            sub,
+            style: TextStyle(fontSize: 10.5, color: mute, height: 1.1),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
@@ -1211,11 +1227,13 @@ class _CommandCenterSection extends ConsumerWidget {
   final bool isDark;
   final Color primary;
   final FinanceiroDashboard? finData;
+  final double cardAspectRatio;
 
   const _CommandCenterSection({
     required this.isDark,
     required this.primary,
     required this.finData,
+    required this.cardAspectRatio,
   });
 
   @override
@@ -1374,6 +1392,8 @@ class _CommandCenterSection extends ConsumerWidget {
                         fontWeight: FontWeight.w600,
                         color: ink,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -1412,7 +1432,7 @@ class _CommandCenterSection extends ConsumerWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 10,
           crossAxisSpacing: 10,
-          childAspectRatio: 2.2,
+          childAspectRatio: cardAspectRatio,
           children: [
             card(
               icon: Icons.chat_bubble_rounded,

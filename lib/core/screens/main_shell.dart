@@ -20,6 +20,8 @@ class MainShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final compact = MediaQuery.sizeOf(context).width < 390;
+    final dockClearance = bottomInset + (compact ? 82.0 : 92.0);
 
     return Scaffold(
       extendBody: true,
@@ -27,7 +29,10 @@ class MainShell extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          navigationShell,
+          Padding(
+            padding: EdgeInsets.only(bottom: dockClearance),
+            child: navigationShell,
+          ),
           Positioned(
             bottom: bottomInset + 18,
             left: 14,
@@ -35,12 +40,13 @@ class MainShell extends StatelessWidget {
             child: FxDock(
               currentIndex: navigationShell.currentIndex,
               isDark: isDark,
-              onTap: (i) => navigationShell.goBranch(
-                i,
-                // Re-tapping active tab scrolls to top (initialLocation = true
-                // resets the branch to its initial route).
-                initialLocation: i == navigationShell.currentIndex,
-              ),
+              onTap:
+                  (i) => navigationShell.goBranch(
+                    i,
+                    // Re-tapping active tab scrolls to top (initialLocation = true
+                    // resets the branch to its initial route).
+                    initialLocation: i == navigationShell.currentIndex,
+                  ),
             ),
           ),
         ],

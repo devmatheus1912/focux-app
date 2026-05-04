@@ -94,39 +94,43 @@ class TreinosListScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${treinos.length} ATIVOS',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: mute,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 1.2,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${treinos.length} ATIVOS',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: mute,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 1.2,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              alunoId == null
-                                  ? 'Treinos'
-                                  : 'Treinos de ${alunoNome ?? 'Aluno'}',
-                              style: TextStyle(
-                                fontSize: 32,
-                                color: ink,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: -0.5,
+                              const SizedBox(height: 2),
+                              Text(
+                                alunoId == null
+                                    ? 'Treinos'
+                                    : 'Treinos de ${alunoNome ?? 'Aluno'}',
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  color: ink,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         IconButton(
                           icon: Icon(Icons.arrow_back, color: mute),
                           onPressed:
                               () => safePopOrGo(
                                 context,
                                 alunoId == null
-                                    ? '/treinos'
+                                    ? '/dashboard/personal'
                                     : '/alunos/$alunoId',
                               ),
                         ),
