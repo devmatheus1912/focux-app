@@ -465,10 +465,24 @@ class ExercicioRepository {
     required String filename,
   }) async {
     final form = FormData.fromMap({
-      'file': MultipartFile.fromBytes(bytes, filename: filename),
+      'file': MultipartFile.fromBytes(
+        bytes,
+        filename: filename,
+        contentType: _videoContentType(filename),
+      ),
     });
     final response = await _dio.post('/api/exercicios/$id/video', data: form);
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  DioMediaType _videoContentType(String filename) {
+    final ext = filename.toLowerCase().split('.').lastOrNull ?? '';
+    return switch (ext) {
+      'mov' => DioMediaType('video', 'quicktime'),
+      'm4v' => DioMediaType('video', 'x-m4v'),
+      'webm' => DioMediaType('video', 'webm'),
+      _ => DioMediaType('video', 'mp4'),
+    };
   }
 
   Future<Exercicio> atualizarCuradoriaEditorial({

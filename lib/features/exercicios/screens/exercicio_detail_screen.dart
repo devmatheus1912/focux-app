@@ -802,14 +802,19 @@ class _VideoPlayer extends StatefulWidget {
 class _VideoPlayerState extends State<_VideoPlayer> {
   late VideoPlayerController _ctrl;
   bool _ready = false;
+  bool _failed = false;
 
   @override
   void initState() {
     super.initState();
     _ctrl = VideoPlayerController.networkUrl(Uri.parse(widget.url))
-      ..initialize().then((_) {
-        if (mounted) setState(() => _ready = true);
-      });
+      ..initialize()
+          .then((_) {
+            if (mounted) setState(() => _ready = true);
+          })
+          .catchError((_) {
+            if (mounted) setState(() => _failed = true);
+          });
   }
 
   @override
@@ -820,6 +825,44 @@ class _VideoPlayerState extends State<_VideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    if (_failed) {
+      return Container(
+        height: 180,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.18),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.video_file_rounded,
+              color: Theme.of(context).colorScheme.primary,
+              size: 34,
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Video enviado, mas este aparelho nao consegue reproduzir o codec.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Use MP4 H.264 para preview no Android/Pixel emulator.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 12.5,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     if (!_ready) {
       return const SizedBox(
         height: 200,
