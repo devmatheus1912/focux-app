@@ -1,0 +1,109 @@
+name: E2E
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  playwright:
+    name: Playwright on Chrome
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    env:
+      # Flutter web is served locally; backend is the deployed Railway prod
+      # (the same target the local dev build hits via Env.apiUrl default).
+      E2E_BASE_URL: http://localhost:61791
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter pub get
+        working-directory: focux-app
+        run: flutter pub get
+
+      - name: Flutter analyze
+        working-directory: focux-app
+        run: flutter analyze
+
+      - name: Flutter unit tests
+        working-directory: focux-app
+        run: flutter test
+
+      - name: Build flutter web
+        working-directory: focux-app
+        run: flutter build web --release
+
+      - name: Serve flutter web
+        working-directory: focux-app/build/web
+        run: |
+          npx --yes http-server -p 61791 -s -c-1 &
+          for i in {1..30}; do
+            if curl -fs http://localhost:61791 >/dev/null; then
+              echo "flutter web up"; exit 0
+            fi
+            sleep 1
+          done
+          echo "flutter web failed to serve"; exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        working-directory: focux-app/e2e
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Run Playwright
+        working-directory: focux-app/e2e
+        env:
+          E2E_BASE_URL: http://localhost:61791
+          E2E_PERSONAL_EMAIL: ${{ secrets.E2E_PERSONAL_EMAIL }}
+          E2E_PERSONAL_SENHA: ${{ secrets.E2E_PERSONAL_SENHA }}
+          E2E_ALUNO_EMAIL: ${{ secrets.E2E_ALUNO_EMAIL }}
+          E2E_ALUNO_SENHA: ${{ secrets.E2E_ALUNO_SENHA }}
+          E2E_ALUNO_ID: ${{ secrets.E2E_ALUNO_ID }}
+          CI: 'true'
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: focux-app/e2e/playwright-report
+          retention-days: 14
+
+      - name: Upload trace + videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_id }}
+          path: focux-app/e2e/test-results
+          retention-days: 7
+
+  backend-tests:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Gradle test
+        working-directory: focux-backend
+        run: |
+          chmod +x ./gradlew
+          ./gradlew test

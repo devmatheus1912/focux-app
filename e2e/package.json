@@ -1,0 +1,21 @@
+{
+  "name": "focux-e2e",
+  "version": "1.0.0",
+  "description": "Playwright E2E suite for Focux Personal Web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:p0": "playwright test --grep @p0",
+    "report": "playwright show-report",
+    "codegen": "playwright codegen http://localhost:61791"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "dotenv": "^16.6.1"
+  }
+}

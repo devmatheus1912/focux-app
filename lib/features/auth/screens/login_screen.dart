@@ -251,74 +251,84 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: GestureDetector(
-                                    onTap:
-                                        () => setState(() => _isAluno = false),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(
-                                        milliseconds: 180,
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 10,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            !_isAluno
-                                                ? Colors.white.withValues(
-                                                  alpha: 0.18,
-                                                )
-                                                : Colors.transparent,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Text(
-                                        'Personal',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Colors.white.withValues(
-                                            alpha: !_isAluno ? 1.0 : 0.5,
-                                          ),
-                                          fontWeight:
+                                  child: Semantics(
+                                    label: 'Personal',
+                                    button: true,
+                                    selected: !_isAluno,
+                                    child: GestureDetector(
+                                      onTap:
+                                          () => setState(() => _isAluno = false),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 180,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color:
                                               !_isAluno
-                                                  ? FontWeight.w700
-                                                  : FontWeight.w500,
-                                          fontSize: 13,
+                                                  ? Colors.white.withValues(
+                                                    alpha: 0.18,
+                                                  )
+                                                  : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Text(
+                                          'Personal',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: Colors.white.withValues(
+                                              alpha: !_isAluno ? 1.0 : 0.5,
+                                            ),
+                                            fontWeight:
+                                                !_isAluno
+                                                    ? FontWeight.w700
+                                                    : FontWeight.w500,
+                                            fontSize: 13,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
                                 Expanded(
-                                  child: GestureDetector(
-                                    onTap:
-                                        () => setState(() => _isAluno = true),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(
-                                        milliseconds: 180,
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 10,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            _isAluno
-                                                ? Colors.white.withValues(
-                                                  alpha: 0.18,
-                                                )
-                                                : Colors.transparent,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Text(
-                                        'Aluno',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Colors.white.withValues(
-                                            alpha: _isAluno ? 1.0 : 0.5,
-                                          ),
-                                          fontWeight:
+                                  child: Semantics(
+                                    label: 'Aluno',
+                                    button: true,
+                                    selected: _isAluno,
+                                    child: GestureDetector(
+                                      onTap:
+                                          () => setState(() => _isAluno = true),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 180,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color:
                                               _isAluno
-                                                  ? FontWeight.w700
-                                                  : FontWeight.w500,
-                                          fontSize: 13,
+                                                  ? Colors.white.withValues(
+                                                    alpha: 0.18,
+                                                  )
+                                                  : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Text(
+                                          'Aluno',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: Colors.white.withValues(
+                                              alpha: _isAluno ? 1.0 : 0.5,
+                                            ),
+                                            fontWeight:
+                                                _isAluno
+                                                    ? FontWeight.w700
+                                                    : FontWeight.w500,
+                                            fontSize: 13,
+                                          ),
                                         ),
                                       ),
                                     ),

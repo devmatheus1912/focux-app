@@ -28,7 +28,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
   Future<void> _load() async {
     try {
       final api = ref.read(apiClientProvider);
-      final res = await api.dio.get('/api/alunos/${widget.alunoId}/fotos');
+      final res = await api.dio.get('/api/evolucao/${widget.alunoId}/fotos');
       final list = (res.data as List? ?? []).map((e) => _Foto.fromJson(e as Map<String, dynamic>)).toList();
       if (mounted) setState(() { _fotos = list; _loading = false; });
     } catch (_) { if (mounted) setState(() => _loading = false); }
@@ -49,8 +49,8 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
     try {
       final api = ref.read(apiClientProvider);
       final bytes = await file.readAsBytes();
-      final fd = FormData.fromMap({'foto': MultipartFile.fromBytes(bytes, filename: file.name), 'alunoId': widget.alunoId});
-      await api.dio.post('/api/alunos/${widget.alunoId}/fotos', data: fd);
+      final fd = FormData.fromMap({'foto': MultipartFile.fromBytes(bytes, filename: file.name)});
+      await api.dio.post('/api/evolucao/${widget.alunoId}/fotos', data: fd);
       HapticFeedback.mediumImpact();
       await _load();
     } catch (e) {
@@ -148,5 +148,3 @@ class _Foto {
   factory _Foto.fromJson(Map<String, dynamic> j) => _Foto(id: j['id'] ?? 0, url: j['url'] ?? j['fotoUrl'] ?? '', data: j['data'] ?? j['createdAt'] ?? '');
   String get dataFmt { try { final d = DateTime.parse(data); return '${d.day.toString().padLeft(2,'0')}/${d.month.toString().padLeft(2,'0')}/${d.year}'; } catch (_) { return data.length > 10 ? data.substring(0, 10) : data; } }
 }
-
-
