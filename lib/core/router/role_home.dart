@@ -13,7 +13,11 @@ String roleHomePath(WidgetRef ref) {
 }
 
 void goToRoleHome(BuildContext context, WidgetRef ref) {
-  context.go(roleHomePath(ref));
+  final target = roleHomePath(ref);
+  if (GoRouterState.of(context).uri.path == Uri.parse(target).path) {
+    return;
+  }
+  context.go(target);
 }
 
 class HomeRedirectScreen extends ConsumerWidget {

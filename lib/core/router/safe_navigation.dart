@@ -7,6 +7,10 @@ void safePopOrGo(BuildContext context, String fallbackLocation) {
     context.pop();
     return;
   }
+  final currentLocation = GoRouterState.of(context).uri.toString();
+  if (_sameLocation(currentLocation, fallbackLocation)) {
+    return;
+  }
   context.go(fallbackLocation);
 }
 
@@ -17,4 +21,15 @@ void safePopOr(BuildContext context, VoidCallback fallback) {
     return;
   }
   fallback();
+}
+
+bool _sameLocation(String currentLocation, String targetLocation) {
+  final current = Uri.tryParse(currentLocation);
+  final target = Uri.tryParse(targetLocation);
+  if (current == null || target == null) {
+    return currentLocation == targetLocation;
+  }
+  return current.path == target.path &&
+      current.query == target.query &&
+      current.fragment == target.fragment;
 }
