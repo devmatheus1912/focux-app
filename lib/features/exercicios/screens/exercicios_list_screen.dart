@@ -100,6 +100,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       _categoriaFiltro == 'Todos' ? null : _categoriaFiltro;
 
   bool get _hasAdvancedFilters =>
+      _tagFiltro.isNotEmpty ||
       _musculoFiltro != null ||
       _equipamentoFiltro != null ||
       _nivelFiltro != null ||
@@ -108,6 +109,55 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       _comVideoFiltro ||
       _fonteVideoFiltro != null ||
       _licencaFiltro != null;
+
+  bool get _hasAnyFilter =>
+      _categoriaFiltro != 'Todos' ||
+      _apenasFavoritos ||
+      _nomeFiltro.isNotEmpty ||
+      _hasAdvancedFilters;
+
+  void _clearFilters() {
+    _nomeCtrl.clear();
+    _tagCtrl.clear();
+    setState(() {
+      _categoriaFiltro = 'Todos';
+      _apenasFavoritos = false;
+      _nomeFiltro = '';
+      _tagFiltro = '';
+      _musculoFiltro = null;
+      _equipamentoFiltro = null;
+      _nivelFiltro = null;
+      _mecanicaFiltro = null;
+      _objetivoFiltro = null;
+      _comVideoFiltro = false;
+      _fonteVideoFiltro = null;
+      _licencaFiltro = null;
+    });
+  }
+
+  void _applyReadyFilter() {
+    setState(() {
+      _comVideoFiltro = true;
+      _fonteVideoFiltro = null;
+      _licencaFiltro = 'LICENSED';
+    });
+  }
+
+  void _applyReviewFilter() {
+    setState(() {
+      _comVideoFiltro = false;
+      _fonteVideoFiltro = null;
+      _licencaFiltro = 'PENDING_REVIEW';
+    });
+  }
+
+  void _applyVideoFilter() {
+    setState(() {
+      _comVideoFiltro = true;
+      _fonteVideoFiltro = null;
+      _licencaFiltro = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -341,11 +391,15 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
               ),
             ),
             Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+              child: _LibraryGuideCard(onOpenFilters: () => _openFilters(context)),
+            ),
+            Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
               child: TextField(
                 controller: _nomeCtrl,
                 decoration: InputDecoration(
-                  hintText: 'Buscar por nome',
+                  hintText: 'Buscar exercicio por nome',
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon:
                       _nomeFiltro.isNotEmpty
@@ -361,30 +415,6 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   border: const OutlineInputBorder(),
                 ),
                 onChanged: (v) => setState(() => _nomeFiltro = v.trim()),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-              child: TextField(
-                controller: _tagCtrl,
-                decoration: InputDecoration(
-                  hintText: 'Buscar por tag (ex: #EmCasa)',
-                  prefixIcon: const Icon(Icons.tag),
-                  suffixIcon:
-                      _tagFiltro.isNotEmpty
-                          ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _tagCtrl.clear();
-                              setState(() => _tagFiltro = '');
-                            },
-                          )
-                          : null,
-                  isDense: true,
-                  border: const OutlineInputBorder(),
-                ),
-                onChanged: (v) => setState(() => _tagFiltro = v.trim()),
               ),
             ),
             SizedBox(
@@ -408,6 +438,54 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 },
               ),
             ),
+            SizedBox(
+              height: 48,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                children: [
+                  _QuickFilterChip(
+                    icon: Icons.verified_rounded,
+                    label: 'Prontos',
+                    selected:
+                        _comVideoFiltro &&
+                        _licencaFiltro == 'LICENSED' &&
+                        _fonteVideoFiltro == null,
+                    onTap: _applyReadyFilter,
+                  ),
+                  const SizedBox(width: 8),
+                  _QuickFilterChip(
+                    icon: Icons.rate_review_rounded,
+                    label: 'Revisar',
+                    selected: _licencaFiltro == 'PENDING_REVIEW',
+                    onTap: _applyReviewFilter,
+                  ),
+                  const SizedBox(width: 8),
+                  _QuickFilterChip(
+                    icon: Icons.play_circle_fill_rounded,
+                    label: 'Com video',
+                    selected: _comVideoFiltro && _licencaFiltro == null,
+                    onTap: _applyVideoFilter,
+                  ),
+                  const SizedBox(width: 8),
+                  _QuickFilterChip(
+                    icon: Icons.star_rounded,
+                    label: 'Favoritos',
+                    selected: _apenasFavoritos,
+                    onTap: () => setState(() => _apenasFavoritos = !_apenasFavoritos),
+                  ),
+                  if (_hasAnyFilter) ...[
+                    const SizedBox(width: 8),
+                    _QuickFilterChip(
+                      icon: Icons.close_rounded,
+                      label: 'Limpar',
+                      selected: false,
+                      onTap: _clearFilters,
+                    ),
+                  ],
+                ],
+              ),
+            ),
             if (_hasAdvancedFilters)
               SizedBox(
                 height: 42,
@@ -418,6 +496,13 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                     vertical: 4,
                   ),
                   children: [
+                    _ActiveFilterChip(
+                      label: _tagFiltro.isEmpty ? null : '#$_tagFiltro',
+                      onDeleted: () {
+                        _tagCtrl.clear();
+                        setState(() => _tagFiltro = '');
+                      },
+                    ),
                     _ActiveFilterChip(
                       label: _musculoFiltro,
                       onDeleted: () => setState(() => _musculoFiltro = null),
@@ -1342,6 +1427,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     var comVideo = _comVideoFiltro;
     var fonteVideo = _fonteVideoFiltro;
     var licenca = _licencaFiltro;
+    final tagCtrl = TextEditingController(text: _tagFiltro);
 
     await showModalBottomSheet<void>(
       context: context,
@@ -1365,7 +1451,29 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                     'Filtros da biblioteca',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Use quando quiser afinar por músculo, equipamento ou status do vídeo.',
+                    style: TextStyle(
+                      color:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? EagleTokens.darkInkMute
+                              : EagleTokens.inkMute,
+                      fontSize: 12.5,
+                    ),
+                  ),
                   const SizedBox(height: 14),
+                  TextField(
+                    controller: tagCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Tag opcional',
+                      hintText: 'Ex: EmCasa, SemEquipamento',
+                      prefixIcon: Icon(Icons.tag_rounded),
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   _FilterDropdown(
                     label: 'Grupo muscular',
                     value: musculo,
@@ -1439,6 +1547,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                               comVideo = false;
                               fonteVideo = null;
                               licenca = null;
+                              tagCtrl.clear();
                             });
                           },
                           child: const Text('Limpar'),
@@ -1457,6 +1566,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                               _comVideoFiltro = comVideo;
                               _fonteVideoFiltro = fonteVideo;
                               _licencaFiltro = licenca;
+                              _tagFiltro = tagCtrl.text.trim().replaceFirst('#', '');
+                              _tagCtrl.text = _tagFiltro;
                             });
                             Navigator.pop(ctx);
                           },
@@ -1472,6 +1583,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         );
       },
     );
+    tagCtrl.dispose();
   }
 
   String? _formatSourceLabel(String? value) {
@@ -1492,6 +1604,111 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       null || '' => null,
       _ => value.replaceAll('_', ' '),
     };
+  }
+}
+
+class _LibraryGuideCard extends StatelessWidget {
+  final VoidCallback onOpenFilters;
+
+  const _LibraryGuideCard({required this.onOpenFilters});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final card = isDark ? EagleTokens.darkCardHi : Colors.white;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: line),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(Icons.auto_awesome_rounded, color: primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Escolha rapido. Edite so quando precisar.',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Use Prontos para montar treinos. Use Revisar para liberar videos e licencas depois.',
+                  style: TextStyle(color: mute, fontSize: 12.5, height: 1.28),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: onOpenFilters,
+            child: const Text('Filtrar'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickFilterChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _QuickFilterChip({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return ActionChip(
+      avatar: Icon(icon, size: 17, color: selected ? Colors.white : primary),
+      label: Text(label),
+      onPressed: onTap,
+      labelStyle: TextStyle(
+        color: selected ? Colors.white : null,
+        fontWeight: FontWeight.w800,
+      ),
+      backgroundColor: selected ? primary : null,
+      side: BorderSide(
+        color: selected ? primary : Theme.of(context).dividerColor,
+      ),
+      visualDensity: VisualDensity.compact,
+    );
   }
 }
 
@@ -1552,7 +1769,7 @@ class _CuradoriaCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Curadoria premium',
+                        'Status da biblioteca',
                         style: TextStyle(
                           color: ink,
                           fontSize: 15,
@@ -1594,24 +1811,19 @@ class _CuradoriaCard extends StatelessWidget {
               runSpacing: 8,
               children: [
                 _CuradoriaMetric(
-                  label: 'Com video',
+                  label: 'Video',
                   value: '${resumo.comVideo}',
                   color: EagleTokens.good,
                 ),
                 _CuradoriaMetric(
-                  label: 'Licencas ok',
+                  label: 'Liberados',
                   value: '${resumo.licenciados + resumo.videosProprios}',
                   color: primary,
                 ),
                 _CuradoriaMetric(
-                  label: 'Pendentes',
+                  label: 'Revisar',
                   value: '${resumo.pendentesLicenca}',
                   color: EagleTokens.warn,
-                ),
-                _CuradoriaMetric(
-                  label: 'Faltam',
-                  value: '${resumo.faltamParaMeta}',
-                  color: EagleTokens.bad,
                 ),
               ],
             ),
@@ -1639,7 +1851,9 @@ class _CuradoriaCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    alert,
+                    resumo.prontosParaAluno == 0
+                        ? 'Comece por Revisar: anexe video proprio ou licenciado, depois libere para usar nos treinos.'
+                        : alert,
                     style: TextStyle(color: mute, fontSize: 12.5, height: 1.25),
                   ),
                 ),
@@ -2034,6 +2248,8 @@ class _ExercicioTile extends ConsumerWidget {
             : null;
     final licensed = exercicio.licenseStatus == 'LICENSED';
     final approved = exercicio.editorialStatus == 'APPROVED';
+    final hasVideo = exercicio.videoUrl?.isNotEmpty == true;
+    final readyForStudent = approved && hasVideo;
     final nivelColor = _nivelColor(exercicio.nivel);
 
     return Material(
@@ -2085,11 +2301,11 @@ class _ExercicioTile extends ConsumerWidget {
                     ),
                   _MiniMediaBadge(
                     icon:
-                        approved
-                            ? Icons.fact_check_rounded
+                        readyForStudent
+                            ? Icons.verified_rounded
                             : Icons.rate_review_rounded,
-                    label: _formatEditorialStatus(exercicio.editorialStatus),
-                    color: approved ? EagleTokens.good : EagleTokens.warn,
+                    label: readyForStudent ? 'Pronto' : 'Revisar',
+                    color: readyForStudent ? EagleTokens.good : EagleTokens.warn,
                   ),
                   if (licensed)
                     const _MiniMediaBadge(
@@ -2111,7 +2327,7 @@ class _ExercicioTile extends ConsumerWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (exercicio.videoUrl?.isNotEmpty == true)
+            if (hasVideo)
               const Icon(
                 Icons.play_circle_fill_rounded,
                 color: EagleTokens.good,
