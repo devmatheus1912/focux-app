@@ -113,11 +113,13 @@ class Exercicio {
 
   String get mediaTrustDescription {
     return switch (mediaTrustLevel) {
-      'READY' => isPersonalUpload
-          ? 'Demonstracao propria validada para passar mais confianca ao aluno.'
-          : 'Midia licenciada e aprovada para prescricao.',
+      'READY' =>
+        isPersonalUpload
+            ? 'Demonstracao propria validada para passar mais confianca ao aluno.'
+            : 'Midia licenciada e aprovada para prescricao.',
       'NO_VIDEO' => 'Adicione video ou GIF antes de priorizar este exercicio.',
-      'NEEDS_LICENSE' => 'Informe se a midia e licenciada ou propria do personal.',
+      'NEEDS_LICENSE' =>
+        'Informe se a midia e licenciada ou propria do personal.',
       _ => 'Aprove a curadoria antes de usar como exercicio premium.',
     };
   }
@@ -394,6 +396,10 @@ class ExercicioRepository {
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<void> excluir(int id) async {
+    await _dio.delete('/api/exercicios/$id');
+  }
+
   Future<ExercicioEditorialQueue> buscarFilaEditorial(
     String status, {
     int size = 20,
@@ -408,9 +414,10 @@ class ExercicioRepository {
       },
     );
     final data = response.data as Map<String, dynamic>;
-    final list = (data['content'] as List<dynamic>? ?? [])
-        .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final list =
+        (data['content'] as List<dynamic>? ?? [])
+            .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
+            .toList();
     return ExercicioEditorialQueue(
       total: (data['totalElements'] as num?)?.toInt() ?? list.length,
       items: list,
@@ -620,9 +627,13 @@ class ExercicioRepository {
   }
 
   Future<List<ExercicioMediaImportBatch>> historicoImportacaoMidias() async {
-    final response = await _dio.get('/api/exercicios/curadoria/midias/historico');
+    final response = await _dio.get(
+      '/api/exercicios/curadoria/midias/historico',
+    );
     return ((response.data as List<dynamic>?) ?? [])
-        .map((e) => ExercicioMediaImportBatch.fromJson(e as Map<String, dynamic>))
+        .map(
+          (e) => ExercicioMediaImportBatch.fromJson(e as Map<String, dynamic>),
+        )
         .toList();
   }
 

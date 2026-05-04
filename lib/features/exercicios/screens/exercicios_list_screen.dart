@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -8,10 +7,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../data/exercicio_media_import_parser.dart';
 import '../data/exercicio_repository.dart';
-import '../data/exercise_media_file_io_stub.dart'
-    if (dart.library.html) '../data/exercise_media_file_io_web.dart';
 import '../providers/exercicios_provider.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 
@@ -194,6 +190,57 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     }
   }
 
+  Future<void> _confirmDeleteExercise(
+    BuildContext context,
+    Exercicio exercicio,
+  ) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Excluir exercicio?'),
+            content: Text(
+              'Isso remove "${exercicio.nome}" da sua biblioteca. Se ele ja estiver em um treino, o app vai avisar e manter o exercicio.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: EagleTokens.bad,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Excluir'),
+              ),
+            ],
+          ),
+    );
+    if (confirm != true || !context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(exercicioRepositoryProvider).excluir(exercicio.id);
+      ref.invalidate(exerciciosFilteredProvider);
+      ref.invalidate(exerciciosCuradoriaProvider);
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Exercicio excluido.'),
+          backgroundColor: EagleTokens.good,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(friendlyError(e)),
+          backgroundColor: EagleTokens.bad,
+        ),
+      );
+    }
+  }
+
   void _applyVideoFilter() {
     setState(() {
       _comVideoFiltro = true;
@@ -320,18 +367,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                         icon: Icon(Icons.more_vert_rounded, color: mute),
                         tooltip: 'Mais opcoes',
                         onSelected: (value) {
-                          if (value == 'seed_v1') _importarSeedV1(context, ref);
-                          if (value == 'seed_premium_v1') {
+                          if (value == 'biblioteca_completa') {
                             _importarSeedPremiumV1(context, ref);
-                          }
-                          if (value == 'curadoria_lote') {
-                            _openCuradoriaLote(context, ref);
-                          }
-                          if (value == 'importar_midias') {
-                            _openImportarMidias(context, ref);
-                          }
-                          if (value == 'historico_midias') {
-                            _openHistoricoMidias(context, ref);
                           }
                           if (value == 'fila_editorial') {
                             _openFilaEditorial(context, ref);
@@ -340,55 +377,12 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                         itemBuilder:
                             (_) => const [
                               PopupMenuItem(
-                                value: 'seed_v1',
+                                value: 'biblioteca_completa',
                                 child: Row(
                                   children: [
                                     Icon(Icons.download_rounded, size: 20),
                                     SizedBox(width: 10),
-                                    Text('Importar biblioteca Focux v1'),
-                                  ],
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'seed_premium_v1',
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.workspace_premium_rounded,
-                                      size: 20,
-                                    ),
-                                    SizedBox(width: 10),
-                                    Text('Importar seed premium 1500'),
-                                  ],
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'curadoria_lote',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.fact_check_rounded, size: 20),
-                                    SizedBox(width: 10),
-                                    Text('Curadoria em lote'),
-                                  ],
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'importar_midias',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.video_file_rounded, size: 20),
-                                    SizedBox(width: 10),
-                                    Text('Importar midias CSV/JSON'),
-                                  ],
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'historico_midias',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.history_rounded, size: 20),
-                                    SizedBox(width: 10),
-                                    Text('Historico de importacoes'),
+                                    Text('Carregar biblioteca completa'),
                                   ],
                                 ),
                               ),
@@ -620,6 +614,11 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                                 context,
                                 exercicios[i].id,
                               ),
+                          onDelete:
+                              () => _confirmDeleteExercise(
+                                context,
+                                exercicios[i],
+                              ),
                         );
                       },
                     ),
@@ -631,80 +630,6 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _importarSeedV1(BuildContext context, WidgetRef ref) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Importar biblioteca Focux v1'),
-            content: const Text(
-              'Isso vai importar 26 exercicios iniciais da biblioteca Focux com videos, thumbnails e orientacoes profissionais.\n\nSe o exercicio ja existir, sera atualizado. A operacao e segura e pode ser repetida.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Importar'),
-              ),
-            ],
-          ),
-    );
-    if (confirm != true) return;
-    if (!context.mounted) return;
-
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(
-      const SnackBar(
-        content: Row(
-          children: [
-            SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(width: 12),
-            Text('Importando biblioteca...'),
-          ],
-        ),
-        duration: Duration(seconds: 30),
-      ),
-    );
-
-    try {
-      final count =
-          await ref.read(exercicioRepositoryProvider).importarSeedV1();
-      ref.invalidate(exerciciosFilteredProvider);
-      ref.invalidate(exerciciosCuradoriaProvider);
-      messenger.clearSnackBars();
-      if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              '${count > 0 ? count : 26} exercicios importados com sucesso.',
-            ),
-            backgroundColor: EagleTokens.good,
-          ),
-        );
-      }
-    } catch (e) {
-      messenger.clearSnackBars();
-      if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(friendlyError(e)),
-            backgroundColor: EagleTokens.bad,
-          ),
-        );
-      }
-    }
   }
 
   Future<void> _importarSeedPremiumV1(
@@ -782,453 +707,6 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         );
       }
     }
-  }
-
-  Future<void> _openCuradoriaLote(BuildContext context, WidgetRef ref) async {
-    var novaFonte = _fonteVideoFiltro ?? 'PERSONAL_UPLOAD';
-    var novaLicenca =
-        _licencaFiltro == 'LICENSED' ? 'LICENSED' : 'PERSONAL_OWNED';
-    final videoCtrl = TextEditingController();
-    final thumbCtrl = TextEditingController();
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => StatefulBuilder(
-            builder:
-                (context, modalSetState) => AlertDialog(
-                  title: const Text('Curadoria em lote'),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Aplica nos exercicios que batem com os filtros atuais. Use filtros antes para evitar alterar a biblioteca inteira.',
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? EagleTokens.darkInkMute
-                                    : EagleTokens.inkMute,
-                            height: 1.25,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        _FilterDropdown(
-                          label: 'Nova fonte',
-                          value: novaFonte,
-                          values: _fontesVideoFiltro,
-                          formatter: _formatSourceLabel,
-                          onChanged:
-                              (v) => modalSetState(
-                                () => novaFonte = v ?? 'PERSONAL_UPLOAD',
-                              ),
-                        ),
-                        const SizedBox(height: 10),
-                        _FilterDropdown(
-                          label: 'Nova licenca',
-                          value: novaLicenca,
-                          values: _licencasFiltro,
-                          formatter: _formatLicenseLabel,
-                          onChanged:
-                              (v) => modalSetState(
-                                () => novaLicenca = v ?? 'PERSONAL_OWNED',
-                              ),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: videoCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'URL de video para aplicar',
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: thumbCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'URL de thumbnail para aplicar',
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancelar'),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Aplicar lote'),
-                    ),
-                  ],
-                ),
-          ),
-    );
-    if (confirm != true) {
-      videoCtrl.dispose();
-      thumbCtrl.dispose();
-      return;
-    }
-
-    final videoUrl = videoCtrl.text.trim();
-    final thumbnailUrl = thumbCtrl.text.trim();
-    videoCtrl.dispose();
-    thumbCtrl.dispose();
-    if (!context.mounted) return;
-
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Aplicando curadoria em lote...')),
-    );
-
-    try {
-      final result = await ref
-          .read(exercicioRepositoryProvider)
-          .curarLote(
-            nome: _nomeFiltro.isEmpty ? null : _nomeFiltro,
-            categoria: _categoriaParam,
-            tag: _tagFiltro.isEmpty ? null : _tagFiltro,
-            musculoAlvo: _musculoFiltro,
-            equipamento: _equipamentoFiltro,
-            nivel: _nivelFiltro,
-            mecanica: _mecanicaFiltro,
-            objetivo: _objetivoFiltro,
-            hasVideo: _comVideoFiltro ? true : null,
-            videoSource: _fonteVideoFiltro,
-            licenseStatus: _licencaFiltro,
-            novoVideoSource: novaFonte,
-            novoLicenseStatus: novaLicenca,
-            novoVideoUrl: videoUrl.isEmpty ? null : videoUrl,
-            novoThumbnailUrl: thumbnailUrl.isEmpty ? null : thumbnailUrl,
-          );
-      ref.invalidate(exerciciosFilteredProvider);
-      ref.invalidate(exerciciosCuradoriaProvider);
-      messenger.clearSnackBars();
-      if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              '${result.afetados} exercicios atualizados - ${result.prontosParaAluno} prontos para aluno.',
-            ),
-            backgroundColor: EagleTokens.good,
-          ),
-        );
-      }
-    } catch (e) {
-      messenger.clearSnackBars();
-      if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text('Erro na curadoria em lote: $e'),
-            backgroundColor: EagleTokens.bad,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _openImportarMidias(BuildContext context, WidgetRef ref) async {
-    final payloadCtrl = TextEditingController(
-      text: exerciseMediaImportTemplate,
-    );
-    final editorialNotesCtrl = TextEditingController(
-      text: 'Midia revisada e liberada para prescricao premium.',
-    );
-    var aprovarEditorial = true;
-    String? selectedFileName;
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => StatefulBuilder(
-            builder:
-                (ctx, setModalState) => AlertDialog(
-                  title: const Text('Importar midias CSV/JSON'),
-                  content: SizedBox(
-                    width: 560,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            OutlinedButton.icon(
-                              onPressed: () async {
-                                final picked = await pickExerciseMediaFile();
-                                if (picked == null) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Selecao de arquivo disponivel no app web.',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  return;
-                                }
-                                setModalState(() {
-                                  selectedFileName = picked.name;
-                                  payloadCtrl.text = picked.content;
-                                });
-                              },
-                              icon: const Icon(Icons.upload_file_rounded),
-                              label: const Text('Escolher arquivo'),
-                            ),
-                            OutlinedButton.icon(
-                              onPressed: () async {
-                                final downloaded =
-                                    await downloadExerciseMediaTemplate(
-                                      filename:
-                                          'focux-template-midias-exercicios.csv',
-                                      content: exerciseMediaImportTemplate,
-                                    );
-                                if (!downloaded) {
-                                  await Clipboard.setData(
-                                    const ClipboardData(
-                                      text: exerciseMediaImportTemplate,
-                                    ),
-                                  );
-                                }
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        downloaded
-                                            ? 'Template baixado.'
-                                            : 'Template copiado para area de transferencia.',
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                              icon: const Icon(Icons.download_rounded),
-                              label: const Text('Template'),
-                            ),
-                          ],
-                        ),
-                        if (selectedFileName != null) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            selectedFileName!,
-                            style: Theme.of(context).textTheme.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: payloadCtrl,
-                          minLines: 8,
-                          maxLines: 14,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            helperText:
-                                'Aceita JSON, CSV com virgula ou CSV com ponto e virgula.',
-                            isDense: true,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        SwitchListTile.adaptive(
-                          contentPadding: EdgeInsets.zero,
-                          value: aprovarEditorial,
-                          title: const Text('Aprovar editorialmente'),
-                          subtitle: const Text(
-                            'O backend so libera automaticamente itens completos com video, thumbnail, licenca e orientacao.',
-                          ),
-                          onChanged:
-                              (value) =>
-                                  setModalState(() => aprovarEditorial = value),
-                        ),
-                        TextField(
-                          controller: editorialNotesCtrl,
-                          minLines: 2,
-                          maxLines: 3,
-                          decoration: const InputDecoration(
-                            labelText: 'Notas editoriais padrao',
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancelar'),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Pre-visualizar'),
-                    ),
-                  ],
-                ),
-          ),
-    );
-    if (confirm != true) {
-      payloadCtrl.dispose();
-      editorialNotesCtrl.dispose();
-      return;
-    }
-
-    final raw = payloadCtrl.text.trim();
-    final shouldApprove = aprovarEditorial;
-    final editorialNotes = editorialNotesCtrl.text.trim();
-    payloadCtrl.dispose();
-    editorialNotesCtrl.dispose();
-    if (!context.mounted) return;
-
-    try {
-      final midias =
-          parseExerciseMediaImportPayload(raw)
-              .map(
-                (row) => {
-                  ...row,
-                  if (!row.containsKey('aprovarEditorial'))
-                    'aprovarEditorial': shouldApprove,
-                  if (!row.containsKey('editorialNotes') &&
-                      editorialNotes.isNotEmpty)
-                    'editorialNotes': editorialNotes,
-                },
-              )
-              .toList();
-      final repo = ref.read(exercicioRepositoryProvider);
-      final preview = await repo.previewMidias(midias);
-      if (!context.mounted) return;
-      final aplicar = await showDialog<bool>(
-        context: context,
-        builder:
-            (ctx) => AlertDialog(
-              title: const Text('Preview da importacao'),
-              content: Text(
-                '${preview.atualizados}/${preview.total} midias encontradas.\n'
-                '${preview.naoEncontrados} nao encontradas.\n'
-                '${preview.prontosParaAluno} ficarao prontas para aluno.\n\n'
-                '${preview.naoEncontradosKeys.isEmpty ? '' : 'Nao encontradas: ${preview.naoEncontradosKeys.take(5).join(', ')}'}',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancelar'),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Aplicar'),
-                ),
-              ],
-            ),
-      );
-      if (aplicar != true) return;
-
-      final result = await repo.importarMidias(midias);
-      ref.invalidate(exerciciosFilteredProvider);
-      ref.invalidate(exerciciosCuradoriaProvider);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${result.atualizados}/${result.total} midias importadas - ${result.prontosParaAluno} prontas - ${result.naoEncontrados} nao encontradas.',
-            ),
-            backgroundColor:
-                result.naoEncontrados == 0
-                    ? EagleTokens.good
-                    : EagleTokens.warn,
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(friendlyError(e)),
-            backgroundColor: EagleTokens.bad,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _openHistoricoMidias(BuildContext context, WidgetRef ref) async {
-    final future =
-        ref.read(exercicioRepositoryProvider).historicoImportacaoMidias();
-    await showDialog<void>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Historico de importacoes'),
-            content: SizedBox(
-              width: 560,
-              child: FutureBuilder<List<ExercicioMediaImportBatch>>(
-                future: future,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const SizedBox(
-                      height: 120,
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  if (snapshot.hasError) {
-                    return Text(
-                      'Erro ao carregar historico: ${snapshot.error}',
-                    );
-                  }
-                  final batches = snapshot.data ?? [];
-                  if (batches.isEmpty) {
-                    return const Text('Nenhuma importacao aplicada ainda.');
-                  }
-                  return ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 420),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: batches.length,
-                      separatorBuilder: (_, __) => const Divider(height: 20),
-                      itemBuilder: (context, index) {
-                        final batch = batches[index];
-                        final criado = batch.criadoEm;
-                        final date =
-                            criado == null
-                                ? 'sem data'
-                                : '${criado.day.toString().padLeft(2, '0')}/'
-                                    '${criado.month.toString().padLeft(2, '0')}/'
-                                    '${criado.year} '
-                                    '${criado.hour.toString().padLeft(2, '0')}:'
-                                    '${criado.minute.toString().padLeft(2, '0')}';
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: CircleAvatar(
-                            child: Text(batch.atualizados.toString()),
-                          ),
-                          title: Text(
-                            '${batch.atualizados}/${batch.total} midias aplicadas',
-                          ),
-                          subtitle: Text(
-                            '$date - ${batch.prontosParaAluno} prontos - '
-                            '${batch.naoEncontrados} nao encontradas'
-                            '${batch.naoEncontradosKeys.isEmpty ? '' : '\nNao encontradas: ${batch.naoEncontradosKeys.take(3).join(', ')}'}',
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Fechar'),
-              ),
-            ],
-          ),
-    );
   }
 
   Future<void> _openFilaEditorial(BuildContext context, WidgetRef ref) async {
@@ -2024,10 +1502,12 @@ class _ExercicioTile extends ConsumerWidget {
   final Exercicio exercicio;
   final VoidCallback onFavoritoToggle;
   final VoidCallback onUploadVideo;
+  final VoidCallback onDelete;
   const _ExercicioTile({
     required this.exercicio,
     required this.onFavoritoToggle,
     required this.onUploadVideo,
+    required this.onDelete,
   });
 
   Future<void> _toggleFavorito(WidgetRef ref, BuildContext context) async {
@@ -2166,14 +1646,6 @@ class _ExercicioTile extends ConsumerWidget {
                 ),
               ),
               IconButton(
-                tooltip: hasVideo ? 'Trocar video' : 'Subir video',
-                onPressed: onUploadVideo,
-                icon: Icon(
-                  hasVideo ? Icons.swap_horiz_rounded : Icons.upload_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              IconButton(
                 icon: Icon(
                   exercicio.favoritado ? Icons.star : Icons.star_border,
                   color:
@@ -2188,6 +1660,46 @@ class _ExercicioTile extends ConsumerWidget {
                         ? 'Remover dos favoritos'
                         : 'Adicionar aos favoritos',
                 onPressed: () => _toggleFavorito(ref, context),
+              ),
+              PopupMenuButton<String>(
+                tooltip: 'Acoes do exercicio',
+                icon: Icon(Icons.more_vert_rounded, color: mute),
+                onSelected: (value) {
+                  if (value == 'video') onUploadVideo();
+                  if (value == 'delete') onDelete();
+                },
+                itemBuilder:
+                    (_) => [
+                      PopupMenuItem(
+                        value: 'video',
+                        child: Row(
+                          children: [
+                            Icon(
+                              hasVideo
+                                  ? Icons.swap_horiz_rounded
+                                  : Icons.upload_rounded,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(hasVideo ? 'Trocar video' : 'Subir video'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_outline_rounded,
+                              size: 20,
+                              color: EagleTokens.bad,
+                            ),
+                            SizedBox(width: 10),
+                            Text('Excluir'),
+                          ],
+                        ),
+                      ),
+                    ],
               ),
             ],
           ),
