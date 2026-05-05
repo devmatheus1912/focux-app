@@ -52,5 +52,7 @@ void main() {
     expect(screen, contains('feed/images'));
     expect(screen, contains('feed/videos'));
     expect(screen, isNot(contains('URL da mídia')));
+    expect(screen, isNot(contains('tituloCtrl.dispose()')));
+    expect(screen, isNot(contains('conteudoCtrl.dispose()')));
   });
 }

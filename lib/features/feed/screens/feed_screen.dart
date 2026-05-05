@@ -412,8 +412,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                 ),
           ),
     ).then((created) async {
-      tituloCtrl.dispose();
-      conteudoCtrl.dispose();
       if (created != true || !mounted) return;
       await _load();
       if (!mounted) return;
