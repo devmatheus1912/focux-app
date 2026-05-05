@@ -43,6 +43,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
     final medidasAsync = ref.watch(minhasMedidasDashboardProvider);
     final historicoAsync = ref.watch(historicoCheckinProvider);
     final chatAsync = ref.watch(chatAlunoDashboardProvider);
+    final proximoTreino = _heroProximoTreino(treinosAsync.valueOrNull);
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -99,6 +100,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
                           aluno: aluno,
                           brand: brand,
                           isDark: isDark,
+                          proximoTreino: proximoTreino,
                         ),
                     loading: () => _HeroCardSkeleton(isDark: isDark),
                     error: (_, __) => const SizedBox.shrink(),
@@ -260,17 +262,26 @@ class AlunoDashboardScreen extends ConsumerWidget {
   }
 }
 
+String? _heroProximoTreino(List<ExecucaoTreino>? treinos) {
+  if (treinos == null || treinos.isEmpty) return null;
+  final nome = treinos.first.treinoNome.trim();
+  if (nome.isEmpty) return null;
+  return 'Próximo treino: $nome';
+}
+
 // ── Profile Card ──────────────────────────────────────────────────────────────
 
 class _AlunoHeroCard extends StatelessWidget {
   final Aluno aluno;
   final PersonalBrand brand;
   final bool isDark;
+  final String? proximoTreino;
 
   const _AlunoHeroCard({
     required this.aluno,
     required this.brand,
     required this.isDark,
+    this.proximoTreino,
   });
 
   @override
@@ -331,7 +342,10 @@ class _AlunoHeroCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const _HeroSubtitle(streakDias: null, proximoTreino: null),
+                    _HeroSubtitle(
+                      streakDias: null,
+                      proximoTreino: proximoTreino,
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       slogan,
@@ -2022,273 +2036,6 @@ class _ProfileCardSkeleton extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-// ── Drawer ────────────────────────────────────────────────────────────────────
-
-// ignore: unused_element
-class _AlunoDrawer extends StatelessWidget {
-  final Aluno aluno;
-  final bool isDark;
-  final WidgetRef ref;
-
-  const _AlunoDrawer({
-    required this.aluno,
-    required this.isDark,
-    required this.ref,
-  });
-
-  String _initials(String nome) {
-    final parts = nome.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty) return '?';
-    if (parts.length == 1) return parts[0][0].toUpperCase();
-    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final drawerBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final headerBg =
-        isDark ? EagleTokens.darkCardHi : BrandPalette.soft(primary);
-    final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final dividerColor = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final hasFoto = aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty;
-
-    void nav(String route) {
-      Navigator.pop(context);
-      context.go(route);
-    }
-
-    return Drawer(
-      backgroundColor: drawerBg,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // ── Header ──────────────────────────────────────────────────────
-          Container(
-            color: headerBg,
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 20,
-              bottom: 20,
-              left: 20,
-              right: 20,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: primary, width: 2.5),
-                  ),
-                  child: CircleAvatar(
-                    radius: 28,
-                    backgroundColor: BrandPalette.soft(primary, dark: false),
-                    backgroundImage:
-                        hasFoto ? NetworkImage(aluno.fotoUrl!) : null,
-                    child:
-                        hasFoto
-                            ? null
-                            : Text(
-                              _initials(aluno.nome),
-                              style: TextStyle(
-                                color: primary,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
-                            ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        aluno.nome,
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (aluno.objetivo != null && aluno.objetivo!.isNotEmpty)
-                        Text(
-                          aluno.objetivo!,
-                          style: TextStyle(
-                            color: primary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // ── Nav links ───────────────────────────────────────────────────
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              children: [
-                _DrawerItem(
-                  icon: Icons.person_outline,
-                  label: 'Meu Perfil',
-                  isDark: isDark,
-                  onTap: () => nav('/aluno/perfil'),
-                ),
-                _DrawerItem(
-                  icon: Icons.fitness_center,
-                  label: 'Meus Treinos',
-                  isDark: isDark,
-                  onTap: () => nav('/checkin/treinos'),
-                ),
-                _DrawerItem(
-                  icon: Icons.calendar_month,
-                  label: 'Agenda',
-                  isDark: isDark,
-                  onTap: () => nav('/agenda/aluno'),
-                ),
-                _DrawerItem(
-                  icon: Icons.history,
-                  label: 'Histórico',
-                  isDark: isDark,
-                  onTap: () => nav('/checkin/historico'),
-                ),
-                _DrawerItem(
-                  icon: Icons.dynamic_feed,
-                  label: 'Feed',
-                  isDark: isDark,
-                  onTap: () => nav('/feed/aluno'),
-                ),
-                _DrawerItem(
-                  icon: Icons.chat_bubble_outline,
-                  label: 'Chat com Personal',
-                  isDark: isDark,
-                  onTap: () => nav('/chat/aluno'),
-                ),
-                _DrawerItem(
-                  icon: Icons.smart_toy,
-                  label: 'IA',
-                  isDark: isDark,
-                  onTap: () => nav('/ia/aluno'),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.star_outline),
-                  title: const Text('Deixar Depoimento'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    context.go('/depoimentos-aluno');
-                  },
-                ),
-                Divider(
-                  color: dividerColor,
-                  thickness: 1,
-                  height: 24,
-                  indent: 16,
-                  endIndent: 16,
-                ),
-                // ── Logout ────────────────────────────────────────────────
-                ListTile(
-                  leading: Icon(Icons.logout, color: primary, size: 22),
-                  title: Text(
-                    'Sair',
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    await ref.read(authProvider.notifier).logout();
-                    if (context.mounted) context.go('/login');
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ignore: unused_element
-class _AlunoDrawerPlaceholder extends StatelessWidget {
-  final bool isDark;
-  const _AlunoDrawerPlaceholder({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    return Drawer(
-      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Menu do Aluno',
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Carregando dados do perfil...',
-                style: TextStyle(
-                  color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DrawerItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  const _DrawerItem({
-    required this.icon,
-    required this.label,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-
-    return ListTile(
-      leading: Icon(icon, color: primary, size: 22),
-      title: Text(
-        label,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
-        ),
-      ),
-      onTap: onTap,
     );
   }
 }

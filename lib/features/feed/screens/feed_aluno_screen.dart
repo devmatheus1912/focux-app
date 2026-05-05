@@ -203,6 +203,8 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              _PostAuthorHeader(post: p, primary: primary),
+                              const SizedBox(height: 12),
                               Row(
                                 children: [
                                   if (p.fixado) ...[
@@ -279,22 +281,6 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                                     ),
                                     label: Text('$comentarios Comentar'),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 10,
-                                    ),
-                                    child: Text(
-                                      fxTimeAgo(DateTime.parse(p.criadoEm)),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color:
-                                            isDark
-                                                ? EagleTokens.darkInkMute
-                                                : EagleTokens.inkMute,
-                                      ),
-                                    ),
-                                  ),
                                 ],
                               ),
                             ],
@@ -332,6 +318,67 @@ class _TypeBadge extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       ),
+    );
+  }
+}
+
+class _PostAuthorHeader extends StatelessWidget {
+  const _PostAuthorHeader({required this.post, required this.primary});
+
+  final FeedPost post;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final name =
+        post.autorNome?.trim().isNotEmpty == true
+            ? post.autorNome!.trim()
+            : 'Personal';
+    final avatarUrl = post.autorAvatarUrl?.trim();
+    final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 18,
+          backgroundColor: primary.withValues(alpha: 0.14),
+          backgroundImage: hasAvatar ? NetworkImage(avatarUrl) : null,
+          child:
+              hasAvatar
+                  ? null
+                  : Text(
+                    fxInitials(name),
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              Text(
+                fxTimeAgo(DateTime.parse(post.criadoEm)),
+                style: TextStyle(fontSize: 12, color: mute),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

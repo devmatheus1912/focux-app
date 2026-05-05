@@ -7,6 +7,8 @@ class FeedPost {
   final String? imagemUrl; // legacy
   final String? midiaUrl;
   final String? tipoPost; // TEXTO, IMAGEM, VIDEO, ENQUETE, DICA
+  final String? autorNome;
+  final String? autorAvatarUrl;
   final bool fixado;
   final int totalCurtidas;
   final int totalComentarios;
@@ -19,6 +21,8 @@ class FeedPost {
     this.imagemUrl,
     this.midiaUrl,
     this.tipoPost,
+    this.autorNome,
+    this.autorAvatarUrl,
     this.fixado = false,
     this.totalCurtidas = 0,
     this.totalComentarios = 0,
@@ -32,6 +36,18 @@ class FeedPost {
     imagemUrl: json['imagemUrl'],
     midiaUrl: json['midiaUrl'],
     tipoPost: json['tipoPost'],
+    autorNome:
+        json['autorNome'] ??
+        json['authorName'] ??
+        json['nomePersonal'] ??
+        json['personalNome'] ??
+        json['criadoPorNome'],
+    autorAvatarUrl:
+        json['autorAvatarUrl'] ??
+        json['authorAvatarUrl'] ??
+        json['personalLogoUrl'] ??
+        json['logoUrl'] ??
+        json['criadoPorAvatarUrl'],
     fixado: json['fixado'] ?? false,
     totalCurtidas: json['totalCurtidas'] ?? 0,
     totalComentarios: json['totalComentarios'] ?? 0,
