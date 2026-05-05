@@ -11,6 +11,11 @@ void main() {
 
     expect(screen, contains('class _Aluno360CopilotCard'));
     expect(screen, contains("'Aluno 360'"));
+    expect(screen, contains('class _Aluno360TimelineCard'));
+    expect(screen, contains("'Linha do tempo 360'"));
+    expect(screen, contains('alunoScoreSnapshotsProvider'));
+    expect(screen, contains('getFocuxScoreSnapshots(alunoId)'));
+    expect(screen, contains('class _Timeline360Tile'));
     expect(screen, contains('alunoCopilotoActionProvider'));
     expect(screen, contains('proximaAcao(alunoId)'));
     expect(screen, contains('salvarAcaoCopiloto'));
