@@ -104,8 +104,13 @@ class AlunoDashboardScreen extends ConsumerWidget {
                   (treinos) => alunoAsync.when(
                     data:
                         (aluno) => _TodayFocusCard(
-                          aluno: aluno,
-                          treinos: treinos,
+                          experience: buildAlunoHomeExperience(
+                            aluno: aluno,
+                            medidas: medidasAsync.valueOrNull ?? const [],
+                            treinos: treinos,
+                            historico: historicoAsync.valueOrNull ?? const [],
+                            mensagens: chatAsync.valueOrNull ?? const [],
+                          ),
                           isDark: isDark,
                         ),
                     loading: () => _FocusCardSkeleton(isDark: isDark),
@@ -503,31 +508,15 @@ class _HeroPill extends StatelessWidget {
 }
 
 class _TodayFocusCard extends StatelessWidget {
-  final Aluno aluno;
-  final List<ExecucaoTreino> treinos;
+  final AlunoHomeExperience experience;
   final bool isDark;
 
-  const _TodayFocusCard({
-    required this.aluno,
-    required this.treinos,
-    required this.isDark,
-  });
+  const _TodayFocusCard({required this.experience, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    final next = treinos.isEmpty ? null : treinos.first;
-    final completedFields =
-        [
-          aluno.telefone,
-          aluno.whatsapp,
-          aluno.objetivo,
-          aluno.genero,
-          aluno.peso?.toString(),
-          aluno.altura?.toString(),
-          aluno.dataNascimento,
-          aluno.fotoUrl,
-        ].where((e) => e != null && e.toString().trim().isNotEmpty).length;
-    final profileCompletion = (completedFields / 8 * 100).round();
+    final action = experience.action;
+    final score = experience.score;
     final primary = Theme.of(context).colorScheme.primary;
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
     final softText = onPrimary.withValues(alpha: 0.72);
@@ -564,7 +553,7 @@ class _TodayFocusCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  'Plano de hoje',
+                  action.eyebrow,
                   style: TextStyle(
                     color: softText,
                     fontSize: 11,
@@ -576,7 +565,7 @@ class _TodayFocusCard extends StatelessWidget {
               Icon(Icons.verified_outlined, color: softText, size: 18),
               const SizedBox(width: 6),
               Text(
-                '$profileCompletion% perfil',
+                'Focux ${score.value}',
                 style: TextStyle(
                   color: softText,
                   fontSize: 11,
@@ -587,7 +576,7 @@ class _TodayFocusCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            next?.treinoNome ?? 'Perfil e acompanhamento',
+            action.title,
             style: TextStyle(
               color: onPrimary,
               fontSize: 25,
@@ -599,9 +588,7 @@ class _TodayFocusCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            next != null
-                ? '${next.exercicios.length} exercícios prontos. Toque para começar e registrar sua evolução.'
-                : 'Seu personal ainda não liberou treino. Complete seu perfil para acelerar os próximos ajustes.',
+            action.description,
             style: TextStyle(color: softText, fontSize: 13, height: 1.4),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -612,12 +599,8 @@ class _TodayFocusCard extends StatelessWidget {
               Expanded(
                 child: FilledButton(
                   onPressed:
-                      next != null
-                          ? () => context.push(
-                            '/checkin/executar',
-                            extra: next.treinoId,
-                          )
-                          : () => context.push('/aluno/perfil'),
+                      () =>
+                          context.push(action.route, extra: action.routeExtra),
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: primary,
@@ -627,15 +610,15 @@ class _TodayFocusCard extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    next != null ? 'Treinar agora' : 'Completar perfil',
+                    action.cta,
                     style: const TextStyle(fontWeight: FontWeight.w900),
                   ),
                 ),
               ),
               const SizedBox(width: 10),
               _WorkoutMetricPill(
-                value: '${treinos.length}',
-                label: 'ativos',
+                value: '${score.value}',
+                label: 'score',
                 onPrimary: onPrimary,
               ),
             ],
@@ -647,18 +630,70 @@ class _TodayFocusCard extends StatelessWidget {
             children: [
               _WorkoutInsightPill(
                 icon: Icons.trending_up_rounded,
-                label: 'Progresso medido',
+                label: score.rhythmLabel,
                 onPrimary: onPrimary,
               ),
               _WorkoutInsightPill(
                 icon: Icons.person_pin_circle_outlined,
-                label: 'Personal acompanhando',
+                label: score.riskLabel,
                 onPrimary: onPrimary,
               ),
             ],
           ),
+          const SizedBox(height: 14),
+          _HomeNarrativeRail(
+            items: experience.narratives,
+            onPrimary: onPrimary,
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _HomeNarrativeRail extends StatelessWidget {
+  final List<String> items;
+  final Color onPrimary;
+
+  const _HomeNarrativeRail({required this.items, required this.onPrimary});
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Column(
+      children: [
+        for (var i = 0; i < items.length; i++) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                margin: const EdgeInsets.only(top: 6),
+                decoration: BoxDecoration(
+                  color: onPrimary.withValues(alpha: 0.72),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  items[i],
+                  style: TextStyle(
+                    color: onPrimary.withValues(alpha: 0.78),
+                    fontSize: 11.5,
+                    height: 1.32,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          if (i != items.length - 1) const SizedBox(height: 6),
+        ],
+      ],
     );
   }
 }

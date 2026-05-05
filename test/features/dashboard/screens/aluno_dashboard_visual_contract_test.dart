@@ -22,10 +22,11 @@ void main() {
     expect(screen, contains("Text('Sair')"));
     expect(screen, contains('class _WorkoutMetricPill'));
     expect(screen, contains('class _WorkoutInsightPill'));
-    expect(screen, contains("'Plano de hoje'"));
-    expect(screen, contains('Toque para começar'));
-    expect(screen, contains("'Progresso medido'"));
-    expect(screen, contains("'Personal acompanhando'"));
+    expect(screen, contains('buildAlunoHomeExperience'));
+    expect(screen, contains('class _HomeNarrativeRail'));
+    expect(screen, contains('Focux \${score.value}'));
+    expect(screen, contains('score.rhythmLabel'));
+    expect(screen, contains('score.riskLabel'));
     expect(screen, contains("'Acompanhamento de \$firstName'"));
     expect(screen, contains("'Padrão'"));
     expect(screen, contains("'Sem ação agora'"));
