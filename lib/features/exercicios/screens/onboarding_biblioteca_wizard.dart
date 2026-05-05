@@ -131,11 +131,17 @@ class _OnboardingBibliotecaWizardState
                   const Spacer(),
                   if (_step < 2)
                     FilledButton(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(0, 40),
+                      ),
                       onPressed: canGoNext ? _next : null,
                       child: const Text('Continuar'),
                     ),
                   if (_step == 2)
                     FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(0, 40),
+                      ),
                       onPressed: _importing ? null : _importar,
                       icon: const Icon(Icons.download_rounded),
                       label: const Text('Carregar biblioteca'),
