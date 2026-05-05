@@ -9,6 +9,13 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_sparkline.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
+import '../../ia/data/ia_repository.dart';
+
+final alunoCopilotoActionProvider =
+    FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
+      return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
+    });
 
 class AlunoDetailScreen extends ConsumerWidget {
   final int alunoId;
@@ -263,6 +270,12 @@ class AlunoDetailScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
+                      ),
+                      const SizedBox(height: 16),
+                      _Aluno360CopilotCard(
+                        aluno: aluno,
+                        resumoAsync: autonomiaResumoAsync,
+                        isDark: isDark,
                       ),
                       const SizedBox(height: 16),
                       _AutonomiaAlunoCard(
@@ -810,6 +823,482 @@ class _AutonomiaAlunoCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _Aluno360CopilotCard extends ConsumerWidget {
+  final Aluno aluno;
+  final AsyncValue<AlunoAutonomiaResumo> resumoAsync;
+  final bool isDark;
+
+  const _Aluno360CopilotCard({
+    required this.aluno,
+    required this.resumoAsync,
+    required this.isDark,
+  });
+
+  int _perfilCompletion(Aluno aluno) {
+    final fields = [
+      aluno.telefone,
+      aluno.whatsapp,
+      aluno.objetivo,
+      aluno.genero,
+      aluno.fotoUrl,
+      aluno.dataNascimento,
+      aluno.peso,
+      aluno.altura,
+    ];
+    final filled =
+        fields.where((value) {
+          if (value == null) return false;
+          if (value is String) return value.trim().isNotEmpty;
+          return true;
+        }).length;
+    return ((filled / fields.length) * 100).round().clamp(0, 100);
+  }
+
+  List<_Aluno360Signal> _signals(
+    BuildContext context,
+    Aluno aluno,
+    AlunoAutonomiaResumo? resumo,
+  ) {
+    final profile = _perfilCompletion(aluno);
+    final financeiroOk = aluno.statusFinanceiro != 'INADIMPLENTE';
+    final hasAutonomyFriction =
+        resumo != null && resumo.cliques > resumo.concluidos;
+    final hasEquipment = aluno.equipamentosDisponiveis.isNotEmpty;
+    return [
+      _Aluno360Signal(
+        label: 'Perfil',
+        value: '$profile%',
+        detail:
+            profile >= 80
+                ? 'dados bons para prescrição'
+                : 'faltam dados que melhoram decisão',
+        color:
+            profile >= 80
+                ? EagleTokens.good
+                : Theme.of(context).colorScheme.primary,
+      ),
+      _Aluno360Signal(
+        label: 'Financeiro',
+        value: financeiroOk ? 'OK' : 'Atenção',
+        detail: financeiroOk ? 'sem bloqueio operacional' : 'pendência ativa',
+        color: financeiroOk ? EagleTokens.good : EagleTokens.bad,
+      ),
+      _Aluno360Signal(
+        label: 'Autonomia',
+        value:
+            resumo == null
+                ? '--'
+                : '${(resumo.concluidos / (resumo.cliques == 0 ? 1 : resumo.cliques) * 100).clamp(0, 100).round()}%',
+        detail:
+            hasAutonomyFriction
+                ? 'clicou e ainda não fechou'
+                : 'sem gargalo aberto forte',
+        color:
+            hasAutonomyFriction
+                ? EagleTokens.warn
+                : Theme.of(context).colorScheme.primary,
+      ),
+      _Aluno360Signal(
+        label: 'Contexto',
+        value: hasEquipment ? 'Rico' : 'Base',
+        detail:
+            hasEquipment
+                ? '${aluno.equipamentosDisponiveis.length} equipamentos'
+                : 'equipamentos não definidos',
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    ];
+  }
+
+  String _fallbackAction(Aluno aluno, AlunoAutonomiaResumo? resumo) {
+    if (aluno.statusFinanceiro == 'INADIMPLENTE') {
+      return 'Regularizar financeiro antes que isso vire atrito de acesso.';
+    }
+    if (_perfilCompletion(aluno) < 80) {
+      return 'Completar perfil do aluno e remover lacunas de prescrição.';
+    }
+    if (resumo != null && resumo.cliques > resumo.concluidos) {
+      return 'Resolver o gargalo de autonomia: ${resumo.gargaloTitulo ?? "tarefa aberta"}.';
+    }
+    return 'Revisar treino e propor a próxima evolução de ${aluno.objetivo ?? "objetivo"}.';
+  }
+
+  Future<void> _atribuir(
+    BuildContext context,
+    WidgetRef ref,
+    String acao,
+  ) async {
+    try {
+      await IaRepository(ref.read(apiClientProvider)).salvarAcaoCopiloto(
+        alunoId: aluno.id,
+        acao: acao,
+        motivo:
+            'Aluno 360: ação prescrita a partir de perfil, autonomia e risco.',
+      );
+      ref.invalidate(commandCenterProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ação enviada para ${aluno.nome}.')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível atribuir: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final actionAsync = ref.watch(alunoCopilotoActionProvider(aluno.id));
+    final resumo = resumoAsync.valueOrNull;
+    final signals = _signals(context, aluno, resumo);
+    final fallback = _fallbackAction(aluno, resumo);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: primary.withValues(alpha: 0.20)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: BrandPalette.soft(primary, dark: isDark),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(Icons.hub_outlined, color: primary, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Aluno 360',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Leitura única de perfil, autonomia, financeiro e próxima melhor ação.',
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 12.5,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton.filledTonal(
+                onPressed:
+                    () => ref.invalidate(alunoCopilotoActionProvider(aluno.id)),
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                tooltip: 'Atualizar Copiloto',
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 2.35,
+            children:
+                signals
+                    .map((signal) => _Aluno360SignalTile(signal: signal))
+                    .toList(),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color:
+                  isDark
+                      ? Colors.white.withValues(alpha: 0.04)
+                      : BrandPalette.softer(primary),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: line),
+            ),
+            child: actionAsync.when(
+              loading:
+                  () => const SizedBox(
+                    height: 52,
+                    child: Center(child: LinearProgressIndicator(minHeight: 2)),
+                  ),
+              error:
+                  (_, __) => _CopilotPrescription(
+                    title: 'Prescrição local',
+                    action: fallback,
+                    reason:
+                        'IA indisponível agora; usando sinais do Aluno 360.',
+                    color: primary,
+                  ),
+              data:
+                  (action) => _CopilotPrescription(
+                    title:
+                        (action['titulo'] ??
+                                action['tipo'] ??
+                                'Próxima melhor ação')
+                            .toString(),
+                    action:
+                        (action['acao'] ??
+                                action['mensagem'] ??
+                                action['descricao'] ??
+                                fallback)
+                            .toString(),
+                    reason:
+                        (action['motivo'] ?? 'Baseado nos sinais atuais.')
+                            .toString(),
+                    color: primary,
+                  ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          actionAsync.maybeWhen(
+            data:
+                (action) => _Aluno360ActionRow(
+                  aluno: aluno,
+                  primary: primary,
+                  acao:
+                      (action['acao'] ??
+                              action['mensagem'] ??
+                              action['descricao'] ??
+                              fallback)
+                          .toString(),
+                  onAssign: (acao) => _atribuir(context, ref, acao),
+                ),
+            orElse:
+                () => _Aluno360ActionRow(
+                  aluno: aluno,
+                  primary: primary,
+                  acao: fallback,
+                  onAssign: (acao) => _atribuir(context, ref, acao),
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Aluno360Signal {
+  final String label;
+  final String value;
+  final String detail;
+  final Color color;
+
+  const _Aluno360Signal({
+    required this.label,
+    required this.value,
+    required this.detail,
+    required this.color,
+  });
+}
+
+class _Aluno360SignalTile extends StatelessWidget {
+  final _Aluno360Signal signal;
+
+  const _Aluno360SignalTile({required this.signal});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+      decoration: BoxDecoration(
+        color: signal.color.withValues(alpha: isDark ? 0.14 : 0.08),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 36,
+            decoration: BoxDecoration(
+              color: signal.color,
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  signal.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Text(
+                      signal.value,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        signal.detail,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: mute, fontSize: 10.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CopilotPrescription extends StatelessWidget {
+  final String title;
+  final String action;
+  final String reason;
+  final Color color;
+
+  const _CopilotPrescription({
+    required this.title,
+    required this.action,
+    required this.reason,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.auto_awesome, color: color, size: 17),
+            const SizedBox(width: 7),
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 7),
+        Text(
+          action,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: ink,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            height: 1.28,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          reason,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: mute, fontSize: 12, height: 1.25),
+        ),
+      ],
+    );
+  }
+}
+
+class _Aluno360ActionRow extends StatelessWidget {
+  final Aluno aluno;
+  final Color primary;
+  final String acao;
+  final Future<void> Function(String acao) onAssign;
+
+  const _Aluno360ActionRow({
+    required this.aluno,
+    required this.primary,
+    required this.acao,
+    required this.onAssign,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        FilledButton.icon(
+          onPressed: () => onAssign(acao),
+          icon: const Icon(Icons.task_alt_rounded, size: 17),
+          label: const Text('Atribuir'),
+          style: FilledButton.styleFrom(backgroundColor: primary),
+        ),
+        OutlinedButton.icon(
+          onPressed:
+              () => context.push('/alunos/${aluno.id}/chat', extra: aluno.nome),
+          icon: const Icon(Icons.chat_bubble_outline, size: 17),
+          label: const Text('Mensagem'),
+        ),
+        OutlinedButton.icon(
+          onPressed:
+              () => context.push(
+                '/alunos/${aluno.id}/ia/progressao',
+                extra: aluno.nome,
+              ),
+          icon: const Icon(Icons.trending_up_rounded, size: 17),
+          label: const Text('Evoluir treino'),
+        ),
+      ],
     );
   }
 }
