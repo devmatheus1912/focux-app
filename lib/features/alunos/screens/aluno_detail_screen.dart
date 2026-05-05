@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -954,6 +955,36 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     }
   }
 
+  Future<void> _copiarMensagem(BuildContext context, String acao) async {
+    final mensagem = _mensagemPronta(aluno, acao);
+    await Clipboard.setData(ClipboardData(text: mensagem));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Mensagem pronta copiada para ${aluno.nome}.'),
+          action: SnackBarAction(
+            label: 'Abrir chat',
+            onPressed:
+                () =>
+                    context.push('/alunos/${aluno.id}/chat', extra: aluno.nome),
+          ),
+        ),
+      );
+    }
+  }
+
+  String _mensagemPronta(Aluno aluno, String acao) {
+    final primeiroNome =
+        aluno.nome.trim().isEmpty
+            ? 'tudo bem'
+            : aluno.nome.trim().split(' ').first;
+    final objetivo =
+        aluno.objetivo == null || aluno.objetivo!.trim().isEmpty
+            ? 'seu objetivo'
+            : aluno.objetivo!.trim();
+    return 'Oi, $primeiroNome! Passei pelo seu acompanhamento agora e o próximo passo para $objetivo é: $acao Me responde aqui com um ok quando fizer, combinado?';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -1093,6 +1124,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                               fallback)
                           .toString(),
                   onAssign: (acao) => _atribuir(context, ref, acao),
+                  onCopyMessage: (acao) => _copiarMensagem(context, acao),
                 ),
             orElse:
                 () => _Aluno360ActionRow(
@@ -1100,6 +1132,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                   primary: primary,
                   acao: fallback,
                   onAssign: (acao) => _atribuir(context, ref, acao),
+                  onCopyMessage: (acao) => _copiarMensagem(context, acao),
                 ),
           ),
         ],
@@ -1263,12 +1296,14 @@ class _Aluno360ActionRow extends StatelessWidget {
   final Color primary;
   final String acao;
   final Future<void> Function(String acao) onAssign;
+  final Future<void> Function(String acao) onCopyMessage;
 
   const _Aluno360ActionRow({
     required this.aluno,
     required this.primary,
     required this.acao,
     required this.onAssign,
+    required this.onCopyMessage,
   });
 
   @override
@@ -1282,6 +1317,11 @@ class _Aluno360ActionRow extends StatelessWidget {
           icon: const Icon(Icons.task_alt_rounded, size: 17),
           label: const Text('Atribuir'),
           style: FilledButton.styleFrom(backgroundColor: primary),
+        ),
+        OutlinedButton.icon(
+          onPressed: () => onCopyMessage(acao),
+          icon: const Icon(Icons.content_copy_rounded, size: 17),
+          label: const Text('Copiar mensagem'),
         ),
         OutlinedButton.icon(
           onPressed:

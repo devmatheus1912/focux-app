@@ -17,7 +17,10 @@ void main() {
     expect(screen, contains('commandCenterProvider'));
     expect(screen, contains('class _Aluno360SignalTile'));
     expect(screen, contains('class _CopilotPrescription'));
+    expect(screen, contains('Clipboard.setData'));
+    expect(screen, contains('_mensagemPronta'));
     expect(screen, contains("'Atribuir'"));
+    expect(screen, contains("'Copiar mensagem'"));
     expect(screen, contains("'Mensagem'"));
     expect(screen, contains("'Evoluir treino'"));
     expect(screen, contains('perfil, autonomia, financeiro'));
