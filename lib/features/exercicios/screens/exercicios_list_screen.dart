@@ -185,15 +185,26 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     _refresh();
   }
 
-  Future<void> _deleteBatch() async {
+  void _selectAllVisible(List<Exercicio> exercicios) {
+    setState(() {
+      _selected
+        ..clear()
+        ..addAll(exercicios.map((e) => e.id));
+    });
+  }
+
+  Future<void> _deleteBatch(List<Exercicio> exercicios) async {
     final count = _selected.length;
+    if (count == 0) return;
     final ok = await showDialog<bool>(
       context: context,
       builder:
           (ctx) => AlertDialog(
             title: Text('Excluir $count exercicios?'),
-            content: const Text(
-              'Esta acao remove os exercicios selecionados da biblioteca. Exercicios em uso podem ser bloqueados pelo backend.',
+            content: Text(
+              'Esta acao remove os exercicios selecionados da biblioteca. '
+              'Se algum estiver cadastrado em treino de aluno, ele sera mantido '
+              'e eu vou te mostrar quais foram bloqueados.',
             ),
             actions: [
               TextButton(
@@ -213,11 +224,91 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     );
     if (ok != true) return;
     final repo = ref.read(exercicioRepositoryProvider);
-    for (final id in _selected.toList()) {
-      await repo.excluir(id);
+    final byId = {for (final ex in exercicios) ex.id: ex};
+    final deleted = <int>[];
+    final blocked = <_DeleteFailure>[];
+    final selectedIds = _selected.toList();
+
+    for (final id in selectedIds) {
+      final ex = byId[id];
+      try {
+        await repo.excluir(id);
+        deleted.add(id);
+      } catch (e) {
+        blocked.add(
+          _DeleteFailure(
+            id: id,
+            nome: ex?.nome ?? 'Exercicio #$id',
+            motivo: friendlyError(e),
+          ),
+        );
+      }
     }
-    setState(_selected.clear);
+    if (!mounted) return;
+    setState(() {
+      _selected
+        ..removeAll(deleted)
+        ..removeAll(blocked.map((e) => e.id));
+      if (blocked.isEmpty) _selected.clear();
+    });
     _refresh();
+    if (blocked.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            deleted.length == 1
+                ? '1 exercicio excluido.'
+                : '${deleted.length} exercicios excluidos.',
+          ),
+          backgroundColor: EagleTokens.good,
+        ),
+      );
+      return;
+    }
+
+    await showDialog<void>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Alguns exercicios nao foram excluidos'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (deleted.isNotEmpty)
+                    Text('${deleted.length} excluido(s) com sucesso.'),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Mantidos porque estao cadastrados para aluno ou em treino:',
+                  ),
+                  const SizedBox(height: 8),
+                  Flexible(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: blocked.length,
+                      separatorBuilder: (_, __) => const Divider(height: 12),
+                      itemBuilder: (_, index) {
+                        final item = blocked[index];
+                        return Text(
+                          '${item.nome}\n${item.motivo}',
+                          style: const TextStyle(fontSize: 13),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Entendi'),
+              ),
+            ],
+          ),
+    );
   }
 
   @override
@@ -245,11 +336,18 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
               ExerciciosBatchActions(
                 count: _selected.length,
                 onCancel: () => setState(_selected.clear),
+                onSelectAll:
+                    () => asyncList.whenData(
+                      (value) => _selectAllVisible(_applyFilter(value)),
+                    ),
                 onFavorite:
                     () => asyncList.whenData(
                       (value) => _favoriteBatch(value),
                     ),
-                onDelete: _deleteBatch,
+                onDelete:
+                    () => asyncList.whenData(
+                      (value) => _deleteBatch(_applyFilter(value)),
+                    ),
               )
             else
               Padding(
@@ -279,6 +377,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                           ),
                         ],
                       ),
+                    ),
+                    IconButton(
+                      tooltip: 'Selecionar exercicios',
+                      icon: const Icon(Icons.checklist_rounded),
+                      onPressed:
+                          () => asyncList.whenData((value) {
+                            final filtered = _applyFilter(value);
+                            if (filtered.isEmpty) return;
+                            setState(() => _selected.add(filtered.first.id));
+                          }),
                     ),
                     IconButton(
                       tooltip: 'Carregar biblioteca completa',
@@ -379,4 +487,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       ),
     );
   }
+}
+
+class _DeleteFailure {
+  final int id;
+  final String nome;
+  final String motivo;
+
+  const _DeleteFailure({
+    required this.id,
+    required this.nome,
+    required this.motivo,
+  });
 }

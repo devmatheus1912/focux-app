@@ -5,12 +5,14 @@ class ExerciciosBatchActions extends StatelessWidget {
     super.key,
     required this.count,
     required this.onCancel,
+    required this.onSelectAll,
     required this.onFavorite,
     required this.onDelete,
   });
 
   final int count;
   final VoidCallback onCancel;
+  final VoidCallback onSelectAll;
   final VoidCallback onFavorite;
   final VoidCallback onDelete;
 
@@ -34,6 +36,11 @@ class ExerciciosBatchActions extends StatelessWidget {
                   '$count selecionado${count == 1 ? '' : 's'}',
                   style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
+              ),
+              IconButton(
+                tooltip: 'Selecionar todos filtrados',
+                icon: const Icon(Icons.select_all_rounded),
+                onPressed: onSelectAll,
               ),
               IconButton(
                 tooltip: 'Favoritar',
