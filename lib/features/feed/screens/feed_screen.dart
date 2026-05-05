@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 
+import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -113,9 +115,31 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final formKey = GlobalKey<FormState>();
     final tituloCtrl = TextEditingController();
     final conteudoCtrl = TextEditingController();
-    final midiaUrlCtrl = TextEditingController();
     String tipoSelecionado = 'TEXTO';
+    XFile? midiaSelecionada;
     bool salvando = false;
+    bool escolhendoMidia = false;
+
+    Future<void> escolherMidia(StateSetter setModalState, String tipo) async {
+      if (escolhendoMidia) return;
+      setModalState(() => escolhendoMidia = true);
+      try {
+        final picker = ImagePicker();
+        final file =
+            tipo == 'VIDEO'
+                ? await picker.pickVideo(source: ImageSource.gallery)
+                : await picker.pickImage(
+                  source: ImageSource.gallery,
+                  imageQuality: 86,
+                  maxWidth: 1600,
+                );
+        if (file != null) {
+          setModalState(() => midiaSelecionada = file);
+        }
+      } finally {
+        setModalState(() => escolhendoMidia = false);
+      }
+    }
 
     showModalBottomSheet<bool>(
       context: context,
@@ -191,7 +215,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               ],
                               onChanged: (v) {
                                 if (v != null) {
-                                  setModalState(() => tipoSelecionado = v);
+                                  setModalState(() {
+                                    tipoSelecionado = v;
+                                    if (v != 'IMAGEM' && v != 'VIDEO') {
+                                      midiaSelecionada = null;
+                                    }
+                                  });
                                 }
                               },
                             ),
@@ -228,14 +257,79 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                             if (tipoSelecionado == 'IMAGEM' ||
                                 tipoSelecionado == 'VIDEO') ...[
                               const SizedBox(height: 12),
-                              TextFormField(
-                                controller: midiaUrlCtrl,
-                                decoration: const InputDecoration(
-                                  labelText: 'URL da mídia',
-                                  border: OutlineInputBorder(),
-                                  prefixIcon: Icon(Icons.link),
+                              OutlinedButton.icon(
+                                onPressed:
+                                    salvando || escolhendoMidia
+                                        ? null
+                                        : () => escolherMidia(
+                                          setModalState,
+                                          tipoSelecionado,
+                                        ),
+                                icon:
+                                    escolhendoMidia
+                                        ? const SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                        : Icon(
+                                          tipoSelecionado == 'VIDEO'
+                                              ? Icons.video_library_outlined
+                                              : Icons.photo_library_outlined,
+                                        ),
+                                label: Text(
+                                  midiaSelecionada == null
+                                      ? (tipoSelecionado == 'VIDEO'
+                                          ? 'Escolher vídeo'
+                                          : 'Escolher imagem')
+                                      : 'Trocar arquivo',
                                 ),
                               ),
+                              if (midiaSelecionada != null) ...[
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(ctx).colorScheme.primary
+                                        .withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        tipoSelecionado == 'VIDEO'
+                                            ? Icons.movie_outlined
+                                            : Icons.image_outlined,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          midiaSelecionada!.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        tooltip: 'Remover arquivo',
+                                        visualDensity: VisualDensity.compact,
+                                        onPressed:
+                                            salvando
+                                                ? null
+                                                : () => setModalState(
+                                                  () => midiaSelecionada = null,
+                                                ),
+                                        icon: const Icon(Icons.close, size: 18),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ],
                             const SizedBox(height: 24),
                             FilledButton.icon(
@@ -248,16 +342,34 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                         }
                                         setModalState(() => salvando = true);
                                         try {
+                                          String? midiaUrl;
+                                          if (midiaSelecionada != null &&
+                                              (tipoSelecionado == 'IMAGEM' ||
+                                                  tipoSelecionado == 'VIDEO')) {
+                                            midiaUrl = await MediaUploadService(
+                                              ref.read(apiClientProvider),
+                                            ).uploadBytes(
+                                              bytes:
+                                                  await midiaSelecionada!
+                                                      .readAsBytes(),
+                                              filename: midiaSelecionada!.name,
+                                              folder:
+                                                  tipoSelecionado == 'VIDEO'
+                                                      ? 'feed/videos'
+                                                      : 'feed/images',
+                                              resourceType:
+                                                  tipoSelecionado == 'VIDEO'
+                                                      ? 'video'
+                                                      : 'image',
+                                            );
+                                          }
                                           await FeedRepository(
                                             ref.read(apiClientProvider),
                                           ).criar(
                                             tituloCtrl.text.trim(),
                                             conteudoCtrl.text.trim(),
                                             tipoPost: tipoSelecionado,
-                                            midiaUrl:
-                                                midiaUrlCtrl.text.trim().isEmpty
-                                                    ? null
-                                                    : midiaUrlCtrl.text.trim(),
+                                            midiaUrl: midiaUrl,
                                           );
                                           if (ctx.mounted) {
                                             Navigator.of(ctx).pop(true);
@@ -302,7 +414,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     ).then((created) async {
       tituloCtrl.dispose();
       conteudoCtrl.dispose();
-      midiaUrlCtrl.dispose();
       if (created != true || !mounted) return;
       await _load();
       if (!mounted) return;
@@ -545,18 +656,21 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               ),
                               if (mUrl != null && mUrl.isNotEmpty) ...[
                                 const SizedBox(height: 12),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    mUrl,
-                                    fit: BoxFit.cover,
-                                    height: 130,
-                                    width: double.infinity,
-                                    errorBuilder:
-                                        (_, __, ___) =>
-                                            _ImagePlaceholder(primary: primary),
-                                  ),
-                                ),
+                                p.tipoPost == 'VIDEO'
+                                    ? _VideoAttachmentTile(primary: primary)
+                                    : ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        mUrl,
+                                        fit: BoxFit.cover,
+                                        height: 130,
+                                        width: double.infinity,
+                                        errorBuilder:
+                                            (_, __, ___) => _ImagePlaceholder(
+                                              primary: primary,
+                                            ),
+                                      ),
+                                    ),
                               ] else if (p.tipoPost == 'IMAGEM') ...[
                                 const SizedBox(height: 12),
                                 _ImagePlaceholder(primary: primary),
@@ -780,6 +894,35 @@ class _ImagePlaceholder extends StatelessWidget {
         ),
       ),
       child: Icon(Icons.image_outlined, color: primary, size: 28),
+    );
+  }
+}
+
+class _VideoAttachmentTile extends StatelessWidget {
+  final Color primary;
+
+  const _VideoAttachmentTile({required this.primary});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 130,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          colors: [BrandPalette.deep(primary), primary.withValues(alpha: 0.74)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.play_circle_fill_rounded,
+          color: Colors.white,
+          size: 44,
+        ),
+      ),
     );
   }
 }

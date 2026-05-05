@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/feed/data/feed_repository.dart';
 
@@ -26,5 +28,29 @@ void main() {
     expect(post.autorNome, 'Matheus Focux');
     expect(post.autorAvatarUrl, 'https://cdn.focux.test/personal.jpg');
     expect(comentario.alunoFotoUrl, 'https://cdn.focux.test/thales.jpg');
+
+    final comentarioComAlias = FeedComentario.fromJson({
+      'id': 12,
+      'alunoId': 2,
+      'alunoNome': 'thales',
+      'avatarUrl': 'https://cdn.focux.test/avatar-alias.jpg',
+      'texto': 'Alias.',
+      'criadoEm': '2026-05-05T15:02:00',
+    });
+    expect(
+      comentarioComAlias.alunoFotoUrl,
+      'https://cdn.focux.test/avatar-alias.jpg',
+    );
+  });
+
+  test('feed composer uploads media instead of asking for URL', () {
+    final screen =
+        File('lib/features/feed/screens/feed_screen.dart').readAsStringSync();
+
+    expect(screen, contains('ImagePicker'));
+    expect(screen, contains('MediaUploadService'));
+    expect(screen, contains('feed/images'));
+    expect(screen, contains('feed/videos'));
+    expect(screen, isNot(contains('URL da mídia')));
   });
 }

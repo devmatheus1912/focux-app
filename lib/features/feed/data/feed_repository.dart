@@ -76,7 +76,12 @@ class FeedComentario {
     id: json['id'],
     alunoId: json['alunoId'],
     alunoNome: json['alunoNome'],
-    alunoFotoUrl: json['alunoFotoUrl'] ?? json['fotoUrl'],
+    alunoFotoUrl:
+        json['alunoFotoUrl'] ??
+        json['fotoUrl'] ??
+        json['avatarUrl'] ??
+        json['alunoAvatarUrl'] ??
+        json['profilePhotoUrl'],
     texto: json['texto'] ?? json['conteudo'] ?? '',
     criadoEm: json['criadoEm'] ?? '',
   );

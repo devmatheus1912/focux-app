@@ -9,12 +9,16 @@ class FeedCommentsSheet extends StatefulWidget {
   final int postId;
   final FeedRepository repo;
   final ValueChanged<int> onComentou;
+  final int? currentAlunoId;
+  final String? currentAlunoFotoUrl;
 
   const FeedCommentsSheet({
     super.key,
     required this.postId,
     required this.repo,
     required this.onComentou,
+    this.currentAlunoId,
+    this.currentAlunoFotoUrl,
   });
 
   @override
@@ -148,7 +152,16 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                           itemCount: _comentarios.length,
                           itemBuilder: (ctx, i) {
                             final c = _comentarios[i];
-                            final fotoUrl = c.alunoFotoUrl?.trim();
+                            final useCurrentAlunoFallback =
+                                widget.currentAlunoId != null &&
+                                widget.currentAlunoId == c.alunoId;
+                            final fotoUrl =
+                                (c.alunoFotoUrl?.trim().isNotEmpty == true
+                                        ? c.alunoFotoUrl
+                                        : useCurrentAlunoFallback
+                                        ? widget.currentAlunoFotoUrl
+                                        : null)
+                                    ?.trim();
                             final hasFoto =
                                 fotoUrl != null && fotoUrl.isNotEmpty;
                             return Padding(

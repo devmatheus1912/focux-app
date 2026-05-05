@@ -6,6 +6,7 @@ import '../../../core/utils/fx_utils.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../alunos/providers/alunos_provider.dart';
 import '../data/feed_repository.dart';
 import '../widgets/feed_comments_sheet.dart';
 
@@ -66,6 +67,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   }
 
   void _abrirComentarios(int postId) {
+    final aluno = ref.read(alunoMeProvider).valueOrNull;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -76,6 +78,8 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
           (ctx) => FeedCommentsSheet(
             postId: postId,
             repo: FeedRepository(ref.read(apiClientProvider)),
+            currentAlunoId: aluno?.id,
+            currentAlunoFotoUrl: aluno?.fotoUrl,
             onComentou:
                 (novoTotal) =>
                     setState(() => _comentariosLocais[postId] = novoTotal),
@@ -241,18 +245,21 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                               ),
                               if (mUrl != null && mUrl.isNotEmpty) ...[
                                 const SizedBox(height: 12),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    mUrl,
-                                    fit: BoxFit.cover,
-                                    height: 130,
-                                    width: double.infinity,
-                                    errorBuilder:
-                                        (_, __, ___) =>
-                                            _ImagePlaceholder(primary: primary),
-                                  ),
-                                ),
+                                p.tipoPost == 'VIDEO'
+                                    ? _VideoAttachmentTile(primary: primary)
+                                    : ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        mUrl,
+                                        fit: BoxFit.cover,
+                                        height: 130,
+                                        width: double.infinity,
+                                        errorBuilder:
+                                            (_, __, ___) => _ImagePlaceholder(
+                                              primary: primary,
+                                            ),
+                                      ),
+                                    ),
                               ] else if (p.tipoPost == 'IMAGEM') ...[
                                 const SizedBox(height: 12),
                                 _ImagePlaceholder(primary: primary),
@@ -405,6 +412,35 @@ class _ImagePlaceholder extends StatelessWidget {
         ),
       ),
       child: Icon(Icons.image_outlined, color: primary, size: 28),
+    );
+  }
+}
+
+class _VideoAttachmentTile extends StatelessWidget {
+  final Color primary;
+
+  const _VideoAttachmentTile({required this.primary});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 130,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          colors: [BrandPalette.deep(primary), primary.withValues(alpha: 0.74)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.play_circle_fill_rounded,
+          color: Colors.white,
+          size: 44,
+        ),
+      ),
     );
   }
 }
