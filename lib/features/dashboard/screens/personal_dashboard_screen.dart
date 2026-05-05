@@ -115,9 +115,7 @@ class _PersonalDashboardScreenState
         data: (data) {
           final screenWidth = MediaQuery.sizeOf(context).width;
           final isCompactPhone = screenWidth < 390;
-          final metricAspectRatio = isCompactPhone ? 1.18 : 1.28;
-          final shortcutAspectRatio = isCompactPhone ? 0.88 : 0.96;
-          final commandAspectRatio = isCompactPhone ? 1.7 : 2.0;
+          final shortcutAspectRatio = isCompactPhone ? 2.35 : 2.65;
 
           // Computed values for hero card
           final monthNames = [
@@ -227,6 +225,12 @@ class _PersonalDashboardScreenState
                                                 : EagleTokens.ink,
                                         fontWeight: FontWeight.w600,
                                       ),
+                                    ),
+                                    TextSpan(
+                                      text:
+                                          riscoAlto > 0
+                                              ? ' · $riscoAlto precisam de você'
+                                              : ' · operação estável',
                                     ),
                                   ],
                                 ),
@@ -435,7 +439,18 @@ class _PersonalDashboardScreenState
                                     letterSpacing: 0.12,
                                   ),
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 4),
+                                Text(
+                                  pendente > 0
+                                      ? 'Faltam R\$ ${pendente.toInt()} para fechar a meta.'
+                                      : 'Meta do mês sob controle.',
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
                                 Row(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.baseline,
@@ -544,52 +559,52 @@ class _PersonalDashboardScreenState
                   ),
                 ),
 
-                // GRID METRICAS
+                // PULSO DO DIA
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-                    child: GridView.count(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: metricAspectRatio,
-                      children: [
-                        _QuickTile(
-                          icon: 'users',
-                          label: 'Alunos ativos',
-                          value: alunosAtivos.toString(),
-                          sub:
-                              '${math.max(0, totalAlunos - alunosAtivos)} inativos',
-                          accent: primary,
-                          isDark: isDark,
-                        ),
-                        _QuickTile(
-                          icon: 'circle-check',
-                          label: 'Check-ins hoje',
-                          value: checkinsHoje.toString(),
-                          sub: 'histórico de treinos',
-                          accent: EagleTokens.good,
-                          isDark: isDark,
-                        ),
-                        _QuickTile(
-                          icon: 'alert-triangle',
-                          label: 'Risco alto',
-                          value: riscoAlto.toString(),
-                          sub: 'precisam atenção',
-                          accent: EagleTokens.warn,
-                          isDark: isDark,
-                        ),
-                        _QuickTile(
-                          icon: 'flame',
-                          label: 'Aderência média',
-                          value: aderenciaMediaStr,
-                          sub: 'últimos 7 dias',
-                          accent: primary,
-                          isDark: isDark,
-                        ),
-                      ],
+                    padding: const EdgeInsets.fromLTRB(16, 18, 0, 20),
+                    child: SizedBox(
+                      height: 96,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.only(right: 16),
+                        children: [
+                          _QuickTile(
+                            icon: 'users',
+                            label: 'Alunos ativos',
+                            value: alunosAtivos.toString(),
+                            sub:
+                                '${math.max(0, totalAlunos - alunosAtivos)} inativos',
+                            accent: primary,
+                            isDark: isDark,
+                          ),
+                          _QuickTile(
+                            icon: 'circle-check',
+                            label: 'Check-ins hoje',
+                            value: checkinsHoje.toString(),
+                            sub: 'histórico de treinos',
+                            accent: EagleTokens.good,
+                            isDark: isDark,
+                          ),
+                          _QuickTile(
+                            icon: 'alert-triangle',
+                            label: 'Risco alto',
+                            value: riscoAlto.toString(),
+                            sub: 'precisam atenção',
+                            accent: EagleTokens.warn,
+                            isDark: isDark,
+                          ),
+                          _QuickTile(
+                            icon: 'flame',
+                            label: 'Aderência média',
+                            value: aderenciaMediaStr,
+                            sub: 'últimos 7 dias',
+                            accent: primary,
+                            isDark: isDark,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -602,7 +617,6 @@ class _PersonalDashboardScreenState
                       isDark: isDark,
                       primary: primary,
                       finData: _finData,
-                      cardAspectRatio: commandAspectRatio,
                     ),
                   ),
                 ),
@@ -670,7 +684,7 @@ class _PersonalDashboardScreenState
                 // ATALHOS — 6 quick action shortcuts (design spec)
                 const SliverToBoxAdapter(child: SizedBox(height: 28)),
                 SliverToBoxAdapter(
-                  child: _SectionTitle(title: 'Atalhos', isDark: isDark),
+                  child: _SectionTitle(title: 'Ferramentas', isDark: isDark),
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
@@ -683,7 +697,7 @@ class _PersonalDashboardScreenState
                     child: GridView.count(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 3,
+                      crossAxisCount: 2,
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 10,
                       childAspectRatio: shortcutAspectRatio,
@@ -918,64 +932,81 @@ class _QuickTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      width: 154,
+      margin: const EdgeInsets.only(right: 10),
+      padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+          color: accent.withValues(alpha: isDark ? 0.22 : 0.13),
           width: 1,
         ),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: const Color(0xFF0B1220).withValues(alpha: 0.035),
+              blurRadius: 22,
+              offset: const Offset(0, 12),
+            ),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 28,
-            height: 28,
+            width: 34,
+            height: 34,
             decoration: BoxDecoration(
-              color: primarySoft,
-              borderRadius: BorderRadius.circular(10),
+              color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
+              borderRadius: BorderRadius.circular(13),
             ),
             child: Center(child: FxIcon(name: icon, size: 16, color: accent)),
           ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: ink,
-              height: 1,
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.w700,
+                    color: ink,
+                    height: 1,
+                    letterSpacing: -0.4,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: ink,
+                    height: 1.1,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  sub,
+                  style: TextStyle(fontSize: 10.5, color: mute, height: 1.1),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const Spacer(),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: ink,
-              height: 1.1,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            sub,
-            style: TextStyle(fontSize: 10.5, color: mute, height: 1.1),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -1060,7 +1091,7 @@ class _AttentionCard extends StatelessWidget {
 
     return Container(
       width: 240,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
@@ -1179,35 +1210,53 @@ class _ShortcutBtn extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
         decoration: BoxDecoration(
           color: cardBg,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+            color:
+                isDark
+                    ? EagleTokens.darkLine
+                    : EagleTokens.line.withValues(alpha: 0.85),
             width: 1,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            FxIcon(
-              name: icon,
-              size: 18,
-              color: isDark ? primaryAccent : primary,
-              strokeWidth: 1.9,
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: (isDark ? primaryAccent : primary).withValues(
+                  alpha: isDark ? 0.14 : 0.09,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: FxIcon(
+                  name: icon,
+                  size: 17,
+                  color: isDark ? primaryAccent : primary,
+                  strokeWidth: 1.9,
+                ),
+              ),
             ),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: ink,
-                height: 1.2,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.2,
+                  fontWeight: FontWeight.w800,
+                  color: ink,
+                  height: 1.2,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -1225,13 +1274,11 @@ class _CommandCenterSection extends ConsumerWidget {
   final bool isDark;
   final Color primary;
   final FinanceiroDashboard? finData;
-  final double cardAspectRatio;
 
   const _CommandCenterSection({
     required this.isDark,
     required this.primary,
     required this.finData,
-    required this.cardAspectRatio,
   });
 
   @override
@@ -1356,56 +1403,62 @@ class _CommandCenterSection extends ConsumerWidget {
       required String subtitle,
       required VoidCallback onTap,
     }) {
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: line, width: 1),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: primarySoft,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: FxIcon(name: icon, size: 18, color: primary),
-                ),
+      return SizedBox(
+        width: 178,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: line.withValues(alpha: 0.78)),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: ink,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: primarySoft,
+                      borderRadius: BorderRadius.circular(13),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(fontSize: 11.5, color: mute),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: Center(
+                      child: FxIcon(name: icon, size: 17, color: primary),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 12.8,
+                            fontWeight: FontWeight.w800,
+                            color: ink,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          subtitle,
+                          style: TextStyle(fontSize: 11.2, color: mute),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       );
@@ -1414,57 +1467,85 @@ class _CommandCenterSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Text(
-            'Central de Comando',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-              letterSpacing: -0.5,
-            ),
-          ),
-        ),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: cardAspectRatio,
+        Row(
           children: [
-            card(
-              icon: 'message-circle',
-              title: 'Mensagens',
-              subtitle: chatSubtitle,
-              onTap: () => context.go('/chat/inbox'),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Central de Comando',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: ink,
+                      letterSpacing: -0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'A melhor próxima ação para proteger receita e aderência.',
+                    style: TextStyle(fontSize: 12.5, color: mute, height: 1.25),
+                  ),
+                ],
+              ),
             ),
-            card(
-              icon: 'users',
-              title: 'Alunos',
-              subtitle: '$alunosAtivos ativos',
-              onTap: () => context.go('/alunos'),
-            ),
-            card(
-              icon: 'calendar',
-              title: 'Agenda',
-              subtitle: agendaSubtitle,
-              onTap: () => context.go('/agenda'),
-            ),
-            card(
-              icon: 'dollar-sign',
-              title: 'Financeiro',
-              subtitle: finSubtitle,
-              onTap: () => context.go('/financeiro'),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: primarySoft,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                '${nextActions.length} focos',
+                style: TextStyle(
+                  color: primary,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         _CommandActionPanel(
           isDark: isDark,
           primary: primary,
           actions: nextActions.take(3).toList(growable: false),
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 82,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            children: [
+              card(
+                icon: 'message-circle',
+                title: 'Mensagens',
+                subtitle: chatSubtitle,
+                onTap: () => context.go('/chat/inbox'),
+              ),
+              card(
+                icon: 'users',
+                title: 'Alunos',
+                subtitle: '$alunosAtivos ativos',
+                onTap: () => context.go('/alunos'),
+              ),
+              card(
+                icon: 'calendar',
+                title: 'Agenda',
+                subtitle: agendaSubtitle,
+                onTap: () => context.go('/agenda'),
+              ),
+              card(
+                icon: 'dollar-sign',
+                title: 'Financeiro',
+                subtitle: finSubtitle,
+                onTap: () => context.go('/financeiro'),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -1528,11 +1609,19 @@ class _CommandActionPanel extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: line),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: line.withValues(alpha: 0.82)),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: const Color(0xFF0B1220).withValues(alpha: 0.045),
+              blurRadius: 30,
+              offset: const Offset(0, 16),
+            ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1545,13 +1634,13 @@ class _CommandActionPanel extends StatelessWidget {
                 'Próximas ações',
                 style: TextStyle(
                   color: ink,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
               const Spacer(),
               Text(
-                'prioridade',
+                'impacto hoje',
                 style: TextStyle(
                   color: mute,
                   fontSize: 11,
@@ -1597,27 +1686,28 @@ class _CommandActionTile extends StatelessWidget {
     };
     return InkWell(
       onTap: () => context.go(item.route),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(18),
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: accent.withValues(alpha: isDark ? 0.16 : 0.09),
-          borderRadius: BorderRadius.circular(14),
+          color: accent.withValues(alpha: isDark ? 0.16 : 0.075),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: accent.withValues(alpha: 0.10)),
         ),
         child: Row(
           children: [
             Container(
-              width: 34,
-              height: 34,
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
                 color: accent.withValues(alpha: isDark ? 0.24 : 0.14),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(15),
               ),
               child: Center(
                 child: FxIcon(name: item.icon, color: accent, size: 18),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1628,16 +1718,16 @@ class _CommandActionTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: ink,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     item.subtitle,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: mute, fontSize: 11.5),
+                    style: TextStyle(color: mute, fontSize: 11.6, height: 1.2),
                   ),
                 ],
               ),
