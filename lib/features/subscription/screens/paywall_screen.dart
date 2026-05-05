@@ -43,7 +43,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           {'ok': false, 'label': 'Financeiro'},
           {'ok': false, 'label': 'IA Copiloto'},
           {'ok': false, 'label': 'Landing Page'},
-          {'ok': false, 'label': 'Migracao Magica'},
+          {'ok': false, 'label': 'Migração Mágica'},
         ],
       },
       {
@@ -57,7 +57,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         'plan': SubscriptionPlan.PREMIUM,
         'features': [
           {'ok': true, 'label': 'Até 20 alunos ativos'},
-          {'ok': true, 'label': 'Financeiro e cobrancas'},
+          {'ok': true, 'label': 'Financeiro e cobranças'},
           {'ok': true, 'label': 'CRM Kanban de Leads'},
           {'ok': true, 'label': 'Migração Mágica IA'},
           {'ok': false, 'label': 'Landing Page white-label'},
@@ -78,8 +78,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           {'ok': true, 'label': 'IA Copiloto completa'},
           {'ok': true, 'label': 'Landing Page white-label'},
           {'ok': true, 'label': 'Motor anti-churn e prova social'},
-          {'ok': true, 'label': 'Analytics avancado'},
-          {'ok': true, 'label': 'Suporte prioritario'},
+          {'ok': true, 'label': 'Analytics avançado'},
+          {'ok': true, 'label': 'Suporte prioritário'},
         ],
       },
     ];
@@ -270,7 +270,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             children: [
               if (trialOfferAvailable) ...[
                 Text(
-                  'Cancele antes dos 7 dias. Nada sera cobrado no cartao.',
+                  'Cancele antes dos 7 dias. Nada será cobrado no cartão.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: mute,
@@ -780,7 +780,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                             child: Text(
                               selectedPlan == SubscriptionPlan.ENTERPRISE &&
                                       !trialUsed
-                                  ? 'Teste por 7 dias. A loja pede cartao para ativar, mas voce pode cancelar antes do fim do periodo e nao tera cobranca.'
+                                  ? 'Teste por 7 dias. A loja pede cartão para ativar, mas você pode cancelar antes do fim do período e não terá cobrança.'
                                   : 'Compra gerenciada pela loja do dispositivo.',
                               style: const TextStyle(
                                 fontSize: 11.5,

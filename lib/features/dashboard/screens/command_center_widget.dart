@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/loading_shimmer.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 
@@ -14,19 +16,35 @@ class CommandCenterWidget extends ConsumerWidget {
     final commandCenterAsync = ref.watch(commandCenterProvider);
 
     return commandCenterAsync.when(
-      loading:
-          () => const Padding(
-            padding: EdgeInsets.all(24),
-            child: Center(child: CircularProgressIndicator()),
-          ),
-      error:
-          (e, _) => Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Erro ao carregar Central: $e',
-              style: const TextStyle(color: EagleTokens.bad),
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: ShimmerListLoading(itemCount: 4, itemHeight: 72),
+      ),
+      error: (e, _) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              friendlyError(
+                e,
+                fallback: 'Não foi possível carregar a Central de Comando.',
+              ),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 14,
+                height: 1.35,
+              ),
             ),
-          ),
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: () => ref.invalidate(commandCenterProvider),
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+              label: const Text('Tentar novamente'),
+            ),
+          ],
+        ),
+      ),
       data: (data) {
         if (data.agendaHoje.isEmpty &&
             data.filaAcoes.isEmpty &&
@@ -112,19 +130,28 @@ class _IaActionHistoryState extends ConsumerState<_IaActionHistory> {
                     ),
                   ),
                 ),
-                DropdownButton<String>(
-                  value: _status,
-                  underline: const SizedBox.shrink(),
-                  items: const [
-                    DropdownMenuItem(value: '', child: Text('Todas')),
-                    DropdownMenuItem(value: 'ABERTO', child: Text('Abertas')),
-                    DropdownMenuItem(value: 'ADIADO', child: Text('Adiadas')),
-                    DropdownMenuItem(
-                      value: 'CONCLUIDO',
-                      child: Text('Concluidas'),
-                    ),
-                  ],
-                  onChanged: (value) => setState(() => _status = value ?? ''),
+                Theme(
+                  data: Theme.of(context).copyWith(
+                    canvasColor: Theme.of(context).colorScheme.surface,
+                  ),
+                  child: DropdownButton<String>(
+                    value: _status,
+                    underline: const SizedBox.shrink(),
+                    iconEnabledColor: primary,
+                    dropdownColor: Theme.of(context).colorScheme.surface,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    borderRadius: BorderRadius.circular(EagleTokens.radiusMd),
+                    items: const [
+                      DropdownMenuItem(value: '', child: Text('Todas')),
+                      DropdownMenuItem(value: 'ABERTO', child: Text('Abertas')),
+                      DropdownMenuItem(value: 'ADIADO', child: Text('Adiadas')),
+                      DropdownMenuItem(
+                        value: 'CONCLUIDO',
+                        child: Text('Concluídas'),
+                      ),
+                    ],
+                    onChanged: (value) => setState(() => _status = value ?? ''),
+                  ),
                 ),
               ],
             ),
@@ -159,7 +186,7 @@ class _IaHistoryTile extends ConsumerWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
         border: Border.all(color: primary.withValues(alpha: 0.18)),
       ),
       child: Row(
@@ -940,7 +967,7 @@ class _AutonomiaGargaloTile extends StatelessWidget {
       height: 34,
       decoration: BoxDecoration(
         color: EagleTokens.warn.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
       ),
       child: const Icon(
         Icons.touch_app_outlined,

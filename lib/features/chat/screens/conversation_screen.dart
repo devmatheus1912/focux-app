@@ -585,7 +585,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               minLines: 1,
               maxLines: 5,
               textInputAction: TextInputAction.newline,
-              decoration: const InputDecoration(hintText: 'Mensagem'),
+              decoration: const InputDecoration(
+                hintText: 'Digite sua mensagem…',
+              ),
             ),
             actions: [
               TextButton(
@@ -1953,7 +1955,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         ),
                                         cursorColor: primary,
                                         decoration: InputDecoration(
-                                          hintText: 'Mensagem',
+                                          hintText: 'Digite sua mensagem…',
                                           hintStyle: TextStyle(
                                             color:
                                                 isDark
@@ -2346,28 +2348,20 @@ class _DeliveryStatus extends StatelessWidget {
     final delivered = msg.deliveredAt != null;
     final iconColor = read ? const Color(0xFF60A5FA) : color;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          delivered ? Icons.done_all_rounded : Icons.check_rounded,
-          size: 14,
-          color: iconColor,
-        ),
-        const SizedBox(width: 2),
-        Text(
-          read
-              ? 'Lido'
-              : delivered
-              ? 'Entregue'
-              : 'Enviado',
-          style: TextStyle(
-            color: color,
-            fontSize: 10.5,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+    final label =
+        read
+            ? 'Lido'
+            : delivered
+            ? 'Entregue'
+            : 'Enviado';
+    return Tooltip(
+      message: label,
+      child: Icon(
+        delivered ? Icons.done_all_rounded : Icons.check_rounded,
+        size: 14,
+        color: iconColor,
+        semanticLabel: label,
+      ),
     );
   }
 }

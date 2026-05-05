@@ -80,7 +80,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
         _message = result.mensagem;
         _hint = result.deliveryAvailable
             ? 'Verifique sua caixa de entrada e spam.'
-            : 'Recuperacao por e-mail nao esta configurada neste ambiente ainda.';
+            : 'Recuperação por e-mail não está configurada neste ambiente ainda.';
       });
     } catch (error) {
       HapticFeedback.heavyImpact();
@@ -100,25 +100,25 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
     if (error is DioException) {
       final statusCode = error.response?.statusCode;
       if (statusCode == null) {
-        return 'Sem conexao com o servidor.';
+        return 'Sem conexão com o servidor.';
       }
     }
-    return 'Nao foi possivel enviar o link agora.';
+    return 'Não foi possível enviar o link agora.';
   }
 
   String _resetEnvironmentWarning() {
     final issue = _environmentStatus?.firstIssueFor('password_reset');
     if (issue != null) {
       return issue.detail.isEmpty
-          ? 'O pedido de reset sera registrado, mas a entrega do link depende da configuracao de e-mail.'
+          ? 'O pedido de reset será registrado, mas a entrega do link depende da configuração de e-mail.'
           : issue.detail;
     }
-    return 'Envio de e-mail ainda nao esta ativo neste ambiente. O pedido sera registrado, mas a entrega depende da configuracao SMTP.';
+    return 'Envio de e-mail ainda não está ativo neste ambiente. O pedido será registrado, mas a entrega depende da configuração SMTP.';
   }
 
   String _resetEnvironmentTitle() {
     return _environmentStatus?.firstIssueFor('password_reset')?.title ??
-        'E-mail de recuperacao pendente';
+        'E-mail de recuperação pendente';
   }
 
   String? _resetEnvironmentAction() {
@@ -133,7 +133,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
     if (actions.isNotEmpty) {
       return actions.first;
     }
-    return 'Configurar SMTP no ambiente real antes da publicacao.';
+    return 'Configurar SMTP no ambiente real antes da publicação.';
   }
 
   @override
@@ -329,7 +329,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                       const SizedBox(height: 14),
                     ],
                     AuthPrimaryButton(
-                      label: 'Enviar link de recuperacao',
+                      label: 'Enviar link de recuperação',
                       icon: Icons.send_rounded,
                       isLoading: _loading,
                       onPressed: _submit,

@@ -266,7 +266,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     label: 'E-mail',
                     controller: _emailController,
                     hintText: 'seu@email.com',
-                    icon: Icons.bolt_rounded,
+                    icon: Icons.mail_outline_rounded,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     validator: (value) {
@@ -281,7 +281,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     label: 'Senha',
                     controller: _passwordController,
                     hintText: 'Mín. 8 caracteres',
-                    icon: Icons.warning_amber_rounded,
+                    icon: Icons.lock_outline_rounded,
                     obscureText: !_showPassword,
                     textInputAction: TextInputAction.next,
                     validator: (value) {
@@ -312,7 +312,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     label: 'Telefone / WhatsApp',
                     controller: _phoneController,
                     hintText: '(11) 99999-0000',
-                    icon: Icons.send_rounded,
+                    icon: Icons.phone_iphone_rounded,
                     keyboardType: TextInputType.phone,
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _submit(),

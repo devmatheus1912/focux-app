@@ -82,6 +82,6 @@ class TaxonomyLabels {
   static const dificuldade = {
     Dificuldade.iniciante: 'Iniciante',
     Dificuldade.intermediario: 'Intermediario',
-    Dificuldade.avancado: 'Avancado',
+    Dificuldade.avancado: 'Avançado',
   };
 }

@@ -414,7 +414,7 @@ class _PerfilBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 _CardSection(
-                  title: 'Informacoes',
+                  title: 'Informações',
                   isDark: isDark,
                   child: Column(
                     children: [
