@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/brand_palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../checkin/providers/checkin_provider.dart';
 
@@ -21,15 +21,16 @@ class ProgressoSemanalWidget extends ConsumerWidget {
         final completedThisWeek =
             historico.where((t) => _isSameWeek(t.concluidoEm)).length;
         final streakDays = _calculateStreak(historico);
-        final progressValue = weeklyGoal == 0
-            ? 0.0
-            : (completedThisWeek / weeklyGoal).clamp(0.0, 1.0);
+        final progressValue =
+            weeklyGoal == 0
+                ? 0.0
+                : (completedThisWeek / weeklyGoal).clamp(0.0, 1.0);
 
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [cs.primary, cs.tertiary],
+              colors: [cs.primary, BrandPalette.deep(cs.primary)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -42,15 +43,18 @@ class ProgressoSemanalWidget extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Consistencia',
+                    'Consistência',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.16),
                       borderRadius: BorderRadius.circular(16),
@@ -77,7 +81,7 @@ class ProgressoSemanalWidget extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Treinos concluidos nesta semana',
+                'Treinos concluídos nesta semana',
                 style: TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 8),
@@ -85,11 +89,17 @@ class ProgressoSemanalWidget extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(7, (index) {
                   final now = DateTime.now();
-                  final startOfWeek =
-                      now.subtract(Duration(days: now.weekday - 1));
-                  final currentDay =
-                      DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day + index);
-                  final done = historico.any((t) => _sameDate(t.concluidoEm, currentDay));
+                  final startOfWeek = now.subtract(
+                    Duration(days: now.weekday - 1),
+                  );
+                  final currentDay = DateTime(
+                    startOfWeek.year,
+                    startOfWeek.month,
+                    startOfWeek.day + index,
+                  );
+                  final done = historico.any(
+                    (t) => _sameDate(t.concluidoEm, currentDay),
+                  );
                   final isToday = _sameDateIso(
                     DateTime.now().toIso8601String(),
                     currentDay,
@@ -100,24 +110,28 @@ class ProgressoSemanalWidget extends ConsumerWidget {
                     height: 32,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: done
-                          ? EagleTokens.good
-                          : (isToday ? Colors.white30 : Colors.white10),
-                      border: isToday
-                          ? Border.all(color: Colors.white, width: 2)
-                          : null,
+                      color:
+                          done
+                              ? Colors.white.withValues(alpha: 0.9)
+                              : (isToday ? Colors.white30 : Colors.white10),
+                      border:
+                          isToday
+                              ? Border.all(color: Colors.white, width: 2)
+                              : null,
                     ),
                     child: Center(
-                      child: done
-                          ? const Icon(Icons.check, color: Colors.black54, size: 16)
-                          : Text(
-                              ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'][index],
-                              style: TextStyle(
-                                color: isToday ? Colors.white : Colors.white54,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
+                      child:
+                          done
+                              ? Icon(Icons.check, color: cs.primary, size: 16)
+                              : Text(
+                                ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'][index],
+                                style: TextStyle(
+                                  color:
+                                      isToday ? Colors.white : Colors.white54,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
                     ),
                   );
                 }),
@@ -129,7 +143,7 @@ class ProgressoSemanalWidget extends ConsumerWidget {
                     child: LinearProgressIndicator(
                       value: progressValue,
                       backgroundColor: Colors.white24,
-                      color: EagleTokens.good,
+                      color: Colors.white,
                       minHeight: 8,
                       borderRadius: BorderRadius.circular(4),
                     ),
@@ -168,13 +182,14 @@ class ProgressoSemanalWidget extends ConsumerWidget {
   }
 
   int _calculateStreak(List<dynamic> historico) {
-    final dates = historico
-        .map((t) => DateTime.tryParse(t.concluidoEm ?? '')?.toLocal())
-        .whereType<DateTime>()
-        .map((d) => DateTime(d.year, d.month, d.day))
-        .toSet()
-        .toList()
-      ..sort((a, b) => b.compareTo(a));
+    final dates =
+        historico
+            .map((t) => DateTime.tryParse(t.concluidoEm ?? '')?.toLocal())
+            .whereType<DateTime>()
+            .map((d) => DateTime(d.year, d.month, d.day))
+            .toSet()
+            .toList()
+          ..sort((a, b) => b.compareTo(a));
     if (dates.isEmpty) return 0;
 
     var streak = 0;
@@ -184,7 +199,8 @@ class ProgressoSemanalWidget extends ConsumerWidget {
       if (date == cursor) {
         streak++;
         cursor = cursor.subtract(const Duration(days: 1));
-      } else if (date == cursor.subtract(const Duration(days: 1)) && streak == 0) {
+      } else if (date == cursor.subtract(const Duration(days: 1)) &&
+          streak == 0) {
         streak++;
         cursor = date.subtract(const Duration(days: 1));
       }

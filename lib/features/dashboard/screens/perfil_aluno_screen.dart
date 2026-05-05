@@ -898,7 +898,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                   _SectionCard(
                     title: 'Progresso corporal',
                     subtitle:
-                        'Medidas, foto de evolucao e historico rapido para acompanhar resultado real.',
+                        'Medidas, foto de evolução e histórico rápido para acompanhar resultado real.',
                     isDark: isDark,
                     trailing: FilledButton.tonalIcon(
                       onPressed: _registrarMedida,
@@ -919,7 +919,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                             (e, _) => Padding(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: Text(
-                                'Nao foi possivel carregar sua evolucao: $e',
+                                'Não foi possível carregar sua evolução: $e',
                                 style: TextStyle(color: mute, height: 1.4),
                               ),
                             ),
@@ -928,7 +928,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                               medidas.isNotEmpty ? medidas.first : null;
                           final cards = <Widget>[
                             _MetricHighlightCard(
-                              label: 'Ultimo peso',
+                              label: 'Último peso',
                               value:
                                   ultima?.peso != null
                                       ? '${ultima!.peso!.toStringAsFixed(1)} kg'
@@ -941,7 +941,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                               isDark: isDark,
                             ),
                             _MetricHighlightCard(
-                              label: 'Variacao',
+                              label: 'Variação',
                               value:
                                   medidas
                                               .where(
@@ -962,8 +962,8 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                               value: '${medidas.length}',
                               helper:
                                   medidas.isEmpty
-                                      ? 'Nenhuma atualizacao ainda'
-                                      : 'Historico pronto para comparar',
+                                      ? 'Nenhuma atualização ainda'
+                                      : 'Histórico pronto para comparar',
                               icon: Icons.timeline,
                               isDark: isDark,
                             ),
@@ -990,7 +990,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   child: Text(
-                                    'Seu historico corporal ainda esta vazio. Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
+                                    'Seu histórico corporal ainda está vazio. Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
                                     style: TextStyle(
                                       color: mute,
                                       fontSize: 13,
@@ -1000,7 +1000,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                 )
                               else ...[
                                 Text(
-                                  'Ultimas atualizacoes',
+                                  'Últimas atualizações',
                                   style: TextStyle(
                                     color: ink,
                                     fontSize: 13,
@@ -1026,15 +1026,15 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                   ),
                   const SizedBox(height: 14),
                   _SectionCard(
-                    title: 'Saude e restricoes',
+                    title: 'Saúde e restrições',
                     subtitle:
-                        'Informacoes que deixam treino e dieta mais seguros.',
+                        'Informações que deixam treino e dieta mais seguros.',
                     isDark: isDark,
                     children: [
                       DropdownButtonFormField<String>(
                         value: _nivelAtividade,
                         decoration: const InputDecoration(
-                          labelText: 'Nivel de atividade',
+                          labelText: 'Nível de atividade',
                           prefixIcon: Icon(Icons.insights_outlined),
                         ),
                         items:
@@ -1052,7 +1052,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                       const SizedBox(height: 12),
                       _Field(
                         controller: _lesoes,
-                        label: 'Lesoes ou limitacoes',
+                        label: 'Lesões ou limitações',
                         icon: Icons.healing_outlined,
                         maxLines: 3,
                       ),
@@ -1064,7 +1064,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                       ),
                       _Field(
                         controller: _historicoMedico,
-                        label: 'Historico medico',
+                        label: 'Histórico médico',
                         icon: Icons.local_hospital_outlined,
                         maxLines: 3,
                       ),
@@ -1076,13 +1076,13 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                       ),
                       _Field(
                         controller: _doresCronicas,
-                        label: 'Dores cronicas',
+                        label: 'Dores crônicas',
                         icon: Icons.accessibility_new_outlined,
                         maxLines: 2,
                       ),
                       _Field(
                         controller: _restricoesAlimentares,
-                        label: 'Restricoes alimentares',
+                        label: 'Restrições alimentares',
                         icon: Icons.no_food_outlined,
                         maxLines: 2,
                       ),
@@ -1092,7 +1092,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                   _SectionCard(
                     title: 'Rotina de treino',
                     subtitle:
-                        'Preferencias e disponibilidade para o plano fazer sentido.',
+                        'Preferências e disponibilidade para o plano fazer sentido.',
                     isDark: isDark,
                     children: [
                       Text(
@@ -1125,13 +1125,13 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                       const SizedBox(height: 12),
                       _Field(
                         controller: _preferenciasTreino,
-                        label: 'Preferencias de treino',
+                        label: 'Preferências de treino',
                         icon: Icons.sports_gymnastics_outlined,
                         maxLines: 3,
                       ),
                       _Field(
                         controller: _observacoes,
-                        label: 'Observacoes para o personal',
+                        label: 'Observações para o personal',
                         icon: Icons.sticky_note_2_outlined,
                         maxLines: 3,
                       ),
@@ -1167,7 +1167,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    'Esses dados ajudam o personal a ajustar treino, contato, seguranca e aderencia sem depender de conversa toda hora.',
+                    'Esses dados ajudam o personal a ajustar treino, contato, segurança e aderência sem depender de conversa toda hora.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: mute, fontSize: 12, height: 1.45),
                   ),

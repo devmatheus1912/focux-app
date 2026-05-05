@@ -54,8 +54,9 @@ class AlunoAutonomyPlan {
       tasks.isEmpty ? 100 : ((doneCount / tasks.length) * 100).round();
 
   AlunoAutonomyTask? get nextTask {
-    final open = tasks.where((task) => !task.done).toList()
-      ..sort((a, b) => a.priority.index.compareTo(b.priority.index));
+    final open =
+        tasks.where((task) => !task.done).toList()
+          ..sort((a, b) => a.priority.index.compareTo(b.priority.index));
     return open.isEmpty ? null : open.first;
   }
 }
@@ -71,14 +72,16 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
   final today = now ?? DateTime.now();
   final profileCompletion = _profileCompletion(aluno);
   final hasPhoto = _isFilled(aluno.fotoUrl);
-  final hasBodyData = aluno.peso != null &&
+  final hasBodyData =
+      aluno.peso != null &&
       aluno.altura != null &&
       _isFilled(aluno.dataNascimento);
   final lastMeasure = _latestMeasureDate(medidas);
   final hasFreshMeasure =
       lastMeasure != null && today.difference(lastMeasure).inDays <= 14;
   final hasWeeklyWorkout = historico.any(
-    (item) => item.status.toUpperCase() == 'CONCLUIDO' &&
+    (item) =>
+        item.status.toUpperCase() == 'CONCLUIDO' &&
         _isWithinDays(_eventDate(item), today, 7),
   );
   final hasStudentMessage = mensagens.any(
@@ -86,7 +89,8 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
   );
   final hasOpenWorkout = treinos.isNotEmpty;
   final isInadimplente =
-      aluno.inadimplente || aluno.statusFinanceiro.toUpperCase() == 'INADIMPLENTE';
+      aluno.inadimplente ||
+      aluno.statusFinanceiro.toUpperCase() == 'INADIMPLENTE';
 
   return AlunoAutonomyPlan(
     profileCompletion: profileCompletion,
@@ -99,9 +103,10 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
         cta: 'Completar',
         route: '/aluno/perfil',
         kind: AlunoTaskKind.perfil,
-        priority: profileCompletion < 60
-            ? AlunoTaskPriority.alta
-            : AlunoTaskPriority.media,
+        priority:
+            profileCompletion < 60
+                ? AlunoTaskPriority.alta
+                : AlunoTaskPriority.media,
         done: profileCompletion >= 80,
       ),
       AlunoAutonomyTask(
@@ -117,26 +122,31 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
       ),
       AlunoAutonomyTask(
         id: 'medida-recente',
-        title: medidas.isEmpty
-            ? 'Registrar primeira medida'
-            : 'Atualizar medida quinzenal',
-        description: medidas.isEmpty
-            ? 'Crie seu ponto de partida com peso, medidas e foto opcional de progresso.'
-            : 'Mantenha peso, medidas e foto de progresso atualizados a cada 14 dias.',
+        title:
+            medidas.isEmpty
+                ? 'Registrar primeira medida'
+                : 'Atualizar medida quinzenal',
+        description:
+            medidas.isEmpty
+                ? 'Crie seu ponto de partida com peso, medidas e foto opcional de progresso.'
+                : 'Mantenha peso, medidas e foto de progresso atualizados a cada 14 dias.',
         cta: 'Registrar',
         route: '/aluno/perfil',
         kind: AlunoTaskKind.medida,
-        priority: medidas.isEmpty
-            ? AlunoTaskPriority.alta
-            : AlunoTaskPriority.media,
+        priority:
+            medidas.isEmpty ? AlunoTaskPriority.alta : AlunoTaskPriority.media,
         done: hasFreshMeasure,
       ),
       AlunoAutonomyTask(
         id: 'treino-semana',
-        title: hasOpenWorkout ? 'Concluir treino da semana' : 'Solicitar treino ativo',
-        description: hasOpenWorkout
-            ? 'Treinar pelo app gera historico de carga, aderencia e feedback para o personal.'
-            : 'Avise seu personal que voce esta pronto para receber um treino ativo.',
+        title:
+            hasOpenWorkout
+                ? 'Concluir treino da semana'
+                : 'Solicitar treino ativo',
+        description:
+            hasOpenWorkout
+                ? 'Treinar pelo app gera histórico de carga, aderência e feedback para o personal.'
+                : 'Avise seu personal que você está pronto para receber um treino ativo.',
         cta: hasOpenWorkout ? 'Treinar' : 'Chamar',
         route: hasOpenWorkout ? '/checkin/treinos' : '/chat/aluno',
         kind: AlunoTaskKind.treino,
@@ -147,7 +157,7 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
         id: 'chat-contexto',
         title: 'Enviar contexto no chat',
         description:
-            'Use o chat para duvidas, dor, dificuldade, preferencia e feedback do treino no mesmo lugar.',
+            'Use o chat para dúvidas, dor, dificuldade, preferência e feedback do treino no mesmo lugar.',
         cta: 'Abrir chat',
         route: '/chat/aluno',
         kind: AlunoTaskKind.chat,
@@ -158,7 +168,7 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
         id: 'agenda-semana',
         title: 'Conferir agenda da semana',
         description:
-            'Revise horarios, compromissos e presencas para evitar perda de acompanhamento.',
+            'Revise horários, compromissos e presenças para evitar perda de acompanhamento.',
         cta: 'Ver agenda',
         route: '/agenda/aluno',
         kind: AlunoTaskKind.agenda,
@@ -168,9 +178,10 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
       AlunoAutonomyTask(
         id: 'financeiro',
         title: isInadimplente ? 'Regularizar financeiro' : 'Financeiro em dia',
-        description: isInadimplente
-            ? 'Resolva pendencias para nao interromper acesso, treino e acompanhamento.'
-            : 'Acompanhe pagamentos e recibos sem depender do personal.',
+        description:
+            isInadimplente
+                ? 'Resolva pendências para não interromper acesso, treino e acompanhamento.'
+                : 'Acompanhe pagamentos e recibos sem depender do personal.',
         cta: 'Abrir',
         route: '/financeiro/aluno',
         kind: AlunoTaskKind.financeiro,
@@ -200,11 +211,12 @@ int _profileCompletion(Aluno aluno) {
 }
 
 DateTime? _latestMeasureDate(List<MedidaCorporal> medidas) {
-  final dates = medidas
-      .map((item) => DateTime.tryParse(item.data))
-      .whereType<DateTime>()
-      .toList()
-    ..sort();
+  final dates =
+      medidas
+          .map((item) => DateTime.tryParse(item.data))
+          .whereType<DateTime>()
+          .toList()
+        ..sort();
   return dates.isEmpty ? null : dates.last;
 }
 

@@ -75,15 +75,23 @@ class AlunoDashboardScreen extends ConsumerWidget {
                       : ThemeMode.dark;
             },
           ),
-          IconButton(
-            icon: Icon(
-              Icons.logout,
-              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-            ),
-            onPressed: () async {
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) context.go('/login');
-            },
+          alunoAsync.when(
+            data:
+                (aluno) => _AlunoAppBarProfileMenu(
+                  aluno: aluno,
+                  isDark: isDark,
+                  onProfile: () => context.push('/aluno/perfil'),
+                  onLogout: () async {
+                    await ref.read(authProvider.notifier).logout();
+                    if (context.mounted) context.go('/login');
+                  },
+                ),
+            loading:
+                () => const Padding(
+                  padding: EdgeInsets.only(right: 12),
+                  child: CircleAvatar(radius: 17),
+                ),
+            error: (_, __) => const SizedBox(width: 8),
           ),
         ],
       ),
@@ -269,6 +277,94 @@ String? _heroProximoTreino(List<ExecucaoTreino>? treinos) {
   return 'Próximo treino: $nome';
 }
 
+enum _AlunoHeaderAction { profile, logout }
+
+class _AlunoAppBarProfileMenu extends StatelessWidget {
+  final Aluno aluno;
+  final bool isDark;
+  final VoidCallback onProfile;
+  final Future<void> Function() onLogout;
+
+  const _AlunoAppBarProfileMenu({
+    required this.aluno,
+    required this.isDark,
+    required this.onProfile,
+    required this.onLogout,
+  });
+
+  String _initials(String nome) {
+    final parts = nome.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts.first.isEmpty) return 'A';
+    if (parts.length == 1 || parts[1].isEmpty) {
+      return parts.first[0].toUpperCase();
+    }
+    return '${parts.first[0]}${parts[1][0]}'.toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final hasFoto = aluno.fotoUrl != null && aluno.fotoUrl!.trim().isNotEmpty;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: PopupMenuButton<_AlunoHeaderAction>(
+        tooltip: 'Perfil do aluno',
+        offset: const Offset(0, 42),
+        onSelected: (action) async {
+          switch (action) {
+            case _AlunoHeaderAction.profile:
+              onProfile();
+              break;
+            case _AlunoHeaderAction.logout:
+              await onLogout();
+              break;
+          }
+        },
+        itemBuilder:
+            (context) => const [
+              PopupMenuItem(
+                value: _AlunoHeaderAction.profile,
+                child: Row(
+                  children: [
+                    Icon(Icons.person_outline),
+                    SizedBox(width: 10),
+                    Text('Perfil'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: _AlunoHeaderAction.logout,
+                child: Row(
+                  children: [
+                    Icon(Icons.logout),
+                    SizedBox(width: 10),
+                    Text('Sair'),
+                  ],
+                ),
+              ),
+            ],
+        child: CircleAvatar(
+          radius: 17,
+          backgroundColor: BrandPalette.soft(primary, dark: isDark),
+          backgroundImage: hasFoto ? NetworkImage(aluno.fotoUrl!.trim()) : null,
+          child:
+              hasFoto
+                  ? null
+                  : Text(
+                    _initials(aluno.nome),
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+        ),
+      ),
+    );
+  }
+}
+
 // ── Profile Card ──────────────────────────────────────────────────────────────
 
 class _AlunoHeroCard extends StatelessWidget {
@@ -337,9 +433,11 @@ class _AlunoHeroCard extends StatelessWidget {
                       'Olá, $firstName',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 24,
+                        fontSize: 21,
                         fontWeight: FontWeight.w800,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     _HeroSubtitle(
@@ -520,7 +618,7 @@ class _TodayFocusCard extends StatelessWidget {
             _PrimaryActionCard(
               title: next.treinoNome,
               subtitle:
-                  '${next.exercicios.length} exercicios para seguir seu plano com clareza.',
+                  '${next.exercicios.length} exercícios para seguir seu plano com clareza.',
               cta: 'Treinar agora',
               onTap:
                   () => context.push('/checkin/executar', extra: next.treinoId),
@@ -586,10 +684,12 @@ class _PrimaryActionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 6),
-          Text(subtitle, style: const TextStyle(height: 1.45)),
+          Text(subtitle, style: const TextStyle(fontSize: 12.5, height: 1.45)),
           const SizedBox(height: 12),
           FilledButton(onPressed: onTap, child: Text(cta)),
         ],
@@ -624,7 +724,7 @@ class _MiniMetricCard extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w800,
               height: 1.05,
             ),
@@ -634,7 +734,7 @@ class _MiniMetricCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(fontSize: 11.5, height: 1.15),
+            style: const TextStyle(fontSize: 10.5, height: 1.15),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -666,7 +766,7 @@ class _StudentStatsRow extends StatelessWidget {
         'Consultoria',
         aluno.tipoConsultoria?.trim().isNotEmpty == true
             ? aluno.tipoConsultoria!
-            : 'Padrao',
+            : 'Padrão',
       ),
       ('Próximos', '${treinos.length}'),
     ];
@@ -1366,7 +1466,7 @@ class _NextBestTaskPanel extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           task == null
-              ? 'Sua rotina esta organizada. Continue acompanhando treino, medidas e agenda.'
+              ? 'Sua rotina está organizada. Continue acompanhando treino, medidas e agenda.'
               : task!.title,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -1522,7 +1622,7 @@ class _AutonomyTaskTile extends StatelessWidget {
               color: _taskPriorityColor(task.priority, primary),
             ),
             _AutonomyTaskPill(
-              label: task.done ? 'Sem acao agora' : _taskHint(task.kind),
+              label: task.done ? 'Sem ação agora' : _taskHint(task.kind),
               color: task.done ? EagleTokens.good : mute,
             ),
           ],
@@ -1634,7 +1734,7 @@ class _AutonomyTaskPill extends StatelessWidget {
 String _taskPriorityLabel(AlunoTaskPriority priority) {
   return switch (priority) {
     AlunoTaskPriority.alta => 'Prioridade alta',
-    AlunoTaskPriority.media => 'Prioridade media',
+    AlunoTaskPriority.media => 'Prioridade média',
     AlunoTaskPriority.baixa => 'Opcional',
   };
 }
@@ -1654,7 +1754,7 @@ String _taskHint(AlunoTaskKind kind) {
     AlunoTaskKind.medida => 'Registrar progresso',
     AlunoTaskKind.treino => 'Mover treino',
     AlunoTaskKind.chat => 'Chamar personal',
-    AlunoTaskKind.agenda => 'Conferir horario',
+    AlunoTaskKind.agenda => 'Conferir horário',
     AlunoTaskKind.financeiro => 'Ver financeiro',
   };
 }
