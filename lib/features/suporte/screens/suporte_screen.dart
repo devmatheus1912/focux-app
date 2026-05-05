@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_logo.dart';
@@ -986,7 +987,7 @@ class _TicketTileContent extends StatelessWidget {
         if (ticket.criadoEm != null) ...[
           const SizedBox(height: 4),
           Text(
-            'Aberto em ${ticket.criadoEm!.length >= 10 ? ticket.criadoEm!.substring(0, 10) : ticket.criadoEm!}',
+            'Aberto em ${fxTimeAgo(DateTime.parse(ticket.criadoEm!))}',
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute),

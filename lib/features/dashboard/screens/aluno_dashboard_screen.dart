@@ -46,25 +46,9 @@ class AlunoDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
-      drawer: alunoAsync.when(
-        data: (aluno) => _AlunoDrawer(aluno: aluno, isDark: isDark, ref: ref),
-        loading: () => _AlunoDrawerPlaceholder(isDark: isDark),
-        error: (_, __) => _AlunoDrawerPlaceholder(isDark: isDark),
-      ),
       appBar: AppBar(
         backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
-        leading: Builder(
-          builder:
-              (ctx) => IconButton(
-                icon: Icon(
-                  Icons.menu,
-                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                ),
-                onPressed: () => Scaffold.of(ctx).openDrawer(),
-                tooltip: 'Menu',
-              ),
-        ),
         title: Text(
           'Meu Treino',
           style: TextStyle(
@@ -183,7 +167,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Acoes rapidas',
+              'Ações rápidas',
               style: TextStyle(
                 color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
                 fontSize: 17,
@@ -305,7 +289,7 @@ class _AlunoHeroCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.tertiary,
+            BrandPalette.deep(Theme.of(context).colorScheme.primary),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
@@ -339,13 +323,15 @@ class _AlunoHeroCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ola, $firstName',
+                      'Olá, $firstName',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    const _HeroSubtitle(streakDias: null, proximoTreino: null),
                     const SizedBox(height: 4),
                     Text(
                       slogan,
@@ -382,6 +368,34 @@ class _AlunoHeroCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _HeroSubtitle extends StatelessWidget {
+  const _HeroSubtitle({this.streakDias, this.proximoTreino});
+
+  final int? streakDias;
+  final String? proximoTreino;
+
+  @override
+  Widget build(BuildContext context) {
+    if (streakDias != null && streakDias! > 1) {
+      return Text(
+        '$streakDias dias seguidos',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Colors.white.withValues(alpha: 0.85),
+        ),
+      );
+    }
+    if (proximoTreino != null) {
+      return Text(
+        proximoTreino!,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Colors.white.withValues(alpha: 0.85),
+        ),
+      );
+    }
+    return const SizedBox.shrink();
   }
 }
 
@@ -1161,7 +1175,7 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Pendencias e proximos passos para voce evoluir sem depender de cobranca do personal.',
+                      'Pendências e próximos passos para você evoluir sem depender de cobrança do personal.',
                       style: TextStyle(color: mute, height: 1.45),
                     ),
                   ],
@@ -1201,7 +1215,7 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
           ),
           const SizedBox(height: 8),
           Text(
-            '${plan.doneCount} de ${plan.tasks.length} pendencias fechadas. Perfil ${plan.profileCompletion}%.',
+            '${plan.doneCount} de ${plan.tasks.length} pendências fechadas. Perfil ${plan.profileCompletion}%.',
             style: TextStyle(
               color: mute,
               fontSize: 12.5,
@@ -2014,6 +2028,7 @@ class _ProfileCardSkeleton extends StatelessWidget {
 
 // ── Drawer ────────────────────────────────────────────────────────────────────
 
+// ignore: unused_element
 class _AlunoDrawer extends StatelessWidget {
   final Aluno aluno;
   final bool isDark;
@@ -2206,6 +2221,7 @@ class _AlunoDrawer extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _AlunoDrawerPlaceholder extends StatelessWidget {
   final bool isDark;
   const _AlunoDrawerPlaceholder({required this.isDark});

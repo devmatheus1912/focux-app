@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -592,9 +593,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                       vertical: 10,
                                     ),
                                     child: Text(
-                                      p.criadoEm.length >= 10
-                                          ? p.criadoEm.substring(0, 10)
-                                          : p.criadoEm,
+                                      fxTimeAgo(DateTime.parse(p.criadoEm)),
                                       style: TextStyle(
                                         fontSize: 12,
                                         color:

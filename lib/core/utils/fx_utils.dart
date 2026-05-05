@@ -3,14 +3,11 @@
 /// Design spec: first letter of first + last word.
 /// "Matheus Ribeiro" → "MR"  |  "Ana" → "AN" (double first)  |  "" → "?"
 String fxInitials(String nome) {
-  final parts =
-      nome.trim().split(' ').where((p) => p.isNotEmpty).toList();
+  final parts = nome.trim().split(' ').where((p) => p.isNotEmpty).toList();
   if (parts.isEmpty) return '?';
   if (parts.length == 1) {
     final w = parts[0];
-    return w.length >= 2
-        ? w.substring(0, 2).toUpperCase()
-        : w[0].toUpperCase();
+    return w.length >= 2 ? w.substring(0, 2).toUpperCase() : w[0].toUpperCase();
   }
   return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
 }
@@ -32,3 +29,44 @@ String fxTimeAgo(DateTime date) {
   final day = date.day.toString().padLeft(2, '0');
   return '$day/$month';
 }
+
+const _monthsFull = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+];
+
+const _monthsShort = [
+  'Jan',
+  'Fev',
+  'Mar',
+  'Abr',
+  'Mai',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Set',
+  'Out',
+  'Nov',
+  'Dez',
+];
+
+/// "4 de maio de 2026"
+String fxDateFull(DateTime d) =>
+    '${d.day} de ${_monthsFull[d.month - 1]} de ${d.year}';
+
+/// "04/05"
+String fxDateShort(DateTime d) =>
+    '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
+
+/// "Mai 2026"
+String fxMonthYear(DateTime d) => '${_monthsShort[d.month - 1]} ${d.year}';

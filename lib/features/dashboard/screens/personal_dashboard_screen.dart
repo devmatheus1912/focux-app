@@ -272,10 +272,8 @@ class _PersonalDashboardScreenState
                                               color: EagleTokens.line,
                                             ),
                                   ),
-                                  child: Icon(
-                                    isDark
-                                        ? Icons.light_mode_outlined
-                                        : Icons.dark_mode_outlined,
+                                  child: FxIcon(
+                                    name: isDark ? 'sun' : 'moon',
                                     size: 20,
                                     color:
                                         isDark
@@ -559,7 +557,7 @@ class _PersonalDashboardScreenState
                       childAspectRatio: metricAspectRatio,
                       children: [
                         _QuickTile(
-                          icon: Icons.people,
+                          icon: 'users',
                           label: 'Alunos ativos',
                           value: alunosAtivos.toString(),
                           sub:
@@ -568,7 +566,7 @@ class _PersonalDashboardScreenState
                           isDark: isDark,
                         ),
                         _QuickTile(
-                          icon: Icons.check_circle_outline,
+                          icon: 'circle-check',
                           label: 'Check-ins hoje',
                           value: checkinsHoje.toString(),
                           sub: 'histórico de treinos',
@@ -576,7 +574,7 @@ class _PersonalDashboardScreenState
                           isDark: isDark,
                         ),
                         _QuickTile(
-                          icon: Icons.warning_amber_rounded,
+                          icon: 'alert-triangle',
                           label: 'Risco alto',
                           value: riscoAlto.toString(),
                           sub: 'precisam atenção',
@@ -584,7 +582,7 @@ class _PersonalDashboardScreenState
                           isDark: isDark,
                         ),
                         _QuickTile(
-                          icon: Icons.local_fire_department_outlined,
+                          icon: 'flame',
                           label: 'Aderência média',
                           value: aderenciaMediaStr,
                           sub: 'últimos 7 dias',
@@ -774,8 +772,8 @@ class _PersonalDashboardScreenState
       child: Column(
         children: [
           Shimmer.fromColors(
-            baseColor: const Color(0xFFD1D5DB),
-            highlightColor: const Color(0xFFF3F4F6),
+            baseColor: EagleTokens.line,
+            highlightColor: EagleTokens.lineSoft,
             child: Container(height: 200, color: Colors.white),
           ),
           Transform.translate(
@@ -788,8 +786,8 @@ class _PersonalDashboardScreenState
                     children: [
                       Expanded(
                         child: Shimmer.fromColors(
-                          baseColor: const Color(0xFFD1D5DB),
-                          highlightColor: const Color(0xFFF3F4F6),
+                          baseColor: EagleTokens.line,
+                          highlightColor: EagleTokens.lineSoft,
                           child: Container(
                             height: 100,
                             decoration: BoxDecoration(
@@ -802,8 +800,8 @@ class _PersonalDashboardScreenState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Shimmer.fromColors(
-                          baseColor: const Color(0xFFD1D5DB),
-                          highlightColor: const Color(0xFFF3F4F6),
+                          baseColor: EagleTokens.line,
+                          highlightColor: EagleTokens.lineSoft,
                           child: Container(
                             height: 100,
                             decoration: BoxDecoration(
@@ -820,8 +818,8 @@ class _PersonalDashboardScreenState
                     children: [
                       Expanded(
                         child: Shimmer.fromColors(
-                          baseColor: const Color(0xFFD1D5DB),
-                          highlightColor: const Color(0xFFF3F4F6),
+                          baseColor: EagleTokens.line,
+                          highlightColor: EagleTokens.lineSoft,
                           child: Container(
                             height: 100,
                             decoration: BoxDecoration(
@@ -834,8 +832,8 @@ class _PersonalDashboardScreenState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Shimmer.fromColors(
-                          baseColor: const Color(0xFFD1D5DB),
-                          highlightColor: const Color(0xFFF3F4F6),
+                          baseColor: EagleTokens.line,
+                          highlightColor: EagleTokens.lineSoft,
                           child: Container(
                             height: 100,
                             decoration: BoxDecoration(
@@ -905,7 +903,7 @@ class _HeroMiniStat extends StatelessWidget {
 }
 
 class _QuickTile extends StatelessWidget {
-  final IconData icon;
+  final String icon;
   final String label, value, sub;
   final Color accent;
   final bool isDark;
@@ -946,7 +944,7 @@ class _QuickTile extends StatelessWidget {
               color: primarySoft,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 16, color: accent),
+            child: Center(child: FxIcon(name: icon, size: 16, color: accent)),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1296,7 +1294,7 @@ class _CommandCenterSection extends ConsumerWidget {
     final nextActions = <_CommandActionItem>[
       if (unreadCount > 0)
         _CommandActionItem(
-          icon: Icons.mark_chat_unread_rounded,
+          icon: 'message-circle',
           title: 'Responder mensagens',
           subtitle:
               '$unreadCount conversa${unreadCount == 1 ? '' : 's'} aguardando',
@@ -1305,16 +1303,16 @@ class _CommandCenterSection extends ConsumerWidget {
         ),
       if (alunosRisco > 0)
         _CommandActionItem(
-          icon: Icons.warning_amber_rounded,
-          title: 'Recuperar aderencia',
+          icon: 'alert-triangle',
+          title: 'Recuperar aderência',
           subtitle: '$alunosRisco aluno${alunosRisco == 1 ? '' : 's'} em risco',
           route: '/dashboard/qualidade',
           tone: _CommandActionTone.hot,
         ),
       if (cobrancasPendentes > 0)
         _CommandActionItem(
-          icon: Icons.payments_rounded,
-          title: 'Cobrar pendencias',
+          icon: 'dollar-sign',
+          title: 'Cobrar pendências',
           subtitle:
               '$cobrancasPendentes mensalidade${cobrancasPendentes == 1 ? '' : 's'} no radar',
           route: '/financeiro',
@@ -1322,8 +1320,8 @@ class _CommandCenterSection extends ConsumerWidget {
         ),
       if (filaAcoes.isNotEmpty)
         _CommandActionItem(
-          icon: Icons.bolt_rounded,
-          title: 'Executar proxima acao',
+          icon: 'zap',
+          title: 'Executar próxima ação',
           subtitle: filaAcoes.first.descricao,
           route:
               filaAcoes.first.acaoUrl.startsWith('/')
@@ -1333,7 +1331,7 @@ class _CommandCenterSection extends ConsumerWidget {
         ),
       if (agendaHoje > 0)
         _CommandActionItem(
-          icon: Icons.today_rounded,
+          icon: 'calendar',
           title: 'Preparar agenda',
           subtitle: '$agendaHoje compromisso${agendaHoje == 1 ? '' : 's'} hoje',
           route: '/agenda',
@@ -1343,8 +1341,8 @@ class _CommandCenterSection extends ConsumerWidget {
     if (nextActions.isEmpty) {
       nextActions.add(
         _CommandActionItem(
-          icon: Icons.add_task_rounded,
-          title: 'Criar proxima oportunidade',
+          icon: 'plus',
+          title: 'Criar próxima oportunidade',
           subtitle: 'Cadastre aluno, treino ou lead antes do pico do dia',
           route: '/alunos/novo',
           tone: _CommandActionTone.primary,
@@ -1353,7 +1351,7 @@ class _CommandCenterSection extends ConsumerWidget {
     }
 
     Widget card({
-      required IconData icon,
+      required String icon,
       required String title,
       required String subtitle,
       required VoidCallback onTap,
@@ -1377,7 +1375,9 @@ class _CommandCenterSection extends ConsumerWidget {
                   color: primarySoft,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, size: 18, color: primary),
+                child: Center(
+                  child: FxIcon(name: icon, size: 18, color: primary),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1435,25 +1435,25 @@ class _CommandCenterSection extends ConsumerWidget {
           childAspectRatio: cardAspectRatio,
           children: [
             card(
-              icon: Icons.chat_bubble_rounded,
+              icon: 'message-circle',
               title: 'Mensagens',
               subtitle: chatSubtitle,
               onTap: () => context.go('/chat/inbox'),
             ),
             card(
-              icon: Icons.people_rounded,
+              icon: 'users',
               title: 'Alunos',
               subtitle: '$alunosAtivos ativos',
               onTap: () => context.go('/alunos'),
             ),
             card(
-              icon: Icons.event_rounded,
+              icon: 'calendar',
               title: 'Agenda',
               subtitle: agendaSubtitle,
               onTap: () => context.go('/agenda'),
             ),
             card(
-              icon: Icons.attach_money_rounded,
+              icon: 'dollar-sign',
               title: 'Financeiro',
               subtitle: finSubtitle,
               onTap: () => context.go('/financeiro'),
@@ -1494,7 +1494,7 @@ class _HeroGridPainter extends CustomPainter {
 enum _CommandActionTone { primary, hot, money }
 
 class _CommandActionItem {
-  final IconData icon;
+  final String icon;
   final String title;
   final String subtitle;
   final String route;
@@ -1539,10 +1539,10 @@ class _CommandActionPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.route_rounded, size: 17, color: primary),
+              FxIcon(name: 'route', size: 17, color: primary),
               const SizedBox(width: 8),
               Text(
-                'Proximas acoes',
+                'Próximas ações',
                 style: TextStyle(
                   color: ink,
                   fontSize: 14,
@@ -1613,7 +1613,9 @@ class _CommandActionTile extends StatelessWidget {
                 color: accent.withValues(alpha: isDark ? 0.24 : 0.14),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(item.icon, color: accent, size: 18),
+              child: Center(
+                child: FxIcon(name: item.icon, color: accent, size: 18),
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -1641,7 +1643,7 @@ class _CommandActionTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right_rounded, color: mute, size: 20),
+            FxIcon(name: 'chevron-right', color: mute, size: 20),
           ],
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/avaliacao_repository.dart';
@@ -8,12 +9,10 @@ import '../../evolucao/data/evolucao_repository.dart';
 String _fmtData(String? iso) {
   if (iso == null || iso.isEmpty) return '—';
   try {
-    final dt = DateTime.parse(iso);
-    final d = dt.day.toString().padLeft(2, '0');
-    final m = dt.month.toString().padLeft(2, '0');
-    return '$d/$m/${dt.year}';
-  } catch (e) { debugPrint('[Focux] Error: $e');
-    return iso.length >= 10 ? iso.substring(0, 10) : iso;
+    return fxDateShort(DateTime.parse(iso));
+  } catch (e) {
+    debugPrint('[Focux] Error: $e');
+    return iso;
   }
 }
 
@@ -31,10 +30,12 @@ class EvolucaoComparativoScreen extends ConsumerStatefulWidget {
     this.alunoNome = 'Aluno',
   });
   @override
-  ConsumerState<EvolucaoComparativoScreen> createState() => _EvolucaoComparativoScreenState();
+  ConsumerState<EvolucaoComparativoScreen> createState() =>
+      _EvolucaoComparativoScreenState();
 }
 
-class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoScreen> {
+class _EvolucaoComparativoScreenState
+    extends ConsumerState<EvolucaoComparativoScreen> {
   ComparativoEvolucao? _comparativo;
   bool _loading = true;
   String? _erro;
@@ -46,17 +47,26 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
   }
 
   Future<void> _load() async {
-    setState(() { _loading = true; _erro = null; });
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
-      final c = await AvaliacaoRepository(ref.read(apiClientProvider)).comparativo(widget.alunoId);
-      setState(() { _comparativo = c; _loading = false; });
+      final c = await AvaliacaoRepository(
+        ref.read(apiClientProvider),
+      ).comparativo(widget.alunoId);
+      setState(() {
+        _comparativo = c;
+        _loading = false;
+      });
     } catch (e) {
       final msg = e.toString();
       final eh404 = msg.contains('404') || msg.contains('Not Found');
       setState(() {
-        _erro = eh404
-            ? 'Nenhuma avaliação encontrada para comparativo.'
-            : 'Erro ao carregar comparativo: $msg';
+        _erro =
+            eh404
+                ? 'Nenhuma avaliação encontrada para comparativo.'
+                : 'Erro ao carregar comparativo: $msg';
         _loading = false;
       });
     }
@@ -65,35 +75,46 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark
+              ? EagleTokens.darkBg
+              : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text('Evolução de ${widget.alunoNome}'),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _erro != null
+      body:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _erro != null
               ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.info_outline, size: 48, color: EagleTokens.inkMute),
-                        const SizedBox(height: 12),
-                        Text(_erro!, textAlign: TextAlign.center,
-                            style: const TextStyle(color: EagleTokens.inkMute)),
-                        const SizedBox(height: 16),
-                        OutlinedButton.icon(
-                          onPressed: _load,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Tentar novamente'),
-                        ),
-                      ],
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.info_outline,
+                        size: 48,
+                        color: EagleTokens.inkMute,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _erro!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: EagleTokens.inkMute),
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: _load,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Tentar novamente'),
+                      ),
+                    ],
                   ),
-                )
+                ),
+              )
               : _buildConteudo(_comparativo!),
     );
   }
@@ -114,23 +135,43 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
               child: Row(
                 children: [
                   Expanded(
-                    child: Column(children: [
-                      const Text('Primeira', style: TextStyle(fontWeight: FontWeight.bold, color: EagleTokens.inkMute)),
-                      const SizedBox(height: 4),
-                      Text(_fmtData(primeira.avaliadoEm),
-                          style: const TextStyle(fontSize: 13)),
-                    ]),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Primeira',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: EagleTokens.inkMute,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _fmtData(primeira.avaliadoEm),
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(width: 8),
                   const Icon(Icons.arrow_forward, color: EagleTokens.inkMute),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Column(children: [
-                      const Text('Atual', style: TextStyle(fontWeight: FontWeight.bold, color: EagleTokens.inkMute)),
-                      const SizedBox(height: 4),
-                      Text(_fmtData(atual.avaliadoEm),
-                          style: const TextStyle(fontSize: 13)),
-                    ]),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Atual',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: EagleTokens.inkMute,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _fmtData(atual.avaliadoEm),
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -208,15 +249,24 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
             children: [
               Icon(Icons.circle, size: 10, color: EagleTokens.good),
               SizedBox(width: 4),
-              Text('Melhora', style: TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
+              Text(
+                'Melhora',
+                style: TextStyle(fontSize: 12, color: EagleTokens.inkMute),
+              ),
               SizedBox(width: 12),
               Icon(Icons.circle, size: 10, color: EagleTokens.bad),
               SizedBox(width: 4),
-              Text('Piora', style: TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
+              Text(
+                'Piora',
+                style: TextStyle(fontSize: 12, color: EagleTokens.inkMute),
+              ),
               SizedBox(width: 12),
               Icon(Icons.circle, size: 10, color: EagleTokens.inkMute),
               SizedBox(width: 4),
-              Text('Sem alteração', style: TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
+              Text(
+                'Sem alteração',
+                style: TextStyle(fontSize: 12, color: EagleTokens.inkMute),
+              ),
             ],
           ),
           const SizedBox(height: 32),
@@ -227,7 +277,13 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
                 final repo = EvolucaoRepository(ref.read(apiClientProvider));
                 await repo.compartilharEvolucao(widget.alunoId);
                 if (mounted) {
-                  messenger.showSnackBar(const SnackBar(content: Text('Evolução compartilhada via chat com sucesso!')));
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Evolução compartilhada via chat com sucesso!',
+                      ),
+                    ),
+                  );
                 }
               } catch (e) {
                 messenger.showSnackBar(SnackBar(content: Text('Erro: $e')));
@@ -242,15 +298,28 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
   }
 
   Widget _headerRow() {
-    const style = TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: EagleTokens.inkMute);
+    const style = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 13,
+      color: EagleTokens.inkMute,
+    );
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
           Expanded(flex: 3, child: Text('Métrica', style: style)),
-          Expanded(flex: 2, child: Text('Primeira', style: style, textAlign: TextAlign.center)),
-          Expanded(flex: 2, child: Text('Atual', style: style, textAlign: TextAlign.center)),
-          Expanded(flex: 2, child: Text('Delta', style: style, textAlign: TextAlign.center)),
+          Expanded(
+            flex: 2,
+            child: Text('Primeira', style: style, textAlign: TextAlign.center),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text('Atual', style: style, textAlign: TextAlign.center),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text('Delta', style: style, textAlign: TextAlign.center),
+          ),
         ],
       ),
     );
@@ -286,7 +355,10 @@ class _EvolucaoComparativoScreenState extends ConsumerState<EvolucaoComparativoS
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
-          Expanded(flex: 3, child: Text(label, style: const TextStyle(fontSize: 13))),
+          Expanded(
+            flex: 3,
+            child: Text(label, style: const TextStyle(fontSize: 13)),
+          ),
           Expanded(
             flex: 2,
             child: Text(

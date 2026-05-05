@@ -46,12 +46,13 @@ class _FxIconPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
 
     // 24x24 coordinate system like the original SVGs
     final s = size.shortestSide;
@@ -81,7 +82,11 @@ class _FxIconPainter extends CustomPainter {
         break;
 
       case 'users':
-        canvas.drawPath(Path()..addOval(Rect.fromCircle(center: const Offset(9, 8), radius: 4)), paint);
+        canvas.drawPath(
+          Path()
+            ..addOval(Rect.fromCircle(center: const Offset(9, 8), radius: 4)),
+          paint,
+        );
         canvas.drawPath(
           Path()
             ..moveTo(2, 21)
@@ -92,7 +97,11 @@ class _FxIconPainter extends CustomPainter {
             ..lineTo(16, 21),
           paint,
         );
-        canvas.drawPath(Path()..addOval(Rect.fromCircle(center: const Offset(17, 6), radius: 3)), paint);
+        canvas.drawPath(
+          Path()
+            ..addOval(Rect.fromCircle(center: const Offset(17, 6), radius: 3)),
+          paint,
+        );
         canvas.drawPath(
           Path()
             ..moveTo(22, 16)
@@ -108,13 +117,22 @@ class _FxIconPainter extends CustomPainter {
         canvas.drawLine(const Offset(2, 11), const Offset(2, 13), paint);
         canvas.drawLine(const Offset(20, 9), const Offset(20, 15), paint);
         canvas.drawLine(const Offset(22, 11), const Offset(22, 13), paint);
-        canvas.drawPath(Path()..addRect(const Rect.fromLTWH(6, 8, 3, 8)), paint);
-        canvas.drawPath(Path()..addRect(const Rect.fromLTWH(15, 8, 3, 8)), paint);
+        canvas.drawPath(
+          Path()..addRect(const Rect.fromLTWH(6, 8, 3, 8)),
+          paint,
+        );
+        canvas.drawPath(
+          Path()..addRect(const Rect.fromLTWH(15, 8, 3, 8)),
+          paint,
+        );
         canvas.drawLine(const Offset(9, 12), const Offset(15, 12), paint);
         break;
 
       case 'coin':
-        canvas.drawPath(Path()..addOval(const Rect.fromLTWH(4, 3, 16, 6)), paint);
+        canvas.drawPath(
+          Path()..addOval(const Rect.fromLTWH(4, 3, 16, 6)),
+          paint,
+        );
         canvas.drawPath(
           Path()
             ..moveTo(4, 6)
@@ -184,6 +202,55 @@ class _FxIconPainter extends CustomPainter {
         );
         break;
 
+      case 'circle-check':
+        canvas.drawCircle(const Offset(12, 12), 9, paint);
+        canvas.drawPath(
+          Path()
+            ..moveTo(8, 12)
+            ..lineTo(11, 15)
+            ..lineTo(16, 9),
+          paint,
+        );
+        break;
+
+      case 'alert-triangle':
+        canvas.drawPath(
+          Path()
+            ..moveTo(12, 3)
+            ..lineTo(22, 20)
+            ..lineTo(2, 20)
+            ..close(),
+          paint,
+        );
+        canvas.drawLine(const Offset(12, 9), const Offset(12, 13), paint);
+        canvas.drawLine(const Offset(12, 17), const Offset(12, 17.1), paint);
+        break;
+
+      case 'flame':
+        canvas.drawPath(
+          Path()
+            ..moveTo(12, 22)
+            ..cubicTo(7, 20, 5, 16, 7, 12)
+            ..cubicTo(8, 9, 11, 8, 10, 3)
+            ..cubicTo(15, 6, 19, 11, 18, 16)
+            ..cubicTo(17, 20, 15, 21, 12, 22)
+            ..close(),
+          paint,
+        );
+        break;
+
+      case 'dollar-sign':
+        canvas.drawLine(const Offset(12, 3), const Offset(12, 21), paint);
+        canvas.drawPath(
+          Path()
+            ..moveTo(17, 7)
+            ..cubicTo(14, 5, 8, 5, 8, 9)
+            ..cubicTo(8, 13, 17, 11, 17, 16)
+            ..cubicTo(17, 20, 10, 20, 7, 17),
+          paint,
+        );
+        break;
+
       case 'plus':
         canvas.drawLine(const Offset(12, 5), const Offset(12, 19), paint);
         canvas.drawLine(const Offset(5, 12), const Offset(19, 12), paint);
@@ -191,7 +258,10 @@ class _FxIconPainter extends CustomPainter {
 
       case 'calendar':
         canvas.drawRRect(
-          RRect.fromRectAndRadius(const Rect.fromLTWH(3, 5, 18, 16), const Radius.circular(2)),
+          RRect.fromRectAndRadius(
+            const Rect.fromLTWH(3, 5, 18, 16),
+            const Radius.circular(2),
+          ),
           paint,
         );
         canvas.drawLine(const Offset(3, 9), const Offset(21, 9), paint);
@@ -215,6 +285,22 @@ class _FxIconPainter extends CustomPainter {
         );
         break;
 
+      case 'message-circle':
+        canvas.drawPath(
+          Path()
+            ..moveTo(21, 11.5)
+            ..cubicTo(21, 16.2, 17, 20, 12, 20)
+            ..cubicTo(10.7, 20, 9.5, 19.8, 8.4, 19.3)
+            ..lineTo(3, 21)
+            ..lineTo(4.7, 15.9)
+            ..cubicTo(4.2, 14.6, 4, 13.1, 4, 11.5)
+            ..cubicTo(4, 6.8, 8, 3, 13, 3)
+            ..cubicTo(17.4, 3, 21, 6.8, 21, 11.5)
+            ..close(),
+          paint,
+        );
+        break;
+
       case 'trend':
         canvas.drawPath(
           Path()
@@ -229,6 +315,71 @@ class _FxIconPainter extends CustomPainter {
             ..moveTo(14, 7)
             ..lineTo(21, 7)
             ..lineTo(21, 14),
+          paint,
+        );
+        break;
+
+      case 'zap':
+        canvas.drawPath(
+          Path()
+            ..moveTo(13, 2)
+            ..lineTo(4, 14)
+            ..lineTo(11, 14)
+            ..lineTo(10, 22)
+            ..lineTo(20, 9)
+            ..lineTo(13, 9)
+            ..close(),
+          paint,
+        );
+        break;
+
+      case 'route':
+        canvas.drawCircle(const Offset(6, 6), 2.5, paint);
+        canvas.drawCircle(const Offset(18, 18), 2.5, paint);
+        canvas.drawPath(
+          Path()
+            ..moveTo(8, 6)
+            ..cubicTo(18, 6, 6, 18, 16, 18),
+          paint,
+        );
+        break;
+
+      case 'chevron-right':
+        canvas.drawPath(
+          Path()
+            ..moveTo(9, 5)
+            ..lineTo(16, 12)
+            ..lineTo(9, 19),
+          paint,
+        );
+        break;
+
+      case 'sun':
+        canvas.drawCircle(const Offset(12, 12), 4, paint);
+        for (final p in const [
+          [12.0, 2.0, 12.0, 5.0],
+          [12.0, 19.0, 12.0, 22.0],
+          [2.0, 12.0, 5.0, 12.0],
+          [19.0, 12.0, 22.0, 12.0],
+          [4.9, 4.9, 7.0, 7.0],
+          [17.0, 17.0, 19.1, 19.1],
+          [19.1, 4.9, 17.0, 7.0],
+          [7.0, 17.0, 4.9, 19.1],
+        ]) {
+          canvas.drawLine(Offset(p[0], p[1]), Offset(p[2], p[3]), paint);
+        }
+        break;
+
+      case 'moon':
+        canvas.drawPath(
+          Path()
+            ..moveTo(21, 13)
+            ..cubicTo(19.7, 18, 14.5, 21, 9.5, 19.5)
+            ..cubicTo(4.5, 18, 1.8, 12.7, 3.5, 7.8)
+            ..cubicTo(4.4, 5.1, 6.5, 3, 9, 2)
+            ..cubicTo(8.1, 5.5, 9.7, 9.4, 13, 11.2)
+            ..cubicTo(15.5, 12.6, 18.4, 12.8, 21, 13)
+            ..close(),
           paint,
         );
         break;
@@ -266,4 +417,3 @@ class _FxIconPainter extends CustomPainter {
         oldDelegate.strokeWidth != strokeWidth;
   }
 }
-

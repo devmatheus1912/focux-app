@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
@@ -425,9 +426,7 @@ class _CardMedida extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  medida.data.length >= 10
-                      ? medida.data.substring(0, 10)
-                      : medida.data,
+                  fxDateShort(DateTime.parse(medida.data)),
                   style: const TextStyle(
                     color: EagleTokens.inkMute,
                     fontSize: 12,
@@ -525,9 +524,7 @@ class _CardRecorde extends StatelessWidget {
             if (recorde.cargaKg != null)
               '${recorde.cargaKg!.toStringAsFixed(1)}kg',
             if (recorde.repeticoes != null) '${recorde.repeticoes} reps',
-            recorde.data.length >= 10
-                ? recorde.data.substring(0, 10)
-                : recorde.data,
+            fxDateShort(DateTime.parse(recorde.data)),
           ].join(' × '),
           style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
         ),

@@ -8,30 +8,44 @@ import '../theme/brand_palette.dart';
 import '../theme/design_tokens.dart';
 import 'fx_icon.dart';
 
-/// Floating glass dock — design spec: iOS 26 style, 5 tabs, backdrop blur 24px.
-///
-/// Positioned by [MainShell] at bottom: safeArea + 18px, left/right: 14px.
-/// Background: dark rgba(20,26,48,0.72) / light rgba(255,255,255,0.78).
-/// Border: 0.5px, borderRadius: 28, shadow: 0 16px 48px -12px rgba(0,0,0,0.32).
+class FxDockItem {
+  final String icon;
+  final String label;
+
+  const FxDockItem({required this.icon, required this.label});
+}
+
+class FxDockItems {
+  static const personal = [
+    FxDockItem(icon: 'home', label: 'Hoje'),
+    FxDockItem(icon: 'users', label: 'Alunos'),
+    FxDockItem(icon: 'dumbbell', label: 'Treinos'),
+    FxDockItem(icon: 'calendar', label: 'Agenda'),
+    FxDockItem(icon: 'spark', label: 'IA'),
+  ];
+
+  static const aluno = [
+    FxDockItem(icon: 'home', label: 'Hoje'),
+    FxDockItem(icon: 'dumbbell', label: 'Treinos'),
+    FxDockItem(icon: 'trend', label: 'Saúde'),
+    FxDockItem(icon: 'users', label: 'Perfil'),
+  ];
+}
+
+/// Floating glass dock with configurable tabs.
 class FxDock extends StatelessWidget {
   const FxDock({
     super.key,
+    required this.items,
     required this.currentIndex,
     required this.onTap,
     required this.isDark,
   });
 
+  final List<FxDockItem> items;
   final int currentIndex;
   final ValueChanged<int> onTap;
   final bool isDark;
-
-  static const _items = [
-    _FxDockItem(icon: 'home', label: 'Hoje'),
-    _FxDockItem(icon: 'users', label: 'Alunos'),
-    _FxDockItem(icon: 'dumbbell', label: 'Treinos'),
-    _FxDockItem(icon: 'calendar', label: 'Agenda'),
-    _FxDockItem(icon: 'spark', label: 'IA'),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +63,6 @@ class FxDock extends StatelessWidget {
     final inactiveColor = (isDark ? EagleTokens.darkInk : EagleTokens.ink)
         .withValues(alpha: 0.45);
 
-    // Shadow is on the outer container; ClipRRect clips content only.
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
@@ -85,8 +98,8 @@ class FxDock extends StatelessWidget {
               compact ? 10 : 14,
             ),
             child: Row(
-              children: List.generate(_items.length, (i) {
-                final item = _items[i];
+              children: List.generate(items.length, (i) {
+                final item = items[i];
                 final active = i == currentIndex;
                 final color = active ? primary : inactiveColor;
 
@@ -146,10 +159,4 @@ class FxDock extends StatelessWidget {
       ),
     );
   }
-}
-
-class _FxDockItem {
-  final String icon;
-  final String label;
-  const _FxDockItem({required this.icon, required this.label});
 }

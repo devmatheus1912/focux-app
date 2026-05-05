@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -14,7 +15,8 @@ class FeedbackVideoScreen extends ConsumerStatefulWidget {
   const FeedbackVideoScreen({super.key, this.alunoId, this.alunoNome});
 
   @override
-  ConsumerState<FeedbackVideoScreen> createState() => _FeedbackVideoScreenState();
+  ConsumerState<FeedbackVideoScreen> createState() =>
+      _FeedbackVideoScreenState();
 }
 
 class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
@@ -31,11 +33,18 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     setState(() => _loading = true);
     try {
       final repo = FeedbackVideoRepository(ref.read(apiClientProvider));
-      final r = widget.alunoId != null
-          ? await repo.listarPorAluno(widget.alunoId!)
-          : await repo.listar();
-      if (mounted) setState(() { _feedbacks = r; _loading = false; });
-    } catch (e) { debugPrint('[Focux] Error: $e');
+      final r =
+          widget.alunoId != null
+              ? await repo.listarPorAluno(widget.alunoId!)
+              : await repo.listar();
+      if (mounted) {
+        setState(() {
+          _feedbacks = r;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -46,7 +55,9 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       await launchUrl(uri);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Não foi possível abrir a URL')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Não foi possível abrir a URL')),
+        );
       }
     }
   }
@@ -57,20 +68,25 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       _feedbacks.removeWhere((f) => f.id == id);
       setState(() {});
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+      }
     }
   }
 
   Future<void> _novoFeedback() async {
     await showDialog(
       context: context,
-      builder: (ctx) => _NovoFeedbackDialog(
-        alunoIdPreenchido: widget.alunoId,
-        onSalvo: () {
-          Navigator.pop(ctx);
-          _load();
-        },
-      ),
+      builder:
+          (ctx) => _NovoFeedbackDialog(
+            alunoIdPreenchido: widget.alunoId,
+            onSalvo: () {
+              Navigator.pop(ctx);
+              _load();
+            },
+          ),
     );
   }
 
@@ -84,20 +100,35 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       appBar: AppBar(
         backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
         elevation: 0,
-        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
-        title: Text(widget.alunoNome != null ? 'Feedbacks — ${widget.alunoNome}' : 'Todos os Feedbacks de Vídeo'),
+        iconTheme: IconThemeData(
+          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+        ),
+        title: Text(
+          widget.alunoNome != null
+              ? 'Feedbacks — ${widget.alunoNome}'
+              : 'Todos os Feedbacks de Vídeo',
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+            icon: Icon(
+              Icons.refresh,
+              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            ),
             onPressed: _load,
-          )
+          ),
         ],
       ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: [primary, primaryDeep]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: primary.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [
+            BoxShadow(
+              color: primary.withValues(alpha: 0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: FloatingActionButton(
           onPressed: _novoFeedback,
@@ -106,48 +137,62 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
-      body: _loading
-          ? Center(child: CircularProgressIndicator(color: primary))
-          : _feedbacks.isEmpty
+      body:
+          _loading
+              ? Center(child: CircularProgressIndicator(color: primary))
+              : _feedbacks.isEmpty
               ? const Center(child: Text('Nenhum feedback encontrado.'))
               : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _feedbacks.length,
-                  itemBuilder: (_, i) {
-                    final f = _feedbacks[i];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        leading: Icon(Icons.video_library, size: 36, color: primary),
-                        title: Text('Exercício ID: ${f.exercicioId}'),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4),
-                            Text('Comentário: ${f.comentario}'),
-                            const SizedBox(height: 4),
-                            Text('Data: ${f.criadoEm.day}/${f.criadoEm.month}/${f.criadoEm.year}', style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.open_in_new),
-                              tooltip: 'Assistir Vídeo',
-                              onPressed: () => _abrirVideo(f.videoUrl),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: EagleTokens.bad),
-                              onPressed: () => _deletar(f.id),
-                            ),
-                          ],
-                        ),
-                        isThreeLine: true,
+                padding: const EdgeInsets.all(16),
+                itemCount: _feedbacks.length,
+                itemBuilder: (_, i) {
+                  final f = _feedbacks[i];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.video_library,
+                        size: 36,
+                        color: primary,
                       ),
-                    );
-                  },
-                ),
+                      title: Text('Exercício ID: ${f.exercicioId}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text('Comentário: ${f.comentario}'),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Data: ${fxDateShort(f.criadoEm)}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: EagleTokens.inkMute,
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.open_in_new),
+                            tooltip: 'Assistir Vídeo',
+                            onPressed: () => _abrirVideo(f.videoUrl),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                              color: EagleTokens.bad,
+                            ),
+                            onPressed: () => _deletar(f.id),
+                          ),
+                        ],
+                      ),
+                      isThreeLine: true,
+                    ),
+                  );
+                },
+              ),
     );
   }
 }
@@ -159,7 +204,8 @@ class _NovoFeedbackDialog extends ConsumerStatefulWidget {
   const _NovoFeedbackDialog({this.alunoIdPreenchido, required this.onSalvo});
 
   @override
-  ConsumerState<_NovoFeedbackDialog> createState() => _NovoFeedbackDialogState();
+  ConsumerState<_NovoFeedbackDialog> createState() =>
+      _NovoFeedbackDialogState();
 }
 
 class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
@@ -172,7 +218,9 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
   @override
   void initState() {
     super.initState();
-    _alunoIdCtrl = TextEditingController(text: widget.alunoIdPreenchido?.toString() ?? '');
+    _alunoIdCtrl = TextEditingController(
+      text: widget.alunoIdPreenchido?.toString() ?? '',
+    );
   }
 
   Future<void> _salvar() async {
@@ -181,8 +229,13 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
     final video = _videoUrlCtrl.text.trim();
     final com = _comentarioCtrl.text.trim();
 
-    if (alunoId == null || exercicioId == null || video.isEmpty || com.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Preencha todos os campos')));
+    if (alunoId == null ||
+        exercicioId == null ||
+        video.isEmpty ||
+        com.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Preencha todos os campos')));
       return;
     }
 
@@ -196,7 +249,11 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
       );
       widget.onSalvo();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      }
     }
     if (mounted) setState(() => _salvando = false);
   }
@@ -224,22 +281,36 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
             const SizedBox(height: 8),
             TextField(
               controller: _videoUrlCtrl,
-              decoration: const InputDecoration(labelText: 'URL do Vídeo (Cloudinary, YouTube, etc)'),
+              decoration: const InputDecoration(
+                labelText: 'URL do Vídeo (Cloudinary, YouTube, etc)',
+              ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _comentarioCtrl,
-              decoration: const InputDecoration(labelText: 'Comentário Técnico'),
+              decoration: const InputDecoration(
+                labelText: 'Comentário Técnico',
+              ),
               maxLines: 3,
             ),
           ],
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
         FilledButton(
           onPressed: _salvando ? null : _salvar,
-          child: _salvando ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Salvar'),
+          child:
+              _salvando
+                  ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : const Text('Salvar'),
         ),
       ],
     );

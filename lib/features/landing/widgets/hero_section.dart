@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../data/landing_tracking.dart';
 import '../models/public_personal_data.dart';
 import 'landing_design_helpers.dart';
@@ -118,9 +119,7 @@ class HeroSection extends StatelessWidget {
                               data.logoUrl != null && data.logoUrl!.isNotEmpty
                                   ? null
                                   : Text(
-                                    data.nomePersonal.isNotEmpty
-                                        ? data.nomePersonal[0].toUpperCase()
-                                        : 'P',
+                                    fxInitials(data.nomePersonal),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 24,
@@ -418,7 +417,7 @@ class _InlinePresentationVideoState extends State<_InlinePresentationVideo> {
             Expanded(
               child: Text(
                 widget.compact
-                    ? 'Apresentacao do personal'
+                    ? 'Apresentação do personal'
                     : 'Assista antes de decidir',
                 style: const TextStyle(
                   color: Colors.white,

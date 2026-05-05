@@ -73,7 +73,7 @@ Future<void> _abrirStore(BuildContext context) async {
   if (!ok && context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Nao foi possivel abrir a loja. Tente novamente.'),
+        content: Text('Não foi possível abrir a loja. Tente novamente.'),
       ),
     );
   }

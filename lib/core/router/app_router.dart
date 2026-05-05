@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../screens/aluno_shell.dart';
 import '../screens/main_shell.dart';
 import '../../features/auth/screens/splash_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
@@ -160,17 +161,48 @@ class AppRouter {
       ),
 
       // ── Aluno (student) dashboard — not part of personal trainer shell ────────
-      GoRoute(
-        path: '/dashboard/aluno',
-        builder: (context, state) => const AlunoDashboardScreen(),
+      StatefulShellRoute.indexedStack(
+        builder:
+            (context, state, navigationShell) =>
+                AlunoShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/dashboard/aluno',
+                builder: (context, state) => const AlunoDashboardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/checkin/treinos',
+                builder: (context, state) => const MeusTreinosScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/saude',
+                builder: (context, state) => const HealthDashboardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/aluno/perfil',
+                builder: (context, state) => const PerfilAlunoScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
         path: '/aluno/ativacao',
         builder: (context, state) => const AlunoActivationScreen(),
-      ),
-      GoRoute(
-        path: '/aluno/perfil',
-        builder: (context, state) => const PerfilAlunoScreen(),
       ),
       GoRoute(
         path: '/notificacoes',
@@ -327,10 +359,6 @@ class AppRouter {
               alunoId: _intPathParam(state, 'id')!,
               alunoNome: _stringExtra(state) ?? 'Aluno',
             ),
-      ),
-      GoRoute(
-        path: '/saude',
-        builder: (context, state) => const HealthDashboardScreen(),
       ),
       GoRoute(
         path: '/treino-presencial/:id',
@@ -510,10 +538,6 @@ class AppRouter {
       ),
 
       // Check-in
-      GoRoute(
-        path: '/checkin/treinos',
-        builder: (context, state) => const MeusTreinosScreen(),
-      ),
       GoRoute(
         path: '/checkin/executar',
         redirect:
@@ -805,6 +829,7 @@ bool _isAlunoOnlyLocation(String path) {
     '/checkin/treinos',
     '/checkin/executar',
     '/checkin/historico',
+    '/saude',
   };
   return alunoOnly.contains(path);
 }

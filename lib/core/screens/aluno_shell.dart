@@ -4,15 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../theme/design_tokens.dart';
 import '../widgets/fx_dock.dart';
 
-/// Shell scaffold wrapping the 5 main personal-trainer tabs.
-///
-/// Renders [navigationShell] (the current branch content) inside a Stack
-/// with [FxDock] floating at bottom: safeArea + 18px.
-///
-/// Each branch screen has its own Scaffold + scroll view. The dock is overlaid
-/// on top so content must add ~90px bottom padding to avoid hiding behind it.
-class MainShell extends StatelessWidget {
-  const MainShell({super.key, required this.navigationShell});
+class AlunoShell extends StatelessWidget {
+  const AlunoShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
@@ -38,14 +31,12 @@ class MainShell extends StatelessWidget {
             left: 14,
             right: 14,
             child: FxDock(
-              items: FxDockItems.personal,
+              items: FxDockItems.aluno,
               currentIndex: navigationShell.currentIndex,
               isDark: isDark,
               onTap:
                   (i) => navigationShell.goBranch(
                     i,
-                    // Re-tapping active tab scrolls to top (initialLocation = true
-                    // resets the branch to its initial route).
                     initialLocation: i == navigationShell.currentIndex,
                   ),
             ),
