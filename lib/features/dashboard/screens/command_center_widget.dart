@@ -355,6 +355,12 @@ class _AlunoScoreTile extends StatelessWidget {
           runSpacing: 4,
           children: [
             _Pill(label: score.prioridade, color: riskColor, filled: true),
+            if (score.deltaScore != null)
+              _Pill(
+                label: _deltaLabel(score.deltaScore!),
+                color: _deltaColor(score.deltaScore!, primary),
+                filled: score.deltaScore! < 0,
+              ),
             _Pill(label: score.ritmo, color: primary),
             _Pill(label: score.risco, color: riskColor),
             _Pill(label: score.proximaAcao, color: primary),
@@ -410,6 +416,17 @@ class _AlunoScoreTile extends StatelessWidget {
       },
     );
   }
+}
+
+String _deltaLabel(int delta) {
+  if (delta == 0) return 'estável';
+  return '${delta > 0 ? '+' : ''}$delta pts';
+}
+
+Color _deltaColor(int delta, Color primary) {
+  if (delta < 0) return EagleTokens.bad;
+  if (delta > 0) return EagleTokens.good;
+  return primary;
 }
 
 class _CommandHeader extends StatelessWidget {

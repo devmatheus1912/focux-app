@@ -72,6 +72,33 @@ class DashboardRepository {
         .toList();
   }
 
+  Future<List<FocuxScoreSnapshotResumo>> runFocuxScoreSnapshots() async {
+    final response = await _dio.post(
+      '/api/dashboard/focux-score/snapshots/run',
+    );
+    return (response.data as List)
+        .map(
+          (item) =>
+              FocuxScoreSnapshotResumo.fromJson(item as Map<String, dynamic>),
+        )
+        .toList();
+  }
+
+  Future<List<FocuxScoreSnapshotResumo>> getFocuxScoreSnapshots(
+    int alunoId,
+  ) async {
+    final response = await _dio.get(
+      '/api/dashboard/focux-score/snapshots',
+      queryParameters: {'alunoId': alunoId},
+    );
+    return (response.data as List)
+        .map(
+          (item) =>
+              FocuxScoreSnapshotResumo.fromJson(item as Map<String, dynamic>),
+        )
+        .toList();
+  }
+
   Future<void> completeCommandAction(String actionKey) async {
     await _dio.post(
       '/api/dashboard/command-center/actions/complete',

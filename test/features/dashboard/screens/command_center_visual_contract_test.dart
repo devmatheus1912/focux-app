@@ -21,5 +21,7 @@ void main() {
     expect(widget, contains("'Radar Focux'"));
     expect(widget, contains('score.proximaAcao'));
     expect(widget, contains('score.risco'));
+    expect(widget, contains('score.deltaScore'));
+    expect(widget, contains('_deltaLabel'));
   });
 }
