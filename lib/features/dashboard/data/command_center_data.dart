@@ -5,6 +5,7 @@ class CommandCenterData {
   final List<FilaAcaoResumo> filaAcoes;
   final List<MensalidadeResumo> cobrancasPendentes;
   final List<AutonomiaGargaloResumo> autonomiaGargalos;
+  final List<ModoOperacaoItem> modoOperacao;
 
   CommandCenterData({
     required this.agendaHoje,
@@ -13,6 +14,7 @@ class CommandCenterData {
     required this.filaAcoes,
     required this.cobrancasPendentes,
     required this.autonomiaGargalos,
+    required this.modoOperacao,
   });
 
   factory CommandCenterData.fromJson(Map<String, dynamic> json) {
@@ -54,8 +56,52 @@ class CommandCenterData {
               )
               .toList() ??
           [],
+      modoOperacao:
+          (json['modoOperacao'] as List?)
+              ?.map(
+                (e) => ModoOperacaoItem.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
     );
   }
+}
+
+class ModoOperacaoItem {
+  final String actionKey;
+  final String titulo;
+  final String descricao;
+  final String motivo;
+  final String categoria;
+  final int impactScore;
+  final String ctaLabel;
+  final String acaoUrl;
+  final String prioridade;
+
+  ModoOperacaoItem({
+    required this.actionKey,
+    required this.titulo,
+    required this.descricao,
+    required this.motivo,
+    required this.categoria,
+    required this.impactScore,
+    required this.ctaLabel,
+    required this.acaoUrl,
+    required this.prioridade,
+  });
+
+  factory ModoOperacaoItem.fromJson(Map<String, dynamic> json) =>
+      ModoOperacaoItem(
+        actionKey: json['actionKey'] as String? ?? '',
+        titulo: json['titulo'] as String? ?? '',
+        descricao: json['descricao'] as String? ?? '',
+        motivo: json['motivo'] as String? ?? '',
+        categoria: json['categoria'] as String? ?? 'OPERACAO',
+        impactScore: (json['impactScore'] as num?)?.toInt() ?? 0,
+        ctaLabel: json['ctaLabel'] as String? ?? 'Abrir',
+        acaoUrl: json['acaoUrl'] as String? ?? '/dashboard/personal',
+        prioridade: json['prioridade'] as String? ?? 'P2',
+      );
 }
 
 class AlunoScoreResumo {

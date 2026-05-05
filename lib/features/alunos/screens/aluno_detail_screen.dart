@@ -26,6 +26,20 @@ final alunoScoreSnapshotsProvider = FutureProvider.family<
   return ref.read(dashboardRepositoryProvider).getFocuxScoreSnapshots(alunoId);
 });
 
+final alunoEvolucaoInteligenteProvider =
+    FutureProvider.family<EvolucaoInteligente, int>((ref, alunoId) async {
+      return AlunoRepository(
+        ref.read(apiClientProvider),
+      ).buscarEvolucaoInteligente(alunoId);
+    });
+
+final alunoTimeline360ApiProvider =
+    FutureProvider.family<List<Timeline360Event>, int>((ref, alunoId) async {
+      return AlunoRepository(
+        ref.read(apiClientProvider),
+      ).buscarTimeline360(alunoId);
+    });
+
 class AlunoDetailScreen extends ConsumerWidget {
   final int alunoId;
   const AlunoDetailScreen({super.key, required this.alunoId});
@@ -82,6 +96,8 @@ class AlunoDetailScreen extends ConsumerWidget {
       alunoAutonomiaResumoProvider(alunoId),
     );
     final scoreSnapshotsAsync = ref.watch(alunoScoreSnapshotsProvider(alunoId));
+    final evolucaoAsync = ref.watch(alunoEvolucaoInteligenteProvider(alunoId));
+    final timeline360ApiAsync = ref.watch(alunoTimeline360ApiProvider(alunoId));
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -288,10 +304,16 @@ class AlunoDetailScreen extends ConsumerWidget {
                         isDark: isDark,
                       ),
                       const SizedBox(height: 16),
+                      _EvolucaoInteligenteCard(
+                        evolucaoAsync: evolucaoAsync,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 16),
                       _Aluno360TimelineCard(
                         aluno: aluno,
                         eventosAsync: autonomiaAsync,
                         snapshotsAsync: scoreSnapshotsAsync,
+                        timelineApiAsync: timeline360ApiAsync,
                         isDark: isDark,
                       ),
                       const SizedBox(height: 16),
@@ -1157,20 +1179,272 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   }
 }
 
+class _EvolucaoInteligenteCard extends StatelessWidget {
+  final AsyncValue<EvolucaoInteligente> evolucaoAsync;
+  final bool isDark;
+
+  const _EvolucaoInteligenteCard({
+    required this.evolucaoAsync,
+    required this.isDark,
+  });
+
+  static String _sinalLabel(String s) {
+    switch (s) {
+      case 'SUBINDO':
+        return 'Em alta';
+      case 'ESTÁVEL':
+        return 'Estável';
+      case 'PLATÔ':
+        return 'Platô';
+      case 'QUEDA':
+        return 'Atenção';
+      case 'SEM_DADOS':
+      default:
+        return 'Sem dados';
+    }
+  }
+
+  static Color _sinalColor(String s) {
+    switch (s) {
+      case 'SUBINDO':
+        return EagleTokens.good;
+      case 'QUEDA':
+        return EagleTokens.bad;
+      case 'PLATÔ':
+        return EagleTokens.warn;
+      default:
+        return EagleTokens.inkMute;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: line),
+      ),
+      child: evolucaoAsync.when(
+        loading: () => const LinearProgressIndicator(minHeight: 2),
+        error:
+            (e, _) => Text(
+              'Evolução inteligente indisponível: $e',
+              style: TextStyle(color: mute, fontSize: 12.5),
+            ),
+        data: (ev) {
+          final sigColor = _sinalColor(ev.sinal);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: BrandPalette.soft(primary, dark: isDark),
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    child: Icon(
+                      Icons.show_chart_rounded,
+                      color: primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Evolução inteligente',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Sinais a partir de check-ins concluídos e volume.',
+                          style: TextStyle(color: mute, fontSize: 12.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _MiniAutonomyChip(
+                    label: _sinalLabel(ev.sinal),
+                    color: sigColor,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                ev.resumo,
+                style: TextStyle(color: ink, fontSize: 13.2, height: 1.35),
+              ),
+              if (ev.sinal != 'SEM_DADOS') ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _MiniAutonomyChip(
+                      label:
+                          'Vol. semanal ${ev.volumeSemanal.toStringAsFixed(0)}',
+                      color: primary,
+                    ),
+                    _MiniAutonomyChip(
+                      label:
+                          'Vol. mensal ${ev.volumeMensal.toStringAsFixed(0)}',
+                      color: primary,
+                    ),
+                    if (ev.tendenciaVolumePct != null)
+                      _MiniAutonomyChip(
+                        label:
+                            'Tendência volume ${ev.tendenciaVolumePct! > 0 ? '+' : ''}${ev.tendenciaVolumePct}%',
+                        color:
+                            ev.tendenciaVolumePct! >= 0
+                                ? EagleTokens.good
+                                : EagleTokens.bad,
+                      ),
+                    if (ev.ultimoPrExercicio != null &&
+                        ev.ultimoPrExercicio!.isNotEmpty)
+                      _MiniAutonomyChip(
+                        label:
+                            ev.ultimoPrLabel != null &&
+                                    ev.ultimoPrLabel!.isNotEmpty
+                                ? '${ev.ultimoPrLabel} · ${ev.ultimoPrExercicio}'
+                                : 'PR · ${ev.ultimoPrExercicio}',
+                        color: EagleTokens.good,
+                      ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 12),
+              Text(
+                'Próxima ação',
+                style: TextStyle(
+                  color: mute,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.6,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                ev.proximaAcao,
+                style: TextStyle(color: ink, fontSize: 13, height: 1.3),
+              ),
+              if (ev.sugerirCopiloto) ...[
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(Icons.auto_awesome, size: 16, color: primary),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Copiloto pode ajudar a transformar isso em mensagem ou tarefa.',
+                        style: TextStyle(color: mute, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
 class _Aluno360TimelineCard extends StatelessWidget {
   final Aluno aluno;
   final AsyncValue<List<AlunoAutonomiaEvento>> eventosAsync;
   final AsyncValue<List<FocuxScoreSnapshotResumo>> snapshotsAsync;
+  final AsyncValue<List<Timeline360Event>> timelineApiAsync;
   final bool isDark;
 
   const _Aluno360TimelineCard({
     required this.aluno,
     required this.eventosAsync,
     required this.snapshotsAsync,
+    required this.timelineApiAsync,
     required this.isDark,
   });
 
+  static _Timeline360Item _itemFromApi(Timeline360Event e) {
+    final at = DateTime.tryParse(e.ocorridoEm);
+    final tipo = e.tipo;
+    IconData icon;
+    Color color;
+    String kind;
+    switch (tipo) {
+      case 'RADAR':
+        icon = Icons.radar_outlined;
+        color = EagleTokens.warn;
+        kind = 'Radar';
+        break;
+      case 'CHECKIN':
+        icon = Icons.fitness_center_outlined;
+        color = EagleTokens.good;
+        kind = 'Check-in';
+        break;
+      case 'MEDIDA':
+        icon = Icons.straighten_outlined;
+        color = EagleTokens.purple;
+        kind = 'Medida';
+        break;
+      case 'AUTONOMIA':
+        icon = Icons.touch_app_outlined;
+        color = EagleTokens.warn;
+        kind = 'Autonomia';
+        break;
+      case 'FINANCEIRO':
+        icon = Icons.payments_outlined;
+        color = EagleTokens.bad;
+        kind = 'Financeiro';
+        break;
+      default:
+        if (tipo.startsWith('CHAT_')) {
+          icon = Icons.chat_bubble_outline;
+          color = EagleTokens.brand;
+          kind = 'Chat';
+        } else {
+          icon = Icons.bolt_outlined;
+          color = EagleTokens.inkMute;
+          kind = tipo;
+        }
+    }
+    final deep =
+        e.deepLink.trim().isEmpty ? null : e.deepLink.trim();
+    return _Timeline360Item(
+      at: at,
+      kind: kind,
+      title: e.titulo,
+      body: e.corpo.isEmpty ? e.meta : e.corpo,
+      meta: e.meta,
+      priority: e.prioridade,
+      icon: icon,
+      color: color,
+      deepLink: deep,
+    );
+  }
+
   List<_Timeline360Item> _items() {
+    final api = timelineApiAsync.valueOrNull;
+    if (api != null && api.isNotEmpty) {
+      return api.take(7).map(_itemFromApi).toList();
+    }
     final items = <_Timeline360Item>[];
     for (final snapshot in snapshotsAsync.valueOrNull ?? const []) {
       final date = DateTime.tryParse(snapshot.dataReferencia);
@@ -1246,7 +1520,10 @@ class _Aluno360TimelineCard extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final loading = eventosAsync.isLoading || snapshotsAsync.isLoading;
+    final loading =
+        eventosAsync.isLoading ||
+        snapshotsAsync.isLoading ||
+        timelineApiAsync.isLoading;
     final items = _items();
 
     return Container(
@@ -1285,7 +1562,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Radar Focux, autonomia e sinais recentes em uma história só.',
+                      'Radar, check-ins, medidas, autonomia, financeiro e chat — consolidado no servidor quando disponível.',
                       style: TextStyle(color: mute, fontSize: 12.5),
                     ),
                   ],
@@ -1324,6 +1601,7 @@ class _Timeline360Item {
   final String priority;
   final IconData icon;
   final Color color;
+  final String? deepLink;
 
   const _Timeline360Item({
     required this.at,
@@ -1334,6 +1612,7 @@ class _Timeline360Item {
     required this.priority,
     required this.icon,
     required this.color,
+    this.deepLink,
   });
 }
 
@@ -1347,7 +1626,8 @@ class _Timeline360Tile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    return Row(
+    final link = item.deepLink;
+    final child = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
@@ -1421,6 +1701,17 @@ class _Timeline360Tile extends StatelessWidget {
         ),
       ],
     );
+    if (link != null && link.isNotEmpty) {
+      return InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => context.push(link),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: child,
+        ),
+      );
+    }
+    return child;
   }
 }
 

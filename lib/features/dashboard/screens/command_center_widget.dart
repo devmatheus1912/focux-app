@@ -49,13 +49,21 @@ class CommandCenterWidget extends ConsumerWidget {
         if (data.agendaHoje.isEmpty &&
             data.filaAcoes.isEmpty &&
             data.alunosScore.isEmpty &&
-            data.autonomiaGargalos.isEmpty) {
+            data.autonomiaGargalos.isEmpty &&
+            data.modoOperacao.isEmpty &&
+            data.alunosEmRisco.isEmpty &&
+            data.cobrancasPendentes.isEmpty) {
           return const _IaActionHistory();
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _CommandHeader(total: data.filaAcoes.length),
+            if (data.modoOperacao.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              _ModoOperacaoSection(itens: data.modoOperacao),
+              const SizedBox(height: 16),
+            ],
             if (data.alunosScore.isNotEmpty) ...[
               const SizedBox(height: 10),
               _FocuxRadarSection(scores: data.alunosScore),
@@ -248,6 +256,183 @@ class _IaHistoryTile extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _ModoOperacaoSection extends StatelessWidget {
+  final List<ModoOperacaoItem> itens;
+
+  const _ModoOperacaoSection({required this.itens});
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final top = itens.take(5).toList();
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: primary.withValues(alpha: 0.20)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.tune_rounded, color: primary, size: 19),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Modo operação',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              _Pill(label: '${itens.length} focos', color: primary),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Prioridades com maior impacto no seu dia — abra e execute em sequência.',
+            style: TextStyle(color: mute, fontSize: 12.5, height: 1.3),
+          ),
+          const SizedBox(height: 12),
+          for (final item in top) ...[
+            _ModoOperacaoTile(item: item),
+            if (item != top.last)
+              Divider(
+                height: 16,
+                color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ModoOperacaoTile extends StatelessWidget {
+  final ModoOperacaoItem item;
+
+  const _ModoOperacaoTile({required this.item});
+
+  Color _categoriaColor(String categoria, Color primary) {
+    switch (categoria.toUpperCase()) {
+      case 'FINANCEIRO':
+        return EagleTokens.warn;
+      case 'ALUNO':
+      case 'RELACIONAMENTO':
+        return EagleTokens.good;
+      default:
+        return primary;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final catColor = _categoriaColor(item.categoria, primary);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        final row = Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: catColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Center(
+                child: Text(
+                  '${item.impactScore}',
+                  style: TextStyle(
+                    color: catColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.titulo,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    item.descricao,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: mute, fontSize: 12.2, height: 1.25),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      _Pill(label: item.prioridade, color: catColor, filled: true),
+                      _Pill(label: item.categoria, color: primary),
+                      if (item.motivo.isNotEmpty)
+                        _Pill(
+                          label: item.motivo,
+                          color: mute,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            if (!compact) ...[
+              const SizedBox(width: 8),
+              FilledButton.tonal(
+                onPressed: () => context.push(item.acaoUrl),
+                child: Text(item.ctaLabel),
+              ),
+            ],
+          ],
+        );
+
+        if (compact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              row,
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: () => context.push(item.acaoUrl),
+                child: Text(item.ctaLabel),
+              ),
+            ],
+          );
+        }
+        return row;
+      },
     );
   }
 }

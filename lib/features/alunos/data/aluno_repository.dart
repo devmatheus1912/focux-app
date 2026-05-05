@@ -119,6 +119,78 @@ class AlunoAutonomiaEvento {
       );
 }
 
+/// Sinais de evolução a partir de check-ins concluídos (backend).
+class EvolucaoInteligente {
+  final String sinal;
+  final String resumo;
+  final String? ultimoPrLabel;
+  final double? ultimoPrCargaKg;
+  final String? ultimoPrExercicio;
+  final double volumeSemanal;
+  final double volumeMensal;
+  final int? tendenciaVolumePct;
+  final String proximaAcao;
+  final bool sugerirCopiloto;
+
+  const EvolucaoInteligente({
+    required this.sinal,
+    required this.resumo,
+    this.ultimoPrLabel,
+    this.ultimoPrCargaKg,
+    this.ultimoPrExercicio,
+    required this.volumeSemanal,
+    required this.volumeMensal,
+    this.tendenciaVolumePct,
+    required this.proximaAcao,
+    required this.sugerirCopiloto,
+  });
+
+  factory EvolucaoInteligente.fromJson(Map<String, dynamic> json) =>
+      EvolucaoInteligente(
+        sinal: json['sinal'] as String? ?? 'SEM_DADOS',
+        resumo: json['resumo'] as String? ?? '',
+        ultimoPrLabel: json['ultimoPrLabel'] as String?,
+        ultimoPrCargaKg: (json['ultimoPrCargaKg'] as num?)?.toDouble(),
+        ultimoPrExercicio: json['ultimoPrExercicio'] as String?,
+        volumeSemanal: (json['volumeSemanal'] as num?)?.toDouble() ?? 0,
+        volumeMensal: (json['volumeMensal'] as num?)?.toDouble() ?? 0,
+        tendenciaVolumePct: (json['tendenciaVolumePct'] as num?)?.toInt(),
+        proximaAcao: json['proximaAcao'] as String? ?? '',
+        sugerirCopiloto: json['sugerirCopiloto'] as bool? ?? false,
+      );
+}
+
+class Timeline360Event {
+  final String tipo;
+  final String titulo;
+  final String corpo;
+  final String meta;
+  final String ocorridoEm;
+  final String deepLink;
+  final String prioridade;
+
+  const Timeline360Event({
+    required this.tipo,
+    required this.titulo,
+    required this.corpo,
+    required this.meta,
+    required this.ocorridoEm,
+    required this.deepLink,
+    required this.prioridade,
+  });
+
+  factory Timeline360Event.fromJson(Map<String, dynamic> json) =>
+      Timeline360Event(
+        tipo: json['tipo'] as String? ?? '',
+        titulo: json['titulo'] as String? ?? '',
+        corpo: json['corpo'] as String? ?? '',
+        meta: json['meta'] as String? ?? '',
+        ocorridoEm: json['ocorridoEm'] as String? ?? '',
+        deepLink: json['deepLink'] as String? ?? '',
+        prioridade: json['prioridade'] as String? ?? 'P2',
+      );
+}
+
 class AlunoAutonomiaResumo {
   final int alunoId;
   final int totalEventos;
@@ -240,6 +312,25 @@ class AlunoRepository {
     return AlunoAutonomiaResumo.fromJson(
       response.data as Map<String, dynamic>,
     );
+  }
+
+  Future<EvolucaoInteligente> buscarEvolucaoInteligente(int alunoId) async {
+    final response = await _dio.get('/api/alunos/$alunoId/evolucao-inteligente');
+    return EvolucaoInteligente.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<List<Timeline360Event>> buscarTimeline360(
+    int alunoId, {
+    int limit = 40,
+  }) async {
+    final response = await _dio.get(
+      '/api/alunos/$alunoId/timeline-360',
+      queryParameters: {'limit': limit},
+    );
+    final list = response.data as List<dynamic>;
+    return list
+        .map((e) => Timeline360Event.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<String> gerarSenhaProvisoria(int id) async {
