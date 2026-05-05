@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import 'enums.dart';
 
 class Exercicio {
   final int id;
@@ -20,6 +21,16 @@ class Exercicio {
   final String? substitutos;
   final String? videoUrl;
   final String? tags;
+  final Modalidade? modalidade;
+  final PadraoMovimento? padraoMovimento;
+  final GrupoMuscular? grupoMuscularPrimario;
+  final List<GrupoMuscular> gruposSecundarios;
+  final List<Equipamento> equipamentos;
+  final List<Espaco> espacosCompativeis;
+  final Dificuldade? dificuldade;
+  final bool unilateral;
+  final bool curado;
+  final int? curatedId;
   final bool favoritado;
   final String editorialStatus;
   final String? editorialNotes;
@@ -44,6 +55,16 @@ class Exercicio {
     this.substitutos,
     this.videoUrl,
     this.tags,
+    this.modalidade,
+    this.padraoMovimento,
+    this.grupoMuscularPrimario,
+    this.gruposSecundarios = const [],
+    this.equipamentos = const [],
+    this.espacosCompativeis = const [],
+    this.dificuldade,
+    this.unilateral = false,
+    this.curado = false,
+    this.curatedId,
     this.favoritado = false,
     this.editorialStatus = 'PENDING_REVIEW',
     this.editorialNotes,
@@ -69,6 +90,31 @@ class Exercicio {
     substitutos: json['substitutos'] as String?,
     videoUrl: json['videoUrl'] as String?,
     tags: json['tags'] as String?,
+    modalidade: tryParseEnum(Modalidade.values, json['modalidade'] as String?),
+    padraoMovimento: tryParseEnum(
+      PadraoMovimento.values,
+      json['padraoMovimento'] as String?,
+    ),
+    grupoMuscularPrimario: tryParseEnum(
+      GrupoMuscular.values,
+      json['grupoMuscularPrimario'] as String?,
+    ),
+    gruposSecundarios: parseEnumCsv(
+      GrupoMuscular.values,
+      json['gruposSecundarios'],
+    ),
+    equipamentos: parseEnumCsv(
+      Equipamento.values,
+      json['equipamentosCurado'] ?? json['equipamentos'],
+    ),
+    espacosCompativeis: parseEnumCsv(Espaco.values, json['espacosCompativeis']),
+    dificuldade: tryParseEnum(
+      Dificuldade.values,
+      json['dificuldade'] as String?,
+    ),
+    unilateral: json['unilateral'] as bool? ?? false,
+    curado: json['curado'] as bool? ?? false,
+    curatedId: (json['curatedId'] as num?)?.toInt(),
     favoritado: json['favoritado'] as bool? ?? false,
     editorialStatus: json['editorialStatus'] as String? ?? 'PENDING_REVIEW',
     editorialNotes: json['editorialNotes'] as String?,
@@ -86,6 +132,16 @@ class Exercicio {
       videoSource == 'PERSONAL_UPLOAD' || licenseStatus == 'PERSONAL_OWNED';
 
   bool get isLicensedMedia => licenseStatus == 'LICENSED';
+
+  bool get isProductionPending =>
+      videoSource == 'PRODUCTION_PENDING' || videoSource == 'CURATION_REQUIRED';
+
+  String? get primaryGroupLabel =>
+      grupoMuscularPrimario?.backendName ?? musculoAlvo;
+
+  String? get modalityLabel => modalidade?.backendName ?? categoria;
+
+  String? get difficultyLabel => dificuldade?.backendName ?? nivel;
 
   bool get isEditorialApproved => editorialStatus == 'APPROVED';
 
@@ -433,6 +489,13 @@ class ExercicioRepository {
     String? nivel,
     String? mecanica,
     String? objetivo,
+    Modalidade? modalidade,
+    PadraoMovimento? padraoMovimento,
+    GrupoMuscular? grupoMuscularPrimario,
+    List<Equipamento> equipamentos = const [],
+    List<Espaco> espacosCompativeis = const [],
+    Dificuldade? dificuldade,
+    bool unilateral = false,
     String? errosComuns,
     String? contraindicacoes,
     String? substitutos,
@@ -452,6 +515,21 @@ class ExercicioRepository {
         if (nivel != null && nivel.isNotEmpty) 'nivel': nivel,
         if (mecanica != null && mecanica.isNotEmpty) 'mecanica': mecanica,
         if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+        if (modalidade != null) 'modalidade': modalidade.backendName,
+        if (padraoMovimento != null)
+          'padraoMovimento': padraoMovimento.backendName,
+        if (grupoMuscularPrimario != null)
+          'grupoMuscularPrimario': grupoMuscularPrimario.backendName,
+        if (equipamentos.isNotEmpty)
+          'equipamentosCurado': equipamentos
+              .map((e) => e.backendName)
+              .join(','),
+        if (espacosCompativeis.isNotEmpty)
+          'espacosCompativeis': espacosCompativeis
+              .map((e) => e.backendName)
+              .join(','),
+        if (dificuldade != null) 'dificuldade': dificuldade.backendName,
+        'unilateral': unilateral,
         if (errosComuns != null && errosComuns.isNotEmpty)
           'errosComuns': errosComuns,
         if (contraindicacoes != null && contraindicacoes.isNotEmpty)
@@ -479,6 +557,48 @@ class ExercicioRepository {
       ),
     });
     final response = await _dio.post('/api/exercicios/$id/video', data: form);
+    return Exercicio.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Map<String, dynamic>> previewCuratedV2({
+    required Set<Modalidade> modalidades,
+    required Set<Espaco> espacos,
+  }) async {
+    final response = await _dio.get(
+      '/api/exercicios/seed/curated/v2/preview',
+      queryParameters: {
+        'modalidades': modalidades.map((e) => e.backendName).join(','),
+        'espacos': espacos.map((e) => e.backendName).join(','),
+      },
+    );
+    return Map<String, dynamic>.from(response.data as Map);
+  }
+
+  Future<Map<String, dynamic>> importarCuratedV2({
+    required Set<Modalidade> modalidades,
+    required Set<Espaco> espacos,
+  }) async {
+    final response = await _dio.post(
+      '/api/exercicios/seed/curated/v2/import',
+      data: {
+        'modalidades': modalidades.map((e) => e.backendName).toList(),
+        'espacos': espacos.map((e) => e.backendName).toList(),
+      },
+    );
+    return Map<String, dynamic>.from(response.data as Map);
+  }
+
+  Future<Exercicio> uploadVideoExercicio(
+    int exercicioId,
+    String filePath,
+  ) async {
+    final form = FormData.fromMap({
+      'file': await MultipartFile.fromFile(filePath),
+    });
+    final response = await _dio.post(
+      '/api/exercicios/$exercicioId/video',
+      data: form,
+    );
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -534,14 +654,21 @@ class ExercicioRepository {
   }
 
   Future<int> importarSeedPremiumV1() async {
-    final response = await _dio.post(
-      '/api/exercicios/importar/seed/premium/v1',
+    final data = await importarCuratedV2(
+      modalidades: {
+        Modalidade.musculacao,
+        Modalidade.mobilidade,
+        Modalidade.cardio,
+      },
+      espacos: {
+        Espaco.academiaCompleta,
+        Espaco.academiaBasica,
+        Espaco.casaEquipada,
+        Espaco.casaSemEquipo,
+        Espaco.outdoor,
+      },
     );
-    final data = response.data;
-    if (data is Map<String, dynamic>) {
-      return (data['importados'] as int?) ?? (data['total'] as int?) ?? 0;
-    }
-    return 0;
+    return (data['importados'] as num?)?.toInt() ?? 0;
   }
 
   Future<ExercicioCuradoriaResumo> buscarCuradoria() async {

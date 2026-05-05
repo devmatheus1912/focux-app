@@ -7,7 +7,9 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../data/enums.dart';
 import '../data/exercicio_repository.dart';
+import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 
@@ -15,14 +17,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 // Seed import provider (simple FutureProvider for one-shot call)
 // ---------------------------------------------------------------------------
 
-const _categoriasFiltro = [
-  'Todos',
-  'Musculacao',
-  'Mobilidade',
-  'Lutas',
-  'Yoga',
-  'Funcional',
-];
+const _categoriasFiltro = ['Todos', 'MUSCULACAO', 'MOBILIDADE', 'CARDIO'];
 
 const _gruposFiltro = [
   'PEITO',
@@ -462,7 +457,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   final cat = _categoriasFiltro[i];
                   final selecionado = cat == _categoriaFiltro;
                   return FilterChip(
-                    label: Text(cat),
+                    label: Text(_formatCategoriaFiltro(cat)),
                     selected: selecionado,
                     onSelected: (_) => setState(() => _categoriaFiltro = cat),
                   );
@@ -640,9 +635,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: const Text('Importar seed premium 1500'),
+            title: const Text('Carregar biblioteca curada'),
             content: const Text(
-              'Isso vai importar 1500 exercicios com taxonomia completa e cobertura muscular balanceada.\n\nVideos oficiais nao serao falsificados. Os itens entram como PENDING_REVIEW/CURATION_REQUIRED ate a curadoria anexar videos licenciados ou videos proprios.',
+              'Isso vai carregar os exercicios curados v2 com modalidade, grupo, padrao de movimento, equipamento e espaco.\n\nVideos oficiais nao serao falsificados. Itens sem video entram para curadoria ate voce anexar video proprio ou licenciado.',
             ),
             actions: [
               TextButton(
@@ -651,7 +646,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Importar 1500'),
+                child: const Text('Carregar'),
               ),
             ],
           ),
@@ -673,7 +668,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
               ),
             ),
             SizedBox(width: 12),
-            Text('Importando seed premium...'),
+            Text('Carregando biblioteca curada...'),
           ],
         ),
         duration: Duration(seconds: 45),
@@ -689,9 +684,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       if (context.mounted) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text(
-              '$count exercicios premium importados para curadoria.',
-            ),
+            content: Text('$count exercicios importados para biblioteca.'),
             backgroundColor: EagleTokens.good,
           ),
         );
@@ -1537,9 +1530,9 @@ class _ExercicioTile extends ConsumerWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final subtitle = [
-      exercicio.musculoAlvo,
-      exercicio.equipamento,
-      exercicio.nivel,
+      _grupoLabel(exercicio),
+      _equipamentoLabel(exercicio),
+      _dificuldadeLabel(exercicio),
     ].where((s) => s != null && s.isNotEmpty).join(' | ');
     final mediaThumb =
         exercicio.thumbnailUrl?.isNotEmpty == true
@@ -1627,10 +1620,10 @@ class _ExercicioTile extends ConsumerWidget {
                           color: hasVideo ? EagleTokens.good : EagleTokens.warn,
                         ),
                         const SizedBox(width: 6),
-                        if (exercicio.categoria?.isNotEmpty == true)
+                        if (_modalidadeLabel(exercicio)?.isNotEmpty == true)
                           Flexible(
                             child: Text(
-                              exercicio.categoria!,
+                              _modalidadeLabel(exercicio)!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -1707,6 +1700,42 @@ class _ExercicioTile extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _formatCategoriaFiltro(String value) {
+  if (value == 'Todos') return value;
+  final modalidade = tryParseEnum(Modalidade.values, value);
+  return modalidade == null
+      ? value
+      : TaxonomyLabels.modalidade[modalidade] ?? value;
+}
+
+String? _modalidadeLabel(Exercicio exercicio) {
+  final modalidade = exercicio.modalidade;
+  if (modalidade != null) return TaxonomyLabels.modalidade[modalidade];
+  return exercicio.categoria;
+}
+
+String? _grupoLabel(Exercicio exercicio) {
+  final grupo = exercicio.grupoMuscularPrimario;
+  if (grupo != null) return TaxonomyLabels.grupo[grupo];
+  return exercicio.musculoAlvo;
+}
+
+String? _equipamentoLabel(Exercicio exercicio) {
+  if (exercicio.equipamentos.isNotEmpty) {
+    return exercicio.equipamentos
+        .take(2)
+        .map((e) => TaxonomyLabels.equipamento[e] ?? e.backendName)
+        .join(' / ');
+  }
+  return exercicio.equipamento;
+}
+
+String? _dificuldadeLabel(Exercicio exercicio) {
+  final dificuldade = exercicio.dificuldade;
+  if (dificuldade != null) return TaxonomyLabels.dificuldade[dificuldade];
+  return exercicio.nivel;
 }
 
 String _formatEditorialStatus(String value) {

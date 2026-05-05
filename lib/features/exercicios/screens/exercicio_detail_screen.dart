@@ -4,7 +4,9 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 import 'package:image_picker/image_picker.dart';
+import '../data/enums.dart';
 import '../data/exercicio_repository.dart';
+import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 
@@ -304,10 +306,11 @@ class _ExerciseEssentials extends StatelessWidget {
   Widget build(BuildContext context) {
     final items =
         [
-          (Icons.fitness_center_rounded, exercicio.musculoAlvo),
-          (Icons.category_rounded, exercicio.categoria),
-          (Icons.construction_rounded, exercicio.equipamento),
-          (Icons.trending_up_rounded, exercicio.nivel),
+          (Icons.fitness_center_rounded, _grupoLabel(exercicio)),
+          (Icons.category_rounded, _modalidadeLabel(exercicio)),
+          (Icons.construction_rounded, _equipamentoLabel(exercicio)),
+          (Icons.trending_up_rounded, _dificuldadeLabel(exercicio)),
+          (Icons.route_rounded, _padraoLabel(exercicio)),
         ].where((item) => item.$2?.trim().isNotEmpty == true).toList();
 
     if (items.isEmpty) return const SizedBox.shrink();
@@ -488,18 +491,8 @@ class _TechnicalDataExpansion extends StatelessWidget {
       icon: Icons.tune_rounded,
       title: 'Dados tecnicos',
       children: [
-        if (exercicio.tags?.trim().isNotEmpty == true)
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children:
-                exercicio.tags!
-                    .split(',')
-                    .map((t) => t.trim())
-                    .where((t) => t.isNotEmpty)
-                    .map((t) => _CompactPill(icon: Icons.tag_rounded, label: t))
-                    .toList(),
-          ),
+        if (_taxonomyChips(exercicio).isNotEmpty)
+          Wrap(spacing: 6, runSpacing: 6, children: _taxonomyChips(exercicio)),
         _PrescriptionReadinessPanel(exercicio: exercicio),
         if (exercicio.videoSource?.isNotEmpty == true ||
             exercicio.licenseStatus?.isNotEmpty == true)
@@ -702,6 +695,70 @@ class _ReadinessCheck extends StatelessWidget {
       ),
     );
   }
+}
+
+String? _modalidadeLabel(Exercicio exercicio) {
+  final value = exercicio.modalidade;
+  if (value != null) return TaxonomyLabels.modalidade[value];
+  return exercicio.categoria;
+}
+
+String? _grupoLabel(Exercicio exercicio) {
+  final value = exercicio.grupoMuscularPrimario;
+  if (value != null) return TaxonomyLabels.grupo[value];
+  return exercicio.musculoAlvo;
+}
+
+String? _equipamentoLabel(Exercicio exercicio) {
+  if (exercicio.equipamentos.isNotEmpty) {
+    return exercicio.equipamentos
+        .take(2)
+        .map((e) => TaxonomyLabels.equipamento[e] ?? e.backendName)
+        .join(' / ');
+  }
+  return exercicio.equipamento;
+}
+
+String? _dificuldadeLabel(Exercicio exercicio) {
+  final value = exercicio.dificuldade;
+  if (value != null) return TaxonomyLabels.dificuldade[value];
+  return exercicio.nivel;
+}
+
+String? _padraoLabel(Exercicio exercicio) {
+  final value = exercicio.padraoMovimento;
+  if (value == null) return exercicio.mecanica;
+  return TaxonomyLabels.padrao[value];
+}
+
+List<Widget> _taxonomyChips(Exercicio exercicio) {
+  return [
+    if (_modalidadeLabel(exercicio)?.isNotEmpty == true)
+      _CompactPill(
+        icon: Icons.category_rounded,
+        label: _modalidadeLabel(exercicio)!,
+      ),
+    if (_grupoLabel(exercicio)?.isNotEmpty == true)
+      _CompactPill(
+        icon: Icons.fitness_center_rounded,
+        label: _grupoLabel(exercicio)!,
+      ),
+    if (_padraoLabel(exercicio)?.isNotEmpty == true)
+      _CompactPill(icon: Icons.route_rounded, label: _padraoLabel(exercicio)!),
+    for (final equipamento in exercicio.equipamentos)
+      _CompactPill(
+        icon: Icons.construction_rounded,
+        label:
+            TaxonomyLabels.equipamento[equipamento] ?? equipamento.backendName,
+      ),
+    if (_dificuldadeLabel(exercicio)?.isNotEmpty == true)
+      _CompactPill(
+        icon: Icons.trending_up_rounded,
+        label: _dificuldadeLabel(exercicio)!,
+      ),
+    if (exercicio.unilateral)
+      const _CompactPill(icon: Icons.swap_horiz_rounded, label: 'Unilateral'),
+  ];
 }
 
 Color _trustColor(Exercicio exercicio, Color primary) {
