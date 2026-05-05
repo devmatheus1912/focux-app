@@ -117,7 +117,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     String tipoSelecionado = 'TEXTO';
     bool salvando = false;
 
-    showModalBottomSheet(
+    showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -260,23 +260,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                                     : midiaUrlCtrl.text.trim(),
                                           );
                                           if (ctx.mounted) {
-                                            Navigator.of(ctx).pop();
-                                          }
-                                          await _load();
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Publicação criada com sucesso!',
-                                                ),
-                                              ),
-                                            );
+                                            Navigator.of(ctx).pop(true);
                                           }
                                         } catch (e) {
-                                          setModalState(() => salvando = false);
                                           if (ctx.mounted) {
+                                            setModalState(
+                                              () => salvando = false,
+                                            );
                                             ScaffoldMessenger.of(
                                               ctx,
                                             ).showSnackBar(
@@ -309,10 +299,16 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   ),
                 ),
           ),
-    ).whenComplete(() {
+    ).then((created) async {
       tituloCtrl.dispose();
       conteudoCtrl.dispose();
       midiaUrlCtrl.dispose();
+      if (created != true || !mounted) return;
+      await _load();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Publicação criada com sucesso!')),
+      );
     });
   }
 
