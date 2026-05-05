@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../data/feed_repository.dart';
 
 class FeedCommentsSheet extends StatefulWidget {
@@ -147,6 +148,9 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                           itemCount: _comentarios.length,
                           itemBuilder: (ctx, i) {
                             final c = _comentarios[i];
+                            final fotoUrl = c.alunoFotoUrl?.trim();
+                            final hasFoto =
+                                fotoUrl != null && fotoUrl.isNotEmpty;
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                               child: Row(
@@ -157,11 +161,12 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                                       alpha: 0.12,
                                     ),
                                     foregroundColor: primary,
-                                    child: Text(
-                                      c.alunoNome.isNotEmpty
-                                          ? c.alunoNome[0].toUpperCase()
-                                          : 'A',
-                                    ),
+                                    backgroundImage:
+                                        hasFoto ? NetworkImage(fotoUrl) : null,
+                                    child:
+                                        hasFoto
+                                            ? null
+                                            : Text(fxInitials(c.alunoNome)),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(

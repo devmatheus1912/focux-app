@@ -59,6 +59,7 @@ class FeedComentario {
   final int id;
   final int alunoId;
   final String alunoNome;
+  final String? alunoFotoUrl;
   final String texto;
   final String criadoEm;
 
@@ -66,6 +67,7 @@ class FeedComentario {
     required this.id,
     required this.alunoId,
     required this.alunoNome,
+    this.alunoFotoUrl,
     required this.texto,
     required this.criadoEm,
   });
@@ -74,6 +76,7 @@ class FeedComentario {
     id: json['id'],
     alunoId: json['alunoId'],
     alunoNome: json['alunoNome'],
+    alunoFotoUrl: json['alunoFotoUrl'] ?? json['fotoUrl'],
     texto: json['texto'] ?? json['conteudo'] ?? '',
     criadoEm: json['criadoEm'] ?? '',
   );

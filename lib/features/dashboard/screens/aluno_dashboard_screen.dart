@@ -205,7 +205,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
                     ),
                     _ShortcutBtn(
                       icon: Icons.history,
-                      label: 'Meu\nHistorico',
+                      label: 'Meu\nHistórico',
                       onTap: () => context.push('/checkin/historico'),
                       isDark: isDark,
                       width: btnWidth,
@@ -511,8 +511,8 @@ class _TodayFocusCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             next != null
-                ? 'Seu proximo passo esta pronto: ${next.treinoNome}.'
-                : 'Seu personal ainda nao liberou um treino para hoje.',
+                ? 'Seu próximo passo está pronto: ${next.treinoNome}.'
+                : 'Seu personal ainda não liberou um treino para hoje.',
             style: TextStyle(color: mute, height: 1.5),
           ),
           const SizedBox(height: 16),
@@ -529,7 +529,7 @@ class _TodayFocusCard extends StatelessWidget {
             _PrimaryActionCard(
               title: 'Perfil e acompanhamento',
               subtitle:
-                  'Enquanto o treino nao chega, deixe seu perfil completo para melhorar os proximos ajustes.',
+                  'Enquanto o treino não chega, deixe seu perfil completo para melhorar os próximos ajustes.',
               cta: 'Completar perfil',
               onTap: () => context.push('/aluno/perfil'),
             ),
@@ -668,7 +668,7 @@ class _StudentStatsRow extends StatelessWidget {
             ? aluno.tipoConsultoria!
             : 'Padrao',
       ),
-      ('Proximos', '${treinos.length}'),
+      ('Próximos', '${treinos.length}'),
     ];
 
     return LayoutBuilder(
@@ -729,7 +729,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
             ),
         error:
             (_, __) => Text(
-              'Sua evolucao de performance vai aparecer aqui assim que o historico carregar.',
+              'Sua evolução de performance vai aparecer aqui assim que o histórico carregar.',
               style: TextStyle(color: mute, height: 1.45),
             ),
         data: (historico) {
@@ -764,7 +764,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Evolucao real',
+                          'Evolução real',
                           style: TextStyle(
                             color: ink,
                             fontSize: 17,
@@ -774,7 +774,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           ultimaEvolucao == null
-                              ? 'Registre as series para o app enxergar carga, repeticoes e volume.'
+                              ? 'Registre as séries para o app enxergar carga, repetições e volume.'
                               : ultimaEvolucao.mensagem,
                           style: TextStyle(color: mute, height: 1.45),
                         ),
@@ -788,7 +788,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _MiniMetricCard(
-                      label: 'Ultimo PR',
+                      label: 'Último PR',
                       value:
                           ultimaEvolucao == null
                               ? '--'
@@ -807,7 +807,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _MiniMetricCard(
-                      label: 'Volume mes',
+                      label: 'Volume mês',
                       value: _fmtVolume(volumeMes),
                       isDark: isDark,
                     ),
@@ -914,7 +914,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
   String _labelEvolucao(String tipo) {
     switch (tipo) {
       case 'REPETICOES':
-        return 'Repeticoes';
+        return 'Repetições';
       case 'VOLUME':
         return 'Volume';
       default:
@@ -1057,7 +1057,7 @@ class _ProgressCheckpointCard extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: _MiniMetricCard(
-                          label: 'Ultimo peso',
+                          label: 'Último peso',
                           value:
                               ultima?.peso != null
                                   ? '${ultima!.peso!.toStringAsFixed(1)} kg'
@@ -1068,7 +1068,7 @@ class _ProgressCheckpointCard extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: _MiniMetricCard(
-                          label: 'Variacao',
+                          label: 'Variação',
                           value:
                               diff == null
                                   ? '--'
@@ -1091,8 +1091,8 @@ class _ProgressCheckpointCard extends StatelessWidget {
                     ),
                     child: Text(
                       ultima == null
-                          ? 'Seu historico corporal ainda esta vazio. Registrar uma medida agora melhora os proximos ajustes do treino.'
-                          : 'Ultima atualizacao em ${_formatarData(ultima.data)}${ultima.fotoUrl != null && ultima.fotoUrl!.isNotEmpty ? ' com foto de progresso.' : '.'}',
+                          ? 'Seu histórico corporal ainda está vazio. Registrar uma medida agora melhora os próximos ajustes do treino.'
+                          : 'Última atualização em ${_formatarData(ultima.data)}${ultima.fotoUrl != null && ultima.fotoUrl!.isNotEmpty ? ' com foto de progresso.' : '.'}',
                       style: TextStyle(
                         color: ink,
                         fontSize: 13,
@@ -1356,7 +1356,7 @@ class _NextBestTaskPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          task == null ? 'Tudo em dia' : 'Proximo melhor passo',
+          task == null ? 'Tudo em dia' : 'Próximo melhor passo',
           style: TextStyle(
             color: mute,
             fontSize: 11.5,
@@ -2060,7 +2060,10 @@ class _ShortcutBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final cardBg =
+        isDark
+            ? BrandPalette.soft(primary, dark: true).withValues(alpha: 0.18)
+            : BrandPalette.softer(primary);
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
 
     return SizedBox(
@@ -2076,19 +2079,43 @@ class _ShortcutBtn extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                color:
+                    isDark
+                        ? BrandPalette.accent(primary).withValues(alpha: 0.32)
+                        : primary.withValues(alpha: 0.18),
                 width: 1,
               ),
+              boxShadow:
+                  isDark
+                      ? null
+                      : [
+                        BoxShadow(
+                          color: primary.withValues(alpha: 0.08),
+                          blurRadius: 18,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  icon,
-                  size: 18,
-                  color: isDark ? BrandPalette.accent(primary) : primary,
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color:
+                        isDark
+                            ? EagleTokens.darkCardHi
+                            : primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: isDark ? BrandPalette.accent(primary) : primary,
+                  ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 Text(
                   label,
                   style: TextStyle(

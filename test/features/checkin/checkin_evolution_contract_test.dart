@@ -73,9 +73,9 @@ void main() {
       'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
     ).readAsStringSync();
 
-    expect(screen, contains('Evolucao real'));
+    expect(screen, contains('Evolução real'));
     expect(screen, contains('Volume semana'));
-    expect(screen, contains('Volume mes'));
+    expect(screen, contains('Volume mês'));
     expect(screen, contains('evolucoesPerformance'));
   });
 }
