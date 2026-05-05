@@ -30,6 +30,7 @@ class CommandCenterWidget extends ConsumerWidget {
       data: (data) {
         if (data.agendaHoje.isEmpty &&
             data.filaAcoes.isEmpty &&
+            data.alunosScore.isEmpty &&
             data.autonomiaGargalos.isEmpty) {
           return const _IaActionHistory();
         }
@@ -37,6 +38,11 @@ class CommandCenterWidget extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _CommandHeader(total: data.filaAcoes.length),
+            if (data.alunosScore.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              _FocuxRadarSection(scores: data.alunosScore),
+              const SizedBox(height: 16),
+            ],
             if (data.autonomiaGargalos.isNotEmpty) ...[
               const SizedBox(height: 10),
               _AutonomiaGargalosSection(gargalos: data.autonomiaGargalos),
@@ -84,7 +90,8 @@ class _IaActionHistoryState extends ConsumerState<_IaActionHistory> {
       future: repo.getIaCommandActions(status: _status),
       builder: (context, snapshot) {
         final actions = snapshot.data ?? const <FilaAcaoResumo>[];
-        if (snapshot.connectionState == ConnectionState.waiting && actions.isEmpty) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            actions.isEmpty) {
           return const SizedBox.shrink();
         }
         if (actions.isEmpty && _status.isEmpty) {
@@ -100,9 +107,9 @@ class _IaActionHistoryState extends ConsumerState<_IaActionHistory> {
                   child: Text(
                     'Histórico IA',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: primary,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      color: primary,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 DropdownButton<String>(
@@ -112,7 +119,10 @@ class _IaActionHistoryState extends ConsumerState<_IaActionHistory> {
                     DropdownMenuItem(value: '', child: Text('Todas')),
                     DropdownMenuItem(value: 'ABERTO', child: Text('Abertas')),
                     DropdownMenuItem(value: 'ADIADO', child: Text('Adiadas')),
-                    DropdownMenuItem(value: 'CONCLUIDO', child: Text('Concluidas')),
+                    DropdownMenuItem(
+                      value: 'CONCLUIDO',
+                      child: Text('Concluidas'),
+                    ),
                   ],
                   onChanged: (value) => setState(() => _status = value ?? ''),
                 ),
@@ -125,7 +135,9 @@ class _IaActionHistoryState extends ConsumerState<_IaActionHistory> {
                 style: Theme.of(context).textTheme.bodySmall,
               )
             else
-              ...actions.take(6).map((action) => _IaHistoryTile(action: action)),
+              ...actions
+                  .take(6)
+                  .map((action) => _IaHistoryTile(action: action)),
           ],
         );
       },
@@ -173,7 +185,8 @@ class _IaHistoryTile extends ConsumerWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    color:
+                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
                     fontSize: 12,
                     height: 1.25,
                   ),
@@ -208,6 +221,193 @@ class _IaHistoryTile extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _FocuxRadarSection extends StatelessWidget {
+  final List<AlunoScoreResumo> scores;
+
+  const _FocuxRadarSection({required this.scores});
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final topScores = scores.take(5).toList();
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: primary.withValues(alpha: 0.20)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.radar_outlined, color: primary, size: 19),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Radar Focux',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              _Pill(label: '${scores.length} sinais', color: primary),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Fila inteligente por score, risco, ritmo e próxima melhor ação.',
+            style: TextStyle(color: mute, fontSize: 12.5, height: 1.3),
+          ),
+          const SizedBox(height: 12),
+          for (final score in topScores) ...[
+            _AlunoScoreTile(score: score),
+            if (score != topScores.last)
+              Divider(
+                height: 16,
+                color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AlunoScoreTile extends StatelessWidget {
+  final AlunoScoreResumo score;
+
+  const _AlunoScoreTile({required this.score});
+
+  Color _riskColor(String risco, Color primary) {
+    final normalized = risco.toLowerCase();
+    if (normalized.contains('alto')) return EagleTokens.bad;
+    if (normalized.contains('moderado')) return EagleTokens.warn;
+    return primary;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final riskColor = _riskColor(score.risco, primary);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final scoreColor =
+        score.score >= 80
+            ? EagleTokens.good
+            : score.score >= 55
+            ? primary
+            : riskColor;
+
+    final badge = Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: scoreColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Center(
+        child: Text(
+          '${score.score}',
+          style: TextStyle(
+            color: scoreColor,
+            fontSize: 15,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
+    final copy = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          score.alunoNome,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: ink,
+            fontSize: 13.5,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          score.narrativa,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: mute, fontSize: 12.2, height: 1.25),
+        ),
+        const SizedBox(height: 7),
+        Wrap(
+          spacing: 6,
+          runSpacing: 4,
+          children: [
+            _Pill(label: score.prioridade, color: riskColor, filled: true),
+            _Pill(label: score.ritmo, color: primary),
+            _Pill(label: score.risco, color: riskColor),
+            _Pill(label: score.proximaAcao, color: primary),
+          ],
+        ),
+      ],
+    );
+    final action = IconButton.filledTonal(
+      onPressed: () => context.push(score.acaoUrl),
+      icon: const Icon(Icons.arrow_forward_rounded),
+      tooltip: 'Abrir aluno',
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        if (compact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  badge,
+                  const SizedBox(width: 10),
+                  Expanded(child: copy),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 150),
+                  child: action,
+                ),
+              ),
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            badge,
+            const SizedBox(width: 10),
+            Expanded(child: copy),
+            const SizedBox(width: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 52),
+              child: action,
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -346,7 +546,8 @@ class _AutonomiaGargaloTile extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final openClicks = gargalo.cliques - gargalo.concluidos;
-    final pendingLabel = openClicks == 1 ? '1 clique aberto' : '$openClicks cliques abertos';
+    final pendingLabel =
+        openClicks == 1 ? '1 clique aberto' : '$openClicks cliques abertos';
 
     final icon = Container(
       width: 34,
@@ -400,10 +601,7 @@ class _AutonomiaGargaloTile extends StatelessWidget {
           children: [
             _Pill(label: pendingLabel, color: EagleTokens.warn),
             _Pill(label: gargalo.prioridade, color: primary),
-            _Pill(
-              label: _actionLabel(gargalo.ultimaAcao),
-              color: primary,
-            ),
+            _Pill(label: _actionLabel(gargalo.ultimaAcao), color: primary),
             _Pill(label: _dateLabel(gargalo.ultimoEventoEm), color: mute),
           ],
         ),
@@ -462,9 +660,12 @@ class _AutonomiaGargaloTile extends StatelessWidget {
 
 String _suggestedAction(String taskId) {
   return switch (taskId) {
-    'perfil-base' || 'foto-dados' => 'Peca os dados que faltam e explique por que isso melhora o acompanhamento.',
-    'medida-recente' => 'Convide o aluno a registrar medida ou envie um lembrete com prazo curto.',
-    'chat-contexto' => 'Abra conversa com uma pergunta objetiva para destravar o contexto.',
+    'perfil-base' || 'foto-dados' =>
+      'Peca os dados que faltam e explique por que isso melhora o acompanhamento.',
+    'medida-recente' =>
+      'Convide o aluno a registrar medida ou envie um lembrete com prazo curto.',
+    'chat-contexto' =>
+      'Abra conversa com uma pergunta objetiva para destravar o contexto.',
     'agenda-semana' => 'Confirme o melhor horario e reduza atrito de agenda.',
     'financeiro' => 'Oriente regularizacao antes de bloquear acesso.',
     'treino-semana' => 'Confirme treino ativo e remova barreira para executar.',

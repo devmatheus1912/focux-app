@@ -1,6 +1,7 @@
 class CommandCenterData {
   final List<AgendamentoResumo> agendaHoje;
   final List<AlertaResumo> alunosEmRisco;
+  final List<AlunoScoreResumo> alunosScore;
   final List<FilaAcaoResumo> filaAcoes;
   final List<MensalidadeResumo> cobrancasPendentes;
   final List<AutonomiaGargaloResumo> autonomiaGargalos;
@@ -8,6 +9,7 @@ class CommandCenterData {
   CommandCenterData({
     required this.agendaHoje,
     required this.alunosEmRisco,
+    required this.alunosScore,
     required this.filaAcoes,
     required this.cobrancasPendentes,
     required this.autonomiaGargalos,
@@ -25,6 +27,11 @@ class CommandCenterData {
       alunosEmRisco:
           (json['alunosEmRisco'] as List?)
               ?.map((e) => AlertaResumo.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      alunosScore:
+          (json['alunosScore'] as List?)
+              ?.map((e) => AlunoScoreResumo.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       filaAcoes:
@@ -49,6 +56,49 @@ class CommandCenterData {
           [],
     );
   }
+}
+
+class AlunoScoreResumo {
+  final int alunoId;
+  final String alunoNome;
+  final int score;
+  final String ritmo;
+  final String risco;
+  final String proximaAcao;
+  final String narrativa;
+  final String objetivo;
+  final String acaoUrl;
+  final String prioridade;
+  final bool iaSugerida;
+
+  AlunoScoreResumo({
+    required this.alunoId,
+    required this.alunoNome,
+    required this.score,
+    required this.ritmo,
+    required this.risco,
+    required this.proximaAcao,
+    required this.narrativa,
+    required this.objetivo,
+    required this.acaoUrl,
+    required this.prioridade,
+    required this.iaSugerida,
+  });
+
+  factory AlunoScoreResumo.fromJson(Map<String, dynamic> json) =>
+      AlunoScoreResumo(
+        alunoId: (json['alunoId'] as num?)?.toInt() ?? 0,
+        alunoNome: json['alunoNome'] as String? ?? 'Aluno',
+        score: (json['score'] as num?)?.toInt() ?? 0,
+        ritmo: json['ritmo'] as String? ?? 'Ritmo em leitura',
+        risco: json['risco'] as String? ?? 'Risco baixo',
+        proximaAcao: json['proximaAcao'] as String? ?? 'Abrir aluno',
+        narrativa: json['narrativa'] as String? ?? '',
+        objetivo: json['objetivo'] as String? ?? 'Objetivo indefinido',
+        acaoUrl: json['acaoUrl'] as String? ?? '/alunos',
+        prioridade: json['prioridade'] as String? ?? 'P2',
+        iaSugerida: json['iaSugerida'] as bool? ?? false,
+      );
 }
 
 class AutonomiaGargaloResumo {
