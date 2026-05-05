@@ -6,6 +6,8 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../features/alunos/data/aluno_repository.dart';
+import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/chat_repository.dart';
 
@@ -38,6 +40,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
   final TextEditingController _searchCtrl = TextEditingController();
   bool _isSearching = false;
   List<ChatMsg>? _searchResults;
+  final Set<int> _selectedAlunoIds = <int>{};
 
   @override
   void initState() {
@@ -68,11 +71,94 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
   void _toggleSearch() {
     setState(() {
       _isSearching = !_isSearching;
+      _selectedAlunoIds.clear();
       if (!_isSearching) {
         _searchCtrl.clear();
         _searchResults = null;
       }
     });
+  }
+
+  bool get _selectionActive => _selectedAlunoIds.isNotEmpty;
+
+  void _toggleSelection(int alunoId) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      if (_selectedAlunoIds.contains(alunoId)) {
+        _selectedAlunoIds.remove(alunoId);
+      } else {
+        _selectedAlunoIds.add(alunoId);
+      }
+    });
+  }
+
+  void _clearSelection() {
+    setState(() => _selectedAlunoIds.clear());
+  }
+
+  Future<void> _deleteSelectedConversations() async {
+    final ids = _selectedAlunoIds.toList();
+    if (ids.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+        return AlertDialog(
+          title: Text(
+            ids.length == 1 ? 'Excluir mensagens?' : 'Excluir conversas?',
+            style: TextStyle(color: ink),
+          ),
+          content: Text(
+            ids.length == 1
+                ? 'As mensagens desta conversa serao limpas da sua caixa.'
+                : 'As mensagens das ${ids.length} conversas selecionadas serao limpas da sua caixa.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Excluir'),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirm != true) return;
+
+    HapticFeedback.mediumImpact();
+    try {
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      for (final alunoId in ids) {
+        await repo.conversationAction(alunoId, 'clear');
+      }
+      _clearSelection();
+      ref.invalidate(chatInboxProvider);
+      ref.invalidate(chatInboxUnreadProvider);
+      ref.invalidate(chatInboxArchivedProvider);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ids.length == 1 ? 'Mensagens excluidas' : 'Conversas excluidas',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro ao excluir mensagens'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Future<void> _conversationAction(int alunoId, String action) async {
@@ -124,16 +210,37 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
 
     return Scaffold(
       backgroundColor: bg,
+      floatingActionButton:
+          _isSearching || _selectionActive
+              ? null
+              : FloatingActionButton(
+                tooltip: 'Nova mensagem',
+                onPressed: _showAlunoPicker,
+                child: const Icon(Icons.edit_outlined),
+              ),
       appBar: AppBar(
         backgroundColor: bg,
         elevation: 0,
         foregroundColor: ink,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: ink),
-          onPressed: () => safePopOrGo(context, '/dashboard/personal'),
-        ),
+        automaticallyImplyLeading: !_selectionActive,
+        leading:
+            _selectionActive
+                ? IconButton(
+                  icon: Icon(Icons.close_rounded, color: ink),
+                  onPressed: _clearSelection,
+                )
+                : IconButton(
+                  icon: Icon(Icons.arrow_back_rounded, color: ink),
+                  onPressed: () => safePopOrGo(context, '/dashboard/personal'),
+                ),
         title:
-            _isSearching
+            _selectionActive
+                ? Text(
+                  _selectedAlunoIds.isEmpty
+                      ? 'Selecione mensagens'
+                      : '${_selectedAlunoIds.length} selecionada(s)',
+                )
+                : _isSearching
                 ? TextField(
                   controller: _searchCtrl,
                   autofocus: true,
@@ -147,13 +254,28 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                 )
                 : const Text('Mensagens'),
         actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search, color: ink),
-            onPressed: _toggleSearch,
-          ),
+          if (_selectionActive)
+            IconButton(
+              tooltip: 'Excluir mensagens',
+              icon: const Icon(Icons.delete_outline_rounded),
+              color:
+                  _selectedAlunoIds.isEmpty
+                      ? mute.withValues(alpha: 0.45)
+                      : EagleTokens.bad,
+              onPressed:
+                  _selectedAlunoIds.isEmpty
+                      ? null
+                      : _deleteSelectedConversations,
+            )
+          else ...[
+            IconButton(
+              icon: Icon(_isSearching ? Icons.close : Icons.search, color: ink),
+              onPressed: _toggleSearch,
+            ),
+          ],
         ],
         bottom:
-            _isSearching
+            _isSearching || _selectionActive
                 ? null
                 : TabBar(
                   controller: _tabCtrl,
@@ -254,6 +376,27 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     );
   }
 
+  void _showAlunoPicker() {
+    HapticFeedback.selectionClick();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark
+              ? EagleTokens.darkCard
+              : EagleTokens.paper,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => _AlunoPickerSheet(
+        onSelect: (aluno) {
+          Navigator.pop(ctx);
+          context.push('/alunos/${aluno.id}/chat', extra: aluno.nome);
+        },
+      ),
+    );
+  }
+
   Widget _buildInboxTab(
     AsyncValue<List<ChatInboxItem>> async,
     FutureProvider<List<ChatInboxItem>> provider,
@@ -283,7 +426,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
             message:
                 isArchived
                     ? 'Arraste conversas para a esquerda para arquivar.'
-                    : 'Abra o perfil de um aluno para iniciar o primeiro chat.',
+                    : 'Toque no botao de escrever para escolher um aluno.',
             color: mute,
           );
         }
@@ -294,21 +437,26 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
             itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder:
-                (context, index) => Dismissible(
-                  key: Key('inbox-${items[index].alunoId}'),
-                  direction: DismissDirection.horizontal,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              final selected = _selectedAlunoIds.contains(item.alunoId);
+              return Dismissible(
+                  key: Key('inbox-${item.alunoId}'),
+                  direction:
+                      _selectionActive
+                          ? DismissDirection.none
+                          : DismissDirection.horizontal,
                   confirmDismiss: (direction) async {
                     if (direction == DismissDirection.endToStart) {
                       // Swipe left → archive/unarchive
                       await _conversationAction(
-                        items[index].alunoId,
+                        item.alunoId,
                         isArchived ? 'unarchive' : 'archive',
                       );
                       return false;
                     } else {
                       // Swipe right → pin/unpin
-                      await _conversationAction(items[index].alunoId, 'pin');
+                      await _conversationAction(item.alunoId, 'pin');
                       return false;
                     }
                   },
@@ -334,115 +482,258 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                     ),
                   ),
                   child: _InboxTile(
-                    item: items[index],
+                    item: item,
                     isDark: isDark,
-                    onTap:
-                        () => context.push(
-                          '/alunos/${items[index].alunoId}/chat',
-                          extra: items[index].alunoNome,
-                        ),
-                    onLongPress: () => _showConversationActions(items[index]),
+                    selected: selected,
+                    selecting: _selectionActive,
+                    onTap: () {
+                      if (_selectionActive) {
+                        _toggleSelection(item.alunoId);
+                        return;
+                      }
+                      context.push(
+                        '/alunos/${item.alunoId}/chat',
+                        extra: item.alunoNome,
+                      );
+                    },
+                    onLongPress: () => _toggleSelection(item.alunoId),
                   ),
-                ),
+                );
+            },
           ),
         );
       },
     );
   }
 
-  void _showConversationActions(ChatInboxItem item) {
+}
+
+class _AlunoPickerSheet extends ConsumerStatefulWidget {
+  const _AlunoPickerSheet({required this.onSelect});
+
+  final ValueChanged<Aluno> onSelect;
+
+  @override
+  ConsumerState<_AlunoPickerSheet> createState() => _AlunoPickerSheetState();
+}
+
+class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
+  final _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDark ? EagleTokens.darkCard : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder:
-          (ctx) => SafeArea(
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+    final async = ref.watch(alunosProvider);
+
+    return SafeArea(
+      top: false,
+      child: AnimatedPadding(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        padding: EdgeInsets.only(bottom: bottom),
+        child: SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.72,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 8),
                 Container(
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
                     color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  item.alunoNome,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Nova mensagem',
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.close_rounded, color: mute),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _searchCtrl,
+                  autofocus: true,
+                  onChanged: (v) => setState(() => _query = v.trim()),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar aluno',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    filled: true,
+                    fillColor:
+                        isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                _ActionTile(
-                  icon: Icons.push_pin,
-                  label: 'Fixar conversa',
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _conversationAction(item.alunoId, 'pin');
-                  },
+                const SizedBox(height: 12),
+                Expanded(
+                  child: async.when(
+                    loading:
+                        () => Center(
+                          child: CircularProgressIndicator(color: primary),
+                        ),
+                    error:
+                        (_, __) => Center(
+                          child: Text(
+                            'Nao foi possivel carregar alunos.',
+                            style: TextStyle(color: mute),
+                          ),
+                        ),
+                    data: (alunos) {
+                      final q = _query.toLowerCase();
+                      final filtered =
+                          q.isEmpty
+                              ? alunos
+                              : alunos
+                                  .where(
+                                    (a) =>
+                                        a.nome.toLowerCase().contains(q) ||
+                                        a.email.toLowerCase().contains(q),
+                                  )
+                                  .toList();
+                      if (filtered.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'Nenhum aluno encontrado',
+                            style: TextStyle(color: mute),
+                          ),
+                        );
+                      }
+                      return ListView.separated(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 8),
+                        itemBuilder: (_, index) {
+                          final aluno = filtered[index];
+                          return _AlunoContactTile(
+                            aluno: aluno,
+                            isDark: isDark,
+                            primary: primary,
+                            onTap: () => widget.onSelect(aluno),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
-                _ActionTile(
-                  icon: Icons.archive_outlined,
-                  label: 'Arquivar',
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _conversationAction(item.alunoId, 'archive');
-                  },
-                ),
-                _ActionTile(
-                  icon: Icons.notifications_off_outlined,
-                  label: 'Silenciar',
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _conversationAction(item.alunoId, 'mute');
-                  },
-                ),
-                _ActionTile(
-                  icon: Icons.delete_sweep_outlined,
-                  label: 'Limpar conversa',
-                  color: EagleTokens.bad,
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _conversationAction(item.alunoId, 'clear');
-                  },
-                ),
-                const SizedBox(height: 16),
               ],
             ),
           ),
+        ),
+      ),
     );
   }
 }
 
-class _ActionTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color? color;
-  final VoidCallback onTap;
-  const _ActionTile({
-    required this.icon,
-    required this.label,
-    this.color,
+class _AlunoContactTile extends StatelessWidget {
+  const _AlunoContactTile({
+    required this.aluno,
+    required this.isDark,
+    required this.primary,
     required this.onTap,
   });
 
+  final Aluno aluno;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final c = color ?? (isDark ? EagleTokens.darkInk : EagleTokens.ink);
-    return ListTile(
-      leading: Icon(icon, color: c, size: 22),
-      title: Text(label, style: TextStyle(color: c, fontSize: 15)),
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final bg = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final soft = BrandPalette.soft(primary, dark: isDark);
+
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: line),
+        ),
+        child: Row(
+          children: [
+            aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty
+                ? CircleAvatar(
+                  radius: 22,
+                  backgroundImage: NetworkImage(aluno.fotoUrl!),
+                )
+                : CircleAvatar(
+                  radius: 22,
+                  backgroundColor: soft,
+                  child: Text(
+                    fxInitials(aluno.nome),
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    aluno.nome,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    aluno.email.isNotEmpty ? aluno.email : 'Aluno',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: mute, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chat_bubble_outline_rounded, color: primary, size: 20),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -563,12 +854,16 @@ class _InboxState extends StatelessWidget {
 class _InboxTile extends StatelessWidget {
   final ChatInboxItem item;
   final bool isDark;
+  final bool selected;
+  final bool selecting;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
   const _InboxTile({
     required this.item,
     required this.isDark,
+    this.selected = false,
+    this.selecting = false,
     required this.onTap,
     this.onLongPress,
   });
@@ -589,12 +884,36 @@ class _InboxTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
-          color: cardBg,
+          color: selected ? primary.withValues(alpha: 0.10) : cardBg,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: line),
+          border: Border.all(color: selected ? primary : line, width: selected ? 1.4 : 1),
         ),
         child: Row(
           children: [
+            if (selecting) ...[
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: selected ? primary : Colors.transparent,
+                  border: Border.all(
+                    color: selected ? primary : mute.withValues(alpha: 0.55),
+                    width: 1.5,
+                  ),
+                ),
+                child:
+                    selected
+                        ? const Icon(
+                          Icons.check_rounded,
+                          size: 15,
+                          color: Colors.white,
+                        )
+                        : null,
+              ),
+              const SizedBox(width: 10),
+            ],
             // Avatar
             item.fotoUrl != null && item.fotoUrl!.isNotEmpty
                 ? CircleAvatar(

@@ -100,7 +100,7 @@ class _FxMarkTile extends StatelessWidget {
         gradient: const RadialGradient(
           center: Alignment(-0.3, -0.5),
           radius: 1.0,
-          colors: [Color(0xFF1A3A7A), Color(0xFF070E2A)],
+          colors: [Color(0xFF122E65), Color(0xFF050B20)],
           stops: [0.0, 1.0],
         ),
         boxShadow: [
@@ -123,7 +123,7 @@ class _FxMarkTile extends StatelessWidget {
         shaderCallback: (Rect bounds) => const RadialGradient(
           center: Alignment(-0.3, -0.5),
           radius: 1.0,
-          colors: [Color(0xFF1A3A7A), Color(0xFF070E2A)],
+          colors: [Color(0xFF122E65), Color(0xFF050B20)],
           stops: [0.0, 1.0],
         ).createShader(bounds),
         blendMode: BlendMode.screen,

@@ -142,10 +142,8 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       );
       final perfil = PerfilPersonal.fromJson(r.data as Map<String, dynamic>);
       if (!mounted) return;
-      if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
-        final hex = perfil.corPrimaria!.replaceFirst('#', '0xFF');
-        ref.read(primaryColorProvider.notifier).state = Color(int.parse(hex));
-      }
+      ref.read(primaryColorProvider.notifier).state =
+          _safePrimaryColor(perfil.corPrimaria);
       if (perfil.logoUrl != null && perfil.logoUrl!.isNotEmpty) {
         ref.read(logoUrlProvider.notifier).state = perfil.logoUrl;
       }
@@ -169,10 +167,8 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       final data = response.data as Map<String, dynamic>;
       if (!mounted) return;
       final corPrimaria = data['corPrimaria'] as String?;
-      if (corPrimaria != null && corPrimaria.length == 7) {
-        final hex = corPrimaria.replaceFirst('#', '0xFF');
-        ref.read(primaryColorProvider.notifier).state = Color(int.parse(hex));
-      }
+      ref.read(primaryColorProvider.notifier).state =
+          _safePrimaryColor(corPrimaria);
       final logoUrl = data['logoUrl'] as String?;
       if (logoUrl != null && logoUrl.isNotEmpty) {
         ref.read(logoUrlProvider.notifier).state = logoUrl;
@@ -184,6 +180,20 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
     ref.read(primaryColorProvider.notifier).state = EagleTokens.brand;
     ref.read(logoUrlProvider.notifier).state = null;
     ref.read(personalNameProvider.notifier).state = null;
+  }
+
+  Color _safePrimaryColor(String? raw) {
+    if (raw == null || raw.length != 7 || !raw.startsWith('#')) {
+      return EagleTokens.brand;
+    }
+    final parsed = int.tryParse(raw.replaceFirst('#', '0xFF'));
+    if (parsed == null) return EagleTokens.brand;
+    final color = Color(parsed);
+    final hsl = HSLColor.fromColor(color);
+    if (hsl.lightness > 0.86 || hsl.saturation < 0.12) {
+      return EagleTokens.brand;
+    }
+    return color;
   }
 
   @override
@@ -221,9 +231,15 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       // quebrar telas densas como dashboard/treinos.
       builder: (context, child) {
         final mq = MediaQuery.of(context);
+        final width = mq.size.width;
+        final isPhone =
+            !kIsWeb &&
+            (defaultTargetPlatform == TargetPlatform.android ||
+                defaultTargetPlatform == TargetPlatform.iOS);
+        final maxScale = isPhone && width <= 390 ? 1.05 : 1.25;
         final scaler = mq.textScaler.clamp(
           minScaleFactor: 0.85,
-          maxScaleFactor: 1.6,
+          maxScaleFactor: maxScale,
         );
         return MediaQuery(
           data: mq.copyWith(textScaler: scaler),

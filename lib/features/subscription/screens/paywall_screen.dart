@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
-import '../../../features/planos/data/planos_repository.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
 import '../models/subscription_plan.dart';
 import '../services/iap_service.dart';
@@ -24,7 +21,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   bool _submitting = false;
   bool _restoringPurchases = false;
   late final List<Map<String, dynamic>> _planos;
-  int _selected = 1;
+  int _selected = 2;
 
   @override
   void initState() {
@@ -53,7 +50,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         'id': 1,
         'nome': 'PREMIUM',
         'preco': '79,00',
-        'trial': 5,
+        'trial': null,
         'cor': null,
         'tag': 'MAIS POPULAR',
         'sub': 'Para consultores sérios',
@@ -71,7 +68,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         'id': 2,
         'nome': 'ENTERPRISE',
         'preco': '149,90',
-        'trial': 5,
+        'trial': 7,
         'cor': const Color(0xFFC49A2A),
         'tag': 'ESCALA TOTAL',
         'sub': 'Para quem quer crescer',
@@ -99,13 +96,21 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
   Future<void> _handlePrimaryAction() async {
     final perfil = ref.read(perfilProvider).valueOrNull;
-    final repo = PlanosRepository(ref.read(apiClientProvider));
     final selectedPlan = _planos[_selected]['plan'] as SubscriptionPlan;
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
     final trialUsed = perfil?.trialUsed ?? false;
+    final trialActive =
+        perfil?.trialEndsAt != null &&
+        perfil!.trialEndsAt!.isAfter(DateTime.now());
+    final trialOfferAvailable =
+        selectedPlan == SubscriptionPlan.ENTERPRISE &&
+        !trialUsed &&
+        !trialActive;
+    final blocksBecauseCurrent =
+        selectedPlan == currentPlan && !trialOfferAvailable;
 
     if (selectedPlan == SubscriptionPlan.FREE ||
-        selectedPlan == currentPlan ||
+        blocksBecauseCurrent ||
         _submitting) {
       return;
     }
@@ -124,37 +129,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       return;
     }
 
-    if (!trialUsed) {
-      setState(() => _submitting = true);
-      try {
-        await repo.startTrial(
-          payload:
-              buildLocalSubscriptionMetadata(
-                productId: 'focux_enterprise_trial',
-              ).toTrialPayload(),
-        );
-        ref.invalidate(perfilProvider);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Trial Enterprise ativado por 5 dias.')),
-        );
-        Navigator.of(context).pop();
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
-      } finally {
-        if (mounted) setState(() => _submitting = false);
-      }
-      return;
-    }
-
     if (!mounted) return;
+    setState(() => _submitting = true);
     await context.push(
       '/assinatura',
       extra: SubscriptionPlan.ENTERPRISE.apiName,
     );
+    if (mounted) setState(() => _submitting = false);
   }
 
   Future<void> _restorePurchases() async {
@@ -221,27 +202,29 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final perfil = ref.watch(perfilProvider).valueOrNull;
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
     final trialUsed = perfil?.trialUsed ?? false;
+    final trialActive =
+        perfil?.trialEndsAt != null &&
+        perfil!.trialEndsAt!.isAfter(DateTime.now());
 
-    final currentIndex = _planos.indexWhere(
-      (item) => item['plan'] == currentPlan,
-    );
-    if (currentIndex >= 0 && !_submitting) {
-      _selected = currentIndex;
-    }
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final brand = Theme.of(context).colorScheme.primary;
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark ||
+        Theme.of(context).brightness == Brightness.light;
+    const bg = Color(0xFF071126);
+    const cardBg = Color(0xFF111A2F);
+    const ink = Colors.white;
+    const mute = Color(0xFFB9C4D8);
+    const line = Color(0x263B82F6);
+    const brand = Color(0xFF4D78FF);
     final brandDeep = BrandPalette.deep(brand);
 
     final pl = _planos[_selected];
     final selectedPlan = pl['plan'] as SubscriptionPlan;
     final plCor = _planAccent(selectedPlan, brand, isDark);
-    final isCurrentPlan = selectedPlan == currentPlan;
+    final trialOfferAvailable =
+        selectedPlan == SubscriptionPlan.ENTERPRISE &&
+        !trialUsed &&
+        !trialActive;
+    final isCurrentPlan = selectedPlan == currentPlan && !trialOfferAvailable;
 
     String ctaLabel;
     if (selectedPlan == SubscriptionPlan.FREE) {
@@ -251,7 +234,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     } else if (selectedPlan == SubscriptionPlan.PREMIUM) {
       ctaLabel = 'Assinar Premium';
     } else if (!trialUsed) {
-      ctaLabel = 'Começar 5 dias grátis';
+      ctaLabel = 'Testar 7 dias grátis';
     } else {
       ctaLabel = 'Assinar Enterprise';
     }
@@ -262,47 +245,183 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         backgroundColor: bg,
         elevation: 0,
         iconTheme: IconThemeData(color: ink),
+        leading: IconButton(
+          tooltip: 'Fechar',
+          icon: const Icon(Icons.close_rounded),
+          onPressed: () => context.go('/dashboard/personal'),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(14, 6, 14, 10),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: bg.withValues(alpha: 0.96),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, -8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (trialOfferAvailable) ...[
+                Text(
+                  'Cancele antes dos 7 dias. Nada sera cobrado no cartao.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 6),
+              ],
+              if (selectedPlan == SubscriptionPlan.FREE || isCurrentPlan)
+                Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color:
+                        isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : EagleTokens.lineSoft,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: line),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    isCurrentPlan ? 'Plano atual' : 'Plano gratuito',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: mute,
+                    ),
+                  ),
+                )
+              else
+                InkWell(
+                  onTap: _submitting ? null : _handlePrimaryAction,
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      gradient:
+                          selectedPlan == SubscriptionPlan.ENTERPRISE
+                              ? const LinearGradient(
+                                colors: [Color(0xFFC49A2A), Color(0xFF7A5C0A)],
+                              )
+                              : LinearGradient(colors: [brand, brandDeep]),
+                      boxShadow: [
+                        BoxShadow(
+                          color: plCor.withValues(alpha: 0.35),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child:
+                        _submitting
+                            ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  selectedPlan == SubscriptionPlan.ENTERPRISE &&
+                                          !trialUsed
+                                      ? Icons.card_giftcard_rounded
+                                      : Icons.star_border,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  selectedPlan == SubscriptionPlan.ENTERPRISE &&
+                                          !trialUsed
+                                      ? 'Testar 7 dias grátis'
+                                      : ctaLabel,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 120),
+        padding: const EdgeInsets.only(bottom: 126),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(22, 10, 22, 20),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Center(
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white24),
+                      ),
+                      child: const Icon(
+                        Icons.workspace_premium_rounded,
+                        color: Color(0xFFFFD76A),
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   Text(
-                    'Evolua seu plano',
+                    'TRIAL ENTERPRISE',
                     style: TextStyle(
-                      fontSize: 11,
-                      color: brand,
+                      fontSize: 10,
+                      color: const Color(0xFFFFD76A),
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.0,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 5),
                   Text(
-                    'Escolha o plano\nideal para você',
+                    'Desbloqueie o Focux completo',
                     style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
                       color: ink,
-                      letterSpacing: -0.5,
-                      height: 1.15,
+                      letterSpacing: 0,
+                      height: 1.12,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
-                    '5 dias grátis e cancelamento quando quiser',
-                    style: TextStyle(fontSize: 14, color: mute, height: 1.5),
+                    'Teste alunos ilimitados, IA completa, landing page, marca própria e automações antes de pagar.',
+                    style: TextStyle(fontSize: 13, color: mute, height: 1.45),
                   ),
                 ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
               child: Row(
                 children:
                     _planos.map((p) {
@@ -318,7 +437,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                               () => setState(() => _selected = p['id'] as int),
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 4),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                             decoration: BoxDecoration(
                               color:
                                   isSelected
@@ -345,7 +464,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                 Text(
                                   p['nome'] as String,
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w700,
                                     color: isSelected ? Colors.white : ink,
                                     letterSpacing: 0.4,
@@ -357,7 +476,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                       ? 'R\$ ${p['preco']}'
                                       : 'Grátis',
                                   style: TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 10,
                                     color:
                                         isSelected
                                             ? Colors.white.withValues(
@@ -375,10 +494,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
+                  borderRadius: BorderRadius.circular(22),
                   border: Border.all(color: plCor, width: 2),
                   boxShadow: [
                     BoxShadow(
@@ -393,10 +512,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                       decoration: BoxDecoration(
                         borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(26),
+                          top: Radius.circular(20),
                         ),
                         color:
                             pl['id'] == 0
@@ -428,7 +547,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                 opacity: 0.08,
                                 child: Icon(
                                   Icons.star,
-                                  size: 160,
+                                  size: 118,
                                   color: Colors.white,
                                 ),
                               ),
@@ -442,7 +561,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                     horizontal: 10,
                                     vertical: 4,
                                   ),
-                                  margin: const EdgeInsets.only(bottom: 12),
+                                  margin: const EdgeInsets.only(bottom: 10),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(999),
@@ -471,17 +590,17 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                               Text(
                                 'Plano ${pl['nome']}',
                                 style: TextStyle(
-                                  fontSize: 22,
+                                  fontSize: 19,
                                   fontWeight: FontWeight.w700,
                                   color: pl['id'] > 0 ? Colors.white : ink,
-                                  letterSpacing: -0.5,
+                                  letterSpacing: 0,
                                 ),
                               ),
                               const SizedBox(height: 3),
                               Text(
                                 pl['sub'] as String,
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: 12,
                                   color:
                                       pl['id'] > 0
                                           ? Colors.white.withValues(alpha: 0.7)
@@ -490,7 +609,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                               ),
                               if (pl['preco'] != null)
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 16),
+                                  padding: const EdgeInsets.only(top: 12),
                                   child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.baseline,
@@ -499,10 +618,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                       Text(
                                         'R\$ ${pl['preco']}',
                                         style: const TextStyle(
-                                          fontSize: 44,
+                                          fontSize: 36,
                                           fontWeight: FontWeight.w700,
                                           color: Colors.white,
-                                          letterSpacing: -1.0,
+                                          letterSpacing: 0,
                                           height: 1.0,
                                         ),
                                       ),
@@ -510,7 +629,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                       Text(
                                         '/mês',
                                         style: TextStyle(
-                                          fontSize: 13,
+                                          fontSize: 12,
                                           color: Colors.white.withValues(
                                             alpha: 0.6,
                                           ),
@@ -521,7 +640,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                 ),
                               if (pl['trial'] != null)
                                 Container(
-                                  margin: const EdgeInsets.only(top: 10),
+                                  margin: const EdgeInsets.only(top: 8),
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 10,
                                     vertical: 5,
@@ -556,10 +675,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
                       decoration: const BoxDecoration(
                         borderRadius: BorderRadius.vertical(
-                          bottom: Radius.circular(26),
+                          bottom: Radius.circular(20),
                         ),
                       ),
                       child: Column(
@@ -571,7 +690,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                   final f = entry.value as Map<String, dynamic>;
                                   final isOk = f['ok'] as bool;
                                   return Container(
-                                    height: 52,
+                                    height: 40,
                                     margin: const EdgeInsets.symmetric(
                                       vertical: 2,
                                     ),
@@ -596,15 +715,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                           isOk
                                               ? Icons.check_circle
                                               : Icons.cancel,
-                                          size: 18,
+                                          size: 16,
                                           color: isOk ? EagleTokens.good : mute,
                                         ),
-                                        const SizedBox(width: 12),
+                                        const SizedBox(width: 10),
                                         Expanded(
                                           child: Text(
                                             f['label'] as String,
                                             style: TextStyle(
-                                              fontSize: 13,
+                                              fontSize: 12,
                                               color: isOk ? ink : mute,
                                               fontWeight: FontWeight.w500,
                                             ),
@@ -622,101 +741,59 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (selectedPlan == SubscriptionPlan.FREE || isCurrentPlan)
+                  if (selectedPlan != SubscriptionPlan.FREE)
                     Container(
-                      height: 52,
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color:
-                            isDark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : EagleTokens.lineSoft,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: line),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        isCurrentPlan ? 'Plano atual' : 'Plano gratuito',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: mute,
+                            selectedPlan == SubscriptionPlan.ENTERPRISE &&
+                                    !trialUsed
+                                ? const Color(0xFF112D23)
+                                : EagleTokens.darkCardHi,
+                        border: Border.all(
+                          color:
+                              selectedPlan == SubscriptionPlan.ENTERPRISE &&
+                                      !trialUsed
+                                  ? const Color(0xFF2E8B57)
+                                  : line,
                         ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    )
-                  else
-                    InkWell(
-                      onTap: _submitting ? null : _handlePrimaryAction,
-                      child: Container(
-                        height: 52,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          gradient:
-                              selectedPlan == SubscriptionPlan.ENTERPRISE
-                                  ? const LinearGradient(
-                                    colors: [
-                                      Color(0xFFC49A2A),
-                                      Color(0xFF7A5C0A),
-                                    ],
-                                  )
-                                  : LinearGradient(colors: [brand, brandDeep]),
-                          boxShadow: [
-                            BoxShadow(
-                              color: plCor.withValues(alpha: 0.4),
-                              blurRadius: 20,
-                              offset: const Offset(0, 6),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.verified_user_outlined,
+                            size: 17,
+                            color:
+                                selectedPlan == SubscriptionPlan.ENTERPRISE &&
+                                        !trialUsed
+                                    ? EagleTokens.good
+                                    : mute,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              selectedPlan == SubscriptionPlan.ENTERPRISE &&
+                                      !trialUsed
+                                  ? 'Teste por 7 dias. A loja pede cartao para ativar, mas voce pode cancelar antes do fim do periodo e nao tera cobranca.'
+                                  : 'Compra gerenciada pela loja do dispositivo.',
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                color: Color(0xFFE8FFF0),
+                                height: 1.35,
+                              ),
                             ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child:
-                            _submitting
-                                ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                                : Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.star_border,
-                                      color: Colors.white,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      ctaLabel,
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                      ),
-                    ),
-                  if (selectedPlan != SubscriptionPlan.FREE)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        selectedPlan == SubscriptionPlan.ENTERPRISE &&
-                                !trialUsed
-                            ? 'Após o trial, a assinatura mensal passa a valer normalmente.'
-                            : 'Compra gerenciada pela loja do dispositivo.',
-                        style: TextStyle(fontSize: 12, color: mute),
-                        textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 16),
+                    padding: const EdgeInsets.only(top: 10),
                     child: TextButton(
                       onPressed: _restoringPurchases ? null : _restorePurchases,
                       child: Text(

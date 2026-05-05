@@ -20,11 +20,13 @@ class Env {
   /// WebSocket base URL. Derived from [apiUrl] but overridable via `WS_URL`.
   static const String _wsOverride = String.fromEnvironment('WS_URL', defaultValue: '');
 
-  /// OAuth client id used by Google Sign-In. Keep empty in builds where Google
-  /// login is not configured, so the UI can hide the button instead of failing.
+  /// OAuth client id used by Google Sign-In (web client, used as serverClientId
+  /// on Android). Public identifier, safe to ship hardcoded. Override via
+  /// --dart-define=GOOGLE_WEB_CLIENT_ID=... when needed for staging.
   static const String googleWebClientId = String.fromEnvironment(
     'GOOGLE_WEB_CLIENT_ID',
-    defaultValue: '',
+    defaultValue:
+        '868715549357-kjut1ja3ab79j6pp3pquk2nha48atbcs.apps.googleusercontent.com',
   );
 
   /// Returns the websocket URL. If `WS_URL` is set, uses it verbatim. Otherwise

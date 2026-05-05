@@ -64,7 +64,7 @@ class AuthShell extends StatelessWidget {
 }
 
 class AuthLogoMark extends StatelessWidget {
-  const AuthLogoMark({super.key, this.size = 110});
+  const AuthLogoMark({super.key, this.size = 96});
 
   final double size;
 
@@ -80,18 +80,18 @@ class AuthLogoMark extends StatelessWidget {
         gradient: const RadialGradient(
           center: Alignment(-0.3, -0.5),
           radius: 1.0,
-          colors: [Color(0xFF1A3A7A), Color(0xFF070E2A)],
+          colors: [Color(0xFF122E65), Color(0xFF050B20)],
           stops: [0.0, 1.0],
         ),
         boxShadow: [
           BoxShadow(
-            color: primary.withValues(alpha: 0.28),
-            blurRadius: 24,
-            offset: const Offset(0, 4),
+            color: primary.withValues(alpha: 0.35),
+            blurRadius: 28,
+            offset: const Offset(0, 6),
           ),
         ],
         border: Border.all(
-          color: const Color.fromRGBO(124, 192, 255, 0.12),
+          color: const Color.fromRGBO(124, 192, 255, 0.10),
           width: 1,
         ),
       ),
@@ -100,7 +100,7 @@ class AuthLogoMark extends StatelessWidget {
         shaderCallback: (Rect bounds) => const RadialGradient(
           center: Alignment(-0.3, -0.5),
           radius: 1.0,
-          colors: [Color(0xFF1A3A7A), Color(0xFF070E2A)],
+          colors: [Color(0xFF122E65), Color(0xFF050B20)],
           stops: [0.0, 1.0],
         ).createShader(bounds),
         blendMode: BlendMode.screen,
@@ -125,9 +125,9 @@ class AuthWordmark extends StatelessWidget {
   const AuthWordmark({
     super.key,
     this.center = true,
-    this.titleSize = 42,
-    this.subtitleSize = 15,
-    this.taglineSize = 13,
+    this.titleSize = 36,
+    this.subtitleSize = 13,
+    this.taglineSize = 12,
   });
 
   final bool center;
@@ -187,8 +187,8 @@ class AuthGlassCard extends StatelessWidget {
   const AuthGlassCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
-    this.radius = 28,
+    this.padding = const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+    this.radius = 22,
   });
 
   final Widget child;
@@ -283,8 +283,8 @@ class AuthField extends StatelessWidget {
             filled: true,
             fillColor: Colors.white.withValues(alpha: 0.07),
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
+              horizontal: 14,
+              vertical: 12,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
@@ -332,13 +332,12 @@ class AuthPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    // Design spec: LinearGradient 135° brand→brandInk + shadow 8px -8px brand 60%
     return SizedBox(
       width: double.infinity,
-      height: 54,
+      height: 48,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -352,10 +351,9 @@ class AuthPrimaryButton extends StatelessWidget {
           boxShadow: [
             if (!isLoading)
               BoxShadow(
-                color: primary.withValues(alpha: 0.6),
-                blurRadius: 8,
-                offset: const Offset(0, -8),
-                spreadRadius: 0,
+                color: primary.withValues(alpha: 0.28),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
           ],
         ),
@@ -367,7 +365,7 @@ class AuthPrimaryButton extends StatelessWidget {
             shadowColor: Colors.transparent,
             elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
           child:
@@ -419,7 +417,7 @@ class AuthSecondaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 54,
+      height: 48,
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(

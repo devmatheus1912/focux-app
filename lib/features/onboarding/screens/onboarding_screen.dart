@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
 
@@ -50,6 +51,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
+  Future<void> _markDone() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_done_v2', true);
+    await prefs.remove('onboarding_done');
+  }
+
+  Future<void> _finish() async {
+    await _markDone();
+    if (mounted) context.go('/login');
+  }
+
   void _next() {
     HapticFeedback.selectionClick();
     if (_current < _pages.length - 1) {
@@ -58,7 +70,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeOut,
       );
     } else {
-      context.go('/login');
+      _finish();
     }
   }
 
@@ -119,7 +131,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          onPressed: () => context.go('/login'),
+                          onPressed: _finish,
                           style: TextButton.styleFrom(
                             foregroundColor: EagleTokens.darkInk.withValues(
                               alpha: 0.5,
@@ -149,7 +161,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                   // Dots
                   Padding(
-                    padding: const EdgeInsets.only(top: 32, bottom: 28),
+                    padding: const EdgeInsets.only(top: 20, bottom: 20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
@@ -169,12 +181,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                   // CTA
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Column(
                       children: [
                         SizedBox(
                           width: double.infinity,
-                          height: 54,
+                          height: 50,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(14),
@@ -248,7 +260,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 14),
                       ],
                     ),
                   ),
@@ -310,18 +322,18 @@ class _OBPageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 32, right: 32, top: 20),
+      padding: const EdgeInsets.only(left: 24, right: 24, top: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Icon Illustration
           Container(
-            width: 120,
-            height: 120,
-            margin: const EdgeInsets.only(bottom: 32, top: 16),
+            width: 96,
+            height: 96,
+            margin: const EdgeInsets.only(bottom: 24, top: 8),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(36),
+              borderRadius: BorderRadius.circular(28),
               border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
               boxShadow: [
                 BoxShadow(
@@ -332,7 +344,7 @@ class _OBPageWidget extends StatelessWidget {
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(36),
+              borderRadius: BorderRadius.circular(28),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
                 child: Stack(
@@ -350,7 +362,7 @@ class _OBPageWidget extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Icon(data.icon, color: data.accent, size: 52),
+                    Icon(data.icon, color: data.accent, size: 42),
                   ],
                 ),
               ),
@@ -363,24 +375,24 @@ class _OBPageWidget extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 34,
+              fontSize: 28,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.85,
               height: 1.15,
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Subtitle
-          SizedBox(
-            width: 300,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 320),
             child: Text(
               data.subtitle,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.65),
-                fontSize: 15.5,
+                fontSize: 14,
                 fontWeight: FontWeight.w400,
                 height: 1.6,
               ),

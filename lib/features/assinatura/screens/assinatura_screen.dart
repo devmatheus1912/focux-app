@@ -365,10 +365,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
           final ctaLabel =
               _syncingPurchase
                   ? 'Sincronizando assinatura...'
+                  : selectedPlan == SubscriptionPlan.ENTERPRISE &&
+                      (_trialStatus?.trialUsed == false)
+                  ? 'Começar 7 dias grátis'
                   : selectedPlan == SubscriptionPlan.ENTERPRISE
                   ? 'Assinar Enterprise'
                   : (_trialStatus?.trialUsed == false)
-                  ? 'Iniciar período gratuito'
+                  ? 'Assinar Premium'
                   : 'Assinar Premium';
 
           return ListView(
@@ -410,8 +413,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 ),
               ),
 
-              // ── Trial card (PREMIUM selecionado) ──────────────────────
-              if (selectedPlan == SubscriptionPlan.PREMIUM) ...[
+              // ── Trial card (ENTERPRISE selecionado) ───────────────────
+              if (selectedPlan == SubscriptionPlan.ENTERPRISE) ...[
                 const SizedBox(height: 4),
                 _TrialInfoCard(
                   trialStatus: _trialStatus,
@@ -809,9 +812,9 @@ class _PlanoCard extends StatelessWidget {
       SubscriptionPlan.ENTERPRISE => const Color(0xFFC49A2A),
     };
 
-    // Trial badge PREMIUM
+    // Trial badge ENTERPRISE
     final showTrialBadge =
-        plan == SubscriptionPlan.PREMIUM &&
+        plan == SubscriptionPlan.ENTERPRISE &&
         (trialStatus == null || !trialStatus!.trialUsed);
 
     return InkWell(

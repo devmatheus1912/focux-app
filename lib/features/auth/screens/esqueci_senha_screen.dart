@@ -191,8 +191,8 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    SizedBox(
-                      width: 300,
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 320),
                       child: Text(
                         'Digite seu e-mail e vamos enviar um link pra redefinir sua senha.',
                         style: TextStyle(

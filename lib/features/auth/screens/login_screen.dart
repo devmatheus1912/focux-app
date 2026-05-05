@@ -1,4 +1,7 @@
+import 'dart:io' show Platform;
+
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,9 +9,12 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/config/env.dart';
+import '../../../features/perfil/providers/perfil_provider.dart';
+import '../../../features/subscription/models/subscription_plan.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
+import '../widgets/google_sign_in_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -44,17 +50,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!mounted) return;
       final appClientConfigured = Env.googleWebClientId.isNotEmpty;
       setState(() {
-        _googleEnabled = status.googleSignInReady && appClientConfigured;
-        if (_googleEnabled) {
-          _googleStatusTitle = null;
-          _googleStatusNote = null;
-          _googleStatusAction = null;
-        } else if (!appClientConfigured) {
+        _googleEnabled = appClientConfigured;
+        if (!appClientConfigured) {
           _googleStatusTitle = 'Google pendente no app';
           _googleStatusNote =
               'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.';
           _googleStatusAction =
               'Gerar o build com GOOGLE_WEB_CLIENT_ID e validar em staging.';
+        } else if (status.googleSignInReady) {
+          _googleStatusTitle = null;
+          _googleStatusNote = null;
+          _googleStatusAction = null;
         } else {
           final issue = status.firstIssueFor('google');
           _googleStatusTitle = issue?.title ?? 'Google pendente no ambiente';
@@ -67,12 +73,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       });
     } catch (_) {
       if (!mounted) return;
+      final appClientConfigured = Env.googleWebClientId.isNotEmpty;
       setState(() {
-        _googleEnabled = false;
-        _googleStatusTitle = 'Nao foi possivel verificar o Google';
-        _googleStatusNote =
-            'Login por e-mail continua disponivel. Tente novamente quando o servidor responder.';
-        _googleStatusAction = null;
+        _googleEnabled = appClientConfigured;
+        if (appClientConfigured) {
+          _googleStatusTitle = null;
+          _googleStatusNote = null;
+          _googleStatusAction = null;
+        } else {
+          _googleStatusTitle = 'Google pendente no app';
+          _googleStatusNote =
+              'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.';
+          _googleStatusAction =
+              'Gerar o build com GOOGLE_WEB_CLIENT_ID e validar em staging.';
+        }
       });
     }
   }
@@ -113,7 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             .read(authProvider.notifier)
             .login(_emailController.text.trim(), _passwordController.text);
         if (!mounted) return;
-        context.go(_postLoginRedirect(context, isAluno: false));
+        context.go(await _postPersonalLoginRedirect(context));
       }
     } catch (error) {
       HapticFeedback.heavyImpact();
@@ -137,15 +151,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
     HapticFeedback.mediumImpact();
     try {
+      final isAndroid = !kIsWeb && Platform.isAndroid;
       final google = GoogleSignIn(
-        clientId: Env.googleWebClientId,
+        clientId: isAndroid ? null : Env.googleWebClientId,
         serverClientId: Env.googleWebClientId,
         scopes: const ['email', 'profile'],
       );
+      try {
+        await google.signOut();
+      } catch (_) {}
       final account = await google.signIn();
       if (account == null) return;
       final auth = await account.authentication;
       final idToken = auth.idToken;
+      debugPrint('[GoogleSignIn] account=${account.email} idToken=${idToken == null ? "null" : "len=${idToken.length}"}');
       if (idToken == null || idToken.isEmpty) {
         throw StateError('Google nao retornou idToken.');
       }
@@ -153,7 +172,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           .read(authProvider.notifier)
           .loginGoogle(idToken: idToken, isAluno: _isAluno);
       if (!mounted) return;
-      context.go(_postLoginRedirect(context, isAluno: _isAluno));
+      if (_isAluno) {
+        context.go(_postLoginRedirect(context, isAluno: true));
+      } else {
+        context.go(await _postPersonalLoginRedirect(context));
+      }
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
@@ -170,6 +193,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return _safePostLoginPath(from, isAluno: isAluno) ?? fallback;
   }
 
+  Future<String> _postPersonalLoginRedirect(BuildContext context) async {
+    final fallback = _postLoginRedirect(context, isAluno: false);
+    try {
+      ref.invalidate(perfilProvider);
+      final perfil = await ref.read(perfilProvider.future);
+      final plan = subscriptionPlanFromApi(perfil.plano);
+      final trialActive =
+          perfil.trialEndsAt != null &&
+          perfil.trialEndsAt!.isAfter(DateTime.now());
+      final shouldOfferTrial =
+          perfil.trialUsed != true &&
+          (plan == SubscriptionPlan.FREE ||
+              plan == SubscriptionPlan.ENTERPRISE && !trialActive);
+      if (shouldOfferTrial ||
+          (plan != SubscriptionPlan.PREMIUM &&
+              plan != SubscriptionPlan.ENTERPRISE)) {
+        return '/paywall';
+      }
+    } catch (_) {
+      return '/paywall';
+    }
+    return fallback;
+  }
+
   String _mapError(Object error) {
     if (error is DioException) {
       final statusCode = error.response?.statusCode;
@@ -180,22 +227,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   String _mapGoogleError(Object error) {
+    debugPrint('[GoogleSignIn] error: $error');
     if (error is DioException) {
       final statusCode = error.response?.statusCode;
+      final body = error.response?.data;
+      debugPrint('[GoogleSignIn] dio status=$statusCode body=$body');
       if (statusCode == 401) {
         return _isAluno
             ? 'Este Google nao esta vinculado a um aluno.'
             : 'Nao foi possivel validar sua conta Google.';
       }
+      if (statusCode == 403) {
+        return 'Conta sem permissao para entrar como ${_isAluno ? "aluno" : "personal"}.';
+      }
       if (statusCode == 503) {
         return 'Google ainda nao esta configurado neste ambiente. Use e-mail e senha por enquanto.';
       }
       if (statusCode == null) return 'Sem conexao com o servidor.';
+      final msg = (body is Map && body['message'] is String) ? body['message'] as String : null;
+      return msg != null && msg.isNotEmpty ? msg : 'Erro $statusCode no Google login.';
     }
     if (error is StateError) {
-      return 'O Google nao devolveu uma credencial valida para este build.';
+      return 'Google nao devolveu idToken. Verifique SHA-1 e google-services.json.';
     }
-    return 'Nao foi possivel entrar com Google agora.';
+    return 'Nao foi possivel entrar com Google: $error';
   }
 
   @override
@@ -418,12 +473,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             const SizedBox(height: 12),
                           ],
                           if (_googleEnabled) ...[
-                            AuthSecondaryButton(
-                              label: 'Continuar com Google',
-                              icon: Icons.g_mobiledata_rounded,
+                            GoogleSignInButton(
                               onPressed: _loadingGoogle ? null : _submitGoogle,
+                              isLoading: _loadingGoogle,
                             ),
-                          ] else if (_googleStatusNote != null) ...[
+                          ],
+                          if (_googleStatusNote != null) ...[
+                            if (_googleEnabled) const SizedBox(height: 12),
                             AuthOperationalNotice(
                               icon: Icons.g_mobiledata_rounded,
                               title:

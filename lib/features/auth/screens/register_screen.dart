@@ -1,25 +1,21 @@
+import 'dart:io' show Platform;
+
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/config/env.dart';
+import '../../../features/perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
-
-enum _RegistrationPlan {
-  free('FREE', '3 alunos', 'Grátis'),
-  premium('PREMIUM', '20 alunos · 5d grátis', 'R\$ 79/mês'),
-  enterprise('ENTERPRISE', 'Ilimitado · 5d grátis', 'R\$ 149/mês');
-
-  const _RegistrationPlan(this.title, this.subtitle, this.price);
-
-  final String title;
-  final String subtitle;
-  final String price;
-}
+import '../widgets/google_sign_in_button.dart';
+import '../widgets/password_strength_meter.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -35,9 +31,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
   bool _loading = false;
+  bool _loadingGoogle = false;
   bool _showPassword = false;
   String? _error;
-  _RegistrationPlan _selectedPlan = _RegistrationPlan.premium;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   void dispose() {
@@ -73,17 +77,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         return;
       }
 
-      switch (_selectedPlan) {
-        case _RegistrationPlan.free:
-          context.go('/dashboard/personal');
-          break;
-        case _RegistrationPlan.premium:
-          context.go('/assinatura', extra: 'PREMIUM');
-          break;
-        case _RegistrationPlan.enterprise:
-          context.go('/promo-enterprise');
-          break;
-      }
+      ref.invalidate(perfilProvider);
+      context.go('/paywall');
     } catch (error) {
       HapticFeedback.heavyImpact();
       setState(() {
@@ -98,6 +93,51 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
   }
 
+  Future<void> _submitGoogle() async {
+    if (_loading || _loadingGoogle) return;
+
+    setState(() {
+      _loadingGoogle = true;
+      _error = null;
+    });
+    HapticFeedback.mediumImpact();
+
+    try {
+      final isAndroid = !kIsWeb && Platform.isAndroid;
+      final google = GoogleSignIn(
+        clientId: isAndroid ? null : Env.googleWebClientId,
+        serverClientId: Env.googleWebClientId,
+        scopes: const ['email', 'profile'],
+      );
+      try {
+        await google.signOut();
+      } catch (_) {}
+
+      final account = await google.signIn();
+      if (account == null) return;
+
+      final auth = await account.authentication;
+      final idToken = auth.idToken;
+      if (idToken == null || idToken.isEmpty) {
+        throw StateError('Google nao retornou idToken.');
+      }
+
+      await ref
+          .read(authProvider.notifier)
+          .loginGoogle(idToken: idToken, isAluno: false);
+
+      if (!mounted) return;
+      ref.invalidate(perfilProvider);
+      context.go('/paywall');
+    } catch (error) {
+      HapticFeedback.heavyImpact();
+      if (!mounted) return;
+      setState(() => _error = _mapGoogleError(error));
+    } finally {
+      if (mounted) setState(() => _loadingGoogle = false);
+    }
+  }
+
   String _mapError(Object error) {
     if (error is DioException) {
       final statusCode = error.response?.statusCode;
@@ -109,6 +149,34 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
     }
     return 'Não foi possível criar a conta agora.';
+  }
+
+  String _mapGoogleError(Object error) {
+    if (error is DioException) {
+      final statusCode = error.response?.statusCode;
+      final body = error.response?.data;
+      if (statusCode == 401 || statusCode == 404) {
+        return 'Nao foi possivel cadastrar com Google.';
+      }
+      if (statusCode == 409) {
+        return 'Este Google ja esta vinculado a uma conta.';
+      }
+      if (statusCode == 503) {
+        return 'Google ainda nao esta configurado neste ambiente.';
+      }
+      if (statusCode == null) return 'Sem conexao com o servidor.';
+      final msg =
+          (body is Map && body['message'] is String)
+              ? body['message'] as String
+              : null;
+      return msg != null && msg.isNotEmpty
+          ? msg
+          : 'Erro $statusCode no cadastro Google.';
+    }
+    if (error is StateError) {
+      return 'Google nao devolveu idToken. Verifique SHA-1 e google-services.json.';
+    }
+    return 'Nao foi possivel cadastrar com Google: $error';
   }
 
   @override
@@ -173,7 +241,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Comece grátis. Sem cartão.',
+                    'Comece com sua conta e escolha o plano depois.',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.5),
                       fontSize: 13.5,
@@ -237,6 +305,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  PasswordStrengthMeter(password: _passwordController.text),
                   const SizedBox(height: 12),
                   AuthField(
                     label: 'Telefone / WhatsApp',
@@ -246,62 +316,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     keyboardType: TextInputType.phone,
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _submit(),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'ESCOLHA SEU PLANO',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children:
-                        _RegistrationPlan.values.map((plan) {
-                          return Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                right:
-                                    plan == _RegistrationPlan.values.last
-                                        ? 0
-                                        : 8,
-                              ),
-                              child: Column(
-                                children: [
-                                  AuthPlanCard(
-                                    title: plan.title,
-                                    subtitle: plan.subtitle,
-                                    price: plan.price,
-                                    selected: _selectedPlan == plan,
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedPlan = plan;
-                                      });
-                                    },
-                                  ),
-                                  if (plan != _RegistrationPlan.free)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 6),
-                                      child: Text(
-                                        '5 dias grÃ¡tis',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.6,
-                                          ),
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
                   ),
                   const SizedBox(height: 28),
                   if (_error != null) ...[
@@ -318,6 +332,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     label: 'Criar minha conta',
                     isLoading: _loading,
                     onPressed: _submit,
+                  ),
+                  const SizedBox(height: 12),
+                  const _AuthDivider(label: 'ou cadastre com'),
+                  const SizedBox(height: 12),
+                  GoogleSignInButton(
+                    label: 'Cadastrar com Google',
+                    isLoading: _loadingGoogle,
+                    onPressed: _loadingGoogle ? null : _submitGoogle,
                   ),
                   const SizedBox(height: 12),
                   Center(
@@ -363,6 +385,37 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AuthDivider extends StatelessWidget {
+  final String label;
+
+  const _AuthDivider({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.4),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
+        ),
+      ],
     );
   }
 }

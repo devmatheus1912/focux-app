@@ -39,7 +39,11 @@ jobs:
 
       - name: Build flutter web
         working-directory: focux-app
-        run: flutter build web --release
+        env:
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+        run: |
+          flutter build web --release \
+            --dart-define=GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID
 
       - name: Serve flutter web
         working-directory: focux-app/build/web

@@ -106,19 +106,19 @@ class AppTheme {
     );
 
     final textTheme = TextTheme(
-      displayLarge:   _spaceGrotesk(fontSize: 48, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: 0),
-      displayMedium:  _spaceGrotesk(fontSize: 36, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: 0),
-      displaySmall:   _spaceGrotesk(fontSize: 28, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: 0),
-      headlineLarge:  _spaceGrotesk(fontSize: 24, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
-      headlineMedium: _spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
-      headlineSmall:  _spaceGrotesk(fontSize: 17, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
-      titleLarge:     _inter(fontSize: 16, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
-      titleMedium:    _inter(fontSize: 14, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
+      displayLarge:   _spaceGrotesk(fontSize: 42, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: 0),
+      displayMedium:  _spaceGrotesk(fontSize: 32, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: 0),
+      displaySmall:   _spaceGrotesk(fontSize: 25, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: 0),
+      headlineLarge:  _spaceGrotesk(fontSize: 22, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
+      headlineMedium: _spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
+      headlineSmall:  _spaceGrotesk(fontSize: 16, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
+      titleLarge:     _inter(fontSize: 15, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
+      titleMedium:    _inter(fontSize: 13.5, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
       titleSmall:     _inter(fontSize: 12, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0.1),
-      bodyLarge:      _inter(fontSize: 16, fontWeight: FontWeight.w400, color: onSurface, letterSpacing: 0),
-      bodyMedium:     _inter(fontSize: 14, fontWeight: FontWeight.w400, color: onSurface, letterSpacing: 0),
-      bodySmall:      _inter(fontSize: 12, fontWeight: FontWeight.w400, color: onSurfMute),
-      labelLarge:     _inter(fontSize: 13, fontWeight: FontWeight.w600, color: onSurface,  letterSpacing: 0.05),
+      bodyLarge:      _inter(fontSize: 15, fontWeight: FontWeight.w400, color: onSurface, letterSpacing: 0),
+      bodyMedium:     _inter(fontSize: 13, fontWeight: FontWeight.w400, color: onSurface, letterSpacing: 0),
+      bodySmall:      _inter(fontSize: 11.5, fontWeight: FontWeight.w400, color: onSurfMute),
+      labelLarge:     _inter(fontSize: 12.5, fontWeight: FontWeight.w600, color: onSurface,  letterSpacing: 0.05),
       labelMedium:    _inter(fontSize: 11, fontWeight: FontWeight.w600, color: onSurfMute, letterSpacing: 0.5),
       labelSmall:     _inter(fontSize: 10, fontWeight: FontWeight.w600, color: onSurfMute, letterSpacing: 0.8),
     );
@@ -126,6 +126,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: _spaceGrotesk().fontFamily,
+      visualDensity: VisualDensity.compact,
       colorScheme: cs,
       scaffoldBackgroundColor: scaffold,
       textTheme: textTheme,
@@ -136,7 +137,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0.5,
         centerTitle: false,
-        titleTextStyle: _spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
+        titleTextStyle: _spaceGrotesk(fontSize: 16.5, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
         systemOverlayStyle: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
             .copyWith(statusBarColor: Colors.transparent),
         iconTheme: IconThemeData(color: onSurface),
@@ -157,7 +158,7 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         hintStyle: _inter(color: onSurfMute, fontSize: 14),
         labelStyle: _inter(color: onSurfMute, fontSize: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusSm), borderSide: BorderSide(color: outline)),
@@ -170,7 +171,7 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primary, foregroundColor: onPrimary,
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusSm)),
           textStyle: _inter(fontSize: 15, fontWeight: FontWeight.w700),
           elevation: 0,
@@ -180,7 +181,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: primary,
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(EagleTokens.radiusSm)),
           side: BorderSide(color: primary, width: 1.5),
           textStyle: _inter(fontSize: 15, fontWeight: FontWeight.w600),
@@ -230,15 +231,15 @@ class AppTheme {
             : Colors.white.withValues(alpha: 0.88),
         indicatorColor: dark ? EagleTokens.darkCardHi : primarySoft,
         iconTheme: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return IconThemeData(color: primary, size: 22);
-          return IconThemeData(color: onSurfMute, size: 22);
+          if (states.contains(WidgetState.selected)) return IconThemeData(color: primary, size: 21);
+          return IconThemeData(color: onSurfMute, size: 21);
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) return _inter(fontSize: 10.5, fontWeight: FontWeight.w700, color: primary);
           return _inter(fontSize: 10.5, fontWeight: FontWeight.w500, color: onSurfMute);
         }),
         elevation: 0,
-        height: 76,
+        height: 70,
       ),
 
       floatingActionButtonTheme: FloatingActionButtonThemeData(

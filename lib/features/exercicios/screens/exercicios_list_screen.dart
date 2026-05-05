@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../data/exercicio_repository.dart';
@@ -354,6 +355,13 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 16, 12, 14),
                 child: Row(
                   children: [
+                    IconButton(
+                      tooltip: 'Voltar',
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      onPressed:
+                          () => safePopOrGo(context, '/dashboard/personal'),
+                    ),
+                    const SizedBox(width: 2),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

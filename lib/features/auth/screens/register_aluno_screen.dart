@@ -6,6 +6,7 @@ import '../../../core/widgets/fx_logo.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/password_strength_meter.dart';
 
 class RegisterAlunoScreen extends ConsumerStatefulWidget {
   final String? personalSlug;
@@ -36,6 +37,9 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
     super.initState();
     _bgCtrl = AnimationController(vsync: this, duration: const Duration(seconds: 12))..repeat();
     _formCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _senhaCtrl.addListener(() {
+      if (mounted) setState(() {});
+    });
     _formSlide = Tween<double>(begin: 50, end: 0).animate(
       CurvedAnimation(parent: _formCtrl, curve: Curves.easeOutCubic),
     );
@@ -291,6 +295,11 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                             icon: Icon(_senhaVisivel ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: inkColor.withValues(alpha: 0.4), size: 20),
                             onPressed: () => setState(() => _senhaVisivel = !_senhaVisivel),
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        PasswordStrengthMeter(
+                          password: _senhaCtrl.text,
+                          minLength: 6,
                         ),
 
                         // Error

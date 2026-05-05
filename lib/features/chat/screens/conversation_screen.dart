@@ -1860,28 +1860,26 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         ),
               ),
               Container(
+                // Scaffold already resizes the body above the keyboard.
+                // Do not add viewInsets here, or the composer jumps upward.
                 padding: EdgeInsets.fromLTRB(
                   12,
                   10,
                   12,
-                  10 + MediaQuery.of(context).viewInsets.bottom,
+                  10 +
+                      (MediaQuery.of(context).viewInsets.bottom > 0
+                          ? 0
+                          : MediaQuery.of(context).padding.bottom),
                 ),
                 decoration: BoxDecoration(
-                  color: (isDark ? EagleTokens.darkBg : EagleTokens.paper)
-                      .withValues(alpha: 0.86),
-                  border: Border(
-                    top: BorderSide(
-                      color:
-                          isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-                    ),
-                  ),
+                  color: Colors.transparent,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(
-                        alpha: isDark ? 0.18 : 0.05,
+                        alpha: isDark ? 0.14 : 0.035,
                       ),
-                      blurRadius: 24,
-                      offset: const Offset(0, -8),
+                      blurRadius: 18,
+                      offset: const Offset(0, -6),
                     ),
                   ],
                 ),
@@ -1900,19 +1898,21 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(28),
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
                           child: Container(
                             decoration: BoxDecoration(
                               color: (isDark
                                       ? EagleTokens.darkCard
                                       : EagleTokens.card)
-                                  .withValues(alpha: isDark ? 0.82 : 0.9),
-                              borderRadius: BorderRadius.circular(28),
+                                  .withValues(alpha: isDark ? 0.86 : 0.94),
+                              borderRadius: BorderRadius.circular(24),
                               border: Border.all(
                                 color:
                                     isDark
-                                        ? EagleTokens.darkLine
-                                        : EagleTokens.line,
+                                        ? EagleTokens.darkLine.withValues(
+                                          alpha: 0.85,
+                                        )
+                                        : primary.withValues(alpha: 0.20),
                               ),
                             ),
                             child: Column(
@@ -1953,7 +1953,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         ),
                                         cursorColor: primary,
                                         decoration: InputDecoration(
-                                          hintText: 'iMessage',
+                                          hintText: 'Mensagem',
                                           hintStyle: TextStyle(
                                             color:
                                                 isDark
@@ -1966,6 +1966,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                 vertical: 12,
                                               ),
                                           border: InputBorder.none,
+                                          enabledBorder: InputBorder.none,
+                                          focusedBorder: InputBorder.none,
+                                          disabledBorder: InputBorder.none,
+                                          errorBorder: InputBorder.none,
+                                          focusedErrorBorder: InputBorder.none,
                                         ),
                                         minLines: 1,
                                         maxLines: 5,
@@ -2539,9 +2544,9 @@ class _ChatBackdrop extends StatelessWidget {
                     Color(0xFF101B34),
                   ]
                   : const [
-                    Color(0xFFF6F7FB),
-                    Color(0xFFF8F8F6),
-                    Color(0xFFF2F5FB),
+                    Color(0xFFFBFCFF),
+                    Color(0xFFF5F7FC),
+                    Color(0xFFEEF3FB),
                   ],
         ),
       ),
@@ -2561,18 +2566,34 @@ class _ChatBackdropPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final linePaint =
+    final glowPaint =
         Paint()
-          ..color = (isDark ? Colors.white : accentColor).withValues(
-            alpha: isDark ? 0.028 : 0.04,
-          )
-          ..strokeWidth = 1;
-    const gap = 26.0;
-    for (double x = 0; x < size.width; x += gap) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
-    }
-    for (double y = 0; y < size.height; y += gap) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
+          ..color = accentColor.withValues(alpha: isDark ? 0.08 : 0.06)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 64);
+    final softPaint =
+        Paint()
+          ..color =
+              (isDark ? Colors.white : Colors.white).withValues(alpha: 0.22)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 80);
+    canvas.drawCircle(
+      Offset(size.width * 0.82, size.height * 0.18),
+      118,
+      glowPaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.10, size.height * 0.82),
+      100,
+      glowPaint,
+    );
+    if (!isDark) {
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: Offset(size.width * 0.52, size.height * 0.48),
+          width: size.width * 0.85,
+          height: size.height * 0.42,
+        ),
+        softPaint,
+      );
     }
   }
 
