@@ -20,9 +20,13 @@ void main() {
     expect(screen, contains('class _AlunoAppBarProfileMenu'));
     expect(screen, contains("Text('Perfil')"));
     expect(screen, contains("Text('Sair')"));
-    expect(screen, contains('fontSize: 21'));
-    expect(screen, contains('fontSize: 16'));
-    expect(screen, contains('exercícios para seguir seu plano'));
+    expect(screen, contains('class _WorkoutMetricPill'));
+    expect(screen, contains('class _WorkoutInsightPill'));
+    expect(screen, contains("'Plano de hoje'"));
+    expect(screen, contains('Toque para começar'));
+    expect(screen, contains("'Progresso medido'"));
+    expect(screen, contains("'Personal acompanhando'"));
+    expect(screen, contains("'Acompanhamento de \$firstName'"));
     expect(screen, contains("'Padrão'"));
     expect(screen, contains("'Sem ação agora'"));
     expect(screen, contains("'Prioridade média'"));

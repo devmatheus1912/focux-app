@@ -43,7 +43,6 @@ class AlunoDashboardScreen extends ConsumerWidget {
     final medidasAsync = ref.watch(minhasMedidasDashboardProvider);
     final historicoAsync = ref.watch(historicoCheckinProvider);
     final chatAsync = ref.watch(chatAlunoDashboardProvider);
-    final proximoTreino = _heroProximoTreino(treinosAsync.valueOrNull);
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -100,23 +99,6 @@ class AlunoDashboardScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            brandAsync.when(
-              data:
-                  (brand) => alunoAsync.when(
-                    data:
-                        (aluno) => _AlunoHeroCard(
-                          aluno: aluno,
-                          brand: brand,
-                          isDark: isDark,
-                          proximoTreino: proximoTreino,
-                        ),
-                    loading: () => _HeroCardSkeleton(isDark: isDark),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-              loading: () => _HeroCardSkeleton(isDark: isDark),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
-            const SizedBox(height: 16),
             treinosAsync.when(
               data:
                   (treinos) => alunoAsync.when(
@@ -132,7 +114,23 @@ class AlunoDashboardScreen extends ConsumerWidget {
               loading: () => _FocusCardSkeleton(isDark: isDark),
               error: (_, __) => _FocusCardSkeleton(isDark: isDark),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            brandAsync.when(
+              data:
+                  (brand) => alunoAsync.when(
+                    data:
+                        (aluno) => _AlunoHeroCard(
+                          aluno: aluno,
+                          brand: brand,
+                          isDark: isDark,
+                        ),
+                    loading: () => _HeroCardSkeleton(isDark: isDark),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+              loading: () => _HeroCardSkeleton(isDark: isDark),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: 12),
             alunoAsync.when(
               data:
                   (aluno) => _StudentStatsRow(
@@ -270,13 +268,6 @@ class AlunoDashboardScreen extends ConsumerWidget {
   }
 }
 
-String? _heroProximoTreino(List<ExecucaoTreino>? treinos) {
-  if (treinos == null || treinos.isEmpty) return null;
-  final nome = treinos.first.treinoNome.trim();
-  if (nome.isEmpty) return null;
-  return 'Próximo treino: $nome';
-}
-
 enum _AlunoHeaderAction { profile, logout }
 
 class _AlunoAppBarProfileMenu extends StatelessWidget {
@@ -371,13 +362,11 @@ class _AlunoHeroCard extends StatelessWidget {
   final Aluno aluno;
   final PersonalBrand brand;
   final bool isDark;
-  final String? proximoTreino;
 
   const _AlunoHeroCard({
     required this.aluno,
     required this.brand,
     required this.isDark,
-    this.proximoTreino,
   });
 
   @override
@@ -387,95 +376,84 @@ class _AlunoHeroCard extends StatelessWidget {
         brand.slogan?.trim().isNotEmpty == true
             ? brand.slogan!
             : 'Seu treino organizado para hoje.';
+    final primary = Theme.of(context).colorScheme.primary;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).colorScheme.primary,
-            BrandPalette.deep(Theme.of(context).colorScheme.primary),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: line),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: Colors.white.withValues(alpha: 0.16),
-                backgroundImage:
-                    brand.logoUrl != null ? NetworkImage(brand.logoUrl!) : null,
-                child:
-                    brand.logoUrl == null
-                        ? Text(
-                          brand.nomePersonal.isNotEmpty
-                              ? brand.nomePersonal[0].toUpperCase()
-                              : 'P',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        )
-                        : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Olá, $firstName',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 21,
+          CircleAvatar(
+            radius: 23,
+            backgroundColor: BrandPalette.soft(primary, dark: isDark),
+            backgroundImage:
+                brand.logoUrl != null ? NetworkImage(brand.logoUrl!) : null,
+            child:
+                brand.logoUrl == null
+                    ? Text(
+                      brand.nomePersonal.isNotEmpty
+                          ? brand.nomePersonal[0].toUpperCase()
+                          : 'P',
+                      style: TextStyle(
+                        color: primary,
                         fontWeight: FontWeight.w800,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    _HeroSubtitle(
-                      streakDias: null,
-                      proximoTreino: proximoTreino,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      slogan,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        height: 1.45,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                    )
+                    : null,
           ),
-          const SizedBox(height: 18),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _HeroPill(
-                icon: Icons.person_outline,
-                label: 'Seu personal',
-                value: brand.nomePersonal,
-              ),
-              if (aluno.objetivo?.trim().isNotEmpty == true)
-                _HeroPill(
-                  icon: Icons.flag_outlined,
-                  label: 'Foco atual',
-                  value: aluno.objetivo!,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Acompanhamento de $firstName',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-            ],
+                const SizedBox(height: 3),
+                Text(
+                  slogan,
+                  style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                _HeroPill(
+                  icon: Icons.person_outline,
+                  value: brand.nomePersonal,
+                  isDark: isDark,
+                ),
+                if (aluno.objetivo?.trim().isNotEmpty == true)
+                  _HeroPill(
+                    icon: Icons.flag_outlined,
+                    value: aluno.objetivo!,
+                    isDark: isDark,
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -483,73 +461,40 @@ class _AlunoHeroCard extends StatelessWidget {
   }
 }
 
-class _HeroSubtitle extends StatelessWidget {
-  const _HeroSubtitle({this.streakDias, this.proximoTreino});
-
-  final int? streakDias;
-  final String? proximoTreino;
-
-  @override
-  Widget build(BuildContext context) {
-    if (streakDias != null && streakDias! > 1) {
-      return Text(
-        '$streakDias dias seguidos',
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Colors.white.withValues(alpha: 0.85),
-        ),
-      );
-    }
-    if (proximoTreino != null) {
-      return Text(
-        proximoTreino!,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Colors.white.withValues(alpha: 0.85),
-        ),
-      );
-    }
-    return const SizedBox.shrink();
-  }
-}
-
 class _HeroPill extends StatelessWidget {
   final IconData icon;
-  final String label;
   final String value;
+  final bool isDark;
 
   const _HeroPill({
     required this.icon,
-    required this.label,
     required this.value,
+    required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(18),
+        color: BrandPalette.soft(primary, dark: isDark),
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white, size: 14),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(color: Colors.white70, fontSize: 11),
-              ),
-              Text(
-                value,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+          Icon(icon, color: primary, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            value,
+            style: TextStyle(
+              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -583,71 +528,132 @@ class _TodayFocusCard extends StatelessWidget {
           aluno.fotoUrl,
         ].where((e) => e != null && e.toString().trim().isNotEmpty).length;
     final profileCompletion = (completedFields / 8 * 100).round();
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final softText = onPrimary.withValues(alpha: 0.72);
 
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [primary, BrandPalette.deep(primary)],
         ),
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withValues(alpha: isDark ? 0.16 : 0.22),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'Plano de hoje',
+                  style: TextStyle(
+                    color: softText,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Icon(Icons.verified_outlined, color: softText, size: 18),
+              const SizedBox(width: 6),
+              Text(
+                '$profileCompletion% perfil',
+                style: TextStyle(
+                  color: softText,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
           Text(
-            'Hoje',
+            next?.treinoNome ?? 'Perfil e acompanhamento',
             style: TextStyle(
-              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+              color: onPrimary,
+              fontSize: 25,
+              fontWeight: FontWeight.w900,
+              height: 1.05,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
           Text(
             next != null
-                ? 'Seu próximo passo está pronto: ${next.treinoNome}.'
-                : 'Seu personal ainda não liberou um treino para hoje.',
-            style: TextStyle(color: mute, height: 1.5),
+                ? '${next.exercicios.length} exercícios prontos. Toque para começar e registrar sua evolução.'
+                : 'Seu personal ainda não liberou treino. Complete seu perfil para acelerar os próximos ajustes.',
+            style: TextStyle(color: softText, fontSize: 13, height: 1.4),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 16),
-          if (next != null)
-            _PrimaryActionCard(
-              title: next.treinoNome,
-              subtitle:
-                  '${next.exercicios.length} exercícios para seguir seu plano com clareza.',
-              cta: 'Treinar agora',
-              onTap:
-                  () => context.push('/checkin/executar', extra: next.treinoId),
-            )
-          else
-            _PrimaryActionCard(
-              title: 'Perfil e acompanhamento',
-              subtitle:
-                  'Enquanto o treino não chega, deixe seu perfil completo para melhorar os próximos ajustes.',
-              cta: 'Completar perfil',
-              onTap: () => context.push('/aluno/perfil'),
-            ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 18),
           Row(
             children: [
               Expanded(
-                child: _MiniMetricCard(
-                  label: 'Perfil',
-                  value: '$profileCompletion%',
-                  isDark: isDark,
+                child: FilledButton(
+                  onPressed:
+                      next != null
+                          ? () => context.push(
+                            '/checkin/executar',
+                            extra: next.treinoId,
+                          )
+                          : () => context.push('/aluno/perfil'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: primary,
+                    minimumSize: const Size(0, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    next != null ? 'Treinar agora' : 'Completar perfil',
+                    style: const TextStyle(fontWeight: FontWeight.w900),
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
-              Expanded(
-                child: _MiniMetricCard(
-                  label: 'Treinos ativos',
-                  value: '${treinos.length}',
-                  isDark: isDark,
-                ),
+              _WorkoutMetricPill(
+                value: '${treinos.length}',
+                label: 'ativos',
+                onPrimary: onPrimary,
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _WorkoutInsightPill(
+                icon: Icons.trending_up_rounded,
+                label: 'Progresso medido',
+                onPrimary: onPrimary,
+              ),
+              _WorkoutInsightPill(
+                icon: Icons.person_pin_circle_outlined,
+                label: 'Personal acompanhando',
+                onPrimary: onPrimary,
               ),
             ],
           ),
@@ -657,41 +663,83 @@ class _TodayFocusCard extends StatelessWidget {
   }
 }
 
-class _PrimaryActionCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final String cta;
-  final VoidCallback onTap;
+class _WorkoutMetricPill extends StatelessWidget {
+  final String value;
+  final String label;
+  final Color onPrimary;
 
-  const _PrimaryActionCard({
-    required this.title,
-    required this.subtitle,
-    required this.cta,
-    required this.onTap,
+  const _WorkoutMetricPill({
+    required this.value,
+    required this.label,
+    required this.onPrimary,
   });
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
     return Container(
-      padding: const EdgeInsets.all(16),
+      width: 72,
+      height: 50,
       decoration: BoxDecoration(
-        color: BrandPalette.soft(primary, dark: false),
-        borderRadius: BorderRadius.circular(18),
+        color: Colors.white.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            title,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            value,
+            style: TextStyle(
+              color: onPrimary,
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+            ),
           ),
-          const SizedBox(height: 6),
-          Text(subtitle, style: const TextStyle(fontSize: 12.5, height: 1.45)),
-          const SizedBox(height: 12),
-          FilledButton(onPressed: onTap, child: Text(cta)),
+          Text(
+            label,
+            style: TextStyle(
+              color: onPrimary.withValues(alpha: 0.68),
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WorkoutInsightPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color onPrimary;
+
+  const _WorkoutInsightPill({
+    required this.icon,
+    required this.label,
+    required this.onPrimary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: onPrimary.withValues(alpha: 0.82), size: 14),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: onPrimary.withValues(alpha: 0.82),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
