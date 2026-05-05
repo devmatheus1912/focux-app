@@ -197,55 +197,60 @@ class _PersonalDashboardScreenState
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              FxLogo(
-                                iconSize: 28,
-                                showLabel: true,
-                                horizontal: true,
-                                light: isDark,
-                              ),
-                              const SizedBox(height: 10),
-                              Text.rich(
-                                TextSpan(
-                                  children: [
-                                    const TextSpan(text: 'Hoje · '),
-                                    TextSpan(
-                                      text:
-                                          'Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
-                                      style: TextStyle(
-                                        color:
-                                            isDark
-                                                ? EagleTokens.darkInk
-                                                : EagleTokens.ink,
-                                        fontWeight: FontWeight.w600,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                FxLogo(
+                                  iconSize: 28,
+                                  showLabel: true,
+                                  horizontal: true,
+                                  light: isDark,
+                                ),
+                                const SizedBox(height: 10),
+                                Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      const TextSpan(text: 'Hoje · '),
+                                      TextSpan(
+                                        text:
+                                            'Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
+                                        style: TextStyle(
+                                          color:
+                                              isDark
+                                                  ? EagleTokens.darkInk
+                                                  : EagleTokens.ink,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
-                                    TextSpan(
-                                      text:
-                                          riscoAlto > 0
-                                              ? ' · $riscoAlto precisam de você'
-                                              : ' · operação estável',
-                                    ),
-                                  ],
+                                      TextSpan(
+                                        text:
+                                            riscoAlto > 0
+                                                ? ' · $riscoAlto precisam de você'
+                                                : ' · operação estável',
+                                      ),
+                                    ],
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkInkMute
+                                            : EagleTokens.inkMute,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color:
-                                      isDark
-                                          ? EagleTokens.darkInkMute
-                                          : EagleTokens.inkMute,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
+                          const SizedBox(width: 10),
                           Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               InkWell(
                                 onTap: () {
