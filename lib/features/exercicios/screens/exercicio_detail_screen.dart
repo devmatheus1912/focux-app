@@ -7,6 +7,7 @@ import '../data/enums.dart';
 import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
+import '../../analytics/data/analytics_service.dart';
 import '../../../core/utils/friendly_error.dart';
 
 class ExercicioDetailScreen extends ConsumerStatefulWidget {
@@ -47,6 +48,10 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
           .read(exercicioVideoUploaderProvider)
           .pickAndUpload(widget.exercicioId);
       if (uploaded == null) return;
+      ref.read(analyticsServiceProvider).track(
+        'video_personal_upload',
+        {'exId': widget.exercicioId},
+      );
       ref.invalidate(exercicioProvider(widget.exercicioId));
       ref.invalidate(exerciciosFilteredProvider);
       if (!context.mounted) return;

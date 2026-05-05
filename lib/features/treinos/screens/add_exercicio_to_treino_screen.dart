@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../analytics/data/analytics_service.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
+import '../../exercicios/screens/widgets/padrao_movimento_grid.dart';
+import '../../exercicios/screens/widgets/template_split_picker.dart';
 import '../data/workout_builder_preset.dart';
 import '../providers/treinos_provider.dart';
 
@@ -85,6 +88,38 @@ class _AddExercicioToTreinoScreenState
     }
   }
 
+  Future<void> _adicionarRapido(Exercicio exercicio) async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      await ref.read(treinoRepositoryProvider).adicionarExercicio(
+        widget.treinoId,
+        exercicio.id,
+        series: int.tryParse(_seriesCtrl.text) ?? 3,
+        repeticoes: _repCtrl.text,
+        descanso: int.tryParse(_descansoCtrl.text) ?? 60,
+        cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
+        observacoes: _observacoesCtrl.text,
+        tipoSerie: _tipoSerie,
+        grupoSuperset: _tipoSerie == 'SUPERSET'
+            ? int.tryParse(_grupoSupersetCtrl.text)
+            : null,
+      );
+      ref.read(analyticsServiceProvider).track(
+        'quick_add_padrao',
+        {'exId': exercicio.id, 'treinoId': widget.treinoId},
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${exercicio.nome} adicionado.')),
+        );
+      }
+    } catch (_) {
+      if (mounted) setState(() { _error = 'Erro ao adicionar exercicio.'; });
+    } finally {
+      if (mounted) setState(() { _loading = false; });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final exerciciosAsync = ref.watch(exerciciosProvider);
@@ -137,45 +172,117 @@ class _AddExercicioToTreinoScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<Exercicio>(
-                              value: _selecionado,
-                              decoration: InputDecoration(
-                                labelText: 'Exercício',
-                                filled: true,
-                                fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
+                      SizedBox(
+                        height: 430,
+                        child: DefaultTabController(
+                          length: 3,
+                          child: Column(
+                            children: [
+                              const TabBar(
+                                tabs: [
+                                  Tab(text: 'Buscar'),
+                                  Tab(text: 'Padrao'),
+                                  Tab(text: 'Templates'),
+                                ],
                               ),
-                              items: exercicios.map((e) => DropdownMenuItem(
-                                    value: e,
-                                    child: Text(e.nome, style: TextStyle(color: ink)),
-                                  )).toList(),
-                              onChanged: (v) => setState(() => _selecionado = v),
-                            ),
+                              Expanded(
+                                child: TabBarView(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 12),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Expanded(
+                                            child:
+                                                DropdownButtonFormField<
+                                                  Exercicio
+                                                >(
+                                                  value: _selecionado,
+                                                  isExpanded: true,
+                                                  decoration: InputDecoration(
+                                                    labelText: 'Exercicio',
+                                                    filled: true,
+                                                    fillColor:
+                                                        isDark
+                                                            ? EagleTokens
+                                                                .darkCardHi
+                                                            : EagleTokens.card,
+                                                    border: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            14,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                  items:
+                                                      exercicios
+                                                          .map(
+                                                            (e) =>
+                                                                DropdownMenuItem(
+                                                                  value: e,
+                                                                  child: Text(
+                                                                    e.nome,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style: TextStyle(
+                                                                      color:
+                                                                          ink,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                          )
+                                                          .toList(),
+                                                  onChanged:
+                                                      (v) => setState(
+                                                        () => _selecionado = v,
+                                                      ),
+                                                ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          IconButton.filledTonal(
+                                            icon: const Icon(Icons.add),
+                                            tooltip: 'Criar novo exercicio',
+                                            onPressed: () async {
+                                              final criado =
+                                                  await context.push<bool>(
+                                                '/exercicios/novo',
+                                              );
+                                              if (criado == true) {
+                                                ref.invalidate(
+                                                  exerciciosProvider,
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    PadraoMovimentoGrid(
+                                      onAdicionar:
+                                          (exercicio) => setState(
+                                            () => _selecionado = exercicio,
+                                          ),
+                                    ),
+                                    TemplateSplitPicker(
+                                      onAdicionar: (exercicio) async {
+                                        await _adicionarRapido(exercicio);
+                                        ref
+                                            .read(analyticsServiceProvider)
+                                            .track('template_uso', {
+                                          'treinoId': widget.treinoId,
+                                          'exId': exercicio.id,
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 12),
-                          Container(
-                            height: 56, // Match Dropdown height
-                            decoration: BoxDecoration(
-                              color: primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: IconButton(
-                              icon: Icon(Icons.add, color: primary),
-                              tooltip: 'Criar novo exercício',
-                              onPressed: () async {
-                                final criado = await context.push<bool>('/exercicios/novo');
-                                if (criado == true) {
-                                  ref.invalidate(exerciciosProvider);
-                                }
-                              },
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                       if (_selecionado != null) ...[
                         const SizedBox(height: 14),

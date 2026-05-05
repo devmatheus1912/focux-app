@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../exercicios/data/enums.dart';
 
 class Aluno {
   final int id;
@@ -19,6 +20,7 @@ class Aluno {
   final double? peso;
   final double? altura;
   final String? dataNascimento;
+  final Set<Equipamento> equipamentosDisponiveis;
 
   Aluno({
     required this.id,
@@ -38,6 +40,7 @@ class Aluno {
     this.peso,
     this.altura,
     this.dataNascimento,
+    this.equipamentosDisponiveis = const {},
   });
 
   int? get idade {
@@ -68,6 +71,12 @@ class Aluno {
         peso: json['peso']?.toDouble(),
         altura: json['altura']?.toDouble(),
         dataNascimento: json['dataNascimento'] as String?,
+        equipamentosDisponiveis: parseEnumCsv(
+          Equipamento.values,
+          json['equipamentosDisponiveis'] ??
+              json['equipamentosDisponiveisCsv'] ??
+              json['equipamentos_disponiveis'],
+        ).toSet(),
       );
 }
 
@@ -200,6 +209,18 @@ class AlunoRepository {
 
   Future<void> excluirAluno(int id) async {
     await _dio.delete('/api/alunos/$id');
+  }
+
+  Future<void> atualizarEquipamentos(
+    int alunoId,
+    Set<Equipamento> equipamentos,
+  ) async {
+    await _dio.patch(
+      '/api/alunos/$alunoId/equipamentos',
+      data: {
+        'equipamentos': equipamentos.map((e) => e.backendName).toList(),
+      },
+    );
   }
 
   Future<List<Map<String, dynamic>>> aderenciaSemanal(int id) async {

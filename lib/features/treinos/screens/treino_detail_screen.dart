@@ -7,7 +7,9 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../../analytics/data/analytics_service.dart';
 import '../../exercicios/data/exercicio_repository.dart';
+import '../../exercicios/screens/widgets/substituir_exercicio_bottom_sheet.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -807,6 +809,53 @@ class _TreinoDetailBody extends StatelessWidget {
                                     }
                                   }
                                 },
+                                onSubstitute: () async {
+                                  await showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder:
+                                        (_) => SubstituirExercicioBottomSheet(
+                                          alvo: te.exercicio,
+                                          onEscolher: (novo) async {
+                                            try {
+                                              await repo.substituirExercicio(
+                                                treinoId,
+                                                te,
+                                                novo.id,
+                                              );
+                                              ref
+                                                  .read(
+                                                    analyticsServiceProvider,
+                                                  )
+                                                  .track('substituir_uso', {
+                                                'treinoId': treinoId,
+                                                'alvoId': te.exercicio.id,
+                                                'novoId': novo.id,
+                                              });
+                                              ref.invalidate(
+                                                treinoProvider(treinoId),
+                                              );
+                                            } catch (error) {
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      'Erro ao substituir: $error',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            }
+                                          },
+                                          onCriarNovo:
+                                              () => context.push(
+                                                '/exercicios/novo',
+                                              ),
+                                        ),
+                                  );
+                                },
                                 onRemove: () async {
                                   final confirm = await showDialog<bool>(
                                     context: context,
@@ -1184,6 +1233,7 @@ class _ExercicioRow extends StatelessWidget {
   final VoidCallback onMoveUp;
   final VoidCallback onMoveDown;
   final VoidCallback onDuplicate;
+  final VoidCallback onSubstitute;
   final VoidCallback onRemove;
 
   const _ExercicioRow({
@@ -1198,6 +1248,7 @@ class _ExercicioRow extends StatelessWidget {
     required this.onMoveUp,
     required this.onMoveDown,
     required this.onDuplicate,
+    required this.onSubstitute,
     required this.onRemove,
   });
 
@@ -1343,6 +1394,7 @@ class _ExercicioRow extends StatelessWidget {
               if (val == 'up') onMoveUp();
               if (val == 'down') onMoveDown();
               if (val == 'duplicate') onDuplicate();
+              if (val == 'substitute') onSubstitute();
               if (val == 'remove') onRemove();
             },
             itemBuilder:
@@ -1360,6 +1412,10 @@ class _ExercicioRow extends StatelessWidget {
                   const PopupMenuItem(
                     value: 'duplicate',
                     child: Text('Duplicar item'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'substitute',
+                    child: Text('Substituir'),
                   ),
                   const PopupMenuItem(
                     value: 'remove',

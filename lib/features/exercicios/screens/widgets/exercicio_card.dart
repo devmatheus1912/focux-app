@@ -13,6 +13,9 @@ class ExercicioCard extends ConsumerWidget {
   final VoidCallback onFavoritoToggle;
   final VoidCallback onUploadVideo;
   final VoidCallback onDelete;
+  final VoidCallback? onTapOverride;
+  final VoidCallback? onLongPress;
+  final bool selected;
 
   const ExercicioCard({
     super.key,
@@ -20,6 +23,9 @@ class ExercicioCard extends ConsumerWidget {
     required this.onFavoritoToggle,
     required this.onUploadVideo,
     required this.onDelete,
+    this.onTapOverride,
+    this.onLongPress,
+    this.selected = false,
   });
 
   Future<void> _toggleFavorito(WidgetRef ref, BuildContext context) async {
@@ -66,12 +72,19 @@ class ExercicioCard extends ConsumerWidget {
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () => context.push('/exercicios/${exercicio.id}'),
+        onTap: onTapOverride ?? () => context.push('/exercicios/${exercicio.id}'),
+        onLongPress: onLongPress,
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: line),
+            border: Border.all(
+              color:
+                  selected
+                      ? Theme.of(context).colorScheme.primary
+                      : line,
+              width: selected ? 2 : 1,
+            ),
           ),
           child: Row(
             children: [
@@ -146,7 +159,13 @@ class ExercicioCard extends ConsumerWidget {
                         : 'Adicionar aos favoritos',
                 onPressed: () => _toggleFavorito(ref, context),
               ),
-              PopupMenuButton<String>(
+              if (selected)
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                )
+              else
+                PopupMenuButton<String>(
                 tooltip: 'Acoes do exercicio',
                 icon: Icon(Icons.more_vert_rounded, color: mute),
                 onSelected: (value) {

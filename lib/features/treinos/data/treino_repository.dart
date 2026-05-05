@@ -110,6 +110,7 @@ class TreinoRepository {
     String? observacoes,
     String tipoSerie = 'NORMAL',
     int? grupoSuperset,
+    int? ordem,
   }) async {
     final response = await _dio.post('/api/treinos/$treinoId/exercicios', data: {
       'exercicioId': exercicioId,
@@ -121,8 +122,29 @@ class TreinoRepository {
         'observacoes': observacoes.trim(),
       'tipoSerie': tipoSerie,
       if (grupoSuperset != null) 'grupoSuperset': grupoSuperset,
+      if (ordem != null) 'ordem': ordem,
     });
     return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Treino> substituirExercicio(
+    int treinoId,
+    TreinoExercicioItem item,
+    int novoExercicioId,
+  ) async {
+    await removerExercicio(treinoId, item.id);
+    return adicionarExercicio(
+      treinoId,
+      novoExercicioId,
+      series: item.series,
+      repeticoes: item.repeticoes,
+      descanso: item.descansoSegundos ?? 60,
+      cargaKg: item.cargaKg,
+      observacoes: item.observacoes,
+      tipoSerie: item.tipoSerie,
+      grupoSuperset: item.grupoSuperset,
+      ordem: item.ordem,
+    );
   }
 
   Future<void> atribuirAluno(int treinoId, int alunoId) async {

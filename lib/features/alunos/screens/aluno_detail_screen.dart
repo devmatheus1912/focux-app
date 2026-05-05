@@ -488,6 +488,19 @@ class AlunoDetailScreen extends ConsumerWidget {
                                 ),
                           ),
                           _ModuleTile(
+                            icon: Icons.tune_rounded,
+                            label: 'Equipamentos',
+                            sub:
+                                aluno.equipamentosDisponiveis.isEmpty
+                                    ? 'Sem restricao'
+                                    : '${aluno.equipamentosDisponiveis.length} marcados',
+                            isDark: isDark,
+                            onTap:
+                                () => context.push(
+                                  '/alunos/$alunoId/equipamentos',
+                                ),
+                          ),
+                          _ModuleTile(
                             icon: Icons.auto_awesome,
                             label: 'IA · Progressão',
                             sub: 'Sugerir cargas',

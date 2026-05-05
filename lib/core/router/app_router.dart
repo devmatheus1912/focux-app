@@ -12,6 +12,7 @@ import '../../features/dashboard/screens/perfil_aluno_screen.dart';
 import '../../features/alunos/screens/alunos_list_screen.dart';
 import '../../features/alunos/screens/add_aluno_screen.dart';
 import '../../features/alunos/screens/aluno_detail_screen.dart';
+import '../../features/alunos/screens/aluno_equipamentos_screen.dart';
 import '../../features/perfil/data/perfil_repository.dart';
 import '../../features/perfil/screens/perfil_screen.dart';
 import '../../features/perfil/screens/editar_perfil_screen.dart';
@@ -273,6 +274,15 @@ class AppRouter {
                     : '/alunos/${state.pathParameters['id']}',
         builder:
             (context, state) => EditarAlunoScreen(aluno: state.extra as Aluno),
+      ),
+      GoRoute(
+        path: '/alunos/:id/equipamentos',
+        redirect:
+            (context, state) =>
+                _intPathParam(state, 'id') == null ? '/alunos' : null,
+        builder:
+            (context, state) =>
+                AlunoEquipamentosScreen(alunoId: _intPathParam(state, 'id')!),
       ),
       GoRoute(
         path: '/alunos/:id/relatorio',
