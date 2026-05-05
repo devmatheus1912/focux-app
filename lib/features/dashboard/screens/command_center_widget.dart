@@ -225,10 +225,40 @@ class _IaHistoryTile extends ConsumerWidget {
   }
 }
 
-class _FocuxRadarSection extends StatelessWidget {
+class _FocuxRadarSection extends ConsumerStatefulWidget {
   final List<AlunoScoreResumo> scores;
 
   const _FocuxRadarSection({required this.scores});
+
+  @override
+  ConsumerState<_FocuxRadarSection> createState() => _FocuxRadarSectionState();
+}
+
+class _FocuxRadarSectionState extends ConsumerState<_FocuxRadarSection> {
+  bool _syncing = false;
+
+  Future<void> _syncSnapshots(BuildContext context) async {
+    setState(() => _syncing = true);
+    try {
+      await ref.read(dashboardRepositoryProvider).runFocuxScoreSnapshots();
+      ref.invalidate(commandCenterProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Radar Focux atualizado.')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível atualizar o Radar: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _syncing = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +266,7 @@ class _FocuxRadarSection extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final topScores = scores.take(5).toList();
+    final topScores = widget.scores.take(5).toList();
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -262,7 +292,19 @@ class _FocuxRadarSection extends StatelessWidget {
                   ),
                 ),
               ),
-              _Pill(label: '${scores.length} sinais', color: primary),
+              _Pill(label: '${widget.scores.length} sinais', color: primary),
+              const SizedBox(width: 6),
+              IconButton.filledTonal(
+                onPressed: _syncing ? null : () => _syncSnapshots(context),
+                icon:
+                    _syncing
+                        ? const SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : const Icon(Icons.insights_rounded, size: 18),
+                tooltip: 'Atualizar Radar Focux',
+              ),
             ],
           ),
           const SizedBox(height: 6),
@@ -285,7 +327,7 @@ class _FocuxRadarSection extends StatelessWidget {
   }
 }
 
-class _AlunoScoreTile extends StatelessWidget {
+class _AlunoScoreTile extends ConsumerWidget {
   final AlunoScoreResumo score;
 
   const _AlunoScoreTile({required this.score});
@@ -298,7 +340,7 @@ class _AlunoScoreTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
     final riskColor = _riskColor(score.risco, primary);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -374,48 +416,375 @@ class _AlunoScoreTile extends StatelessWidget {
       tooltip: 'Abrir aluno',
     );
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final compact = constraints.maxWidth < 360;
-        if (compact) {
-          return Column(
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => _openScoreHistory(context, ref, score),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 360;
+            if (compact) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      badge,
+                      const SizedBox(width: 10),
+                      Expanded(child: copy),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 150),
+                      child: action,
+                    ),
+                  ),
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                badge,
+                const SizedBox(width: 10),
+                Expanded(child: copy),
+                const SizedBox(width: 8),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 52),
+                  child: action,
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+void _openScoreHistory(
+  BuildContext context,
+  WidgetRef ref,
+  AlunoScoreResumo score,
+) {
+  final repo = ref.read(dashboardRepositoryProvider);
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder:
+        (context) => _FocuxScoreHistorySheet(
+          score: score,
+          future: repo.getFocuxScoreSnapshots(score.alunoId),
+        ),
+  );
+}
+
+class _FocuxScoreHistorySheet extends StatelessWidget {
+  final AlunoScoreResumo score;
+  final Future<List<FocuxScoreSnapshotResumo>> future;
+
+  const _FocuxScoreHistorySheet({required this.score, required this.future});
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.76;
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 6, 20, 20),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  badge,
-                  const SizedBox(width: 10),
-                  Expanded(child: copy),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          score.alunoNome,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Histórico do Radar Focux',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _ScoreRing(score: score.score),
                 ],
               ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 150),
-                  child: action,
+              const SizedBox(height: 14),
+              Text(
+                score.narrativa,
+                style: TextStyle(color: mute, fontSize: 13.2, height: 1.35),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  _Pill(label: score.prioridade, color: primary, filled: true),
+                  if (score.deltaScore != null)
+                    _Pill(
+                      label: _deltaLabel(score.deltaScore!),
+                      color: _deltaColor(score.deltaScore!, primary),
+                      filled: score.deltaScore! < 0,
+                    ),
+                  _Pill(label: score.risco, color: primary),
+                  _Pill(label: score.proximaAcao, color: primary),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Expanded(
+                child: FutureBuilder<List<FocuxScoreSnapshotResumo>>(
+                  future: future,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final snapshots = snapshot.data ?? const [];
+                    if (snapshots.isEmpty) {
+                      return _EmptyHistoryState(score: score);
+                    }
+                    return ListView.separated(
+                      itemCount: snapshots.length,
+                      separatorBuilder:
+                          (_, __) => Divider(
+                            height: 18,
+                            color:
+                                isDark
+                                    ? EagleTokens.darkLine
+                                    : EagleTokens.line,
+                          ),
+                      itemBuilder:
+                          (context, index) =>
+                              _ScoreHistoryRow(snapshot: snapshots[index]),
+                    );
+                  },
                 ),
               ),
             ],
-          );
-        }
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            badge,
-            const SizedBox(width: 10),
-            Expanded(child: copy),
-            const SizedBox(width: 8),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 52),
-              child: action,
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+      ),
     );
   }
+}
+
+class _ScoreRing extends StatelessWidget {
+  final int score;
+
+  const _ScoreRing({required this.score});
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final color =
+        score >= 80
+            ? EagleTokens.good
+            : score >= 55
+            ? primary
+            : EagleTokens.bad;
+    return Container(
+      width: 58,
+      height: 58,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withValues(alpha: 0.10),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
+      ),
+      child: Center(
+        child: Text(
+          '$score',
+          style: TextStyle(
+            color: color,
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyHistoryState extends StatelessWidget {
+  final AlunoScoreResumo score;
+
+  const _EmptyHistoryState({required this.score});
+
+  @override
+  Widget build(BuildContext context) {
+    final mute =
+        Theme.of(context).brightness == Brightness.dark
+            ? EagleTokens.darkInkMute
+            : EagleTokens.inkMute;
+    return Center(
+      child: Text(
+        'A primeira leitura histórica de ${score.alunoNome} ainda não foi registrada.',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+      ),
+    );
+  }
+}
+
+class _ScoreHistoryRow extends StatelessWidget {
+  final FocuxScoreSnapshotResumo snapshot;
+
+  const _ScoreHistoryRow({required this.snapshot});
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final scoreColor =
+        snapshot.score >= 80
+            ? EagleTokens.good
+            : snapshot.score >= 55
+            ? primary
+            : EagleTokens.bad;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 58,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _shortDate(snapshot.dataReferencia),
+                style: TextStyle(
+                  color: ink,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 12.5,
+                ),
+              ),
+              const SizedBox(height: 5),
+              _ScoreBar(value: snapshot.score, color: scoreColor),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    '${snapshot.score} pts',
+                    style: TextStyle(
+                      color: scoreColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      snapshot.ritmo,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 3),
+              Text(
+                snapshot.narrativa,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: mute, fontSize: 12.5, height: 1.3),
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  _Pill(label: snapshot.prioridade, color: scoreColor),
+                  _Pill(label: snapshot.risco, color: primary),
+                  _Pill(label: snapshot.proximaAcao, color: primary),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ScoreBar extends StatelessWidget {
+  final int value;
+  final Color color;
+
+  const _ScoreBar({required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final width = 42 * (value.clamp(0, 100) / 100);
+    return Stack(
+      children: [
+        Container(
+          width: 42,
+          height: 5,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(999),
+          ),
+        ),
+        Container(
+          width: width,
+          height: 5,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(999),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+String _shortDate(String value) {
+  final parsed = DateTime.tryParse(value);
+  if (parsed == null) return value;
+  final day = parsed.day.toString().padLeft(2, '0');
+  final month = parsed.month.toString().padLeft(2, '0');
+  return '$day/$month';
 }
 
 String _deltaLabel(int delta) {

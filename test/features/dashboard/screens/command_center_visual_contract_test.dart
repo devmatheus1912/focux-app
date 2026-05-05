@@ -23,5 +23,10 @@ void main() {
     expect(widget, contains('score.risco'));
     expect(widget, contains('score.deltaScore'));
     expect(widget, contains('_deltaLabel'));
+    expect(widget, contains('runFocuxScoreSnapshots'));
+    expect(widget, contains('class _FocuxScoreHistorySheet'));
+    expect(widget, contains('getFocuxScoreSnapshots(score.alunoId)'));
+    expect(widget, contains('class _ScoreHistoryRow'));
+    expect(widget, contains('class _ScoreBar'));
   });
 }
