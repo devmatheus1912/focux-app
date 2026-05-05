@@ -2,12 +2,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../alunos/providers/alunos_provider.dart';
-import '../../analytics/data/analytics_service.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/substituir_exercicio_bottom_sheet.dart';
 import '../data/treino_repository.dart';
@@ -823,15 +823,14 @@ class _TreinoDetailBody extends StatelessWidget {
                                                 te,
                                                 novo.id,
                                               );
-                                              ref
-                                                  .read(
-                                                    analyticsServiceProvider,
-                                                  )
-                                                  .track('substituir_uso', {
-                                                'treinoId': treinoId,
-                                                'alvoId': te.exercicio.id,
-                                                'novoId': novo.id,
-                                              });
+                                              AnalyticsService.instance.track(
+                                                'substituir_uso',
+                                                props: {
+                                                  'treinoId': treinoId,
+                                                  'alvoId': te.exercicio.id,
+                                                  'novoId': novo.id,
+                                                },
+                                              );
                                               ref.invalidate(
                                                 treinoProvider(treinoId),
                                               );

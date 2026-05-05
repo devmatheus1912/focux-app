@@ -45,3 +45,23 @@ app.*.map.json
 /android/app/release
 .vscode/
 .superpowers/
+
+# Local environment and signing material
+.env
+.env.*
+!.env.example
+!.env.*.example
+android/key.properties
+android/signing.txt
+*.jks
+*.keystore
+*.p12
+*.pem
+
+# Firebase configuration is generated/provided per environment.
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# Local design exports and generated archives
+*.zip
+temp_design/

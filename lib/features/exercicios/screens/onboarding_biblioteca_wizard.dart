@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../analytics/data/analytics_service.dart';
 import '../data/enums.dart';
 import '../providers/exercicios_provider.dart';
 import 'widgets/wizard_step_confirmacao.dart';
@@ -75,11 +75,14 @@ class _OnboardingBibliotecaWizardState
       ref.invalidate(exerciciosFilteredProvider);
       ref.invalidate(exerciciosCuradoriaProvider);
       final importados = (result['importados'] as num?)?.toInt() ?? 0;
-      ref.read(analyticsServiceProvider).track('wizard_completed', {
-        'modalidades': _modalidades.map((e) => e.backendName).toList(),
-        'espacos': _espacos.map((e) => e.backendName).toList(),
-        'importados': importados,
-      });
+      AnalyticsService.instance.track(
+        'wizard_completed',
+        props: {
+          'modalidades': _modalidades.map((e) => e.backendName).toList(),
+          'espacos': _espacos.map((e) => e.backendName).toList(),
+          'importados': importados,
+        },
+      );
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(
@@ -118,9 +121,7 @@ class _OnboardingBibliotecaWizardState
               _importing
                   ? null
                   : () {
-                    ref
-                        .read(analyticsServiceProvider)
-                        .track('wizard_skipped');
+                    AnalyticsService.instance.track('wizard_skipped');
                     context.pop(false);
                   },
         ),

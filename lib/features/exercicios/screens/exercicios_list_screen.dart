@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../analytics/data/analytics_service.dart';
 import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
@@ -33,31 +33,31 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final query = _filter.query.trim().toLowerCase();
     final filtered =
         input.where((exercicio) {
-          if (query.isNotEmpty &&
-              !exercicio.nome.toLowerCase().contains(query)) {
-            return false;
-          }
-          if (_filter.modalidade != null &&
-              exercicio.modalidade != _filter.modalidade) {
-            return false;
-          }
-          if (_filter.grupo != null &&
-              exercicio.grupoMuscularPrimario != _filter.grupo) {
-            return false;
-          }
-          if (_filter.equipamento != null &&
-              !exercicio.equipamentos.contains(_filter.equipamento)) {
-            return false;
-          }
-          if (_filter.dificuldade != null &&
-              exercicio.dificuldade != _filter.dificuldade) {
-            return false;
-          }
-          if (_filter.favoritos && !exercicio.favoritado) return false;
-          if (_filter.comVideo && !exercicio.hasPlayableMedia) return false;
-          if (_filter.semVideo && exercicio.hasPlayableMedia) return false;
-          return true;
-        }).toList()
+            if (query.isNotEmpty &&
+                !exercicio.nome.toLowerCase().contains(query)) {
+              return false;
+            }
+            if (_filter.modalidade != null &&
+                exercicio.modalidade != _filter.modalidade) {
+              return false;
+            }
+            if (_filter.grupo != null &&
+                exercicio.grupoMuscularPrimario != _filter.grupo) {
+              return false;
+            }
+            if (_filter.equipamento != null &&
+                !exercicio.equipamentos.contains(_filter.equipamento)) {
+              return false;
+            }
+            if (_filter.dificuldade != null &&
+                exercicio.dificuldade != _filter.dificuldade) {
+              return false;
+            }
+            if (_filter.favoritos && !exercicio.favoritado) return false;
+            if (_filter.comVideo && !exercicio.hasPlayableMedia) return false;
+            if (_filter.semVideo && exercicio.hasPlayableMedia) return false;
+            return true;
+          }).toList()
           ..sort((a, b) {
             final fav = (b.favoritado ? 1 : 0).compareTo(a.favoritado ? 1 : 0);
             if (fav != 0) return fav;
@@ -79,14 +79,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       SnackBar(content: Text('Enviando video de ${exercicio.nome}...')),
     );
     try {
-      await ref.read(exercicioRepositoryProvider).uploadVideo(
+      await ref
+          .read(exercicioRepositoryProvider)
+          .uploadVideo(
             id: exercicio.id,
             bytes: await file.readAsBytes(),
             filename: file.name,
           );
-      ref.read(analyticsServiceProvider).track(
+      AnalyticsService.instance.track(
         'video_personal_upload',
-        {'exId': exercicio.id},
+        props: {'exId': exercicio.id},
       );
       _refresh();
       messenger.clearSnackBars();
@@ -341,9 +343,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                       (value) => _selectAllVisible(_applyFilter(value)),
                     ),
                 onFavorite:
-                    () => asyncList.whenData(
-                      (value) => _favoriteBatch(value),
-                    ),
+                    () => asyncList.whenData((value) => _favoriteBatch(value)),
                 onDelete:
                     () => asyncList.whenData(
                       (value) => _deleteBatch(_applyFilter(value)),
@@ -415,9 +415,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
               filter: _filter,
               onChanged: (value) => setState(() => _filter = value),
               onClear:
-                  () => setState(
-                    () => _filter = const ExerciciosUiFilter(),
-                  ),
+                  () => setState(() => _filter = const ExerciciosUiFilter()),
             ),
             Expanded(
               child: asyncList.when(
@@ -469,9 +467,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                             context.push('/exercicios/${exercicio.id}');
                           },
                           onLongPress:
-                              (exercicio) => setState(
-                                () => _selected.add(exercicio.id),
-                              ),
+                              (exercicio) =>
+                                  setState(() => _selected.add(exercicio.id)),
                           onFavorite: _favorite,
                           onUploadVideo: _uploadVideo,
                           onDelete: _deleteOne,

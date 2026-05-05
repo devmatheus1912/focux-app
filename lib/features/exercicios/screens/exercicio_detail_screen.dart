@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
@@ -7,7 +8,6 @@ import '../data/enums.dart';
 import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
-import '../../analytics/data/analytics_service.dart';
 import '../../../core/utils/friendly_error.dart';
 
 class ExercicioDetailScreen extends ConsumerStatefulWidget {
@@ -48,9 +48,9 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
           .read(exercicioVideoUploaderProvider)
           .pickAndUpload(widget.exercicioId);
       if (uploaded == null) return;
-      ref.read(analyticsServiceProvider).track(
+      AnalyticsService.instance.track(
         'video_personal_upload',
-        {'exId': widget.exercicioId},
+        props: {'exId': widget.exercicioId},
       );
       ref.invalidate(exercicioProvider(widget.exercicioId));
       ref.invalidate(exerciciosFilteredProvider);
