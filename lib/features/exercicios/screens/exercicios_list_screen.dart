@@ -362,11 +362,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                       PopupMenuButton<String>(
                         icon: Icon(Icons.more_vert_rounded, color: mute),
                         tooltip: 'Mais opcoes',
-                        onSelected: (value) {
+                        onSelected: (value) async {
                           if (value == 'biblioteca_completa') {
-                            _importarSeedPremiumV1(context, ref);
-                          }
-                          if (value == 'fila_editorial') {
+                            final changed = await context.push<bool>(
+                              '/exercicios/biblioteca-wizard',
+                            );
+                            if (changed == true) {
+                              ref.invalidate(exerciciosFilteredProvider);
+                              ref.invalidate(exerciciosCuradoriaProvider);
+                            }
+                          } else if (value == 'fila_editorial') {
                             _openFilaEditorial(context, ref);
                           }
                         },
@@ -626,81 +631,6 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _importarSeedPremiumV1(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Carregar biblioteca curada'),
-            content: const Text(
-              'Isso vai carregar os exercicios curados v2 com modalidade, grupo, padrao de movimento, equipamento e espaco.\n\nVideos oficiais nao serao falsificados. Itens sem video entram para curadoria ate voce anexar video proprio ou licenciado.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Carregar'),
-              ),
-            ],
-          ),
-    );
-    if (confirm != true) return;
-    if (!context.mounted) return;
-
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(
-      const SnackBar(
-        content: Row(
-          children: [
-            SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(width: 12),
-            Text('Carregando biblioteca curada...'),
-          ],
-        ),
-        duration: Duration(seconds: 45),
-      ),
-    );
-
-    try {
-      final count =
-          await ref.read(exercicioRepositoryProvider).importarSeedPremiumV1();
-      ref.invalidate(exerciciosFilteredProvider);
-      ref.invalidate(exerciciosCuradoriaProvider);
-      messenger.clearSnackBars();
-      if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text('$count exercicios importados para biblioteca.'),
-            backgroundColor: EagleTokens.good,
-          ),
-        );
-      }
-    } catch (e) {
-      messenger.clearSnackBars();
-      if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(friendlyError(e)),
-            backgroundColor: EagleTokens.bad,
-          ),
-        );
-      }
-    }
   }
 
   Future<void> _openFilaEditorial(BuildContext context, WidgetRef ref) async {

@@ -1,0 +1,171 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/theme/design_tokens.dart';
+import '../data/enums.dart';
+import '../providers/exercicios_provider.dart';
+import 'widgets/wizard_step_confirmacao.dart';
+import 'widgets/wizard_step_espacos.dart';
+import 'widgets/wizard_step_loading.dart';
+import 'widgets/wizard_step_modalidades.dart';
+
+class OnboardingBibliotecaWizard extends ConsumerStatefulWidget {
+  const OnboardingBibliotecaWizard({super.key});
+
+  @override
+  ConsumerState<OnboardingBibliotecaWizard> createState() =>
+      _OnboardingBibliotecaWizardState();
+}
+
+class _OnboardingBibliotecaWizardState
+    extends ConsumerState<OnboardingBibliotecaWizard> {
+  int _step = 0;
+  bool _importing = false;
+  Future<Map<String, dynamic>>? _previewFuture;
+  final Set<Modalidade> _modalidades = {
+    Modalidade.musculacao,
+    Modalidade.mobilidade,
+    Modalidade.cardio,
+  };
+  final Set<Espaco> _espacos = {
+    Espaco.academiaCompleta,
+    Espaco.academiaBasica,
+    Espaco.casaEquipada,
+  };
+
+  void _toggleModalidade(Modalidade value) {
+    setState(() {
+      _modalidades.contains(value)
+          ? _modalidades.remove(value)
+          : _modalidades.add(value);
+    });
+  }
+
+  void _toggleEspaco(Espaco value) {
+    setState(() {
+      _espacos.contains(value) ? _espacos.remove(value) : _espacos.add(value);
+    });
+  }
+
+  void _next() {
+    if (_step == 0 && _modalidades.isEmpty) return;
+    if (_step == 1 && _espacos.isEmpty) return;
+    setState(() {
+      if (_step == 1) {
+        _previewFuture = ref
+            .read(exercicioRepositoryProvider)
+            .previewCuratedV2(modalidades: _modalidades, espacos: _espacos);
+      }
+      _step += 1;
+    });
+  }
+
+  Future<void> _importar() async {
+    setState(() {
+      _importing = true;
+      _step = 3;
+    });
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final result = await ref
+          .read(exercicioRepositoryProvider)
+          .importarCuratedV2(modalidades: _modalidades, espacos: _espacos);
+      ref.invalidate(exerciciosFilteredProvider);
+      ref.invalidate(exerciciosCuradoriaProvider);
+      final importados = (result['importados'] as num?)?.toInt() ?? 0;
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('$importados exercicios carregados.'),
+          backgroundColor: EagleTokens.good,
+        ),
+      );
+      context.pop(true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _importing = false;
+        _step = 2;
+      });
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Falha ao carregar biblioteca: $e'),
+          backgroundColor: EagleTokens.bad,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final canGoNext =
+        (_step == 0 && _modalidades.isNotEmpty) ||
+        (_step == 1 && _espacos.isNotEmpty);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Biblioteca curada'),
+        leading: IconButton(
+          icon: const Icon(Icons.close_rounded),
+          onPressed: _importing ? null : () => context.pop(false),
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              LinearProgressIndicator(value: (_step + 1) / 4),
+              const SizedBox(height: 24),
+              Expanded(child: _content()),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  if (_step > 0 && _step < 3)
+                    TextButton(
+                      onPressed:
+                          _importing ? null : () => setState(() => _step -= 1),
+                      child: const Text('Voltar'),
+                    ),
+                  const Spacer(),
+                  if (_step < 2)
+                    FilledButton(
+                      onPressed: canGoNext ? _next : null,
+                      child: const Text('Continuar'),
+                    ),
+                  if (_step == 2)
+                    FilledButton.icon(
+                      onPressed: _importing ? null : _importar,
+                      icon: const Icon(Icons.download_rounded),
+                      label: const Text('Carregar biblioteca'),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _content() {
+    return switch (_step) {
+      0 => WizardStepModalidades(
+        selecionadas: _modalidades,
+        onToggle: _toggleModalidade,
+      ),
+      1 => WizardStepEspacos(selecionados: _espacos, onToggle: _toggleEspaco),
+      2 => FutureBuilder<Map<String, dynamic>>(
+        future: _previewFuture,
+        builder:
+            (context, snapshot) => WizardStepConfirmacao(
+              modalidades: _modalidades,
+              espacos: _espacos,
+              preview: snapshot,
+            ),
+      ),
+      _ => const WizardStepLoading(),
+    };
+  }
+}

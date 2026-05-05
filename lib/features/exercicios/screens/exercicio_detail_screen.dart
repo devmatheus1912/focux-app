@@ -3,7 +3,6 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
-import 'package:image_picker/image_picker.dart';
 import '../data/enums.dart';
 import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';
@@ -20,7 +19,6 @@ class ExercicioDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
-  final _picker = ImagePicker();
   bool _uploadingVideo = false;
 
   Future<void> _toggleFavorito(BuildContext context, bool favoritado) async {
@@ -43,28 +41,12 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
   }
 
   Future<void> _pickAndUploadVideo(BuildContext context) async {
-    XFile? file;
-    try {
-      file = await _picker.pickVideo(source: ImageSource.gallery);
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Nao foi possivel selecionar o video: $e')),
-        );
-      }
-      return;
-    }
-    if (file == null) return;
-
     setState(() => _uploadingVideo = true);
     try {
-      await ref
-          .read(exercicioRepositoryProvider)
-          .uploadVideo(
-            id: widget.exercicioId,
-            bytes: await file.readAsBytes(),
-            filename: file.name,
-          );
+      final uploaded = await ref
+          .read(exercicioVideoUploaderProvider)
+          .pickAndUpload(widget.exercicioId);
+      if (uploaded == null) return;
       ref.invalidate(exercicioProvider(widget.exercicioId));
       ref.invalidate(exerciciosFilteredProvider);
       if (!context.mounted) return;
