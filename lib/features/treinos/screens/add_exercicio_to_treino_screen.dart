@@ -7,6 +7,8 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../exercicios/data/enums.dart';
+import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
 import '../../exercicios/screens/widgets/padrao_movimento_grid.dart';
@@ -1120,50 +1122,14 @@ class _ExercisePickerCard extends StatelessWidget {
         ),
         if (selected) ...[
           const SizedBox(height: 10),
-          Row(
-            children: [
-              if (exercicio!.videoUrl?.trim().isNotEmpty == true) ...[
-                Expanded(
-                  child: _ExerciseMediaButton(
-                    icon: Icons.play_circle_outline_rounded,
-                    label: 'Ver vídeo',
-                    primary: primary,
-                    isDark: isDark,
-                    onTap: mediaLoading ? null : onPreviewVideo,
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              Expanded(
-                child: _ExerciseMediaButton(
-                  icon:
-                      mediaLoading
-                          ? Icons.hourglass_empty_rounded
-                          : Icons.video_call_outlined,
-                  label:
-                      mediaLoading
-                          ? 'Processando'
-                          : exercicio!.videoUrl?.trim().isNotEmpty == true
-                          ? 'Trocar vídeo'
-                          : 'Adicionar vídeo',
-                  primary: primary,
-                  isDark: isDark,
-                  onTap: mediaLoading ? null : onUploadVideo,
-                ),
-              ),
-              if (exercicio!.videoUrl?.trim().isNotEmpty == true) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _ExerciseMediaButton(
-                    icon: Icons.delete_outline_rounded,
-                    label: 'Remover vídeo',
-                    primary: EagleTokens.bad,
-                    isDark: isDark,
-                    onTap: mediaLoading ? null : onRemoveVideo,
-                  ),
-                ),
-              ],
-            ],
+          _ExerciseMediaStatus(
+            exercicio: exercicio!,
+            isDark: isDark,
+            primary: primary,
+            mediaLoading: mediaLoading,
+            onPreviewVideo: onPreviewVideo,
+            onUploadVideo: onUploadVideo,
+            onRemoveVideo: onRemoveVideo,
           ),
         ],
       ],
@@ -1171,61 +1137,148 @@ class _ExercisePickerCard extends StatelessWidget {
   }
 }
 
-class _ExerciseMediaButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color primary;
-  final bool isDark;
-  final VoidCallback? onTap;
+enum _ExerciseMediaAction { preview, upload, remove }
 
-  const _ExerciseMediaButton({
-    required this.icon,
-    required this.label,
-    required this.primary,
+class _ExerciseMediaStatus extends StatelessWidget {
+  final Exercicio exercicio;
+  final bool isDark;
+  final Color primary;
+  final bool mediaLoading;
+  final VoidCallback onPreviewVideo;
+  final VoidCallback onUploadVideo;
+  final VoidCallback onRemoveVideo;
+
+  const _ExerciseMediaStatus({
+    required this.exercicio,
     required this.isDark,
-    required this.onTap,
+    required this.primary,
+    required this.mediaLoading,
+    required this.onPreviewVideo,
+    required this.onUploadVideo,
+    required this.onRemoveVideo,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 160),
-        opacity: onTap == null ? 0.55 : 1,
-        child: Container(
-          height: 42,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color:
-                isDark
-                    ? primary.withValues(alpha: 0.14)
-                    : primary.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: primary.withValues(alpha: 0.22)),
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final hasVideo = exercicio.videoUrl?.trim().isNotEmpty == true;
+    final statusColor =
+        hasVideo
+            ? primary
+            : isDark
+            ? Colors.white.withValues(alpha: 0.68)
+            : EagleTokens.inkMute;
+    final statusIcon =
+        mediaLoading
+            ? Icons.hourglass_empty_rounded
+            : hasVideo
+            ? Icons.play_circle_fill_rounded
+            : Icons.video_call_outlined;
+    final statusTitle =
+        mediaLoading
+            ? 'Processando vídeo'
+            : hasVideo
+            ? 'Vídeo próprio disponível'
+            : 'Sem vídeo próprio';
+    final statusSubtitle =
+        hasVideo
+            ? 'Confira a prévia ou troque a mídia deste exercício.'
+            : 'Adicione uma demonstração quando quiser revisar com precisão.';
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+      decoration: BoxDecoration(
+        color:
+            isDark
+                ? Colors.white.withValues(alpha: 0.035)
+                : Colors.white.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: line.withValues(alpha: 0.72)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: isDark ? 0.16 : 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(statusIcon, color: statusColor, size: 18),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: primary, size: 17),
-              const SizedBox(width: 7),
-              Flexible(
-                child: Text(
-                  label,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  statusTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: primary,
-                    fontSize: 12,
+                    color: ink,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 0,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 2),
+                Text(
+                  statusSubtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 11.2,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          if (hasVideo)
+            TextButton(
+              onPressed: mediaLoading ? null : onPreviewVideo,
+              style: TextButton.styleFrom(
+                foregroundColor: primary,
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                textStyle: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              child: const Text('Prévia'),
+            ),
+          PopupMenuButton<_ExerciseMediaAction>(
+            enabled: !mediaLoading,
+            tooltip: 'Ações de vídeo',
+            icon: Icon(Icons.more_horiz_rounded, color: mute),
+            onSelected: (action) {
+              if (action == _ExerciseMediaAction.preview) onPreviewVideo();
+              if (action == _ExerciseMediaAction.upload) onUploadVideo();
+              if (action == _ExerciseMediaAction.remove) onRemoveVideo();
+            },
+            itemBuilder:
+                (context) => [
+                  if (hasVideo)
+                    const PopupMenuItem(
+                      value: _ExerciseMediaAction.preview,
+                      child: Text('Ver prévia'),
+                    ),
+                  PopupMenuItem(
+                    value: _ExerciseMediaAction.upload,
+                    child: Text(hasVideo ? 'Trocar vídeo' : 'Adicionar vídeo'),
+                  ),
+                  if (hasVideo)
+                    const PopupMenuItem(
+                      value: _ExerciseMediaAction.remove,
+                      child: Text('Remover vídeo'),
+                    ),
+                ],
+          ),
+        ],
       ),
     );
   }
@@ -1975,13 +2028,40 @@ class _ExercisePickerTile extends StatelessWidget {
 
 String _exerciseMeta(Exercicio exercicio) {
   final parts = <String>[
-    if (exercicio.primaryGroupLabel?.trim().isNotEmpty == true)
-      exercicio.primaryGroupLabel!.trim(),
-    if (exercicio.equipamento?.trim().isNotEmpty == true)
-      exercicio.equipamento!.trim(),
-    if (exercicio.nivel?.trim().isNotEmpty == true) exercicio.nivel!.trim(),
+    if (exercicio.grupoMuscularPrimario != null)
+      TaxonomyLabels.grupo[exercicio.grupoMuscularPrimario!] ??
+          _humanizeMetaToken(exercicio.grupoMuscularPrimario!.backendName),
+    if (exercicio.grupoMuscularPrimario == null &&
+        exercicio.primaryGroupLabel?.trim().isNotEmpty == true)
+      _humanizeMetaToken(exercicio.primaryGroupLabel!),
+    if (exercicio.equipamentos.isNotEmpty)
+      exercicio.equipamentos
+          .take(2)
+          .map((e) => TaxonomyLabels.equipamento[e])
+          .whereType<String>()
+          .join(' / '),
+    if (exercicio.equipamentos.isEmpty &&
+        exercicio.equipamento?.trim().isNotEmpty == true)
+      _humanizeMetaToken(exercicio.equipamento!),
+    if (exercicio.dificuldade != null)
+      TaxonomyLabels.dificuldade[exercicio.dificuldade!] ??
+          _humanizeMetaToken(exercicio.dificuldade!.backendName),
+    if (exercicio.dificuldade == null &&
+        exercicio.nivel?.trim().isNotEmpty == true)
+      _humanizeMetaToken(exercicio.nivel!),
   ];
-  return parts.isEmpty ? exercicio.mediaTrustLabel : parts.take(3).join(' · ');
+  final clean = parts.whereType<String>().where((e) => e.isNotEmpty).toList();
+  return clean.isEmpty ? exercicio.mediaTrustLabel : clean.take(3).join(' · ');
+}
+
+String _humanizeMetaToken(String value) {
+  final normalized = value.trim().replaceAll('_', ' ').toLowerCase();
+  if (normalized.isEmpty) return normalized;
+  return normalized
+      .split(RegExp(r'\s+'))
+      .where((part) => part.isNotEmpty)
+      .map((part) => part[0].toUpperCase() + part.substring(1))
+      .join(' ');
 }
 
 class _PresetSelector extends StatelessWidget {

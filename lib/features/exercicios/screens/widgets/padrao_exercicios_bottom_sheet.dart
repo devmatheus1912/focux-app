@@ -64,9 +64,12 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
             data: (all) {
               final items =
                   all.where((ex) {
-                      if (padrao != null) return ex.padraoMovimento == padrao;
-                      if (grupo != null)
+                      if (padrao != null) {
+                        return ex.padraoMovimento == padrao;
+                      }
+                      if (grupo != null) {
                         return ex.grupoMuscularPrimario == grupo;
+                      }
                       return false;
                     }).toList()
                     ..sort((a, b) {
