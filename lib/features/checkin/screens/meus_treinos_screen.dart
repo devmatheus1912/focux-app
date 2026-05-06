@@ -724,7 +724,7 @@ class _TrainingReadinessSection extends StatelessWidget {
           Text(
             hasExercises
                 ? 'Entre com foco, registre as séries e finalize com feedback.'
-                : 'O treino está reservado. Esta linha mostra o que falta para virar sessão guiada.',
+                : 'O que falta para a sessão guiada aparecer.',
             style: TextStyle(color: mute, fontSize: 12.3, height: 1.28),
           ),
           const SizedBox(height: 14),
@@ -753,31 +753,38 @@ class _TrainingReadinessSection extends StatelessWidget {
               ],
             )
           else ...[
-            _ReadinessStep(
-              icon: Icons.bookmark_added_outlined,
-              title: 'Treino reservado',
-              detail: '$ativos ativo${ativos == 1 ? '' : 's'} no plano atual',
-              state: 'feito',
-              color: EagleTokens.good,
-              isDark: isDark,
-            ),
-            const SizedBox(height: 10),
-            _ReadinessStep(
-              icon: Icons.tune_rounded,
-              title: 'Exercícios e séries',
-              detail: 'Aguardando a ficha técnica do personal',
-              state: 'pendente',
-              color: primary,
-              isDark: isDark,
-            ),
-            const SizedBox(height: 10),
-            _ReadinessStep(
-              icon: Icons.play_circle_outline_rounded,
-              title: 'Sessão guiada',
-              detail: 'Registro, vídeos e feedback entram juntos',
-              state: 'próximo',
-              color: primary,
-              isDark: isDark,
+            Row(
+              children: [
+                Expanded(
+                  child: _ReadinessMarker(
+                    icon: Icons.bookmark_added_outlined,
+                    title: 'Reservado',
+                    state: '$ativos ativo${ativos == 1 ? '' : 's'}',
+                    color: EagleTokens.good,
+                    isDark: isDark,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _ReadinessMarker(
+                    icon: Icons.tune_rounded,
+                    title: 'Ficha',
+                    state: 'pendente',
+                    color: primary,
+                    isDark: isDark,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _ReadinessMarker(
+                    icon: Icons.play_circle_outline_rounded,
+                    title: 'Sessão',
+                    state: 'proximo',
+                    color: primary,
+                    isDark: isDark,
+                  ),
+                ),
+              ],
             ),
           ],
         ],
@@ -786,18 +793,16 @@ class _TrainingReadinessSection extends StatelessWidget {
   }
 }
 
-class _ReadinessStep extends StatelessWidget {
+class _ReadinessMarker extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String detail;
   final String state;
   final Color color;
   final bool isDark;
 
-  const _ReadinessStep({
+  const _ReadinessMarker({
     required this.icon,
     required this.title,
-    required this.detail,
     required this.state,
     required this.color,
     required this.isDark,
@@ -810,66 +815,44 @@ class _ReadinessStep extends StatelessWidget {
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: isDark ? EagleTokens.darkCardHi : EagleTokens.brandSofter,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: line),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
               color: BrandPalette.soft(color, dark: isDark),
-              borderRadius: BorderRadius.circular(13),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, size: 18, color: color),
+            child: Icon(icon, size: 17, color: color),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 12.8,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  detail,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 11.2,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+          const SizedBox(height: 8),
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-            decoration: BoxDecoration(
-              color: BrandPalette.soft(color, dark: isDark),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              state,
-              style: TextStyle(
-                color: color,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w900,
-              ),
+          const SizedBox(height: 2),
+          Text(
+            state,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: mute,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
