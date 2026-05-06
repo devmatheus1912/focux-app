@@ -294,12 +294,13 @@ class _TreinoDetailBody extends StatelessWidget {
               : 'Outros';
       grouped.putIfAbsent(group, () => []).add(te);
     }
+    final durationMin = math.max(4, (treino.exercicios.length * 3.5).round());
 
     return CustomScrollView(
       slivers: [
         // Hero AppBar
         SliverAppBar(
-          expandedHeight: 320,
+          expandedHeight: 300,
           pinned: true,
           backgroundColor: isDark ? const Color(0xFF0A0F1E) : primaryDeep,
           iconTheme: const IconThemeData(color: Colors.white),
@@ -350,7 +351,7 @@ class _TreinoDetailBody extends StatelessWidget {
                 CustomPaint(painter: const _GridTexturePainter()),
                 // Content
                 Container(
-                  padding: const EdgeInsets.fromLTRB(22, 100, 22, 0),
+                  padding: const EdgeInsets.fromLTRB(22, 96, 22, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -360,11 +361,14 @@ class _TreinoDetailBody extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Container(
-                            width: 108,
-                            height: 108,
+                            width: 88,
+                            height: 88,
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.12),
+                              ),
                               boxShadow: const [
                                 BoxShadow(
                                   color: Colors.black26,
@@ -378,7 +382,7 @@ class _TreinoDetailBody extends StatelessWidget {
                               children: [
                                 Icon(
                                   Icons.fitness_center,
-                                  size: 56,
+                                  size: 44,
                                   color: Colors.white.withValues(alpha: 0.9),
                                 ),
                                 Positioned(
@@ -438,7 +442,7 @@ class _TreinoDetailBody extends StatelessWidget {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        '45min',
+                                        '~${durationMin}min',
                                         style: TextStyle(
                                           color: Colors.white.withValues(
                                             alpha: 0.7,
@@ -474,7 +478,7 @@ class _TreinoDetailBody extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 18),
 
                       // Action row
                       Row(
@@ -488,12 +492,21 @@ class _TreinoDetailBody extends StatelessWidget {
                                   extra: treinoId,
                                 );
                               },
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(16),
                               child: Container(
                                 height: 48,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.10,
+                                      ),
+                                      blurRadius: 18,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -505,7 +518,7 @@ class _TreinoDetailBody extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
-                                      'Iniciar treino',
+                                      'Abrir sessão',
                                       style: TextStyle(
                                         color: primary,
                                         fontSize: 14,
@@ -518,29 +531,39 @@ class _TreinoDetailBody extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: const Icon(
-                              Icons.send_rounded,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
                           InkWell(
                             onTap: () => _openMenu(context),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(16),
                             child: Container(
                               width: 48,
                               height: 48,
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.12),
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.send_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          InkWell(
+                            onTap: () => _openMenu(context),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.12),
+                                ),
                               ),
                               child: const Icon(
                                 Icons.more_horiz,
@@ -551,7 +574,7 @@ class _TreinoDetailBody extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 26),
+                      const SizedBox(height: 22),
                     ],
                   ),
                 ),
@@ -656,15 +679,16 @@ class _TreinoDetailBody extends StatelessWidget {
             child: Center(child: Text('Nenhum exercício no treino.')),
           )
         else ...[
-          SliverToBoxAdapter(
-            child: _DraggableExerciseOrderPanel(
-              treinoId: treinoId,
-              exercises: orderedExercises,
-              isDark: isDark,
-              primary: primary,
-              ref: ref,
+          if (orderedExercises.length > 1)
+            SliverToBoxAdapter(
+              child: _DraggableExerciseOrderPanel(
+                treinoId: treinoId,
+                exercises: orderedExercises,
+                isDark: isDark,
+                primary: primary,
+                ref: ref,
+              ),
             ),
-          ),
           ...grouped.entries.map(
             (entry) => SliverToBoxAdapter(
               child: Padding(
@@ -842,36 +866,19 @@ class _TreinoDetailBody extends StatelessWidget {
                                   );
                                 },
                                 onRemove: () async {
-                                  final confirm = await showDialog<bool>(
-                                    context: context,
-                                    builder:
-                                        (ctx) => AlertDialog(
-                                          title: const Text(
-                                            'Remover exercício',
-                                          ),
-                                          content: Text(
-                                            'Remover "${te.exercicio.nome}" do treino?',
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed:
-                                                  () =>
-                                                      Navigator.pop(ctx, false),
-                                              child: const Text('Cancelar'),
-                                            ),
-                                            FilledButton(
-                                              style: FilledButton.styleFrom(
-                                                backgroundColor:
-                                                    EagleTokens.bad,
-                                              ),
-                                              onPressed:
-                                                  () =>
-                                                      Navigator.pop(ctx, true),
-                                              child: const Text('Remover'),
-                                            ),
-                                          ],
+                                  final confirm =
+                                      await showModalBottomSheet<bool>(
+                                        context: context,
+                                        backgroundColor: Colors.transparent,
+                                        barrierColor: Colors.black.withValues(
+                                          alpha: 0.34,
                                         ),
-                                  );
+                                        builder:
+                                            (ctx) => _RemoveExerciseSheet(
+                                              title: te.exercicio.nome,
+                                              isDark: isDark,
+                                            ),
+                                      );
                                   if (confirm == true && context.mounted) {
                                     try {
                                       await repo.removerExercicio(
@@ -1174,10 +1181,23 @@ class _MiniMetric extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+            color:
+                isDark
+                    ? EagleTokens.darkLine
+                    : EagleTokens.line.withValues(alpha: 0.82),
           ),
+          boxShadow:
+              isDark
+                  ? null
+                  : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.025),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
         ),
         child: Column(
           children: [
@@ -1468,6 +1488,153 @@ class _ExerciseMeta extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _RemoveExerciseSheet extends StatelessWidget {
+  final String title;
+  final bool isDark;
+
+  const _RemoveExerciseSheet({required this.title, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final card = isDark ? EagleTokens.darkCard : Colors.white;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final border =
+        isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : EagleTokens.line.withValues(alpha: 0.9);
+    final dangerFill =
+        isDark ? const Color(0xFFB24646) : const Color(0xFFA83A3A);
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          decoration: BoxDecoration(
+            color: card,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.14),
+                blurRadius: 34,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: border,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: EagleTokens.bad.withValues(
+                        alpha: isDark ? 0.16 : 0.10,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      Icons.remove_circle_outline_rounded,
+                      color: EagleTokens.bad,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Remover exercício?',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '$title sai apenas deste treino. O exercício continua disponível na biblioteca.',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 13,
+                            height: 1.38,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        foregroundColor: ink,
+                        side: BorderSide(color: border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        backgroundColor: dangerFill,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text(
+                        'Remover',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
