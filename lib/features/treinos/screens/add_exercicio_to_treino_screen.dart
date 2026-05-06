@@ -31,6 +31,7 @@ class _AddExercicioToTreinoScreenState
   final _grupoSupersetCtrl = TextEditingController(text: '1');
   String _presetId = 'hypertrophy';
   String _tipoSerie = 'NORMAL';
+  int _tabIndex = 0;
   bool _loading = false;
   String? _error;
 
@@ -173,6 +174,55 @@ class _AddExercicioToTreinoScreenState
     }
   }
 
+  Widget _buildTabContent({
+    required BuildContext context,
+    required List<Exercicio> exercicios,
+    required bool isDark,
+    required Color primary,
+  }) {
+    switch (_tabIndex) {
+      case 1:
+        return SizedBox(
+          height: 286,
+          child: PadraoMovimentoGrid(
+            onAdicionar:
+                (exercicio) => setState(() {
+                  _selecionado = exercicio;
+                  _tabIndex = 0;
+                  _error = null;
+                }),
+          ),
+        );
+      case 2:
+        return SizedBox(
+          height: 286,
+          child: TemplateSplitPicker(
+            onAdicionar: (exercicio) async {
+              await _adicionarRapido(exercicio);
+              AnalyticsService.instance.track(
+                'template_uso',
+                props: {'treinoId': widget.treinoId, 'exId': exercicio.id},
+              );
+            },
+          ),
+        );
+      default:
+        return _ExercisePickerCard(
+          exercicio: _selecionado,
+          isDark: isDark,
+          primary: primary,
+          total: exercicios.length,
+          onTap: () => _openExercisePicker(exercicios),
+          onCreate: () async {
+            final criado = await context.push<bool>('/exercicios/novo');
+            if (criado == true) {
+              ref.invalidate(exerciciosProvider);
+            }
+          },
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final exerciciosAsync = ref.watch(exerciciosProvider);
@@ -245,73 +295,27 @@ class _AddExercicioToTreinoScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          SizedBox(
-                            height: 330,
-                            child: DefaultTabController(
-                              length: 3,
-                              child: Column(
-                                children: [
-                                  const TabBar(
-                                    tabs: [
-                                      Tab(text: 'Buscar'),
-                                      Tab(text: 'Padrao'),
-                                      Tab(text: 'Templates'),
-                                    ],
-                                  ),
-                                  Expanded(
-                                    child: TabBarView(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                            0,
-                                            18,
-                                            0,
-                                            0,
-                                          ),
-                                          child: _ExercisePickerCard(
-                                            exercicio: _selecionado,
-                                            isDark: isDark,
-                                            primary: primary,
-                                            total: exercicios.length,
-                                            onTap:
-                                                () => _openExercisePicker(
-                                                  exercicios,
-                                                ),
-                                            onCreate: () async {
-                                              final criado = await context
-                                                  .push<bool>(
-                                                    '/exercicios/novo',
-                                                  );
-                                              if (criado == true) {
-                                                ref.invalidate(
-                                                  exerciciosProvider,
-                                                );
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                        PadraoMovimentoGrid(
-                                          onAdicionar:
-                                              (exercicio) => setState(
-                                                () => _selecionado = exercicio,
-                                              ),
-                                        ),
-                                        TemplateSplitPicker(
-                                          onAdicionar: (exercicio) async {
-                                            await _adicionarRapido(exercicio);
-                                            AnalyticsService.instance.track(
-                                              'template_uso',
-                                              props: {
-                                                'treinoId': widget.treinoId,
-                                                'exId': exercicio.id,
-                                              },
-                                            );
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                          _AddExerciseTabStrip(
+                            selectedIndex: _tabIndex,
+                            primary: primary,
+                            isDark: isDark,
+                            onChanged: (index) {
+                              HapticFeedback.selectionClick();
+                              setState(() => _tabIndex = index);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 180),
+                            switchInCurve: Curves.easeOutCubic,
+                            switchOutCurve: Curves.easeOutCubic,
+                            child: KeyedSubtree(
+                              key: ValueKey(_tabIndex),
+                              child: _buildTabContent(
+                                context: context,
+                                exercicios: exercicios,
+                                isDark: isDark,
+                                primary: primary,
                               ),
                             ),
                           ),
@@ -634,6 +638,75 @@ class _AddExercicioToTreinoScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AddExerciseTabStrip extends StatelessWidget {
+  final int selectedIndex;
+  final Color primary;
+  final bool isDark;
+  final ValueChanged<int> onChanged;
+
+  const _AddExerciseTabStrip({
+    required this.selectedIndex,
+    required this.primary,
+    required this.isDark,
+    required this.onChanged,
+  });
+
+  static const _labels = ['Buscar', 'Padrão', 'Templates'];
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: line.withValues(alpha: 0.72))),
+      ),
+      child: Row(
+        children: [
+          for (var i = 0; i < _labels.length; i++)
+            Expanded(
+              child: InkWell(
+                onTap: () => onChanged(i),
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _labels[i],
+                        style: TextStyle(
+                          color: selectedIndex == i ? primary : mute,
+                          fontSize: 12,
+                          fontWeight:
+                              selectedIndex == i
+                                  ? FontWeight.w900
+                                  : FontWeight.w700,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        width: selectedIndex == i ? 36 : 0,
+                        height: 3,
+                        decoration: BoxDecoration(
+                          color: primary,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

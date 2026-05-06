@@ -37,18 +37,16 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final all = ref.watch(exerciciosProvider).maybeWhen(
-          data: (value) => value,
-          orElse: () => const <Exercicio>[],
-        );
+    final all = ref
+        .watch(exerciciosProvider)
+        .maybeWhen(data: (value) => value, orElse: () => const <Exercicio>[]);
     final items =
         _mode == PadraoGridMode.padrao
             ? [
               for (final padrao in _padroes)
                 _GridItem(
                   label: TaxonomyLabels.padrao[padrao] ?? padrao.name,
-                  count:
-                      all.where((ex) => ex.padraoMovimento == padrao).length,
+                  count: all.where((ex) => ex.padraoMovimento == padrao).length,
                   icon: Icons.account_tree_rounded,
                   onTap: () => _open(padrao: padrao),
                 ),
@@ -84,7 +82,7 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
         ),
         Expanded(
           child: GridView.builder(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 96),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               childAspectRatio: 1.55,

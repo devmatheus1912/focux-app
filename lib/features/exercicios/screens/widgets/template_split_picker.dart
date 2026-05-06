@@ -13,7 +13,7 @@ class TemplateSplitPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       itemCount: templateSplits.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
