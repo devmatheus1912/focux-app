@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -271,6 +272,22 @@ class _AddExercicioToTreinoScreenState
     }
   }
 
+  Future<void> _previewSelectedExerciseVideo() async {
+    final exercicio = _selecionado;
+    final videoUrl = exercicio?.videoUrl?.trim();
+    if (exercicio == null || videoUrl == null || videoUrl.isEmpty) return;
+    HapticFeedback.selectionClick();
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+      isScrollControlled: true,
+      builder:
+          (_) =>
+              _ExerciseVideoPreviewSheet(exercicio: exercicio, url: videoUrl),
+    );
+  }
+
   Widget _buildTabContent({
     required BuildContext context,
     required List<Exercicio> exercicios,
@@ -311,6 +328,7 @@ class _AddExercicioToTreinoScreenState
           total: exercicios.length,
           onTap: () => _openExercisePicker(exercicios),
           mediaLoading: _mediaLoading,
+          onPreviewVideo: _previewSelectedExerciseVideo,
           onUploadVideo: _uploadSelectedExerciseVideo,
           onRemoveVideo: _removeSelectedExerciseVideo,
           onCreate: () async {
@@ -819,6 +837,7 @@ class _ExercisePickerCard extends StatelessWidget {
   final int total;
   final VoidCallback onTap;
   final bool mediaLoading;
+  final VoidCallback onPreviewVideo;
   final VoidCallback onUploadVideo;
   final VoidCallback onRemoveVideo;
   final VoidCallback onCreate;
@@ -830,6 +849,7 @@ class _ExercisePickerCard extends StatelessWidget {
     required this.total,
     required this.onTap,
     required this.mediaLoading,
+    required this.onPreviewVideo,
     required this.onUploadVideo,
     required this.onRemoveVideo,
     required this.onCreate,
@@ -1035,6 +1055,18 @@ class _ExercisePickerCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
+              if (exercicio!.videoUrl?.trim().isNotEmpty == true) ...[
+                Expanded(
+                  child: _ExerciseMediaButton(
+                    icon: Icons.play_circle_outline_rounded,
+                    label: 'Ver vídeo',
+                    primary: primary,
+                    isDark: isDark,
+                    onTap: mediaLoading ? null : onPreviewVideo,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
               Expanded(
                 child: _ExerciseMediaButton(
                   icon:
@@ -1053,7 +1085,7 @@ class _ExercisePickerCard extends StatelessWidget {
                 ),
               ),
               if (exercicio!.videoUrl?.trim().isNotEmpty == true) ...[
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _ExerciseMediaButton(
                     icon: Icons.delete_outline_rounded,
@@ -1259,6 +1291,251 @@ class _RemoveExerciseVideoSheet extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ExerciseVideoPreviewSheet extends StatefulWidget {
+  final Exercicio exercicio;
+  final String url;
+
+  const _ExerciseVideoPreviewSheet({
+    required this.exercicio,
+    required this.url,
+  });
+
+  @override
+  State<_ExerciseVideoPreviewSheet> createState() =>
+      _ExerciseVideoPreviewSheetState();
+}
+
+class _ExerciseVideoPreviewSheetState
+    extends State<_ExerciseVideoPreviewSheet> {
+  late final VideoPlayerController _controller;
+  bool _ready = false;
+  bool _failed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+      ..initialize()
+          .then((_) {
+            if (!mounted) return;
+            setState(() => _ready = true);
+            _controller.play();
+          })
+          .catchError((_) {
+            if (mounted) setState(() => _failed = true);
+          });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final bottom = MediaQuery.of(context).padding.bottom;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(12, 0, 12, bottom + 10),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          decoration: BoxDecoration(
+            color: isDark ? EagleTokens.darkCard : Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: line.withValues(alpha: 0.9)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.16),
+                blurRadius: 30,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color:
+                        isDark
+                            ? Colors.white.withValues(alpha: 0.16)
+                            : EagleTokens.line,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: EagleTokens.brandSofter,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(
+                      Icons.play_circle_outline_rounded,
+                      color: EagleTokens.brand,
+                      size: 21,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.exercicio.nome,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Confira se a demonstração está correta.',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close_rounded, color: mute),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  color: Colors.black,
+                  child:
+                      _failed
+                          ? const _VideoPreviewFallback()
+                          : !_ready
+                          ? const SizedBox(
+                            height: 210,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            ),
+                          )
+                          : AspectRatio(
+                            aspectRatio: _controller.value.aspectRatio,
+                            child: VideoPlayer(_controller),
+                          ),
+                ),
+              ),
+              if (_ready && !_failed) ...[
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed:
+                            () => setState(() {
+                              _controller.value.isPlaying
+                                  ? _controller.pause()
+                                  : _controller.play();
+                            }),
+                        icon: Icon(
+                          _controller.value.isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                        ),
+                        label: Text(
+                          _controller.value.isPlaying ? 'Pausar' : 'Reproduzir',
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: EagleTokens.brand,
+                          minimumSize: const Size.fromHeight(44),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.check_rounded),
+                        label: const Text('Está certo'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(44),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VideoPreviewFallback extends StatelessWidget {
+  const _VideoPreviewFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 210,
+      child: Padding(
+        padding: EdgeInsets.all(18),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.video_file_rounded, color: Colors.white, size: 34),
+            SizedBox(height: 10),
+            Text(
+              'Vídeo enviado, mas este aparelho não conseguiu reproduzir o codec.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            SizedBox(height: 5),
+            Text(
+              'Para prévia no Android, prefira MP4 H.264.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white70, fontSize: 12.5),
+            ),
+          ],
         ),
       ),
     );
