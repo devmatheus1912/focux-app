@@ -508,48 +508,65 @@ class _TrainingPlanCard extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    concluido
-                        ? 'Treino finalizado. Historico salvo.'
-                        : !hasExercises
-                        ? 'Plano recebido. Aguarde a liberação dos exercícios.'
-                        : done == 0
-                        ? 'Pronto para iniciar com registro de séries.'
-                        : '$done de ${treino.exercicios.length} exercicios ja marcados.',
-                    style: TextStyle(
-                      color: mute,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+            if (!hasExercises && !concluido) ...[
+              Text(
+                'Treino reservado. A ficha abre assim que o personal liberar os exercícios.',
+                style: TextStyle(
+                  color: mute,
+                  fontSize: 12.5,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
                 ),
-                FilledButton.icon(
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
                   onPressed: handleAction,
                   style: FilledButton.styleFrom(
-                    minimumSize: const Size(0, 44),
+                    minimumSize: const Size.fromHeight(46),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                  icon: Icon(
-                    concluido
-                        ? Icons.replay_rounded
-                        : hasExercises
-                        ? Icons.play_arrow_rounded
-                        : Icons.info_outline_rounded,
-                    size: 18,
-                  ),
-                  label: Text(
-                    concluido
-                        ? 'Rever'
-                        : hasExercises
-                        ? 'Iniciar'
-                        : 'Status',
-                  ),
+                  icon: const Icon(Icons.info_outline_rounded, size: 18),
+                  label: const Text('Ver status do treino'),
                 ),
-              ],
-            ),
+              ),
+            ] else
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      concluido
+                          ? 'Treino finalizado. Historico salvo.'
+                          : done == 0
+                          ? 'Pronto para iniciar com registro de séries.'
+                          : '$done de ${treino.exercicios.length} exercicios ja marcados.',
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  FilledButton.icon(
+                    onPressed: handleAction,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    icon: Icon(
+                      concluido
+                          ? Icons.replay_rounded
+                          : Icons.play_arrow_rounded,
+                      size: 18,
+                    ),
+                    label: Text(concluido ? 'Rever' : 'Iniciar'),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
@@ -695,7 +712,7 @@ class _TrainingReadinessSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Antes de treinar',
+            hasExercises ? 'Antes de treinar' : 'Próxima liberação',
             style: TextStyle(
               color: ink,
               fontSize: 17,
@@ -707,35 +724,153 @@ class _TrainingReadinessSection extends StatelessWidget {
           Text(
             hasExercises
                 ? 'Entre com foco, registre as séries e finalize com feedback.'
-                : 'Seu plano já está salvo. Assim que o personal liberar os exercícios, a sessão fica pronta.',
+                : 'O treino está reservado. Esta linha mostra o que falta para virar sessão guiada.',
             style: TextStyle(color: mute, fontSize: 12.3, height: 1.28),
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: _ReadinessPill(
-                  icon: Icons.assignment_turned_in_outlined,
-                  title: hasExercises ? 'Registro' : 'Status',
-                  value:
-                      hasExercises
-                          ? '$totalConcluidos/$totalExercicios'
-                          : 'aguardando',
-                  color: primary,
-                  isDark: isDark,
+          if (hasExercises)
+            Row(
+              children: [
+                Expanded(
+                  child: _ReadinessPill(
+                    icon: Icons.assignment_turned_in_outlined,
+                    title: 'Registro',
+                    value: '$totalConcluidos/$totalExercicios',
+                    color: primary,
+                    isDark: isDark,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _ReadinessPill(
-                  icon: Icons.local_fire_department_outlined,
-                  title: 'Rotina',
-                  value: '$ativos ativo${ativos == 1 ? '' : 's'}',
-                  color: primary,
-                  isDark: isDark,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _ReadinessPill(
+                    icon: Icons.local_fire_department_outlined,
+                    title: 'Rotina',
+                    value: '$ativos ativo${ativos == 1 ? '' : 's'}',
+                    color: primary,
+                    isDark: isDark,
+                  ),
                 ),
+              ],
+            )
+          else ...[
+            _ReadinessStep(
+              icon: Icons.bookmark_added_outlined,
+              title: 'Treino reservado',
+              detail: '$ativos ativo${ativos == 1 ? '' : 's'} no plano atual',
+              state: 'feito',
+              color: EagleTokens.good,
+              isDark: isDark,
+            ),
+            const SizedBox(height: 10),
+            _ReadinessStep(
+              icon: Icons.tune_rounded,
+              title: 'Exercícios e séries',
+              detail: 'Aguardando a ficha técnica do personal',
+              state: 'pendente',
+              color: primary,
+              isDark: isDark,
+            ),
+            const SizedBox(height: 10),
+            _ReadinessStep(
+              icon: Icons.play_circle_outline_rounded,
+              title: 'Sessão guiada',
+              detail: 'Registro, vídeos e feedback entram juntos',
+              state: 'próximo',
+              color: primary,
+              isDark: isDark,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadinessStep extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String detail;
+  final String state;
+  final Color color;
+  final bool isDark;
+
+  const _ReadinessStep({
+    required this.icon,
+    required this.title,
+    required this.detail,
+    required this.state,
+    required this.color,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCardHi : EagleTokens.brandSofter,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: BrandPalette.soft(color, dark: isDark),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Icon(icon, size: 18, color: color),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 12.8,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  detail,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 11.2,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            decoration: BoxDecoration(
+              color: BrandPalette.soft(color, dark: isDark),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              state,
+              style: TextStyle(
+                color: color,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w900,
               ),
-            ],
+            ),
           ),
         ],
       ),
