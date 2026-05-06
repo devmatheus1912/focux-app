@@ -129,7 +129,7 @@ class _PersonalDashboardScreenState
             data: (data) {
               final screenWidth = MediaQuery.sizeOf(context).width;
               final isCompactPhone = screenWidth < 390;
-              final shortcutAspectRatio = isCompactPhone ? 2.35 : 2.65;
+              final shortcutAspectRatio = isCompactPhone ? 2.75 : 3.05;
 
               // Computed values for hero card
               final monthNames = [
@@ -721,7 +721,7 @@ class _PersonalDashboardScreenState
                     ),
 
                     // ATALHOS — 6 quick action shortcuts (design spec)
-                    const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                    const SliverToBoxAdapter(child: SizedBox(height: 18)),
                     SliverToBoxAdapter(
                       child: _SectionTitle(
                         title: 'Ferramentas',
@@ -740,7 +740,7 @@ class _PersonalDashboardScreenState
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           crossAxisCount: 2,
-                          mainAxisSpacing: 10,
+                          mainAxisSpacing: 9,
                           crossAxisSpacing: 10,
                           childAspectRatio: shortcutAspectRatio,
                           children: [
