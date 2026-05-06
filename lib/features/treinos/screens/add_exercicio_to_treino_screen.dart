@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -151,6 +152,27 @@ class _AddExercicioToTreinoScreenState
     }
   }
 
+  Future<void> _openExercisePicker(List<Exercicio> exercicios) async {
+    HapticFeedback.selectionClick();
+    final selected = await showModalBottomSheet<Exercicio>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.34),
+      isScrollControlled: true,
+      builder:
+          (sheetContext) => _ExercisePickerSheet(
+            exercicios: exercicios,
+            selected: _selecionado,
+          ),
+    );
+    if (selected != null && mounted) {
+      setState(() {
+        _selecionado = selected;
+        _error = null;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final exerciciosAsync = ref.watch(exerciciosProvider);
@@ -224,7 +246,7 @@ class _AddExercicioToTreinoScreenState
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           SizedBox(
-                            height: 430,
+                            height: 370,
                             child: DefaultTabController(
                               length: 3,
                               child: Column(
@@ -240,78 +262,32 @@ class _AddExercicioToTreinoScreenState
                                     child: TabBarView(
                                       children: [
                                         Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 12,
+                                          padding: const EdgeInsets.fromLTRB(
+                                            0,
+                                            18,
+                                            0,
+                                            0,
                                           ),
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Expanded(
-                                                child: DropdownButtonFormField<
-                                                  Exercicio
-                                                >(
-                                                  value: _selecionado,
-                                                  isExpanded: true,
-                                                  decoration: InputDecoration(
-                                                    labelText: 'Exercicio',
-                                                    filled: true,
-                                                    fillColor:
-                                                        isDark
-                                                            ? EagleTokens
-                                                                .darkCardHi
-                                                            : EagleTokens.card,
-                                                    border: OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            14,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                  items:
-                                                      exercicios
-                                                          .map(
-                                                            (
-                                                              e,
-                                                            ) => DropdownMenuItem(
-                                                              value: e,
-                                                              child: Text(
-                                                                e.nome,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                style:
-                                                                    TextStyle(
-                                                                      color:
-                                                                          ink,
-                                                                    ),
-                                                              ),
-                                                            ),
-                                                          )
-                                                          .toList(),
-                                                  onChanged:
-                                                      (v) => setState(
-                                                        () => _selecionado = v,
-                                                      ),
+                                          child: _ExercisePickerCard(
+                                            exercicio: _selecionado,
+                                            isDark: isDark,
+                                            primary: primary,
+                                            total: exercicios.length,
+                                            onTap:
+                                                () => _openExercisePicker(
+                                                  exercicios,
                                                 ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              IconButton.filledTonal(
-                                                icon: const Icon(Icons.add),
-                                                tooltip: 'Criar novo exercicio',
-                                                onPressed: () async {
-                                                  final criado = await context
-                                                      .push<bool>(
-                                                        '/exercicios/novo',
-                                                      );
-                                                  if (criado == true) {
-                                                    ref.invalidate(
-                                                      exerciciosProvider,
-                                                    );
-                                                  }
-                                                },
-                                              ),
-                                            ],
+                                            onCreate: () async {
+                                              final criado = await context
+                                                  .push<bool>(
+                                                    '/exercicios/novo',
+                                                  );
+                                              if (criado == true) {
+                                                ref.invalidate(
+                                                  exerciciosProvider,
+                                                );
+                                              }
+                                            },
                                           ),
                                         ),
                                         PadraoMovimentoGrid(
@@ -669,6 +645,486 @@ class _AddExercicioToTreinoScreenState
       ),
     );
   }
+}
+
+class _ExercisePickerCard extends StatelessWidget {
+  final Exercicio? exercicio;
+  final bool isDark;
+  final Color primary;
+  final int total;
+  final VoidCallback onTap;
+  final VoidCallback onCreate;
+
+  const _ExercisePickerCard({
+    required this.exercicio,
+    required this.isDark,
+    required this.primary,
+    required this.total,
+    required this.onTap,
+    required this.onCreate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final selected = exercicio != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(22),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color:
+                        isDark
+                            ? EagleTokens.darkCardHi
+                            : selected
+                            ? EagleTokens.brandSofter
+                            : Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color:
+                          selected
+                              ? primary.withValues(alpha: 0.28)
+                              : line.withValues(alpha: 0.95),
+                    ),
+                    boxShadow:
+                        isDark
+                            ? null
+                            : [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.045),
+                                blurRadius: 22,
+                                offset: const Offset(0, 12),
+                              ),
+                            ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color:
+                              selected
+                                  ? primary
+                                  : primary.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          selected ? Icons.check_rounded : Icons.search_rounded,
+                          color: selected ? Colors.white : primary,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              selected ? exercicio!.nome : 'Escolher exercício',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              selected
+                                  ? _exerciseMeta(exercicio!)
+                                  : '$total exercícios na biblioteca',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: mute,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(Icons.expand_more_rounded, color: mute, size: 22),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            InkWell(
+              onTap: onCreate,
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color:
+                      isDark
+                          ? Colors.white.withValues(alpha: 0.06)
+                          : EagleTokens.brandSofter,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color:
+                        isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : primary.withValues(alpha: 0.10),
+                  ),
+                ),
+                child: Icon(Icons.add_rounded, color: primary, size: 26),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color:
+                isDark
+                    ? Colors.white.withValues(alpha: 0.035)
+                    : EagleTokens.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: line.withValues(alpha: 0.76)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.auto_awesome_motion_rounded, color: primary, size: 17),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  selected
+                      ? 'Revise a prescrição abaixo antes de adicionar.'
+                      : 'Busque pelo nome ou use padrões/templates para montar rápido.',
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 12,
+                    height: 1.25,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ExercisePickerSheet extends StatefulWidget {
+  final List<Exercicio> exercicios;
+  final Exercicio? selected;
+
+  const _ExercisePickerSheet({
+    required this.exercicios,
+    required this.selected,
+  });
+
+  @override
+  State<_ExercisePickerSheet> createState() => _ExercisePickerSheetState();
+}
+
+class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
+  final _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final bottom = MediaQuery.of(context).padding.bottom;
+    final normalized = _query.trim().toLowerCase();
+    final filtered =
+        normalized.isEmpty
+            ? widget.exercicios
+            : widget.exercicios.where((exercicio) {
+              final haystack =
+                  '${exercicio.nome} ${exercicio.musculoAlvo ?? ''} '
+                          '${exercicio.equipamento ?? ''} ${exercicio.nivel ?? ''}'
+                      .toLowerCase();
+              return haystack.contains(normalized);
+            }).toList();
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(10, 0, 10, bottom + 8),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.82,
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          decoration: BoxDecoration(
+            color: isDark ? EagleTokens.darkCard : Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color:
+                  isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : EagleTokens.lineSoft,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.16),
+                blurRadius: 30,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color:
+                      isDark
+                          ? Colors.white.withValues(alpha: 0.16)
+                          : EagleTokens.line,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: EagleTokens.brandSofter,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(Icons.fitness_center_rounded, color: primary),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Biblioteca de exercícios',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          '${filtered.length} de ${widget.exercicios.length} disponíveis',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _searchCtrl,
+                autofocus: true,
+                onChanged: (value) => setState(() => _query = value),
+                decoration: InputDecoration(
+                  hintText: 'Buscar por nome, músculo ou equipamento',
+                  prefixIcon: Icon(Icons.search_rounded, color: primary),
+                  filled: true,
+                  fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide(color: line),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide(color: line),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide(color: primary, width: 1.4),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Flexible(
+                child:
+                    filtered.isEmpty
+                        ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(28),
+                            child: Text(
+                              'Nenhum exercício encontrado.',
+                              style: TextStyle(
+                                color: mute,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        )
+                        : ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: filtered.length,
+                          separatorBuilder:
+                              (_, __) => const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+                            final exercicio = filtered[index];
+                            final selected =
+                                widget.selected?.id == exercicio.id;
+                            return _ExercisePickerTile(
+                              exercicio: exercicio,
+                              selected: selected,
+                              primary: primary,
+                              isDark: isDark,
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                Navigator.pop(context, exercicio);
+                              },
+                            );
+                          },
+                        ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ExercisePickerTile extends StatelessWidget {
+  final Exercicio exercicio;
+  final bool selected;
+  final Color primary;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _ExercisePickerTile({
+    required this.exercicio,
+    required this.selected,
+    required this.primary,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color:
+              selected
+                  ? EagleTokens.brandSofter
+                  : isDark
+                  ? Colors.white.withValues(alpha: 0.03)
+                  : Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color:
+                selected
+                    ? primary.withValues(alpha: 0.30)
+                    : line.withValues(alpha: 0.9),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: selected ? primary : primary.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                selected ? Icons.check_rounded : _trustIcon(exercicio),
+                color:
+                    selected ? Colors.white : _trustColor(exercicio, primary),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    exercicio.nome,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _exerciseMeta(exercicio),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: mute, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+String _exerciseMeta(Exercicio exercicio) {
+  final parts = <String>[
+    if (exercicio.primaryGroupLabel?.trim().isNotEmpty == true)
+      exercicio.primaryGroupLabel!.trim(),
+    if (exercicio.equipamento?.trim().isNotEmpty == true)
+      exercicio.equipamento!.trim(),
+    if (exercicio.nivel?.trim().isNotEmpty == true) exercicio.nivel!.trim(),
+  ];
+  return parts.isEmpty ? exercicio.mediaTrustLabel : parts.take(3).join(' · ');
 }
 
 class _PresetSelector extends StatelessWidget {
