@@ -72,7 +72,7 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
             segments: const [
               ButtonSegment(
                 value: PadraoGridMode.padrao,
-                label: Text('Padrao'),
+                label: Text('Movimento'),
               ),
               ButtonSegment(value: PadraoGridMode.grupo, label: Text('Grupo')),
             ],
@@ -147,7 +147,7 @@ class _GridItem extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 3),
-              Text('$count exercicios'),
+              Text('$count exercícios'),
             ],
           ),
         ),
