@@ -1001,39 +1001,16 @@ class _ExercisePickerCard extends StatelessWidget {
                                     selected
                                         ? exercicio!.nome
                                         : 'Escolher exercício',
-                                    maxLines: 1,
+                                    maxLines: selected ? 2 : 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       color: ink,
                                       fontSize: 15,
+                                      height: 1.12,
                                       fontWeight: FontWeight.w900,
                                     ),
                                   ),
                                 ),
-                                if (hasMediaIssue) ...[
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: EagleTokens.warn.withValues(
-                                        alpha: isDark ? 0.16 : 0.12,
-                                      ),
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: const Text(
-                                      'Sem mídia',
-                                      style: TextStyle(
-                                        color: EagleTokens.warn,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: 0,
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ],
                             ),
                             const SizedBox(height: 4),
@@ -1041,11 +1018,12 @@ class _ExercisePickerCard extends StatelessWidget {
                               selected
                                   ? _exerciseMeta(exercicio!)
                                   : '$total exercícios na biblioteca',
-                              maxLines: 1,
+                              maxLines: selected ? 2 : 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: mute,
                                 fontSize: 12,
+                                height: 1.18,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -1187,7 +1165,7 @@ class _ExerciseMediaStatus extends StatelessWidget {
     final statusSubtitle =
         hasVideo
             ? 'Confira a prévia ou troque a mídia deste exercício.'
-            : 'Adicione uma demonstração quando quiser revisar com precisão.';
+            : 'Adicione sua demonstração para revisar antes de prescrever.';
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
@@ -1228,7 +1206,7 @@ class _ExerciseMediaStatus extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   statusSubtitle,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: mute,
@@ -1253,33 +1231,54 @@ class _ExerciseMediaStatus extends StatelessWidget {
               ),
               child: const Text('Prévia'),
             ),
-          PopupMenuButton<_ExerciseMediaAction>(
-            enabled: !mediaLoading,
-            tooltip: 'Ações de vídeo',
-            icon: Icon(Icons.more_horiz_rounded, color: mute),
-            onSelected: (action) {
-              if (action == _ExerciseMediaAction.preview) onPreviewVideo();
-              if (action == _ExerciseMediaAction.upload) onUploadVideo();
-              if (action == _ExerciseMediaAction.remove) onRemoveVideo();
-            },
-            itemBuilder:
-                (context) => [
-                  if (hasVideo)
-                    const PopupMenuItem(
+          if (hasVideo)
+            PopupMenuButton<_ExerciseMediaAction>(
+              enabled: !mediaLoading,
+              tooltip: 'Ações de vídeo',
+              icon: Icon(Icons.more_horiz_rounded, color: mute),
+              onSelected: (action) {
+                if (action == _ExerciseMediaAction.preview) onPreviewVideo();
+                if (action == _ExerciseMediaAction.upload) onUploadVideo();
+                if (action == _ExerciseMediaAction.remove) onRemoveVideo();
+              },
+              itemBuilder:
+                  (context) => const [
+                    PopupMenuItem(
                       value: _ExerciseMediaAction.preview,
                       child: Text('Ver prévia'),
                     ),
-                  PopupMenuItem(
-                    value: _ExerciseMediaAction.upload,
-                    child: Text(hasVideo ? 'Trocar vídeo' : 'Adicionar vídeo'),
-                  ),
-                  if (hasVideo)
-                    const PopupMenuItem(
+                    PopupMenuItem(
+                      value: _ExerciseMediaAction.upload,
+                      child: Text('Trocar vídeo'),
+                    ),
+                    PopupMenuItem(
                       value: _ExerciseMediaAction.remove,
                       child: Text('Remover vídeo'),
                     ),
-                ],
-          ),
+                  ],
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: FilledButton(
+                onPressed: mediaLoading ? null : onUploadVideo,
+                style: FilledButton.styleFrom(
+                  backgroundColor: primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(86, 36),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  visualDensity: VisualDensity.compact,
+                  textStyle: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                ),
+                child: const Text('Adicionar'),
+              ),
+            ),
         ],
       ),
     );
