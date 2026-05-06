@@ -1085,6 +1085,7 @@ class _VideoPlayerState extends State<_VideoPlayer> {
   bool _ready = false;
   bool _failed = false;
   int _attempt = 0;
+  static const int _maxProcessingAttempts = 10;
 
   @override
   void initState() {
@@ -1111,9 +1112,10 @@ class _VideoPlayerState extends State<_VideoPlayer> {
       await controller.dispose();
       if (!mounted || _ctrl != controller) return;
       _ctrl = null;
-      if (_attempt < 4) {
+      if (_attempt < _maxProcessingAttempts) {
         _attempt += 1;
-        await Future<void>.delayed(Duration(seconds: 2 + _attempt));
+        final delaySeconds = (2 + _attempt).clamp(3, 12);
+        await Future<void>.delayed(Duration(seconds: delaySeconds));
         if (mounted) await _loadVideo();
         return;
       }
@@ -1152,13 +1154,13 @@ class _VideoPlayerState extends State<_VideoPlayer> {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Video enviado, mas este aparelho nao consegue reproduzir o codec.',
+              'Video enviado, mas a previa ainda nao ficou disponivel.',
               textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
             Text(
-              'Use MP4 H.264 para preview no Android/Pixel emulator.',
+              'Tente abrir novamente em instantes. Se persistir, use MP4 H.264.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,

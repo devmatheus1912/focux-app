@@ -209,7 +209,9 @@ class _AddExercicioToTreinoScreenState
       messenger.clearSnackBars();
       messenger.showSnackBar(
         const SnackBar(
-          content: Text('Vídeo do exercício atualizado.'),
+          content: Text(
+            'Vídeo enviado. A prévia pode levar alguns segundos para liberar.',
+          ),
           backgroundColor: EagleTokens.good,
         ),
       );
@@ -1437,6 +1439,7 @@ class _ExerciseVideoPreviewSheetState
   bool _ready = false;
   bool _failed = false;
   int _attempt = 0;
+  static const int _maxProcessingAttempts = 10;
 
   @override
   void initState() {
@@ -1465,9 +1468,10 @@ class _ExerciseVideoPreviewSheetState
       await controller.dispose();
       if (!mounted || _controller != controller) return;
       _controller = null;
-      if (_attempt < 4) {
+      if (_attempt < _maxProcessingAttempts) {
         _attempt += 1;
-        await Future<void>.delayed(Duration(seconds: 2 + _attempt));
+        final delaySeconds = (2 + _attempt).clamp(3, 12);
+        await Future<void>.delayed(Duration(seconds: delaySeconds));
         if (mounted) await _loadPreview();
         return;
       }
@@ -1674,7 +1678,7 @@ class _VideoPreparingPreview extends StatelessWidget {
           ),
           SizedBox(height: 5),
           Text(
-            'Na primeira abertura, o Cloudinary pode levar alguns segundos.',
+            'Na primeira abertura, o Cloudinary pode levar até um minuto.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white70, fontSize: 12.5),
           ),
@@ -1699,7 +1703,7 @@ class _VideoPreviewFallback extends StatelessWidget {
             Icon(Icons.video_file_rounded, color: Colors.white, size: 34),
             SizedBox(height: 10),
             Text(
-              'Vídeo enviado, mas este aparelho não conseguiu reproduzir o codec.',
+              'Vídeo enviado, mas a prévia ainda não ficou disponível.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,
@@ -1708,7 +1712,7 @@ class _VideoPreviewFallback extends StatelessWidget {
             ),
             SizedBox(height: 5),
             Text(
-              'Para prévia no Android, prefira MP4 H.264.',
+              'Tente abrir novamente em instantes. Se persistir, envie um MP4 H.264.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white70, fontSize: 12.5),
             ),
