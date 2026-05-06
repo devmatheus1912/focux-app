@@ -225,9 +225,9 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
         children: [
           _TemplateProgressCard(done: _done.length, total: slotsTotal),
           const SizedBox(height: 18),
-          for (final day in widget.template.dias) ...[
+          for (final (dayIndex, day) in widget.template.dias.indexed) ...[
             Text(
-              day.nome,
+              _templateDayTitle(day.nome, dayIndex),
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 8),
@@ -331,6 +331,15 @@ class _TemplateProgressCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _templateDayTitle(String value, int index) {
+  final trimmed = value.trim();
+  if (trimmed.length == 1 && RegExp(r'^[A-Za-z]$').hasMatch(trimmed)) {
+    return 'Bloco ${trimmed.toUpperCase()}';
+  }
+  if (trimmed.isEmpty) return 'Bloco ${index + 1}';
+  return trimmed;
 }
 
 class _SlotTile extends StatelessWidget {

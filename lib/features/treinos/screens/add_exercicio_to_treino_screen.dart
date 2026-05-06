@@ -1061,45 +1061,45 @@ class _ExercisePickerCard extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color:
-                isDark
-                    ? Colors.white.withValues(alpha: 0.035)
-                    : EagleTokens.card,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: line.withValues(alpha: 0.76)),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                hasMediaIssue
-                    ? Icons.videocam_off_outlined
-                    : Icons.auto_awesome_motion_rounded,
-                color: hasMediaIssue ? EagleTokens.warn : primary,
-                size: 17,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
+        if (!selected || !hasMediaIssue) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color:
+                  isDark
+                      ? Colors.white.withValues(alpha: 0.035)
+                      : EagleTokens.card,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: line.withValues(alpha: 0.76)),
+            ),
+            child: Row(
+              children: [
+                Icon(
                   selected
-                      ? hasMediaIssue
-                          ? 'Pode adicionar. Vídeo ou GIF melhora a orientação depois.'
-                          : 'Revise a prescrição abaixo antes de adicionar.'
-                      : 'Busque pelo nome ou use Categorias e Modelos para montar rápido.',
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 12,
-                    height: 1.25,
-                    fontWeight: FontWeight.w700,
+                      ? Icons.edit_note_rounded
+                      : Icons.auto_awesome_motion_rounded,
+                  color: primary,
+                  size: 17,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    selected
+                        ? 'Revise a prescrição abaixo antes de adicionar.'
+                        : 'Busque pelo nome ou use Categorias e Modelos para montar rápido.',
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 12,
+                      height: 1.25,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
         if (selected) ...[
           const SizedBox(height: 10),
           _ExerciseMediaStatus(

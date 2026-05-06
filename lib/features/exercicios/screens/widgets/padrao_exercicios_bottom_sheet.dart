@@ -272,13 +272,14 @@ class _ExerciseChoiceTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Text(
-              'Adicionar',
-              style: TextStyle(
-                color: scheme.primary,
-                fontSize: 12.5,
-                fontWeight: FontWeight.w900,
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: scheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
               ),
+              child: Icon(Icons.add_rounded, color: scheme.primary, size: 20),
             ),
           ],
         ),
