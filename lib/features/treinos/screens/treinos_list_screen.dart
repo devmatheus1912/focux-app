@@ -9,17 +9,29 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
 
-class TreinosListScreen extends ConsumerStatefulWidget {
+class TreinosListScreen extends ConsumerWidget {
   final int? alunoId;
   final String? alunoNome;
 
   const TreinosListScreen({super.key, this.alunoId, this.alunoNome});
 
   @override
-  ConsumerState<TreinosListScreen> createState() => _TreinosListScreenState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _TreinosListView(alunoId: alunoId, alunoNome: alunoNome);
+  }
 }
 
-class _TreinosListScreenState extends ConsumerState<TreinosListScreen> {
+class _TreinosListView extends ConsumerStatefulWidget {
+  final int? alunoId;
+  final String? alunoNome;
+
+  const _TreinosListView({required this.alunoId, required this.alunoNome});
+
+  @override
+  ConsumerState<_TreinosListView> createState() => _TreinosListViewState();
+}
+
+class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   final TextEditingController _searchController = TextEditingController();
   final Set<int> _selectedIds = <int>{};
   String _query = '';
