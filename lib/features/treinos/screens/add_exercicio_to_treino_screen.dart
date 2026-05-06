@@ -294,10 +294,14 @@ class _AddExercicioToTreinoScreenState
     required bool isDark,
     required Color primary,
   }) {
+    final browseHeight =
+        (MediaQuery.sizeOf(context).height - 280)
+            .clamp(430.0, 620.0)
+            .toDouble();
     switch (_tabIndex) {
       case 1:
         return SizedBox(
-          height: 286,
+          height: browseHeight,
           child: PadraoMovimentoGrid(
             onAdicionar:
                 (exercicio) => setState(() {
@@ -309,7 +313,7 @@ class _AddExercicioToTreinoScreenState
         );
       case 2:
         return SizedBox(
-          height: 286,
+          height: browseHeight,
           child: TemplateSplitPicker(
             onAdicionar: (exercicio) async {
               await _adicionarRapido(exercicio);
