@@ -487,10 +487,17 @@ class _TreinoDetailBody extends StatelessWidget {
                             child: InkWell(
                               onTap: () {
                                 HapticFeedback.mediumImpact();
-                                context.push(
-                                  '/checkin/executar',
-                                  extra: treinoId,
-                                );
+                                context
+                                    .push<bool>(
+                                      '/treinos/$treinoId/exercicios/add',
+                                    )
+                                    .then((added) {
+                                      if (added == true) {
+                                        ref.invalidate(
+                                          treinoProvider(treinoId),
+                                        );
+                                      }
+                                    });
                               },
                               borderRadius: BorderRadius.circular(16),
                               child: Container(
@@ -518,7 +525,7 @@ class _TreinoDetailBody extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
-                                      'Abrir sessão',
+                                      'Adicionar exercício',
                                       style: TextStyle(
                                         color: primary,
                                         fontSize: 14,
@@ -527,27 +534,6 @@ class _TreinoDetailBody extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          InkWell(
-                            onTap: () => _openMenu(context),
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.12),
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.send_rounded,
-                                color: Colors.white,
-                                size: 18,
                               ),
                             ),
                           ),
