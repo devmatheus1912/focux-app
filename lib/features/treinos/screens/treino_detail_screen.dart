@@ -589,28 +589,32 @@ class _TreinoDetailBody extends StatelessWidget {
                     letterSpacing: -0.5,
                   ),
                 ),
-                InkWell(
-                  onTap: () async {
-                    final adicionado = await context.push<bool>(
-                      '/treinos/$treinoId/exercicios/add',
-                    );
-                    if (adicionado == true) {
-                      ref.invalidate(treinoProvider(treinoId));
-                    }
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.add, size: 14, color: primary),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Adicionar',
-                        style: TextStyle(
-                          color: primary,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        isDark
+                            ? Colors.white.withValues(alpha: 0.06)
+                            : EagleTokens.brandSofter,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color:
+                          isDark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : EagleTokens.brand.withValues(alpha: 0.08),
+                    ),
+                  ),
+                  child: Text(
+                    '${treino.exercicios.length} ${treino.exercicios.length == 1 ? 'exercício' : 'exercícios'}',
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0,
+                    ),
                   ),
                 ),
               ],
