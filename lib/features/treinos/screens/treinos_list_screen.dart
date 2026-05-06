@@ -48,20 +48,6 @@ class TreinosListScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: bg,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 74),
-        child: FloatingActionButton.extended(
-          onPressed: createWorkout,
-          backgroundColor: primary,
-          foregroundColor: Colors.white,
-          elevation: 10,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          icon: const Icon(Icons.add_rounded),
-          label: const Text('Novo'),
-        ),
-      ),
       body: SafeArea(
         bottom: false,
         child: treinosAsync.when(
@@ -115,6 +101,7 @@ class TreinosListScreen extends ConsumerWidget {
                             treinos: treinos,
                             isDark: isDark,
                             primary: primary,
+                            onCreate: createWorkout,
                           ),
                         ),
                       ),
@@ -132,7 +119,7 @@ class TreinosListScreen extends ConsumerWidget {
                         ),
                       ),
                       SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 118),
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 104),
                         sliver: SliverList.separated(
                           itemCount: treinos.length,
                           separatorBuilder:
@@ -256,11 +243,13 @@ class _TreinosCommandCard extends StatelessWidget {
   final List<Treino> treinos;
   final bool isDark;
   final Color primary;
+  final VoidCallback onCreate;
 
   const _TreinosCommandCard({
     required this.treinos,
     required this.isDark,
     required this.primary,
+    required this.onCreate,
   });
 
   @override
@@ -336,6 +325,26 @@ class _TreinosCommandCard extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              TextButton.icon(
+                onPressed: onCreate,
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.white.withValues(alpha: 0.14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 9,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                icon: const Icon(Icons.add_rounded, size: 17),
+                label: const Text(
+                  'Novo',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
                 ),
               ),
             ],
@@ -770,14 +779,14 @@ class _PlanPill extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
       decoration: BoxDecoration(
         color: BrandPalette.soft(color, dark: isDark),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 14),
+          Icon(icon, color: color, size: 13),
           const SizedBox(width: 5),
           Expanded(
             child: Text(
@@ -786,7 +795,7 @@ class _PlanPill extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: ink,
-                fontSize: 10.8,
+                fontSize: 10.2,
                 fontWeight: FontWeight.w800,
               ),
             ),
