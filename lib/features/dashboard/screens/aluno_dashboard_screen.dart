@@ -1260,10 +1260,18 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
       mensagens: mensagens,
     );
     final nextTask = plan.nextTask;
-    final visibleTasks = [
-      if (nextTask != null) nextTask,
-      ...plan.tasks.where((task) => task.id != nextTask?.id).take(2),
-    ];
+    var visibleTasks =
+        plan.tasks
+            .where((task) => !task.done && !_sameAutonomyTask(task, nextTask))
+            .take(2)
+            .toList();
+    if (visibleTasks.isEmpty) {
+      visibleTasks =
+          plan.tasks
+              .where((task) => !_sameAutonomyTask(task, nextTask))
+              .take(2)
+              .toList();
+    }
     _trackVisibleTasks(visibleTasks, plan.profileCompletion);
 
     return Container(
@@ -1401,6 +1409,12 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
         }
       }
     });
+  }
+
+  bool _sameAutonomyTask(AlunoAutonomyTask task, AlunoAutonomyTask? nextTask) {
+    if (nextTask == null) return false;
+    return task.id == nextTask.id ||
+        (task.title == nextTask.title && task.route == nextTask.route);
   }
 
   void _openTask(AlunoAutonomyTask task) {
@@ -1933,38 +1947,38 @@ class _StudentToolsSection extends StatelessWidget {
       _StudentToolAction(
         icon: Icons.fitness_center,
         title: 'Treinos',
-        subtitle: 'Sessões, check-ins e histórico',
+        subtitle: 'Check-ins e histórico',
         route: '/checkin/treinos',
         emphasis: true,
       ),
       _StudentToolAction(
         icon: Icons.chat_bubble_outline,
         title: 'Personal',
-        subtitle: 'Chat e orientações',
+        subtitle: 'Chat direto',
         route: '/chat/aluno',
       ),
       _StudentToolAction(
         icon: Icons.trending_up_rounded,
         title: 'Evolução',
-        subtitle: 'Saúde, medidas e progresso',
+        subtitle: 'Medidas e saúde',
         route: '/checkin/historico',
       ),
       _StudentToolAction(
         icon: Icons.smart_toy_outlined,
         title: 'IA',
-        subtitle: 'Assistente de rotina',
+        subtitle: 'Rotina guiada',
         route: '/ia/aluno',
       ),
       _StudentToolAction(
         icon: Icons.payments_outlined,
         title: 'Financeiro',
-        subtitle: 'Mensalidades e status',
+        subtitle: 'Pagamentos',
         route: '/financeiro/aluno',
       ),
       _StudentToolAction(
         icon: Icons.calendar_month_outlined,
         title: 'Agenda',
-        subtitle: 'Horários e presenças',
+        subtitle: 'Horários',
         route: '/agenda/aluno',
       ),
     ];
@@ -2004,7 +2018,7 @@ class _StudentToolsSection extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Tudo que você usa, sem painel lotado.',
+                      'Acesso rápido ao que importa.',
                       style: TextStyle(color: mute, fontSize: 12.2),
                     ),
                   ],
@@ -2110,8 +2124,8 @@ class _StudentToolTile extends StatelessWidget {
       onTap: () => context.push(action.route),
       borderRadius: BorderRadius.circular(18),
       child: Container(
-        constraints: const BoxConstraints(minHeight: 74),
-        padding: const EdgeInsets.all(12),
+        constraints: const BoxConstraints(minHeight: 66),
+        padding: const EdgeInsets.all(11),
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(18),
@@ -2140,7 +2154,7 @@ class _StudentToolTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: ink,
-                      fontSize: 13.2,
+                      fontSize: 12.8,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -2149,7 +2163,7 @@ class _StudentToolTile extends StatelessWidget {
                     action.subtitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: mute, fontSize: 11.2, height: 1.2),
+                    style: TextStyle(color: mute, fontSize: 10.7, height: 1.1),
                   ),
                 ],
               ),
