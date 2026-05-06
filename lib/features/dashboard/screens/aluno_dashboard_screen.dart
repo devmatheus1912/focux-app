@@ -285,16 +285,16 @@ class _AlunoHeroCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: line),
       ),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 23,
+            radius: 18,
             backgroundColor: BrandPalette.soft(primary, dark: isDark),
             backgroundImage:
                 brand.logoUrl != null ? NetworkImage(brand.logoUrl!) : null,
@@ -311,47 +311,48 @@ class _AlunoHeroCard extends StatelessWidget {
                     )
                     : null,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Acompanhamento',
+                  brand.nomePersonal,
                   style: TextStyle(
                     color: ink,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 13.8,
+                    fontWeight: FontWeight.w900,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 2),
                 Text(
                   slogan,
-                  style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
-                  maxLines: 2,
+                  style: TextStyle(color: mute, fontSize: 11.4, height: 1.2),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Flexible(
             child: Wrap(
               alignment: WrapAlignment.end,
               spacing: 6,
               runSpacing: 6,
               children: [
-                _HeroPill(
-                  icon: Icons.person_outline,
-                  value: brand.nomePersonal,
-                  isDark: isDark,
-                ),
                 if (aluno.objetivo?.trim().isNotEmpty == true)
                   _HeroPill(
                     icon: Icons.flag_outlined,
                     value: aluno.objetivo!,
+                    isDark: isDark,
+                  )
+                else
+                  _HeroPill(
+                    icon: Icons.verified_outlined,
+                    value: 'Ativo',
                     isDark: isDark,
                   ),
               ],
@@ -378,7 +379,7 @@ class _HeroPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
       decoration: BoxDecoration(
         color: BrandPalette.soft(primary, dark: isDark),
         borderRadius: BorderRadius.circular(999),
@@ -387,12 +388,12 @@ class _HeroPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: primary, size: 14),
-          const SizedBox(width: 6),
+          const SizedBox(width: 5),
           Text(
             value,
             style: TextStyle(
               color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-              fontSize: 11.5,
+              fontSize: 11,
               fontWeight: FontWeight.w800,
             ),
             maxLines: 1,
