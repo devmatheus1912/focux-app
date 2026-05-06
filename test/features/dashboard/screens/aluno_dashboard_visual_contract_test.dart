@@ -27,7 +27,7 @@ void main() {
     expect(screen, contains('Focux \${score.value}'));
     expect(screen, contains('score.rhythmLabel'));
     expect(screen, contains('score.riskLabel'));
-    expect(screen, contains("'Acompanhamento de \$firstName'"));
+    expect(screen, contains("'Acompanhamento'"));
     expect(screen, contains("'Padrão'"));
     expect(screen, contains("'Sem ação agora'"));
     expect(screen, contains("'Prioridade média'"));

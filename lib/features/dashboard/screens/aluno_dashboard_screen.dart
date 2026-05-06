@@ -285,7 +285,6 @@ class _AlunoHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final firstName = aluno.nome.split(' ').first;
     final slogan =
         brand.slogan?.trim().isNotEmpty == true
             ? brand.slogan!
@@ -329,7 +328,7 @@ class _AlunoHeroCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Acompanhamento de $firstName',
+                  'Acompanhamento',
                   style: TextStyle(
                     color: ink,
                     fontSize: 15,
