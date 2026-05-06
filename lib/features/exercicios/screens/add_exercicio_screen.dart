@@ -91,6 +91,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
+    final bottom = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: bg,
@@ -100,7 +101,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -119,11 +120,12 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Novo Exercicio',
+                        'Novo Exercício',
                         style: TextStyle(
                           fontSize: 28,
                           color: ink,
-                          fontWeight: FontWeight.w800,
+                          height: 1.04,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ],
@@ -137,32 +139,28 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 104 + bottom),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _SectionCard(
-                        title: 'Essencial',
+                        icon: Icons.fitness_center_rounded,
+                        title: 'Identidade',
+                        subtitle:
+                            'Nomeie o exercício e defina como ele entra na biblioteca.',
                         child: Column(
                           children: [
                             _TextInput(
                               controller: _nomeCtrl,
-                              label: 'Nome do exercicio',
+                              label: 'Nome do exercício',
+                              hint: 'Ex.: Elevação lateral',
                               validator:
                                   (v) =>
                                       v == null || v.trim().isEmpty
                                           ? 'Informe o nome'
                                           : null,
-                            ),
-                            const SizedBox(height: 12),
-                            _EnumDropdown<Modalidade>(
-                              label: 'Modalidade',
-                              value: _modalidade,
-                              values: Modalidade.values,
-                              labels: TaxonomyLabels.modalidade,
-                              onChanged: (v) => setState(() => _modalidade = v),
                             ),
                             const SizedBox(height: 12),
                             _EnumDropdown<GrupoMuscular>(
@@ -178,8 +176,34 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                   (v) => v == null ? 'Escolha o grupo' : null,
                             ),
                             const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _EnumDropdown<Modalidade>(
+                                    label: 'Modalidade',
+                                    value: _modalidade,
+                                    values: Modalidade.values,
+                                    labels: TaxonomyLabels.modalidade,
+                                    onChanged:
+                                        (v) => setState(() => _modalidade = v),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _EnumDropdown<Dificuldade>(
+                                    label: 'Dificuldade',
+                                    value: _dificuldade,
+                                    values: Dificuldade.values,
+                                    labels: TaxonomyLabels.dificuldade,
+                                    onChanged:
+                                        (v) => setState(() => _dificuldade = v),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
                             _EnumDropdown<PadraoMovimento>(
-                              label: 'Padrao de movimento',
+                              label: 'Padrão de movimento',
                               value: _padraoMovimento,
                               values: PadraoMovimento.values,
                               labels: TaxonomyLabels.padrao,
@@ -187,18 +211,11 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                   (v) => setState(() => _padraoMovimento = v),
                             ),
                             const SizedBox(height: 12),
-                            _EnumDropdown<Dificuldade>(
-                              label: 'Dificuldade',
-                              value: _dificuldade,
-                              values: Dificuldade.values,
-                              labels: TaxonomyLabels.dificuldade,
-                              onChanged:
-                                  (v) => setState(() => _dificuldade = v),
-                            ),
-                            SwitchListTile.adaptive(
-                              contentPadding: EdgeInsets.zero,
+                            _SwitchRow(
                               value: _unilateral,
-                              title: const Text('Unilateral'),
+                              title: 'Unilateral',
+                              subtitle:
+                                  'Marque quando cada lado deve ser executado separadamente.',
                               onChanged: (v) => setState(() => _unilateral = v),
                             ),
                           ],
@@ -206,10 +223,18 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       ),
                       const SizedBox(height: 12),
                       _SectionCard(
-                        title: 'Onde usa',
+                        icon: Icons.inventory_2_outlined,
+                        title: 'Equipamentos e espaços',
+                        subtitle:
+                            'Selecione só o que realmente ajuda o personal a filtrar.',
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            _GroupLabel(
+                              label: 'Equipamentos',
+                              count: _equipamentos.length,
+                            ),
+                            const SizedBox(height: 8),
                             _ChoiceGroup<Equipamento>(
                               values: Equipamento.values,
                               selected: _equipamentos,
@@ -222,12 +247,9 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                   }),
                             ),
                             const SizedBox(height: 14),
-                            Text(
-                              'Espacos',
-                              style: TextStyle(
-                                color: mute,
-                                fontWeight: FontWeight.w800,
-                              ),
+                            _GroupLabel(
+                              label: 'Espaços',
+                              count: _espacos.length,
                             ),
                             const SizedBox(height: 8),
                             _ChoiceGroup<Espaco>(
@@ -246,24 +268,31 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       ),
                       const SizedBox(height: 12),
                       _SectionCard(
-                        title: 'Orientacao',
+                        icon: Icons.co_present_outlined,
+                        title: 'Orientação',
+                        subtitle:
+                            'Texto curto, prático e útil para o aluno executar melhor.',
                         child: Column(
                           children: [
                             _TextInput(
                               controller: _descricaoCtrl,
-                              label: 'Descricao curta',
+                              label: 'Descrição curta',
+                              hint: 'Como executar em uma frase objetiva.',
                               maxLines: 3,
                             ),
                             const SizedBox(height: 12),
                             _TextInput(
                               controller: _errosComunsCtrl,
                               label: 'Erros comuns',
+                              hint:
+                                  'Ex.: elevar os ombros, roubar com o tronco.',
                               maxLines: 3,
                             ),
                             const SizedBox(height: 12),
                             _TextInput(
                               controller: _contraindicacoesCtrl,
-                              label: 'Contraindicacoes',
+                              label: 'Contraindicações',
+                              hint: 'Quando evitar ou adaptar este exercício.',
                               maxLines: 3,
                             ),
                           ],
@@ -271,45 +300,24 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       ),
                       if (_error != null) ...[
                         const SizedBox(height: 12),
-                        Text(
-                          _error!,
-                          style: const TextStyle(
-                            color: EagleTokens.bad,
-                            fontWeight: FontWeight.w800,
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: EagleTokens.bad.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: EagleTokens.bad.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Text(
+                            _error!,
+                            style: const TextStyle(
+                              color: EagleTokens.bad,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                       ],
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        height: 54,
-                        child: ElevatedButton(
-                          onPressed: _loading ? null : _submit,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            elevation: 0,
-                          ),
-                          child:
-                              _loading
-                                  ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                  : const Text(
-                                    'Cadastrar exercicio',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -318,15 +326,68 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+          decoration: BoxDecoration(
+            color: bg.withValues(alpha: 0.96),
+            border: Border(
+              top: BorderSide(
+                color:
+                    isDark
+                        ? EagleTokens.darkLine
+                        : EagleTokens.line.withValues(alpha: 0.78),
+              ),
+            ),
+          ),
+          child: SizedBox(
+            height: 54,
+            child: ElevatedButton(
+              onPressed: _loading ? null : _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primary,
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: primary.withValues(alpha: 0.42),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                elevation: 0,
+              ),
+              child:
+                  _loading
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                      : const Text(
+                        'Cadastrar exercício',
+                        style: TextStyle(fontWeight: FontWeight.w900),
+                      ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
 class _SectionCard extends StatelessWidget {
+  final IconData icon;
   final String title;
+  final String subtitle;
   final Widget child;
 
-  const _SectionCard({required this.title, required this.child});
+  const _SectionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -343,8 +404,55 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
-          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.09),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color:
+                            isDark
+                                ? EagleTokens.darkInkMute
+                                : EagleTokens.inkMute,
+                        fontSize: 12,
+                        height: 1.25,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
           child,
         ],
       ),
@@ -355,12 +463,14 @@ class _SectionCard extends StatelessWidget {
 class _TextInput extends StatelessWidget {
   final TextEditingController controller;
   final String label;
+  final String? hint;
   final int maxLines;
   final String? Function(String?)? validator;
 
   const _TextInput({
     required this.controller,
     required this.label,
+    this.hint,
     this.maxLines = 1,
     this.validator,
   });
@@ -373,8 +483,27 @@ class _TextInput extends StatelessWidget {
       validator: validator,
       decoration: InputDecoration(
         labelText: label,
+        hintText: hint,
+        alignLabelWithHint: maxLines > 1,
         filled: true,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+        fillColor:
+            Theme.of(context).brightness == Brightness.dark
+                ? EagleTokens.darkCard
+                : Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(
+            color:
+                Theme.of(context).brightness == Brightness.dark
+                    ? EagleTokens.darkLine
+                    : EagleTokens.line,
+          ),
+        ),
       ),
     );
   }
@@ -406,7 +535,24 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+        fillColor:
+            Theme.of(context).brightness == Brightness.dark
+                ? EagleTokens.darkCard
+                : Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(
+            color:
+                Theme.of(context).brightness == Brightness.dark
+                    ? EagleTokens.darkLine
+                    : EagleTokens.line,
+          ),
+        ),
       ),
       items: [
         for (final item in values)
@@ -435,17 +581,137 @@ class _ChoiceGroup<T extends Enum> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
         for (final value in values)
-          FilterChip(
+          ChoiceChip(
             label: Text(labels[value] ?? value.backendName),
             selected: selected.contains(value),
             onSelected: (_) => onToggle(value),
+            showCheckmark: true,
+            checkmarkColor: primary,
+            labelStyle: TextStyle(
+              color:
+                  selected.contains(value)
+                      ? primary
+                      : Theme.of(context).colorScheme.onSurface,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+            side: BorderSide(
+              color:
+                  selected.contains(value)
+                      ? primary.withValues(alpha: 0.18)
+                      : Theme.of(context).colorScheme.outlineVariant,
+            ),
           ),
       ],
+    );
+  }
+}
+
+class _GroupLabel extends StatelessWidget {
+  final String label;
+  final int count;
+
+  const _GroupLabel({required this.label, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final mute =
+        Theme.of(context).brightness == Brightness.dark
+            ? EagleTokens.darkInkMute
+            : EagleTokens.inkMute;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: mute,
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+        if (count > 0)
+          Text(
+            '$count selecionado${count == 1 ? '' : 's'}',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _SwitchRow extends StatelessWidget {
+  final bool value;
+  final String title;
+  final String subtitle;
+  final ValueChanged<bool> onChanged;
+
+  const _SwitchRow({
+    required this.value,
+    required this.title,
+    required this.subtitle,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return InkWell(
+      onTap: () => onChanged(!value),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+        decoration: BoxDecoration(
+          color: isDark ? EagleTokens.darkCard : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color:
+                          isDark
+                              ? EagleTokens.darkInkMute
+                              : EagleTokens.inkMute,
+                      fontSize: 11.5,
+                      height: 1.25,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Switch.adaptive(value: value, onChanged: onChanged),
+          ],
+        ),
+      ),
     );
   }
 }
