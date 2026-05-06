@@ -1933,20 +1933,20 @@ class _StudentToolsSection extends StatelessWidget {
       _StudentToolAction(
         icon: Icons.fitness_center,
         title: 'Treinos',
-        subtitle: 'SessÃµes, check-ins e histÃ³rico',
+        subtitle: 'Sessões, check-ins e histórico',
         route: '/checkin/treinos',
         emphasis: true,
       ),
       _StudentToolAction(
         icon: Icons.chat_bubble_outline,
         title: 'Personal',
-        subtitle: 'Chat e orientaÃ§Ãµes',
+        subtitle: 'Chat e orientações',
         route: '/chat/aluno',
       ),
       _StudentToolAction(
         icon: Icons.trending_up_rounded,
-        title: 'EvoluÃ§Ã£o',
-        subtitle: 'SaÃºde, medidas e progresso',
+        title: 'Evolução',
+        subtitle: 'Saúde, medidas e progresso',
         route: '/checkin/historico',
       ),
       _StudentToolAction(
@@ -1964,7 +1964,7 @@ class _StudentToolsSection extends StatelessWidget {
       _StudentToolAction(
         icon: Icons.calendar_month_outlined,
         title: 'Agenda',
-        subtitle: 'HorÃ¡rios e presenÃ§as',
+        subtitle: 'Horários e presenças',
         route: '/agenda/aluno',
       ),
     ];
@@ -2004,7 +2004,7 @@ class _StudentToolsSection extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Tudo que vocÃª usa, sem painel lotado.',
+                      'Tudo que você usa, sem painel lotado.',
                       style: TextStyle(color: mute, fontSize: 12.2),
                     ),
                   ],
@@ -2034,7 +2034,7 @@ class _StudentToolsSection extends StatelessWidget {
           LayoutBuilder(
             builder: (context, constraints) {
               const gap = 10.0;
-              final compact = constraints.maxWidth < 360;
+              final compact = constraints.maxWidth < 270;
               final itemWidth =
                   compact
                       ? constraints.maxWidth
