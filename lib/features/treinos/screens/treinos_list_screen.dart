@@ -355,6 +355,12 @@ class _DeleteWorkoutSheet extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final dangerFill =
+        isDark ? const Color(0xFFB24646) : const Color(0xFFA83A3A);
+    final dangerSoft =
+        isDark
+            ? EagleTokens.bad.withValues(alpha: 0.16)
+            : EagleTokens.badSoft.withValues(alpha: 0.88);
     final actionLabel = unlinkOnly ? 'Desvincular' : 'Remover';
     final title =
         unlinkOnly
@@ -368,10 +374,10 @@ class _DeleteWorkoutSheet extends StatelessWidget {
     final body =
         unlinkOnly
             ? count == 1
-                ? '"$subject" sai do aluno, mas continua na sua biblioteca.'
+                ? '$subject sai do aluno, mas continua na sua biblioteca.'
                 : '$subject saem destes alunos, mas continuam na sua biblioteca.'
             : count == 1
-            ? '"$subject" sai da biblioteca. Historicos ja concluidos continuam preservados.'
+            ? '$subject sai da biblioteca. Historicos ja concluidos continuam preservados.'
             : '$subject saem da biblioteca. Historicos ja concluidos continuam preservados.';
 
     return SafeArea(
@@ -416,11 +422,11 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 46,
+                    height: 46,
                     decoration: BoxDecoration(
-                      color: EagleTokens.badSoft,
-                      borderRadius: BorderRadius.circular(17),
+                      color: dangerSoft,
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: const Icon(
                       Icons.inventory_2_outlined,
@@ -509,8 +515,9 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                     child: FilledButton(
                       onPressed: () => Navigator.of(context).pop(true),
                       style: FilledButton.styleFrom(
-                        backgroundColor: EagleTokens.bad,
+                        backgroundColor: dangerFill,
                         foregroundColor: Colors.white,
+                        elevation: 0,
                         minimumSize: const Size(0, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
