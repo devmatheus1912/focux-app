@@ -1081,28 +1081,49 @@ class _VideoPlayer extends StatefulWidget {
 }
 
 class _VideoPlayerState extends State<_VideoPlayer> {
-  late VideoPlayerController _ctrl;
+  VideoPlayerController? _ctrl;
   bool _ready = false;
   bool _failed = false;
+  int _attempt = 0;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = VideoPlayerController.networkUrl(
-        Uri.parse(_cloudinaryH264VideoUrl(widget.url)),
-      )
-      ..initialize()
-          .then((_) {
-            if (mounted) setState(() => _ready = true);
-          })
-          .catchError((_) {
-            if (mounted) setState(() => _failed = true);
-          });
+    _loadVideo();
+  }
+
+  Future<void> _loadVideo() async {
+    final controller = VideoPlayerController.networkUrl(
+      Uri.parse(_cloudinaryH264VideoUrl(widget.url)),
+    );
+    _ctrl = controller;
+    if (mounted) {
+      setState(() {
+        _ready = false;
+        _failed = false;
+      });
+    }
+
+    try {
+      await controller.initialize();
+      if (mounted && _ctrl == controller) setState(() => _ready = true);
+    } catch (_) {
+      await controller.dispose();
+      if (!mounted || _ctrl != controller) return;
+      _ctrl = null;
+      if (_attempt < 4) {
+        _attempt += 1;
+        await Future<void>.delayed(Duration(seconds: 2 + _attempt));
+        if (mounted) await _loadVideo();
+        return;
+      }
+      if (mounted) setState(() => _failed = true);
+    }
   }
 
   @override
   void dispose() {
-    _ctrl.dispose();
+    _ctrl?.dispose();
     super.dispose();
   }
 
@@ -1154,13 +1175,15 @@ class _VideoPlayerState extends State<_VideoPlayer> {
         child: Center(child: CircularProgressIndicator()),
       );
     }
+    final controller = _ctrl;
+    if (controller == null) return const SizedBox.shrink();
     return Column(
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: AspectRatio(
-            aspectRatio: _ctrl.value.aspectRatio,
-            child: VideoPlayer(_ctrl),
+            aspectRatio: controller.value.aspectRatio,
+            child: VideoPlayer(controller),
           ),
         ),
         Row(
@@ -1168,11 +1191,13 @@ class _VideoPlayerState extends State<_VideoPlayer> {
           children: [
             IconButton(
               icon: Icon(
-                _ctrl.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
               ),
               onPressed:
                   () => setState(() {
-                    _ctrl.value.isPlaying ? _ctrl.pause() : _ctrl.play();
+                    controller.value.isPlaying
+                        ? controller.pause()
+                        : controller.play();
                   }),
             ),
           ],

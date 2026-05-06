@@ -1313,30 +1313,51 @@ class _ExerciseVideoPreviewSheet extends StatefulWidget {
 
 class _ExerciseVideoPreviewSheetState
     extends State<_ExerciseVideoPreviewSheet> {
-  late final VideoPlayerController _controller;
+  VideoPlayerController? _controller;
   bool _ready = false;
   bool _failed = false;
+  int _attempt = 0;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(
-        Uri.parse(_cloudinaryH264VideoUrl(widget.url)),
-      )
-      ..initialize()
-          .then((_) {
-            if (!mounted) return;
-            setState(() => _ready = true);
-            _controller.play();
-          })
-          .catchError((_) {
-            if (mounted) setState(() => _failed = true);
-          });
+    _loadPreview();
+  }
+
+  Future<void> _loadPreview() async {
+    final controller = VideoPlayerController.networkUrl(
+      Uri.parse(_cloudinaryH264VideoUrl(widget.url)),
+    );
+    _controller = controller;
+    if (mounted) {
+      setState(() {
+        _ready = false;
+        _failed = false;
+      });
+    }
+
+    try {
+      await controller.initialize();
+      if (!mounted || _controller != controller) return;
+      setState(() => _ready = true);
+      await controller.play();
+    } catch (_) {
+      await controller.dispose();
+      if (!mounted || _controller != controller) return;
+      _controller = null;
+      if (_attempt < 4) {
+        _attempt += 1;
+        await Future<void>.delayed(Duration(seconds: 2 + _attempt));
+        if (mounted) await _loadPreview();
+        return;
+      }
+      if (mounted) setState(() => _failed = true);
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -1443,19 +1464,15 @@ class _ExerciseVideoPreviewSheetState
                           : !_ready
                           ? const SizedBox(
                             height: 210,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            ),
+                            child: Center(child: _VideoPreparingPreview()),
                           )
                           : AspectRatio(
-                            aspectRatio: _controller.value.aspectRatio,
-                            child: VideoPlayer(_controller),
+                            aspectRatio: _controller!.value.aspectRatio,
+                            child: VideoPlayer(_controller!),
                           ),
                 ),
               ),
-              if (_ready && !_failed) ...[
+              if (_ready && !_failed && _controller != null) ...[
                 const SizedBox(height: 10),
                 Row(
                   children: [
@@ -1463,17 +1480,19 @@ class _ExerciseVideoPreviewSheetState
                       child: FilledButton.icon(
                         onPressed:
                             () => setState(() {
-                              _controller.value.isPlaying
-                                  ? _controller.pause()
-                                  : _controller.play();
+                              _controller!.value.isPlaying
+                                  ? _controller!.pause()
+                                  : _controller!.play();
                             }),
                         icon: Icon(
-                          _controller.value.isPlaying
+                          _controller!.value.isPlaying
                               ? Icons.pause_rounded
                               : Icons.play_arrow_rounded,
                         ),
                         label: Text(
-                          _controller.value.isPlaying ? 'Pausar' : 'Reproduzir',
+                          _controller!.value.isPlaying
+                              ? 'Pausar'
+                              : 'Reproduzir',
                         ),
                         style: FilledButton.styleFrom(
                           backgroundColor: EagleTokens.brand,
@@ -1504,6 +1523,42 @@ class _ExerciseVideoPreviewSheetState
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _VideoPreparingPreview extends StatelessWidget {
+  const _VideoPreparingPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(18),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 26,
+            height: 26,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2.8,
+            ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            'Preparando prévia do vídeo...',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+          ),
+          SizedBox(height: 5),
+          Text(
+            'Na primeira abertura, o Cloudinary pode levar alguns segundos.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white70, fontSize: 12.5),
+          ),
+        ],
       ),
     );
   }
