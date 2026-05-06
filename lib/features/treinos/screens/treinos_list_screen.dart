@@ -723,73 +723,90 @@ class _LibraryControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
 
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: card,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: line),
+        color:
+            isDark
+                ? EagleTokens.darkCard
+                : BrandPalette.soft(
+                  primary,
+                  dark: false,
+                ).withValues(alpha: 0.58),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color:
+              isDark
+                  ? line
+                  : primary.withValues(alpha: selectionMode ? 0.28 : 0.16),
+        ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
-            onChanged: onQueryChanged,
-            controller: controller,
-            style: TextStyle(
-              color: ink,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: 'Buscar treino, objetivo ou nivel',
-              hintStyle: TextStyle(color: mute, fontWeight: FontWeight.w600),
-              prefixIcon: Icon(Icons.search_rounded, color: primary, size: 20),
-              suffixIcon:
-                  query.trim().isEmpty
-                      ? null
-                      : IconButton(
-                        onPressed: onClearQuery,
-                        icon: Icon(Icons.close_rounded, color: mute, size: 18),
-                      ),
-              filled: true,
-              fillColor: isDark ? EagleTokens.darkBg : const Color(0xFFF6F7FB),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 180),
             child:
                 selectionMode
                     ? Row(
-                      key: const ValueKey('selection'),
+                      key: const ValueKey('selection-toolbar'),
                       children: [
-                        Expanded(
-                          child: Text(
-                            '$selectedCount selecionado${selectedCount == 1 ? '' : 's'}',
-                            style: TextStyle(
-                              color: ink,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w900,
-                            ),
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.check_circle_rounded,
+                            color: primary,
+                            size: 19,
                           ),
                         ),
-                        TextButton(
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '$selectedCount selecionado${selectedCount == 1 ? '' : 's'}',
+                                style: TextStyle(
+                                  color: ink,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.1,
+                                ),
+                              ),
+                              Text(
+                                'Acoes em lote',
+                                style: TextStyle(
+                                  color: mute,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
                           onPressed: onCancelSelection,
-                          child: const Text('Cancelar'),
+                          tooltip: 'Cancelar selecao',
+                          style: IconButton.styleFrom(
+                            backgroundColor:
+                                isDark
+                                    ? EagleTokens.darkBg
+                                    : Colors.white.withValues(alpha: 0.72),
+                          ),
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: mute,
+                            size: 19,
+                          ),
                         ),
                         const SizedBox(width: 6),
                         FilledButton.icon(
@@ -812,30 +829,63 @@ class _LibraryControls extends StatelessWidget {
                       ],
                     )
                     : Row(
-                      key: const ValueKey('normal'),
+                      key: const ValueKey('normal-toolbar'),
                       children: [
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.tune_rounded,
+                            color: primary,
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            'Busca e operacoes da biblioteca',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: mute,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Operacoes da biblioteca',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: ink,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.1,
+                                ),
+                              ),
+                              Text(
+                                query.trim().isEmpty
+                                    ? 'Buscar, selecionar e organizar'
+                                    : 'Filtro aplicado',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: mute,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        OutlinedButton.icon(
+                        FilledButton.tonalIcon(
                           onPressed: onSelectAll,
                           icon: const Icon(Icons.checklist_rounded, size: 17),
                           label: const Text('Selecionar'),
-                          style: OutlinedButton.styleFrom(
+                          style: FilledButton.styleFrom(
                             foregroundColor: primary,
-                            side: BorderSide(
-                              color: primary.withValues(alpha: 0.34),
-                            ),
+                            backgroundColor:
+                                isDark
+                                    ? primary.withValues(alpha: 0.16)
+                                    : Colors.white.withValues(alpha: 0.86),
                             minimumSize: const Size(0, 40),
                             padding: const EdgeInsets.symmetric(horizontal: 11),
                             shape: RoundedRectangleBorder(
@@ -845,6 +895,53 @@ class _LibraryControls extends StatelessWidget {
                         ),
                       ],
                     ),
+          ),
+          const SizedBox(height: 11),
+          TextField(
+            onChanged: onQueryChanged,
+            controller: controller,
+            textInputAction: TextInputAction.search,
+            style: TextStyle(
+              color: ink,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: 'Buscar treino, objetivo ou nivel',
+              hintStyle: TextStyle(color: mute, fontWeight: FontWeight.w600),
+              prefixIcon: Icon(Icons.search_rounded, color: primary, size: 20),
+              suffixIcon:
+                  query.trim().isEmpty
+                      ? null
+                      : IconButton(
+                        onPressed: onClearQuery,
+                        icon: Icon(Icons.close_rounded, color: mute, size: 18),
+                      ),
+              filled: true,
+              fillColor:
+                  isDark
+                      ? EagleTokens.darkBg
+                      : Colors.white.withValues(alpha: 0.92),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 12,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: isDark ? EagleTokens.darkLine : Colors.white,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: primary.withValues(alpha: 0.42)),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+            ),
           ),
         ],
       ),
@@ -1152,7 +1249,7 @@ class _TreinoCard extends StatelessWidget {
                 else
                   PopupMenuButton<String>(
                     tooltip: 'Acoes do treino',
-                    icon: Icon(Icons.more_horiz_rounded, color: mute),
+                    padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -1186,6 +1283,37 @@ class _TreinoCard extends StatelessWidget {
                             ),
                           ),
                         ],
+                    child: Container(
+                      height: 34,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color:
+                            isDark
+                                ? EagleTokens.darkBg
+                                : const Color(0xFFF5F6FA),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: line),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Acoes',
+                            style: TextStyle(
+                              color: mute,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(width: 3),
+                          Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: mute,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
               ],
             ),
