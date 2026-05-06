@@ -179,87 +179,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 24),
-            Text(
-              'Ações rápidas',
-              style: TextStyle(
-                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _QuickActionStrip(isDark: isDark),
-            const SizedBox(height: 24),
-            Text(
-              'Meus Atalhos',
-              style: TextStyle(
-                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 12),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                const spacing = 10.0;
-                final btnWidth = (constraints.maxWidth - spacing * 2) / 3;
-                return Wrap(
-                  spacing: spacing,
-                  runSpacing: spacing,
-                  children: [
-                    _ShortcutBtn(
-                      icon: Icons.fitness_center,
-                      label: 'Meus\nTreinos',
-                      onTap: () => context.push('/checkin/treinos'),
-                      isDark: isDark,
-                      width: btnWidth,
-                    ),
-                    _ShortcutBtn(
-                      icon: Icons.history,
-                      label: 'Meu\nHistórico',
-                      onTap: () => context.push('/checkin/historico'),
-                      isDark: isDark,
-                      width: btnWidth,
-                    ),
-                    _ShortcutBtn(
-                      icon: Icons.dynamic_feed,
-                      label: 'Feed\ndo Personal',
-                      onTap: () => context.push('/feed/aluno'),
-                      isDark: isDark,
-                      width: btnWidth,
-                    ),
-                    _ShortcutBtn(
-                      icon: Icons.chat_bubble_outline,
-                      label: 'Falar\ncom Personal',
-                      onTap: () => context.push('/chat/aluno'),
-                      isDark: isDark,
-                      width: btnWidth,
-                    ),
-                    _ShortcutBtn(
-                      icon: Icons.smart_toy,
-                      label: 'IA\nAssistente',
-                      onTap: () => context.push('/ia/aluno'),
-                      isDark: isDark,
-                      width: btnWidth,
-                    ),
-                    _ShortcutBtn(
-                      icon: Icons.payments,
-                      label: 'Meu\nFinanceiro',
-                      onTap: () => context.push('/financeiro/aluno'),
-                      isDark: isDark,
-                      width: btnWidth,
-                    ),
-                    _ShortcutBtn(
-                      icon: Icons.calendar_month,
-                      label: 'Minha\nAgenda',
-                      onTap: () => context.push('/agenda/aluno'),
-                      isDark: isDark,
-                      width: btnWidth,
-                    ),
-                  ],
-                );
-              },
-            ),
+            _StudentToolsSection(isDark: isDark),
             const SizedBox(height: 20),
             alunoAsync.when(
               data: (aluno) => _AlunoProfileCard(aluno: aluno, isDark: isDark),
@@ -1342,7 +1262,7 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
     final nextTask = plan.nextTask;
     final visibleTasks = [
       if (nextTask != null) nextTask,
-      ...plan.tasks.where((task) => task.id != nextTask?.id).take(5),
+      ...plan.tasks.where((task) => task.id != nextTask?.id).take(2),
     ];
     _trackVisibleTasks(visibleTasks, plan.profileCompletion);
 
@@ -1445,6 +1365,24 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
             ),
             if (i != visibleTasks.length - 1) const SizedBox(height: 10),
           ],
+          if (plan.tasks.length > visibleTasks.length) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed:
+                    () => _showAlunoPlanSheet(
+                      context,
+                      isDark: widget.isDark,
+                      primary: primary,
+                      plan: plan,
+                      onOpenTask: _openTask,
+                    ),
+                icon: const Icon(Icons.view_agenda_outlined, size: 17),
+                label: Text('Ver plano completo (${plan.tasks.length})'),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1508,6 +1446,143 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
           .catchError((_) {}),
     );
   }
+}
+
+void _showAlunoPlanSheet(
+  BuildContext context, {
+  required bool isDark,
+  required Color primary,
+  required AlunoAutonomyPlan plan,
+  required void Function(AlunoAutonomyTask task) onOpenTask,
+}) {
+  final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+  final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+  final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+  final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: isDark ? 0.56 : 0.24),
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (sheetContext) {
+      final media = MediaQuery.of(sheetContext);
+      return Padding(
+        padding: EdgeInsets.fromLTRB(14, 0, 14, media.viewPadding.bottom + 10),
+        child: Container(
+          constraints: BoxConstraints(maxHeight: media.size.height * 0.76),
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: line),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.34 : 0.12),
+                blurRadius: 34,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 14),
+                  decoration: BoxDecoration(
+                    color: line,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: BrandPalette.soft(primary, dark: isDark),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Icon(Icons.route_outlined, size: 18, color: primary),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Plano do aluno',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.45,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${plan.doneCount} de ${plan.tasks.length} passos fechados.',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12.2,
+                            height: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(Icons.close_rounded, size: 18, color: mute),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  value:
+                      plan.tasks.isEmpty
+                          ? 1
+                          : plan.doneCount / plan.tasks.length,
+                  minHeight: 8,
+                  backgroundColor: BrandPalette.soft(primary, dark: isDark),
+                  valueColor: AlwaysStoppedAnimation(primary),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: plan.tasks.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 9),
+                  itemBuilder: (_, index) {
+                    final task = plan.tasks[index];
+                    return _AutonomyTaskTile(
+                      task: task,
+                      isDark: isDark,
+                      onTap: () {
+                        Navigator.of(sheetContext).pop();
+                        onOpenTask(task);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class _NextBestTaskPanel extends StatelessWidget {
@@ -1842,84 +1917,241 @@ String _taskHint(AlunoTaskKind kind) {
   };
 }
 
-class _QuickActionStrip extends StatelessWidget {
+class _StudentToolsSection extends StatelessWidget {
   final bool isDark;
 
-  const _QuickActionStrip({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _InlineActionButton(
-            icon: Icons.chat_bubble_outline,
-            label: 'Chat',
-            onTap: () => context.push('/chat/aluno'),
-            isDark: isDark,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _InlineActionButton(
-            icon: Icons.person_outline,
-            label: 'Perfil',
-            onTap: () => context.push('/aluno/perfil'),
-            isDark: isDark,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _InlineActionButton(
-            icon: Icons.smart_toy_outlined,
-            label: 'IA',
-            onTap: () => context.push('/ia/aluno'),
-            isDark: isDark,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _InlineActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isDark;
-
-  const _InlineActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    required this.isDark,
-  });
+  const _StudentToolsSection({required this.isDark});
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-        decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final tools = [
+      _StudentToolAction(
+        icon: Icons.fitness_center,
+        title: 'Treinos',
+        subtitle: 'SessÃµes, check-ins e histÃ³rico',
+        route: '/checkin/treinos',
+        emphasis: true,
+      ),
+      _StudentToolAction(
+        icon: Icons.chat_bubble_outline,
+        title: 'Personal',
+        subtitle: 'Chat e orientaÃ§Ãµes',
+        route: '/chat/aluno',
+      ),
+      _StudentToolAction(
+        icon: Icons.trending_up_rounded,
+        title: 'EvoluÃ§Ã£o',
+        subtitle: 'SaÃºde, medidas e progresso',
+        route: '/checkin/historico',
+      ),
+      _StudentToolAction(
+        icon: Icons.smart_toy_outlined,
+        title: 'IA',
+        subtitle: 'Assistente de rotina',
+        route: '/ia/aluno',
+      ),
+      _StudentToolAction(
+        icon: Icons.payments_outlined,
+        title: 'Financeiro',
+        subtitle: 'Mensalidades e status',
+        route: '/financeiro/aluno',
+      ),
+      _StudentToolAction(
+        icon: Icons.calendar_month_outlined,
+        title: 'Agenda',
+        subtitle: 'HorÃ¡rios e presenÃ§as',
+        route: '/agenda/aluno',
+      ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: line),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: const Color(0xFF0B1220).withValues(alpha: 0.045),
+              blurRadius: 28,
+              offset: const Offset(0, 14),
+            ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ferramentas',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.35,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Tudo que vocÃª usa, sem painel lotado.',
+                      style: TextStyle(color: mute, fontSize: 12.2),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: BrandPalette.soft(primary, dark: isDark),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${tools.length} atalhos',
+                  style: TextStyle(
+                    color: primary,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 14),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const gap = 10.0;
+              final compact = constraints.maxWidth < 360;
+              final itemWidth =
+                  compact
+                      ? constraints.maxWidth
+                      : (constraints.maxWidth - gap) / 2;
+              return Wrap(
+                spacing: gap,
+                runSpacing: gap,
+                children: [
+                  for (final tool in tools)
+                    SizedBox(
+                      width: itemWidth,
+                      child: _StudentToolTile(
+                        action: tool,
+                        isDark: isDark,
+                        primary: primary,
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StudentToolAction {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String route;
+  final bool emphasis;
+
+  const _StudentToolAction({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.route,
+    this.emphasis = false,
+  });
+}
+
+class _StudentToolTile extends StatelessWidget {
+  final _StudentToolAction action;
+  final bool isDark;
+  final Color primary;
+
+  const _StudentToolTile({
+    required this.action,
+    required this.isDark,
+    required this.primary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final bg =
+        action.emphasis
+            ? primary.withValues(alpha: isDark ? 0.18 : 0.075)
+            : isDark
+            ? EagleTokens.darkBg
+            : const Color(0xFFF8FAFC);
+    final border =
+        action.emphasis
+            ? primary.withValues(alpha: 0.16)
+            : isDark
+            ? EagleTokens.darkLine
+            : EagleTokens.lineSoft;
+
+    return InkWell(
+      onTap: () => context.push(action.route),
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 74),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: border),
         ),
-        child: Column(
+        child: Row(
           children: [
-            Icon(icon, color: primary, size: 18),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: BrandPalette.soft(primary, dark: isDark),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(action.icon, color: primary, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    action.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 13.2,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    action.subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: mute, fontSize: 11.2, height: 1.2),
+                  ),
+                ],
               ),
             ),
           ],
@@ -2217,100 +2449,6 @@ class _ProfileCardSkeleton extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Shortcut Button ─────────────────────────────────────────────────────────────
-
-class _ShortcutBtn extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isDark;
-  final double width;
-
-  const _ShortcutBtn({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    required this.isDark,
-    required this.width,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final cardBg =
-        isDark
-            ? BrandPalette.soft(primary, dark: true).withValues(alpha: 0.18)
-            : BrandPalette.softer(primary);
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-
-    return SizedBox(
-      width: width,
-      child: Material(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color:
-                    isDark
-                        ? BrandPalette.accent(primary).withValues(alpha: 0.32)
-                        : primary.withValues(alpha: 0.18),
-                width: 1,
-              ),
-              boxShadow:
-                  isDark
-                      ? null
-                      : [
-                        BoxShadow(
-                          color: primary.withValues(alpha: 0.08),
-                          blurRadius: 18,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color:
-                        isDark
-                            ? EagleTokens.darkCardHi
-                            : primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: isDark ? BrandPalette.accent(primary) : primary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: ink,
-                    height: 1.2,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
