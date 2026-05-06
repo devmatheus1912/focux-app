@@ -938,8 +938,8 @@ class _QuickTile extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
-      height: 86,
-      padding: const EdgeInsets.fromLTRB(11, 12, 11, 11),
+      height: 98,
+      padding: const EdgeInsets.fromLTRB(11, 11, 11, 10),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
@@ -960,19 +960,19 @@ class _QuickTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 30,
-            height: 30,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
               color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Center(child: FxIcon(name: icon, size: 15, color: accent)),
+            child: Center(child: FxIcon(name: icon, size: 14, color: accent)),
           ),
           const Spacer(),
           Text(
             value,
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 21,
               fontWeight: FontWeight.w800,
               color: ink,
               height: 1,
@@ -981,11 +981,11 @@ class _QuickTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11.2,
+              fontSize: 11,
               fontWeight: FontWeight.w800,
               color: ink,
               height: 1.1,
@@ -993,10 +993,10 @@ class _QuickTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 1),
           Text(
             sub,
-            style: TextStyle(fontSize: 10.2, color: mute, height: 1.1),
+            style: TextStyle(fontSize: 10, color: mute, height: 1.05),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
