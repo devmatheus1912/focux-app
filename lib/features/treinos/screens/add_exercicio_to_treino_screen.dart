@@ -246,7 +246,7 @@ class _AddExercicioToTreinoScreenState
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           SizedBox(
-                            height: 370,
+                            height: 330,
                             child: DefaultTabController(
                               length: 3,
                               child: Column(
@@ -315,15 +315,7 @@ class _AddExercicioToTreinoScreenState
                               ),
                             ),
                           ),
-                          if (_selecionado != null) ...[
-                            const SizedBox(height: 14),
-                            _SelectedExerciseTrustPanel(
-                              exercicio: _selecionado!,
-                              primary: primary,
-                              isDark: isDark,
-                            ),
-                          ],
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 18),
                           _PresetSelector(
                             selectedId: _presetId,
                             primary: primary,
@@ -670,6 +662,7 @@ class _ExercisePickerCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final selected = exercicio != null;
+    final hasMediaIssue = selected && exercicio!.mediaTrustLevel != 'READY';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -731,15 +724,47 @@ class _ExercisePickerCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              selected ? exercicio!.nome : 'Escolher exercício',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: ink,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w900,
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    selected
+                                        ? exercicio!.nome
+                                        : 'Escolher exercício',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ),
+                                if (hasMediaIssue) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: EagleTokens.warn.withValues(
+                                        alpha: isDark ? 0.16 : 0.12,
+                                      ),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: const Text(
+                                      'Sem mídia',
+                                      style: TextStyle(
+                                        color: EagleTokens.warn,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -801,12 +826,20 @@ class _ExercisePickerCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(Icons.auto_awesome_motion_rounded, color: primary, size: 17),
+              Icon(
+                hasMediaIssue
+                    ? Icons.videocam_off_outlined
+                    : Icons.auto_awesome_motion_rounded,
+                color: hasMediaIssue ? EagleTokens.warn : primary,
+                size: 17,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   selected
-                      ? 'Revise a prescrição abaixo antes de adicionar.'
+                      ? hasMediaIssue
+                          ? 'Pode adicionar. Vídeo ou GIF melhora a orientação depois.'
+                          : 'Revise a prescrição abaixo antes de adicionar.'
                       : 'Busque pelo nome ou use padrões/templates para montar rápido.',
                   style: TextStyle(
                     color: mute,
@@ -1163,7 +1196,7 @@ class _PresetSelector extends StatelessWidget {
               Icon(Icons.tune_rounded, color: primary, size: 18),
               const SizedBox(width: 8),
               Text(
-                'Presets de prescricao',
+                'Presets de prescrição',
                 style: TextStyle(
                   color: ink,
                   fontSize: 13,
@@ -1203,67 +1236,6 @@ class _PresetSelector extends StatelessWidget {
               fontSize: 12.5,
               height: 1.35,
               fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SelectedExerciseTrustPanel extends StatelessWidget {
-  final Exercicio exercicio;
-  final Color primary;
-  final bool isDark;
-
-  const _SelectedExerciseTrustPanel({
-    required this.exercicio,
-    required this.primary,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final color = _trustColor(exercicio, primary);
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.16 : 0.10),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(_trustIcon(exercicio), color: color, size: 22),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  exercicio.mediaTrustLabel,
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  exercicio.mediaTrustDescription,
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 12.5,
-                    height: 1.35,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
             ),
           ),
         ],
