@@ -431,7 +431,7 @@ class _TodayFocusCard extends StatelessWidget {
     final softText = onPrimary.withValues(alpha: 0.72);
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -483,26 +483,26 @@ class _TodayFocusCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Text(
             action.title,
             style: TextStyle(
               color: onPrimary,
-              fontSize: 25,
+              fontSize: 23,
               fontWeight: FontWeight.w900,
               height: 1.05,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 7),
           Text(
             action.description,
-            style: TextStyle(color: softText, fontSize: 13, height: 1.4),
+            style: TextStyle(color: softText, fontSize: 12.5, height: 1.35),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
@@ -513,7 +513,7 @@ class _TodayFocusCard extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: primary,
-                    minimumSize: const Size(0, 50),
+                    minimumSize: const Size(0, 44),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -532,7 +532,7 @@ class _TodayFocusCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -549,7 +549,7 @@ class _TodayFocusCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           _HomeNarrativeRail(
             items: experience.narratives,
             onPrimary: onPrimary,
@@ -569,9 +569,10 @@ class _HomeNarrativeRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
+    final visibleItems = items.take(3).toList(growable: false);
     return Column(
       children: [
-        for (var i = 0; i < items.length; i++) ...[
+        for (var i = 0; i < visibleItems.length; i++) ...[
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -587,20 +588,20 @@ class _HomeNarrativeRail extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  items[i],
+                  visibleItems[i],
                   style: TextStyle(
                     color: onPrimary.withValues(alpha: 0.78),
-                    fontSize: 11.5,
-                    height: 1.32,
+                    fontSize: 11,
+                    height: 1.25,
                     fontWeight: FontWeight.w600,
                   ),
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          if (i != items.length - 1) const SizedBox(height: 6),
+          if (i != visibleItems.length - 1) const SizedBox(height: 5),
         ],
       ],
     );
@@ -621,8 +622,8 @@ class _WorkoutMetricPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 72,
-      height: 50,
+      width: 68,
+      height: 44,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
@@ -634,7 +635,7 @@ class _WorkoutMetricPill extends StatelessWidget {
             value,
             style: TextStyle(
               color: onPrimary,
-              fontSize: 17,
+              fontSize: 16,
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -642,7 +643,7 @@ class _WorkoutMetricPill extends StatelessWidget {
             label,
             style: TextStyle(
               color: onPrimary.withValues(alpha: 0.68),
-              fontSize: 10.5,
+              fontSize: 10,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -666,7 +667,7 @@ class _WorkoutInsightPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(999),
