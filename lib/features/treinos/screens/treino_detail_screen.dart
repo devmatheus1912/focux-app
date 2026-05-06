@@ -246,30 +246,16 @@ class _TreinoDetailBody extends StatelessWidget {
         }
         break;
       case 'delete':
-        final confirm = await showDialog<bool>(
+        final confirm = await showModalBottomSheet<bool>(
           context: context,
+          backgroundColor: Colors.transparent,
+          barrierColor: Colors.black.withValues(alpha: 0.34),
           builder:
-              (dialogContext) => AlertDialog(
-                title: const Text('Excluir treino?'),
-                content: const Text(
-                  'Essa acao remove o treino e seus vinculos. Ela nao pode ser desfeita.',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogContext, false),
-                    child: const Text('Cancelar'),
-                  ),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: EagleTokens.bad,
-                    ),
-                    onPressed: () => Navigator.pop(dialogContext, true),
-                    child: const Text('Excluir'),
-                  ),
-                ],
-              ),
+              (dialogContext) =>
+                  _DeleteTrainingSheet(title: treino.nome, isDark: isDark),
         );
         if (confirm != true) break;
+        HapticFeedback.mediumImpact();
         try {
           await repo.excluirTreino(treinoId);
           ref.invalidate(treinosProvider);
@@ -1482,6 +1468,186 @@ class _ExerciseMeta extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DeleteTrainingSheet extends StatelessWidget {
+  final String title;
+  final bool isDark;
+
+  const _DeleteTrainingSheet({required this.title, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final card = isDark ? EagleTokens.darkCard : Colors.white;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final border =
+        isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : EagleTokens.line.withValues(alpha: 0.9);
+    final softBad = EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.1);
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          decoration: BoxDecoration(
+            color: card,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.14),
+                blurRadius: 34,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: border,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: softBad,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: EagleTokens.bad,
+                      size: 21,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Remover treino?',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '$title sai da biblioteca. Historicos ja concluidos continuam preservados.',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 13,
+                            height: 1.38,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color:
+                      isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : EagleTokens.brandSoft.withValues(alpha: 0.42),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: border),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.history_rounded,
+                      color:
+                          isDark ? EagleTokens.darkInkMute : EagleTokens.brand,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Text(
+                        'Execucoes antigas e dados de alunos nao serao apagados.',
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 12.5,
+                          height: 1.25,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        foregroundColor: ink,
+                        side: BorderSide(color: border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      child: const Text('Cancelar'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        backgroundColor: EagleTokens.bad,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      child: const Text('Remover'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
