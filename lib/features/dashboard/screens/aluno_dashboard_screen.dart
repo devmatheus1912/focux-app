@@ -1076,18 +1076,7 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
       mensagens: mensagens,
     );
     final nextTask = plan.nextTask;
-    var visibleTasks =
-        plan.tasks
-            .where((task) => !task.done && !_sameAutonomyTask(task, nextTask))
-            .take(2)
-            .toList();
-    if (visibleTasks.isEmpty) {
-      visibleTasks =
-          plan.tasks
-              .where((task) => !_sameAutonomyTask(task, nextTask))
-              .take(2)
-              .toList();
-    }
+    final visibleTasks = [if (nextTask != null) nextTask];
     _trackVisibleTasks(visibleTasks, plan.profileCompletion);
 
     return Container(
@@ -1180,33 +1169,26 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
               onTap: nextTask == null ? null : () => _openTask(nextTask),
             ),
           ),
-          const SizedBox(height: 14),
-          for (var i = 0; i < visibleTasks.length; i++) ...[
-            _AutonomyTaskTile(
-              task: visibleTasks[i],
-              isDark: widget.isDark,
-              onTap: () => _openTask(visibleTasks[i]),
-            ),
-            if (i != visibleTasks.length - 1) const SizedBox(height: 10),
-          ],
-          if (plan.tasks.length > visibleTasks.length) ...[
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed:
-                    () => _showAlunoPlanSheet(
-                      context,
-                      isDark: widget.isDark,
-                      primary: primary,
-                      plan: plan,
-                      onOpenTask: _openTask,
-                    ),
-                icon: const Icon(Icons.view_agenda_outlined, size: 17),
-                label: Text('Ver plano completo (${plan.tasks.length})'),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed:
+                  () => _showAlunoPlanSheet(
+                    context,
+                    isDark: widget.isDark,
+                    primary: primary,
+                    plan: plan,
+                    onOpenTask: _openTask,
+                  ),
+              icon: const Icon(Icons.view_agenda_outlined, size: 17),
+              label: Text(
+                plan.tasks.isEmpty
+                    ? 'Ver plano completo'
+                    : 'Ver plano completo (${plan.tasks.length})',
               ),
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -1225,12 +1207,6 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
         }
       }
     });
-  }
-
-  bool _sameAutonomyTask(AlunoAutonomyTask task, AlunoAutonomyTask? nextTask) {
-    if (nextTask == null) return false;
-    return task.id == nextTask.id ||
-        (task.title == nextTask.title && task.route == nextTask.route);
   }
 
   void _openTask(AlunoAutonomyTask task) {
