@@ -938,8 +938,8 @@ class _QuickTile extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
-      height: 98,
-      padding: const EdgeInsets.fromLTRB(11, 11, 11, 10),
+      height: 108,
+      padding: const EdgeInsets.fromLTRB(11, 11, 11, 11),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
@@ -968,7 +968,7 @@ class _QuickTile extends StatelessWidget {
             ),
             child: Center(child: FxIcon(name: icon, size: 14, color: accent)),
           ),
-          const Spacer(),
+          const SizedBox(height: 10),
           Text(
             value,
             style: TextStyle(
