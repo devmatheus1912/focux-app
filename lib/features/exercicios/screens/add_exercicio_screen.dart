@@ -28,6 +28,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   final Set<Equipamento> _equipamentos = {};
   final Set<Espaco> _espacos = {Espaco.academiaCompleta};
   bool _unilateral = false;
+  bool _showGuidance = false;
   bool _loading = false;
   String? _error;
 
@@ -82,6 +83,22 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  void _applyQuickSetup(_ExerciseQuickSetup setup) {
+    setState(() {
+      _modalidade = setup.modalidade;
+      _dificuldade = setup.dificuldade;
+      if (setup.padraoMovimento != null) {
+        _padraoMovimento = setup.padraoMovimento;
+      }
+      _equipamentos
+        ..clear()
+        ..addAll(setup.equipamentos);
+      _espacos
+        ..clear()
+        ..addAll(setup.espacos);
+    });
   }
 
   @override
@@ -162,6 +179,8 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                           ? 'Informe o nome'
                                           : null,
                             ),
+                            const SizedBox(height: 12),
+                            _QuickSetupStrip(onSelected: _applyQuickSetup),
                             const SizedBox(height: 12),
                             _EnumDropdown<GrupoMuscular>(
                               label: 'Grupo principal',
@@ -269,9 +288,15 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       const SizedBox(height: 12),
                       _SectionCard(
                         icon: Icons.co_present_outlined,
-                        title: 'Orientação',
+                        title: 'Orientação opcional',
                         subtitle:
-                            'Texto curto, prático e útil para o aluno executar melhor.',
+                            _showGuidance
+                                ? 'Adicione detalhes se eles forem úteis para o aluno.'
+                                : 'Toque para incluir execução, erros comuns e restrições.',
+                        expanded: _showGuidance,
+                        onToggle:
+                            () =>
+                                setState(() => _showGuidance = !_showGuidance),
                         child: Column(
                           children: [
                             _TextInput(
@@ -376,22 +401,205 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   }
 }
 
+class _ExerciseQuickSetup {
+  final String label;
+  final IconData icon;
+  final Modalidade modalidade;
+  final Dificuldade dificuldade;
+  final PadraoMovimento? padraoMovimento;
+  final Set<Equipamento> equipamentos;
+  final Set<Espaco> espacos;
+
+  const _ExerciseQuickSetup({
+    required this.label,
+    required this.icon,
+    required this.modalidade,
+    required this.dificuldade,
+    required this.padraoMovimento,
+    required this.equipamentos,
+    required this.espacos,
+  });
+}
+
+const _quickSetups = [
+  _ExerciseQuickSetup(
+    label: 'Academia',
+    icon: Icons.apartment_rounded,
+    modalidade: Modalidade.musculacao,
+    dificuldade: Dificuldade.iniciante,
+    padraoMovimento: null,
+    equipamentos: {
+      Equipamento.halter,
+      Equipamento.barra,
+      Equipamento.maquina,
+      Equipamento.polia,
+      Equipamento.banco,
+    },
+    espacos: {Espaco.academiaCompleta, Espaco.academiaBasica},
+  ),
+  _ExerciseQuickSetup(
+    label: 'Casa',
+    icon: Icons.home_work_rounded,
+    modalidade: Modalidade.musculacao,
+    dificuldade: Dificuldade.iniciante,
+    padraoMovimento: null,
+    equipamentos: {
+      Equipamento.halter,
+      Equipamento.kettlebell,
+      Equipamento.banda,
+      Equipamento.pesoCorporal,
+    },
+    espacos: {Espaco.casaEquipada},
+  ),
+  _ExerciseQuickSetup(
+    label: 'Peso corporal',
+    icon: Icons.accessibility_new_rounded,
+    modalidade: Modalidade.musculacao,
+    dificuldade: Dificuldade.iniciante,
+    padraoMovimento: null,
+    equipamentos: {Equipamento.pesoCorporal},
+    espacos: {Espaco.casaSemEquipo, Espaco.outdoor},
+  ),
+  _ExerciseQuickSetup(
+    label: 'Mobilidade',
+    icon: Icons.self_improvement_rounded,
+    modalidade: Modalidade.mobilidade,
+    dificuldade: Dificuldade.iniciante,
+    padraoMovimento: PadraoMovimento.mobilidadeDinamica,
+    equipamentos: {Equipamento.pesoCorporal, Equipamento.banda},
+    espacos: {Espaco.academiaCompleta, Espaco.casaEquipada},
+  ),
+];
+
+class _QuickSetupStrip extends StatelessWidget {
+  final ValueChanged<_ExerciseQuickSetup> onSelected;
+
+  const _QuickSetupStrip({required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Atalhos para começar',
+          style: TextStyle(
+            color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          child: Row(
+            children: [
+              for (final setup in _quickSetups) ...[
+                ActionChip(
+                  avatar: Icon(setup.icon, color: primary, size: 16),
+                  label: Text(setup.label),
+                  onPressed: () => onSelected(setup),
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  labelStyle: TextStyle(
+                    color: primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                  side: BorderSide(color: primary.withValues(alpha: 0.16)),
+                  backgroundColor:
+                      isDark
+                          ? Colors.white.withValues(alpha: 0.04)
+                          : primary.withValues(alpha: 0.06),
+                ),
+                const SizedBox(width: 8),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _SectionCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
   final Widget child;
+  final bool expanded;
+  final VoidCallback? onToggle;
 
   const _SectionCard({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.child,
+    this.expanded = true,
+    this.onToggle,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final header = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.09),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            color: Theme.of(context).colorScheme.primary,
+            size: 18,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                  fontSize: 12,
+                  height: 1.25,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (onToggle != null) ...[
+          const SizedBox(width: 8),
+          Icon(
+            expanded
+                ? Icons.keyboard_arrow_up_rounded
+                : Icons.keyboard_arrow_down_rounded,
+            color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          ),
+        ],
+      ],
+    );
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -404,56 +612,18 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.09),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 18,
-                ),
+          if (onToggle == null)
+            header
+          else
+            InkWell(
+              onTap: onToggle,
+              borderRadius: BorderRadius.circular(14),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: header,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        color:
-                            isDark
-                                ? EagleTokens.darkInkMute
-                                : EagleTokens.inkMute,
-                        fontSize: 12,
-                        height: 1.25,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          child,
+            ),
+          if (expanded) ...[const SizedBox(height: 14), child],
         ],
       ),
     );
@@ -593,6 +763,9 @@ class _ChoiceGroup<T extends Enum> extends StatelessWidget {
             onSelected: (_) => onToggle(value),
             showCheckmark: true,
             checkmarkColor: primary,
+            visualDensity: VisualDensity.compact,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
             labelStyle: TextStyle(
               color:
                   selected.contains(value)
