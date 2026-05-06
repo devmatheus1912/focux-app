@@ -7,6 +7,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/substituir_exercicio_bottom_sheet.dart';
@@ -60,66 +61,87 @@ class _TreinoDetailBody extends StatelessWidget {
   Future<void> _openMenu(BuildContext context) async {
     final action = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.34),
       builder: (sheetContext) {
         final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
         final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+        final card = isDark ? EagleTokens.darkCard : Colors.white;
+        final border =
+            isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : EagleTokens.line.withValues(alpha: 0.9);
 
         return SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 44,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: mute.withValues(alpha: 0.35),
-                    borderRadius: BorderRadius.circular(999),
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(18, 10, 18, 16),
+              decoration: BoxDecoration(
+                color: card,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.14),
+                    blurRadius: 34,
+                    offset: const Offset(0, 18),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Opcoes do treino',
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: mute.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                _MenuActionTile(
-                  icon: Icons.add_circle_outline,
-                  label: 'Adicionar exercicio',
-                  onTap: () => Navigator.pop(sheetContext, 'add'),
-                ),
-                _MenuActionTile(
-                  icon: Icons.person_add_alt_1_outlined,
-                  label: 'Atribuir a aluno',
-                  onTap: () => Navigator.pop(sheetContext, 'assign'),
-                ),
-                _MenuActionTile(
-                  icon: Icons.copy_outlined,
-                  label: 'Duplicar treino',
-                  onTap: () => Navigator.pop(sheetContext, 'duplicate'),
-                ),
-                _MenuActionTile(
-                  icon: Icons.bookmark_border,
-                  label: 'Salvar como template',
-                  onTap: () => Navigator.pop(sheetContext, 'template'),
-                ),
-                _MenuActionTile(
-                  icon: Icons.delete_outline,
-                  label: 'Excluir treino',
-                  color: EagleTokens.bad,
-                  onTap: () => Navigator.pop(sheetContext, 'delete'),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Opções do treino',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  _MenuActionTile(
+                    icon: Icons.add_circle_outline,
+                    label: 'Adicionar exercício',
+                    onTap: () => Navigator.pop(sheetContext, 'add'),
+                  ),
+                  _MenuActionTile(
+                    icon: Icons.person_add_alt_1_outlined,
+                    label: 'Atribuir a aluno',
+                    onTap: () => Navigator.pop(sheetContext, 'assign'),
+                  ),
+                  _MenuActionTile(
+                    icon: Icons.copy_outlined,
+                    label: 'Duplicar treino',
+                    onTap: () => Navigator.pop(sheetContext, 'duplicate'),
+                  ),
+                  _MenuActionTile(
+                    icon: Icons.bookmark_border,
+                    label: 'Salvar como template',
+                    onTap: () => Navigator.pop(sheetContext, 'template'),
+                  ),
+                  _MenuActionTile(
+                    icon: Icons.delete_outline,
+                    label: 'Excluir treino',
+                    color: EagleTokens.bad,
+                    onTap: () => Navigator.pop(sheetContext, 'delete'),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -145,54 +167,14 @@ class _TreinoDetailBody extends StatelessWidget {
         try {
           final alunos = await ref.read(alunosProvider.future);
           if (!context.mounted) return;
-          int? alunoId = alunos.isEmpty ? null : alunos.first.id;
-          final selected = await showDialog<int>(
+          final selected = await showModalBottomSheet<int>(
             context: context,
+            backgroundColor: Colors.transparent,
+            barrierColor: Colors.black.withValues(alpha: 0.34),
+            isScrollControlled: true,
             builder:
-                (dialogContext) => StatefulBuilder(
-                  builder:
-                      (dialogContext, setDialogState) => AlertDialog(
-                        title: const Text('Atribuir treino'),
-                        content:
-                            alunos.isEmpty
-                                ? const Text(
-                                  'Nenhum aluno cadastrado encontrado.',
-                                )
-                                : DropdownButtonFormField<int>(
-                                  value: alunoId,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Aluno',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  items:
-                                      alunos
-                                          .map(
-                                            (aluno) => DropdownMenuItem<int>(
-                                              value: aluno.id,
-                                              child: Text(aluno.nome),
-                                            ),
-                                          )
-                                          .toList(),
-                                  onChanged:
-                                      (value) =>
-                                          setDialogState(() => alunoId = value),
-                                ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(dialogContext),
-                            child: const Text('Cancelar'),
-                          ),
-                          FilledButton(
-                            onPressed:
-                                alunoId == null
-                                    ? null
-                                    : () =>
-                                        Navigator.pop(dialogContext, alunoId),
-                            child: const Text('Atribuir'),
-                          ),
-                        ],
-                      ),
-                ),
+                (dialogContext) =>
+                    _AssignWorkoutSheet(alunos: alunos, isDark: isDark),
           );
           if (selected == null) return;
           await repo.atribuirAluno(treinoId, selected);
@@ -1105,22 +1087,366 @@ class _MenuActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = color ?? (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+    final border =
+        isDark
+            ? Colors.white.withValues(alpha: 0.06)
+            : EagleTokens.lineSoft.withValues(alpha: 0.95);
+    final iconFill =
+        color == null
+            ? (isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : EagleTokens.brandSofter)
+            : EagleTokens.bad.withValues(alpha: isDark ? 0.16 : 0.10);
 
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      leading: Icon(icon, color: ink),
-      title: Text(
-        label,
-        style: TextStyle(color: ink, fontWeight: FontWeight.w600),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: border),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: iconFill,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(icon, color: ink, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: ink, size: 18),
+            ],
+          ),
+        ),
       ),
-      trailing: Icon(Icons.chevron_right, color: ink),
-      tileColor: Colors.transparent,
-      onTap: onTap,
-      horizontalTitleGap: 10,
-      minLeadingWidth: 24,
-      dense: false,
-      visualDensity: VisualDensity.compact,
+    );
+  }
+}
+
+class _AssignWorkoutSheet extends StatefulWidget {
+  final List<Aluno> alunos;
+  final bool isDark;
+
+  const _AssignWorkoutSheet({required this.alunos, required this.isDark});
+
+  @override
+  State<_AssignWorkoutSheet> createState() => _AssignWorkoutSheetState();
+}
+
+class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
+  int? selectedAlunoId;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedAlunoId = widget.alunos.isEmpty ? null : widget.alunos.first.id;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).padding.bottom;
+    final ink = widget.isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = widget.isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final border =
+        widget.isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : EagleTokens.lineSoft.withValues(alpha: 0.95);
+    final sheetFill = widget.isDark ? EagleTokens.darkCard : Colors.white;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(12, 0, 12, math.max(10, bottom + 8)),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          decoration: BoxDecoration(
+            color: sheetFill,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(
+                  alpha: widget.isDark ? 0.34 : 0.16,
+                ),
+                blurRadius: 30,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color:
+                      widget.isDark
+                          ? Colors.white.withValues(alpha: 0.16)
+                          : EagleTokens.line,
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: EagleTokens.brandSofter,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: const Icon(
+                      Icons.person_add_alt_1_rounded,
+                      color: EagleTokens.brand,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Atribuir treino',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          widget.alunos.isEmpty
+                              ? 'Nenhum aluno cadastrado.'
+                              : 'Escolha quem recebe este plano.',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (widget.alunos.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color:
+                        widget.isDark
+                            ? Colors.white.withValues(alpha: 0.04)
+                            : EagleTokens.card,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: border),
+                  ),
+                  child: Text(
+                    'Cadastre um aluno antes de atribuir este treino.',
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 13,
+                      height: 1.35,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+              else
+                Flexible(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 300),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: widget.alunos.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final aluno = widget.alunos[index];
+                        final selected = selectedAlunoId == aluno.id;
+                        final initials =
+                            aluno.nome.trim().isEmpty
+                                ? '?'
+                                : aluno.nome
+                                    .trim()
+                                    .split(RegExp(r'\s+'))
+                                    .take(2)
+                                    .map((part) => part[0].toUpperCase())
+                                    .join();
+
+                        return InkWell(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => selectedAlunoId = aluno.id);
+                          },
+                          borderRadius: BorderRadius.circular(18),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 160),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color:
+                                  selected
+                                      ? EagleTokens.brandSofter
+                                      : widget.isDark
+                                      ? Colors.white.withValues(alpha: 0.03)
+                                      : Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color:
+                                    selected
+                                        ? EagleTokens.brand.withValues(
+                                          alpha: 0.28,
+                                        )
+                                        : border,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        selected
+                                            ? EagleTokens.brand
+                                            : EagleTokens.brandSofter,
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    initials,
+                                    style: TextStyle(
+                                      color:
+                                          selected
+                                              ? Colors.white
+                                              : EagleTokens.brand,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        aluno.nome,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: ink,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        aluno.objetivo?.trim().isNotEmpty ==
+                                                true
+                                            ? aluno.objetivo!.trim()
+                                            : 'Objetivo não definido',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: mute,
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  selected
+                                      ? Icons.check_circle_rounded
+                                      : Icons.radio_button_unchecked_rounded,
+                                  color:
+                                      selected
+                                          ? EagleTokens.brand
+                                          : mute.withValues(alpha: 0.7),
+                                  size: 20,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(46),
+                        side: BorderSide(color: border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        foregroundColor: ink,
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      child: const Text('Cancelar'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed:
+                          selectedAlunoId == null
+                              ? null
+                              : () => Navigator.pop(context, selectedAlunoId),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(46),
+                        backgroundColor: EagleTokens.brand,
+                        disabledBackgroundColor: EagleTokens.brand.withValues(
+                          alpha: 0.28,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      child: const Text('Atribuir'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1354,44 +1680,41 @@ class _ExercicioRow extends StatelessWidget {
               ],
             ),
           ),
-          PopupMenuButton<String>(
-            iconColor: mute,
-            iconSize: 20,
-            onSelected: (val) {
-              if (val == 'up') onMoveUp();
-              if (val == 'down') onMoveDown();
-              if (val == 'duplicate') onDuplicate();
-              if (val == 'substitute') onSubstitute();
-              if (val == 'remove') onRemove();
-            },
-            itemBuilder:
-                (_) => [
-                  PopupMenuItem(
-                    value: 'up',
-                    enabled: canMoveUp,
-                    child: const Text('Mover para cima'),
-                  ),
-                  PopupMenuItem(
-                    value: 'down',
-                    enabled: canMoveDown,
-                    child: const Text('Mover para baixo'),
-                  ),
-                  const PopupMenuItem(
-                    value: 'duplicate',
-                    child: Text('Duplicar item'),
-                  ),
-                  const PopupMenuItem(
-                    value: 'substitute',
-                    child: Text('Substituir'),
-                  ),
-                  const PopupMenuItem(
-                    value: 'remove',
-                    child: Text(
-                      'Remover',
-                      style: TextStyle(color: EagleTokens.bad),
+          InkWell(
+            onTap: () async {
+              HapticFeedback.selectionClick();
+              final action = await showModalBottomSheet<String>(
+                context: context,
+                backgroundColor: Colors.transparent,
+                barrierColor: Colors.black.withValues(alpha: 0.34),
+                builder:
+                    (_) => _ExerciseActionsSheet(
+                      title: te.exercicio.nome,
+                      canMoveUp: canMoveUp,
+                      canMoveDown: canMoveDown,
+                      isDark: isDark,
                     ),
-                  ),
-                ],
+              );
+              if (action == 'up') onMoveUp();
+              if (action == 'down') onMoveDown();
+              if (action == 'duplicate') onDuplicate();
+              if (action == 'substitute') onSubstitute();
+              if (action == 'remove') onRemove();
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              width: 36,
+              height: 36,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color:
+                    isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : EagleTokens.brandSofter.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(Icons.more_vert_rounded, color: mute, size: 18),
+            ),
           ),
         ],
       ),
@@ -1450,6 +1773,190 @@ class _ExerciseMeta extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ExerciseActionsSheet extends StatelessWidget {
+  final String title;
+  final bool canMoveUp;
+  final bool canMoveDown;
+  final bool isDark;
+
+  const _ExerciseActionsSheet({
+    required this.title,
+    required this.canMoveUp,
+    required this.canMoveDown,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final card = isDark ? EagleTokens.darkCard : Colors.white;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final border =
+        isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : EagleTokens.line.withValues(alpha: 0.9);
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 16),
+          decoration: BoxDecoration(
+            color: card,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.14),
+                blurRadius: 34,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: border,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'Ações do exercício',
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: mute,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (canMoveUp)
+                _ExerciseActionTile(
+                  icon: Icons.keyboard_arrow_up_rounded,
+                  label: 'Mover para cima',
+                  onTap: () => Navigator.pop(context, 'up'),
+                ),
+              if (canMoveDown)
+                _ExerciseActionTile(
+                  icon: Icons.keyboard_arrow_down_rounded,
+                  label: 'Mover para baixo',
+                  onTap: () => Navigator.pop(context, 'down'),
+                ),
+              _ExerciseActionTile(
+                icon: Icons.copy_rounded,
+                label: 'Duplicar item',
+                onTap: () => Navigator.pop(context, 'duplicate'),
+              ),
+              _ExerciseActionTile(
+                icon: Icons.swap_horiz_rounded,
+                label: 'Substituir exercício',
+                onTap: () => Navigator.pop(context, 'substitute'),
+              ),
+              _ExerciseActionTile(
+                icon: Icons.remove_circle_outline_rounded,
+                label: 'Remover do treino',
+                color: EagleTokens.bad,
+                onTap: () => Navigator.pop(context, 'remove'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ExerciseActionTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? color;
+  final VoidCallback onTap;
+
+  const _ExerciseActionTile({
+    required this.icon,
+    required this.label,
+    this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = color ?? (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+    final border =
+        isDark
+            ? Colors.white.withValues(alpha: 0.06)
+            : EagleTokens.lineSoft.withValues(alpha: 0.95);
+    final iconFill =
+        color == null
+            ? (isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : EagleTokens.brandSofter)
+            : EagleTokens.bad.withValues(alpha: isDark ? 0.16 : 0.10);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: border),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: iconFill,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(icon, color: ink, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: ink, size: 18),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
