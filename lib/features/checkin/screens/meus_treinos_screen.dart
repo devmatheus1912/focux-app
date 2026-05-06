@@ -128,7 +128,7 @@ class MeusTreinosScreen extends ConsumerWidget {
                     ),
                   ),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
                     sliver: SliverList.separated(
                       itemCount: treinos.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -142,6 +142,17 @@ class MeusTreinosScreen extends ConsumerWidget {
                                   extra: treinos[index].treinoId,
                                 ),
                           ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
+                      child: _TrainingReadinessSection(
+                        totalExercicios: totalExercicios,
+                        totalConcluidos: totalConcluidos,
+                        ativos: ativos,
+                        isDark: isDark,
+                      ),
                     ),
                   ),
                 ],
@@ -237,6 +248,15 @@ class _TrainingHero extends StatelessWidget {
     final primaryDeep = BrandPalette.deep(primary);
     final progresso =
         totalExercicios == 0 ? 0.0 : totalConcluidos / totalExercicios;
+    final hasExercises = totalExercicios > 0;
+    final headline =
+        hasExercises
+            ? '$ativos treino${ativos == 1 ? '' : 's'} ativo${ativos == 1 ? '' : 's'}'
+            : 'Plano em montagem';
+    final subtitle =
+        hasExercises
+            ? '$total no plano atual'
+            : '$total treino${total == 1 ? '' : 's'} no plano atual';
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -276,7 +296,7 @@ class _TrainingHero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$ativos treino${ativos == 1 ? '' : 's'} ativo${ativos == 1 ? '' : 's'}',
+                      headline,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 19,
@@ -285,7 +305,7 @@ class _TrainingHero extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$total no plano atual',
+                      subtitle,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.72),
                         fontSize: 12.5,
@@ -298,18 +318,39 @@ class _TrainingHero extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 18),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: progresso,
-              minHeight: 8,
-              backgroundColor: Colors.white.withValues(alpha: 0.18),
-              valueColor: const AlwaysStoppedAnimation(Colors.white),
+          if (hasExercises)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value: progresso,
+                minHeight: 8,
+                backgroundColor: Colors.white.withValues(alpha: 0.18),
+                valueColor: const AlwaysStoppedAnimation(Colors.white),
+              ),
+            )
+          else
+            Container(
+              height: 8,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              alignment: Alignment.centerLeft,
+              child: FractionallySizedBox(
+                widthFactor: 0.18,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.72),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
             ),
-          ),
           const SizedBox(height: 10),
           Text(
-            '$totalConcluidos de $totalExercicios exercicios concluidos no ciclo aberto.',
+            hasExercises
+                ? '$totalConcluidos de $totalExercicios exercícios concluídos no ciclo aberto.'
+                : 'A sessão já está no radar. Os exercícios aparecem aqui quando forem liberados.',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.76),
               fontSize: 12,
@@ -343,13 +384,26 @@ class _TrainingPlanCard extends StatelessWidget {
     final done = treino.exercicios.where((e) => e.concluido).length;
     final progress =
         treino.exercicios.isEmpty ? 0.0 : done / treino.exercicios.length;
+    final hasExercises = treino.exercicios.isNotEmpty;
     final mediaCount =
         treino.exercicios.where((e) => e.gifUrl?.isNotEmpty == true).length;
     final status = treino.status.toUpperCase();
     final concluido = status == 'CONCLUIDO';
+    void handleAction() {
+      if (hasExercises || concluido) {
+        onStart();
+        return;
+      }
+
+      _showTrainingPendingSheet(
+        context: context,
+        treinoNome: treino.treinoNome,
+        isDark: isDark,
+      );
+    }
 
     return InkWell(
-      onTap: onStart,
+      onTap: handleAction,
       borderRadius: BorderRadius.circular(22),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -405,7 +459,10 @@ class _TrainingPlanCard extends StatelessWidget {
                         children: [
                           _PlanMeta(
                             icon: Icons.list_alt_rounded,
-                            text: '${treino.exercicios.length} exercicios',
+                            text:
+                                hasExercises
+                                    ? '${treino.exercicios.length} exercícios'
+                                    : 'em preparação',
                             color: mute,
                           ),
                           if (mediaCount > 0)
@@ -429,18 +486,27 @@ class _TrainingPlanCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 7,
-                backgroundColor:
-                    isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-                valueColor: AlwaysStoppedAnimation(
-                  concluido ? EagleTokens.good : primary,
+            if (hasExercises)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 7,
+                  backgroundColor:
+                      isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                  valueColor: AlwaysStoppedAnimation(
+                    concluido ? EagleTokens.good : primary,
+                  ),
+                ),
+              )
+            else
+              Container(
+                height: 7,
+                decoration: BoxDecoration(
+                  color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                  borderRadius: BorderRadius.circular(999),
                 ),
               ),
-            ),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -448,8 +514,10 @@ class _TrainingPlanCard extends StatelessWidget {
                   child: Text(
                     concluido
                         ? 'Treino finalizado. Historico salvo.'
+                        : !hasExercises
+                        ? 'Plano recebido. Aguarde a liberação dos exercícios.'
                         : done == 0
-                        ? 'Pronto para iniciar com registro de series.'
+                        ? 'Pronto para iniciar com registro de séries.'
                         : '$done de ${treino.exercicios.length} exercicios ja marcados.',
                     style: TextStyle(
                       color: mute,
@@ -459,21 +527,281 @@ class _TrainingPlanCard extends StatelessWidget {
                   ),
                 ),
                 FilledButton.icon(
-                  onPressed: onStart,
+                  onPressed: handleAction,
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(0, 44),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   icon: Icon(
-                    concluido ? Icons.replay_rounded : Icons.play_arrow_rounded,
+                    concluido
+                        ? Icons.replay_rounded
+                        : hasExercises
+                        ? Icons.play_arrow_rounded
+                        : Icons.info_outline_rounded,
                     size: 18,
                   ),
-                  label: Text(concluido ? 'Rever' : 'Iniciar'),
+                  label: Text(
+                    concluido
+                        ? 'Rever'
+                        : hasExercises
+                        ? 'Iniciar'
+                        : 'Status',
+                  ),
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+void _showTrainingPendingSheet({
+  required BuildContext context,
+  required String treinoNome,
+  required bool isDark,
+}) {
+  final primary = Theme.of(context).colorScheme.primary;
+  final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+  final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+  final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+  final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+
+  showModalBottomSheet<void>(
+    context: context,
+    useSafeArea: true,
+    showDragHandle: true,
+    backgroundColor: card,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+    ),
+    builder:
+        (context) => Padding(
+          padding: const EdgeInsets.fromLTRB(22, 4, 22, 26),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: BrandPalette.soft(primary, dark: isDark),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(Icons.pending_actions_rounded, color: primary),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          treinoNome,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Em preparacao',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: BrandPalette.soft(primary, dark: isDark),
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: line),
+                ),
+                child: Text(
+                  'Seu personal ja reservou este treino. Assim que os exercicios forem liberados, o botao Iniciar aparece com registro de series, videos e feedback.',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13,
+                    height: 1.42,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text('Entendi'),
+                ),
+              ),
+            ],
+          ),
+        ),
+  );
+}
+
+class _TrainingReadinessSection extends StatelessWidget {
+  final int totalExercicios;
+  final int totalConcluidos;
+  final int ativos;
+  final bool isDark;
+
+  const _TrainingReadinessSection({
+    required this.totalExercicios,
+    required this.totalConcluidos,
+    required this.ativos,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final hasExercises = totalExercicios > 0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: card,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Antes de treinar',
+            style: TextStyle(
+              color: ink,
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.25,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            hasExercises
+                ? 'Entre com foco, registre as séries e finalize com feedback.'
+                : 'Seu plano já está salvo. Assim que o personal liberar os exercícios, a sessão fica pronta.',
+            style: TextStyle(color: mute, fontSize: 12.3, height: 1.28),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: _ReadinessPill(
+                  icon: Icons.assignment_turned_in_outlined,
+                  title: hasExercises ? 'Registro' : 'Status',
+                  value:
+                      hasExercises
+                          ? '$totalConcluidos/$totalExercicios'
+                          : 'aguardando',
+                  color: primary,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _ReadinessPill(
+                  icon: Icons.local_fire_department_outlined,
+                  title: 'Rotina',
+                  value: '$ativos ativo${ativos == 1 ? '' : 's'}',
+                  color: primary,
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadinessPill extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String value;
+  final Color color;
+  final bool isDark;
+
+  const _ReadinessPill({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.color,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: BrandPalette.soft(color, dark: isDark),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
