@@ -89,34 +89,15 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   Future<void> _deleteTreinos(List<Treino> treinos) async {
     if (treinos.isEmpty) return;
     final count = treinos.length;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showModalBottomSheet<bool>(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder:
-          (context) => AlertDialog(
-            title: Text(count == 1 ? 'Excluir treino?' : 'Excluir treinos?'),
-            content: Text(
-              widget.alunoId == null
-                  ? count == 1
-                      ? 'Essa acao remove "${treinos.first.nome}" da biblioteca.'
-                      : 'Essa acao remove $count treinos da biblioteca.'
-                  : count == 1
-                  ? 'Essa acao desvincula "${treinos.first.nome}" deste aluno.'
-                  : 'Essa acao desvincula $count treinos deste aluno.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                style: FilledButton.styleFrom(
-                  backgroundColor: EagleTokens.bad,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text(widget.alunoId == null ? 'Excluir' : 'Desvincular'),
-              ),
-            ],
+          (context) => _DeleteWorkoutSheet(
+            count: count,
+            name: count == 1 ? treinos.first.nome : null,
+            unlinkOnly: widget.alunoId != null,
           ),
     );
     if (confirmed != true) return;
@@ -350,6 +331,201 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _DeleteWorkoutSheet extends StatelessWidget {
+  final int count;
+  final String? name;
+  final bool unlinkOnly;
+
+  const _DeleteWorkoutSheet({
+    required this.count,
+    required this.name,
+    required this.unlinkOnly,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final actionLabel = unlinkOnly ? 'Desvincular' : 'Remover';
+    final title =
+        unlinkOnly
+            ? count == 1
+                ? 'Desvincular treino?'
+                : 'Desvincular treinos?'
+            : count == 1
+            ? 'Remover da biblioteca?'
+            : 'Remover treinos?';
+    final subject = name ?? '$count treinos selecionados';
+    final body =
+        unlinkOnly
+            ? count == 1
+                ? '"$subject" sai do aluno, mas continua na sua biblioteca.'
+                : '$subject saem destes alunos, mas continuam na sua biblioteca.'
+            : count == 1
+            ? '"$subject" sai da biblioteca. Historicos ja concluidos continuam preservados.'
+            : '$subject saem da biblioteca. Historicos ja concluidos continuam preservados.';
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 14,
+          right: 14,
+          bottom: 14 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
+          decoration: BoxDecoration(
+            color: card,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: line),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.12),
+                blurRadius: 32,
+                offset: const Offset(0, 18),
+                spreadRadius: -18,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: EagleTokens.badSoft,
+                      borderRadius: BorderRadius.circular(17),
+                    ),
+                    child: const Icon(
+                      Icons.inventory_2_outlined,
+                      color: EagleTokens.bad,
+                      size: 23,
+                    ),
+                  ),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          body,
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 13,
+                            height: 1.35,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isDark ? EagleTokens.darkBg : const Color(0xFFF7F7F4),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: line),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.history_rounded, color: mute, size: 18),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Text(
+                        unlinkOnly
+                            ? 'O aluno perde o acesso a este plano.'
+                            : 'Historico e execucoes antigas nao sao apagados.',
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: ink,
+                        side: BorderSide(color: line),
+                        minimumSize: const Size(0, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: EagleTokens.bad,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(0, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        actionLabel,
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
