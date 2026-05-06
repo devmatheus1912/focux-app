@@ -103,6 +103,8 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
       builder:
           (_) => PadraoExerciciosBottomSheet(
             padrao: padrao,

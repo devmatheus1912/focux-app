@@ -205,6 +205,7 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
     );
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
       appBar: AppBar(
         title: Text(widget.template.nome),
         actions: [
@@ -215,31 +216,117 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
         ],
       ),
       body: ListView(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          12,
+          16,
+          MediaQuery.paddingOf(context).bottom + 18,
+        ),
         children: [
+          _TemplateProgressCard(done: _done.length, total: slotsTotal),
+          const SizedBox(height: 18),
           for (final day in widget.template.dias) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
-              child: Text(
-                day.nome,
-                style: Theme.of(context).textTheme.titleMedium,
+            Text(
+              day.nome,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outlineVariant.withValues(alpha: 0.7),
+                ),
+              ),
+              child: Column(
+                children: [
+                  for (var i = 0; i < day.slots.length; i++) ...[
+                    _SlotTile(
+                      done: _done.contains('${day.nome}-$i'),
+                      slot: day.slots[i],
+                      saving: _saving,
+                      onChoose: (ex) async {
+                        setState(() => _saving = true);
+                        try {
+                          await widget.onAdicionar(ex);
+                          setState(() => _done.add('${day.nome}-$i'));
+                        } finally {
+                          if (mounted) setState(() => _saving = false);
+                        }
+                      },
+                    ),
+                    if (i != day.slots.length - 1)
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outlineVariant.withValues(alpha: 0.52),
+                      ),
+                  ],
+                ],
               ),
             ),
-            for (var i = 0; i < day.slots.length; i++)
-              _SlotTile(
-                done: _done.contains('${day.nome}-$i'),
-                slot: day.slots[i],
-                saving: _saving,
-                onChoose: (ex) async {
-                  setState(() => _saving = true);
-                  try {
-                    await widget.onAdicionar(ex);
-                    setState(() => _done.add('${day.nome}-$i'));
-                  } finally {
-                    if (mounted) setState(() => _saving = false);
-                  }
-                },
-              ),
+            const SizedBox(height: 18),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TemplateProgressCard extends StatelessWidget {
+  final int done;
+  final int total;
+
+  const _TemplateProgressCard({required this.done, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final progress = total == 0 ? 0.0 : done / total;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 13, 14, 14),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.7)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.playlist_add_check_rounded, color: scheme.primary),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'Preencha os slots do modelo',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
+                ),
+              ),
+              Text(
+                '$done/$total',
+                style: TextStyle(
+                  color: scheme.primary,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              minHeight: 7,
+              value: progress,
+              backgroundColor: scheme.surfaceContainerHighest,
+            ),
+          ),
         ],
       ),
     );
@@ -261,20 +348,16 @@ class _SlotTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(
-        done ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
-        color: done ? Colors.green : null,
-      ),
-      title: Text(slot.label),
-      subtitle: Text(done ? 'Adicionado ao treino' : 'Toque para escolher'),
-      enabled: !saving,
+    final scheme = Theme.of(context).colorScheme;
+    return InkWell(
       onTap:
           saving
               ? null
               : () => showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                barrierColor: Colors.black.withValues(alpha: 0.42),
                 builder:
                     (_) => PadraoExerciciosBottomSheet(
                       padrao: slot.padrao,
@@ -282,6 +365,45 @@ class _SlotTile extends StatelessWidget {
                       onAdicionar: onChoose,
                     ),
               ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 13, 12, 13),
+        child: Row(
+          children: [
+            Icon(
+              done
+                  ? Icons.check_circle_rounded
+                  : Icons.add_circle_outline_rounded,
+              color: done ? Colors.green : scheme.primary,
+              size: 21,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    slot.label,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    done ? 'Adicionado ao treino' : 'Escolher exercício',
+                    style: TextStyle(
+                      color: scheme.onSurfaceVariant,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
+          ],
+        ),
+      ),
     );
   }
 }
