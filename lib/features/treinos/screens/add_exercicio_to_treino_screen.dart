@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../exercicios/data/exercicio_repository.dart';
@@ -29,10 +31,12 @@ class _AddExercicioToTreinoScreenState
   final _cargaCtrl = TextEditingController();
   final _observacoesCtrl = TextEditingController();
   final _grupoSupersetCtrl = TextEditingController(text: '1');
+  final _videoPicker = ImagePicker();
   String _presetId = 'hypertrophy';
   String _tipoSerie = 'NORMAL';
   int _tabIndex = 0;
   bool _loading = false;
+  bool _mediaLoading = false;
   String? _error;
 
   @override
@@ -174,6 +178,99 @@ class _AddExercicioToTreinoScreenState
     }
   }
 
+  Future<void> _uploadSelectedExerciseVideo() async {
+    final exercicio = _selecionado;
+    if (exercicio == null || _mediaLoading) return;
+    final file = await _videoPicker.pickVideo(source: ImageSource.gallery);
+    if (file == null || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _mediaLoading = true);
+    messenger.showSnackBar(
+      SnackBar(content: Text('Enviando vídeo de ${exercicio.nome}...')),
+    );
+    try {
+      final updated = await ref
+          .read(exercicioRepositoryProvider)
+          .uploadVideo(
+            id: exercicio.id,
+            bytes: await file.readAsBytes(),
+            filename: file.name,
+          );
+      AnalyticsService.instance.track(
+        'video_personal_upload',
+        props: {'exId': exercicio.id, 'origin': 'treino_add_exercise'},
+      );
+      ref.invalidate(exerciciosProvider);
+      if (!mounted) return;
+      setState(() => _selecionado = updated);
+      messenger.clearSnackBars();
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Vídeo do exercício atualizado.'),
+          backgroundColor: EagleTokens.good,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      messenger.clearSnackBars();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(friendlyError(e)),
+          backgroundColor: EagleTokens.bad,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _mediaLoading = false);
+      }
+    }
+  }
+
+  Future<void> _removeSelectedExerciseVideo() async {
+    final exercicio = _selecionado;
+    if (exercicio == null || _mediaLoading) return;
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.34),
+      builder:
+          (sheetContext) => _RemoveExerciseVideoSheet(exercicio: exercicio),
+    );
+    if (confirmed != true || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _mediaLoading = true);
+    try {
+      final updated = await ref
+          .read(exercicioRepositoryProvider)
+          .removerVideo(id: exercicio.id);
+      AnalyticsService.instance.track(
+        'video_personal_remove',
+        props: {'exId': exercicio.id, 'origin': 'treino_add_exercise'},
+      );
+      ref.invalidate(exerciciosProvider);
+      if (!mounted) return;
+      setState(() => _selecionado = updated);
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Vídeo removido do exercício.'),
+          backgroundColor: EagleTokens.good,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(friendlyError(e)),
+          backgroundColor: EagleTokens.bad,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _mediaLoading = false);
+      }
+    }
+  }
+
   Widget _buildTabContent({
     required BuildContext context,
     required List<Exercicio> exercicios,
@@ -213,6 +310,9 @@ class _AddExercicioToTreinoScreenState
           primary: primary,
           total: exercicios.length,
           onTap: () => _openExercisePicker(exercicios),
+          mediaLoading: _mediaLoading,
+          onUploadVideo: _uploadSelectedExerciseVideo,
+          onRemoveVideo: _removeSelectedExerciseVideo,
           onCreate: () async {
             final criado = await context.push<bool>('/exercicios/novo');
             if (criado == true) {
@@ -718,6 +818,9 @@ class _ExercisePickerCard extends StatelessWidget {
   final Color primary;
   final int total;
   final VoidCallback onTap;
+  final bool mediaLoading;
+  final VoidCallback onUploadVideo;
+  final VoidCallback onRemoveVideo;
   final VoidCallback onCreate;
 
   const _ExercisePickerCard({
@@ -726,6 +829,9 @@ class _ExercisePickerCard extends StatelessWidget {
     required this.primary,
     required this.total,
     required this.onTap,
+    required this.mediaLoading,
+    required this.onUploadVideo,
+    required this.onRemoveVideo,
     required this.onCreate,
   });
 
@@ -925,7 +1031,236 @@ class _ExercisePickerCard extends StatelessWidget {
             ],
           ),
         ),
+        if (selected) ...[
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _ExerciseMediaButton(
+                  icon:
+                      mediaLoading
+                          ? Icons.hourglass_empty_rounded
+                          : Icons.video_call_outlined,
+                  label:
+                      mediaLoading
+                          ? 'Processando'
+                          : exercicio!.videoUrl?.trim().isNotEmpty == true
+                          ? 'Trocar vídeo'
+                          : 'Adicionar vídeo',
+                  primary: primary,
+                  isDark: isDark,
+                  onTap: mediaLoading ? null : onUploadVideo,
+                ),
+              ),
+              if (exercicio!.videoUrl?.trim().isNotEmpty == true) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _ExerciseMediaButton(
+                    icon: Icons.delete_outline_rounded,
+                    label: 'Remover vídeo',
+                    primary: EagleTokens.bad,
+                    isDark: isDark,
+                    onTap: mediaLoading ? null : onRemoveVideo,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
       ],
+    );
+  }
+}
+
+class _ExerciseMediaButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color primary;
+  final bool isDark;
+  final VoidCallback? onTap;
+
+  const _ExerciseMediaButton({
+    required this.icon,
+    required this.label,
+    required this.primary,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 160),
+        opacity: onTap == null ? 0.55 : 1,
+        child: Container(
+          height: 42,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color:
+                isDark
+                    ? primary.withValues(alpha: 0.14)
+                    : primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: primary.withValues(alpha: 0.22)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: primary, size: 17),
+              const SizedBox(width: 7),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RemoveExerciseVideoSheet extends StatelessWidget {
+  final Exercicio exercicio;
+
+  const _RemoveExerciseVideoSheet({required this.exercicio});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final bottom = MediaQuery.of(context).padding.bottom;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(14, 0, 14, bottom + 10),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          decoration: BoxDecoration(
+            color: isDark ? EagleTokens.darkCard : Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color:
+                  isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : EagleTokens.lineSoft,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.34 : 0.16),
+                blurRadius: 28,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color:
+                      isDark
+                          ? Colors.white.withValues(alpha: 0.16)
+                          : EagleTokens.line,
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: EagleTokens.bad.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      Icons.videocam_off_outlined,
+                      color: EagleTokens.bad,
+                      size: 21,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Remover vídeo?',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '"${exercicio.nome}" continua na biblioteca. Só a mídia de demonstração será removida.',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12.5,
+                            height: 1.35,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(44),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: const Text('Cancelar'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(44),
+                        backgroundColor: EagleTokens.bad,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: const Text('Remover'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

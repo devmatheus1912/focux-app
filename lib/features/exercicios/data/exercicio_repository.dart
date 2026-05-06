@@ -560,6 +560,11 @@ class ExercicioRepository {
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<Exercicio> removerVideo({required int id}) async {
+    final response = await _dio.delete('/api/exercicios/$id/video');
+    return Exercicio.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<Map<String, dynamic>> previewCuratedV2({
     required Set<Modalidade> modalidades,
     required Set<Espaco> espacos,
