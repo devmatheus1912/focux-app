@@ -1335,6 +1335,8 @@ class _CommandCenterSection extends ConsumerWidget {
 
     // Chat inbox — count total unread messages
     final chatAsync = ref.watch(chatInboxProvider);
+    final commandAsync = ref.watch(commandCenterProvider);
+    final isCommandPreparing = chatAsync.isLoading || commandAsync.isLoading;
     final unreadCount = chatAsync.maybeWhen(
       data: (items) => items.fold<int>(0, (sum, i) => sum + i.naoLidas),
       orElse: () => 0,
@@ -1356,7 +1358,6 @@ class _CommandCenterSection extends ConsumerWidget {
     );
 
     // Agenda today — count from agendaHojeProvider (commandCenterProvider)
-    final commandAsync = ref.watch(commandCenterProvider);
     final agendaHoje = commandAsync.maybeWhen(
       data: (cc) => cc.agendaHoje.length,
       orElse: () => 0,
@@ -1429,7 +1430,7 @@ class _CommandCenterSection extends ConsumerWidget {
           tone: _CommandActionTone.primary,
         ),
     ];
-    if (nextActions.isEmpty) {
+    if (nextActions.isEmpty && !isCommandPreparing) {
       nextActions.add(
         _CommandActionItem(
           icon: 'plus',
@@ -1541,7 +1542,9 @@ class _CommandCenterSection extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
-                '${nextActions.length} focos',
+                isCommandPreparing
+                    ? 'lendo sinais'
+                    : '${nextActions.length} focos',
                 style: TextStyle(
                   color: primary,
                   fontSize: 11.5,
@@ -1555,6 +1558,7 @@ class _CommandCenterSection extends ConsumerWidget {
         _CommandActionPanel(
           isDark: isDark,
           primary: primary,
+          loading: isCommandPreparing,
           actions: nextActions.take(3).toList(growable: false),
         ),
         const SizedBox(height: 14),
@@ -1638,11 +1642,13 @@ class _CommandActionItem {
 class _CommandActionPanel extends StatelessWidget {
   final bool isDark;
   final Color primary;
+  final bool loading;
   final List<_CommandActionItem> actions;
 
   const _CommandActionPanel({
     required this.isDark,
     required this.primary,
+    required this.loading,
     required this.actions,
   });
 
@@ -1695,14 +1701,77 @@ class _CommandActionPanel extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          for (var index = 0; index < actions.length; index++) ...[
-            _CommandActionTile(
-              item: actions[index],
-              isDark: isDark,
-              primary: primary,
+          if (loading)
+            _CommandLoadingTile(isDark: isDark, primary: primary)
+          else
+            for (var index = 0; index < actions.length; index++) ...[
+              _CommandActionTile(
+                item: actions[index],
+                isDark: isDark,
+                primary: primary,
+              ),
+              if (index < actions.length - 1) const SizedBox(height: 8),
+            ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CommandLoadingTile extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+
+  const _CommandLoadingTile({required this.isDark, required this.primary});
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: isDark ? 0.14 : 0.065),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: primary.withValues(alpha: 0.10)),
+      ),
+      child: Row(
+        children: [
+          Shimmer.fromColors(
+            baseColor: primary.withValues(alpha: isDark ? 0.18 : 0.10),
+            highlightColor: primary.withValues(alpha: isDark ? 0.32 : 0.18),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: primary,
+                borderRadius: BorderRadius.circular(15),
+              ),
             ),
-            if (index < actions.length - 1) const SizedBox(height: 8),
-          ],
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Preparando prioridades',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Lendo mensagens, risco, agenda e financeiro.',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: mute, fontSize: 11.6, height: 1.2),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
