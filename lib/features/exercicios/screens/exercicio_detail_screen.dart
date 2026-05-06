@@ -1088,7 +1088,9 @@ class _VideoPlayerState extends State<_VideoPlayer> {
   @override
   void initState() {
     super.initState();
-    _ctrl = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+    _ctrl = VideoPlayerController.networkUrl(
+        Uri.parse(_cloudinaryH264VideoUrl(widget.url)),
+      )
       ..initialize()
           .then((_) {
             if (mounted) setState(() => _ready = true);
@@ -1178,6 +1180,21 @@ class _VideoPlayerState extends State<_VideoPlayer> {
       ],
     );
   }
+}
+
+String _cloudinaryH264VideoUrl(String rawUrl) {
+  final url = rawUrl.trim();
+  const marker = '/video/upload/';
+  if (!url.contains(marker)) return url;
+
+  final delivery = url.substring(url.indexOf(marker) + marker.length);
+  if (delivery.startsWith('f_mp4') ||
+      delivery.startsWith('vc_h264') ||
+      delivery.startsWith('vc_auto')) {
+    return url;
+  }
+
+  return url.replaceFirst(marker, '${marker}f_mp4,vc_h264/');
 }
 
 class _OwnVideoPanel extends StatelessWidget {
