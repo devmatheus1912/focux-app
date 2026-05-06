@@ -136,17 +136,6 @@ class AlunoDashboardScreen extends ConsumerWidget {
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 12),
-            alunoAsync.when(
-              data:
-                  (aluno) => _StudentStatsRow(
-                    aluno: aluno,
-                    treinos: treinosAsync.valueOrNull ?? const [],
-                    isDark: isDark,
-                  ),
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
-            const SizedBox(height: 16),
             const ProgressoSemanalWidget(),
             const SizedBox(height: 16),
             _PerformanceEvolutionCard(
@@ -732,59 +721,6 @@ class _MiniMetricCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _StudentStatsRow extends StatelessWidget {
-  final Aluno aluno;
-  final List<ExecucaoTreino> treinos;
-  final bool isDark;
-
-  const _StudentStatsRow({
-    required this.aluno,
-    required this.treinos,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cards = [
-      (
-        'Objetivo',
-        aluno.objetivo?.trim().isNotEmpty == true ? aluno.objetivo! : 'Definir',
-      ),
-      (
-        'Consultoria',
-        aluno.tipoConsultoria?.trim().isNotEmpty == true
-            ? aluno.tipoConsultoria!
-            : 'Padrão',
-      ),
-      ('Próximos', '${treinos.length}'),
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final twoColumns = constraints.maxWidth < 360;
-        return Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            for (final card in cards)
-              SizedBox(
-                width:
-                    twoColumns
-                        ? (constraints.maxWidth - 10) / 2
-                        : (constraints.maxWidth - 20) / 3,
-                child: _MiniMetricCard(
-                  label: card.$1,
-                  value: card.$2,
-                  isDark: isDark,
-                ),
-              ),
-          ],
-        );
-      },
     );
   }
 }

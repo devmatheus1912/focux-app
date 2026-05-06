@@ -28,7 +28,7 @@ void main() {
     expect(screen, contains('score.rhythmLabel'));
     expect(screen, contains('score.riskLabel'));
     expect(screen, contains("'Acompanhamento'"));
-    expect(screen, contains("'Padrão'"));
+    expect(screen, isNot(contains('class _StudentStatsRow')));
     expect(screen, contains("'Sem ação agora'"));
     expect(screen, contains("'Prioridade média'"));
     expect(screen, contains("'Conferir horário'"));
