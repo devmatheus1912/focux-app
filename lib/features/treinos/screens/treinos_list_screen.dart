@@ -9,27 +9,152 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
 
-class TreinosListScreen extends ConsumerWidget {
+class TreinosListScreen extends ConsumerStatefulWidget {
   final int? alunoId;
   final String? alunoNome;
 
   const TreinosListScreen({super.key, this.alunoId, this.alunoNome});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TreinosListScreen> createState() => _TreinosListScreenState();
+}
+
+class _TreinosListScreenState extends ConsumerState<TreinosListScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  final Set<int> _selectedIds = <int>{};
+  String _query = '';
+  bool _selectionMode = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  bool _matchesQuery(Treino treino) {
+    final query = _query.trim().toLowerCase();
+    if (query.isEmpty) return true;
+    return [
+      treino.nome,
+      treino.objetivo,
+      treino.descricao,
+      treino.nivel,
+      '${treino.exercicios.length} exercicios',
+      treino.isTemplate ? 'template base' : null,
+    ].whereType<String>().any((value) => value.toLowerCase().contains(query));
+  }
+
+  void _toggleSelection(int id) {
+    setState(() {
+      _selectionMode = true;
+      if (_selectedIds.contains(id)) {
+        _selectedIds.remove(id);
+      } else {
+        _selectedIds.add(id);
+      }
+      if (_selectedIds.isEmpty) {
+        _selectionMode = false;
+      }
+    });
+  }
+
+  void _startSelection(int id) {
+    setState(() {
+      _selectionMode = true;
+      _selectedIds
+        ..clear()
+        ..add(id);
+    });
+  }
+
+  void _clearSelection() {
+    setState(() {
+      _selectionMode = false;
+      _selectedIds.clear();
+    });
+  }
+
+  Future<void> _deleteTreinos(List<Treino> treinos) async {
+    if (treinos.isEmpty) return;
+    final count = treinos.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(count == 1 ? 'Excluir treino?' : 'Excluir treinos?'),
+            content: Text(
+              widget.alunoId == null
+                  ? count == 1
+                      ? 'Essa acao remove "${treinos.first.nome}" da biblioteca.'
+                      : 'Essa acao remove $count treinos da biblioteca.'
+                  : count == 1
+                  ? 'Essa acao desvincula "${treinos.first.nome}" deste aluno.'
+                  : 'Essa acao desvincula $count treinos deste aluno.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: FilledButton.styleFrom(
+                  backgroundColor: EagleTokens.bad,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(widget.alunoId == null ? 'Excluir' : 'Desvincular'),
+              ),
+            ],
+          ),
+    );
+    if (confirmed != true) return;
+
+    final repository = ref.read(treinoRepositoryProvider);
+    try {
+      for (final treino in treinos) {
+        if (widget.alunoId == null) {
+          await repository.excluirTreino(treino.id);
+        } else {
+          await repository.desvincularAluno(widget.alunoId!, treino.id);
+        }
+      }
+      _clearSelection();
+      if (widget.alunoId == null) {
+        ref.invalidate(treinosProvider);
+      } else {
+        ref.invalidate(treinosDoAlunoProvider(widget.alunoId!));
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            count == 1 ? 'Treino removido.' : '$count treinos removidos.',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Nao foi possivel remover: $e')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final treinosAsync =
-        alunoId == null
+        widget.alunoId == null
             ? ref.watch(treinosProvider)
-            : ref.watch(treinosDoAlunoProvider(alunoId!));
+            : ref.watch(treinosDoAlunoProvider(widget.alunoId!));
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
 
     Future<void> refresh() async {
-      if (alunoId == null) {
+      if (widget.alunoId == null) {
         ref.invalidate(treinosProvider);
       } else {
-        ref.invalidate(treinosDoAlunoProvider(alunoId!));
+        ref.invalidate(treinosDoAlunoProvider(widget.alunoId!));
       }
     }
 
@@ -37,9 +162,9 @@ class TreinosListScreen extends ConsumerWidget {
       final criado = await context.push<bool>(
         '/treinos/novo',
         extra:
-            alunoId == null
+            widget.alunoId == null
                 ? null
-                : {'alunoId': alunoId, 'alunoNome': alunoNome},
+                : {'alunoId': widget.alunoId, 'alunoNome': widget.alunoNome},
       );
       if (criado == true) {
         await refresh();
@@ -62,81 +187,157 @@ class TreinosListScreen extends ConsumerWidget {
                 primary: primary,
                 onRetry: refresh,
               ),
-          data:
-              (treinos) => RefreshIndicator(
-                color: primary,
-                onRefresh: refresh,
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: _TreinosHeader(
-                        treinos: treinos,
-                        alunoId: alunoId,
-                        alunoNome: alunoNome,
-                        isDark: isDark,
-                        onBack:
-                            () => safePopOrGo(
-                              context,
-                              alunoId == null
-                                  ? '/dashboard/personal'
-                                  : '/alunos/$alunoId',
-                            ),
-                      ),
+          data: (treinos) {
+            final filteredTreinos = treinos.where(_matchesQuery).toList();
+            final selectedTreinos =
+                treinos
+                    .where((treino) => _selectedIds.contains(treino.id))
+                    .toList();
+
+            return RefreshIndicator(
+              color: primary,
+              onRefresh: refresh,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: _TreinosHeader(
+                      treinos: treinos,
+                      alunoId: widget.alunoId,
+                      alunoNome: widget.alunoNome,
+                      isDark: isDark,
+                      onBack:
+                          () => safePopOrGo(
+                            context,
+                            widget.alunoId == null
+                                ? '/dashboard/personal'
+                                : '/alunos/${widget.alunoId}',
+                          ),
                     ),
-                    if (treinos.isEmpty)
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: _EmptyState(
+                  ),
+                  if (treinos.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _EmptyState(
+                        isDark: isDark,
+                        primary: primary,
+                        onCreate: createWorkout,
+                      ),
+                    )
+                  else ...[
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                        child: _TreinosCommandCard(
+                          treinos: treinos,
                           isDark: isDark,
                           primary: primary,
                           onCreate: createWorkout,
                         ),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+                        child: _LibraryControls(
+                          controller: _searchController,
+                          query: _query,
+                          selectedCount: _selectedIds.length,
+                          selectionMode: _selectionMode,
+                          isDark: isDark,
+                          primary: primary,
+                          onQueryChanged:
+                              (value) => setState(() => _query = value),
+                          onClearQuery:
+                              () => setState(() {
+                                _query = '';
+                                _searchController.clear();
+                              }),
+                          onSelectAll:
+                              filteredTreinos.isEmpty
+                                  ? null
+                                  : () {
+                                    setState(() {
+                                      _selectionMode = true;
+                                      _selectedIds
+                                        ..clear()
+                                        ..addAll(
+                                          filteredTreinos.map(
+                                            (treino) => treino.id,
+                                          ),
+                                        );
+                                    });
+                                  },
+                          onCancelSelection: _clearSelection,
+                          onDeleteSelected:
+                              selectedTreinos.isEmpty
+                                  ? null
+                                  : () => _deleteTreinos(selectedTreinos),
+                        ),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                        child: _SectionHeader(
+                          title:
+                              widget.alunoId == null
+                                  ? 'Biblioteca ativa'
+                                  : 'Plano do aluno',
+                          action:
+                              _query.trim().isEmpty
+                                  ? '${treinos.length} planos'
+                                  : '${filteredTreinos.length} de ${treinos.length}',
+                          isDark: isDark,
+                        ),
+                      ),
+                    ),
+                    if (filteredTreinos.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: _NoResultsState(
+                          isDark: isDark,
+                          primary: primary,
+                          onClear:
+                              () => setState(() {
+                                _query = '';
+                                _searchController.clear();
+                              }),
+                        ),
                       )
-                    else ...[
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                          child: _TreinosCommandCard(
-                            treinos: treinos,
-                            isDark: isDark,
-                            primary: primary,
-                            onCreate: createWorkout,
-                          ),
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                          child: _SectionHeader(
-                            title:
-                                alunoId == null
-                                    ? 'Biblioteca ativa'
-                                    : 'Plano do aluno',
-                            action: '${treinos.length} planos',
-                            isDark: isDark,
-                          ),
-                        ),
-                      ),
+                    else
                       SliverPadding(
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 104),
                         sliver: SliverList.separated(
-                          itemCount: treinos.length,
+                          itemCount: filteredTreinos.length,
                           separatorBuilder:
                               (_, __) => const SizedBox(height: 12),
                           itemBuilder:
                               (context, i) => _TreinoCard(
-                                treino: treinos[i],
+                                treino: filteredTreinos[i],
                                 index: i,
                                 isDark: isDark,
                                 primary: primary,
+                                selectionMode: _selectionMode,
+                                selected: _selectedIds.contains(
+                                  filteredTreinos[i].id,
+                                ),
+                                onToggleSelection:
+                                    () =>
+                                        _toggleSelection(filteredTreinos[i].id),
+                                onStartSelection:
+                                    () =>
+                                        _startSelection(filteredTreinos[i].id),
+                                onDelete:
+                                    () => _deleteTreinos([filteredTreinos[i]]),
                               ),
                         ),
                       ),
-                    ],
                   ],
-                ),
+                ],
               ),
+            );
+          },
         ),
       ),
     );
@@ -481,6 +682,164 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
+class _LibraryControls extends StatelessWidget {
+  final TextEditingController controller;
+  final String query;
+  final int selectedCount;
+  final bool selectionMode;
+  final bool isDark;
+  final Color primary;
+  final ValueChanged<String> onQueryChanged;
+  final VoidCallback onClearQuery;
+  final VoidCallback? onSelectAll;
+  final VoidCallback onCancelSelection;
+  final VoidCallback? onDeleteSelected;
+
+  const _LibraryControls({
+    required this.controller,
+    required this.query,
+    required this.selectedCount,
+    required this.selectionMode,
+    required this.isDark,
+    required this.primary,
+    required this.onQueryChanged,
+    required this.onClearQuery,
+    required this.onSelectAll,
+    required this.onCancelSelection,
+    required this.onDeleteSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: card,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        children: [
+          TextField(
+            onChanged: onQueryChanged,
+            controller: controller,
+            style: TextStyle(
+              color: ink,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: 'Buscar treino, objetivo ou nivel',
+              hintStyle: TextStyle(color: mute, fontWeight: FontWeight.w600),
+              prefixIcon: Icon(Icons.search_rounded, color: primary, size: 20),
+              suffixIcon:
+                  query.trim().isEmpty
+                      ? null
+                      : IconButton(
+                        onPressed: onClearQuery,
+                        icon: Icon(Icons.close_rounded, color: mute, size: 18),
+                      ),
+              filled: true,
+              fillColor: isDark ? EagleTokens.darkBg : const Color(0xFFF6F7FB),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 12,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 180),
+            child:
+                selectionMode
+                    ? Row(
+                      key: const ValueKey('selection'),
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '$selectedCount selecionado${selectedCount == 1 ? '' : 's'}',
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: onCancelSelection,
+                          child: const Text('Cancelar'),
+                        ),
+                        const SizedBox(width: 6),
+                        FilledButton.icon(
+                          onPressed: onDeleteSelected,
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            size: 17,
+                          ),
+                          label: const Text('Excluir'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: EagleTokens.bad,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(0, 40),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                    : Row(
+                      key: const ValueKey('normal'),
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Busca e operacoes da biblioteca',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: mute,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        OutlinedButton.icon(
+                          onPressed: onSelectAll,
+                          icon: const Icon(Icons.checklist_rounded, size: 17),
+                          label: const Text('Selecionar'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: primary,
+                            side: BorderSide(
+                              color: primary.withValues(alpha: 0.34),
+                            ),
+                            minimumSize: const Size(0, 40),
+                            padding: const EdgeInsets.symmetric(horizontal: 11),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _EmptyState extends StatelessWidget {
   final bool isDark;
   final Color primary;
@@ -546,17 +905,86 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+class _NoResultsState extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onClear;
+
+  const _NoResultsState({
+    required this.isDark,
+    required this.primary,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 24, 28, 150),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: BrandPalette.soft(primary, dark: isDark),
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: Icon(Icons.manage_search_rounded, color: primary, size: 31),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Nada encontrado',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ink,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.2,
+            ),
+          ),
+          const SizedBox(height: 7),
+          Text(
+            'Ajuste a busca para encontrar outro treino da biblioteca.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: onClear,
+            icon: const Icon(Icons.close_rounded, size: 18),
+            label: const Text('Limpar busca'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TreinoCard extends StatelessWidget {
   final Treino treino;
   final int index;
   final bool isDark;
   final Color primary;
+  final bool selectionMode;
+  final bool selected;
+  final VoidCallback onToggleSelection;
+  final VoidCallback onStartSelection;
+  final VoidCallback onDelete;
 
   const _TreinoCard({
     required this.treino,
     required this.index,
     required this.isDark,
     required this.primary,
+    required this.selectionMode,
+    required this.selected,
+    required this.onToggleSelection,
+    required this.onStartSelection,
+    required this.onDelete,
   });
 
   IconData get _nivelIcon {
@@ -604,14 +1032,21 @@ class _TreinoCard extends StatelessWidget {
         hasExercises ? (treino.exercicios.length * 5).clamp(12, 90) : 0;
 
     return InkWell(
-      onTap: () => context.push('/treinos/${treino.id}'),
+      onTap:
+          selectionMode
+              ? onToggleSelection
+              : () => context.push('/treinos/${treino.id}'),
+      onLongPress: onStartSelection,
       borderRadius: BorderRadius.circular(24),
       child: Container(
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
           color: card,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: line),
+          border: Border.all(
+            color: selected ? primary.withValues(alpha: 0.62) : line,
+            width: selected ? 1.4 : 1,
+          ),
           boxShadow: [
             if (!isDark)
               BoxShadow(
@@ -691,7 +1126,55 @@ class _TreinoCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(Icons.chevron_right_rounded, color: mute),
+                const SizedBox(width: 2),
+                if (selectionMode)
+                  Checkbox(
+                    value: selected,
+                    onChanged: (_) => onToggleSelection(),
+                    activeColor: primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  )
+                else
+                  PopupMenuButton<String>(
+                    tooltip: 'Acoes do treino',
+                    icon: Icon(Icons.more_horiz_rounded, color: mute),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    onSelected: (value) {
+                      if (value == 'select') {
+                        onStartSelection();
+                      } else if (value == 'delete') {
+                        onDelete();
+                      }
+                    },
+                    itemBuilder:
+                        (context) => [
+                          const PopupMenuItem(
+                            value: 'select',
+                            child: Row(
+                              children: [
+                                Icon(Icons.checklist_rounded, size: 18),
+                                SizedBox(width: 10),
+                                Text('Selecionar'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete_outline_rounded, size: 18),
+                                SizedBox(width: 10),
+                                Text('Excluir'),
+                              ],
+                            ),
+                          ),
+                        ],
+                  ),
               ],
             ),
             const SizedBox(height: 14),
