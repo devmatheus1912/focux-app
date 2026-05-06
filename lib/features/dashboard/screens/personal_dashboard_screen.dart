@@ -1466,20 +1466,47 @@ class _CommandCenterSection extends ConsumerWidget {
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-              decoration: BoxDecoration(
-                color: primarySoft,
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap:
+                    isCommandPreparing
+                        ? null
+                        : () => _showCommandActionsSheet(
+                          context,
+                          isDark: isDark,
+                          primary: primary,
+                          actions: nextActions,
+                        ),
                 borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                isCommandPreparing
-                    ? 'lendo sinais'
-                    : 'Ver ${nextActions.length}',
-                style: TextStyle(
-                  color: primary,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w800,
+                child: Ink(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    color: primarySoft,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        isCommandPreparing
+                            ? 'lendo sinais'
+                            : 'Ver ${nextActions.length}',
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      if (!isCommandPreparing) ...[
+                        const SizedBox(width: 4),
+                        FxIcon(name: 'chevron-right', size: 13, color: primary),
+                      ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1530,6 +1557,137 @@ class _CommandCenterSection extends ConsumerWidget {
       ],
     );
   }
+}
+
+void _showCommandActionsSheet(
+  BuildContext context, {
+  required bool isDark,
+  required Color primary,
+  required List<_CommandActionItem> actions,
+}) {
+  final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+  final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+  final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+  final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: isDark ? 0.56 : 0.24),
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (sheetContext) {
+      final media = MediaQuery.of(sheetContext);
+      return Padding(
+        padding: EdgeInsets.fromLTRB(
+          14,
+          0,
+          14,
+          math.max(12, media.viewPadding.bottom + 10),
+        ),
+        child: Container(
+          constraints: BoxConstraints(maxHeight: media.size.height * 0.72),
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: line.withValues(alpha: 0.86)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.12),
+                blurRadius: 34,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 14),
+                  decoration: BoxDecoration(
+                    color: line.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: BrandPalette.soft(primary, dark: isDark),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Center(
+                      child: FxIcon(name: 'route', size: 18, color: primary),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Todas as prioridades',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.45,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Ordenadas pelo impacto de hoje.',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12.2,
+                            height: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    visualDensity: VisualDensity.compact,
+                    icon: FxIcon(name: 'x', size: 18, color: mute),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: actions.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (_, index) {
+                    final item = actions[index];
+                    return _CommandActionTile(
+                      item: item,
+                      isDark: isDark,
+                      primary: primary,
+                      onTap: () {
+                        Navigator.of(sheetContext).pop();
+                        context.go(item.route);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class _HeroGridPainter extends CustomPainter {
@@ -1727,11 +1885,13 @@ class _CommandActionTile extends StatelessWidget {
   final _CommandActionItem item;
   final bool isDark;
   final Color primary;
+  final VoidCallback? onTap;
 
   const _CommandActionTile({
     required this.item,
     required this.isDark,
     required this.primary,
+    this.onTap,
   });
 
   @override
@@ -1744,7 +1904,7 @@ class _CommandActionTile extends StatelessWidget {
       _CommandActionTone.primary => primary,
     };
     return InkWell(
-      onTap: () => context.go(item.route),
+      onTap: onTap ?? () => context.go(item.route),
       borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.all(12),
