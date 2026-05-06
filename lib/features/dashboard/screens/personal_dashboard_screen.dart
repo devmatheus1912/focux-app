@@ -1559,7 +1559,7 @@ class _CommandCenterSection extends ConsumerWidget {
           isDark: isDark,
           primary: primary,
           loading: isCommandPreparing,
-          actions: nextActions.take(3).toList(growable: false),
+          actions: nextActions.take(2).toList(growable: false),
         ),
         const SizedBox(height: 14),
         SizedBox(
@@ -1703,6 +1703,13 @@ class _CommandActionPanel extends StatelessWidget {
           const SizedBox(height: 10),
           if (loading)
             _CommandLoadingTile(isDark: isDark, primary: primary)
+          else if (actions.isEmpty)
+            _CommandLoadingTile(
+              isDark: isDark,
+              primary: primary,
+              title: 'Operação sob controle',
+              subtitle: 'Nenhuma ação crítica para agora.',
+            )
           else
             for (var index = 0; index < actions.length; index++) ...[
               _CommandActionTile(
@@ -1721,8 +1728,15 @@ class _CommandActionPanel extends StatelessWidget {
 class _CommandLoadingTile extends StatelessWidget {
   final bool isDark;
   final Color primary;
+  final String title;
+  final String subtitle;
 
-  const _CommandLoadingTile({required this.isDark, required this.primary});
+  const _CommandLoadingTile({
+    required this.isDark,
+    required this.primary,
+    this.title = 'Preparando prioridades',
+    this.subtitle = 'Lendo mensagens, risco, agenda e financeiro.',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1755,7 +1769,7 @@ class _CommandLoadingTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Preparando prioridades',
+                  title,
                   style: TextStyle(
                     color: ink,
                     fontSize: 13.5,
@@ -1764,7 +1778,7 @@ class _CommandLoadingTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Lendo mensagens, risco, agenda e financeiro.',
+                  subtitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: mute, fontSize: 11.6, height: 1.2),
