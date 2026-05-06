@@ -1657,7 +1657,7 @@ void _showCommandActionsSheet(
                   IconButton(
                     onPressed: () => Navigator.of(sheetContext).pop(),
                     visualDensity: VisualDensity.compact,
-                    icon: FxIcon(name: 'x', size: 18, color: mute),
+                    icon: Icon(Icons.close_rounded, size: 18, color: mute),
                   ),
                 ],
               ),
