@@ -104,7 +104,6 @@ class _PersonalDashboardScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final alunosAsync = ref.watch(alunosProvider);
     final historicoCheckinsAsync = ref.watch(historicoCheckinProvider);
-    final aderenciaAsync = ref.watch(aderenciaTop3Provider);
     final notificacoesNaoLidas =
         ref.watch(notificacoesNaoLidasProvider).valueOrNull ?? 0;
 
@@ -165,20 +164,6 @@ class _PersonalDashboardScreenState
                 orElse: () => 0,
               );
 
-              // BUG-07: aderência média real dos top-3 alunos
-              final aderenciaMediaStr = aderenciaAsync.maybeWhen(
-                data: (lista) {
-                  if (lista.isEmpty) return '—';
-                  final media =
-                      lista
-                          .map((a) => a.aderenciaPercent)
-                          .reduce((a, b) => a + b) ~/
-                      lista.length;
-                  return '$media%';
-                },
-                orElse: () => '—',
-              );
-
               final hoje = DateTime.now();
               final checkinsHoje = historicoCheckinsAsync.maybeWhen(
                 data: (items) {
@@ -224,38 +209,17 @@ class _PersonalDashboardScreenState
                                     light: isDark,
                                   ),
                                   const SizedBox(height: 10),
-                                  Text.rich(
-                                    TextSpan(
-                                      children: [
-                                        const TextSpan(text: 'Hoje · '),
-                                        TextSpan(
-                                          text:
-                                              'Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
-                                          style: TextStyle(
-                                            color:
-                                                isDark
-                                                    ? EagleTokens.darkInk
-                                                    : EagleTokens.ink,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text:
-                                              riscoAlto > 0
-                                                  ? ' · $riscoAlto precisam de você'
-                                                  : ' · operação estável',
-                                        ),
-                                      ],
-                                    ),
+                                  Text(
+                                    'Hoje · Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontSize: 12,
                                       color:
                                           isDark
-                                              ? EagleTokens.darkInkMute
-                                              : EagleTokens.inkMute,
-                                      fontWeight: FontWeight.w500,
+                                              ? EagleTokens.darkInk
+                                              : EagleTokens.ink,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ],
@@ -594,50 +558,43 @@ class _PersonalDashboardScreenState
                     // PULSO DO DIA
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 18, 0, 20),
-                        child: SizedBox(
-                          height: 96,
-                          child: ListView(
-                            key: const PageStorageKey('personal-pulse-strip'),
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            padding: const EdgeInsets.only(right: 16),
-                            children: [
-                              _QuickTile(
+                        padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _QuickTile(
                                 icon: 'users',
-                                label: 'Alunos ativos',
+                                label: 'Ativos',
                                 value: alunosAtivos.toString(),
                                 sub:
                                     '${math.max(0, totalAlunos - alunosAtivos)} inativos',
                                 accent: primary,
                                 isDark: isDark,
                               ),
-                              _QuickTile(
+                            ),
+                            const SizedBox(width: 9),
+                            Expanded(
+                              child: _QuickTile(
                                 icon: 'circle-check',
-                                label: 'Check-ins hoje',
+                                label: 'Check-ins',
                                 value: checkinsHoje.toString(),
-                                sub: 'histórico de treinos',
+                                sub: 'hoje',
                                 accent: EagleTokens.good,
                                 isDark: isDark,
                               ),
-                              _QuickTile(
+                            ),
+                            const SizedBox(width: 9),
+                            Expanded(
+                              child: _QuickTile(
                                 icon: 'alert-triangle',
-                                label: 'Risco alto',
+                                label: 'Risco',
                                 value: riscoAlto.toString(),
-                                sub: 'precisam atenção',
+                                sub: 'atenção',
                                 accent: EagleTokens.warn,
                                 isDark: isDark,
                               ),
-                              _QuickTile(
-                                icon: 'flame',
-                                label: 'Aderência média',
-                                value: aderenciaMediaStr,
-                                sub: 'últimos 7 dias',
-                                accent: primary,
-                                isDark: isDark,
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -981,12 +938,11 @@ class _QuickTile extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
-      width: 154,
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.all(13),
+      height: 86,
+      padding: const EdgeInsets.fromLTRB(11, 12, 11, 11),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: accent.withValues(alpha: isDark ? 0.22 : 0.13),
           width: 1,
@@ -1000,57 +956,49 @@ class _QuickTile extends StatelessWidget {
             ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 34,
-            height: 34,
+            width: 30,
+            height: 30,
             decoration: BoxDecoration(
               color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
-              borderRadius: BorderRadius.circular(13),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Center(child: FxIcon(name: icon, size: 16, color: accent)),
+            child: Center(child: FxIcon(name: icon, size: 15, color: accent)),
           ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 23,
-                    fontWeight: FontWeight.w700,
-                    color: ink,
-                    height: 1,
-                    letterSpacing: -0.4,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                    color: ink,
-                    height: 1.1,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  sub,
-                  style: TextStyle(fontSize: 10.5, color: mute, height: 1.1),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+          const Spacer(),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: ink,
+              height: 1,
+              letterSpacing: -0.4,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.2,
+              fontWeight: FontWeight.w800,
+              color: ink,
+              height: 1.1,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            sub,
+            style: TextStyle(fontSize: 10.2, color: mute, height: 1.1),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -1544,7 +1492,7 @@ class _CommandCenterSection extends ConsumerWidget {
               child: Text(
                 isCommandPreparing
                     ? 'lendo sinais'
-                    : '${nextActions.length} focos',
+                    : 'Ver ${nextActions.length}',
                 style: TextStyle(
                   color: primary,
                   fontSize: 11.5,

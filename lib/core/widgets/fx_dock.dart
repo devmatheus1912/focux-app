@@ -54,8 +54,8 @@ class FxDock extends StatelessWidget {
     final compact = width < 390;
     final bgColor =
         isDark
-            ? const Color.fromRGBO(20, 26, 48, 0.72)
-            : const Color.fromRGBO(255, 255, 255, 0.78);
+            ? const Color.fromRGBO(20, 26, 48, 0.66)
+            : const Color.fromRGBO(255, 255, 255, 0.70);
     final borderColor =
         isDark
             ? const Color.fromRGBO(255, 255, 255, 0.12)
@@ -68,14 +68,14 @@ class FxDock extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: const [
           BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.32),
-            blurRadius: 48,
-            offset: Offset(0, 16),
+            color: Color.fromRGBO(0, 0, 0, 0.20),
+            blurRadius: 34,
+            offset: Offset(0, 12),
             spreadRadius: -12,
           ),
           BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.18),
-            blurRadius: 16,
+            color: Color.fromRGBO(0, 0, 0, 0.10),
+            blurRadius: 12,
             offset: Offset(0, 4),
             spreadRadius: -4,
           ),
@@ -93,9 +93,9 @@ class FxDock extends StatelessWidget {
             ),
             padding: EdgeInsets.fromLTRB(
               6,
-              compact ? 8 : 10,
+              compact ? 7 : 8,
               6,
-              compact ? 10 : 14,
+              compact ? 9 : 11,
             ),
             child: Row(
               children: List.generate(items.length, (i) {
