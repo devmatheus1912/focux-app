@@ -155,10 +155,6 @@ class _PersonalDashboardScreenState
                     (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
                 orElse: () => data.alunosAtivos,
               );
-              final totalAlunos = alunosAsync.maybeWhen(
-                data: (alunos) => alunos.length,
-                orElse: () => data.totalAlunos,
-              );
               final riscoAlto = alunosAsync.maybeWhen(
                 data: (alunos) => alunos.where((a) => a.emRisco).length,
                 orElse: () => 0,
@@ -566,8 +562,6 @@ class _PersonalDashboardScreenState
                                 icon: 'users',
                                 label: 'Ativos',
                                 value: alunosAtivos.toString(),
-                                sub:
-                                    '${math.max(0, totalAlunos - alunosAtivos)} inativos',
                                 accent: primary,
                                 isDark: isDark,
                               ),
@@ -578,7 +572,6 @@ class _PersonalDashboardScreenState
                                 icon: 'circle-check',
                                 label: 'Check-ins',
                                 value: checkinsHoje.toString(),
-                                sub: 'hoje',
                                 accent: EagleTokens.good,
                                 isDark: isDark,
                               ),
@@ -589,7 +582,6 @@ class _PersonalDashboardScreenState
                                 icon: 'alert-triangle',
                                 label: 'Risco',
                                 value: riscoAlto.toString(),
-                                sub: 'atenção',
                                 accent: EagleTokens.warn,
                                 isDark: isDark,
                               ),
@@ -919,14 +911,13 @@ class _HeroMiniStat extends StatelessWidget {
 
 class _QuickTile extends StatelessWidget {
   final String icon;
-  final String label, value, sub;
+  final String label, value;
   final Color accent;
   final bool isDark;
   const _QuickTile({
     required this.icon,
     required this.label,
     required this.value,
-    required this.sub,
     required this.accent,
     required this.isDark,
   });
@@ -935,11 +926,10 @@ class _QuickTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
-      height: 108,
-      padding: const EdgeInsets.fromLTRB(11, 11, 11, 11),
+      height: 92,
+      padding: const EdgeInsets.fromLTRB(11, 11, 11, 10),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
@@ -968,7 +958,7 @@ class _QuickTile extends StatelessWidget {
             ),
             child: Center(child: FxIcon(name: icon, size: 14, color: accent)),
           ),
-          const SizedBox(height: 10),
+          const Spacer(),
           Text(
             value,
             style: TextStyle(
@@ -990,13 +980,6 @@ class _QuickTile extends StatelessWidget {
               color: ink,
               height: 1.1,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 1),
-          Text(
-            sub,
-            style: TextStyle(fontSize: 10, color: mute, height: 1.05),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
