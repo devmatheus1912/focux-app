@@ -304,49 +304,6 @@ class _TreinoDetailBody extends StatelessWidget {
           pinned: true,
           backgroundColor: isDark ? const Color(0xFF0A0F1E) : primaryDeep,
           iconTheme: const IconThemeData(color: Colors.white),
-          actions: [
-            InkWell(
-              onTap: () async {
-                HapticFeedback.selectionClick();
-                await AnalyticsService.instance.track(
-                  ProductEvents.iaInsightRequested,
-                  props: {'source': 'treino_detail', 'treinoId': treinoId},
-                );
-                if (context.mounted) {
-                  context.go('/ia/copiloto');
-                }
-              },
-              borderRadius: BorderRadius.circular(999),
-              child: Container(
-                margin: const EdgeInsets.only(right: 16),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.10),
-                  ),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.auto_awesome, size: 12, color: Colors.white),
-                    SizedBox(width: 4),
-                    Text(
-                      'IA Copiloto',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
           flexibleSpace: FlexibleSpaceBar(
             background: Stack(
               fit: StackFit.expand,
