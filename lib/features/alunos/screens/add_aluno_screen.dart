@@ -436,7 +436,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                             ),
                           ),
                           const SizedBox(height: 14),
-                          _OnboardingStatusCard(
+                          _AccessProgressStrip(
                             name: _firstName,
                             hasName: _nomeCtrl.text.trim().isNotEmpty,
                             hasEmail: RegExp(
@@ -445,7 +445,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                             hasWhatsapp: _whatsappCtrl.text.trim().isNotEmpty,
                             isDark: isDark,
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 16),
                           _SectionCard(
                             icon: Icons.person_outline_rounded,
                             title: 'Identidade',
@@ -589,17 +589,19 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                               ),
                             ],
                           ),
-                          const SizedBox(height: 14),
-                          _InvitePreviewCard(
-                            isDark: isDark,
-                            name: _firstName,
-                            hasWhatsapp: _whatsappCtrl.text.trim().isNotEmpty,
-                            consultoriaLabel:
-                                _tipoConsultoria == null
-                                    ? null
-                                    : _tiposConsultoriaLabel[_tiposConsultoria
-                                        .indexOf(_tipoConsultoria!)],
-                          ),
+                          if (_canSubmit) ...[
+                            const SizedBox(height: 14),
+                            _InvitePreviewCard(
+                              isDark: isDark,
+                              name: _firstName,
+                              hasWhatsapp: _whatsappCtrl.text.trim().isNotEmpty,
+                              consultoriaLabel:
+                                  _tipoConsultoria == null
+                                      ? null
+                                      : _tiposConsultoriaLabel[_tiposConsultoria
+                                          .indexOf(_tipoConsultoria!)],
+                            ),
+                          ],
                           if (_error != null) ...[
                             const SizedBox(height: 14),
                             _ErrorCard(message: _error!, isDark: isDark),
@@ -703,14 +705,14 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-class _OnboardingStatusCard extends StatelessWidget {
+class _AccessProgressStrip extends StatelessWidget {
   final String name;
   final bool hasName;
   final bool hasEmail;
   final bool hasWhatsapp;
   final bool isDark;
 
-  const _OnboardingStatusCard({
+  const _AccessProgressStrip({
     required this.name,
     required this.hasName,
     required this.hasEmail,
@@ -723,64 +725,33 @@ class _OnboardingStatusCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final ready = hasName && hasEmail;
     final progress = (hasName ? 1 : 0) + (hasEmail ? 1 : 0);
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 13),
-      decoration: BoxDecoration(
-        color:
-            ready
-                ? primary.withValues(alpha: isDark ? 0.15 : 0.055)
-                : (isDark
-                    ? EagleTokens.darkCard
-                    : Colors.white.withValues(alpha: 0.72)),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color:
-              ready
-                  ? primary.withValues(alpha: 0.22)
-                  : line.withValues(alpha: 0.7),
-        ),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(left: 2, right: 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: ready ? primary : primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  ready
-                      ? Icons.mark_email_read_rounded
-                      : Icons.person_add_rounded,
-                  color: ready ? Colors.white : primary,
-                  size: 17,
-                ),
-              ),
-              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   ready
                       ? 'Convite pronto para $name'
-                      : 'Complete o acesso do aluno',
+                      : 'Nome e e-mail liberam o convite',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: ink,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
+                    color: ready ? ink : mute,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
+              const SizedBox(width: 10),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: primary.withValues(alpha: isDark ? 0.18 : 0.08),
                   borderRadius: BorderRadius.circular(999),
@@ -796,41 +767,15 @@ class _OnboardingStatusCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 11),
+          const SizedBox(height: 9),
           Row(
             children: [
-              Expanded(
-                child: _ProgressStep(
-                  label: 'Nome',
-                  done: hasName,
-                  isDark: isDark,
-                ),
-              ),
+              Expanded(child: _ProgressStep(done: hasName, isDark: isDark)),
               const SizedBox(width: 8),
-              Expanded(
-                child: _ProgressStep(
-                  label: 'E-mail',
-                  done: hasEmail,
-                  isDark: isDark,
-                ),
-              ),
+              Expanded(child: _ProgressStep(done: hasEmail, isDark: isDark)),
               const SizedBox(width: 8),
-              Expanded(
-                child: _ProgressStep(
-                  label: 'WhatsApp',
-                  done: hasWhatsapp,
-                  isDark: isDark,
-                  optional: true,
-                ),
-              ),
+              Expanded(child: _ProgressStep(done: hasWhatsapp, isDark: isDark)),
             ],
-          ),
-          const SizedBox(height: 9),
-          Text(
-            ready
-                ? 'A senha provisória será gerada ao cadastrar.'
-                : 'Nome e e-mail válido liberam o envio do convite.',
-            style: TextStyle(color: mute, fontSize: 11.5, height: 1.2),
           ),
         ],
       ),
@@ -839,64 +784,22 @@ class _OnboardingStatusCard extends StatelessWidget {
 }
 
 class _ProgressStep extends StatelessWidget {
-  final String label;
   final bool done;
   final bool isDark;
-  final bool optional;
 
-  const _ProgressStep({
-    required this.label,
-    required this.done,
-    required this.isDark,
-    this.optional = false,
-  });
+  const _ProgressStep({required this.done, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final activeColor = done ? primary : (optional ? mute : EagleTokens.warn);
 
     return Container(
-      height: 30,
+      height: 4,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color:
-            done
-                ? primary.withValues(alpha: isDark ? 0.18 : 0.08)
-                : Colors.transparent,
+        color: done ? primary : line.withValues(alpha: isDark ? 0.7 : 0.75),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: done ? primary.withValues(alpha: 0.25) : line,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            done
-                ? Icons.check_rounded
-                : optional
-                ? Icons.more_horiz_rounded
-                : Icons.priority_high_rounded,
-            size: 13,
-            color: activeColor,
-          ),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: activeColor,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1302,37 +1205,70 @@ class _BottomSubmitBar extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               height: 52,
-              child: ElevatedButton.icon(
-                onPressed: canSubmit ? onSubmit : null,
-                icon:
-                    loading
-                        ? const SizedBox.shrink()
-                        : const Icon(Icons.person_add_alt_1_rounded, size: 20),
-                label:
-                    loading
-                        ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
-                          ),
-                        )
-                        : const Text(
-                          'Cadastrar aluno',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primary,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: primary.withValues(alpha: 0.42),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(17),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: canSubmit ? onSubmit : null,
+                  borderRadius: BorderRadius.circular(17),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color:
+                          canSubmit
+                              ? primary
+                              : (isDark
+                                  ? Colors.white.withValues(alpha: 0.04)
+                                  : Colors.white),
+                      borderRadius: BorderRadius.circular(17),
+                      border: Border.all(
+                        color:
+                            canSubmit
+                                ? primary
+                                : line.withValues(alpha: isDark ? 0.9 : 0.75),
+                      ),
+                      boxShadow:
+                          canSubmit
+                              ? [
+                                BoxShadow(
+                                  color: primary.withValues(alpha: 0.18),
+                                  blurRadius: 22,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ]
+                              : null,
+                    ),
+                    child:
+                        loading
+                            ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                            : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.person_add_alt_1_rounded,
+                                  size: 19,
+                                  color: canSubmit ? Colors.white : mute,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Cadastrar aluno',
+                                  style: TextStyle(
+                                    color: canSubmit ? Colors.white : mute,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
                   ),
-                  elevation: 0,
                 ),
               ),
             ),
