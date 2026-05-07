@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../core/theme/brand_palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +55,23 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       return isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     }
     return primary; // AGENDADO
+  }
+
+  String _statusText(String status) {
+    switch (status) {
+      case 'AGENDADO':
+        return 'Agendado';
+      case 'PRESENTE':
+        return 'Presente';
+      case 'CONCLUIDO':
+        return 'Concluído';
+      case 'FALTA':
+        return 'Falta';
+      case 'CANCELADO':
+        return 'Cancelado';
+      default:
+        return status;
+    }
   }
 
   @override
@@ -310,7 +328,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                       ),
                     ),
                     TextSpan(
-                      text: '${dailyEvents.length} atendimentos',
+                      text:
+                          dailyEvents.length == 1
+                              ? '1 atendimento'
+                              : '${dailyEvents.length} atendimentos',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
@@ -331,10 +352,17 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                       : ListView.builder(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                         itemCount:
-                            dailyEvents.length +
-                            1, // +1 for the Add Slot button
+                            dailyEvents.length + (dailyEvents.isEmpty ? 2 : 1),
                         itemBuilder: (_, i) {
-                          if (i == dailyEvents.length) {
+                          if (dailyEvents.isEmpty && i == 0) {
+                            return _AgendaEmptyState(
+                              selectedDate:
+                                  '${diasSemanaStr[_selectedIdx]}, ${selectedDate.day} ${monthNames[selectedDate.month]}',
+                            );
+                          }
+
+                          if (i == dailyEvents.length ||
+                              (dailyEvents.isEmpty && i == 1)) {
                             // Add slot button
                             return GestureDetector(
                               onTap: () async {
@@ -377,7 +405,8 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                             );
                           }
 
-                          final e = dailyEvents[i];
+                          final eventIndex = dailyEvents.isEmpty ? i - 1 : i;
+                          final e = dailyEvents[eventIndex];
                           final sColor = _statusColor(
                             e.status,
                             isDark,
@@ -470,7 +499,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                           ),
                                           const SizedBox(width: 5),
                                           Text(
-                                            e.status,
+                                            _statusText(e.status),
                                             style: TextStyle(
                                               fontSize: 11.5,
                                               fontWeight: FontWeight.w600,
@@ -514,6 +543,79 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   }
 }
 
+class _AgendaEmptyState extends StatelessWidget {
+  final String selectedDate;
+
+  const _AgendaEmptyState({required this.selectedDate});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.only(bottom: 10),
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: EagleTokens.line),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: EagleTokens.brandSoft,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.event_available_outlined,
+                size: 19,
+                color: EagleTokens.brandInk,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Dia livre',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: EagleTokens.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    selectedDate,
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: EagleTokens.inkMute,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Text(
+          'Nenhum atendimento marcado. Use este espaço para encaixar uma avaliação, retorno ou sessão avulsa.',
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            height: 1.35,
+            color: EagleTokens.inkMute,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class _NovoAgendamentoScreen extends ConsumerStatefulWidget {
   const _NovoAgendamentoScreen();
   @override
@@ -525,36 +627,59 @@ class _NovoAgendamentoScreenState
     extends ConsumerState<_NovoAgendamentoScreen> {
   final _titulo = TextEditingController();
   int? _alunoId;
+  Aluno? _alunoSelecionado;
   DateTime? _inicio;
   DateTime? _fim;
   bool _saving = false;
 
+  @override
+  void dispose() {
+    _titulo.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickDateTime(bool isInicio) async {
-    final date = await showDatePicker(
+    final base =
+        isInicio
+            ? (_inicio ?? DateTime.now().add(const Duration(hours: 1)))
+            : (_fim ??
+                (_inicio ?? DateTime.now().add(const Duration(hours: 1))).add(
+                  const Duration(hours: 1),
+                ));
+    final dt = await showModalBottomSheet<DateTime>(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (_) => _AgendaDateTimeSheet(
+            title: isInicio ? 'Início' : 'Fim',
+            initial: base,
+          ),
     );
-    if (date == null || !mounted) return;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (time == null) return;
-    final dt = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
+    if (dt == null || !mounted) return;
     setState(() {
       if (isInicio) {
         _inicio = dt;
+        if (_fim == null || !_fim!.isAfter(dt)) {
+          _fim = dt.add(const Duration(hours: 1));
+        }
       } else {
         _fim = dt;
       }
+    });
+  }
+
+  Future<void> _showAlunoSheet(List<Aluno> alunos) async {
+    final aluno = await showModalBottomSheet<Aluno>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AgendaAlunoSheet(alunos: alunos, selectedId: _alunoId),
+    );
+    if (aluno == null || !mounted) return;
+    setState(() {
+      _alunoId = aluno.id;
+      _alunoSelecionado = aluno;
     });
   }
 
@@ -571,7 +696,7 @@ class _NovoAgendamentoScreenState
     final fim = _fim ?? inicio.add(const Duration(hours: 1));
     if (!fim.isAfter(inicio)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Fim deve ser apos inicio.')),
+        const SnackBar(content: Text('Fim deve ser após início.')),
       );
       return;
     }
@@ -594,12 +719,12 @@ class _NovoAgendamentoScreenState
   String _fmtDt(DateTime? dt) =>
       dt == null
           ? 'Selecionar'
-          : '${dt.day}/${dt.month}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+          : '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')} · ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Novo Agendamento'),
+      title: const Text('Novo agendamento'),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () => safePopOrGo(context, '/agenda'),
@@ -615,28 +740,15 @@ class _NovoAgendamentoScreenState
                 loading: () => const LinearProgressIndicator(),
                 error:
                     (e, _) => Text(
-                      'Nao foi possivel carregar alunos.',
+                      'Não foi possível carregar alunos.',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.error,
                       ),
                     ),
                 data:
-                    (alunos) => DropdownButtonFormField<int>(
-                      value: _alunoId,
-                      decoration: const InputDecoration(
-                        labelText: 'Aluno *',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
-                      items:
-                          alunos
-                              .map(
-                                (a) => DropdownMenuItem<int>(
-                                  value: a.id,
-                                  child: Text(a.nome),
-                                ),
-                              )
-                              .toList(),
-                      onChanged: (value) => setState(() => _alunoId = value),
+                    (alunos) => _AgendaAlunoButton(
+                      aluno: _alunoSelecionado,
+                      onTap: () => _showAlunoSheet(alunos),
                     ),
               ),
           const SizedBox(height: 12),
@@ -666,4 +778,505 @@ class _NovoAgendamentoScreenState
       ),
     ),
   );
+}
+
+class _AgendaAlunoButton extends StatelessWidget {
+  final Aluno? aluno;
+  final VoidCallback onTap;
+
+  const _AgendaAlunoButton({required this.aluno, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(16),
+    child: Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: aluno == null ? Colors.white : EagleTokens.brandSofter,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: aluno == null ? EagleTokens.line : EagleTokens.brand,
+        ),
+      ),
+      child: Row(
+        children: [
+          _AgendaAlunoAvatar(aluno: aluno),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  aluno?.nome ?? 'Aluno',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color:
+                        aluno == null ? EagleTokens.inkMute : EagleTokens.ink,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  aluno?.email ?? 'Selecione quem será atendido',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: EagleTokens.inkMute,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: EagleTokens.inkMute,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _AgendaAlunoAvatar extends StatelessWidget {
+  final Aluno? aluno;
+
+  const _AgendaAlunoAvatar({required this.aluno});
+
+  @override
+  Widget build(BuildContext context) {
+    final foto = aluno?.fotoUrl;
+    final hasPhoto = foto != null && foto.isNotEmpty;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(13),
+      child: Container(
+        width: 42,
+        height: 42,
+        color: EagleTokens.brandSoft,
+        child:
+            hasPhoto
+                ? Image.network(foto, fit: BoxFit.cover)
+                : Center(
+                  child: Text(
+                    _initials(aluno?.nome ?? ''),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: EagleTokens.brandInk,
+                    ),
+                  ),
+                ),
+      ),
+    );
+  }
+
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts.first.isEmpty) return '?';
+    final first = parts.first.characters.first;
+    final last = parts.length > 1 ? parts.last.characters.first : '';
+    return (first + last).toUpperCase();
+  }
+}
+
+class _AgendaAlunoSheet extends StatefulWidget {
+  final List<Aluno> alunos;
+  final int? selectedId;
+
+  const _AgendaAlunoSheet({required this.alunos, required this.selectedId});
+
+  @override
+  State<_AgendaAlunoSheet> createState() => _AgendaAlunoSheetState();
+}
+
+class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final query = _search.text.trim().toLowerCase();
+    final alunos =
+        widget.alunos.where((aluno) {
+          if (query.isEmpty) return true;
+          return aluno.nome.toLowerCase().contains(query) ||
+              aluno.email.toLowerCase().contains(query) ||
+              (aluno.objetivo ?? '').toLowerCase().contains(query);
+        }).toList();
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.78,
+      minChildSize: 0.5,
+      maxChildSize: 0.92,
+      builder:
+          (context, controller) => Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: EagleTokens.line,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Selecionar aluno',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: EagleTokens.ink,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '${alunos.length}/${widget.alunos.length}',
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: EagleTokens.brandInk,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _search,
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          hintText: 'Buscar por nome, e-mail ou objetivo',
+                          prefixIcon: const Icon(Icons.search, size: 19),
+                          filled: true,
+                          fillColor: EagleTokens.card,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: EagleTokens.line,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: EagleTokens.line,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: EagleTokens.brand,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.separated(
+                    controller: controller,
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+                    itemCount: alunos.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (_, index) {
+                      final aluno = alunos[index];
+                      final selected = aluno.id == widget.selectedId;
+                      return InkWell(
+                        onTap: () => Navigator.pop(context, aluno),
+                        borderRadius: BorderRadius.circular(18),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color:
+                                selected
+                                    ? EagleTokens.brandSofter
+                                    : EagleTokens.card,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color:
+                                  selected
+                                      ? EagleTokens.brand
+                                      : EagleTokens.line,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              _AgendaAlunoAvatar(aluno: aluno),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      aluno.nome,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800,
+                                        color: EagleTokens.ink,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      [
+                                        if ((aluno.objetivo ?? '').isNotEmpty)
+                                          aluno.objetivo!,
+                                        aluno.email,
+                                      ].join(' · '),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        color: EagleTokens.inkMute,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                selected
+                                    ? Icons.check_circle
+                                    : Icons.chevron_right_rounded,
+                                color:
+                                    selected
+                                        ? EagleTokens.brandInk
+                                        : EagleTokens.inkMute,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+}
+
+class _AgendaDateTimeSheet extends StatefulWidget {
+  final String title;
+  final DateTime initial;
+
+  const _AgendaDateTimeSheet({required this.title, required this.initial});
+
+  @override
+  State<_AgendaDateTimeSheet> createState() => _AgendaDateTimeSheetState();
+}
+
+class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
+  late DateTime _selectedDay;
+  late TimeOfDay _selectedTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = DateTime(
+      widget.initial.year,
+      widget.initial.month,
+      widget.initial.day,
+    );
+    _selectedTime = TimeOfDay(
+      hour: widget.initial.hour,
+      minute: widget.initial.minute,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final days = List.generate(
+      14,
+      (i) => DateTime.now().add(Duration(days: i)),
+    );
+    final slots = <TimeOfDay>[
+      for (var hour = 6; hour <= 22; hour++)
+        for (final minute in const [0, 30])
+          TimeOfDay(hour: hour, minute: minute),
+    ];
+
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 38,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: EagleTokens.line,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              widget.title,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: EagleTokens.ink,
+              ),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              height: 74,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: days.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (_, index) {
+                  final day = days[index];
+                  final selected = _sameDay(day, _selectedDay);
+                  return InkWell(
+                    onTap: () => setState(() => _selectedDay = day),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      width: 58,
+                      padding: const EdgeInsets.symmetric(vertical: 9),
+                      decoration: BoxDecoration(
+                        color: selected ? EagleTokens.brand : EagleTokens.card,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color:
+                              selected ? EagleTokens.brand : EagleTokens.line,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _weekLabel(day.weekday),
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color:
+                                  selected ? Colors.white : EagleTokens.inkMute,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${day.day}',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: selected ? Colors.white : EagleTokens.ink,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 230,
+              child: GridView.builder(
+                itemCount: slots.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 1.8,
+                ),
+                itemBuilder: (_, index) {
+                  final slot = slots[index];
+                  final selected =
+                      slot.hour == _selectedTime.hour &&
+                      slot.minute == _selectedTime.minute;
+                  return InkWell(
+                    onTap: () => setState(() => _selectedTime = slot),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selected ? EagleTokens.brand : EagleTokens.card,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color:
+                              selected ? EagleTokens.brand : EagleTokens.line,
+                        ),
+                      ),
+                      child: Text(
+                        _timeLabel(slot),
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: selected ? Colors.white : EagleTokens.ink,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              height: 52,
+              child: FilledButton(
+                onPressed: () {
+                  Navigator.pop(
+                    context,
+                    DateTime(
+                      _selectedDay.year,
+                      _selectedDay.month,
+                      _selectedDay.day,
+                      _selectedTime.hour,
+                      _selectedTime.minute,
+                    ),
+                  );
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: EagleTokens.brandInk,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Text('Confirmar horário'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool _sameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  String _weekLabel(int weekday) =>
+      const ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'][weekday - 1];
+
+  String _timeLabel(TimeOfDay time) =>
+      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }
