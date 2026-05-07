@@ -1407,35 +1407,106 @@ class _ChoiceGroup<T extends Enum> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final selectedValues =
+        values.where((value) => selected.contains(value)).toList();
+    final availableValues =
+        values.where((value) => !selected.contains(value)).toList();
+
+    Widget chipFor(T value, {required bool isSelected}) {
+      return ChoiceChip(
+        label: Text(labels[value] ?? value.backendName),
+        selected: isSelected,
+        onSelected: (_) => onToggle(value),
+        showCheckmark: isSelected,
+        checkmarkColor: primary,
+        visualDensity: VisualDensity.compact,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? 10 : 9,
+          vertical: isSelected ? 7 : 6,
+        ),
+        labelStyle: TextStyle(
+          color:
+              isSelected
+                  ? primary
+                  : (isDark ? EagleTokens.darkInk : EagleTokens.ink),
+          fontSize: isSelected ? 12 : 11.5,
+          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+        ),
+        selectedColor: primary.withValues(alpha: 0.1),
+        backgroundColor:
+            isDark ? Colors.white.withValues(alpha: 0.035) : EagleTokens.paper,
+        side: BorderSide(
+          color:
+              isSelected
+                  ? primary.withValues(alpha: 0.22)
+                  : (isDark
+                      ? EagleTokens.darkLine
+                      : EagleTokens.line.withValues(alpha: 0.72)),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final value in values)
-          ChoiceChip(
-            label: Text(labels[value] ?? value.backendName),
-            selected: selected.contains(value),
-            onSelected: (_) => onToggle(value),
-            showCheckmark: true,
-            checkmarkColor: primary,
-            visualDensity: VisualDensity.compact,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-            labelStyle: TextStyle(
+        if (selectedValues.isNotEmpty)
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final value in selectedValues)
+                chipFor(value, isSelected: true),
+            ],
+          )
+        else
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
               color:
-                  selected.contains(value)
-                      ? primary
-                      : Theme.of(context).colorScheme.onSurface,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
+                  isDark
+                      ? Colors.white.withValues(alpha: 0.035)
+                      : EagleTokens.paper,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color:
+                    isDark
+                        ? EagleTokens.darkLine
+                        : EagleTokens.line.withValues(alpha: 0.72),
+              ),
             ),
-            side: BorderSide(
-              color:
-                  selected.contains(value)
-                      ? primary.withValues(alpha: 0.18)
-                      : Theme.of(context).colorScheme.outlineVariant,
+            child: Text(
+              'Nenhum selecionado',
+              style: TextStyle(
+                color: mute,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
+        if (availableValues.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Text(
+            'Adicionar',
+            style: TextStyle(
+              color: mute,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final value in availableValues)
+                chipFor(value, isSelected: false),
+            ],
+          ),
+        ],
       ],
     );
   }
