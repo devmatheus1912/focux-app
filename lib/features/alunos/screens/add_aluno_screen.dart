@@ -433,7 +433,6 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                             hasEmail: RegExp(
                               _emailPattern,
                             ).hasMatch(_emailCtrl.text.trim()),
-                            hasWhatsapp: _whatsappCtrl.text.trim().isNotEmpty,
                             isDark: isDark,
                           ),
                           const SizedBox(height: 16),
@@ -604,7 +603,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
               helper:
                   _canSubmit
                       ? 'O convite de $_firstName será preparado após o cadastro.'
-                      : 'Preencha nome e e-mail válido para liberar o cadastro.',
+                      : 'Complete nome e e-mail para cadastrar',
               onSubmit: _submit,
             ),
           ],
@@ -692,14 +691,12 @@ class _AccessProgressStrip extends StatelessWidget {
   final String name;
   final bool hasName;
   final bool hasEmail;
-  final bool hasWhatsapp;
   final bool isDark;
 
   const _AccessProgressStrip({
     required this.name,
     required this.hasName,
     required this.hasEmail,
-    required this.hasWhatsapp,
     required this.isDark,
   });
 
@@ -756,8 +753,6 @@ class _AccessProgressStrip extends StatelessWidget {
               Expanded(child: _ProgressStep(done: hasName, isDark: isDark)),
               const SizedBox(width: 8),
               Expanded(child: _ProgressStep(done: hasEmail, isDark: isDark)),
-              const SizedBox(width: 8),
-              Expanded(child: _ProgressStep(done: hasWhatsapp, isDark: isDark)),
             ],
           ),
         ],
@@ -1185,8 +1180,6 @@ class _BottomSubmitBar extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.lock_open_rounded, size: 16, color: mute),
-                    const SizedBox(width: 7),
                     Flexible(
                       child: Text(
                         helper,
@@ -1195,8 +1188,8 @@ class _BottomSubmitBar extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: mute,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
