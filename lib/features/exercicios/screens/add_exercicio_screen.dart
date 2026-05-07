@@ -769,7 +769,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
                     values: values,
                     labels: labels,
                     selected: effectiveValue,
-                    maxHeight: menuMaxHeight ?? 560,
+                    maxHeight: menuMaxHeight ?? 720,
                   ),
             );
             if (picked != null) {
@@ -864,7 +864,10 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
     final primary = Theme.of(context).colorScheme.primary;
     final screenHeight = MediaQuery.sizeOf(context).height;
     final bottom = MediaQuery.paddingOf(context).bottom;
-    final sheetHeight = widget.maxHeight.clamp(360.0, screenHeight * 0.74);
+    final sheetHeight = widget.maxHeight.clamp(
+      screenHeight * 0.82,
+      screenHeight * 0.9,
+    );
     final filtered =
         widget.values.where((item) {
           final label = widget.labels[item] ?? item.backendName;
@@ -877,11 +880,11 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
         alignment: Alignment.bottomCenter,
         child: Container(
           height: sheetHeight,
-          margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+          margin: EdgeInsets.zero,
           padding: EdgeInsets.fromLTRB(16, 10, 16, 12 + bottom),
           decoration: BoxDecoration(
             color: bg,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
             border: Border.all(
               color: isDark ? EagleTokens.darkLine : EagleTokens.line,
             ),
@@ -961,6 +964,7 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
               const SizedBox(height: 10),
               Expanded(
                 child: ListView.separated(
+                  physics: const ClampingScrollPhysics(),
                   itemCount: filtered.length,
                   separatorBuilder:
                       (_, __) => Divider(
