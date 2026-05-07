@@ -427,15 +427,6 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            'Crie o acesso agora. Foto, medidas e ajustes finos entram depois no perfil.',
-                            style: TextStyle(
-                              color: mute,
-                              fontSize: 13,
-                              height: 1.35,
-                            ),
-                          ),
-                          const SizedBox(height: 14),
                           _AccessProgressStrip(
                             name: _firstName,
                             hasName: _nomeCtrl.text.trim().isNotEmpty,
@@ -449,16 +440,13 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                           _SectionCard(
                             icon: Icons.person_outline_rounded,
                             title: 'Identidade',
-                            subtitle:
-                                'Dados de acesso e contato direto do aluno.',
+                            subtitle: 'Acesso e contato.',
                             isDark: isDark,
                             children: [
                               _FxFormField(
                                 controller: _nomeCtrl,
                                 label: 'Nome completo',
                                 hint: 'Ex.: Beatriz Andrade',
-                                helper:
-                                    'Use o nome que deve aparecer na agenda e nos treinos.',
                                 icon: Icons.person_outline_rounded,
                                 isDark: isDark,
                                 validator:
@@ -473,8 +461,6 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                 controller: _emailCtrl,
                                 label: 'E-mail',
                                 hint: 'aluno@email.com',
-                                helper:
-                                    'O e-mail será usado no primeiro acesso ao app.',
                                 icon: Icons.alternate_email_rounded,
                                 isDark: isDark,
                                 keyboardType: TextInputType.emailAddress,
@@ -504,16 +490,13 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                           _SectionCard(
                             icon: Icons.tune_rounded,
                             title: 'Perfil inicial',
-                            subtitle:
-                                'Contexto rápido para organizar lista, treinos e atendimento.',
+                            subtitle: 'Filtros e atendimento.',
                             isDark: isDark,
                             children: [
                               _FxFormField(
                                 controller: _objetivoCtrl,
                                 label: 'Objetivo',
                                 hint: 'Ex.: Hipertrofia',
-                                helper:
-                                    'Ajuda o personal a filtrar alunos e escolher treinos depois.',
                                 icon: Icons.flag_outlined,
                                 isDark: isDark,
                                 textCapitalization: TextCapitalization.words,
@@ -739,7 +722,7 @@ class _AccessProgressStrip extends StatelessWidget {
                 child: Text(
                   ready
                       ? 'Convite pronto para $name'
-                      : 'Nome e e-mail liberam o convite',
+                      : 'Preencha nome e e-mail',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -1188,7 +1171,7 @@ class _BottomSubmitBar extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 9, 20, 12),
+        padding: EdgeInsets.fromLTRB(20, canSubmit ? 9 : 8, 20, 12),
         decoration: BoxDecoration(
           color: isDark ? EagleTokens.darkBg : EagleTokens.paper,
           border: Border(top: BorderSide(color: line.withValues(alpha: 0.65))),
@@ -1196,82 +1179,95 @@ class _BottomSubmitBar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              helper,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 11, height: 1.2),
-            ),
-            const SizedBox(height: 7),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: canSubmit ? onSubmit : null,
-                  borderRadius: BorderRadius.circular(17),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    curve: Curves.easeOutCubic,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color:
-                          canSubmit
-                              ? primary
-                              : (isDark
-                                  ? Colors.white.withValues(alpha: 0.04)
-                                  : Colors.white),
-                      borderRadius: BorderRadius.circular(17),
-                      border: Border.all(
-                        color:
-                            canSubmit
-                                ? primary
-                                : line.withValues(alpha: isDark ? 0.9 : 0.75),
+            if (!canSubmit) ...[
+              SizedBox(
+                height: 34,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.lock_open_rounded, size: 16, color: mute),
+                    const SizedBox(width: 7),
+                    Flexible(
+                      child: Text(
+                        helper,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      boxShadow:
-                          canSubmit
-                              ? [
-                                BoxShadow(
-                                  color: primary.withValues(alpha: 0.18),
-                                  blurRadius: 22,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ]
-                              : null,
                     ),
-                    child:
-                        loading
-                            ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            )
-                            : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.person_add_alt_1_rounded,
-                                  size: 19,
-                                  color: canSubmit ? Colors.white : mute,
+                  ],
+                ),
+              ),
+            ] else ...[
+              Text(
+                helper,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: mute, fontSize: 11, height: 1.2),
+              ),
+              const SizedBox(height: 7),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onSubmit,
+                    borderRadius: BorderRadius.circular(17),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOutCubic,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: primary,
+                        borderRadius: BorderRadius.circular(17),
+                        border: Border.all(color: primary),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primary.withValues(alpha: 0.18),
+                            blurRadius: 22,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child:
+                          loading
+                              ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Cadastrar aluno',
-                                  style: TextStyle(
-                                    color: canSubmit ? Colors.white : mute,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w800,
+                              )
+                              : const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.person_add_alt_1_rounded,
+                                    size: 19,
+                                    color: Colors.white,
                                   ),
-                                ),
-                              ],
-                            ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Cadastrar aluno',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
