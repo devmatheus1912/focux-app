@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
@@ -912,22 +913,10 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
               const SizedBox(width: 10),
             ],
             // FxAvatar
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: avatarColor,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                fxInitials(displayName),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+            _AlunoPhotoAvatar(
+              name: displayName,
+              photoUrl: aluno.fotoUrl,
+              fallbackColor: avatarColor,
             ),
             const SizedBox(width: 12),
 
@@ -1059,6 +1048,66 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
   }
 }
 
+class _AlunoPhotoAvatar extends StatelessWidget {
+  final String name;
+  final String? photoUrl;
+  final Color fallbackColor;
+
+  const _AlunoPhotoAvatar({
+    required this.name,
+    required this.photoUrl,
+    required this.fallbackColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedUrl = _resolveMediaUrl(photoUrl);
+
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(color: fallbackColor, shape: BoxShape.circle),
+      clipBehavior: Clip.antiAlias,
+      child:
+          resolvedUrl == null
+              ? _AlunoInitials(name: name)
+              : Image.network(
+                resolvedUrl,
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.medium,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return _AlunoInitials(name: name);
+                },
+                errorBuilder:
+                    (context, error, stackTrace) => _AlunoInitials(name: name),
+              ),
+    );
+  }
+}
+
+class _AlunoInitials extends StatelessWidget {
+  final String name;
+
+  const _AlunoInitials({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        fxInitials(name),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
 class _AdherenceRail extends StatelessWidget {
   final double value;
   final Color color;
@@ -1103,6 +1152,21 @@ class _AdherenceRail extends StatelessWidget {
       ),
     );
   }
+}
+
+String? _resolveMediaUrl(String? value) {
+  final raw = value?.trim();
+  if (raw == null || raw.isEmpty) return null;
+
+  final uri = Uri.tryParse(raw);
+  if (uri != null && uri.hasScheme) return raw;
+
+  final base =
+      Env.apiUrl.endsWith('/')
+          ? Env.apiUrl.substring(0, Env.apiUrl.length - 1)
+          : Env.apiUrl;
+  final path = raw.startsWith('/') ? raw : '/$raw';
+  return '$base$path';
 }
 
 String _titleCaseName(String value) {
