@@ -848,17 +848,19 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
     final sparkValues = (_dados ?? const <Map<String, dynamic>>[])
         .map((e) => (e['checkins'] as num?)?.toDouble() ?? 0.0)
         .toList(growable: false);
+    final weeklyCheckins = sparkValues.fold<double>(0, (p, v) => p + v).round();
     final aderenciaPercent =
         sparkValues.isEmpty
             ? null
-            : ((sparkValues.fold<double>(0, (p, v) => p + v) / 7.0) * 100)
-                .round()
-                .clamp(0, 100);
-    final diasSem = 0;
+            : ((weeklyCheckins / 7.0) * 100).round().clamp(0, 100);
     final aderColor = EagleTokens.aderenciaColor(
       (aderenciaPercent ?? 0).toDouble(),
       isDark: isDark,
     );
+    final adherenceLabel =
+        weeklyCheckins == 0
+            ? 'sem check-ins'
+            : '$weeklyCheckins ${weeklyCheckins == 1 ? 'check-in' : 'check-ins'}';
 
     final isSelected = widget.isSelected;
     final modoSelecao = widget.modoSelecao;
@@ -997,8 +999,8 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                   Row(
                     children: [
                       Container(
-                        width: 8,
-                        height: 8,
+                        width: 7,
+                        height: 7,
                         decoration: BoxDecoration(
                           color: aderColor,
                           shape: BoxShape.circle,
@@ -1022,9 +1024,13 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                       const SizedBox(width: 10),
                       Container(width: 1, height: 10, color: line),
                       const SizedBox(width: 10),
-                      Text(
-                        diasSem == 0 ? 'Treinou hoje' : 'há ${diasSem}d',
-                        style: TextStyle(fontSize: 11, color: mute),
+                      Flexible(
+                        child: Text(
+                          adherenceLabel,
+                          style: TextStyle(fontSize: 11, color: mute),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -1040,6 +1046,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                   value: (aderenciaPercent ?? 0).toDouble(),
                   color: aderColor,
                   line: line,
+                  isEmpty: weeklyCheckins == 0,
                 ),
                 const SizedBox(height: 10),
                 Icon(Icons.chevron_right, size: 16, color: mute),
@@ -1056,11 +1063,13 @@ class _AdherenceRail extends StatelessWidget {
   final double value;
   final Color color;
   final Color line;
+  final bool isEmpty;
 
   const _AdherenceRail({
     required this.value,
     required this.color,
     required this.line,
+    required this.isEmpty,
   });
 
   @override
@@ -1076,7 +1085,11 @@ class _AdherenceRail extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           child: Stack(
             children: [
-              Container(width: 54, height: 3, color: line),
+              Container(
+                width: 54,
+                height: 3,
+                color: isEmpty ? line.withValues(alpha: 0.55) : line,
+              ),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOutCubic,
