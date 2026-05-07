@@ -210,6 +210,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     await showModalBottomSheet<void>(
       context: context,
       useSafeArea: true,
+      isScrollControlled: true,
       showDragHandle: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
@@ -300,119 +301,126 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
           );
         }
 
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Organizar alunos',
-                      style: GoogleFonts.spaceGrotesk(
-                        color: ink,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.4,
+        final sheetMaxHeight = MediaQuery.sizeOf(ctx).height * 0.72;
+
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: sheetMaxHeight),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(18, 0, 18, 26),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Organizar alunos',
+                        style: GoogleFonts.spaceGrotesk(
+                          color: ink,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.4,
+                        ),
                       ),
                     ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _filtro = AlunoFiltro.todos;
-                        _ordenacao = AlunoOrdenacao.prioridade;
-                      });
-                      Navigator.pop(ctx);
-                    },
-                    child: const Text('Redefinir'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Escolha como a lista deve aparecer agora.',
-                style: TextStyle(color: mute, fontSize: 13),
-              ),
-              const SizedBox(height: 16),
-              option(
-                title: 'Prioridade do dia',
-                subtitle: 'Risco, inadimplência e convites aparecem primeiro.',
-                icon: Icons.priority_high_rounded,
-                selected: _ordenacao == AlunoOrdenacao.prioridade,
-                onTap:
-                    () =>
-                        setState(() => _ordenacao = AlunoOrdenacao.prioridade),
-              ),
-              const SizedBox(height: 8),
-              option(
-                title: 'Nome A-Z',
-                subtitle: 'Lista alfabética para encontrar alunos rápido.',
-                icon: Icons.sort_by_alpha_rounded,
-                selected: _ordenacao == AlunoOrdenacao.nome,
-                onTap: () => setState(() => _ordenacao = AlunoOrdenacao.nome),
-              ),
-              const SizedBox(height: 8),
-              option(
-                title: 'Sem foto primeiro',
-                subtitle:
-                    'Ajuda a completar perfis que ainda parecem genéricos.',
-                icon: Icons.no_photography_outlined,
-                selected: _ordenacao == AlunoOrdenacao.semFoto,
-                onTap:
-                    () => setState(() => _ordenacao = AlunoOrdenacao.semFoto),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'Atalhos de foco',
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _filtro = AlunoFiltro.todos;
+                          _ordenacao = AlunoOrdenacao.prioridade;
+                        });
+                        Navigator.pop(ctx);
+                      },
+                      child: const Text('Redefinir'),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _SheetShortcutChip(
-                    label: 'Risco alto',
-                    selected: _filtro == AlunoFiltro.risco,
-                    onTap: () {
-                      setState(() => _filtro = AlunoFiltro.risco);
-                      Navigator.pop(ctx);
-                    },
+                const SizedBox(height: 4),
+                Text(
+                  'Escolha como a lista deve aparecer agora.',
+                  style: TextStyle(color: mute, fontSize: 13),
+                ),
+                const SizedBox(height: 16),
+                option(
+                  title: 'Prioridade do dia',
+                  subtitle:
+                      'Risco, inadimplência e convites aparecem primeiro.',
+                  icon: Icons.priority_high_rounded,
+                  selected: _ordenacao == AlunoOrdenacao.prioridade,
+                  onTap:
+                      () => setState(
+                        () => _ordenacao = AlunoOrdenacao.prioridade,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                option(
+                  title: 'Nome A-Z',
+                  subtitle: 'Lista alfabética para encontrar alunos rápido.',
+                  icon: Icons.sort_by_alpha_rounded,
+                  selected: _ordenacao == AlunoOrdenacao.nome,
+                  onTap: () => setState(() => _ordenacao = AlunoOrdenacao.nome),
+                ),
+                const SizedBox(height: 8),
+                option(
+                  title: 'Sem foto primeiro',
+                  subtitle:
+                      'Ajuda a completar perfis que ainda parecem genéricos.',
+                  icon: Icons.no_photography_outlined,
+                  selected: _ordenacao == AlunoOrdenacao.semFoto,
+                  onTap:
+                      () => setState(() => _ordenacao = AlunoOrdenacao.semFoto),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Atalhos de foco',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
                   ),
-                  _SheetShortcutChip(
-                    label: 'Inadimplentes',
-                    selected: _filtro == AlunoFiltro.inadimplentes,
-                    onTap: () {
-                      setState(() => _filtro = AlunoFiltro.inadimplentes);
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                  _SheetShortcutChip(
-                    label: 'Convites',
-                    selected: _filtro == AlunoFiltro.novos,
-                    onTap: () {
-                      setState(() => _filtro = AlunoFiltro.novos);
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                  _SheetShortcutChip(
-                    label: 'Todos',
-                    selected: _filtro == AlunoFiltro.todos,
-                    onTap: () {
-                      setState(() => _filtro = AlunoFiltro.todos);
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _SheetShortcutChip(
+                      label: 'Risco alto',
+                      selected: _filtro == AlunoFiltro.risco,
+                      onTap: () {
+                        setState(() => _filtro = AlunoFiltro.risco);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                    _SheetShortcutChip(
+                      label: 'Inadimplentes',
+                      selected: _filtro == AlunoFiltro.inadimplentes,
+                      onTap: () {
+                        setState(() => _filtro = AlunoFiltro.inadimplentes);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                    _SheetShortcutChip(
+                      label: 'Convites',
+                      selected: _filtro == AlunoFiltro.novos,
+                      onTap: () {
+                        setState(() => _filtro = AlunoFiltro.novos);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                    _SheetShortcutChip(
+                      label: 'Todos',
+                      selected: _filtro == AlunoFiltro.todos,
+                      onTap: () {
+                        setState(() => _filtro = AlunoFiltro.todos);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
