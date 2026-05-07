@@ -1,15 +1,25 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:dio/dio.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../../core/theme/design_tokens.dart';
 import '../providers/alunos_provider.dart';
 
 const _generos = ['Masculino', 'Feminino', 'Outro'];
 const _tiposConsultoria = ['ONLINE', 'PRESENCIAL', 'HIBRIDO'];
 const _tiposConsultoriaLabel = ['Online', 'Presencial', 'Híbrido'];
+const _objetivosRapidos = [
+  'Hipertrofia',
+  'Emagrecimento',
+  'Força',
+  'Condicionamento',
+];
+
+const _emailPattern = r'^[^@\s]+@[^@\s]+\.[^@\s]+$';
 
 class AddAlunoScreen extends ConsumerStatefulWidget {
   const AddAlunoScreen({super.key});
@@ -25,6 +35,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
   final _emailCtrl = TextEditingController();
   final _objetivoCtrl = TextEditingController();
   final _whatsappCtrl = TextEditingController();
+
   String? _genero;
   String? _tipoConsultoria;
   bool _loading = false;
@@ -34,52 +45,96 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
   late final Animation<double> _entryFade;
   late final Animation<Offset> _entrySlide;
 
+  bool get _canSubmit {
+    return _nomeCtrl.text.trim().isNotEmpty &&
+        RegExp(_emailPattern).hasMatch(_emailCtrl.text.trim()) &&
+        !_loading;
+  }
+
+  String get _firstName {
+    final name = _nomeCtrl.text.trim();
+    if (name.isEmpty) return 'Aluno';
+    return name.split(RegExp(r'\s+')).first;
+  }
+
   @override
   void initState() {
     super.initState();
-    _entryCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _entryCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520),
+    );
     _entryFade = CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut);
-    _entrySlide = Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOutCubic));
+    _entrySlide = Tween<Offset>(
+      begin: const Offset(0, 0.035),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOutCubic));
     _entryCtrl.forward();
+
+    _nomeCtrl.addListener(_refreshSubmitState);
+    _emailCtrl.addListener(_refreshSubmitState);
+    _objetivoCtrl.addListener(_refreshSubmitState);
+    _whatsappCtrl.addListener(_refreshSubmitState);
+  }
+
+  void _refreshSubmitState() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    _nomeCtrl.dispose();
-    _emailCtrl.dispose();
-    _objetivoCtrl.dispose();
-    _whatsappCtrl.dispose();
+    _nomeCtrl
+      ..removeListener(_refreshSubmitState)
+      ..dispose();
+    _emailCtrl
+      ..removeListener(_refreshSubmitState)
+      ..dispose();
+    _objetivoCtrl
+      ..removeListener(_refreshSubmitState)
+      ..dispose();
+    _whatsappCtrl
+      ..removeListener(_refreshSubmitState)
+      ..dispose();
     _entryCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
+    FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
-    setState(() { _loading = true; _error = null; });
+
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     HapticFeedback.mediumImpact();
+
     try {
-      final novoAluno = await ref.read(alunoRepositoryProvider).criar(
-        nome: _nomeCtrl.text.trim(),
-        email: _emailCtrl.text.trim(),
-        objetivo: _objetivoCtrl.text.trim(),
-        whatsapp: _whatsappCtrl.text.trim(),
-        genero: _genero,
-        tipoConsultoria: _tipoConsultoria,
-      );
-      if (mounted) {
-        if (novoAluno.senhaProvisoria != null) {
-          _showSenhaBottomSheet(novoAluno);
-        } else {
-          HapticFeedback.heavyImpact();
-          context.pop(true);
-        }
+      final objetivo = _objetivoCtrl.text.trim();
+      final whatsapp = _whatsappCtrl.text.trim();
+      final novoAluno = await ref
+          .read(alunoRepositoryProvider)
+          .criar(
+            nome: _nomeCtrl.text.trim(),
+            email: _emailCtrl.text.trim(),
+            objetivo: objetivo.isEmpty ? null : objetivo,
+            whatsapp: whatsapp.isEmpty ? null : whatsapp,
+            genero: _genero,
+            tipoConsultoria: _tipoConsultoria,
+          );
+
+      if (!mounted) return;
+      if (novoAluno.senhaProvisoria != null) {
+        _showSenhaBottomSheet(novoAluno);
+      } else {
+        HapticFeedback.heavyImpact();
+        context.pop(true);
       }
     } catch (e) {
       HapticFeedback.heavyImpact();
-      String errorMsg = 'Erro ao cadastrar aluno. Verifique os dados.';
+      var errorMsg = 'Não foi possível cadastrar o aluno. Revise os dados.';
       String? requestId;
-      // Fase 2/3: Extract specific error from backend response
+
       if (e is DioException && e.response?.data is Map) {
         final data = e.response!.data as Map;
         if (data.containsKey('erro')) {
@@ -96,15 +151,17 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       if (requestId != null) {
         errorMsg = '$errorMsg\n\nRef: $requestId';
       }
-      setState(() { _error = errorMsg; });
+
+      if (mounted) setState(() => _error = errorMsg);
     } finally {
-      if (mounted) setState(() { _loading = false; });
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   void _showSenhaBottomSheet(final aluno) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -112,268 +169,699 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       enableDrag: false,
       backgroundColor: isDark ? EagleTokens.darkCard : Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.all(28).copyWith(bottom: 28 + MediaQuery.of(ctx).padding.bottom),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64, height: 64,
-              decoration: BoxDecoration(
-                color: EagleTokens.good.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.check_rounded, color: EagleTokens.good, size: 36),
+      builder:
+          (ctx) => Padding(
+            padding: EdgeInsets.fromLTRB(
+              24,
+              24,
+              24,
+              24 + MediaQuery.of(ctx).padding.bottom,
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Aluno cadastrado!',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Senha provisória gerada. Compartilhe com o aluno:',
-              style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-              decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: primary.withValues(alpha: 0.2)),
-              ),
-              child: Text(
-                aluno.senhaProvisoria!,
-                style: TextStyle(
-                  fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: 6,
-                  color: isDark ? Colors.white : EagleTokens.ink,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: EagleTokens.good.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: EagleTokens.good,
+                    size: 34,
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity, height: 52,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  final texto = 'Olá ${aluno.nome.split(' ').first}! Seu perfil no Focux foi criado.\n\nAcesse com seu e-mail: ${aluno.email}\nSenha provisória: ${aluno.senhaProvisoria}\n\nLembre-se de alterar a senha no primeiro acesso!';
-                  final numero = (aluno.whatsapp as String? ?? '').replaceAll(RegExp(r'\D'), '');
-                  HapticFeedback.mediumImpact();
-                  if (numero.isNotEmpty) {
-                    final uri = Uri.parse('https://wa.me/55$numero?text=${Uri.encodeComponent(texto)}');
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                const SizedBox(height: 18),
+                Text(
+                  'Aluno cadastrado',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.6,
+                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Senha provisória criada. Compartilhe com o aluno para ele acessar o app.',
+                  style: TextStyle(
+                    color:
+                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    fontSize: 14,
+                    height: 1.35,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 22),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 18,
+                  ),
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: primary.withValues(alpha: 0.2)),
+                  ),
+                  child: Text(
+                    aluno.senhaProvisoria!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 6,
+                      color: isDark ? Colors.white : EagleTokens.ink,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 22),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final texto = _inviteMessage(aluno);
+                      final numero = (aluno.whatsapp as String? ?? '')
+                          .replaceAll(RegExp(r'\D'), '');
+                      HapticFeedback.mediumImpact();
+                      if (numero.isNotEmpty) {
+                        final uri = Uri.parse(
+                          'https://wa.me/55$numero?text=${Uri.encodeComponent(texto)}',
+                        );
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                          if (ctx.mounted) Navigator.of(ctx).pop();
+                          if (mounted) context.pop(true);
+                          return;
+                        }
+                      }
+                      await Clipboard.setData(ClipboardData(text: texto));
                       if (ctx.mounted) Navigator.of(ctx).pop();
-                      if (mounted) context.pop(true);
-                      return;
-                    }
-                  }
-                  await Clipboard.setData(ClipboardData(text: texto));
-                  if (ctx.mounted) Navigator.of(ctx).pop();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Mensagem copiada! Abra o WhatsApp e cole para o aluno.'),
-                        duration: Duration(seconds: 4),
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Mensagem copiada. Abra o WhatsApp e envie ao aluno.',
+                            ),
+                            duration: Duration(seconds: 4),
+                          ),
+                        );
+                        context.pop(true);
+                      }
+                    },
+                    icon: const Icon(Icons.send_rounded, size: 18),
+                    label: const Text('Enviar no WhatsApp'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF25D366),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                    );
-                    context.pop(true);
-                  }
-                },
-                icon: const Icon(Icons.send, size: 18),
-                label: const Text('Enviar no WhatsApp'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF25D366),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  elevation: 0,
+                      elevation: 0,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity, height: 48,
-              child: OutlinedButton.icon(
-                onPressed: () async {
-                  final texto = 'Olá ${aluno.nome.split(' ').first}! Seu perfil no Focux foi criado.\n\nAcesse com seu e-mail: ${aluno.email}\nSenha provisória: ${aluno.senhaProvisoria}\n\nLembre-se de alterar a senha no primeiro acesso!';
-                  await Clipboard.setData(ClipboardData(text: texto));
-                  HapticFeedback.mediumImpact();
-                  if (ctx.mounted) Navigator.of(ctx).pop();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Mensagem copiada!'),
-                        duration: Duration(seconds: 3),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      await Clipboard.setData(
+                        ClipboardData(text: _inviteMessage(aluno)),
+                      );
+                      HapticFeedback.mediumImpact();
+                      if (ctx.mounted) Navigator.of(ctx).pop();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Mensagem copiada.')),
+                        );
+                        context.pop(true);
+                      }
+                    },
+                    icon: Icon(
+                      Icons.copy_rounded,
+                      size: 18,
+                      color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    ),
+                    label: Text(
+                      'Copiar mensagem',
+                      style: TextStyle(
+                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
                       ),
-                    );
-                    context.pop(true);
-                  }
-                },
-                icon: Icon(Icons.copy, size: 18, color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
-                label: Text('Copiar mensagem', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink)),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 6),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    if (mounted) context.pop(true);
+                  },
+                  child: Text(
+                    'Fechar',
+                    style: TextStyle(
+                      color:
+                          isDark
+                              ? EagleTokens.darkInkMute
+                              : EagleTokens.inkMute,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 6),
-            TextButton(
-              onPressed: () { Navigator.of(ctx).pop(); if (mounted) context.pop(true); },
-              child: Text('Fechar', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute)),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
+  }
+
+  String _inviteMessage(dynamic aluno) {
+    return 'Olá ${aluno.nome.split(' ').first}! Seu perfil no Focux foi criado.\n\n'
+        'Acesse com seu e-mail: ${aluno.email}\n'
+        'Senha provisória: ${aluno.senhaProvisoria}\n\n'
+        'Altere a senha no primeiro acesso.';
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text('Novo Aluno', style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontWeight: FontWeight.w700)),
-        iconTheme: IconThemeData(color: isDark ? EagleTokens.darkInk : EagleTokens.ink),
-      ),
-      body: FadeTransition(
-        opacity: _entryFade,
-        child: SlideTransition(
-          position: _entrySlide,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: bg,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              child: Row(
                 children: [
-                  // Section: basic info
-                  _SectionHeader(label: 'INFORMAÇÕES BÁSICAS', icon: Icons.person_outline, isDark: isDark),
-                  const SizedBox(height: 16),
-                  _FxFormField(controller: _nomeCtrl, label: 'Nome completo', icon: Icons.person_outline, isDark: isDark, validator: (v) => v == null || v.isEmpty ? 'Informe o nome' : null, textCapitalization: TextCapitalization.words),
-                  const SizedBox(height: 14),
-                  _FxFormField(controller: _emailCtrl, label: 'E-mail', icon: Icons.alternate_email, isDark: isDark, keyboardType: TextInputType.emailAddress, validator: (v) => v == null || v.isEmpty ? 'Informe o e-mail' : null),
-                  const SizedBox(height: 14),
-                  _FxFormField(controller: _whatsappCtrl, label: 'WhatsApp (opcional)', icon: Icons.phone_outlined, isDark: isDark, keyboardType: TextInputType.phone, hint: '(11) 99999-9999'),
-
-                  const SizedBox(height: 28),
-                  _SectionHeader(label: 'PERFIL', icon: Icons.tune, isDark: isDark),
-                  const SizedBox(height: 16),
-                  _FxFormField(controller: _objetivoCtrl, label: 'Objetivo', icon: Icons.flag_outlined, isDark: isDark, hint: 'Hipertrofia, Emagrecimento...', maxLines: 2),
-                  const SizedBox(height: 14),
-
-                  // Gender chips
-                  Text('Gênero', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 12, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: _generos.map((g) => ChoiceChip(
-                      label: Text(g),
-                      selected: _genero == g,
-                      onSelected: (sel) => setState(() => _genero = sel ? g : null),
-                      selectedColor: primary.withValues(alpha: 0.15),
-                      labelStyle: TextStyle(
-                        color: _genero == g ? primary : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-                        fontWeight: _genero == g ? FontWeight.w600 : FontWeight.w400,
-                      ),
-                      side: BorderSide(color: _genero == g ? primary.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    )).toList(),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // Consultoria chips
-                  Text('Consultoria', style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute, fontSize: 12, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: List.generate(_tiposConsultoria.length, (i) {
-                      final sel = _tipoConsultoria == _tiposConsultoria[i];
-                      return ChoiceChip(
-                        label: Text(_tiposConsultoriaLabel[i]),
-                        selected: sel,
-                        onSelected: (s) => setState(() => _tipoConsultoria = s ? _tiposConsultoria[i] : null),
-                        selectedColor: primary.withValues(alpha: 0.15),
-                        labelStyle: TextStyle(color: sel ? primary : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute), fontWeight: sel ? FontWeight.w600 : FontWeight.w400),
-                        side: BorderSide(color: sel ? primary.withValues(alpha: 0.4) : (isDark ? EagleTokens.darkLine : EagleTokens.line)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      );
-                    }),
-                  ),
-
-                  // Error
-                  if (_error != null) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: EagleTokens.bad.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.25)),
-                      ),
-                      child: Row(children: [
-                        const Icon(Icons.error_outline, color: EagleTokens.bad, size: 18),
-                        const SizedBox(width: 8),
-                        Expanded(child: Text(_error!, style: const TextStyle(color: EagleTokens.bad, fontSize: 13))),
-                      ]),
+                  IconButton(
+                    onPressed: () => context.pop(false),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                    color: ink,
+                    iconSize: 20,
+                    style: IconButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                  ],
-
-                  const SizedBox(height: 32),
-
-                  // Submit
-                  SizedBox(
-                    width: double.infinity, height: 54,
-                    child: ElevatedButton.icon(
-                      onPressed: _loading ? null : _submit,
-                      icon: _loading ? const SizedBox.shrink() : const Icon(Icons.person_add, size: 20),
-                      label: _loading
-                          ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                          : const Text('Cadastrar Aluno', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary,
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: primary.withValues(alpha: 0.5),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 0,
-                      ),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Novo item',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Novo aluno',
+                          style: GoogleFonts.spaceGrotesk(
+                            color: ink,
+                            fontSize: 30,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.9,
+                            height: 1,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ),
+            Expanded(
+              child: FadeTransition(
+                opacity: _entryFade,
+                child: SlideTransition(
+                  position: _entrySlide,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 118),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Cadastre o essencial agora. Foto, medidas e ajustes finos entram depois no perfil do aluno.',
+                            style: TextStyle(
+                              color: mute,
+                              fontSize: 13,
+                              height: 1.35,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          _OnboardingStatusCard(
+                            name: _firstName,
+                            hasName: _nomeCtrl.text.trim().isNotEmpty,
+                            hasEmail: RegExp(
+                              _emailPattern,
+                            ).hasMatch(_emailCtrl.text.trim()),
+                            hasWhatsapp: _whatsappCtrl.text.trim().isNotEmpty,
+                            isDark: isDark,
+                          ),
+                          const SizedBox(height: 14),
+                          _SectionCard(
+                            icon: Icons.person_outline_rounded,
+                            title: 'Identidade',
+                            subtitle:
+                                'Dados de acesso e contato direto do aluno.',
+                            isDark: isDark,
+                            children: [
+                              _FxFormField(
+                                controller: _nomeCtrl,
+                                label: 'Nome completo',
+                                hint: 'Ex.: Beatriz Andrade',
+                                helper:
+                                    'Use o nome que deve aparecer na agenda e nos treinos.',
+                                icon: Icons.person_outline_rounded,
+                                isDark: isDark,
+                                validator:
+                                    (v) =>
+                                        v == null || v.trim().isEmpty
+                                            ? 'Informe o nome completo.'
+                                            : null,
+                                textCapitalization: TextCapitalization.words,
+                              ),
+                              const SizedBox(height: 14),
+                              _FxFormField(
+                                controller: _emailCtrl,
+                                label: 'E-mail',
+                                hint: 'aluno@email.com',
+                                helper:
+                                    'O e-mail será usado no primeiro acesso ao app.',
+                                icon: Icons.alternate_email_rounded,
+                                isDark: isDark,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (v) {
+                                  final value = v?.trim() ?? '';
+                                  if (value.isEmpty) return 'Informe o e-mail.';
+                                  if (!RegExp(_emailPattern).hasMatch(value)) {
+                                    return 'Informe um e-mail válido.';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 14),
+                              _FxFormField(
+                                controller: _whatsappCtrl,
+                                label: 'WhatsApp',
+                                helper:
+                                    'Opcional. Se preencher, abrimos o WhatsApp com a mensagem pronta.',
+                                hint: '(11) 99999-9999',
+                                icon: Icons.phone_outlined,
+                                isDark: isDark,
+                                keyboardType: TextInputType.phone,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          _SectionCard(
+                            icon: Icons.tune_rounded,
+                            title: 'Perfil inicial',
+                            subtitle:
+                                'Contexto rápido para organizar lista, treinos e atendimento.',
+                            isDark: isDark,
+                            children: [
+                              _FxFormField(
+                                controller: _objetivoCtrl,
+                                label: 'Objetivo',
+                                hint: 'Ex.: Hipertrofia',
+                                helper:
+                                    'Ajuda o personal a filtrar alunos e escolher treinos depois.',
+                                icon: Icons.flag_outlined,
+                                isDark: isDark,
+                                textCapitalization: TextCapitalization.words,
+                              ),
+                              const SizedBox(height: 10),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children:
+                                    _objetivosRapidos.map((objetivo) {
+                                      final selected =
+                                          _objetivoCtrl.text.trim() == objetivo;
+                                      return _OptionChip(
+                                        label: objetivo,
+                                        selected: selected,
+                                        isDark: isDark,
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          setState(() {
+                                            _objetivoCtrl.text =
+                                                selected ? '' : objetivo;
+                                          });
+                                        },
+                                      );
+                                    }).toList(),
+                              ),
+                              const SizedBox(height: 18),
+                              _LabelRow(label: 'Gênero', isDark: isDark),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children:
+                                    _generos.map((g) {
+                                      return _OptionChip(
+                                        label: g,
+                                        selected: _genero == g,
+                                        isDark: isDark,
+                                        onTap:
+                                            () => setState(
+                                              () =>
+                                                  _genero =
+                                                      _genero == g ? null : g,
+                                            ),
+                                      );
+                                    }).toList(),
+                              ),
+                              const SizedBox(height: 18),
+                              _LabelRow(label: 'Consultoria', isDark: isDark),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: List.generate(
+                                  _tiposConsultoria.length,
+                                  (i) {
+                                    final value = _tiposConsultoria[i];
+                                    return _OptionChip(
+                                      label: _tiposConsultoriaLabel[i],
+                                      selected: _tipoConsultoria == value,
+                                      isDark: isDark,
+                                      onTap:
+                                          () => setState(
+                                            () =>
+                                                _tipoConsultoria =
+                                                    _tipoConsultoria == value
+                                                        ? null
+                                                        : value,
+                                          ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          _InvitePreviewCard(
+                            isDark: isDark,
+                            name: _firstName,
+                            hasWhatsapp: _whatsappCtrl.text.trim().isNotEmpty,
+                            consultoriaLabel:
+                                _tipoConsultoria == null
+                                    ? null
+                                    : _tiposConsultoriaLabel[_tiposConsultoria
+                                        .indexOf(_tipoConsultoria!)],
+                          ),
+                          if (_error != null) ...[
+                            const SizedBox(height: 14),
+                            _ErrorCard(message: _error!, isDark: isDark),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            _BottomSubmitBar(
+              isDark: isDark,
+              primary: primary,
+              canSubmit: _canSubmit,
+              loading: _loading,
+              helper:
+                  _canSubmit
+                      ? 'O convite de $_firstName será preparado após o cadastro.'
+                      : 'Preencha nome e e-mail válido para liberar o cadastro.',
+              onSubmit: _submit,
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// ── Shared widgets ──────────────────────────────────────────────────────────
-
-class _SectionHeader extends StatelessWidget {
-  final String label;
+class _SectionCard extends StatelessWidget {
   final IconData icon;
+  final String title;
+  final String subtitle;
   final bool isDark;
-  const _SectionHeader({required this.label, required this.icon, required this.isDark});
+  final List<Widget> children;
+
+  const _SectionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.isDark,
+    required this.children,
+  });
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return Row(children: [
-      Icon(icon, size: 16, color: primary),
-      const SizedBox(width: 8),
-      Text(label, style: TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
-    ]);
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCard : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: isDark ? 0.18 : 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: primary, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(color: mute, fontSize: 12, height: 1.25),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
+class _OnboardingStatusCard extends StatelessWidget {
+  final String name;
+  final bool hasName;
+  final bool hasEmail;
+  final bool hasWhatsapp;
+  final bool isDark;
+
+  const _OnboardingStatusCard({
+    required this.name,
+    required this.hasName,
+    required this.hasEmail,
+    required this.hasWhatsapp,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ready = hasName && hasEmail;
+
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color:
+            ready
+                ? primary.withValues(alpha: isDark ? 0.16 : 0.07)
+                : (isDark ? EagleTokens.darkCard : Colors.white),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color:
+              ready
+                  ? primary.withValues(alpha: 0.24)
+                  : line.withValues(alpha: 0.9),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: ready ? primary : primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              ready ? Icons.mark_email_read_rounded : Icons.person_add_rounded,
+              color: ready ? Colors.white : primary,
+              size: 21,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ready ? '$name pronto para convite' : 'Cadastro em preparo',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    _StatusPill(
+                      label: hasName ? 'Nome ok' : 'Nome pendente',
+                      done: hasName,
+                      isDark: isDark,
+                    ),
+                    _StatusPill(
+                      label: hasEmail ? 'E-mail ok' : 'E-mail pendente',
+                      done: hasEmail,
+                      isDark: isDark,
+                    ),
+                    _StatusPill(
+                      label:
+                          hasWhatsapp ? 'WhatsApp pronto' : 'WhatsApp opcional',
+                      done: hasWhatsapp,
+                      isDark: isDark,
+                      optional: !hasWhatsapp,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  ready
+                      ? 'Ao salvar, uma senha provisória será gerada automaticamente.'
+                      : 'O convite fica bloqueado até o e-mail estar correto.',
+                  style: TextStyle(color: mute, fontSize: 11.5, height: 1.25),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  final String label;
+  final bool done;
+  final bool isDark;
+  final bool optional;
+
+  const _StatusPill({
+    required this.label,
+    required this.done,
+    required this.isDark,
+    this.optional = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final color =
+        done ? EagleTokens.good : (optional ? mute : EagleTokens.warn);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.18 : 0.1),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: (done ? primary : color).withValues(alpha: 0.16),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            done
+                ? Icons.check_rounded
+                : (optional
+                    ? Icons.more_horiz_rounded
+                    : Icons.priority_high_rounded),
+            size: 13,
+            color: color,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -383,38 +871,436 @@ class _FxFormField extends StatelessWidget {
   final IconData icon;
   final bool isDark;
   final String? hint;
+  final String? helper;
   final TextInputType? keyboardType;
   final TextCapitalization textCapitalization;
-  final int maxLines;
   final String? Function(String?)? validator;
 
-  const _FxFormField({required this.controller, required this.label, required this.icon, required this.isDark, this.hint, this.keyboardType, this.textCapitalization = TextCapitalization.none, this.maxLines = 1, this.validator});
+  const _FxFormField({
+    required this.controller,
+    required this.label,
+    required this.icon,
+    required this.isDark,
+    this.hint,
+    this.helper,
+    this.keyboardType,
+    this.textCapitalization = TextCapitalization.none,
+    this.validator,
+  });
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      textCapitalization: textCapitalization,
-      maxLines: maxLines,
-      validator: validator,
-      style: TextStyle(color: isDark ? EagleTokens.darkInk : EagleTokens.ink, fontSize: 15),
-      cursorColor: primary,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon, size: 20, color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-        filled: true,
-        fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-        labelStyle: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
-        hintStyle: TextStyle(color: (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute).withValues(alpha: 0.5)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: isDark ? EagleTokens.darkLine : EagleTokens.line)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: primary, width: 1.5)),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: EagleTokens.bad)),
-        errorStyle: const TextStyle(color: EagleTokens.bad, fontSize: 11),
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: mute,
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 7),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          textCapitalization: textCapitalization,
+          validator: validator,
+          style: TextStyle(
+            color: ink,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+          cursorColor: primary,
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: Icon(icon, size: 19, color: mute),
+            filled: true,
+            fillColor:
+                isDark
+                    ? EagleTokens.darkCardHi
+                    : EagleTokens.paper.withValues(alpha: 0.78),
+            hintStyle: TextStyle(color: mute.withValues(alpha: 0.62)),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 15,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: line),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: line),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: primary.withValues(alpha: 0.42),
+                width: 1.3,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: EagleTokens.bad),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: EagleTokens.bad, width: 1.3),
+            ),
+            errorStyle: const TextStyle(color: EagleTokens.bad, fontSize: 11),
+          ),
+        ),
+        if (helper != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            helper!,
+            style: TextStyle(color: mute, fontSize: 11.5, height: 1.25),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _LabelRow extends StatelessWidget {
+  final String label;
+  final bool isDark;
+
+  const _LabelRow({required this.label, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: TextStyle(
+        color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+        fontSize: 11,
+        fontWeight: FontWeight.w800,
+      ),
+    );
+  }
+}
+
+class _OptionChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _OptionChip({
+    required this.label,
+    required this.selected,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+        decoration: BoxDecoration(
+          color:
+              selected
+                  ? primary.withValues(alpha: isDark ? 0.2 : 0.1)
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : EagleTokens.paper),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? primary.withValues(alpha: 0.48) : line,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (selected) ...[
+              Icon(Icons.check_rounded, size: 15, color: primary),
+              const SizedBox(width: 5),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                color: selected ? primary : ink,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InvitePreviewCard extends StatelessWidget {
+  final bool isDark;
+  final String name;
+  final bool hasWhatsapp;
+  final String? consultoriaLabel;
+
+  const _InvitePreviewCard({
+    required this.isDark,
+    required this.name,
+    required this.hasWhatsapp,
+    this.consultoriaLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: isDark ? 0.14 : 0.06),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: isDark ? 0.22 : 0.1),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(
+                  Icons.auto_awesome_motion_rounded,
+                  color: primary,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Fluxo pós-cadastro',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      '$name entra na lista de alunos e recebe acesso com senha provisória.',
+                      style: TextStyle(color: mute, fontSize: 12, height: 1.3),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _PreviewBadge(
+                icon: Icons.password_rounded,
+                label: 'Senha provisória',
+                isDark: isDark,
+              ),
+              _PreviewBadge(
+                icon:
+                    hasWhatsapp
+                        ? Icons.send_to_mobile_rounded
+                        : Icons.content_copy_rounded,
+                label: hasWhatsapp ? 'WhatsApp pronto' : 'Mensagem copiável',
+                isDark: isDark,
+              ),
+              if (consultoriaLabel != null)
+                _PreviewBadge(
+                  icon: Icons.co_present_rounded,
+                  label: consultoriaLabel!,
+                  isDark: isDark,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PreviewBadge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isDark;
+
+  const _PreviewBadge({
+    required this.icon,
+    required this.label,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color:
+            isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.white.withValues(alpha: 0.78),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: primary.withValues(alpha: 0.14)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: primary),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: primary,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorCard extends StatelessWidget {
+  final String message;
+  final bool isDark;
+
+  const _ErrorCard({required this.message, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: EagleTokens.bad.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline, color: EagleTokens.bad, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: EagleTokens.bad, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomSubmitBar extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final bool canSubmit;
+  final bool loading;
+  final String helper;
+  final VoidCallback onSubmit;
+
+  const _BottomSubmitBar({
+    required this.isDark,
+    required this.primary,
+    required this.canSubmit,
+    required this.loading,
+    required this.helper,
+    required this.onSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+        decoration: BoxDecoration(
+          color: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+          border: Border(top: BorderSide(color: line.withValues(alpha: 0.65))),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              helper,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: mute, fontSize: 11.5, height: 1.25),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton.icon(
+                onPressed: canSubmit ? onSubmit : null,
+                icon:
+                    loading
+                        ? const SizedBox.shrink()
+                        : const Icon(Icons.person_add_alt_1_rounded, size: 20),
+                label:
+                    loading
+                        ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                        : const Text(
+                          'Cadastrar aluno',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primary,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: primary.withValues(alpha: 0.42),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(17),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
