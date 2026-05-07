@@ -165,7 +165,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 132 + bottom),
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 118 + bottom),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -367,48 +367,57 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
-          decoration: BoxDecoration(
-            color: bg,
-            border: Border(
-              top: BorderSide(
-                color:
-                    isDark
-                        ? EagleTokens.darkLine
-                        : EagleTokens.line.withValues(alpha: 0.78),
-              ),
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          color: bg,
+          border: Border(
+            top: BorderSide(
+              color:
+                  isDark
+                      ? EagleTokens.darkLine
+                      : EagleTokens.line.withValues(alpha: 0.54),
             ),
           ),
-          child: SizedBox(
-            height: 54,
-            child: ElevatedButton(
-              onPressed: _loading ? null : _submit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primary,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: primary.withValues(alpha: 0.42),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+              blurRadius: 22,
+              offset: const Offset(0, -10),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+            child: SizedBox(
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _loading ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primary,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: primary.withValues(alpha: 0.42),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  elevation: 0,
                 ),
-                elevation: 0,
-              ),
-              child:
-                  _loading
-                      ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
+                child:
+                    _loading
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : const Text(
+                          'Cadastrar exercício',
+                          style: TextStyle(fontWeight: FontWeight.w900),
                         ),
-                      )
-                      : const Text(
-                        'Cadastrar exercício',
-                        style: TextStyle(fontWeight: FontWeight.w900),
-                      ),
+              ),
             ),
           ),
         ),
@@ -588,23 +597,24 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final collapsed = onToggle != null && !expanded;
+    final stroke =
+        isDark
+            ? EagleTokens.darkLine
+            : EagleTokens.line.withValues(alpha: collapsed ? 0.7 : 0.92);
+    final surface = isDark ? EagleTokens.darkCardHi : Colors.white;
     final header = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 34,
-          height: 34,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: 0.09),
+            color: primary.withValues(alpha: collapsed ? 0.07 : 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            icon,
-            color: Theme.of(context).colorScheme.primary,
-            size: 18,
-          ),
+          child: Icon(icon, color: primary, size: 17),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -633,24 +643,39 @@ class _SectionCard extends StatelessWidget {
         ),
         if (onToggle != null) ...[
           const SizedBox(width: 8),
-          Icon(
-            expanded
-                ? Icons.keyboard_arrow_up_rounded
-                : Icons.keyboard_arrow_down_rounded,
-            color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          AnimatedRotation(
+            turns: expanded ? 0.5 : 0,
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            ),
           ),
         ],
       ],
     );
 
-    return Container(
-      padding: const EdgeInsets.all(14),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOutCubic,
+      padding: EdgeInsets.all(collapsed ? 12 : 14),
       decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-        ),
+        color: surface,
+        borderRadius: BorderRadius.circular(collapsed ? 18 : 20),
+        border: Border.all(color: stroke),
+        boxShadow:
+            expanded
+                ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: isDark ? 0.18 : 0.035,
+                    ),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
+                ]
+                : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -666,7 +691,29 @@ class _SectionCard extends StatelessWidget {
                 child: header,
               ),
             ),
-          if (expanded) ...[const SizedBox(height: 14), child],
+          AnimatedSize(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child:
+                expanded
+                    ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 12),
+                        Divider(
+                          height: 1,
+                          color:
+                              isDark
+                                  ? EagleTokens.darkLine
+                                  : EagleTokens.line.withValues(alpha: 0.58),
+                        ),
+                        const SizedBox(height: 14),
+                        child,
+                      ],
+                    )
+                    : const SizedBox.shrink(),
+          ),
         ],
       ),
     );
