@@ -28,9 +28,11 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   final Set<Equipamento> _equipamentos = {};
   final Set<Espaco> _espacos = {Espaco.academiaCompleta};
   bool _unilateral = false;
+  bool _showFilters = false;
   bool _showGuidance = false;
   bool _loading = false;
   String? _error;
+  String? _selectedSetupLabel;
 
   @override
   void dispose() {
@@ -87,6 +89,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
 
   void _applyQuickSetup(_ExerciseQuickSetup setup) {
     setState(() {
+      _selectedSetupLabel = setup.label;
       _modalidade = setup.modalidade;
       _dificuldade = setup.dificuldade;
       if (setup.padraoMovimento != null) {
@@ -180,7 +183,10 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                           : null,
                             ),
                             const SizedBox(height: 12),
-                            _QuickSetupStrip(onSelected: _applyQuickSetup),
+                            _QuickSetupStrip(
+                              selectedLabel: _selectedSetupLabel,
+                              onSelected: _applyQuickSetup,
+                            ),
                             const SizedBox(height: 12),
                             _EnumDropdown<GrupoMuscular>(
                               label: 'Grupo principal',
@@ -244,8 +250,13 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       _SectionCard(
                         icon: Icons.inventory_2_outlined,
                         title: 'Equipamentos e espaços',
-                        subtitle:
-                            'Selecione só o que realmente ajuda o personal a filtrar.',
+                        subtitle: _filterSummary(
+                          equipamentos: _equipamentos.length,
+                          espacos: _espacos.length,
+                        ),
+                        expanded: _showFilters,
+                        onToggle:
+                            () => setState(() => _showFilters = !_showFilters),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -401,6 +412,16 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   }
 }
 
+String _filterSummary({required int equipamentos, required int espacos}) {
+  if (equipamentos == 0 && espacos == 0) {
+    return 'Opcional: refine filtros quando isso ajudar na busca.';
+  }
+  final equipamentoText =
+      '$equipamentos equipamento${equipamentos == 1 ? '' : 's'}';
+  final espacoText = '$espacos espaço${espacos == 1 ? '' : 's'}';
+  return 'Pré-preenchido com $equipamentoText e $espacoText. Toque para ajustar.';
+}
+
 class _ExerciseQuickSetup {
   final String label;
   final IconData icon;
@@ -472,9 +493,13 @@ const _quickSetups = [
 ];
 
 class _QuickSetupStrip extends StatelessWidget {
+  final String? selectedLabel;
   final ValueChanged<_ExerciseQuickSetup> onSelected;
 
-  const _QuickSetupStrip({required this.onSelected});
+  const _QuickSetupStrip({
+    required this.selectedLabel,
+    required this.onSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -492,33 +517,37 @@ class _QuickSetupStrip extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          child: Row(
-            children: [
-              for (final setup in _quickSetups) ...[
-                ActionChip(
-                  avatar: Icon(setup.icon, color: primary, size: 16),
-                  label: Text(setup.label),
-                  onPressed: () => onSelected(setup),
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  labelStyle: TextStyle(
-                    color: primary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                  ),
-                  side: BorderSide(color: primary.withValues(alpha: 0.16)),
-                  backgroundColor:
-                      isDark
-                          ? Colors.white.withValues(alpha: 0.04)
-                          : primary.withValues(alpha: 0.06),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final setup in _quickSetups)
+              FilterChip(
+                avatar: Icon(
+                  setup.icon,
+                  color: selectedLabel == setup.label ? Colors.white : primary,
+                  size: 16,
                 ),
-                const SizedBox(width: 8),
-              ],
-            ],
-          ),
+                label: Text(setup.label),
+                selected: selectedLabel == setup.label,
+                onSelected: (_) => onSelected(setup),
+                showCheckmark: false,
+                visualDensity: VisualDensity.compact,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+                labelStyle: TextStyle(
+                  color: selectedLabel == setup.label ? Colors.white : primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                ),
+                side: BorderSide(color: primary.withValues(alpha: 0.16)),
+                selectedColor: primary,
+                backgroundColor:
+                    isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : primary.withValues(alpha: 0.06),
+              ),
+          ],
         ),
       ],
     );
