@@ -729,6 +729,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
   final Map<T, String> labels;
   final ValueChanged<T?> onChanged;
   final String? Function(T?)? validator;
+  final double? menuMaxHeight;
 
   const _EnumDropdown({
     required this.label,
@@ -737,21 +738,23 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
     required this.labels,
     required this.onChanged,
     this.validator,
+    this.menuMaxHeight,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return DropdownButtonFormField<T>(
       value: value,
       validator: validator,
       isExpanded: true,
+      menuMaxHeight: menuMaxHeight ?? 320,
+      borderRadius: BorderRadius.circular(18),
+      dropdownColor: isDark ? EagleTokens.darkCardHi : Colors.white,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor:
-            Theme.of(context).brightness == Brightness.dark
-                ? EagleTokens.darkCard
-                : Colors.white,
+        fillColor: isDark ? EagleTokens.darkCard : Colors.white,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 14,
@@ -760,10 +763,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide(
-            color:
-                Theme.of(context).brightness == Brightness.dark
-                    ? EagleTokens.darkLine
-                    : EagleTokens.line,
+            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
           ),
         ),
       ),
@@ -771,7 +771,10 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
         for (final item in values)
           DropdownMenuItem<T>(
             value: item,
-            child: Text(labels[item] ?? item.backendName),
+            child: Text(
+              labels[item] ?? item.backendName,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
       ],
       onChanged: onChanged,
