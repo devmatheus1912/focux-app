@@ -769,7 +769,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
                     values: values,
                     labels: labels,
                     selected: effectiveValue,
-                    maxHeight: menuMaxHeight ?? 460,
+                    maxHeight: menuMaxHeight ?? 560,
                   ),
             );
             if (picked != null) {
@@ -862,7 +862,9 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
+    final screenHeight = MediaQuery.sizeOf(context).height;
     final bottom = MediaQuery.paddingOf(context).bottom;
+    final sheetHeight = widget.maxHeight.clamp(360.0, screenHeight * 0.74);
     final filtered =
         widget.values.where((item) {
           final label = widget.labels[item] ?? item.backendName;
@@ -874,8 +876,8 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Container(
-          constraints: BoxConstraints(maxHeight: widget.maxHeight),
-          margin: const EdgeInsets.all(10),
+          height: sheetHeight,
+          margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
           padding: EdgeInsets.fromLTRB(16, 10, 16, 12 + bottom),
           decoration: BoxDecoration(
             color: bg,
@@ -892,7 +894,6 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
             ],
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 38,
@@ -958,9 +959,8 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                 ),
               ],
               const SizedBox(height: 10),
-              Flexible(
+              Expanded(
                 child: ListView.separated(
-                  shrinkWrap: true,
                   itemCount: filtered.length,
                   separatorBuilder:
                       (_, __) => Divider(
