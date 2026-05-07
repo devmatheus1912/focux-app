@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/widgets/fx_sparkline.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -25,6 +24,14 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   AlunoFiltro _filtro = AlunoFiltro.todos;
   bool _modoSelecao = false;
   final Set<int> _selecionados = {};
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _toggleModoSelecao() {
     HapticFeedback.mediumImpact();
@@ -46,13 +53,16 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   }
 
   Future<void> _excluirSelecionados() async {
+    final total = _selecionados.length;
     final confirmar = await showDialog<bool>(
       context: context,
       builder:
           (ctx) => AlertDialog(
             title: const Text('Excluir alunos?'),
             content: Text(
-              '${_selecionados.length} aluno(s) serão excluídos permanentemente. Esta ação não pode ser desfeita.',
+              '${_plural(total, 'aluno selecionado', 'alunos selecionados')} '
+              '${total == 1 ? 'será excluído' : 'serão excluídos'} permanentemente. '
+              'Esta ação não pode ser desfeita.',
             ),
             actions: [
               TextButton(
@@ -83,7 +93,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       ref.invalidate(alunosProvider);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('$sucesso aluno(s) excluído(s)')));
+      ).showSnackBar(SnackBar(content: Text(_deletedMessage(sucesso))));
       setState(() {
         _modoSelecao = false;
         _selecionados.clear();
@@ -92,28 +102,60 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   }
 
   List<Aluno> _filtrarAlunos(List<Aluno> todos) {
-    switch (_filtro) {
-      case AlunoFiltro.todos:
-        return todos;
-      case AlunoFiltro.ativos:
-        return todos
+    final porStatus = switch (_filtro) {
+      AlunoFiltro.todos => todos,
+      AlunoFiltro.ativos =>
+        todos
             .where(
               (a) =>
                   a.status == 'ATIVO' && a.statusFinanceiro != 'INADIMPLENTE',
             )
-            .toList();
-      case AlunoFiltro.inadimplentes:
-        return todos
+            .toList(),
+      AlunoFiltro.inadimplentes =>
+        todos
             .where(
               (a) => a.statusFinanceiro == 'INADIMPLENTE' || a.inadimplente,
             )
-            .toList();
-      case AlunoFiltro.risco:
-        return todos.where((a) => a.emRisco).toList();
-      case AlunoFiltro.novos:
-        // "Novos" = invited students who haven't set their password yet
-        return todos.where((a) => a.senhaProvisoria != null).toList();
-    }
+            .toList(),
+      AlunoFiltro.risco => todos.where((a) => a.emRisco).toList(),
+      AlunoFiltro.novos =>
+        todos.where((a) => a.senhaProvisoria != null).toList(),
+    };
+
+    final busca = _fold(_query.trim());
+    if (busca.isEmpty) return porStatus;
+
+    return porStatus.where((a) {
+      final alvo = _fold(
+        '${a.nome} ${a.email} ${a.objetivo ?? ''} ${a.statusFinanceiro}',
+      );
+      return alvo.contains(busca);
+    }).toList();
+  }
+
+  static String _fold(String value) {
+    return value
+        .toLowerCase()
+        .replaceAll(RegExp('[áàâãä]'), 'a')
+        .replaceAll(RegExp('[éèêë]'), 'e')
+        .replaceAll(RegExp('[íìîï]'), 'i')
+        .replaceAll(RegExp('[óòôõö]'), 'o')
+        .replaceAll(RegExp('[úùûü]'), 'u')
+        .replaceAll('ç', 'c');
+  }
+
+  static String _plural(int count, String singular, String plural) {
+    return '$count ${count == 1 ? singular : plural}';
+  }
+
+  static String _deletedMessage(int total) {
+    if (total == 0) return 'Nenhum aluno foi excluído.';
+    return '${_plural(total, 'aluno excluído', 'alunos excluídos')}.';
+  }
+
+  String _selectionSummary() {
+    if (_selecionados.isEmpty) return 'Selecione os alunos';
+    return _plural(_selecionados.length, 'selecionado', 'selecionados');
   }
 
   @override
@@ -141,6 +183,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                         a.statusFinanceiro == 'INADIMPLENTE' || a.inadimplente,
                   )
                   .length;
+          final riscoCount = alunos.where((a) => a.emRisco).length;
+          final novosCount =
+              alunos.where((a) => a.senhaProvisoria != null).length;
 
           return SafeArea(
             bottom: false,
@@ -149,7 +194,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
               children: [
                 // Header (Alunos + Botão Adicionar)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -176,10 +221,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                           children: [
                             Text(
                               _modoSelecao
-                                  ? (_selecionados.isEmpty
-                                      ? 'SELECIONE OS ALUNOS'
-                                      : '${_selecionados.length} SELECIONADO(S)')
-                                  : '$ativosCount ativos · $inadCount inadimpl.',
+                                  ? _selectionSummary()
+                                  : '${_plural(ativosCount, 'ativo', 'ativos')} · '
+                                      '${_plural(inadCount, 'inadimplente', 'inadimplentes')}',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: _modoSelecao ? primary : mute,
@@ -292,12 +336,12 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 8,
+                    vertical: 6,
                   ),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
-                      vertical: 12,
+                      vertical: 2,
                     ),
                     decoration: BoxDecoration(
                       color: isDark ? EagleTokens.darkCard : EagleTokens.card,
@@ -311,28 +355,50 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                         Icon(Icons.search, size: 20, color: mute),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            'Buscar por nome, objetivo...',
-                            style: TextStyle(fontSize: 14, color: mute),
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: (value) {
+                              setState(() => _query = value);
+                            },
+                            textInputAction: TextInputAction.search,
+                            style: TextStyle(fontSize: 14, color: ink),
+                            decoration: InputDecoration(
+                              isDense: true,
+                              hintText: 'Buscar por nome ou objetivo',
+                              hintStyle: TextStyle(fontSize: 14, color: mute),
+                              border: InputBorder.none,
+                            ),
                           ),
                         ),
-                        Icon(Icons.tune, size: 20, color: primary),
+                        if (_query.isNotEmpty)
+                          InkWell(
+                            onTap: () {
+                              _searchController.clear();
+                              setState(() => _query = '');
+                            },
+                            borderRadius: BorderRadius.circular(999),
+                            child: Padding(
+                              padding: const EdgeInsets.all(6),
+                              child: Icon(Icons.close, size: 18, color: mute),
+                            ),
+                          )
+                        else
+                          Icon(Icons.tune, size: 20, color: primary),
                       ],
                     ),
                   ),
                 ),
 
                 // Filter Chips
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
                       _FxChip(
                         label: 'Todos',
+                        count: alunos.length,
                         isSelected: _filtro == AlunoFiltro.todos,
                         isDark: isDark,
                         onTap:
@@ -340,6 +406,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                       ),
                       _FxChip(
                         label: 'Ativos',
+                        count: ativosCount,
                         isSelected: _filtro == AlunoFiltro.ativos,
                         isDark: isDark,
                         onTap:
@@ -347,6 +414,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                       ),
                       _FxChip(
                         label: 'Inadimplentes',
+                        count: inadCount,
                         isSelected: _filtro == AlunoFiltro.inadimplentes,
                         isDark: isDark,
                         onTap:
@@ -356,13 +424,15 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                       ),
                       _FxChip(
                         label: 'Risco alto',
+                        count: riscoCount,
                         isSelected: _filtro == AlunoFiltro.risco,
                         isDark: isDark,
                         onTap:
                             () => setState(() => _filtro = AlunoFiltro.risco),
                       ),
                       _FxChip(
-                        label: 'Novos',
+                        label: 'Convites',
+                        count: novosCount,
                         isSelected: _filtro == AlunoFiltro.novos,
                         isDark: isDark,
                         onTap:
@@ -376,8 +446,16 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                 Expanded(
                   child:
                       filtrados.isEmpty
-                          ? const Center(
-                            child: Text('Nenhum aluno encontrado.'),
+                          ? _EmptyAlunosState(
+                            hasQuery: _query.trim().isNotEmpty,
+                            isDark: isDark,
+                            onClear:
+                                _query.trim().isEmpty
+                                    ? null
+                                    : () {
+                                      _searchController.clear();
+                                      setState(() => _query = '');
+                                    },
                           )
                           : RefreshIndicator(
                             onRefresh:
@@ -440,7 +518,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                                       label: Text(
                                         _selecionados.length == filtrados.length
                                             ? 'Desmarcar todos'
-                                            : 'Selec. todos',
+                                            : 'Selecionar todos',
                                       ),
                                       style: OutlinedButton.styleFrom(
                                         side: BorderSide(
@@ -504,12 +582,14 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
 class _FxChip extends StatelessWidget {
   final String label;
+  final int count;
   final bool isSelected;
   final bool isDark;
   final VoidCallback onTap;
 
   const _FxChip({
     required this.label,
+    required this.count,
     required this.isSelected,
     required this.isDark,
     required this.onTap,
@@ -547,15 +627,123 @@ class _FxChip extends StatelessWidget {
             borderRadius: BorderRadius.circular(999),
             border: border,
           ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.2,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.1,
+                ),
+              ),
+              const SizedBox(width: 7),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color:
+                      isSelected
+                          ? Colors.white.withValues(alpha: isDark ? 0.16 : 0.18)
+                          : (isDark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : EagleTokens.paper),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '$count',
+                  style: TextStyle(
+                    color:
+                        isSelected
+                            ? color
+                            : (isDark
+                                ? EagleTokens.darkInkMute
+                                : EagleTokens.inkMute),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    height: 1,
+                  ),
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyAlunosState extends StatelessWidget {
+  final bool hasQuery;
+  final bool isDark;
+  final VoidCallback? onClear;
+
+  const _EmptyAlunosState({
+    required this.hasQuery,
+    required this.isDark,
+    this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: primary.withValues(alpha: isDark ? 0.18 : 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                hasQuery ? Icons.search_off_rounded : Icons.group_add_rounded,
+                color: primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              hasQuery ? 'Nenhum aluno encontrado' : 'Nenhum aluno cadastrado',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                color: ink,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.4,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              hasQuery
+                  ? 'Tente buscar por outro nome, objetivo ou e-mail.'
+                  : 'Adicione o primeiro aluno para montar treinos e acompanhar a evolução.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+            ),
+            if (onClear != null) ...[
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: onClear,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primary,
+                  side: BorderSide(color: primary.withValues(alpha: 0.35)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                child: const Text('Limpar busca'),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -610,6 +798,8 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
     final aluno = widget.aluno;
+    final displayName = _titleCaseName(aluno.nome);
+    final objetivo = _prettyObjective(aluno.objetivo);
 
     // FxStatus pill colors
     Color statusBg, statusColor;
@@ -652,7 +842,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
               Color(0xFF4A6FD1),
               Color(0xFF8DA4E2),
             ];
-    final hash = aluno.nome.isNotEmpty ? aluno.nome.codeUnitAt(0) : 0;
+    final hash = displayName.isNotEmpty ? displayName.codeUnitAt(0) : 0;
     final avatarColor = palette[hash % palette.length];
 
     final sparkValues = (_dados ?? const <Map<String, dynamic>>[])
@@ -729,7 +919,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
               ),
               alignment: Alignment.center,
               child: Text(
-                fxInitials(aluno.nome),
+                fxInitials(displayName),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -748,9 +938,9 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                     children: [
                       Flexible(
                         child: Text(
-                          aluno.nome,
+                          displayName,
                           style: TextStyle(
-                            fontSize: 14.5,
+                            fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: ink,
                           ),
@@ -797,7 +987,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${aluno.objetivo ?? 'Emagrecimento'} · ${aluno.email}',
+                    '$objetivo · ${aluno.email.toLowerCase()}',
                     style: TextStyle(fontSize: 12, color: mute),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -842,20 +1032,16 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
               ),
             ),
 
-            // Sparkline + Chevron
+            // Adherence rail + Chevron
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (sparkValues.isNotEmpty)
-                  SizedBox(
-                    width: 60,
-                    height: 24,
-                    child: FxSparkline(data: sparkValues, color: aderColor),
-                  )
-                else
-                  const SizedBox(width: 60, height: 24),
-
-                const SizedBox(height: 6),
+                _AdherenceRail(
+                  value: (aderenciaPercent ?? 0).toDouble(),
+                  color: aderColor,
+                  line: line,
+                ),
+                const SizedBox(height: 10),
                 Icon(Icons.chevron_right, size: 16, color: mute),
               ],
             ),
@@ -864,4 +1050,80 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
       ),
     );
   }
+}
+
+class _AdherenceRail extends StatelessWidget {
+  final double value;
+  final Color color;
+  final Color line;
+
+  const _AdherenceRail({
+    required this.value,
+    required this.color,
+    required this.line,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = (value / 100).clamp(0.0, 1.0);
+
+    return SizedBox(
+      width: 58,
+      height: 22,
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: Stack(
+            children: [
+              Container(width: 54, height: 3, color: line),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                width: 54 * progress,
+                height: 3,
+                color: color,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String _titleCaseName(String value) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return 'Aluno';
+
+  return trimmed
+      .split(RegExp(r'\s+'))
+      .map((part) {
+        if (part.isEmpty) return part;
+        return part[0].toUpperCase() + part.substring(1).toLowerCase();
+      })
+      .join(' ');
+}
+
+String _prettyObjective(String? value) {
+  final raw = (value ?? '').trim();
+  if (raw.isEmpty) return 'Objetivo não definido';
+
+  final normalized =
+      raw
+          .toLowerCase()
+          .replaceAll('_', ' ')
+          .replaceAll('-', ' ')
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim();
+  if (normalized.isEmpty) return 'Objetivo não definido';
+
+  return switch (normalized) {
+    'musculacao' || 'musculaçao' => 'Musculação',
+    'emagrecimento' => 'Emagrecimento',
+    'hipertrofia' => 'Hipertrofia',
+    'condicionamento' => 'Condicionamento',
+    'forca' => 'Força',
+    _ => normalized[0].toUpperCase() + normalized.substring(1),
+  };
 }
