@@ -29,11 +29,21 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   bool _modoSelecao = false;
   final Set<int> _selecionados = {};
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _searchFocusNode.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -607,35 +617,82 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                     horizontal: 16,
                     vertical: 6,
                   ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 2,
-                    ),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.fromLTRB(13, 3, 8, 3),
                     decoration: BoxDecoration(
-                      color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                      borderRadius: BorderRadius.circular(14),
+                      color:
+                          isDark
+                              ? EagleTokens.darkCard
+                              : Colors.white.withValues(alpha: 0.86),
+                      borderRadius: BorderRadius.circular(17),
                       border: Border.all(
-                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                        color:
+                            _searchFocusNode.hasFocus
+                                ? primary.withValues(alpha: 0.32)
+                                : (isDark
+                                    ? EagleTokens.darkLine
+                                    : EagleTokens.line),
+                        width: _searchFocusNode.hasFocus ? 1.2 : 1,
                       ),
+                      boxShadow: [
+                        if (_searchFocusNode.hasFocus && !isDark)
+                          BoxShadow(
+                            color: primary.withValues(alpha: 0.08),
+                            blurRadius: 18,
+                            offset: const Offset(0, 8),
+                            spreadRadius: -12,
+                          ),
+                      ],
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.search, size: 20, color: mute),
+                        Container(
+                          width: 26,
+                          height: 26,
+                          decoration: BoxDecoration(
+                            color:
+                                _searchFocusNode.hasFocus
+                                    ? primary.withValues(alpha: 0.08)
+                                    : Colors.transparent,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.search_rounded,
+                            size: 18,
+                            color: _searchFocusNode.hasFocus ? primary : mute,
+                          ),
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: TextField(
                             controller: _searchController,
+                            focusNode: _searchFocusNode,
                             onChanged: (value) {
                               setState(() => _query = value);
                             },
                             textInputAction: TextInputAction.search,
-                            style: TextStyle(fontSize: 14, color: ink),
+                            cursorColor: primary,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: ink,
+                              fontWeight: FontWeight.w500,
+                            ),
                             decoration: InputDecoration(
                               isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                              ),
                               hintText: 'Buscar por nome ou objetivo',
-                              hintStyle: TextStyle(fontSize: 14, color: mute),
+                              hintStyle: TextStyle(
+                                fontSize: 14,
+                                color: mute.withValues(alpha: 0.9),
+                                fontWeight: FontWeight.w500,
+                              ),
                               border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
                             ),
                           ),
                         ),
@@ -657,14 +714,22 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                             child: InkWell(
                               onTap: _showListOptions,
                               borderRadius: BorderRadius.circular(999),
-                              child: Padding(
-                                padding: const EdgeInsets.all(6),
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: primary.withValues(
+                                    alpha: isDark ? 0.14 : 0.07,
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
                                 child: Stack(
                                   clipBehavior: Clip.none,
                                   children: [
                                     Icon(
                                       Icons.tune_rounded,
-                                      size: 20,
+                                      size: 18,
                                       color: primary,
                                     ),
                                     if (_ordenacao !=
@@ -910,7 +975,9 @@ class _FxChip extends StatelessWidget {
     final bg =
         isSelected
             ? (isDark ? Colors.white : EagleTokens.ink)
-            : (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.white);
+            : (isDark
+                ? Colors.white.withValues(alpha: 0.055)
+                : Colors.white.withValues(alpha: 0.78));
     final color =
         isSelected
             ? (isDark ? EagleTokens.ink : Colors.white)
@@ -925,59 +992,70 @@ class _FxChip extends StatelessWidget {
                       : EagleTokens.line,
             );
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(999),
-            border: border,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.1,
-                ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.fromLTRB(12, 7, 8, 7),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(999),
+          border: border,
+          boxShadow: [
+            if (isSelected && !isDark)
+              BoxShadow(
+                color: EagleTokens.ink.withValues(alpha: 0.12),
+                blurRadius: 14,
+                offset: const Offset(0, 8),
+                spreadRadius: -12,
               ),
-              const SizedBox(width: 7),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0,
+                height: 1,
+              ),
+            ),
+            const SizedBox(width: 7),
+            Container(
+              constraints: const BoxConstraints(minWidth: 19),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color:
+                    isSelected
+                        ? Colors.white.withValues(alpha: isDark ? 0.18 : 0.16)
+                        : (isDark
+                            ? Colors.white.withValues(alpha: 0.07)
+                            : EagleTokens.paper),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                '$count',
+                style: TextStyle(
                   color:
                       isSelected
-                          ? Colors.white.withValues(alpha: isDark ? 0.16 : 0.18)
+                          ? color
                           : (isDark
-                              ? Colors.white.withValues(alpha: 0.08)
-                              : EagleTokens.paper),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  '$count',
-                  style: TextStyle(
-                    color:
-                        isSelected
-                            ? color
-                            : (isDark
-                                ? EagleTokens.darkInkMute
-                                : EagleTokens.inkMute),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    height: 1,
-                  ),
+                              ? EagleTokens.darkInkMute
+                              : EagleTokens.inkMute),
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w900,
+                  height: 1,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
