@@ -416,10 +416,19 @@ String _filterSummary({required int equipamentos, required int espacos}) {
   if (equipamentos == 0 && espacos == 0) {
     return 'Opcional: refine filtros quando isso ajudar na busca.';
   }
+  if (equipamentos == 0) {
+    final espacoText = '$espacos espaço${espacos == 1 ? '' : 's'}';
+    return 'Espaço definido: $espacoText. Toque para adicionar equipamentos.';
+  }
+  if (espacos == 0) {
+    final equipamentoText =
+        '$equipamentos equipamento${equipamentos == 1 ? '' : 's'}';
+    return 'Equipamentos definidos: $equipamentoText. Toque para adicionar espaços.';
+  }
   final equipamentoText =
       '$equipamentos equipamento${equipamentos == 1 ? '' : 's'}';
   final espacoText = '$espacos espaço${espacos == 1 ? '' : 's'}';
-  return 'Pré-preenchido com $equipamentoText e $espacoText. Toque para ajustar.';
+  return '$equipamentoText e $espacoText definidos. Toque para ajustar.';
 }
 
 class _ExerciseQuickSetup {
@@ -509,7 +518,7 @@ class _QuickSetupStrip extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Atalhos para começar',
+          'Perfil rápido',
           style: TextStyle(
             color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
             fontSize: 12,
