@@ -766,7 +766,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
               pageBuilder:
                   (context, _, __) => Material(
                     type: MaterialType.transparency,
-                    child: _EnumPickerSheet<T>(
+                    child: _EnumPickerFullScreen<T>(
                       title: label,
                       values: values,
                       labels: labels,
@@ -873,6 +873,167 @@ class _EnumPickerSheet<T extends Enum> extends StatefulWidget {
 
   @override
   State<_EnumPickerSheet<T>> createState() => _EnumPickerSheetState<T>();
+}
+
+class _EnumPickerFullScreen<T extends Enum> extends StatefulWidget {
+  final String title;
+  final List<T> values;
+  final Map<T, String> labels;
+  final T? selected;
+  final double maxHeight;
+
+  const _EnumPickerFullScreen({
+    required this.title,
+    required this.values,
+    required this.labels,
+    required this.selected,
+    required this.maxHeight,
+  });
+
+  @override
+  State<_EnumPickerFullScreen<T>> createState() =>
+      _EnumPickerFullScreenState<T>();
+}
+
+class _EnumPickerFullScreenState<T extends Enum>
+    extends State<_EnumPickerFullScreen<T>> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkCardHi : Colors.white;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
+    final bottom = MediaQuery.paddingOf(context).bottom;
+    final filtered =
+        widget.values.where((item) {
+          final label = widget.labels[item] ?? item.backendName;
+          return label.toLowerCase().contains(_query.toLowerCase().trim());
+        }).toList();
+
+    return ColoredBox(
+      color: bg,
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(20, 14, 20, 12 + bottom),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      '${filtered.length}',
+                      style: TextStyle(
+                        color: primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: Icon(Icons.close_rounded, color: mute),
+                  ),
+                ],
+              ),
+              if (widget.values.length > 8) ...[
+                const SizedBox(height: 14),
+                TextField(
+                  onChanged: (value) => setState(() => _query = value),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar opção',
+                    prefixIcon: Icon(Icons.search_rounded, color: mute),
+                    filled: true,
+                    fillColor:
+                        isDark ? EagleTokens.darkCard : EagleTokens.paper,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 12),
+              Expanded(
+                child: ListView.separated(
+                  physics: const ClampingScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  itemCount: filtered.length,
+                  separatorBuilder:
+                      (_, __) => Divider(
+                        height: 1,
+                        color:
+                            isDark
+                                ? EagleTokens.darkLine
+                                : EagleTokens.line.withValues(alpha: 0.72),
+                      ),
+                  itemBuilder: (context, index) {
+                    final item = filtered[index];
+                    final selected = item == widget.selected;
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      minLeadingWidth: 28,
+                      leading: Icon(
+                        selected
+                            ? Icons.check_circle_rounded
+                            : Icons.circle_outlined,
+                        color: selected ? primary : mute,
+                        size: 21,
+                      ),
+                      title: Text(
+                        widget.labels[item] ?? item.backendName,
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 14,
+                          fontWeight:
+                              selected ? FontWeight.w900 : FontWeight.w700,
+                        ),
+                      ),
+                      onTap: () => Navigator.of(context).pop(item),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
