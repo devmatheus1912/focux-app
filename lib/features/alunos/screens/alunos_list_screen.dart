@@ -14,6 +14,8 @@ import '../../../core/widgets/skeleton_loader.dart';
 
 enum AlunoFiltro { todos, ativos, inadimplentes, risco, novos }
 
+enum AlunoOrdenacao { prioridade, nome, semFoto }
+
 class AlunosListScreen extends ConsumerStatefulWidget {
   const AlunosListScreen({super.key});
 
@@ -23,6 +25,7 @@ class AlunosListScreen extends ConsumerStatefulWidget {
 
 class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   AlunoFiltro _filtro = AlunoFiltro.todos;
+  AlunoOrdenacao _ordenacao = AlunoOrdenacao.prioridade;
   bool _modoSelecao = false;
   final Set<int> _selecionados = {};
   final TextEditingController _searchController = TextEditingController();
@@ -124,14 +127,57 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     };
 
     final busca = _fold(_query.trim());
-    if (busca.isEmpty) return porStatus;
+    if (busca.isEmpty) return _ordenarAlunos(porStatus);
 
-    return porStatus.where((a) {
-      final alvo = _fold(
-        '${a.nome} ${a.email} ${a.objetivo ?? ''} ${a.statusFinanceiro}',
-      );
-      return alvo.contains(busca);
-    }).toList();
+    final encontrados =
+        porStatus.where((a) {
+          final alvo = _fold(
+            '${a.nome} ${a.email} ${a.objetivo ?? ''} ${a.statusFinanceiro}',
+          );
+          return alvo.contains(busca);
+        }).toList();
+
+    return _ordenarAlunos(encontrados);
+  }
+
+  List<Aluno> _ordenarAlunos(List<Aluno> alunos) {
+    final ordenados = List<Aluno>.from(alunos);
+    switch (_ordenacao) {
+      case AlunoOrdenacao.prioridade:
+        ordenados.sort((a, b) {
+          final scoreA = _priorityScore(a);
+          final scoreB = _priorityScore(b);
+          final score = scoreB.compareTo(scoreA);
+          if (score != 0) return score;
+          return _fold(a.nome).compareTo(_fold(b.nome));
+        });
+      case AlunoOrdenacao.nome:
+        ordenados.sort((a, b) => _fold(a.nome).compareTo(_fold(b.nome)));
+      case AlunoOrdenacao.semFoto:
+        ordenados.sort((a, b) {
+          final photo = _hasPhoto(
+            a,
+          ).toString().compareTo(_hasPhoto(b).toString());
+          if (photo != 0) return photo;
+          return _fold(a.nome).compareTo(_fold(b.nome));
+        });
+    }
+    return ordenados;
+  }
+
+  int _priorityScore(Aluno aluno) {
+    var score = 0;
+    if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
+      score += 8;
+    }
+    if (aluno.emRisco) score += 6;
+    if (aluno.senhaProvisoria != null) score += 3;
+    if (!_hasPhoto(aluno)) score += 1;
+    return score;
+  }
+
+  bool _hasPhoto(Aluno aluno) {
+    return aluno.fotoUrl != null && aluno.fotoUrl!.trim().isNotEmpty;
   }
 
   static String _fold(String value) {
@@ -157,6 +203,220 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   String _selectionSummary() {
     if (_selecionados.isEmpty) return 'Selecione os alunos';
     return _plural(_selecionados.length, 'selecionado', 'selecionados');
+  }
+
+  Future<void> _showListOptions() async {
+    HapticFeedback.selectionClick();
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+        final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+        final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+        final primary = Theme.of(ctx).colorScheme.primary;
+
+        Widget option({
+          required String title,
+          required String subtitle,
+          required IconData icon,
+          required bool selected,
+          required VoidCallback onTap,
+        }) {
+          return InkWell(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onTap();
+              Navigator.pop(ctx);
+            },
+            borderRadius: BorderRadius.circular(18),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color:
+                    selected
+                        ? primary.withValues(alpha: isDark ? 0.2 : 0.08)
+                        : Colors.transparent,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color:
+                      selected
+                          ? primary.withValues(alpha: 0.35)
+                          : line.withValues(alpha: 0.75),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color:
+                          selected
+                              ? primary
+                              : primary.withValues(alpha: isDark ? 0.18 : 0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      selected ? Icons.check_rounded : icon,
+                      color: selected ? Colors.white : primary,
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12,
+                            height: 1.25,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Organizar alunos',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: ink,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.4,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _filtro = AlunoFiltro.todos;
+                        _ordenacao = AlunoOrdenacao.prioridade;
+                      });
+                      Navigator.pop(ctx);
+                    },
+                    child: const Text('Redefinir'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Escolha como a lista deve aparecer agora.',
+                style: TextStyle(color: mute, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              option(
+                title: 'Prioridade do dia',
+                subtitle: 'Risco, inadimplência e convites aparecem primeiro.',
+                icon: Icons.priority_high_rounded,
+                selected: _ordenacao == AlunoOrdenacao.prioridade,
+                onTap:
+                    () =>
+                        setState(() => _ordenacao = AlunoOrdenacao.prioridade),
+              ),
+              const SizedBox(height: 8),
+              option(
+                title: 'Nome A-Z',
+                subtitle: 'Lista alfabética para encontrar alunos rápido.',
+                icon: Icons.sort_by_alpha_rounded,
+                selected: _ordenacao == AlunoOrdenacao.nome,
+                onTap: () => setState(() => _ordenacao = AlunoOrdenacao.nome),
+              ),
+              const SizedBox(height: 8),
+              option(
+                title: 'Sem foto primeiro',
+                subtitle:
+                    'Ajuda a completar perfis que ainda parecem genéricos.',
+                icon: Icons.no_photography_outlined,
+                selected: _ordenacao == AlunoOrdenacao.semFoto,
+                onTap:
+                    () => setState(() => _ordenacao = AlunoOrdenacao.semFoto),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'Atalhos de foco',
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _SheetShortcutChip(
+                    label: 'Risco alto',
+                    selected: _filtro == AlunoFiltro.risco,
+                    onTap: () {
+                      setState(() => _filtro = AlunoFiltro.risco);
+                      Navigator.pop(ctx);
+                    },
+                  ),
+                  _SheetShortcutChip(
+                    label: 'Inadimplentes',
+                    selected: _filtro == AlunoFiltro.inadimplentes,
+                    onTap: () {
+                      setState(() => _filtro = AlunoFiltro.inadimplentes);
+                      Navigator.pop(ctx);
+                    },
+                  ),
+                  _SheetShortcutChip(
+                    label: 'Convites',
+                    selected: _filtro == AlunoFiltro.novos,
+                    onTap: () {
+                      setState(() => _filtro = AlunoFiltro.novos);
+                      Navigator.pop(ctx);
+                    },
+                  ),
+                  _SheetShortcutChip(
+                    label: 'Todos',
+                    selected: _filtro == AlunoFiltro.todos,
+                    onTap: () {
+                      setState(() => _filtro = AlunoFiltro.todos);
+                      Navigator.pop(ctx);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -384,7 +644,48 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                             ),
                           )
                         else
-                          Icon(Icons.tune, size: 20, color: primary),
+                          Tooltip(
+                            message: 'Organizar lista',
+                            child: InkWell(
+                              onTap: _showListOptions,
+                              borderRadius: BorderRadius.circular(999),
+                              child: Padding(
+                                padding: const EdgeInsets.all(6),
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Icon(
+                                      Icons.tune_rounded,
+                                      size: 20,
+                                      color: primary,
+                                    ),
+                                    if (_ordenacao !=
+                                            AlunoOrdenacao.prioridade ||
+                                        _filtro != AlunoFiltro.todos)
+                                      Positioned(
+                                        right: -2,
+                                        top: -2,
+                                        child: Container(
+                                          width: 7,
+                                          height: 7,
+                                          decoration: BoxDecoration(
+                                            color: primary,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color:
+                                                  isDark
+                                                      ? EagleTokens.darkCard
+                                                      : EagleTokens.card,
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -675,6 +976,56 @@ class _FxChip extends StatelessWidget {
   }
 }
 
+class _SheetShortcutChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SheetShortcutChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+        decoration: BoxDecoration(
+          color:
+              selected
+                  ? primary
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.06)
+                      : EagleTokens.card),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color:
+                selected
+                    ? primary
+                    : (isDark ? EagleTokens.darkLine : EagleTokens.line),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : ink,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _EmptyAlunosState extends StatelessWidget {
   final bool hasQuery;
   final bool isDark;
@@ -860,8 +1211,8 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
     );
     final adherenceLabel =
         weeklyCheckins == 0
-            ? 'sem check-ins'
-            : '$weeklyCheckins ${weeklyCheckins == 1 ? 'check-in' : 'check-ins'}';
+            ? 'sem treinos'
+            : '$weeklyCheckins ${weeklyCheckins == 1 ? 'treino' : 'treinos'}';
 
     final isSelected = widget.isSelected;
     final modoSelecao = widget.modoSelecao;
