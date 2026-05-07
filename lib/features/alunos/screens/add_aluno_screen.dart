@@ -421,14 +421,14 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                 child: SlideTransition(
                   position: _entrySlide,
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 118),
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 132),
                     child: Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            'Cadastre o essencial agora. Foto, medidas e ajustes finos entram depois no perfil do aluno.',
+                            'Crie o acesso agora. Foto, medidas e ajustes finos entram depois no perfil.',
                             style: TextStyle(
                               color: mute,
                               fontSize: 13,
@@ -652,11 +652,11 @@ class _SectionCard extends StatelessWidget {
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 15),
       decoration: BoxDecoration(
         color: isDark ? EagleTokens.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: line),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: line.withValues(alpha: 0.86)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -668,7 +668,7 @@ class _SectionCard extends StatelessWidget {
                 height: 34,
                 decoration: BoxDecoration(
                   color: primary.withValues(alpha: isDark ? 0.18 : 0.08),
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: primary, size: 18),
               ),
@@ -725,83 +725,112 @@ class _OnboardingStatusCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final ready = hasName && hasEmail;
+    final progress = (hasName ? 1 : 0) + (hasEmail ? 1 : 0);
 
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 13),
       decoration: BoxDecoration(
         color:
             ready
-                ? primary.withValues(alpha: isDark ? 0.16 : 0.07)
-                : (isDark ? EagleTokens.darkCard : Colors.white),
-        borderRadius: BorderRadius.circular(22),
+                ? primary.withValues(alpha: isDark ? 0.15 : 0.055)
+                : (isDark
+                    ? EagleTokens.darkCard
+                    : Colors.white.withValues(alpha: 0.72)),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color:
               ready
-                  ? primary.withValues(alpha: 0.24)
-                  : line.withValues(alpha: 0.9),
+                  ? primary.withValues(alpha: 0.22)
+                  : line.withValues(alpha: 0.7),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: ready ? primary : primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              ready ? Icons.mark_email_read_rounded : Icons.person_add_rounded,
-              color: ready ? Colors.white : primary,
-              size: 21,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ready ? '$name pronto para convite' : 'Cadastro em preparo',
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: ready ? primary : primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  ready
+                      ? Icons.mark_email_read_rounded
+                      : Icons.person_add_rounded,
+                  color: ready ? Colors.white : primary,
+                  size: 17,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  ready
+                      ? 'Convite pronto para $name'
+                      : 'Complete o acesso do aluno',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: ink,
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                const SizedBox(height: 5),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    _StatusPill(
-                      label: hasName ? 'Nome ok' : 'Nome pendente',
-                      done: hasName,
-                      isDark: isDark,
-                    ),
-                    _StatusPill(
-                      label: hasEmail ? 'E-mail ok' : 'E-mail pendente',
-                      done: hasEmail,
-                      isDark: isDark,
-                    ),
-                    _StatusPill(
-                      label:
-                          hasWhatsapp ? 'WhatsApp pronto' : 'WhatsApp opcional',
-                      done: hasWhatsapp,
-                      isDark: isDark,
-                      optional: !hasWhatsapp,
-                    ),
-                  ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: isDark ? 0.18 : 0.08),
+                  borderRadius: BorderRadius.circular(999),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  ready
-                      ? 'Ao salvar, uma senha provisória será gerada automaticamente.'
-                      : 'O convite fica bloqueado até o e-mail estar correto.',
-                  style: TextStyle(color: mute, fontSize: 11.5, height: 1.25),
+                child: Text(
+                  '$progress/2',
+                  style: TextStyle(
+                    color: primary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 11),
+          Row(
+            children: [
+              Expanded(
+                child: _ProgressStep(
+                  label: 'Nome',
+                  done: hasName,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProgressStep(
+                  label: 'E-mail',
+                  done: hasEmail,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProgressStep(
+                  label: 'WhatsApp',
+                  done: hasWhatsapp,
+                  isDark: isDark,
+                  optional: true,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          Text(
+            ready
+                ? 'A senha provisória será gerada ao cadastrar.'
+                : 'Nome e e-mail válido liberam o envio do convite.',
+            style: TextStyle(color: mute, fontSize: 11.5, height: 1.2),
           ),
         ],
       ),
@@ -809,13 +838,13 @@ class _OnboardingStatusCard extends StatelessWidget {
   }
 }
 
-class _StatusPill extends StatelessWidget {
+class _ProgressStep extends StatelessWidget {
   final String label;
   final bool done;
   final bool isDark;
   final bool optional;
 
-  const _StatusPill({
+  const _ProgressStep({
     required this.label,
     required this.done,
     required this.isDark,
@@ -826,37 +855,45 @@ class _StatusPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final color =
-        done ? EagleTokens.good : (optional ? mute : EagleTokens.warn);
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final activeColor = done ? primary : (optional ? mute : EagleTokens.warn);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      height: 30,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.18 : 0.1),
+        color:
+            done
+                ? primary.withValues(alpha: isDark ? 0.18 : 0.08)
+                : Colors.transparent,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: (done ? primary : color).withValues(alpha: 0.16),
+          color: done ? primary.withValues(alpha: 0.25) : line,
         ),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             done
                 ? Icons.check_rounded
-                : (optional
-                    ? Icons.more_horiz_rounded
-                    : Icons.priority_high_rounded),
+                : optional
+                ? Icons.more_horiz_rounded
+                : Icons.priority_high_rounded,
             size: 13,
-            color: color,
+            color: activeColor,
           ),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: activeColor,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ],
@@ -1248,7 +1285,7 @@ class _BottomSubmitBar extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+        padding: const EdgeInsets.fromLTRB(20, 9, 20, 12),
         decoration: BoxDecoration(
           color: isDark ? EagleTokens.darkBg : EagleTokens.paper,
           border: Border(top: BorderSide(color: line.withValues(alpha: 0.65))),
@@ -1259,12 +1296,12 @@ class _BottomSubmitBar extends StatelessWidget {
             Text(
               helper,
               textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 11.5, height: 1.25),
+              style: TextStyle(color: mute, fontSize: 11, height: 1.2),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 7),
             SizedBox(
               width: double.infinity,
-              height: 54,
+              height: 52,
               child: ElevatedButton.icon(
                 onPressed: canSubmit ? onSubmit : null,
                 icon:
