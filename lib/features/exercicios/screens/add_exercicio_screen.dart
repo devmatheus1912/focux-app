@@ -753,12 +753,13 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
         final effectiveValue = value ?? state.value;
         final selectedLabel =
             effectiveValue == null
-                ? label
+                ? ''
                 : labels[effectiveValue] ?? effectiveValue.backendName;
         return InkWell(
           onTap: () async {
             final picked = await showModalBottomSheet<T>(
               context: context,
+              barrierColor: Colors.black.withValues(alpha: 0.58),
               enableDrag: false,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
@@ -768,7 +769,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
                     values: values,
                     labels: labels,
                     selected: effectiveValue,
-                    maxHeight: menuMaxHeight ?? 420,
+                    maxHeight: menuMaxHeight ?? 460,
                   ),
             );
             if (picked != null) {
