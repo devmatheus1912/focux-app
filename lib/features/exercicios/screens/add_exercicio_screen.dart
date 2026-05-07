@@ -25,14 +25,20 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   PadraoMovimento? _padraoMovimento;
   GrupoMuscular? _grupoMuscularPrimario;
   Dificuldade? _dificuldade = Dificuldade.iniciante;
-  final Set<Equipamento> _equipamentos = {};
-  final Set<Espaco> _espacos = {Espaco.academiaCompleta};
+  final Set<Equipamento> _equipamentos = {
+    Equipamento.halter,
+    Equipamento.barra,
+    Equipamento.maquina,
+    Equipamento.polia,
+    Equipamento.banco,
+  };
+  final Set<Espaco> _espacos = {Espaco.academiaCompleta, Espaco.academiaBasica};
   bool _unilateral = false;
   bool _showFilters = false;
   bool _showGuidance = false;
   bool _loading = false;
   String? _error;
-  String? _selectedSetupLabel;
+  String? _selectedSetupLabel = 'Academia';
 
   @override
   void dispose() {
@@ -159,7 +165,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 104 + bottom),
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 132 + bottom),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -168,8 +174,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       _SectionCard(
                         icon: Icons.fitness_center_rounded,
                         title: 'Identidade',
-                        subtitle:
-                            'Nomeie o exercício e defina como ele entra na biblioteca.',
+                        subtitle: 'Defina nome, grupo e intenção principal.',
                         child: Column(
                           children: [
                             _TextInput(
@@ -303,7 +308,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                         subtitle:
                             _showGuidance
                                 ? 'Adicione detalhes se eles forem úteis para o aluno.'
-                                : 'Toque para incluir execução, erros comuns e restrições.',
+                                : 'Execução, erros comuns e restrições quando precisar.',
                         expanded: _showGuidance,
                         onToggle:
                             () =>
@@ -367,7 +372,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
           decoration: BoxDecoration(
-            color: bg.withValues(alpha: 0.96),
+            color: bg,
             border: Border(
               top: BorderSide(
                 color:
