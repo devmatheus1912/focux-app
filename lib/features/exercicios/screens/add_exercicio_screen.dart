@@ -759,6 +759,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
           onTap: () async {
             final picked = await showModalBottomSheet<T>(
               context: context,
+              enableDrag: false,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
               builder:
@@ -779,7 +780,8 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
           child: InputDecorator(
             isEmpty: effectiveValue == null,
             decoration: InputDecoration(
-              labelText: label,
+              labelText: effectiveValue == null ? null : label,
+              hintText: effectiveValue == null ? label : null,
               errorText: state.errorText,
               filled: true,
               fillColor: fillColor,
