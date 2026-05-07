@@ -757,20 +757,43 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
                 : labels[effectiveValue] ?? effectiveValue.backendName;
         return InkWell(
           onTap: () async {
-            final picked = await showModalBottomSheet<T>(
+            final picked = await showGeneralDialog<T>(
               context: context,
-              barrierColor: Colors.black.withValues(alpha: 0.58),
-              enableDrag: false,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder:
-                  (context) => _EnumPickerSheet<T>(
-                    title: label,
-                    values: values,
-                    labels: labels,
-                    selected: effectiveValue,
-                    maxHeight: menuMaxHeight ?? 720,
+              barrierDismissible: true,
+              barrierLabel: 'Fechar seletor',
+              barrierColor: Colors.black.withValues(alpha: 0.68),
+              transitionDuration: const Duration(milliseconds: 180),
+              pageBuilder:
+                  (context, _, __) => Material(
+                    type: MaterialType.transparency,
+                    child: _EnumPickerSheet<T>(
+                      title: label,
+                      values: values,
+                      labels: labels,
+                      selected: effectiveValue,
+                      maxHeight: menuMaxHeight ?? 720,
+                    ),
                   ),
+              transitionBuilder:
+                  (context, animation, secondaryAnimation, child) =>
+                      FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        ),
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.04),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeOutCubic,
+                            ),
+                          ),
+                          child: child,
+                        ),
+                      ),
             );
             if (picked != null) {
               state.didChange(picked);
