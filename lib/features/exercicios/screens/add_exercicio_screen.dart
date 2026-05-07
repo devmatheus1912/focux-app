@@ -757,6 +757,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
                 : labels[effectiveValue] ?? effectiveValue.backendName;
         return InkWell(
           onTap: () async {
+            final useCompactPicker = values.length <= 4;
             final picked = await showGeneralDialog<T>(
               context: context,
               barrierDismissible: true,
@@ -766,13 +767,21 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
               pageBuilder:
                   (context, _, __) => Material(
                     type: MaterialType.transparency,
-                    child: _EnumPickerFullScreen<T>(
-                      title: label,
-                      values: values,
-                      labels: labels,
-                      selected: effectiveValue,
-                      maxHeight: menuMaxHeight ?? 720,
-                    ),
+                    child:
+                        useCompactPicker
+                            ? _EnumPickerCompact<T>(
+                              title: label,
+                              values: values,
+                              labels: labels,
+                              selected: effectiveValue,
+                            )
+                            : _EnumPickerFullScreen<T>(
+                              title: label,
+                              values: values,
+                              labels: labels,
+                              selected: effectiveValue,
+                              maxHeight: menuMaxHeight ?? 720,
+                            ),
                   ),
               transitionBuilder:
                   (context, animation, secondaryAnimation, child) =>
@@ -852,6 +861,148 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _EnumPickerCompact<T extends Enum> extends StatelessWidget {
+  final String title;
+  final List<T> values;
+  final Map<T, String> labels;
+  final T? selected;
+
+  const _EnumPickerCompact({
+    required this.title,
+    required this.values,
+    required this.labels,
+    required this.selected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkCardHi : Colors.white;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width =
+              constraints.maxWidth > 420 ? 360.0 : constraints.maxWidth - 40;
+          return Center(
+            child: Container(
+              width: width,
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+              decoration: BoxDecoration(
+                color: bg,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: line),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.14),
+                    blurRadius: 30,
+                    offset: const Offset(0, 18),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          '${values.length}',
+                          style: TextStyle(
+                            color: primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Icon(Icons.close_rounded, color: mute),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ...values.map((item) {
+                    final isSelected = item == selected;
+                    return Material(
+                      color:
+                          isSelected
+                              ? primary.withValues(alpha: 0.08)
+                              : Colors.transparent,
+                      borderRadius: BorderRadius.circular(16),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => Navigator.of(context).pop(item),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                isSelected
+                                    ? Icons.check_circle_rounded
+                                    : Icons.circle_outlined,
+                                color: isSelected ? primary : mute,
+                                size: 21,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  labels[item] ?? item.backendName,
+                                  style: TextStyle(
+                                    color: ink,
+                                    fontSize: 14,
+                                    fontWeight:
+                                        isSelected
+                                            ? FontWeight.w900
+                                            : FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
