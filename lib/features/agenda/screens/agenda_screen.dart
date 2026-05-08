@@ -3,7 +3,6 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
-import '../../../core/theme/brand_palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -121,35 +120,6 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
     return Scaffold(
       backgroundColor: bg,
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [primary, BrandPalette.deep(primary)],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            if (!isDark)
-              BoxShadow(
-                color: primary.withValues(alpha: 0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-          ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const _NovoAgendamentoScreen()),
-            );
-            if (!context.mounted) return;
-            _load();
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
-      ),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -376,27 +346,36 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                 _load();
                               },
                               child: Container(
-                                height: 52,
-                                margin: const EdgeInsets.only(top: 8),
+                                height: 56,
+                                margin: const EdgeInsets.only(top: 10),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: mute.withValues(alpha: 0.3),
-                                    width: 1.5,
-                                  ),
+                                  color: primary,
+                                  boxShadow: [
+                                    if (!isDark)
+                                      BoxShadow(
+                                        color: primary.withValues(alpha: 0.18),
+                                        blurRadius: 18,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                  ],
                                 ),
                                 alignment: Alignment.center,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.add, size: 18, color: mute),
-                                    const SizedBox(width: 6),
-                                    Text(
+                                    const Icon(
+                                      Icons.add_rounded,
+                                      size: 20,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Text(
                                       'Novo agendamento',
                                       style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: mute,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ],
