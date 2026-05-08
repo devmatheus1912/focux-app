@@ -668,8 +668,11 @@ class _AgendaEventSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final title = agendamento.titulo ?? 'Atendimento';
-    final time = '${_hm(agendamento.inicio)}–${_hm(agendamento.fim)}';
+    final title = _displayTitle(agendamento.titulo ?? 'Atendimento');
+    final time =
+        agendamento.fim.isAfter(agendamento.inicio)
+            ? '${_hm(agendamento.inicio)}–${_hm(agendamento.fim)}'
+            : _hm(agendamento.inicio);
     final date =
         '${agendamento.inicio.day.toString().padLeft(2, '0')}/${agendamento.inicio.month.toString().padLeft(2, '0')}/${agendamento.inicio.year}';
 
@@ -777,6 +780,11 @@ class _AgendaEventSheet extends StatelessWidget {
 
   String _hm(DateTime date) =>
       '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+
+  String _displayTitle(String value) {
+    if (value.trim().toLowerCase() == 'avaliacao') return 'Avaliação';
+    return value;
+  }
 }
 
 class _AgendaInfoTile extends StatelessWidget {
@@ -836,6 +844,8 @@ class _NovoAgendamentoScreenState
   DateTime? _fim;
   bool _saving = false;
 
+  bool get _canSave => _alunoId != null && _inicio != null && _fim != null;
+
   @override
   void dispose() {
     _titulo.dispose();
@@ -888,6 +898,14 @@ class _NovoAgendamentoScreenState
   }
 
   Future<void> _salvar() async {
+    if (!_canSave) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecione aluno, início e fim para agendar.'),
+        ),
+      );
+      return;
+    }
     final alunoId = _alunoId;
     if (alunoId == null) {
       ScaffoldMessenger.of(
@@ -895,9 +913,8 @@ class _NovoAgendamentoScreenState
       ).showSnackBar(const SnackBar(content: Text('Selecione um aluno.')));
       return;
     }
-    final fallbackInicio = DateTime.now().add(const Duration(hours: 1));
-    final inicio = _inicio ?? fallbackInicio;
-    final fim = _fim ?? inicio.add(const Duration(hours: 1));
+    final inicio = _inicio!;
+    final fim = _fim!;
     if (!fim.isAfter(inicio)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Fim deve ser após início.')),
@@ -975,7 +992,7 @@ class _NovoAgendamentoScreenState
           ),
           const SizedBox(height: 16),
           FilledButton(
-            onPressed: _saving ? null : _salvar,
+            onPressed: _saving || !_canSave ? null : _salvar,
             child: const Text('Agendar'),
           ),
         ],
