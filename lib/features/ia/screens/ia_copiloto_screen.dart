@@ -703,697 +703,712 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
     return Scaffold(
       backgroundColor: bg,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 110),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 54),
+      body: SafeArea(
+        top: true,
+        bottom: false,
+        child: SingleChildScrollView(
+          clipBehavior: Clip.hardEdge,
+          padding: const EdgeInsets.only(bottom: 110),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 18),
 
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed:
-                            () => safePopOr(
-                              context,
-                              () => goToRoleHome(context, ref),
-                            ),
-                        icon: Icon(
-                          Icons.arrow_back_ios_new,
-                          color: ink,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  color: primarySoft,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(
-                                  Icons.auto_awesome,
-                                  color: brand,
-                                  size: 15,
-                                ),
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed:
+                              () => safePopOr(
+                                context,
+                                () => goToRoleHome(context, ref),
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'IA FOCUX',
-                                style: TextStyle(
-                                  color: brand,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.8,
-                                ),
-                              ),
-                            ],
+                          icon: Icon(
+                            Icons.arrow_back_ios_new,
+                            color: ink,
+                            size: 18,
                           ),
-                          const SizedBox(height: 6),
+                        ),
+                        const SizedBox(width: 6),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 30,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    color: primarySoft,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(
+                                    Icons.auto_awesome,
+                                    color: brand,
+                                    size: 15,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'IA FOCUX',
+                                  style: TextStyle(
+                                    color: brand,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Copiloto',
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 28,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -1.2,
+                                height: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            dark ? const Color(0x0FFFFFFF) : EagleTokens.card,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: line),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.bolt, color: brand, size: 14),
+                          const SizedBox(width: 6),
                           Text(
                             'Copiloto',
                             style: TextStyle(
                               color: ink,
-                              fontSize: 28,
+                              fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              letterSpacing: -1.2,
-                              height: 1,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  Container(
+                    ),
+                  ],
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                child: GestureDetector(
+                  onTap: _selecionarAluno,
+                  child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
-                      vertical: 8,
+                      vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: dark ? const Color(0x0FFFFFFF) : EagleTokens.card,
-                      borderRadius: BorderRadius.circular(999),
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: line),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.bolt, color: brand, size: 14),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Copiloto',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                        Icon(Icons.group_outlined, color: brand, size: 18),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _selectedAlunoNome == null
+                                ? 'Selecionar aluno'
+                                : 'Aluno selecionado: $_selectedAlunoNome',
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
+                        Icon(Icons.keyboard_arrow_down, color: mute),
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
 
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-              child: GestureDetector(
-                onTap: _selecionarAluno,
+              // Mode selector
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
+                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(14),
+                    color: dark ? EagleTokens.darkCard : EagleTokens.lineSoft,
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: line),
                   ),
                   child: Row(
-                    children: [
-                      Icon(Icons.group_outlined, color: brand, size: 18),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _selectedAlunoNome == null
-                              ? 'Selecionar aluno'
-                              : 'Aluno selecionado: $_selectedAlunoNome',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Icon(Icons.keyboard_arrow_down, color: mute),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // Mode selector
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: dark ? EagleTokens.darkCard : EagleTokens.lineSoft,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: line),
-                ),
-                child: Row(
-                  children:
-                      _modes.asMap().entries.map((e) {
-                        final sel = e.key == _modeIdx;
-                        return Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _modeIdx = e.key),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              decoration: BoxDecoration(
-                                color: sel ? brand : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow:
-                                    sel
-                                        ? [
-                                          BoxShadow(
-                                            color: brand.withValues(alpha: 0.3),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ]
-                                        : null,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  e.value,
-                                  style: TextStyle(
-                                    color: sel ? Colors.white : mute,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                ),
-              ),
-            ),
-
-            // Contexto e preparo
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-              child: _CopilotReadinessCard(
-                mode: _mode,
-                icon: _modeIcon,
-                promise: _modePromise,
-                checks: _modeChecks,
-                alunoNome: _selectedAlunoNome,
-              ),
-            ),
-
-            // Safety disclaimer
-            const IaSafetyDisclaimer(compact: true),
-            const SizedBox(height: 4),
-
-            // Generate button / progress
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-              child:
-                  !_gerado && !_gerando
-                      ? _CopilotPrimaryAction(
-                        label: 'Gerar $_mode',
-                        icon: _modeIcon,
-                        brand: brand,
-                        primaryDeep: primaryDeep,
-                        onTap: _gerar,
-                      )
-                      : _CopilotGenerationStatus(
-                        gerando: _gerando,
-                        gerado: _gerado,
-                        elapsedMs: _geracaoMs,
-                        mode: _mode,
-                        cardBg: cardBg,
-                        line: line,
-                        ink: ink,
-                        mute: mute,
-                        primarySoft: primarySoft,
-                      ),
-            ),
-
-            if (!_gerado && !_gerando && _erro == null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-                child: _CopilotPreviewCard(
-                  mode: _mode,
-                  brand: brand,
-                  cardBg: cardBg,
-                  line: line,
-                  ink: ink,
-                  mute: mute,
-                  checks: _modeChecks,
-                ),
-              ),
-
-            // Result card — vinculado ao backend (/api/ia/copiloto/insights)
-            if (_erro != null) ...[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color:
-                        dark
-                            ? const Color(0x331F1212)
-                            : const Color(0x14E25656),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0x33E25656)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Color(0xFFE25656),
-                        size: 20,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _erroIaTexto(_erro!),
-                          style: TextStyle(color: ink, fontSize: 13),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: _gerar,
-                        child: const Text('Tentar'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ] else if (_gerado) ...[
-              Consumer(
-                builder: (context, ref, _) {
-                  final query = InsightsQuery(
-                    alunoId: _selectedAlunoId,
-                    mode: _mode,
-                  );
-                  final insightsAsync = ref.watch(insightsProvider(query));
-                  return insightsAsync.when(
-                    loading:
-                        () => Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          child: _CopilotInsightsLoading(
-                            cardBg: cardBg,
-                            line: line,
-                            ink: ink,
-                            mute: mute,
-                            brand: brand,
-                          ),
-                        ),
-                    error:
-                        (e, _) => Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color:
-                                  dark
-                                      ? const Color(0x331F1212)
-                                      : const Color(0x14E25656),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: const Color(0x33E25656),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: Color(0xFFE25656),
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    _erroIaTexto(e),
-                                    style: TextStyle(color: ink, fontSize: 13),
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed:
-                                      () => ref.invalidate(
-                                        insightsProvider(query),
-                                      ),
-                                  child: const Text('Recarregar'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    data: (insights) {
-                      final degraded = insights.any((insight) {
-                        final status =
-                            (insight['status'] ?? 'READY').toString();
-                        return status != 'READY';
-                      });
-                      if (insights.isEmpty) {
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          child: Container(
-                            padding: const EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              color: cardBg,
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: line),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Sem insights no momento',
-                                  style: TextStyle(
-                                    color: ink,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  'Adicione mais treinos e check-ins para que a IA gere recomendações personalizadas.',
-                                  style: TextStyle(color: mute, fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: cardBg,
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(color: line),
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.fromLTRB(
-                                  18,
-                                  18,
-                                  18,
-                                  16,
+                    children:
+                        _modes.asMap().entries.map((e) {
+                          final sel = e.key == _modeIdx;
+                          return Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _modeIdx = e.key),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
                                 ),
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors:
-                                        dark
-                                            ? [
-                                              primaryDeep,
-                                              BrandPalette.deep(primaryDeep),
-                                            ]
-                                            : [primary, primaryDeep],
-                                  ),
+                                  color: sel ? brand : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow:
+                                      sel
+                                          ? [
+                                            BoxShadow(
+                                              color: brand.withValues(
+                                                alpha: 0.3,
+                                              ),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ]
+                                          : null,
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'INSIGHTS · ${_mode.toUpperCase()}',
-                                      style: const TextStyle(
-                                        color: Color(0xB3FFFFFF),
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 1.2,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      '${insights.length} recomendações geradas',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1.2,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (degraded)
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    12,
-                                    16,
-                                    12,
-                                  ),
-                                  color: const Color(
-                                    0xFFFFB020,
-                                  ).withValues(alpha: 0.12),
+                                child: Center(
                                   child: Text(
-                                    'A IA respondeu fora do formato ideal. Mantivemos o resultado como rascunho para revisão.',
+                                    e.value,
                                     style: TextStyle(
-                                      color: ink,
-                                      fontSize: 12,
+                                      color: sel ? Colors.white : mute,
+                                      fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ),
-                              ...insights.asMap().entries.map((e) {
-                                final ins = e.value;
-                                final rawTitulo =
-                                    (ins['titulo'] ?? ins['title'] ?? '')
-                                        .toString();
-                                final titulo =
-                                    rawTitulo.trim().isEmpty ||
-                                            RegExp(
-                                              r'^insight\s+\d+$',
-                                              caseSensitive: false,
-                                            ).hasMatch(rawTitulo.trim())
-                                        ? 'Recomendação ${e.key + 1}'
-                                        : rawTitulo;
-                                final detalhe =
-                                    (ins['detalhe'] ??
-                                            ins['descricao'] ??
-                                            ins['descrição'] ??
-                                            ins['mensagem'] ??
-                                            '')
-                                        .toString();
-                                final tipo =
-                                    (ins['tipo'] ?? ins['categoria'] ?? '')
-                                        .toString();
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom:
-                                          e.key < insights.length - 1
-                                              ? BorderSide(
-                                                color: line,
-                                                width: 0.5,
-                                              )
-                                              : BorderSide.none,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 32,
-                                        height: 32,
-                                        decoration: BoxDecoration(
-                                          color: primarySoft,
-                                          borderRadius: BorderRadius.circular(
-                                            9,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            '${e.key + 1}',
-                                            style: TextStyle(
-                                              color: brand,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              titulo,
-                                              style: TextStyle(
-                                                color: ink,
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            if (detalhe.isNotEmpty) ...[
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                detalhe,
-                                                style: TextStyle(
-                                                  color: mute,
-                                                  fontSize: 11.5,
-                                                  height: 1.4,
-                                                ),
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                      ),
-                                      if (tipo.isNotEmpty)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 3,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                dark
-                                                    ? const Color(0x0FFFFFFF)
-                                                    : EagleTokens.lineSoft,
-                                            borderRadius: BorderRadius.circular(
-                                              999,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            tipo,
-                                            style: TextStyle(
-                                              color: mute,
-                                              fontSize: 10,
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                );
-                              }),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-              Container(
-                margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color:
-                      dark
-                          ? EagleTokens.darkCardHi
-                          : BrandPalette.softer(brand),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: brand.withValues(alpha: 0.18)),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(Icons.auto_awesome, size: 16, color: brand),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _resultNote,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color:
-                              dark ? EagleTokens.darkInk : EagleTokens.inkSoft,
-                          height: 1.45,
-                        ),
-                      ),
-                    ),
-                  ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                  ),
                 ),
               ),
+
+              // Contexto e preparo
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _atribuir,
-                        child: Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: brand,
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: brand.withValues(alpha: 0.35),
-                                blurRadius: 16,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(
-                                Icons.assignment_turned_in_outlined,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                'Atribuir ação',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: _abrirMenu,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: cardBg,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: line),
-                        ),
-                        child: Icon(Icons.more_vert, color: ink),
-                      ),
-                    ),
-                  ],
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                child: _CopilotReadinessCard(
+                  mode: _mode,
+                  icon: _modeIcon,
+                  promise: _modePromise,
+                  checks: _modeChecks,
+                  alunoNome: _selectedAlunoNome,
                 ),
               ),
-              if (_proximaAcao != null)
+
+              // Safety disclaimer
+              const IaSafetyDisclaimer(compact: true),
+              const SizedBox(height: 4),
+
+              // Generate button / progress
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+                child:
+                    !_gerado && !_gerando
+                        ? _CopilotPrimaryAction(
+                          label: 'Gerar $_mode',
+                          icon: _modeIcon,
+                          brand: brand,
+                          primaryDeep: primaryDeep,
+                          onTap: _gerar,
+                        )
+                        : _CopilotGenerationStatus(
+                          gerando: _gerando,
+                          gerado: _gerado,
+                          elapsedMs: _geracaoMs,
+                          mode: _mode,
+                          cardBg: cardBg,
+                          line: line,
+                          ink: ink,
+                          mute: mute,
+                          primarySoft: primarySoft,
+                        ),
+              ),
+
+              if (!_gerado && !_gerando && _erro == null)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+                  child: _CopilotPreviewCard(
+                    mode: _mode,
+                    brand: brand,
+                    cardBg: cardBg,
+                    line: line,
+                    ink: ink,
+                    mute: mute,
+                    checks: _modeChecks,
+                  ),
+                ),
+
+              // Result card — vinculado ao backend (/api/ia/copiloto/insights)
+              if (_erro != null) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: line),
+                      color:
+                          dark
+                              ? const Color(0x331F1212)
+                              : const Color(0x14E25656),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0x33E25656)),
                     ),
-                    child: Text(
-                      'Próxima ação: ${(_proximaAcao!['acao'] ?? _proximaAcao!['titulo'] ?? _proximaAcao!['mensagem'] ?? 'Sem detalhe').toString()}',
-                      style: TextStyle(color: ink, fontSize: 12.5),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: Color(0xFFE25656),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _erroIaTexto(_erro!),
+                            style: TextStyle(color: ink, fontSize: 13),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _gerar,
+                          child: const Text('Tentar'),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+              ] else if (_gerado) ...[
+                Consumer(
+                  builder: (context, ref, _) {
+                    final query = InsightsQuery(
+                      alunoId: _selectedAlunoId,
+                      mode: _mode,
+                    );
+                    final insightsAsync = ref.watch(insightsProvider(query));
+                    return insightsAsync.when(
+                      loading:
+                          () => Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            child: _CopilotInsightsLoading(
+                              cardBg: cardBg,
+                              line: line,
+                              ink: ink,
+                              mute: mute,
+                              brand: brand,
+                            ),
+                          ),
+                      error:
+                          (e, _) => Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            child: Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color:
+                                    dark
+                                        ? const Color(0x331F1212)
+                                        : const Color(0x14E25656),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: const Color(0x33E25656),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.error_outline,
+                                    color: Color(0xFFE25656),
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      _erroIaTexto(e),
+                                      style: TextStyle(
+                                        color: ink,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed:
+                                        () => ref.invalidate(
+                                          insightsProvider(query),
+                                        ),
+                                    child: const Text('Recarregar'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      data: (insights) {
+                        final degraded = insights.any((insight) {
+                          final status =
+                              (insight['status'] ?? 'READY').toString();
+                          return status != 'READY';
+                        });
+                        if (insights.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            child: Container(
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: cardBg,
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(color: line),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Sem insights no momento',
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Adicione mais treinos e check-ins para que a IA gere recomendações personalizadas.',
+                                    style: TextStyle(color: mute, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: cardBg,
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(color: line),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.fromLTRB(
+                                    18,
+                                    18,
+                                    18,
+                                    16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors:
+                                          dark
+                                              ? [
+                                                primaryDeep,
+                                                BrandPalette.deep(primaryDeep),
+                                              ]
+                                              : [primary, primaryDeep],
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'INSIGHTS · ${_mode.toUpperCase()}',
+                                        style: const TextStyle(
+                                          color: Color(0xB3FFFFFF),
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        '${insights.length} recomendações geradas',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.2,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (degraded)
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      12,
+                                      16,
+                                      12,
+                                    ),
+                                    color: const Color(
+                                      0xFFFFB020,
+                                    ).withValues(alpha: 0.12),
+                                    child: Text(
+                                      'A IA respondeu fora do formato ideal. Mantivemos o resultado como rascunho para revisão.',
+                                      style: TextStyle(
+                                        color: ink,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ...insights.asMap().entries.map((e) {
+                                  final ins = e.value;
+                                  final rawTitulo =
+                                      (ins['titulo'] ?? ins['title'] ?? '')
+                                          .toString();
+                                  final titulo =
+                                      rawTitulo.trim().isEmpty ||
+                                              RegExp(
+                                                r'^insight\s+\d+$',
+                                                caseSensitive: false,
+                                              ).hasMatch(rawTitulo.trim())
+                                          ? 'Recomendação ${e.key + 1}'
+                                          : rawTitulo;
+                                  final detalhe =
+                                      (ins['detalhe'] ??
+                                              ins['descricao'] ??
+                                              ins['descrição'] ??
+                                              ins['mensagem'] ??
+                                              '')
+                                          .toString();
+                                  final tipo =
+                                      (ins['tipo'] ?? ins['categoria'] ?? '')
+                                          .toString();
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom:
+                                            e.key < insights.length - 1
+                                                ? BorderSide(
+                                                  color: line,
+                                                  width: 0.5,
+                                                )
+                                                : BorderSide.none,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: BoxDecoration(
+                                            color: primarySoft,
+                                            borderRadius: BorderRadius.circular(
+                                              9,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              '${e.key + 1}',
+                                              style: TextStyle(
+                                                color: brand,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                titulo,
+                                                style: TextStyle(
+                                                  color: ink,
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              if (detalhe.isNotEmpty) ...[
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  detalhe,
+                                                  style: TextStyle(
+                                                    color: mute,
+                                                    fontSize: 11.5,
+                                                    height: 1.4,
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                        if (tipo.isNotEmpty)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  dark
+                                                      ? const Color(0x0FFFFFFF)
+                                                      : EagleTokens.lineSoft,
+                                              borderRadius:
+                                                  BorderRadius.circular(999),
+                                            ),
+                                            child: Text(
+                                              tipo,
+                                              style: TextStyle(
+                                                color: mute,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+                Container(
+                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color:
+                        dark
+                            ? EagleTokens.darkCardHi
+                            : BrandPalette.softer(brand),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: brand.withValues(alpha: 0.18)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.auto_awesome, size: 16, color: brand),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _resultNote,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color:
+                                dark
+                                    ? EagleTokens.darkInk
+                                    : EagleTokens.inkSoft,
+                            height: 1.45,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: _atribuir,
+                          child: Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: brand,
+                              borderRadius: BorderRadius.circular(14),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: brand.withValues(alpha: 0.35),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(
+                                  Icons.assignment_turned_in_outlined,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Atribuir ação',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      GestureDetector(
+                        onTap: _abrirMenu,
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: line),
+                          ),
+                          child: Icon(Icons.more_vert, color: ink),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_proximaAcao != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: line),
+                      ),
+                      child: Text(
+                        'Próxima ação: ${(_proximaAcao!['acao'] ?? _proximaAcao!['titulo'] ?? _proximaAcao!['mensagem'] ?? 'Sem detalhe').toString()}',
+                        style: TextStyle(color: ink, fontSize: 12.5),
+                      ),
+                    ),
+                  ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
