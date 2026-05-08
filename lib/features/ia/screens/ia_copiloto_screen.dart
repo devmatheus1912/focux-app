@@ -113,6 +113,17 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     }
   }
 
+  String get _resultNote {
+    switch (_mode) {
+      case 'Dieta':
+        return 'Dieta gerada como rascunho para revisão profissional, com pontos de atenção antes de aplicar ao aluno.';
+      case 'Progressão':
+        return 'Progressão gerada com base no histórico de check-ins e recordes pessoais do aluno.';
+      default:
+        return 'Treino gerado como rascunho editável, com volume, objetivo e observações para revisão do personal.';
+    }
+  }
+
   Future<void> _selecionarAluno() async {
     final alunos = await ref.read(alunosProvider.future);
     if (!mounted) return;
@@ -535,32 +546,127 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   }
 
   Future<void> _abrirMenu() async {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
+    final surface = dark ? EagleTokens.darkBg : EagleTokens.paper;
+
     final action = await showModalBottomSheet<String>(
       context: context,
-      showDragHandle: true,
-      builder:
-          (ctx) => SafeArea(
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return SafeArea(
+          top: false,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
+              border: Border(top: BorderSide(color: line)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: dark ? 0.38 : 0.16),
+                  blurRadius: 30,
+                  offset: const Offset(0, -10),
+                ),
+              ],
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ListTile(
-                  leading: const Icon(Icons.person_search),
-                  title: const Text('Trocar aluno'),
+                Container(
+                  width: 34,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: line,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: BrandPalette.soft(primary, dark: dark),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: Icon(
+                        Icons.tune_outlined,
+                        color: primary,
+                        size: 19,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Ações do rascunho',
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Atualize, troque o aluno ou limpe este resultado.',
+                            style: TextStyle(
+                              color: mute,
+                              fontSize: 12.2,
+                              height: 1.25,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _CopilotMenuAction(
+                  icon: Icons.person_search_outlined,
+                  title: 'Trocar aluno',
+                  subtitle: 'Gera um novo rascunho para outra pessoa.',
+                  cardBg: cardBg,
+                  line: line,
+                  ink: ink,
+                  mute: mute,
                   onTap: () => Navigator.of(ctx).pop('trocar'),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.refresh),
-                  title: const Text('Atualizar insights'),
+                _CopilotMenuAction(
+                  icon: Icons.refresh_rounded,
+                  title: 'Atualizar insights',
+                  subtitle: 'Recalcula as recomendações para este aluno.',
+                  cardBg: cardBg,
+                  line: line,
+                  ink: ink,
+                  mute: mute,
                   onTap: () => Navigator.of(ctx).pop('atualizar'),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.cleaning_services_outlined),
-                  title: const Text('Limpar resultado'),
+                _CopilotMenuAction(
+                  icon: Icons.cleaning_services_outlined,
+                  title: 'Limpar resultado',
+                  subtitle: 'Volta para o estado inicial do Copiloto.',
+                  cardBg: cardBg,
+                  line: line,
+                  ink: ink,
+                  mute: mute,
                   onTap: () => Navigator.of(ctx).pop('limpar'),
                 ),
               ],
             ),
           ),
+        );
+      },
     );
 
     if (!mounted || action == null) return;
@@ -889,9 +995,15 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                   final insightsAsync = ref.watch(insightsProvider(query));
                   return insightsAsync.when(
                     loading:
-                        () => const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
-                          child: Center(child: CircularProgressIndicator()),
+                        () => Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: _CopilotInsightsLoading(
+                            cardBg: cardBg,
+                            line: line,
+                            ink: ink,
+                            mute: mute,
+                            brand: brand,
+                          ),
                         ),
                     error:
                         (e, _) => Padding(
@@ -983,6 +1095,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
+                                width: double.infinity,
                                 padding: const EdgeInsets.fromLTRB(
                                   18,
                                   18,
@@ -1050,11 +1163,17 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                 ),
                               ...insights.asMap().entries.map((e) {
                                 final ins = e.value;
-                                final titulo =
-                                    (ins['titulo'] ??
-                                            ins['title'] ??
-                                            'Insight ${e.key + 1}')
+                                final rawTitulo =
+                                    (ins['titulo'] ?? ins['title'] ?? '')
                                         .toString();
+                                final titulo =
+                                    rawTitulo.trim().isEmpty ||
+                                            RegExp(
+                                              r'^insight\s+\d+$',
+                                              caseSensitive: false,
+                                            ).hasMatch(rawTitulo.trim())
+                                        ? 'Recomendação ${e.key + 1}'
+                                        : rawTitulo;
                                 final detalhe =
                                     (ins['detalhe'] ??
                                             ins['descricao'] ??
@@ -1186,7 +1305,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Progressão gerada com base no histórico de check-ins e recordes pessoais do aluno.',
+                        _resultNote,
                         style: TextStyle(
                           fontSize: 13,
                           color:
@@ -1411,6 +1530,178 @@ class _CopilotReadinessCard extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CopilotMenuAction extends StatelessWidget {
+  const _CopilotMenuAction({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.cardBg,
+    required this.line,
+    required this.ink,
+    required this.mute,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color cardBg;
+  final Color line;
+  final Color ink;
+  final Color mute;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: line),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: BrandPalette.soft(primary, dark: dark),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(icon, color: primary, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 11.5,
+                        height: 1.25,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: mute, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CopilotInsightsLoading extends StatelessWidget {
+  const _CopilotInsightsLoading({
+    required this.cardBg,
+    required this.line,
+    required this.ink,
+    required this.mute,
+    required this.brand,
+  });
+
+  final Color cardBg;
+  final Color line;
+  final Color ink;
+  final Color mute;
+  final Color brand;
+
+  @override
+  Widget build(BuildContext context) {
+    final soft = brand.withValues(alpha: 0.10);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: soft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.auto_awesome, color: brand, size: 17),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Preparando recomendações',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Organizando os achados antes de mostrar o rascunho.',
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 11.5,
+                        height: 1.25,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          for (final width in const [0.92, 0.74, 0.84])
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: FractionallySizedBox(
+                widthFactor: width,
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: soft,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
