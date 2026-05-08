@@ -124,34 +124,293 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       );
       return;
     }
+    final search = TextEditingController();
     final escolhido = await showModalBottomSheet<int>(
       context: context,
       useRootNavigator: true,
-      showDragHandle: true,
-      builder:
-          (ctx) => SafeArea(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: alunos.length,
-              itemBuilder: (ctx, index) {
-                final a = alunos[index];
-                return ListTile(
-                  leading: const Icon(Icons.person_outline),
-                  title: Text(a.nome),
-                  subtitle: Text(a.objetivo ?? 'Sem objetivo definido'),
-                  trailing:
-                      _selectedAlunoId == a.id
-                          ? const Icon(
-                            Icons.check_circle,
-                            color: Color(0xFF2BB673),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final dark = Theme.of(ctx).brightness == Brightness.dark;
+        final primary = Theme.of(ctx).colorScheme.primary;
+        final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
+        final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+        final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+        final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
+        final surface = dark ? EagleTokens.darkBg : EagleTokens.paper;
+        var query = '';
+
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            final filtered =
+                alunos.where((a) {
+                  final haystack =
+                      '${a.nome} ${a.objetivo ?? ''}'.toLowerCase();
+                  return haystack.contains(query.trim().toLowerCase());
+                }).toList();
+
+            return DraggableScrollableSheet(
+              initialChildSize: 0.58,
+              minChildSize: 0.42,
+              maxChildSize: 0.82,
+              expand: false,
+              builder: (ctx, scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: surface,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                    border: Border(top: BorderSide(color: line)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: dark ? 0.38 : 0.16,
+                        ),
+                        blurRadius: 32,
+                        offset: const Offset(0, -12),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: ListView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.fromLTRB(18, 10, 18, 20),
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 34,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: line,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        Row(
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: BrandPalette.soft(primary, dark: dark),
+                                borderRadius: BorderRadius.circular(13),
+                              ),
+                              child: Icon(
+                                Icons.person_search_outlined,
+                                color: primary,
+                                size: 19,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Selecionar aluno',
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Escolha quem receberá o rascunho da IA.',
+                                    style: TextStyle(
+                                      color: mute,
+                                      fontSize: 12.2,
+                                      height: 1.25,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: BrandPalette.soft(primary, dark: dark),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                '${filtered.length}/${alunos.length}',
+                                style: TextStyle(
+                                  color: primary,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: search,
+                          onChanged:
+                              (value) => setModalState(() => query = value),
+                          textInputAction: TextInputAction.search,
+                          decoration: InputDecoration(
+                            hintText: 'Buscar por nome ou objetivo',
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: mute,
+                              size: 20,
+                            ),
+                            filled: true,
+                            fillColor: cardBg,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(color: line),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(color: line),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(color: primary),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        if (filtered.isEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cardBg,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(color: line),
+                            ),
+                            child: Text(
+                              'Nenhum aluno encontrado para essa busca.',
+                              style: TextStyle(
+                                color: mute,
+                                fontSize: 13,
+                                height: 1.35,
+                              ),
+                            ),
                           )
-                          : null,
-                  onTap: () => Navigator.of(ctx).pop(a.id),
+                        else
+                          ...filtered.map((a) {
+                            final selected = _selectedAlunoId == a.id;
+                            final objetivo =
+                                (a.objetivo == null || a.objetivo!.isEmpty)
+                                    ? 'Sem objetivo definido'
+                                    : a.objetivo!;
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(18),
+                                onTap: () => Navigator.of(ctx).pop(a.id),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 160),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        selected
+                                            ? BrandPalette.soft(
+                                              primary,
+                                              dark: dark,
+                                            )
+                                            : cardBg,
+                                    borderRadius: BorderRadius.circular(18),
+                                    border: Border.all(
+                                      color: selected ? primary : line,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 42,
+                                        height: 42,
+                                        decoration: BoxDecoration(
+                                          color:
+                                              selected
+                                                  ? primary
+                                                  : BrandPalette.soft(
+                                                    primary,
+                                                    dark: dark,
+                                                  ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            _iniciais(a.nome),
+                                            style: TextStyle(
+                                              color:
+                                                  selected
+                                                      ? Colors.white
+                                                      : primary,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w900,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              a.nome,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: ink,
+                                                fontSize: 13.5,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 3),
+                                            Text(
+                                              objetivo,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: mute,
+                                                fontSize: 11.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Icon(
+                                        selected
+                                            ? Icons.check_circle
+                                            : Icons.chevron_right,
+                                        color: selected ? primary : mute,
+                                        size: selected ? 22 : 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                      ],
+                    ),
+                  ),
                 );
               },
-            ),
-          ),
-    );
+            );
+          },
+        );
+      },
+    ).whenComplete(search.dispose);
     if (escolhido == null) return;
     final aluno = alunos.firstWhere((a) => a.id == escolhido);
     setState(() {
@@ -161,6 +420,15 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       _erro = null;
       _proximaAcao = null;
     });
+  }
+
+  String _iniciais(String nome) {
+    final partes =
+        nome.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (partes.isEmpty) return '?';
+    final first = partes.first.characters.first;
+    final second = partes.length > 1 ? partes.last.characters.first : '';
+    return ('$first$second').toUpperCase();
   }
 
   Future<void> _gerar() async {
