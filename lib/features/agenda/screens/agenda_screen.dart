@@ -73,6 +73,37 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     }
   }
 
+  void _changeWeek(int delta) {
+    setState(() {
+      _weekStart = _weekStart.add(Duration(days: delta * 7));
+      _selectedIdx = 0;
+    });
+  }
+
+  Future<void> _openAgendamentoDetails(Agendamento ag) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (_) => _AgendaEventSheet(
+            agendamento: ag,
+            statusLabel: _statusText(ag.status),
+            onDelete: () async {
+              await AgendaRepository(
+                ref.read(apiClientProvider),
+              ).excluir(ag.id);
+              if (!mounted) return;
+              Navigator.pop(context);
+              _load();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Agendamento excluído.')),
+              );
+            },
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -170,8 +201,19 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.chevron_left, size: 16, color: mute),
-                        const SizedBox(width: 4),
+                        InkWell(
+                          onTap: () => _changeWeek(-1),
+                          borderRadius: BorderRadius.circular(999),
+                          child: Padding(
+                            padding: const EdgeInsets.all(2),
+                            child: Icon(
+                              Icons.chevron_left,
+                              size: 16,
+                              color: mute,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
                         Text(
                           '${_weekStart.day}–${_weekStart.add(const Duration(days: 6)).day} ${monthNames[_weekStart.month]}',
                           style: TextStyle(
@@ -180,8 +222,19 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                             color: ink,
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.chevron_right, size: 16, color: mute),
+                        const SizedBox(width: 6),
+                        InkWell(
+                          onTap: () => _changeWeek(1),
+                          borderRadius: BorderRadius.circular(999),
+                          child: Padding(
+                            padding: const EdgeInsets.all(2),
+                            child: Icon(
+                              Icons.chevron_right,
+                              size: 16,
+                              color: mute,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -392,124 +445,130 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                             primary,
                           );
 
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color: cardBg,
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: line),
-                            ),
-                            child: Row(
-                              children: [
-                                SizedBox(
-                                  width: 52,
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        '${e.inicio.hour.toString().padLeft(2, '0')}:${e.inicio.minute.toString().padLeft(2, '0')}',
-                                        style: GoogleFonts.jetBrainsMono(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: primary,
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 2,
-                                        height: 20,
-                                        margin: const EdgeInsets.only(top: 4),
-                                        decoration: BoxDecoration(
-                                          color: primary.withValues(alpha: 0.3),
-                                          borderRadius: BorderRadius.circular(
-                                            2,
+                          return InkWell(
+                            onTap: () => _openAgendamentoDetails(e),
+                            borderRadius: BorderRadius.circular(18),
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                color: cardBg,
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(color: line),
+                              ),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 52,
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          '${e.inicio.hour.toString().padLeft(2, '0')}:${e.inicio.minute.toString().padLeft(2, '0')}',
+                                          style: GoogleFonts.jetBrainsMono(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: primary,
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  margin: const EdgeInsets.only(right: 12),
-                                  decoration: BoxDecoration(
-                                    color: primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    e.alunoNome.isNotEmpty
-                                        ? e.alunoNome[0].toUpperCase()
-                                        : '?',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                        Container(
+                                          width: 2,
+                                          height: 20,
+                                          margin: const EdgeInsets.only(top: 4),
+                                          decoration: BoxDecoration(
+                                            color: primary.withValues(
+                                              alpha: 0.3,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              2,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        e.titulo ?? e.alunoNome,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: ink,
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    margin: const EdgeInsets.only(right: 12),
+                                    decoration: BoxDecoration(
+                                      color: primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      e.alunoNome.isNotEmpty
+                                          ? e.alunoNome[0].toUpperCase()
+                                          : '?',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          e.titulo ?? e.alunoNome,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: ink,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            width: 5,
-                                            height: 5,
-                                            decoration: BoxDecoration(
-                                              color: sColor,
-                                              shape: BoxShape.circle,
+                                        const SizedBox(height: 2),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: 5,
+                                              height: 5,
+                                              decoration: BoxDecoration(
+                                                color: sColor,
+                                                shape: BoxShape.circle,
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Text(
-                                            _statusText(e.status),
-                                            style: TextStyle(
-                                              fontSize: 11.5,
-                                              fontWeight: FontWeight.w600,
-                                              color: sColor,
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              _statusText(e.status),
+                                              style: TextStyle(
+                                                fontSize: 11.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: sColor,
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        isDark
-                                            ? Colors.white.withValues(
-                                              alpha: 0.06,
-                                            )
-                                            : primary.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(10),
+                                  Container(
+                                    width: 34,
+                                    height: 34,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          isDark
+                                              ? Colors.white.withValues(
+                                                alpha: 0.06,
+                                              )
+                                              : primary.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Icon(
+                                      Icons.chevron_right,
+                                      size: 18,
+                                      color: primary,
+                                    ),
                                   ),
-                                  alignment: Alignment.center,
-                                  child: Icon(
-                                    Icons.chevron_right,
-                                    size: 18,
-                                    color: primary,
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           );
                         },
@@ -588,6 +647,172 @@ class _AgendaEmptyState extends StatelessWidget {
             fontSize: 12,
             height: 1.35,
             color: EagleTokens.inkMute,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _AgendaEventSheet extends StatelessWidget {
+  final Agendamento agendamento;
+  final String statusLabel;
+  final Future<void> Function() onDelete;
+
+  const _AgendaEventSheet({
+    required this.agendamento,
+    required this.statusLabel,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final title = agendamento.titulo ?? 'Atendimento';
+    final time = '${_hm(agendamento.inicio)}–${_hm(agendamento.fim)}';
+    final date =
+        '${agendamento.inicio.day.toString().padLeft(2, '0')}/${agendamento.inicio.month.toString().padLeft(2, '0')}/${agendamento.inicio.year}';
+
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 38,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: EagleTokens.line,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: EagleTokens.brandSoft,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.event_note_outlined,
+                    size: 20,
+                    color: primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: EagleTokens.ink,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        agendamento.alunoNome,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: EagleTokens.inkMute,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(child: _AgendaInfoTile(label: 'Data', value: date)),
+                const SizedBox(width: 10),
+                Expanded(child: _AgendaInfoTile(label: 'Horário', value: time)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _AgendaInfoTile(label: 'Status', value: statusLabel),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline_rounded, size: 18),
+              label: const Text('Excluir agendamento'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: EagleTokens.bad,
+                side: const BorderSide(color: EagleTokens.badSoft),
+                minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _hm(DateTime date) =>
+      '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+}
+
+class _AgendaInfoTile extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _AgendaInfoTile({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: EagleTokens.brandSofter,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: EagleTokens.brandSoft),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: EagleTokens.inkMute,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: EagleTokens.ink,
           ),
         ),
       ],
