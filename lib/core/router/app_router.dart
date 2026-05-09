@@ -234,7 +234,12 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: '/alunos',
-                builder: (context, state) => const AlunosListScreen(),
+                builder:
+                    (context, state) => AlunosListScreen(
+                      initialFiltro: _alunoFiltroFromQuery(
+                        state.uri.queryParameters['filtro'],
+                      ),
+                    ),
               ),
             ],
           ),
@@ -894,6 +899,16 @@ bool _isPersonalOnlyLocation(String path) {
 String? _stringExtra(GoRouterState state) {
   final extra = state.extra;
   return extra is String && extra.trim().isNotEmpty ? extra : null;
+}
+
+AlunoFiltro _alunoFiltroFromQuery(String? value) {
+  return switch (value?.trim().toLowerCase()) {
+    'ativos' => AlunoFiltro.ativos,
+    'inadimplentes' => AlunoFiltro.inadimplentes,
+    'risco' => AlunoFiltro.risco,
+    'novos' => AlunoFiltro.novos,
+    _ => AlunoFiltro.todos,
+  };
 }
 
 int? _intPathParam(GoRouterState state, String key) {

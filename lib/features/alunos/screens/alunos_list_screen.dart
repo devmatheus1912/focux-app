@@ -17,7 +17,9 @@ enum AlunoFiltro { todos, ativos, inadimplentes, risco, novos }
 enum AlunoOrdenacao { prioridade, nome, semFoto }
 
 class AlunosListScreen extends ConsumerStatefulWidget {
-  const AlunosListScreen({super.key});
+  final AlunoFiltro initialFiltro;
+
+  const AlunosListScreen({super.key, this.initialFiltro = AlunoFiltro.todos});
 
   @override
   ConsumerState<AlunosListScreen> createState() => _AlunosListScreenState();
@@ -35,9 +37,18 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   @override
   void initState() {
     super.initState();
+    _filtro = widget.initialFiltro;
     _searchFocusNode.addListener(() {
       if (mounted) setState(() {});
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant AlunosListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialFiltro != widget.initialFiltro) {
+      setState(() => _filtro = widget.initialFiltro);
+    }
   }
 
   @override

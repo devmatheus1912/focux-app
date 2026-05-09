@@ -649,7 +649,7 @@ class _PersonalDashboardScreenState
                               riscoAlto > 1
                                   ? 'Ver tudo · +${riscoAlto - 1}'
                                   : 'Ver tudo',
-                          onAction: () => context.push('/dashboard/qualidade'),
+                          onAction: () => context.go('/alunos?filtro=risco'),
                           isDark: isDark,
                         ),
                       ),
