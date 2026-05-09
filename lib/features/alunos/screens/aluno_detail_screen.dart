@@ -2237,16 +2237,31 @@ class _Aluno360ActionRow extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         SizedBox(
+          width: 98,
           height: 44,
-          child: OutlinedButton.icon(
-            onPressed: () => onCopyMessage(acao),
-            icon: const Icon(Icons.content_copy_rounded, size: 15),
-            label: const Text('Copiar'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: primary,
-              side: BorderSide(color: primary.withValues(alpha: 0.28)),
-              shape: RoundedRectangleBorder(
+          child: InkWell(
+            onTap: () => onCopyMessage(acao),
+            borderRadius: BorderRadius.circular(14),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: primary.withValues(alpha: 0.04),
                 borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: primary.withValues(alpha: 0.28)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.content_copy_rounded, size: 15, color: primary),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Copiar',
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
