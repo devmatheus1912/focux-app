@@ -754,7 +754,9 @@ class AlunoDetailScreen extends ConsumerWidget {
                                   ],
                                 ),
                                 Text(
-                                  'Meta · 62 kg',
+                                  aluno.peso == null
+                                      ? 'Sem medida'
+                                      : 'Meta · 62 kg',
                                   style: TextStyle(
                                     color:
                                         isDark
@@ -769,19 +771,27 @@ class AlunoDetailScreen extends ConsumerWidget {
                             const SizedBox(height: 14),
                             SizedBox(
                               height: 72,
-                              child: FxSparkline(
-                                data: const [
-                                  68,
-                                  67.5,
-                                  66.8,
-                                  66.0,
-                                  65.2,
-                                  64.8,
-                                  64.1,
-                                ],
-                                color: primary,
-                                fill: true,
-                              ),
+                              child:
+                                  aluno.peso == null
+                                      ? _EmptyMiniState(
+                                        icon: Icons.monitor_weight_outlined,
+                                        text:
+                                            'Registre a primeira medida para acompanhar evolução.',
+                                        isDark: isDark,
+                                      )
+                                      : FxSparkline(
+                                        data: const [
+                                          68,
+                                          67.5,
+                                          66.8,
+                                          66.0,
+                                          65.2,
+                                          64.8,
+                                          64.1,
+                                        ],
+                                        color: primary,
+                                        fill: true,
+                                      ),
                             ),
                           ],
                         ),
@@ -843,7 +853,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                         crossAxisCount: 2,
                         mainAxisSpacing: 8,
                         crossAxisSpacing: 10,
-                        childAspectRatio: 2.75,
+                        childAspectRatio: 2.55,
                         children: [
                           _ModuleTile(
                             icon: Icons.fitness_center,
@@ -871,8 +881,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           ),
                           _ModuleTile(
                             icon: Icons.auto_awesome,
-                            label: 'IA · Progressão',
-                            sub: 'Sugerir cargas',
+                            label: 'IA Progresso',
+                            sub: 'Sugerir carga',
                             highlight: true,
                             isDark: isDark,
                             onTap:
@@ -883,8 +893,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           ),
                           _ModuleTile(
                             icon: Icons.show_chart,
-                            label: 'Evolução · Medidas',
-                            sub: 'Medidas corporais e PRs',
+                            label: 'Medidas',
+                            sub: 'Corpo e PRs',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -894,8 +904,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           ),
                           _ModuleTile(
                             icon: Icons.assessment_outlined,
-                            label: 'Relatório de Aderência',
-                            sub: 'Check-ins, faltas e PDF',
+                            label: 'Aderência',
+                            sub: 'Check-ins',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -905,8 +915,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           ),
                           _ModuleTile(
                             icon: Icons.flag_outlined,
-                            label: 'Plano de Sucesso',
-                            sub: 'Onboarding e etapas',
+                            label: 'Sucesso',
+                            sub: 'Onboarding',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -2615,6 +2625,51 @@ class _HeroStat extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _EmptyMiniState extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final bool isDark;
+
+  const _EmptyMiniState({
+    required this.icon,
+    required this.text,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: isDark ? 0.10 : 0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: primary.withValues(alpha: 0.10)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: primary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: mute,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                height: 1.25,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
