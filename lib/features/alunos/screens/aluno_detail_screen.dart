@@ -189,7 +189,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${aluno.nome} deve trocar a senha no primeiro acesso.',
+                  'A senha anterior não funciona mais. ${aluno.nome} deve trocar no primeiro acesso.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color:
@@ -229,6 +229,19 @@ class AlunoDetailScreen extends ConsumerWidget {
                           fontSize: 31,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 5.5,
+                        ),
+                      ),
+                      const SizedBox(height: 9),
+                      Text(
+                        'Compartilhe apenas com o aluno.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color:
+                              isDark
+                                  ? EagleTokens.darkInkMute
+                                  : EagleTokens.inkMute,
+                          fontSize: 11.8,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -273,7 +286,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                       size: 18,
                     ),
                     label: Text(
-                      hasWhatsapp ? 'Enviar no WhatsApp' : 'Copiar convite',
+                      hasWhatsapp ? 'Enviar nova senha' : 'Copiar nova senha',
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primary,
@@ -307,7 +320,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                         color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
                       ),
                       label: Text(
-                        'Copiar convite',
+                        'Copiar nova senha',
                         style: TextStyle(
                           color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
                         ),
