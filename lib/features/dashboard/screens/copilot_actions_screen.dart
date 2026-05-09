@@ -7,17 +7,28 @@ import '../../../core/theme/design_tokens.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 
-final copilotActionsProvider = FutureProvider<List<FilaAcaoResumo>>((ref) {
+final iaActionsProvider = FutureProvider.family<List<FilaAcaoResumo>, String>((
+  ref,
+  status,
+) {
   return ref
       .read(dashboardRepositoryProvider)
-      .getIaCommandActions(status: 'ABERTO');
+      .getIaCommandActions(status: status);
 });
 
-class CopilotActionsScreen extends ConsumerWidget {
+class CopilotActionsScreen extends ConsumerStatefulWidget {
   const CopilotActionsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CopilotActionsScreen> createState() =>
+      _CopilotActionsScreenState();
+}
+
+class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
+  String _status = 'ABERTO';
+
+  @override
+  Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final brand = dark ? BrandPalette.accent(primary) : primary;
@@ -26,7 +37,7 @@ class CopilotActionsScreen extends ConsumerWidget {
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final actionsAsync = ref.watch(copilotActionsProvider);
+    final actionsAsync = ref.watch(iaActionsProvider(_status));
 
     return Scaffold(
       backgroundColor: bg,
@@ -45,7 +56,7 @@ class CopilotActionsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Command Center',
+              'Tarefas IA',
               style: TextStyle(
                 color: ink,
                 fontSize: 18,
@@ -53,7 +64,7 @@ class CopilotActionsScreen extends ConsumerWidget {
               ),
             ),
             Text(
-              'Tarefas do Copiloto',
+              'Command Center',
               style: TextStyle(
                 color: brand,
                 fontSize: 11,
@@ -64,96 +75,357 @@ class CopilotActionsScreen extends ConsumerWidget {
           ],
         ),
       ),
-      body: actionsAsync.when(
-        loading:
-            () => ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-              itemCount: 4,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder:
-                  (_, __) => Container(
-                    height: 104,
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: line),
-                    ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+            child: _StatusSegmentedControl(
+              selected: _status,
+              brand: brand,
+              cardBg: cardBg,
+              line: line,
+              ink: ink,
+              mute: mute,
+              onChanged: (value) => setState(() => _status = value),
+            ),
+          ),
+          Expanded(
+            child: actionsAsync.when(
+              loading:
+                  () => ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 120),
+                    itemCount: 5,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder:
+                        (_, __) => Container(
+                          height: 94,
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: line),
+                          ),
+                        ),
                   ),
-            ),
-        error:
-            (_, __) => _CopilotActionsEmpty(
-              title: 'Não foi possível carregar',
-              subtitle: 'Tente novamente em alguns instantes.',
-              ink: ink,
-              mute: mute,
-              cardBg: cardBg,
-              line: line,
-              brand: brand,
-              onRefresh: () => ref.invalidate(copilotActionsProvider),
-            ),
-        data: (actions) {
-          if (actions.isEmpty) {
-            return _CopilotActionsEmpty(
-              title: 'Nenhuma tarefa aberta',
-              subtitle:
-                  'Quando o Copiloto criar uma tarefa, ela aparece aqui primeiro.',
-              ink: ink,
-              mute: mute,
-              cardBg: cardBg,
-              line: line,
-              brand: brand,
-              onRefresh: () => ref.invalidate(copilotActionsProvider),
-            );
-          }
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(copilotActionsProvider),
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-              itemCount: actions.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final action = actions[index];
-                return _CopilotActionCard(
-                  action: action,
-                  cardBg: cardBg,
-                  line: line,
-                  ink: ink,
-                  mute: mute,
-                  brand: brand,
+              error:
+                  (_, __) => _IaActionsEmpty(
+                    title: 'Não foi possível carregar',
+                    subtitle: 'Puxe para atualizar ou tente novamente.',
+                    ink: ink,
+                    mute: mute,
+                    cardBg: cardBg,
+                    line: line,
+                    brand: brand,
+                    onRefresh: _refresh,
+                  ),
+              data: (actions) {
+                final copilot =
+                    actions
+                        .where((action) => action.tipo == 'IA_COPILOTO')
+                        .toList();
+                final radar =
+                    actions
+                        .where((action) => action.tipo != 'IA_COPILOTO')
+                        .toList();
+
+                if (actions.isEmpty) {
+                  return RefreshIndicator(
+                    onRefresh: _refresh,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+                      children: [
+                        _IaActionsEmptyCard(
+                          title: _emptyTitle(_status),
+                          subtitle: _emptySubtitle(_status),
+                          ink: ink,
+                          mute: mute,
+                          cardBg: cardBg,
+                          line: line,
+                          brand: brand,
+                          onRefresh: _refresh,
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 120),
+                    children: [
+                      if (copilot.isNotEmpty) ...[
+                        _SectionHeader(
+                          title: 'Copiloto',
+                          count: copilot.length,
+                          ink: ink,
+                          mute: mute,
+                        ),
+                        const SizedBox(height: 8),
+                        for (final action in copilot) ...[
+                          _CopilotTaskCard(
+                            action: action,
+                            status: _status,
+                            cardBg: cardBg,
+                            line: line,
+                            ink: ink,
+                            mute: mute,
+                            brand: brand,
+                            onOpen: () => _openAction(context, action),
+                            onComplete: () => _complete(action),
+                            onSnooze: () => _snooze(action),
+                            onReopen: () => _reopen(action),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ],
+                      if (radar.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        _SectionHeader(
+                          title: 'Sinais automáticos',
+                          count: radar.length,
+                          ink: ink,
+                          mute: mute,
+                        ),
+                        const SizedBox(height: 8),
+                        for (final action in radar) ...[
+                          _RadarSignalCard(
+                            action: action,
+                            status: _status,
+                            cardBg: cardBg,
+                            line: line,
+                            ink: ink,
+                            mute: mute,
+                            brand: brand,
+                            onOpen: () => _openAction(context, action),
+                            onComplete: () => _complete(action),
+                            onSnooze: () => _snooze(action),
+                            onReopen: () => _reopen(action),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ],
+                    ],
+                  ),
                 );
               },
             ),
-          );
-        },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _refresh() async {
+    ref.invalidate(iaActionsProvider(_status));
+    await ref.read(iaActionsProvider(_status).future);
+  }
+
+  void _openAction(BuildContext context, FilaAcaoResumo action) {
+    if (action.acaoUrl.startsWith('/')) {
+      context.push(action.acaoUrl);
+    }
+  }
+
+  Future<void> _complete(FilaAcaoResumo action) async {
+    await _runAction(
+      () => ref
+          .read(dashboardRepositoryProvider)
+          .completeCommandAction(action.actionKey),
+      'Tarefa concluída',
+    );
+  }
+
+  Future<void> _snooze(FilaAcaoResumo action) async {
+    await _runAction(
+      () => ref
+          .read(dashboardRepositoryProvider)
+          .snoozeCommandAction(action.actionKey, hours: 24),
+      'Tarefa adiada por 24h',
+    );
+  }
+
+  Future<void> _reopen(FilaAcaoResumo action) async {
+    await _runAction(
+      () => ref
+          .read(dashboardRepositoryProvider)
+          .reopenCommandAction(action.actionKey),
+      'Tarefa reaberta',
+    );
+  }
+
+  Future<void> _runAction(
+    Future<void> Function() action,
+    String successMessage,
+  ) async {
+    try {
+      await action();
+      if (!mounted) return;
+      ref.invalidate(iaActionsProvider(_status));
+      ref.invalidate(commandCenterProvider);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(successMessage)));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível atualizar a tarefa.')),
+      );
+    }
+  }
+}
+
+class _StatusSegmentedControl extends StatelessWidget {
+  const _StatusSegmentedControl({
+    required this.selected,
+    required this.brand,
+    required this.cardBg,
+    required this.line,
+    required this.ink,
+    required this.mute,
+    required this.onChanged,
+  });
+
+  final String selected;
+  final Color brand;
+  final Color cardBg;
+  final Color line;
+  final Color ink;
+  final Color mute;
+  final ValueChanged<String> onChanged;
+
+  static const _items = [
+    ('ABERTO', 'Abertas'),
+    ('ADIADO', 'Adiadas'),
+    ('CONCLUIDO', 'Concluídas'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children:
+            _items.map((item) {
+              final active = item.$1 == selected;
+              return Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => onChanged(item.$1),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 160),
+                    height: 34,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: active ? brand : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow:
+                          active
+                              ? [
+                                BoxShadow(
+                                  color: brand.withValues(alpha: 0.18),
+                                  blurRadius: 14,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ]
+                              : null,
+                    ),
+                    child: Text(
+                      item.$2,
+                      style: TextStyle(
+                        color: active ? Colors.white : mute,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
 }
 
-class _CopilotActionCard extends StatelessWidget {
-  const _CopilotActionCard({
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    required this.count,
+    required this.ink,
+    required this.mute,
+  });
+
+  final String title;
+  final int count;
+  final Color ink;
+  final Color mute;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: ink,
+            fontSize: 13,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.2,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '$count',
+          style: TextStyle(
+            color: mute,
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CopilotTaskCard extends StatelessWidget {
+  const _CopilotTaskCard({
     required this.action,
+    required this.status,
     required this.cardBg,
     required this.line,
     required this.ink,
     required this.mute,
     required this.brand,
+    required this.onOpen,
+    required this.onComplete,
+    required this.onSnooze,
+    required this.onReopen,
   });
 
   final FilaAcaoResumo action;
+  final String status;
   final Color cardBg;
   final Color line;
   final Color ink;
   final Color mute;
   final Color brand;
+  final VoidCallback onOpen;
+  final VoidCallback onComplete;
+  final VoidCallback onSnooze;
+  final VoidCallback onReopen;
 
   @override
   Widget build(BuildContext context) {
+    final mode = _modeLabel(action);
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: line),
       ),
       child: Column(
@@ -162,15 +434,7 @@ class _CopilotActionCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: brand.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(Icons.auto_awesome, color: brand, size: 18),
-              ),
+              _TaskIcon(icon: Icons.auto_awesome, brand: brand),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -178,58 +442,159 @@ class _CopilotActionCard extends StatelessWidget {
                   children: [
                     Text(
                       action.titulo,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: ink,
-                        fontSize: 14,
+                        fontSize: 13.5,
                         fontWeight: FontWeight.w900,
-                        height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Text(
-                      [
-                        if ((action.sourceMode ?? '').isNotEmpty)
-                          'Copiloto · ${action.sourceMode}',
-                        action.prioridade,
-                        action.sla,
-                      ].join(' · '),
+                      'Copiloto · $mode',
                       style: TextStyle(
                         color: brand,
                         fontSize: 11,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                   ],
                 ),
               ),
-              _StatusPill(label: action.status, color: brand),
+              _CompactPill(label: _deadlineLabel(action, status), color: brand),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 9),
           Text(
             action.descricao,
-            maxLines: 4,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: mute, fontSize: 12.4, height: 1.35),
+            style: TextStyle(color: mute, fontSize: 12, height: 1.32),
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed:
-                  action.acaoUrl.startsWith('/')
-                      ? () => context.push(action.acaoUrl)
-                      : null,
-              icon: const Icon(Icons.person_outline, size: 16),
-              label: Text(action.ctaLabel),
-              style: FilledButton.styleFrom(
-                backgroundColor: brand,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(44),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+          const SizedBox(height: 11),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: action.acaoUrl.startsWith('/') ? onOpen : null,
+                  icon: const Icon(Icons.person_outline, size: 15),
+                  label: const Text('Revisar aluno'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: brand,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(38),
+                    textStyle: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w900,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
+              if (status == 'CONCLUIDO')
+                _MiniActionButton(label: 'Reabrir', onPressed: onReopen)
+              else ...[
+                _MiniActionButton(label: 'Adiar', onPressed: onSnooze),
+                const SizedBox(width: 6),
+                _MiniActionButton(label: 'Concluir', onPressed: onComplete),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RadarSignalCard extends StatelessWidget {
+  const _RadarSignalCard({
+    required this.action,
+    required this.status,
+    required this.cardBg,
+    required this.line,
+    required this.ink,
+    required this.mute,
+    required this.brand,
+    required this.onOpen,
+    required this.onComplete,
+    required this.onSnooze,
+    required this.onReopen,
+  });
+
+  final FilaAcaoResumo action;
+  final String status;
+  final Color cardBg;
+  final Color line;
+  final Color ink;
+  final Color mute;
+  final Color brand;
+  final VoidCallback onOpen;
+  final VoidCallback onComplete;
+  final VoidCallback onSnooze;
+  final VoidCallback onReopen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _TaskIcon(icon: Icons.sensors, brand: brand),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        action.titulo,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 13.2,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _CompactPill(label: action.prioridade, color: brand),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  action.descricao,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: mute, fontSize: 11.8, height: 1.3),
+                ),
+                const SizedBox(height: 9),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    _TextAction(label: action.ctaLabel, onPressed: onOpen),
+                    if (status == 'CONCLUIDO')
+                      _TextAction(label: 'Reabrir', onPressed: onReopen)
+                    else ...[
+                      _TextAction(label: 'Adiar', onPressed: onSnooze),
+                      _TextAction(label: 'Concluir', onPressed: onComplete),
+                    ],
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -238,8 +603,28 @@ class _CopilotActionCard extends StatelessWidget {
   }
 }
 
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.label, required this.color});
+class _TaskIcon extends StatelessWidget {
+  const _TaskIcon({required this.icon, required this.brand});
+
+  final IconData icon;
+  final Color brand;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 34,
+      height: 34,
+      decoration: BoxDecoration(
+        color: brand.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(icon, color: brand, size: 17),
+    );
+  }
+}
+
+class _CompactPill extends StatelessWidget {
+  const _CompactPill({required this.label, required this.color});
 
   final String label;
   final Color color;
@@ -264,8 +649,55 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
-class _CopilotActionsEmpty extends StatelessWidget {
-  const _CopilotActionsEmpty({
+class _MiniActionButton extends StatelessWidget {
+  const _MiniActionButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(0, 38),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      child: Text(label),
+    );
+  }
+}
+
+class _TextAction extends StatelessWidget {
+  const _TextAction({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+            fontSize: 11.5,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _IaActionsEmpty extends StatelessWidget {
+  const _IaActionsEmpty({
     required this.title,
     required this.subtitle,
     required this.ink,
@@ -283,48 +715,131 @@ class _CopilotActionsEmpty extends StatelessWidget {
   final Color cardBg;
   final Color line;
   final Color brand;
-  final VoidCallback onRefresh;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.all(20),
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: line),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.assignment_turned_in_outlined, color: brand, size: 28),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: ink,
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
-            ),
-            const SizedBox(height: 14),
-            OutlinedButton.icon(
-              onPressed: onRefresh,
-              icon: const Icon(Icons.refresh, size: 16),
-              label: const Text('Atualizar'),
-            ),
-          ],
-        ),
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+        children: [
+          _IaActionsEmptyCard(
+            title: title,
+            subtitle: subtitle,
+            ink: ink,
+            mute: mute,
+            cardBg: cardBg,
+            line: line,
+            brand: brand,
+            onRefresh: onRefresh,
+          ),
+        ],
       ),
     );
   }
+}
+
+class _IaActionsEmptyCard extends StatelessWidget {
+  const _IaActionsEmptyCard({
+    required this.title,
+    required this.subtitle,
+    required this.ink,
+    required this.mute,
+    required this.cardBg,
+    required this.line,
+    required this.brand,
+    required this.onRefresh,
+  });
+
+  final String title;
+  final String subtitle;
+  final Color ink;
+  final Color mute;
+  final Color cardBg;
+  final Color line;
+  final Color brand;
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: brand.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(Icons.task_alt, color: brand, size: 22),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ink,
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+          ),
+          const SizedBox(height: 14),
+          OutlinedButton.icon(
+            onPressed: onRefresh,
+            icon: const Icon(Icons.refresh, size: 16),
+            label: const Text('Atualizar'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _modeLabel(FilaAcaoResumo action) {
+  final raw = (action.sourceMode ?? '').trim();
+  if (raw.isEmpty) return 'Treino';
+  final lower = raw.toLowerCase();
+  return lower.substring(0, 1).toUpperCase() + lower.substring(1);
+}
+
+String _deadlineLabel(FilaAcaoResumo action, String status) {
+  if (status == 'CONCLUIDO') return 'concluída';
+  if (status == 'ADIADO') return 'adiada';
+  final dueAt = DateTime.tryParse(action.dueAt ?? '');
+  if (dueAt == null) return action.sla.isNotEmpty ? action.sla : '24h';
+  final diff = dueAt.difference(DateTime.now());
+  if (diff.isNegative) return 'atrasada';
+  final hours = diff.inHours.clamp(1, 999);
+  return 'vence em ${hours}h';
+}
+
+String _emptyTitle(String status) {
+  return switch (status) {
+    'ADIADO' => 'Nenhuma tarefa adiada',
+    'CONCLUIDO' => 'Nenhuma tarefa concluída',
+    _ => 'Nenhuma tarefa IA aberta',
+  };
+}
+
+String _emptySubtitle(String status) {
+  return switch (status) {
+    'ADIADO' => 'Quando uma ação for adiada, ela fica guardada aqui.',
+    'CONCLUIDO' => 'As tarefas resolvidas aparecem aqui para auditoria.',
+    _ => 'Copiloto e Radar Focux aparecem aqui quando exigem ação humana.',
+  };
 }
