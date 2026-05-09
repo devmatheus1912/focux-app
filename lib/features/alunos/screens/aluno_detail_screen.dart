@@ -404,7 +404,7 @@ class AlunoDetailScreen extends ConsumerWidget {
             slivers: [
               // Hero App Bar that stays when scrolling
               SliverAppBar(
-                expandedHeight: 196,
+                expandedHeight: 180,
                 pinned: true,
                 backgroundColor: primary,
                 foregroundColor: Colors.white,
@@ -428,8 +428,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                             Row(
                               children: [
                                 Container(
-                                  width: 60,
-                                  height: 60,
+                                  width: 56,
+                                  height: 56,
                                   decoration: const BoxDecoration(
                                     color: Colors.white,
                                     shape: BoxShape.circle,
@@ -446,7 +446,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                     fxInitials(aluno.nome),
                                     style: TextStyle(
                                       color: primary,
-                                      fontSize: 24,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -461,7 +461,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                         aluno.nome,
                                         style: const TextStyle(
                                           color: Colors.white,
-                                          fontSize: 24,
+                                          fontSize: 22,
                                           fontWeight: FontWeight.bold,
                                           letterSpacing: -0.5,
                                         ),
@@ -483,7 +483,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 13),
+                            const SizedBox(height: 11),
                             // Stats Strip
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -585,7 +585,7 @@ class AlunoDetailScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.only(
-                    top: 24,
+                    top: 16,
                     left: 16,
                     right: 16,
                     bottom: 80,
@@ -1376,20 +1376,16 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-            childAspectRatio: 3.0,
-            children:
-                signals
-                    .map((signal) => _Aluno360SignalTile(signal: signal))
-                    .toList(),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              for (final signal in signals) ...[
+                Expanded(child: _Aluno360SignalTile(signal: signal)),
+                if (signal != signals.last) const SizedBox(width: 7),
+              ],
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
@@ -1435,7 +1431,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                   ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           actionAsync.maybeWhen(
             data:
                 (action) => _Aluno360ActionRow(
@@ -2098,55 +2094,44 @@ class _Aluno360SignalTile extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      height: 54,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
       decoration: BoxDecoration(
         color: signal.color.withValues(alpha: isDark ? 0.14 : 0.08),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 6,
-            height: 28,
+            width: 18,
+            height: 3,
             decoration: BoxDecoration(
               color: signal.color,
               borderRadius: BorderRadius.circular(999),
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  signal.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        signal.value,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          const SizedBox(height: 5),
+          Text(
+            signal.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: mute,
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 1),
+          Text(
+            signal.value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: ink,
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
             ),
           ),
         ],
@@ -2235,11 +2220,9 @@ class _Aluno360ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       children: [
-        SizedBox(
-          width: double.infinity,
-          height: 46,
+        Expanded(
           child: FilledButton.icon(
             onPressed: () => onAssign(acao),
             icon: const Icon(Icons.task_alt_rounded, size: 17),
@@ -2252,68 +2235,23 @@ class _Aluno360ActionRow extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _ActionMiniChip(
-                icon: Icons.content_copy_rounded,
-                label: 'Copiar',
-                onTap: () => onCopyMessage(acao),
+        const SizedBox(width: 8),
+        SizedBox(
+          height: 44,
+          child: OutlinedButton.icon(
+            onPressed: () => onCopyMessage(acao),
+            icon: const Icon(Icons.content_copy_rounded, size: 15),
+            label: const Text('Copiar'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: primary,
+              side: BorderSide(color: primary.withValues(alpha: 0.28)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
-              _ActionMiniChip(
-                icon: Icons.chat_bubble_outline,
-                label: 'Abrir chat',
-                onTap:
-                    () => context.push(
-                      '/alunos/${aluno.id}/chat',
-                      extra: aluno.nome,
-                    ),
-              ),
-              _ActionMiniChip(
-                icon: Icons.trending_up_rounded,
-                label: 'Evoluir',
-                onTap:
-                    () => context.push(
-                      '/alunos/${aluno.id}/ia/progressao',
-                      extra: aluno.nome,
-                    ),
-              ),
-            ],
+            ),
           ),
         ),
       ],
-    );
-  }
-}
-
-class _ActionMiniChip extends StatelessWidget {
-  const _ActionMiniChip({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ActionChip(
-        onPressed: onTap,
-        avatar: Icon(icon, size: 15, color: primary),
-        label: Text(label),
-        labelStyle: TextStyle(color: primary, fontWeight: FontWeight.w800),
-        side: BorderSide(color: primary.withValues(alpha: 0.22)),
-        backgroundColor: primary.withValues(alpha: 0.06),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-      ),
     );
   }
 }
