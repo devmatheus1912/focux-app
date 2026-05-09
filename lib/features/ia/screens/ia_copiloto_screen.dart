@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/widgets/ia_safety_disclaimer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -51,6 +50,13 @@ final proximaAcaoProvider = FutureProvider.family<Map<String, dynamic>, int>((
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
+class _CopilotTaskDraft {
+  const _CopilotTaskDraft({required this.acao, required this.motivo});
+
+  final String acao;
+  final String motivo;
+}
+
 class IaCopilotoScreen extends ConsumerStatefulWidget {
   const IaCopilotoScreen({super.key});
   @override
@@ -71,6 +77,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   final _modes = ['Treino', 'Dieta', 'Progressão'];
 
   String get _mode => _modes[_modeIdx];
+  String get _modeDisplay => _mode == 'Progressão' ? 'Progresso' : _mode;
 
   IconData get _modeIcon {
     switch (_mode) {
@@ -522,10 +529,16 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                   '')
               .toString();
       final motivo = (acaoAtual['motivo'] ?? '').toString();
+      final draft = await _confirmarCriarTarefa(
+        textoAcao.isEmpty ? 'Revisar aluno no Copiloto' : textoAcao,
+        motivo,
+      );
+      if (draft == null) return;
       final acao = await repo.salvarAcaoCopiloto(
         alunoId: _selectedAlunoId!,
-        acao: textoAcao.isEmpty ? 'Revisar aluno no Copiloto' : textoAcao,
-        motivo: motivo,
+        acao: draft.acao,
+        motivo: draft.motivo,
+        modo: _mode,
       );
       if (!mounted) return;
       setState(() => _proximaAcao = acao);
@@ -533,7 +546,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Ação atribuída para ${_selectedAlunoNome ?? "aluno"}: ${(acao['acao'] ?? acao['titulo'] ?? 'Próxima ação').toString()}',
+            'Tarefa criada para ${_selectedAlunoNome ?? "aluno"} no Command Center.',
           ),
         ),
       );
@@ -543,6 +556,226 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
         const SnackBar(content: Text('Não foi possível atribuir agora.')),
       );
     }
+  }
+
+  Future<_CopilotTaskDraft?> _confirmarCriarTarefa(
+    String acaoInicial,
+    String motivoInicial,
+  ) async {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final brand = dark ? BrandPalette.accent(primary) : primary;
+    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
+    final surface = dark ? EagleTokens.darkBg : EagleTokens.paper;
+    final controller = TextEditingController(text: acaoInicial);
+
+    final result = await showModalBottomSheet<_CopilotTaskDraft>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+          ),
+          child: SafeArea(
+            top: false,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
+                ),
+                border: Border(top: BorderSide(color: line)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: line,
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: brand.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          Icons.assignment_turned_in_outlined,
+                          color: brand,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Criar tarefa para ${_selectedAlunoNome ?? "aluno"}?',
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                                height: 1.15,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Vai para o Command Center. Nada é aplicado automaticamente.',
+                              style: TextStyle(
+                                color: mute,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Ação',
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: controller,
+                    minLines: 3,
+                    maxLines: 5,
+                    textInputAction: TextInputAction.newline,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: cardBg,
+                      hintText: 'Descreva a tarefa para revisar depois',
+                      hintStyle: TextStyle(color: mute),
+                      contentPadding: const EdgeInsets.all(14),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: line),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: brand, width: 1.2),
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _CopilotMetaChip(
+                        label: 'Destino: Command Center',
+                        icon: Icons.space_dashboard_outlined,
+                        brand: brand,
+                        ink: ink,
+                        line: line,
+                      ),
+                      _CopilotMetaChip(
+                        label: 'Prioridade P1',
+                        icon: Icons.flag_outlined,
+                        brand: brand,
+                        ink: ink,
+                        line: line,
+                      ),
+                      _CopilotMetaChip(
+                        label: 'SLA 24h',
+                        icon: Icons.timer_outlined,
+                        brand: brand,
+                        ink: ink,
+                        line: line,
+                      ),
+                    ],
+                  ),
+                  if (motivoInicial.trim().isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      motivoInicial,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text('Cancelar'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        flex: 2,
+                        child: FilledButton.icon(
+                          onPressed: () {
+                            final text = controller.text.trim();
+                            if (text.isEmpty) return;
+                            Navigator.of(ctx).pop(
+                              _CopilotTaskDraft(
+                                acao: text,
+                                motivo: motivoInicial.trim(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.add_task_outlined, size: 17),
+                          label: const Text('Criar tarefa'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: brand,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    controller.dispose();
+    return result;
   }
 
   Future<void> _abrirMenu() async {
@@ -704,12 +937,12 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     return Scaffold(
       backgroundColor: bg,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(86),
+        preferredSize: const Size.fromHeight(82),
         child: SafeArea(
           bottom: false,
           child: Container(
             color: bg,
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -727,77 +960,46 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         size: 18,
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 4),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: primarySoft,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Icon(
-                                Icons.auto_awesome,
-                                color: brand,
-                                size: 15,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'IA FOCUX',
-                              style: TextStyle(
-                                color: brand,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
                         Text(
                           'Copiloto',
                           style: TextStyle(
                             color: ink,
-                            fontSize: 27,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -1.2,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -1,
                             height: 1,
                           ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(Icons.auto_awesome, color: brand, size: 13),
+                            const SizedBox(width: 5),
+                            Text(
+                              'IA FOCUX',
+                              style: TextStyle(
+                                color: brand,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: dark ? const Color(0x0FFFFFFF) : EagleTokens.card,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: line),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.bolt, color: brand, size: 14),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Copiloto',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
+                _CopilotHeaderStatus(
+                  dark: dark,
+                  brand: brand,
+                  line: line,
+                  ink: ink,
                 ),
               ],
             ),
@@ -810,94 +1012,32 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-              child: GestureDetector(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: _CopilotStudentSelector(
+                alunoNome: _selectedAlunoNome,
+                brand: brand,
+                cardBg: cardBg,
+                line: line,
+                ink: ink,
+                mute: mute,
                 onTap: _selecionarAluno,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: line),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.group_outlined, color: brand, size: 18),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _selectedAlunoNome == null
-                              ? 'Selecionar aluno'
-                              : 'Aluno selecionado: $_selectedAlunoNome',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Icon(Icons.keyboard_arrow_down, color: mute),
-                    ],
-                  ),
-                ),
               ),
             ),
 
             // Mode selector
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: dark ? EagleTokens.darkCard : EagleTokens.lineSoft,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: line),
-                ),
-                child: Row(
-                  children:
-                      _modes.asMap().entries.map((e) {
-                        final sel = e.key == _modeIdx;
-                        return Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _modeIdx = e.key),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              decoration: BoxDecoration(
-                                color: sel ? brand : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow:
-                                    sel
-                                        ? [
-                                          BoxShadow(
-                                            color: brand.withValues(alpha: 0.3),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ]
-                                        : null,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  e.value,
-                                  style: TextStyle(
-                                    color: sel ? Colors.white : mute,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                ),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              child: _CopilotModeSelector(
+                modes: _modes,
+                selectedIndex: _modeIdx,
+                brand: brand,
+                dark: dark,
+                line: line,
+                mute: mute,
+                onSelect: (index) => setState(() => _modeIdx = index),
               ),
             ),
 
@@ -905,7 +1045,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
               child: _CopilotReadinessCard(
-                mode: _mode,
+                modeDisplay: _modeDisplay,
                 icon: _modeIcon,
                 promise: _modePromise,
                 checks: _modeChecks,
@@ -914,8 +1054,16 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
             ),
 
             // Safety disclaimer
-            const IaSafetyDisclaimer(compact: true),
-            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: _CopilotSafetyNote(
+                cardBg: cardBg,
+                line: line,
+                ink: ink,
+                mute: mute,
+                brand: brand,
+              ),
+            ),
 
             // Generate button / progress
             Padding(
@@ -923,7 +1071,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
               child:
                   !_gerado && !_gerando
                       ? _CopilotPrimaryAction(
-                        label: 'Gerar $_mode',
+                        label: 'Gerar $_modeDisplay',
                         icon: _modeIcon,
                         brand: brand,
                         primaryDeep: primaryDeep,
@@ -933,7 +1081,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         gerando: _gerando,
                         gerado: _gerado,
                         elapsedMs: _geracaoMs,
-                        mode: _mode,
+                        mode: _modeDisplay,
                         cardBg: cardBg,
                         line: line,
                         ink: ink,
@@ -1354,7 +1502,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                               ),
                               SizedBox(width: 8),
                               Text(
-                                'Atribuir ação',
+                                'Criar tarefa',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
@@ -1407,16 +1555,328 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   }
 }
 
+class _CopilotHeaderStatus extends StatelessWidget {
+  const _CopilotHeaderStatus({
+    required this.dark,
+    required this.brand,
+    required this.line,
+    required this.ink,
+  });
+
+  final bool dark;
+  final Color brand;
+  final Color line;
+  final Color ink;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: dark ? const Color(0x0FFFFFFF) : EagleTokens.card,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: line),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: dark ? 0.16 : 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(color: brand, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 7),
+          Text(
+            'Pronto',
+            style: TextStyle(
+              color: ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CopilotStudentSelector extends StatelessWidget {
+  const _CopilotStudentSelector({
+    required this.alunoNome,
+    required this.brand,
+    required this.cardBg,
+    required this.line,
+    required this.ink,
+    required this.mute,
+    required this.onTap,
+  });
+
+  final String? alunoNome;
+  final Color brand;
+  final Color cardBg;
+  final Color line;
+  final Color ink;
+  final Color mute;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = alunoNome != null;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: line),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.035),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: brand.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.person_search_outlined, color: brand, size: 18),
+            ),
+            const SizedBox(width: 11),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    selected ? alunoNome! : 'Selecionar aluno',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      height: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    selected
+                        ? 'Aluno ativo para esta análise'
+                        : 'Escolha para personalizar o rascunho',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 11.2,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.keyboard_arrow_down_rounded, color: mute, size: 22),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CopilotModeSelector extends StatelessWidget {
+  const _CopilotModeSelector({
+    required this.modes,
+    required this.selectedIndex,
+    required this.brand,
+    required this.dark,
+    required this.line,
+    required this.mute,
+    required this.onSelect,
+  });
+
+  final List<String> modes;
+  final int selectedIndex;
+  final Color brand;
+  final bool dark;
+  final Color line;
+  final Color mute;
+  final ValueChanged<int> onSelect;
+
+  String _label(String mode) => mode == 'Progressão' ? 'Progresso' : mode;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: dark ? EagleTokens.darkCard : EagleTokens.lineSoft,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children:
+            modes.asMap().entries.map((e) {
+              final selected = e.key == selectedIndex;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onSelect(e.key),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: selected ? brand : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow:
+                          selected
+                              ? [
+                                BoxShadow(
+                                  color: brand.withValues(alpha: 0.20),
+                                  blurRadius: 14,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ]
+                              : null,
+                    ),
+                    child: Center(
+                      child: Text(
+                        _label(e.value),
+                        style: TextStyle(
+                          color: selected ? Colors.white : mute,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+      ),
+    );
+  }
+}
+
+class _CopilotSafetyNote extends StatelessWidget {
+  const _CopilotSafetyNote({
+    required this.cardBg,
+    required this.line,
+    required this.ink,
+    required this.mute,
+    required this.brand,
+  });
+
+  final Color cardBg;
+  final Color line;
+  final Color ink;
+  final Color mute;
+  final Color brand;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.verified_user_outlined, color: brand, size: 16),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Text(
+              'Nada é aplicado automaticamente. Revise antes de usar com o aluno.',
+              style: TextStyle(
+                color: ink,
+                fontSize: 11.6,
+                fontWeight: FontWeight.w700,
+                height: 1.25,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Seguro',
+            style: TextStyle(
+              color: mute,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CopilotMetaChip extends StatelessWidget {
+  const _CopilotMetaChip({
+    required this.label,
+    required this.icon,
+    required this.brand,
+    required this.ink,
+    required this.line,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color brand;
+  final Color ink;
+  final Color line;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(9, 7, 10, 7),
+      decoration: BoxDecoration(
+        color: brand.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: brand),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              color: ink,
+              fontSize: 11.2,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CopilotReadinessCard extends StatelessWidget {
   const _CopilotReadinessCard({
-    required this.mode,
+    required this.modeDisplay,
     required this.icon,
     required this.promise,
     required this.checks,
     required this.alunoNome,
   });
 
-  final String mode;
+  final String modeDisplay;
   final IconData icon;
   final String promise;
   final List<String> checks;
@@ -1431,18 +1891,19 @@ class _CopilotReadinessCard extends StatelessWidget {
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
     final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final soft = BrandPalette.soft(primary, dark: dark);
+    final visibleChecks = checks.take(2).toList();
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(color: line),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? 0.18 : 0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+            color: Colors.black.withValues(alpha: dark ? 0.20 : 0.045),
+            blurRadius: 26,
+            offset: const Offset(0, 14),
           ),
         ],
       ),
@@ -1452,13 +1913,13 @@ class _CopilotReadinessCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   color: soft,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                child: Icon(icon, color: primary, size: 18),
+                child: Icon(icon, color: primary, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1466,10 +1927,10 @@ class _CopilotReadinessCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Rascunho de $mode',
+                      'Rascunho de $modeDisplay',
                       style: TextStyle(
                         color: ink,
-                        fontSize: 14,
+                        fontSize: 15,
                         fontWeight: FontWeight.w800,
                         height: 1.15,
                       ),
@@ -1477,11 +1938,11 @@ class _CopilotReadinessCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       alunoNome == null
-                          ? 'Escolha um aluno para personalizar a análise.'
+                          ? 'Escolha um aluno para personalizar.'
                           : 'Personalizado para $alunoNome.',
                       style: TextStyle(
                         color: mute,
-                        fontSize: 11.5,
+                        fontSize: 11.8,
                         height: 1.25,
                       ),
                     ),
@@ -1506,17 +1967,19 @@ class _CopilotReadinessCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Text(
             promise,
-            style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: mute, fontSize: 12.4, height: 1.35),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final check in checks)
+              for (final check in visibleChecks)
                 _CopilotPill(
                   icon: Icons.check_rounded,
                   label: check,
