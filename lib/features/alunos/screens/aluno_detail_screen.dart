@@ -1256,6 +1256,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     return 'Revisar treino e propor a próxima evolução de ${aluno.objetivo ?? "objetivo"}.';
   }
 
+  // ignore: unused_element
   Future<void> _atribuir(
     BuildContext context,
     WidgetRef ref,
@@ -1288,6 +1289,64 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       '/alunos/${aluno.id}/chat',
       extra: {'nome': aluno.nome, 'draft': _mensagemPronta(aluno, acao)},
     );
+  }
+
+  Future<void> _criarTarefaCopiloto(
+    BuildContext context,
+    WidgetRef ref,
+    String acao,
+  ) async {
+    try {
+      final saved = await IaRepository(
+        ref.read(apiClientProvider),
+      ).salvarAcaoCopiloto(
+        alunoId: aluno.id,
+        acao: acao,
+        motivo:
+            'Aluno 360: acao prescrita a partir de perfil, autonomia e risco.',
+        modo: 'ALUNO_360',
+        source: 'ALUNO_360',
+        recommendationId:
+            'ALUNO_360_${aluno.id}_${DateTime.now().millisecondsSinceEpoch}',
+        createdFromInsight: true,
+      );
+      final actionKey = (saved['actionKey'] ?? '').toString();
+      var persisted = actionKey.isNotEmpty;
+      if (persisted) {
+        final abertas = await ref
+            .read(dashboardRepositoryProvider)
+            .getIaCommandActions(status: 'ABERTO', alunoId: aluno.id);
+        persisted = abertas.any((item) => item.actionKey == actionKey);
+      }
+      ref.invalidate(commandCenterProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              persisted
+                  ? 'Tarefa criada no Command Center.'
+                  : 'Servidor aceitou, mas a tarefa ainda nao apareceu.',
+            ),
+            action:
+                persisted
+                    ? SnackBarAction(
+                      label: 'Ver',
+                      onPressed:
+                          () => context.push(
+                            '/dashboard/command-center/copiloto',
+                          ),
+                    )
+                    : null,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Nao foi possivel criar tarefa: $e')),
+        );
+      }
+    }
   }
 
   String _mensagemPronta(Aluno aluno, String acao) {
@@ -1440,7 +1499,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                               action['descricao'] ??
                               fallback)
                           .toString(),
-                  onAssign: (acao) => _atribuir(context, ref, acao),
+                  onAssign: (acao) => _criarTarefaCopiloto(context, ref, acao),
                   onPrepareMessage: (acao) => _prepararMensagem(context, acao),
                 ),
             orElse:
@@ -1448,7 +1507,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                   aluno: aluno,
                   primary: primary,
                   acao: fallback,
-                  onAssign: (acao) => _atribuir(context, ref, acao),
+                  onAssign: (acao) => _criarTarefaCopiloto(context, ref, acao),
                   onPrepareMessage: (acao) => _prepararMensagem(context, acao),
                 ),
           ),
@@ -2230,7 +2289,7 @@ class _Aluno360ActionRow extends StatelessWidget {
           child: FilledButton.icon(
             onPressed: () => onAssign(acao),
             icon: const Icon(Icons.task_alt_rounded, size: 17),
-            label: const Text('Resolver agora'),
+            label: const Text('Criar tarefa'),
             style: FilledButton.styleFrom(
               backgroundColor: primary,
               shape: RoundedRectangleBorder(
