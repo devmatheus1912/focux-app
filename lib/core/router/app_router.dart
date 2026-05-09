@@ -7,6 +7,7 @@ import '../../features/auth/screens/splash_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/dashboard/screens/personal_dashboard_screen.dart';
+import '../../features/dashboard/screens/copilot_actions_screen.dart';
 import '../../features/dashboard/screens/aluno_dashboard_screen.dart';
 import '../../features/dashboard/screens/aluno_activation_screen.dart';
 import '../../features/dashboard/screens/perfil_aluno_screen.dart';
@@ -271,6 +272,10 @@ class AppRouter {
       GoRoute(
         path: '/dashboard/qualidade',
         builder: (context, state) => const QualidadeOperacionalScreen(),
+      ),
+      GoRoute(
+        path: '/dashboard/command-center/copiloto',
+        builder: (context, state) => const CopilotActionsScreen(),
       ),
 
       // Alunos sub-routes (specific before parameterized)

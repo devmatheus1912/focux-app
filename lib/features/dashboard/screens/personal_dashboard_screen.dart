@@ -1310,11 +1310,21 @@ class _CommandCenterSection extends ConsumerWidget {
       data: (cc) => cc.filaAcoes,
       orElse: () => const <FilaAcaoResumo>[],
     );
+    final copilotAcoes =
+        filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList();
     final cobrancasPendentes = commandAsync.maybeWhen(
       data: (cc) => cc.cobrancasPendentes.length,
       orElse: () => finData?.totalInadimplentes ?? 0,
     );
     final nextActions = <_CommandActionItem>[
+      if (copilotAcoes.isNotEmpty)
+        _CommandActionItem(
+          icon: 'zap',
+          title: 'Revisar tarefa do Copiloto',
+          subtitle: copilotAcoes.first.descricao,
+          route: '/dashboard/command-center/copiloto',
+          tone: _CommandActionTone.primary,
+        ),
       if (unreadCount > 0)
         _CommandActionItem(
           icon: 'message-circle',
@@ -1341,14 +1351,18 @@ class _CommandCenterSection extends ConsumerWidget {
           route: '/financeiro',
           tone: _CommandActionTone.money,
         ),
-      if (filaAcoes.isNotEmpty)
+      if (filaAcoes.where((a) => a.tipo != 'IA_COPILOTO').isNotEmpty)
         _CommandActionItem(
           icon: 'zap',
           title: 'Executar próxima ação',
-          subtitle: filaAcoes.first.descricao,
+          subtitle:
+              filaAcoes.firstWhere((a) => a.tipo != 'IA_COPILOTO').descricao,
           route:
-              filaAcoes.first.acaoUrl.startsWith('/')
-                  ? filaAcoes.first.acaoUrl
+              filaAcoes
+                      .firstWhere((a) => a.tipo != 'IA_COPILOTO')
+                      .acaoUrl
+                      .startsWith('/')
+                  ? filaAcoes.firstWhere((a) => a.tipo != 'IA_COPILOTO').acaoUrl
                   : '/dashboard/personal',
           tone: _CommandActionTone.primary,
         ),
@@ -1527,6 +1541,15 @@ class _CommandCenterSection extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
             children: [
+              card(
+                icon: 'zap',
+                title: 'Copiloto',
+                subtitle:
+                    copilotAcoes.isEmpty
+                        ? 'Sem tarefas'
+                        : '${copilotAcoes.length} aberta${copilotAcoes.length == 1 ? '' : 's'}',
+                onTap: () => context.go('/dashboard/command-center/copiloto'),
+              ),
               card(
                 icon: 'message-circle',
                 title: 'Mensagens',

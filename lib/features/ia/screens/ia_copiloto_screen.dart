@@ -555,7 +555,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
           ),
           action: SnackBarAction(
             label: 'Ver',
-            onPressed: () => context.go('/dashboard/personal'),
+            onPressed: () => context.go('/dashboard/command-center/copiloto'),
           ),
         ),
       );
@@ -1479,7 +1479,9 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                             Expanded(
                               child: OutlinedButton.icon(
                                 onPressed:
-                                    () => context.go('/dashboard/personal'),
+                                    () => context.go(
+                                      '/dashboard/command-center/copiloto',
+                                    ),
                                 icon: const Icon(
                                   Icons.space_dashboard_outlined,
                                   size: 16,
