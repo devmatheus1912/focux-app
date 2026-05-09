@@ -521,28 +521,56 @@ class AlunoDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 actions: [
-                  IconButton(
-                    icon: const Icon(Icons.key_outlined),
-                    tooltip: 'Gerar nova senha',
-                    onPressed: () => _confirmarGerarSenha(context, ref, aluno),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined),
-                    tooltip: 'Editar',
-                    onPressed: () async {
-                      final updated = await context.push<bool>(
-                        '/alunos/$alunoId/editar',
-                        extra: aluno,
-                      );
-                      if (updated == true) {
-                        ref.invalidate(alunoProvider(alunoId));
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_horiz_rounded),
+                    tooltip: 'Ações do aluno',
+                    onSelected: (value) async {
+                      if (value == 'senha') {
+                        await _confirmarGerarSenha(context, ref, aluno);
+                        return;
+                      }
+                      if (value == 'editar') {
+                        final updated = await context.push<bool>(
+                          '/alunos/$alunoId/editar',
+                          extra: aluno,
+                        );
+                        if (updated == true) {
+                          ref.invalidate(alunoProvider(alunoId));
+                        }
+                        return;
+                      }
+                      if (value == 'excluir') {
+                        await _confirmarExclusao(context, ref, aluno);
                       }
                     },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    tooltip: 'Excluir',
-                    onPressed: () => _confirmarExclusao(context, ref, aluno),
+                    itemBuilder:
+                        (ctx) => const [
+                          PopupMenuItem(
+                            value: 'senha',
+                            child: ListTile(
+                              leading: Icon(Icons.key_outlined),
+                              title: Text('Gerar nova senha'),
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'editar',
+                            child: ListTile(
+                              leading: Icon(Icons.edit_outlined),
+                              title: Text('Editar aluno'),
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                          PopupMenuDivider(),
+                          PopupMenuItem(
+                            value: 'excluir',
+                            child: ListTile(
+                              leading: Icon(Icons.delete_outline),
+                              title: Text('Excluir aluno'),
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ],
                   ),
                 ],
               ),
@@ -559,32 +587,31 @@ class AlunoDetailScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Status Banner
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.auto_awesome, color: primary, size: 20),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Copiloto IA pronto para sugestões',
-                                style: TextStyle(
-                                  color:
-                                      isDark
-                                          ? EagleTokens.darkInk
-                                          : EagleTokens.ink,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                      _StudentQuickActions(
+                        aluno: aluno,
+                        isDark: isDark,
+                        primary: primary,
+                        onPassword:
+                            () => _confirmarGerarSenha(context, ref, aluno),
+                        onEdit: () async {
+                          final updated = await context.push<bool>(
+                            '/alunos/$alunoId/editar',
+                            extra: aluno,
+                          );
+                          if (updated == true) {
+                            ref.invalidate(alunoProvider(alunoId));
+                          }
+                        },
+                        onMessage:
+                            () => context.push(
+                              '/alunos/${aluno.id}/chat',
+                              extra: aluno.nome,
                             ),
-                          ],
-                        ),
+                        onEvolve:
+                            () => context.push(
+                              '/alunos/${aluno.id}/ia/progressao',
+                              extra: aluno.nome,
+                            ),
                       ),
                       const SizedBox(height: 16),
                       _Aluno360CopilotCard(
@@ -603,12 +630,6 @@ class AlunoDetailScreen extends ConsumerWidget {
                         eventosAsync: autonomiaAsync,
                         snapshotsAsync: scoreSnapshotsAsync,
                         timelineApiAsync: timeline360ApiAsync,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: 16),
-                      _AutonomiaAlunoCard(
-                        eventosAsync: autonomiaAsync,
-                        resumoAsync: autonomiaResumoAsync,
                         isDark: isDark,
                       ),
                       const SizedBox(height: 16),
@@ -813,9 +834,9 @@ class AlunoDetailScreen extends ConsumerWidget {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         crossAxisCount: 2,
-                        mainAxisSpacing: 10,
+                        mainAxisSpacing: 8,
                         crossAxisSpacing: 10,
-                        childAspectRatio: 1.4,
+                        childAspectRatio: 2.15,
                         children: [
                           _ModuleTile(
                             icon: Icons.fitness_center,
@@ -949,60 +970,33 @@ class AlunoDetailScreen extends ConsumerWidget {
   }
 }
 
-class _AutonomiaAlunoCard extends StatelessWidget {
-  final AsyncValue<List<AlunoAutonomiaEvento>> eventosAsync;
-  final AsyncValue<AlunoAutonomiaResumo> resumoAsync;
-  final bool isDark;
-
-  const _AutonomiaAlunoCard({
-    required this.eventosAsync,
-    required this.resumoAsync,
+class _StudentQuickActions extends StatelessWidget {
+  const _StudentQuickActions({
+    required this.aluno,
     required this.isDark,
+    required this.primary,
+    required this.onMessage,
+    required this.onPassword,
+    required this.onEdit,
+    required this.onEvolve,
   });
 
-  String _formatDate(DateTime? value) {
-    if (value == null) return '--';
-    final day = value.day.toString().padLeft(2, '0');
-    final month = value.month.toString().padLeft(2, '0');
-    final hour = value.hour.toString().padLeft(2, '0');
-    final minute = value.minute.toString().padLeft(2, '0');
-    return '$day/$month $hour:$minute';
-  }
-
-  String _actionLabel(String action) {
-    switch (action.toUpperCase()) {
-      case 'CLICKED':
-        return 'Clicou';
-      case 'COMPLETED':
-        return 'Concluiu';
-      case 'VIEWED':
-        return 'Viu';
-      default:
-        return action;
-    }
-  }
-
-  Color _actionColor(String action, Color fallback) {
-    switch (action.toUpperCase()) {
-      case 'CLICKED':
-        return EagleTokens.warn;
-      case 'COMPLETED':
-        return EagleTokens.good;
-      default:
-        return fallback;
-    }
-  }
+  final Aluno aluno;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onMessage;
+  final VoidCallback onPassword;
+  final VoidCallback onEdit;
+  final VoidCallback onEvolve;
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
@@ -1014,142 +1008,104 @@ class _AutonomiaAlunoCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 38,
-                height: 38,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
-                  color: BrandPalette.soft(primary, dark: isDark),
-                  borderRadius: BorderRadius.circular(13),
+                  color: primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.fact_check_outlined,
-                  color: primary,
-                  size: 20,
-                ),
+                child: Icon(Icons.flash_on_rounded, color: primary, size: 17),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Autonomia do aluno',
+                      'Ações rápidas',
                       style: TextStyle(
                         color: ink,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: 3),
                     Text(
-                      'Mostra onde o aluno tenta agir sozinho e onde ainda trava.',
-                      style: TextStyle(color: mute, fontSize: 12.5),
+                      'Contato, acesso e evolução de ${aluno.nome.split(' ').first}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          resumoAsync.when(
-            loading: () => const LinearProgressIndicator(minHeight: 2),
-            error:
-                (_, __) => Text(
-                  'Resumo indisponivel agora.',
-                  style: TextStyle(color: mute, fontSize: 12.5),
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _QuickActionPill(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  label: 'Mensagem',
+                  primary: primary,
+                  onTap: onMessage,
                 ),
-            data:
-                (resumo) => Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _AutonomiaMetric(
-                            label: 'Vistos',
-                            value: resumo.vistos.toString(),
-                            color: primary,
-                            isDark: isDark,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _AutonomiaMetric(
-                            label: 'Cliques',
-                            value: resumo.cliques.toString(),
-                            color: EagleTokens.warn,
-                            isDark: isDark,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _AutonomiaMetric(
-                            label: 'Fechados',
-                            value: resumo.concluidos.toString(),
-                            color: EagleTokens.good,
-                            isDark: isDark,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (resumo.gargaloTitulo?.isNotEmpty == true) ...[
-                      const SizedBox(height: 10),
-                      _AutonomiaBottleneck(
-                        resumo: resumo,
-                        isDark: isDark,
-                        actionLabel: _actionLabel(
-                          resumo.gargaloUltimaAcao ?? '',
-                        ),
-                        dateLabel: _formatDate(resumo.gargaloCriadoEm),
-                      ),
-                    ],
-                  ],
+                _QuickActionPill(
+                  icon: Icons.key_outlined,
+                  label: 'Nova senha',
+                  primary: primary,
+                  onTap: onPassword,
                 ),
-          ),
-          const SizedBox(height: 14),
-          eventosAsync.when(
-            loading: () => const LinearProgressIndicator(minHeight: 2),
-            error:
-                (_, __) => Text(
-                  'Historico indisponivel agora.',
-                  style: TextStyle(color: mute, fontSize: 12.5),
+                _QuickActionPill(
+                  icon: Icons.trending_up_rounded,
+                  label: 'Evoluir',
+                  primary: primary,
+                  onTap: onEvolve,
                 ),
-            data: (eventos) {
-              if (eventos.isEmpty) {
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color:
-                        isDark
-                            ? Colors.white.withValues(alpha: 0.04)
-                            : BrandPalette.softer(primary),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    'Sem sinais ainda. Quando o aluno abrir, clicar ou concluir tarefas, o historico aparece aqui.',
-                    style: TextStyle(color: mute, height: 1.4),
-                  ),
-                );
-              }
-
-              final recentes = eventos.take(5).toList();
-              return Column(
-                children: [
-                  for (final evento in recentes) ...[
-                    _AutonomiaEventoTile(
-                      evento: evento,
-                      isDark: isDark,
-                      actionLabel: _actionLabel(evento.action),
-                      actionColor: _actionColor(evento.action, primary),
-                      dateLabel: _formatDate(evento.criadoEm),
-                    ),
-                    if (evento != recentes.last)
-                      Divider(color: line, height: 14),
-                  ],
-                ],
-              );
-            },
+                _QuickActionPill(
+                  icon: Icons.edit_outlined,
+                  label: 'Editar',
+                  primary: primary,
+                  onTap: onEdit,
+                ),
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _QuickActionPill extends StatelessWidget {
+  const _QuickActionPill({
+    required this.icon,
+    required this.label,
+    required this.primary,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color primary;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ActionChip(
+        avatar: Icon(icon, size: 16, color: primary),
+        label: Text(label),
+        labelStyle: TextStyle(color: primary, fontWeight: FontWeight.w800),
+        side: BorderSide(color: primary.withValues(alpha: 0.18)),
+        backgroundColor: primary.withValues(alpha: 0.07),
+        onPressed: onTap,
       ),
     );
   }
@@ -1352,7 +1308,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Aluno 360',
+                      'Próxima melhor ação',
                       style: TextStyle(
                         color: ink,
                         fontSize: 18,
@@ -1361,7 +1317,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Leitura única de perfil, autonomia, financeiro e próxima melhor ação.',
+                      'Decisão sugerida com perfil, autonomia e financeiro.',
                       style: TextStyle(
                         color: mute,
                         fontSize: 12.5,
@@ -1386,7 +1342,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
-            childAspectRatio: 2.35,
+            childAspectRatio: 2.85,
             children:
                 signals
                     .map((signal) => _Aluno360SignalTile(signal: signal))
@@ -1813,6 +1769,8 @@ class _Aluno360TimelineCard extends StatelessWidget {
         snapshotsAsync.isLoading ||
         timelineApiAsync.isLoading;
     final items = _items();
+    final visibleItems = items.take(3).toList();
+    final hasMore = items.length > visibleItems.length;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1850,7 +1808,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Radar, check-ins, medidas, autonomia, financeiro e chat — consolidado no servidor quando disponível.',
+                      'Últimos sinais consolidados do aluno.',
                       style: TextStyle(color: mute, fontSize: 12.5),
                     ),
                   ],
@@ -1869,13 +1827,75 @@ class _Aluno360TimelineCard extends StatelessWidget {
             ),
           ] else ...[
             const SizedBox(height: 14),
-            for (final item in items) ...[
+            for (final item in visibleItems) ...[
               _Timeline360Tile(item: item, isDark: isDark),
-              if (item != items.last) Divider(height: 18, color: line),
+              if (item != visibleItems.last) Divider(height: 18, color: line),
+            ],
+            if (hasMore) ...[
+              const SizedBox(height: 6),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => _showFullTimeline(context, items),
+                  child: Text('Ver histórico completo · ${items.length}'),
+                ),
+              ),
             ],
           ],
         ],
       ),
+    );
+  }
+
+  void _showFullTimeline(BuildContext context, List<_Timeline360Item> items) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder:
+          (ctx) => DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: 0.78,
+            minChildSize: 0.45,
+            maxChildSize: 0.92,
+            builder:
+                (context, controller) => ListView.separated(
+                  controller: controller,
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    18,
+                    16,
+                    24 + MediaQuery.of(ctx).padding.bottom,
+                  ),
+                  itemCount: items.length + 1,
+                  separatorBuilder: (_, index) {
+                    if (index == 0) return const SizedBox(height: 12);
+                    return Divider(
+                      height: 18,
+                      color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                    );
+                  },
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return Text(
+                        'Histórico 360',
+                        style: TextStyle(
+                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      );
+                    }
+                    return _Timeline360Tile(
+                      item: items[index - 1],
+                      isDark: isDark,
+                    );
+                  },
+                ),
+          ),
     );
   }
 }
@@ -2179,41 +2199,93 @@ class _Aluno360ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    return Column(
       children: [
-        FilledButton.icon(
-          onPressed: () => onAssign(acao),
-          icon: const Icon(Icons.task_alt_rounded, size: 17),
-          label: const Text('Atribuir'),
-          style: FilledButton.styleFrom(backgroundColor: primary),
-        ),
-        OutlinedButton.icon(
-          onPressed: () => onCopyMessage(acao),
-          icon: const Icon(Icons.content_copy_rounded, size: 17),
-          label: const Text('Copiar mensagem'),
-        ),
-        OutlinedButton.icon(
-          onPressed:
-              () => context.push('/alunos/${aluno.id}/chat', extra: aluno.nome),
-          icon: const Icon(Icons.chat_bubble_outline, size: 17),
-          label: const Text('Mensagem'),
-        ),
-        OutlinedButton.icon(
-          onPressed:
-              () => context.push(
-                '/alunos/${aluno.id}/ia/progressao',
-                extra: aluno.nome,
+        SizedBox(
+          width: double.infinity,
+          height: 46,
+          child: FilledButton.icon(
+            onPressed: () => onAssign(acao),
+            icon: const Icon(Icons.task_alt_rounded, size: 17),
+            label: const Text('Resolver agora'),
+            style: FilledButton.styleFrom(
+              backgroundColor: primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
-          icon: const Icon(Icons.trending_up_rounded, size: 17),
-          label: const Text('Evoluir treino'),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _ActionMiniChip(
+                icon: Icons.content_copy_rounded,
+                label: 'Copiar',
+                onTap: () => onCopyMessage(acao),
+              ),
+              _ActionMiniChip(
+                icon: Icons.chat_bubble_outline,
+                label: 'Mensagem',
+                onTap:
+                    () => context.push(
+                      '/alunos/${aluno.id}/chat',
+                      extra: aluno.nome,
+                    ),
+              ),
+              _ActionMiniChip(
+                icon: Icons.trending_up_rounded,
+                label: 'Evoluir',
+                onTap:
+                    () => context.push(
+                      '/alunos/${aluno.id}/ia/progressao',
+                      extra: aluno.nome,
+                    ),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 }
 
+class _ActionMiniChip extends StatelessWidget {
+  const _ActionMiniChip({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon, size: 15),
+        label: Text(label),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: primary,
+          side: BorderSide(color: primary.withValues(alpha: 0.22)),
+          visualDensity: VisualDensity.compact,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ignore: unused_element
 class _AutonomiaMetric extends StatelessWidget {
   final String label;
   final String value;
@@ -2274,6 +2346,7 @@ class _AutonomiaMetric extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _AutonomiaBottleneck extends StatelessWidget {
   final AlunoAutonomiaResumo resumo;
   final bool isDark;
@@ -2384,6 +2457,7 @@ String _bottleneckHint(String? taskId) {
   };
 }
 
+// ignore: unused_element
 class _AutonomiaEventoTile extends StatelessWidget {
   final AlunoAutonomiaEvento evento;
   final bool isDark;
@@ -2631,7 +2705,7 @@ class _ModuleTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(16),
@@ -2641,19 +2715,21 @@ class _ModuleTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 32,
-              height: 32,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 color: primary.withValues(alpha: highlight ? 0.18 : 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, size: 16, color: highlight ? primary : primary),
             ),
-            const Spacer(),
+            const SizedBox(height: 10),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 13.5,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: highlight ? primary : ink,
                 letterSpacing: -0.2,
@@ -2661,8 +2737,10 @@ class _ModuleTile extends StatelessWidget {
             ),
             Text(
               sub,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 11.5,
+                fontSize: 11,
                 color: highlight ? BrandPalette.deep(primary) : mute,
               ),
             ),
