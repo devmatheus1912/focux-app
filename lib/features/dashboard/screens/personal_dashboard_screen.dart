@@ -730,7 +730,7 @@ class _PersonalDashboardScreenState
                     const SliverToBoxAdapter(child: SizedBox(height: 18)),
                     SliverToBoxAdapter(
                       child: _SectionTitle(
-                        title: 'Ferramentas',
+                        title: 'Mais ferramentas',
                         isDark: isDark,
                       ),
                     ),
@@ -745,57 +745,8 @@ class _PersonalDashboardScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _ToolGroupLabel(label: 'Operação', isDark: isDark),
-                            const SizedBox(height: 8),
-                            GridView.count(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 9,
-                              crossAxisSpacing: 10,
-                              childAspectRatio: shortcutAspectRatio,
-                              children: [
-                                _ShortcutBtn(
-                                  icon: 'spark',
-                                  label: 'IA Copiloto',
-                                  isDark: isDark,
-                                  onTap: () => context.go('/ia/copiloto'),
-                                ),
-                                _ShortcutBtn(
-                                  icon: 'plus',
-                                  label: 'Novo aluno',
-                                  isDark: isDark,
-                                  onTap: () => context.push('/alunos/novo'),
-                                ),
-                                _ShortcutBtn(
-                                  icon: 'calendar',
-                                  label: 'Agenda',
-                                  isDark: isDark,
-                                  onTap: () => context.go('/agenda'),
-                                ),
-                                _ShortcutBtn(
-                                  icon: 'chat',
-                                  label: 'Mensagens',
-                                  isDark: isDark,
-                                  onTap: () => context.push('/chat/inbox'),
-                                ),
-                                _ShortcutBtn(
-                                  icon: 'pix',
-                                  label: 'Financeiro',
-                                  isDark: isDark,
-                                  onTap: () => context.go('/financeiro'),
-                                ),
-                                _ShortcutBtn(
-                                  icon: 'dumbbell',
-                                  label: 'Exercícios',
-                                  isDark: isDark,
-                                  onTap: () => context.push('/exercicios'),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
                             _ToolGroupLabel(
-                              label: 'Crescimento',
+                              label: 'Acessos menos frequentes',
                               isDark: isDark,
                             ),
                             const SizedBox(height: 8),
@@ -807,6 +758,12 @@ class _PersonalDashboardScreenState
                               crossAxisSpacing: 10,
                               childAspectRatio: shortcutAspectRatio,
                               children: [
+                                _ShortcutBtn(
+                                  icon: 'dumbbell',
+                                  label: 'Exercícios',
+                                  isDark: isDark,
+                                  onTap: () => context.push('/exercicios'),
+                                ),
                                 _ShortcutBtn(
                                   icon: 'article',
                                   label: 'Feed',
