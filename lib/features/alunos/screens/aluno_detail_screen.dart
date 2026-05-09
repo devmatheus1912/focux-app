@@ -1057,7 +1057,7 @@ class _StudentQuickActions extends StatelessWidget {
               Expanded(
                 child: _QuickActionPill(
                   icon: Icons.chat_bubble_outline_rounded,
-                  label: 'Mensagem',
+                  label: 'Chat',
                   primary: primary,
                   onTap: onMessage,
                 ),
@@ -1373,7 +1373,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
-            childAspectRatio: 3.25,
+            childAspectRatio: 3.0,
             children:
                 signals
                     .map((signal) => _Aluno360SignalTile(signal: signal))
