@@ -655,7 +655,7 @@ class _PersonalDashboardScreenState
                       ),
                       SliverToBoxAdapter(
                         child: SizedBox(
-                          height: 160,
+                          height: 168,
                           child: ListView.separated(
                             key: const PageStorageKey(
                               'personal-attention-rail',
@@ -1160,7 +1160,7 @@ class _AttentionCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       child: Container(
         width: 240,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(20),
@@ -1208,7 +1208,7 @@ class _AttentionCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Row(
               children: [
                 Container(
@@ -1234,12 +1234,14 @@ class _AttentionCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               subt,
-              style: TextStyle(fontSize: 12.5, color: ink, height: 1.35),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12.2, color: ink, height: 1.25),
             ),
             const Spacer(),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 9),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
                 color: primarySoft,
                 borderRadius: BorderRadius.circular(12),
