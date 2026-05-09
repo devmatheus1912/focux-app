@@ -33,11 +33,13 @@ class ConversationScreen extends ConsumerStatefulWidget {
   final ConversationMode mode;
   final int? alunoId;
   final String? alunoNome;
+  final String? initialDraft;
 
   const ConversationScreen.personal({
     super.key,
     required this.alunoId,
     required this.alunoNome,
+    this.initialDraft,
   }) : mode = ConversationMode.personal,
        assert(alunoId != null),
        assert(alunoNome != null);
@@ -45,7 +47,8 @@ class ConversationScreen extends ConsumerStatefulWidget {
   const ConversationScreen.aluno({super.key})
     : mode = ConversationMode.aluno,
       alunoId = null,
-      alunoNome = null;
+      alunoNome = null,
+      initialDraft = null;
 
   @override
   ConsumerState<ConversationScreen> createState() => _ConversationScreenState();
@@ -96,6 +99,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   void initState() {
     super.initState();
     _alunoId = widget.alunoId;
+    final draft = widget.initialDraft?.trim();
+    if (draft != null && draft.isNotEmpty) {
+      _ctrl.text = draft;
+      _ctrl.selection = TextSelection.collapsed(offset: draft.length);
+      _composerHasText = true;
+    }
     _ctrl.addListener(_handleComposerChange);
     _scroll.addListener(_handleScroll);
     _loadHistorico();
@@ -2566,8 +2575,9 @@ class _ChatBackdropPainter extends CustomPainter {
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 64);
     final softPaint =
         Paint()
-          ..color =
-              (isDark ? Colors.white : Colors.white).withValues(alpha: 0.22)
+          ..color = (isDark ? Colors.white : Colors.white).withValues(
+            alpha: 0.22,
+          )
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 80);
     canvas.drawCircle(
       Offset(size.width * 0.82, size.height * 0.18),

@@ -1283,21 +1283,13 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     }
   }
 
-  Future<void> _copiarMensagem(BuildContext context, String acao) async {
-    final texto = acao.trim();
-    await Clipboard.setData(ClipboardData(text: texto));
-    HapticFeedback.selectionClick();
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Ação copiada. Nada foi enviado.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+  void _prepararMensagem(BuildContext context, String acao) {
+    context.push(
+      '/alunos/${aluno.id}/chat',
+      extra: {'nome': aluno.nome, 'draft': _mensagemPronta(aluno, acao)},
+    );
   }
 
-  // ignore: unused_element
   String _mensagemPronta(Aluno aluno, String acao) {
     final primeiroNome =
         aluno.nome.trim().isEmpty
@@ -1449,7 +1441,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                               fallback)
                           .toString(),
                   onAssign: (acao) => _atribuir(context, ref, acao),
-                  onCopyMessage: (acao) => _copiarMensagem(context, acao),
+                  onPrepareMessage: (acao) => _prepararMensagem(context, acao),
                 ),
             orElse:
                 () => _Aluno360ActionRow(
@@ -1457,7 +1449,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                   primary: primary,
                   acao: fallback,
                   onAssign: (acao) => _atribuir(context, ref, acao),
-                  onCopyMessage: (acao) => _copiarMensagem(context, acao),
+                  onPrepareMessage: (acao) => _prepararMensagem(context, acao),
                 ),
           ),
         ],
@@ -2220,14 +2212,14 @@ class _Aluno360ActionRow extends StatelessWidget {
   final Color primary;
   final String acao;
   final Future<void> Function(String acao) onAssign;
-  final Future<void> Function(String acao) onCopyMessage;
+  final void Function(String acao) onPrepareMessage;
 
   const _Aluno360ActionRow({
     required this.aluno,
     required this.primary,
     required this.acao,
     required this.onAssign,
-    required this.onCopyMessage,
+    required this.onPrepareMessage,
   });
 
   @override
@@ -2252,7 +2244,7 @@ class _Aluno360ActionRow extends StatelessWidget {
           width: 98,
           height: 44,
           child: InkWell(
-            onTap: () => onCopyMessage(acao),
+            onTap: () => onPrepareMessage(acao),
             borderRadius: BorderRadius.circular(14),
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -2263,10 +2255,10 @@ class _Aluno360ActionRow extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.content_copy_rounded, size: 15, color: primary),
+                  Icon(Icons.chat_bubble_outline, size: 15, color: primary),
                   const SizedBox(width: 6),
                   Text(
-                    'Copiar',
+                    'Msg',
                     style: TextStyle(
                       color: primary,
                       fontSize: 12,

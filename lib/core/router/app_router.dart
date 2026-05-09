@@ -427,7 +427,8 @@ class AppRouter {
         builder:
             (context, state) => ChatScreen(
               alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _stringExtra(state) ?? 'Aluno',
+              alunoNome: _chatAlunoNomeExtra(state) ?? 'Aluno',
+              initialDraft: _chatDraftExtra(state),
             ),
       ),
       GoRoute(
@@ -899,6 +900,25 @@ bool _isPersonalOnlyLocation(String path) {
 String? _stringExtra(GoRouterState state) {
   final extra = state.extra;
   return extra is String && extra.trim().isNotEmpty ? extra : null;
+}
+
+String? _chatAlunoNomeExtra(GoRouterState state) {
+  final extra = state.extra;
+  if (extra is String && extra.trim().isNotEmpty) return extra;
+  if (extra is Map) {
+    final nome = extra['nome'];
+    if (nome is String && nome.trim().isNotEmpty) return nome;
+  }
+  return null;
+}
+
+String? _chatDraftExtra(GoRouterState state) {
+  final extra = state.extra;
+  if (extra is Map) {
+    final draft = extra['draft'];
+    if (draft is String && draft.trim().isNotEmpty) return draft;
+  }
+  return null;
 }
 
 AlunoFiltro _alunoFiltroFromQuery(String? value) {
