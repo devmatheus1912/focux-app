@@ -84,11 +84,16 @@ class NotificacoesScreen extends ConsumerWidget {
               );
             }
 
+            final showQuietFooter = entries.length <= 2;
             return ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 120),
-              itemCount: entries.length,
+              itemCount: entries.length + (showQuietFooter ? 1 : 0),
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
+                if (index == entries.length) {
+                  return _QuietFooter(isDark: isDark, primary: primary);
+                }
+
                 final entry = entries[index];
                 final group = _groupLabel(entry.createdAt);
                 final previousGroup =
@@ -260,17 +265,13 @@ String _timeLabel(DateTime? date) {
     if (diff.inMinutes < 60) {
       return 'há ${diff.inMinutes <= 0 ? 1 : diff.inMinutes}min';
     }
-    if (diff.inHours < 8) return 'há ${diff.inHours}h';
-    return _clock(local);
+    return 'há ${diff.inHours}h';
   }
   if (DateUtils.isSameDay(local, now.subtract(const Duration(days: 1)))) {
     return 'ontem';
   }
   return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}';
 }
-
-String _clock(DateTime date) =>
-    '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 
 String _radarSummary(NotificacaoApp item) {
   final msg = item.mensagem.trim();
@@ -395,10 +396,8 @@ class _RadarNotificationGroup extends StatelessWidget {
                     color: primary.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Icon(
-                    Icons.track_changes_rounded,
-                    color: primary,
-                    size: 18,
+                  child: Center(
+                    child: FxIcon(name: 'spark', color: primary, size: 18),
                   ),
                 ),
                 const SizedBox(width: 11),
@@ -444,6 +443,49 @@ class _RadarNotificationGroup extends StatelessWidget {
               ),
               if (i != items.length - 1)
                 Divider(height: 14, thickness: 1, color: line),
+            ],
+            if (items.length > 1) ...[
+              const SizedBox(height: 10),
+              InkWell(
+                onTap:
+                    () => onOpen(
+                      items.firstWhere(
+                        (item) => !item.lida,
+                        orElse: () => items.first,
+                      ),
+                    ),
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: isDark ? 0.14 : 0.07),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Abrir sinais',
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        color: primary,
+                        size: 15,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ],
         ),
@@ -510,6 +552,74 @@ class _RadarRow extends StatelessWidget {
             Icon(Icons.chevron_right_rounded, color: primary, size: 20),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _QuietFooter extends StatelessWidget {
+  const _QuietFooter({required this.isDark, required this.primary});
+
+  final bool isDark;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: EagleTokens.good.withValues(alpha: isDark ? 0.16 : 0.10),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              Icons.check_circle_outline_rounded,
+              color: EagleTokens.good,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Inbox sob controle',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13.4,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'Fora destes sinais, nada crítico pendente agora.',
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 11.8,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _TinyBadge(label: 'ok', color: primary, isDark: isDark),
+        ],
       ),
     );
   }
