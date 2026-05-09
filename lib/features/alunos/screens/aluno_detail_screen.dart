@@ -836,7 +836,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                         crossAxisCount: 2,
                         mainAxisSpacing: 8,
                         crossAxisSpacing: 10,
-                        childAspectRatio: 2.15,
+                        childAspectRatio: 1.62,
                         children: [
                           _ModuleTile(
                             icon: Icons.fitness_center,
@@ -2702,7 +2702,7 @@ class _ModuleTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(11),
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(16),
@@ -2720,7 +2720,7 @@ class _ModuleTile extends StatelessWidget {
               ),
               child: Icon(icon, size: 16, color: highlight ? primary : primary),
             ),
-            const SizedBox(height: 10),
+            const Spacer(),
             Text(
               label,
               maxLines: 1,
