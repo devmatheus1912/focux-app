@@ -404,7 +404,7 @@ class AlunoDetailScreen extends ConsumerWidget {
             slivers: [
               // Hero App Bar that stays when scrolling
               SliverAppBar(
-                expandedHeight: 220,
+                expandedHeight: 196,
                 pinned: true,
                 backgroundColor: primary,
                 foregroundColor: Colors.white,
@@ -420,7 +420,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                     ),
                     child: SafeArea(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                        padding: const EdgeInsets.fromLTRB(18, 10, 18, 14),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -428,8 +428,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                             Row(
                               children: [
                                 Container(
-                                  width: 72,
-                                  height: 72,
+                                  width: 60,
+                                  height: 60,
                                   decoration: const BoxDecoration(
                                     color: Colors.white,
                                     shape: BoxShape.circle,
@@ -446,7 +446,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                     fxInitials(aluno.nome),
                                     style: TextStyle(
                                       color: primary,
-                                      fontSize: 28,
+                                      fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -461,7 +461,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                         aluno.nome,
                                         style: const TextStyle(
                                           color: Colors.white,
-                                          fontSize: 26,
+                                          fontSize: 24,
                                           fontWeight: FontWeight.bold,
                                           letterSpacing: -0.5,
                                         ),
@@ -483,7 +483,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 13),
                             // Stats Strip
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -684,7 +684,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                       children: [
                                         Text(
                                           aluno.peso?.toStringAsFixed(1) ??
-                                              '0.0',
+                                              '--',
                                           style: TextStyle(
                                             color: ink,
                                             fontSize: 32,
@@ -692,62 +692,63 @@ class AlunoDetailScreen extends ConsumerWidget {
                                             letterSpacing: -0.5,
                                           ),
                                         ),
-                                        const SizedBox(width: 3),
-                                        Text(
-                                          'kg',
-                                          style: TextStyle(
-                                            color:
-                                                isDark
-                                                    ? EagleTokens.darkInkMute
-                                                    : EagleTokens.inkMute,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 3,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                isDark
-                                                    ? const Color(0x1F6FE296)
-                                                    : EagleTokens.goodSoft,
-                                            borderRadius: BorderRadius.circular(
-                                              999,
+                                        if (aluno.peso != null) ...[
+                                          const SizedBox(width: 3),
+                                          Text(
+                                            'kg',
+                                            style: TextStyle(
+                                              color:
+                                                  isDark
+                                                      ? EagleTokens.darkInkMute
+                                                      : EagleTokens.inkMute,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
                                             ),
                                           ),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                Icons.arrow_downward,
-                                                size: 10,
-                                                color:
-                                                    isDark
-                                                        ? const Color(
-                                                          0xFF6FE296,
-                                                        )
-                                                        : EagleTokens.good,
-                                              ),
-                                              const SizedBox(width: 3),
-                                              Text(
-                                                '3.9 kg',
-                                                style: TextStyle(
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  isDark
+                                                      ? const Color(0x1F6FE296)
+                                                      : EagleTokens.goodSoft,
+                                              borderRadius:
+                                                  BorderRadius.circular(999),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.arrow_downward,
+                                                  size: 10,
                                                   color:
                                                       isDark
                                                           ? const Color(
                                                             0xFF6FE296,
                                                           )
                                                           : EagleTokens.good,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600,
                                                 ),
-                                              ),
-                                            ],
+                                                const SizedBox(width: 3),
+                                                Text(
+                                                  '3.9 kg',
+                                                  style: TextStyle(
+                                                    color:
+                                                        isDark
+                                                            ? const Color(
+                                                              0xFF6FE296,
+                                                            )
+                                                            : EagleTokens.good,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
+                                        ],
                                       ],
                                     ),
                                   ],
@@ -822,7 +823,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
 
                       Text(
                         'Módulos',
@@ -833,7 +834,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                           letterSpacing: -0.5,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
 
                       // Grid Ferramentas (SaaS Handoff style)
                       GridView.count(
@@ -842,7 +843,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                         crossAxisCount: 2,
                         mainAxisSpacing: 8,
                         crossAxisSpacing: 10,
-                        childAspectRatio: 2.35,
+                        childAspectRatio: 2.75,
                         children: [
                           _ModuleTile(
                             icon: Icons.fitness_center,
@@ -1051,37 +1052,42 @@ class _StudentQuickActions extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 3.25,
+          Row(
             children: [
-              _QuickActionPill(
-                icon: Icons.chat_bubble_outline_rounded,
-                label: 'Mensagem',
-                primary: primary,
-                onTap: onMessage,
+              Expanded(
+                child: _QuickActionPill(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  label: 'Mensagem',
+                  primary: primary,
+                  onTap: onMessage,
+                ),
               ),
-              _QuickActionPill(
-                icon: Icons.key_outlined,
-                label: 'Nova senha',
-                primary: primary,
-                onTap: onPassword,
+              const SizedBox(width: 7),
+              Expanded(
+                child: _QuickActionPill(
+                  icon: Icons.key_outlined,
+                  label: 'Senha',
+                  primary: primary,
+                  onTap: onPassword,
+                ),
               ),
-              _QuickActionPill(
-                icon: Icons.trending_up_rounded,
-                label: 'Evoluir',
-                primary: primary,
-                onTap: onEvolve,
+              const SizedBox(width: 7),
+              Expanded(
+                child: _QuickActionPill(
+                  icon: Icons.trending_up_rounded,
+                  label: 'Evoluir',
+                  primary: primary,
+                  onTap: onEvolve,
+                ),
               ),
-              _QuickActionPill(
-                icon: Icons.edit_outlined,
-                label: 'Editar',
-                primary: primary,
-                onTap: onEdit,
+              const SizedBox(width: 7),
+              Expanded(
+                child: _QuickActionPill(
+                  icon: Icons.edit_outlined,
+                  label: 'Editar',
+                  primary: primary,
+                  onTap: onEdit,
+                ),
               ),
             ],
           ),
@@ -1110,7 +1116,8 @@ class _QuickActionPill extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: primary.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(14),
@@ -1118,8 +1125,8 @@ class _QuickActionPill extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: primary),
-            const SizedBox(width: 7),
+            Icon(icon, size: 15, color: primary),
+            const SizedBox(width: 5),
             Expanded(
               child: Text(
                 label,
@@ -1127,7 +1134,7 @@ class _QuickActionPill extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: primary,
-                  fontSize: 12,
+                  fontSize: 10.5,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -1309,7 +1316,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     final fallback = _fallbackAction(aluno, resumo);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(22),
@@ -1322,13 +1329,13 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: BrandPalette.soft(primary, dark: isDark),
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Icon(Icons.hub_outlined, color: primary, size: 22),
+                child: Icon(Icons.hub_outlined, color: primary, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1339,7 +1346,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                       'Próxima melhor ação',
                       style: TextStyle(
                         color: ink,
-                        fontSize: 18,
+                        fontSize: 17,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -1363,23 +1370,23 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisCount: 2,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
-            childAspectRatio: 2.85,
+            childAspectRatio: 3.25,
             children:
                 signals
                     .map((signal) => _Aluno360SignalTile(signal: signal))
                     .toList(),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color:
                   isDark
@@ -2085,7 +2092,7 @@ class _Aluno360SignalTile extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: signal.color.withValues(alpha: isDark ? 0.14 : 0.08),
         borderRadius: BorderRadius.circular(16),
@@ -2094,13 +2101,13 @@ class _Aluno360SignalTile extends StatelessWidget {
         children: [
           Container(
             width: 6,
-            height: 32,
+            height: 28,
             decoration: BoxDecoration(
               color: signal.color,
               borderRadius: BorderRadius.circular(999),
             ),
           ),
-          const SizedBox(width: 9),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
