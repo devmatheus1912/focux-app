@@ -1276,16 +1276,12 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   Future<void> _copiarMensagem(BuildContext context, String acao) async {
     final mensagem = _mensagemPronta(aluno, acao);
     await Clipboard.setData(ClipboardData(text: mensagem));
+    HapticFeedback.selectionClick();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Mensagem pronta copiada para ${aluno.nome}.'),
-          action: SnackBarAction(
-            label: 'Abrir chat',
-            onPressed:
-                () =>
-                    context.push('/alunos/${aluno.id}/chat', extra: aluno.nome),
-          ),
+        const SnackBar(
+          content: Text('Mensagem copiada. Nada foi enviado.'),
+          duration: Duration(seconds: 2),
         ),
       );
     }
@@ -2258,7 +2254,7 @@ class _Aluno360ActionRow extends StatelessWidget {
               ),
               _ActionMiniChip(
                 icon: Icons.chat_bubble_outline,
-                label: 'Mensagem',
+                label: 'Abrir chat',
                 onTap:
                     () => context.push(
                       '/alunos/${aluno.id}/chat',
