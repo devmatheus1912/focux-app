@@ -156,7 +156,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                       if (copilot.isNotEmpty) ...[
                         _SectionHeader(
                           title: 'Copiloto',
-                          count: copilot.length,
+                          detail: _sectionDetail(_status, copilot.length),
                           ink: ink,
                           mute: mute,
                         ),
@@ -182,7 +182,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                         const SizedBox(height: 4),
                         _SectionHeader(
                           title: 'Sinais automáticos',
-                          count: radar.length,
+                          detail: '${radar.length} sinais',
                           ink: ink,
                           mute: mute,
                         ),
@@ -354,13 +354,13 @@ class _StatusSegmentedControl extends StatelessWidget {
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({
     required this.title,
-    required this.count,
+    required this.detail,
     required this.ink,
     required this.mute,
   });
 
   final String title;
-  final int count;
+  final String detail;
   final Color ink;
   final Color mute;
 
@@ -379,7 +379,7 @@ class _SectionHeader extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Text(
-          '$count',
+          detail,
           style: TextStyle(
             color: mute,
             fontSize: 12,
@@ -421,8 +421,9 @@ class _CopilotTaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mode = _modeLabel(action);
+    final isDone = status == 'CONCLUIDO';
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
@@ -462,7 +463,10 @@ class _CopilotTaskCard extends StatelessWidget {
                   ],
                 ),
               ),
-              _CompactPill(label: _deadlineLabel(action, status), color: brand),
+              _CompactPill(
+                label: _deadlineLabel(action, status),
+                color: isDone ? mute : brand,
+              ),
             ],
           ),
           const SizedBox(height: 9),
@@ -476,26 +480,46 @@ class _CopilotTaskCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: FilledButton.icon(
-                  onPressed: action.acaoUrl.startsWith('/') ? onOpen : null,
-                  icon: const Icon(Icons.person_outline, size: 15),
-                  label: const Text('Revisar aluno'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: brand,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(38),
-                    textStyle: const TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w900,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
+                child:
+                    isDone
+                        ? OutlinedButton.icon(
+                          onPressed:
+                              action.acaoUrl.startsWith('/') ? onOpen : null,
+                          icon: const Icon(Icons.person_outline, size: 15),
+                          label: const Text('Ver aluno'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: brand,
+                            minimumSize: const Size.fromHeight(38),
+                            textStyle: const TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w900,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        )
+                        : FilledButton.icon(
+                          onPressed:
+                              action.acaoUrl.startsWith('/') ? onOpen : null,
+                          icon: const Icon(Icons.person_outline, size: 15),
+                          label: const Text('Revisar aluno'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: brand,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(38),
+                            textStyle: const TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w900,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
               ),
               const SizedBox(width: 8),
-              if (status == 'CONCLUIDO')
+              if (isDone)
                 _MiniActionButton(label: 'Reabrir', onPressed: onReopen)
               else ...[
                 _MiniActionButton(label: 'Adiar', onPressed: onSnooze),
@@ -657,13 +681,16 @@ class _MiniActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    final primary = Theme.of(context).colorScheme.primary;
+    return TextButton(
       onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size(0, 38),
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      style: TextButton.styleFrom(
+        backgroundColor: primary.withValues(alpha: 0.07),
+        foregroundColor: primary,
+        minimumSize: const Size(0, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 9),
+        textStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
       ),
       child: Text(label),
     );
@@ -784,6 +811,17 @@ class _IaActionsEmptyCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
+            'Tudo em ordem',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: brand,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.7,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -821,11 +859,24 @@ String _deadlineLabel(FilaAcaoResumo action, String status) {
   if (status == 'CONCLUIDO') return 'concluída';
   if (status == 'ADIADO') return 'adiada';
   final dueAt = DateTime.tryParse(action.dueAt ?? '');
-  if (dueAt == null) return action.sla.isNotEmpty ? action.sla : '24h';
+  if (dueAt == null) {
+    final sla = action.sla.trim();
+    if (sla.isEmpty) return 'vence em 24h';
+    return sla.toLowerCase().contains('vence') ? sla : 'vence em $sla';
+  }
   final diff = dueAt.difference(DateTime.now());
   if (diff.isNegative) return 'atrasada';
   final hours = diff.inHours.clamp(1, 999);
   return 'vence em ${hours}h';
+}
+
+String _sectionDetail(String status, int count) {
+  final suffix = switch (status) {
+    'ADIADO' => 'adiadas',
+    'CONCLUIDO' => 'concluídas',
+    _ => 'abertas',
+  };
+  return '$count $suffix';
 }
 
 String _emptyTitle(String status) {
