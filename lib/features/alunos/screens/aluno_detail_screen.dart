@@ -1284,19 +1284,20 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   }
 
   Future<void> _copiarMensagem(BuildContext context, String acao) async {
-    final mensagem = _mensagemPronta(aluno, acao);
-    await Clipboard.setData(ClipboardData(text: mensagem));
+    final texto = acao.trim();
+    await Clipboard.setData(ClipboardData(text: texto));
     HapticFeedback.selectionClick();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Mensagem copiada. Nada foi enviado.'),
+          content: Text('Ação copiada. Nada foi enviado.'),
           duration: Duration(seconds: 2),
         ),
       );
     }
   }
 
+  // ignore: unused_element
   String _mensagemPronta(Aluno aluno, String acao) {
     final primeiroNome =
         aluno.nome.trim().isEmpty
