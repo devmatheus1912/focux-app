@@ -565,8 +565,14 @@ class AlunoDetailScreen extends ConsumerWidget {
                           PopupMenuItem(
                             value: 'excluir',
                             child: ListTile(
-                              leading: Icon(Icons.delete_outline),
-                              title: Text('Excluir aluno'),
+                              leading: Icon(
+                                Icons.delete_outline,
+                                color: EagleTokens.bad,
+                              ),
+                              title: Text(
+                                'Excluir aluno',
+                                style: TextStyle(color: EagleTokens.bad),
+                              ),
                               contentPadding: EdgeInsets.zero,
                             ),
                           ),
@@ -836,7 +842,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                         crossAxisCount: 2,
                         mainAxisSpacing: 8,
                         crossAxisSpacing: 10,
-                        childAspectRatio: 1.62,
+                        childAspectRatio: 2.35,
                         children: [
                           _ModuleTile(
                             icon: Icons.fitness_center,
@@ -1045,36 +1051,39 @@ class _StudentQuickActions extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _QuickActionPill(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  label: 'Mensagem',
-                  primary: primary,
-                  onTap: onMessage,
-                ),
-                _QuickActionPill(
-                  icon: Icons.key_outlined,
-                  label: 'Nova senha',
-                  primary: primary,
-                  onTap: onPassword,
-                ),
-                _QuickActionPill(
-                  icon: Icons.trending_up_rounded,
-                  label: 'Evoluir',
-                  primary: primary,
-                  onTap: onEvolve,
-                ),
-                _QuickActionPill(
-                  icon: Icons.edit_outlined,
-                  label: 'Editar',
-                  primary: primary,
-                  onTap: onEdit,
-                ),
-              ],
-            ),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 3.25,
+            children: [
+              _QuickActionPill(
+                icon: Icons.chat_bubble_outline_rounded,
+                label: 'Mensagem',
+                primary: primary,
+                onTap: onMessage,
+              ),
+              _QuickActionPill(
+                icon: Icons.key_outlined,
+                label: 'Nova senha',
+                primary: primary,
+                onTap: onPassword,
+              ),
+              _QuickActionPill(
+                icon: Icons.trending_up_rounded,
+                label: 'Evoluir',
+                primary: primary,
+                onTap: onEvolve,
+              ),
+              _QuickActionPill(
+                icon: Icons.edit_outlined,
+                label: 'Editar',
+                primary: primary,
+                onTap: onEdit,
+              ),
+            ],
           ),
         ],
       ),
@@ -1097,15 +1106,34 @@ class _QuickActionPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ActionChip(
-        avatar: Icon(icon, size: 16, color: primary),
-        label: Text(label),
-        labelStyle: TextStyle(color: primary, fontWeight: FontWeight.w800),
-        side: BorderSide(color: primary.withValues(alpha: 0.18)),
-        backgroundColor: primary.withValues(alpha: 0.07),
-        onPressed: onTap,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: primary.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: primary.withValues(alpha: 0.18)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: primary),
+            const SizedBox(width: 7),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -2065,8 +2093,8 @@ class _Aluno360SignalTile extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 8,
-            height: 36,
+            width: 6,
+            height: 32,
             decoration: BoxDecoration(
               color: signal.color,
               borderRadius: BorderRadius.circular(999),
@@ -2091,21 +2119,16 @@ class _Aluno360SignalTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    Text(
-                      signal.value,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(width: 5),
                     Expanded(
                       child: Text(
-                        signal.detail,
+                        signal.value,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: mute, fontSize: 10.5),
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ],
@@ -2161,7 +2184,7 @@ class _CopilotPrescription extends StatelessWidget {
         const SizedBox(height: 7),
         Text(
           action,
-          maxLines: 3,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: ink,
@@ -2173,7 +2196,7 @@ class _CopilotPrescription extends StatelessWidget {
         const SizedBox(height: 5),
         Text(
           reason,
-          maxLines: 2,
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(color: mute, fontSize: 12, height: 1.25),
         ),
@@ -2708,37 +2731,44 @@ class _ModuleTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: border,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
             Container(
-              width: 28,
-              height: 28,
+              width: 34,
+              height: 34,
               decoration: BoxDecoration(
                 color: primary.withValues(alpha: highlight ? 0.18 : 0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, size: 16, color: highlight ? primary : primary),
+              child: Icon(icon, size: 17, color: primary),
             ),
-            const Spacer(),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: highlight ? primary : ink,
-                letterSpacing: -0.2,
-              ),
-            ),
-            Text(
-              sub,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11,
-                color: highlight ? BrandPalette.deep(primary) : mute,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: highlight ? primary : ink,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  Text(
+                    sub,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: highlight ? BrandPalette.deep(primary) : mute,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
