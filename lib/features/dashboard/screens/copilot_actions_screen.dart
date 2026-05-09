@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_dock.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 
@@ -44,6 +45,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       appBar: AppBar(
         backgroundColor: bg,
         elevation: 0,
+        toolbarHeight: 76,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: ink, size: 18),
           onPressed:
@@ -66,7 +68,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
             Text(
               'Command Center',
               style: TextStyle(
-                color: brand,
+                color: mute,
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.6,
@@ -75,10 +77,31 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        child: SafeArea(
+          top: false,
+          child: FxDock(
+            items: FxDockItems.personal,
+            currentIndex: 4,
+            isDark: dark,
+            onTap: (index) {
+              final path = switch (index) {
+                0 => '/dashboard/personal',
+                1 => '/alunos',
+                2 => '/treinos',
+                3 => '/agenda',
+                _ => '/ia/copiloto',
+              };
+              context.go(path);
+            },
+          ),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+            padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
             child: _StatusSegmentedControl(
               selected: _status,
               brand: brand,
@@ -161,19 +184,20 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                           mute: mute,
                         ),
                         const SizedBox(height: 8),
-                        for (final action in copilot) ...[
+                        for (final entry in copilot.asMap().entries) ...[
                           _CopilotTaskCard(
-                            action: action,
+                            action: entry.value,
                             status: _status,
+                            highlighted: _status == 'ABERTO' && entry.key == 0,
                             cardBg: cardBg,
                             line: line,
                             ink: ink,
                             mute: mute,
                             brand: brand,
-                            onOpen: () => _openAction(context, action),
-                            onComplete: () => _complete(action),
-                            onSnooze: () => _snooze(action),
-                            onReopen: () => _reopen(action),
+                            onOpen: () => _openAction(context, entry.value),
+                            onComplete: () => _complete(entry.value),
+                            onSnooze: () => _snooze(entry.value),
+                            onReopen: () => _reopen(entry.value),
                           ),
                           const SizedBox(height: 8),
                         ],
@@ -395,6 +419,7 @@ class _CopilotTaskCard extends StatelessWidget {
   const _CopilotTaskCard({
     required this.action,
     required this.status,
+    required this.highlighted,
     required this.cardBg,
     required this.line,
     required this.ink,
@@ -408,6 +433,7 @@ class _CopilotTaskCard extends StatelessWidget {
 
   final FilaAcaoResumo action;
   final String status;
+  final bool highlighted;
   final Color cardBg;
   final Color line;
   final Color ink;
@@ -425,13 +451,41 @@ class _CopilotTaskCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
       decoration: BoxDecoration(
-        color: cardBg,
+        color:
+            highlighted
+                ? Color.alphaBlend(brand.withValues(alpha: 0.035), cardBg)
+                : cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
+        border: Border.all(
+          color: highlighted ? brand.withValues(alpha: 0.34) : line,
+        ),
+        boxShadow:
+            highlighted
+                ? [
+                  BoxShadow(
+                    color: brand.withValues(alpha: 0.11),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                    spreadRadius: -14,
+                  ),
+                ]
+                : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (highlighted) ...[
+            Text(
+              'Próxima ação',
+              style: TextStyle(
+                color: brand,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
