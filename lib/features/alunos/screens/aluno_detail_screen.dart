@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
@@ -86,6 +87,276 @@ class AlunoDetailScreen extends ConsumerWidget {
         ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     }
+  }
+
+  Future<void> _confirmarGerarSenha(
+    BuildContext context,
+    WidgetRef ref,
+    Aluno aluno,
+  ) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Gerar nova senha?'),
+            content: Text(
+              'A senha atual de ${aluno.nome} deixará de funcionar. Gere apenas se o aluno esqueceu a senha ou precisa recuperar acesso.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton.icon(
+                onPressed: () => Navigator.pop(ctx, true),
+                icon: const Icon(Icons.key_rounded, size: 18),
+                label: const Text('Gerar senha'),
+              ),
+            ],
+          ),
+    );
+    if (confirm != true || !context.mounted) return;
+
+    try {
+      final senha = await AlunoRepository(
+        ref.read(apiClientProvider),
+      ).gerarSenhaProvisoria(aluno.id);
+      ref.invalidate(alunoProvider(aluno.id));
+      if (context.mounted) {
+        _showNovaSenhaSheet(context, aluno, senha);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível gerar senha: $e')),
+        );
+      }
+    }
+  }
+
+  void _showNovaSenhaSheet(BuildContext context, Aluno aluno, String senha) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
+    final hasWhatsapp = whatsappNumber.isNotEmpty;
+    final mensagem = _senhaProvisoriaMessage(aluno, senha);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? EagleTokens.darkCard : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder:
+          (ctx) => Padding(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              12,
+              20,
+              24 + MediaQuery.of(ctx).padding.bottom,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                const SizedBox(height: 22),
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.10),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.key_rounded, color: primary, size: 28),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Nova senha provisória',
+                  style: TextStyle(
+                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${aluno.nome} deve trocar a senha no primeiro acesso.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color:
+                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    fontSize: 13.4,
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(18, 15, 18, 14),
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: primary.withValues(alpha: 0.2)),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Senha provisória',
+                        style: TextStyle(
+                          color:
+                              isDark
+                                  ? EagleTokens.darkInkMute
+                                  : EagleTokens.inkMute,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        senha,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: isDark ? Colors.white : EagleTokens.ink,
+                          fontSize: 31,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 5.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      HapticFeedback.mediumImpact();
+                      if (hasWhatsapp) {
+                        final uri = Uri.parse(
+                          'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(mensagem)}',
+                        );
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                          if (ctx.mounted) Navigator.of(ctx).pop();
+                          return;
+                        }
+                      }
+                      await Clipboard.setData(ClipboardData(text: mensagem));
+                      if (ctx.mounted) Navigator.of(ctx).pop();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              hasWhatsapp
+                                  ? 'Mensagem copiada. Abra o WhatsApp e envie ao aluno.'
+                                  : 'Convite copiado.',
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    icon: Icon(
+                      hasWhatsapp ? Icons.send_rounded : Icons.copy_rounded,
+                      size: 18,
+                    ),
+                    label: Text(
+                      hasWhatsapp ? 'Enviar no WhatsApp' : 'Copiar convite',
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+                if (hasWhatsapp) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        await Clipboard.setData(ClipboardData(text: mensagem));
+                        HapticFeedback.mediumImpact();
+                        if (ctx.mounted) Navigator.of(ctx).pop();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Convite copiado.')),
+                          );
+                        }
+                      },
+                      icon: Icon(
+                        Icons.copy_rounded,
+                        size: 18,
+                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                      ),
+                      label: Text(
+                        'Copiar convite',
+                        style: TextStyle(
+                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color:
+                              isDark ? EagleTokens.darkLine : EagleTokens.line,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: Text(
+                      'Fechar',
+                      style: TextStyle(
+                        color:
+                            isDark
+                                ? EagleTokens.darkInkMute
+                                : EagleTokens.inkMute,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+
+  String _senhaProvisoriaMessage(Aluno aluno, String senha) {
+    final primeiroNome =
+        aluno.nome.trim().isEmpty
+            ? 'tudo bem'
+            : aluno.nome.trim().split(RegExp(r'\s+')).first;
+    return 'Olá $primeiroNome! Sua senha do Focux foi redefinida.\n\n'
+        'Acesse com seu e-mail: ${aluno.email}\n'
+        'Senha provisória: $senha\n\n'
+        'Troque a senha no primeiro acesso.';
   }
 
   @override
@@ -237,6 +508,11 @@ class AlunoDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 actions: [
+                  IconButton(
+                    icon: const Icon(Icons.key_outlined),
+                    tooltip: 'Gerar nova senha',
+                    onPressed: () => _confirmarGerarSenha(context, ref, aluno),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.edit_outlined),
                     tooltip: 'Editar',
@@ -1425,8 +1701,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
           kind = tipo;
         }
     }
-    final deep =
-        e.deepLink.trim().isEmpty ? null : e.deepLink.trim();
+    final deep = e.deepLink.trim().isEmpty ? null : e.deepLink.trim();
     return _Timeline360Item(
       at: at,
       kind: kind,
