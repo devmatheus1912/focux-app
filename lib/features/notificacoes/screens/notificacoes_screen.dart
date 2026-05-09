@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
 
@@ -15,6 +17,8 @@ class NotificacoesScreen extends ConsumerWidget {
     final async = ref.watch(notificacoesProvider);
     final repo = ref.read(notificacoesRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
 
     Future<void> reload() async {
       ref.invalidate(notificacoesProvider);
@@ -22,9 +26,14 @@ class NotificacoesScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: bg,
       appBar: AppBar(
-        title: const Text('Notificacoes'),
+        backgroundColor: bg,
+        elevation: 0,
+        title: Text(
+          'Notificações',
+          style: TextStyle(color: ink, fontWeight: FontWeight.w900),
+        ),
         actions: [
           TextButton(
             onPressed: () async {
@@ -38,50 +47,35 @@ class NotificacoesScreen extends ConsumerWidget {
       body: RefreshIndicator(
         onRefresh: reload,
         child: async.when(
-          loading: () => const SkeletonList(count: 5),
+          loading:
+              () => ListView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                children: const [SkeletonList(count: 5)],
+              ),
           error:
-              (_, __) => ListView(
-                padding: const EdgeInsets.all(20),
-                children: const [
-                  Text('Nao foi possivel carregar suas notificacoes agora.'),
-                ],
+              (_, __) => _NotificationsStateCard(
+                isDark: isDark,
+                primary: primary,
+                icon: 'bell',
+                title: 'Não foi possível carregar',
+                subtitle: 'Puxe para atualizar ou tente novamente.',
               ),
           data: (items) {
             if (items.isEmpty) {
-              return ListView(
-                padding: const EdgeInsets.all(20),
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color:
-                            isDark
-                                ? EagleTokens.darkLine
-                                : EagleTokens.lineSoft,
-                      ),
-                    ),
-                    child: Text(
-                      'Quando houver PR, mensagem importante ou alerta operacional, tudo aparece aqui.',
-                      style: TextStyle(
-                        color:
-                            isDark
-                                ? EagleTokens.darkInkMute
-                                : EagleTokens.inkMute,
-                        height: 1.45,
-                      ),
-                    ),
-                  ),
-                ],
+              return _NotificationsStateCard(
+                isDark: isDark,
+                primary: primary,
+                icon: 'circle-check',
+                title: 'Tudo em ordem',
+                subtitle:
+                    'Alertas operacionais, mensagens importantes e Radar Focux aparecem aqui.',
               );
             }
 
             return ListView.separated(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 120),
               itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final item = items[index];
                 final group = _groupLabel(item.criadaEm);
@@ -92,17 +86,17 @@ class NotificacoesScreen extends ConsumerWidget {
                   children: [
                     if (index == 0 || group != previousGroup)
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
+                        padding: const EdgeInsets.fromLTRB(2, 8, 0, 8),
                         child: Text(
                           group.toUpperCase(),
                           style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w900,
                             color:
                                 isDark
                                     ? EagleTokens.darkInkMute
                                     : EagleTokens.inkMute,
-                            letterSpacing: 0.8,
+                            letterSpacing: 0.9,
                           ),
                         ),
                       ),
@@ -155,11 +149,44 @@ Color _notifColor(String tipo, Color primary) {
       return EagleTokens.good;
     case 'ai':
     case 'ia':
-      return EagleTokens.purple;
+    case 'radar':
+      return primary;
     case 'feed':
       return EagleTokens.warn;
     default:
       return primary;
+  }
+}
+
+String _humanTitle(NotificacaoApp item) {
+  final title = item.titulo.trim();
+  final msg = item.mensagem.trim();
+  if (title.toLowerCase().startsWith('radar focux:')) {
+    final name = title.split(':').skip(1).join(':').trim();
+    return name.isEmpty ? 'Aluno precisa de ação' : '$name precisa de ação';
+  }
+  if (title.isNotEmpty) return title;
+  if (msg.isNotEmpty) return msg;
+  return 'Nova notificação';
+}
+
+String _badgeLabel(NotificacaoApp item) {
+  final title = item.titulo.toLowerCase();
+  if (title.contains('radar focux') || item.tipo.toLowerCase() == 'radar') {
+    return 'Radar Focux';
+  }
+  switch (item.tipo.toLowerCase()) {
+    case 'risco':
+    case 'alerta':
+      return 'Alerta';
+    case 'pag':
+    case 'pagamento':
+      return 'Financeiro';
+    case 'ia':
+    case 'ai':
+      return 'IA';
+    default:
+      return item.tipo.isEmpty ? 'Info' : item.tipo;
   }
 }
 
@@ -183,20 +210,36 @@ class _NotificationTile extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final tipoColor = _notifColor(item.tipo, primary);
+    final unread = !item.lida;
+    final action =
+        item.ctaLabel?.trim().isNotEmpty == true
+            ? item.ctaLabel!.trim()
+            : item.route?.startsWith('/') == true
+            ? 'Abrir'
+            : null;
 
-    return Opacity(
-      opacity: item.lida ? 0.75 : 1.0,
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 180),
+      opacity: item.lida ? 0.76 : 1,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(13),
           decoration: BoxDecoration(
             color: cardBg,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: item.lida ? line : tipoColor.withValues(alpha: 0.55),
+              color: unread ? tipoColor.withValues(alpha: 0.22) : line,
             ),
+            boxShadow: [
+              if (!isDark && unread)
+                BoxShadow(
+                  color: const Color(0xFF0B1220).withValues(alpha: 0.035),
+                  blurRadius: 22,
+                  offset: const Offset(0, 12),
+                ),
+            ],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,60 +248,83 @@ class _NotificationTile extends StatelessWidget {
                 clipBehavior: Clip.none,
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
-                      color: tipoColor.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
+                      color: tipoColor.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(15),
                     ),
                     child: Icon(
-                      _iconFor(item.tipo),
+                      _iconFor(item.tipo, item.titulo),
                       color: tipoColor,
-                      size: 20,
+                      size: 18,
                     ),
                   ),
-                  if (!item.lida)
+                  if (unread)
                     Positioned(
-                      right: -2,
-                      top: -2,
+                      right: -1,
+                      top: -1,
                       child: Container(
-                        width: 9,
-                        height: 9,
+                        width: 7,
+                        height: 7,
                         decoration: BoxDecoration(
                           color: tipoColor,
                           shape: BoxShape.circle,
-                          border: Border.all(color: cardBg, width: 2),
+                          border: Border.all(color: cardBg, width: 1.5),
                         ),
                       ),
                     ),
                 ],
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 11),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.titulo,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 15,
-                        fontWeight:
-                            item.lida ? FontWeight.w400 : FontWeight.w600,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _humanTitle(item),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 14,
+                              fontWeight:
+                                  unread ? FontWeight.w900 : FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _TinyBadge(
+                          label: _badgeLabel(item),
+                          color: tipoColor,
+                          isDark: isDark,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 5),
                     Text(
                       item.mensagem,
-                      style: TextStyle(color: mute, height: 1.4),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 12.1,
+                        height: 1.3,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                    if (item.ctaLabel != null && item.ctaLabel!.isNotEmpty) ...[
-                      const SizedBox(height: 10),
+                    if (action != null) ...[
+                      const SizedBox(height: 8),
                       Text(
-                        item.ctaLabel!,
+                        action,
                         style: TextStyle(
                           color: tipoColor,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ],
@@ -272,14 +338,120 @@ class _NotificationTile extends StatelessWidget {
     );
   }
 
-  IconData _iconFor(String tipo) {
-    switch (tipo) {
-      case 'EVOLUCAO':
+  IconData _iconFor(String tipo, String titulo) {
+    final lowTipo = tipo.toLowerCase();
+    final lowTitle = titulo.toLowerCase();
+    if (lowTitle.contains('radar')) return Icons.radar_outlined;
+    switch (lowTipo) {
+      case 'evolucao':
         return Icons.trending_up_rounded;
-      case 'ALERTA':
+      case 'alerta':
+      case 'risco':
         return Icons.priority_high_rounded;
+      case 'pagamento':
+      case 'pag':
+        return Icons.attach_money_rounded;
       default:
         return Icons.notifications_none_rounded;
     }
+  }
+}
+
+class _TinyBadge extends StatelessWidget {
+  const _TinyBadge({
+    required this.label,
+    required this.color,
+    required this.isDark,
+  });
+
+  final String label;
+  final Color color;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.16 : 0.08),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 9.5,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _NotificationsStateCard extends StatelessWidget {
+  const _NotificationsStateCard({
+    required this.isDark,
+    required this.primary,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final bool isDark;
+  final Color primary;
+  final String icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: line),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: BrandPalette.soft(primary, dark: isDark),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Center(child: FxIcon(name: icon, color: primary)),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(subtitle, style: TextStyle(color: mute, height: 1.35)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
