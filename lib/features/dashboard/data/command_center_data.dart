@@ -58,9 +58,7 @@ class CommandCenterData {
           [],
       modoOperacao:
           (json['modoOperacao'] as List?)
-              ?.map(
-                (e) => ModoOperacaoItem.fromJson(e as Map<String, dynamic>),
-              )
+              ?.map((e) => ModoOperacaoItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
     );
@@ -302,6 +300,12 @@ class FilaAcaoResumo {
   final String ctaLabel;
   final bool iaSugerida;
   final int? alunoId;
+  final String? source;
+  final String? sourceMode;
+  final String? dueAt;
+  final bool createdFromInsight;
+  final String? recommendationId;
+  final String? metadataJson;
   final String? snoozedUntil;
   final String? resolvedAt;
   final String? createdAt;
@@ -321,6 +325,12 @@ class FilaAcaoResumo {
     required this.ctaLabel,
     required this.iaSugerida,
     this.alunoId,
+    this.source,
+    this.sourceMode,
+    this.dueAt,
+    this.createdFromInsight = false,
+    this.recommendationId,
+    this.metadataJson,
     this.snoozedUntil,
     this.resolvedAt,
     this.createdAt,
@@ -341,6 +351,12 @@ class FilaAcaoResumo {
     ctaLabel: json['ctaLabel'] as String? ?? 'Abrir',
     iaSugerida: json['iaSugerida'] as bool? ?? false,
     alunoId: (json['alunoId'] as num?)?.toInt(),
+    source: json['source'] as String?,
+    sourceMode: json['sourceMode'] as String?,
+    dueAt: json['dueAt'] as String?,
+    createdFromInsight: json['createdFromInsight'] as bool? ?? false,
+    recommendationId: json['recommendationId'] as String?,
+    metadataJson: json['metadataJson'] as String?,
     snoozedUntil: json['snoozedUntil'] as String?,
     resolvedAt: json['resolvedAt'] as String?,
     createdAt: json['createdAt'] as String?,

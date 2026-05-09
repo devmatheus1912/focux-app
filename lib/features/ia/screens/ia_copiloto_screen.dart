@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/analytics/analytics_service.dart';
@@ -539,6 +540,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
         acao: draft.acao,
         motivo: draft.motivo,
         modo: _mode,
+        source: 'COPILOT',
+        recommendationId:
+            'COPILOT_${_modeDisplay.toUpperCase()}_STUDENT_${_selectedAlunoId!}',
+        createdFromInsight: true,
       );
       if (!mounted) return;
       setState(() => _proximaAcao = acao);
@@ -547,6 +552,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
         SnackBar(
           content: Text(
             'Tarefa criada para ${_selectedAlunoNome ?? "aluno"} no Command Center.',
+          ),
+          action: SnackBarAction(
+            label: 'Ver',
+            onPressed: () => context.go('/dashboard/personal'),
           ),
         ),
       );
@@ -1318,120 +1327,19 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                 ),
                               ...insights.asMap().entries.map((e) {
                                 final ins = e.value;
-                                final rawTitulo =
-                                    (ins['titulo'] ?? ins['title'] ?? '')
-                                        .toString();
-                                final titulo =
-                                    rawTitulo.trim().isEmpty ||
-                                            RegExp(
-                                              r'^insight\s+\d+$',
-                                              caseSensitive: false,
-                                            ).hasMatch(rawTitulo.trim())
-                                        ? 'Recomendação ${e.key + 1}'
-                                        : rawTitulo;
-                                final detalhe =
-                                    (ins['detalhe'] ??
-                                            ins['descricao'] ??
-                                            ins['descrição'] ??
-                                            ins['mensagem'] ??
-                                            '')
-                                        .toString();
-                                final tipo =
-                                    (ins['tipo'] ?? ins['categoria'] ?? '')
-                                        .toString();
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom:
-                                          e.key < insights.length - 1
-                                              ? BorderSide(
-                                                color: line,
-                                                width: 0.5,
-                                              )
-                                              : BorderSide.none,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 32,
-                                        height: 32,
-                                        decoration: BoxDecoration(
-                                          color: primarySoft,
-                                          borderRadius: BorderRadius.circular(
-                                            9,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            '${e.key + 1}',
-                                            style: TextStyle(
-                                              color: brand,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              titulo,
-                                              style: TextStyle(
-                                                color: ink,
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            if (detalhe.isNotEmpty) ...[
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                detalhe,
-                                                style: TextStyle(
-                                                  color: mute,
-                                                  fontSize: 11.5,
-                                                  height: 1.4,
-                                                ),
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                      ),
-                                      if (tipo.isNotEmpty)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 3,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                dark
-                                                    ? const Color(0x0FFFFFFF)
-                                                    : EagleTokens.lineSoft,
-                                            borderRadius: BorderRadius.circular(
-                                              999,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            tipo,
-                                            style: TextStyle(
-                                              color: mute,
-                                              fontSize: 10,
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
+                                return _CopilotInsightItem(
+                                  index: e.key,
+                                  insight: ins,
+                                  isLast: e.key == insights.length - 1,
+                                  line: line,
+                                  primarySoft: primarySoft,
+                                  brand: brand,
+                                  ink: ink,
+                                  mute: mute,
+                                  chipBg:
+                                      dark
+                                          ? const Color(0x0FFFFFFF)
+                                          : EagleTokens.lineSoft,
                                 );
                               }),
                             ],
@@ -1541,9 +1449,63 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: line),
                     ),
-                    child: Text(
-                      'Próxima ação: ${(_proximaAcao!['acao'] ?? _proximaAcao!['titulo'] ?? _proximaAcao!['mensagem'] ?? 'Sem detalhe').toString()}',
-                      style: TextStyle(color: ink, fontSize: 12.5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tarefa criada no Command Center',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          (_proximaAcao!['acao'] ??
+                                  _proximaAcao!['titulo'] ??
+                                  _proximaAcao!['mensagem'] ??
+                                  'Sem detalhe')
+                              .toString(),
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12.3,
+                            height: 1.35,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed:
+                                    () => context.go('/dashboard/personal'),
+                                icon: const Icon(
+                                  Icons.space_dashboard_outlined,
+                                  size: 16,
+                                ),
+                                label: const Text('Command Center'),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: FilledButton.icon(
+                                onPressed:
+                                    _selectedAlunoId == null
+                                        ? null
+                                        : () => context.push(
+                                          '/alunos/$_selectedAlunoId',
+                                        ),
+                                icon: const Icon(
+                                  Icons.person_outline,
+                                  size: 16,
+                                ),
+                                label: const Text('Abrir aluno'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -1862,6 +1824,192 @@ class _CopilotMetaChip extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CopilotInsightItem extends StatefulWidget {
+  const _CopilotInsightItem({
+    required this.index,
+    required this.insight,
+    required this.isLast,
+    required this.line,
+    required this.primarySoft,
+    required this.brand,
+    required this.ink,
+    required this.mute,
+    required this.chipBg,
+  });
+
+  final int index;
+  final Map<String, dynamic> insight;
+  final bool isLast;
+  final Color line;
+  final Color primarySoft;
+  final Color brand;
+  final Color ink;
+  final Color mute;
+  final Color chipBg;
+
+  @override
+  State<_CopilotInsightItem> createState() => _CopilotInsightItemState();
+}
+
+class _CopilotInsightItemState extends State<_CopilotInsightItem> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final rawTitulo =
+        (widget.insight['titulo'] ?? widget.insight['title'] ?? '').toString();
+    final titulo =
+        rawTitulo.trim().isEmpty ||
+                RegExp(
+                  r'^insight\s+\d+$',
+                  caseSensitive: false,
+                ).hasMatch(rawTitulo.trim())
+            ? 'Recomendação ${widget.index + 1}'
+            : rawTitulo;
+    final detalhe =
+        (widget.insight['detalhe'] ??
+                widget.insight['descricao'] ??
+                widget.insight['descrição'] ??
+                widget.insight['mensagem'] ??
+                '')
+            .toString();
+    final tipo =
+        (widget.insight['tipo'] ?? widget.insight['categoria'] ?? '')
+            .toString();
+
+    return InkWell(
+      onTap:
+          detalhe.length > 150
+              ? () => setState(() => _expanded = !_expanded)
+              : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom:
+                widget.isLast
+                    ? BorderSide.none
+                    : BorderSide(color: widget.line, width: 0.5),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: widget.primarySoft,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Text(
+                  '${widget.index + 1}',
+                  style: TextStyle(
+                    color: widget.brand,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          titulo,
+                          style: TextStyle(
+                            color: widget.ink,
+                            fontSize: 13.4,
+                            fontWeight: FontWeight.w800,
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                      if (tipo.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        _CopilotTinyTypeChip(
+                          label: tipo,
+                          color: widget.mute,
+                          background: widget.chipBg,
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (detalhe.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      detalhe,
+                      maxLines: _expanded ? null : 3,
+                      overflow:
+                          _expanded
+                              ? TextOverflow.visible
+                              : TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: widget.mute,
+                        fontSize: 12.7,
+                        height: 1.42,
+                      ),
+                    ),
+                    if (detalhe.length > 150) ...[
+                      const SizedBox(height: 7),
+                      Text(
+                        _expanded ? 'Ver menos' : 'Ver detalhe',
+                        style: TextStyle(
+                          color: widget.brand,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CopilotTinyTypeChip extends StatelessWidget {
+  const _CopilotTinyTypeChip({
+    required this.label,
+    required this.color,
+    required this.background,
+  });
+
+  final String label;
+  final Color color;
+  final Color background;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 9.5,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }

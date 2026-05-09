@@ -189,6 +189,9 @@ class IaRepository {
     required String acao,
     String? motivo,
     String? modo,
+    String? source,
+    String? recommendationId,
+    bool createdFromInsight = true,
   }) async {
     return _withIaErrorContext(() async {
       final r = await _dio.post(
@@ -198,6 +201,10 @@ class IaRepository {
           'acao': acao,
           if (motivo != null && motivo.isNotEmpty) 'motivo': motivo,
           if (modo != null && modo.isNotEmpty) 'modo': modo,
+          if (source != null && source.isNotEmpty) 'source': source,
+          if (recommendationId != null && recommendationId.isNotEmpty)
+            'recommendationId': recommendationId,
+          'createdFromInsight': createdFromInsight,
         },
       );
       return r.data as Map<String, dynamic>;
