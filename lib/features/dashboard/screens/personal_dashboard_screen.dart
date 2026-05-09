@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/aderencia_provider.dart';
+import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../checkin/providers/checkin_provider.dart';
 import '../data/command_center_data.dart';
@@ -158,6 +159,10 @@ class _PersonalDashboardScreenState
               final riscoAlto = alunosAsync.maybeWhen(
                 data: (alunos) => alunos.where((a) => a.emRisco).length,
                 orElse: () => 0,
+              );
+              final alunosEmRisco = alunosAsync.maybeWhen(
+                data: (alunos) => alunos.where((a) => a.emRisco).toList(),
+                orElse: () => const <Aluno>[],
               );
 
               final hoje = DateTime.now();
@@ -379,170 +384,187 @@ class _PersonalDashboardScreenState
                               math.cos(angle),
                               math.sin(angle),
                             );
-                            return Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(28),
-                                gradient: LinearGradient(
-                                  colors:
-                                      isDark
-                                          ? const [
-                                            Color(0xFF1C3273),
-                                            Color(0xFF0F1E4A),
-                                          ]
-                                          : [primary, primaryDeep],
-                                  begin: begin,
-                                  end: end,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(
-                                      0xFF2B4A9E,
-                                    ).withValues(alpha: 0.4),
-                                    blurRadius: 40,
-                                    offset: const Offset(0, 20),
-                                    spreadRadius: -20,
+                            return InkWell(
+                              onTap: () => context.go('/financeiro'),
+                              borderRadius: BorderRadius.circular(28),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(28),
+                                  gradient: LinearGradient(
+                                    colors:
+                                        isDark
+                                            ? const [
+                                              Color(0xFF1C3273),
+                                              Color(0xFF0F1E4A),
+                                            ]
+                                            : [primary, primaryDeep],
+                                    begin: begin,
+                                    end: end,
                                   ),
-                                ],
-                              ),
-                              padding: const EdgeInsets.fromLTRB(
-                                22,
-                                22,
-                                22,
-                                20,
-                              ),
-                              child: CustomPaint(
-                                foregroundPainter: _HeroGridPainter(),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Receita · $mes',
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      pendente > 0
-                                          ? 'Faltam R\$ ${pendente.toInt()} para fechar a meta.'
-                                          : 'Meta do mês sob controle.',
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.baseline,
-                                      textBaseline: TextBaseline.alphabetic,
-                                      children: [
-                                        _loadingFin
-                                            ? const SizedBox(
-                                              width: 24,
-                                              height: 24,
-                                              child: CircularProgressIndicator(
-                                                color: Colors.white,
-                                                strokeWidth: 2,
-                                              ),
-                                            )
-                                            : AnimatedBuilder(
-                                              animation: _counterAnim,
-                                              builder:
-                                                  (ctx, _) => Text(
-                                                    'R\$ ${_counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 44,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      letterSpacing: -1,
-                                                      height: 1,
-                                                    ),
-                                                  ),
-                                            ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          '/ R\$ ${_finData?.previsaoReceita.toStringAsFixed(0) ?? '--'}',
-                                          style: const TextStyle(
-                                            color: Colors.white54,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 14),
-                                    Container(
-                                      height: 6,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      alignment: Alignment.centerLeft,
-                                      child: FractionallySizedBox(
-                                        widthFactor:
-                                            (_finData == null ||
-                                                    (_finData!
-                                                            .previsaoReceita) ==
-                                                        0)
-                                                ? 0.0
-                                                : (_finData!.receitaMes /
-                                                        _finData!
-                                                            .previsaoReceita)
-                                                    .clamp(0.0, 1.0),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        _HeroMiniStat(
-                                          label: 'PENDENTE',
-                                          value: 'R\$ ${pendente.toInt()}',
-                                        ),
-                                        Container(
-                                          width: 1,
-                                          height: 30,
-                                          color: Colors.white.withValues(
-                                            alpha: 0.15,
-                                          ),
-                                        ),
-                                        _HeroMiniStat(
-                                          label: 'INADIMPL.',
-                                          value:
-                                              '${_finData?.totalInadimplentes ?? 0}',
-                                          suffix: ' alunos',
-                                        ),
-                                        Container(
-                                          width: 1,
-                                          height: 30,
-                                          color: Colors.white.withValues(
-                                            alpha: 0.15,
-                                          ),
-                                        ),
-                                        _HeroMiniStat(
-                                          label: 'TICKET',
-                                          value:
-                                              'R\$ ${_finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
-                                        ),
-                                      ],
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(
+                                        0xFF2B4A9E,
+                                      ).withValues(alpha: 0.4),
+                                      blurRadius: 40,
+                                      offset: const Offset(0, 20),
+                                      spreadRadius: -20,
                                     ),
                                   ],
+                                ),
+                                padding: const EdgeInsets.fromLTRB(
+                                  22,
+                                  22,
+                                  22,
+                                  20,
+                                ),
+                                child: CustomPaint(
+                                  foregroundPainter: _HeroGridPainter(),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Receita recebida · $mes',
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.12,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        pendente > 0
+                                            ? 'Recebido agora. Faltam R\$ ${pendente.toInt()} para a meta.'
+                                            : 'Recebido agora. Meta do mês sob controle.',
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.baseline,
+                                        textBaseline: TextBaseline.alphabetic,
+                                        children: [
+                                          _loadingFin
+                                              ? const SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      color: Colors.white,
+                                                      strokeWidth: 2,
+                                                    ),
+                                              )
+                                              : AnimatedBuilder(
+                                                animation: _counterAnim,
+                                                builder:
+                                                    (ctx, _) => Text(
+                                                      'R\$ ${_counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 44,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        letterSpacing: -1,
+                                                        height: 1,
+                                                      ),
+                                                    ),
+                                              ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'recebido',
+                                            style: const TextStyle(
+                                              color: Colors.white54,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        'Meta R\$ ${_finData?.previsaoReceita.toStringAsFixed(0) ?? '--'}',
+                                        style: const TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 14),
+                                      Container(
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.15,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        alignment: Alignment.centerLeft,
+                                        child: FractionallySizedBox(
+                                          widthFactor:
+                                              (_finData == null ||
+                                                      (_finData!
+                                                              .previsaoReceita) ==
+                                                          0)
+                                                  ? 0.0
+                                                  : (_finData!.receitaMes /
+                                                          _finData!
+                                                              .previsaoReceita)
+                                                      .clamp(0.0, 1.0),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          _HeroMiniStat(
+                                            label: 'PENDENTE',
+                                            value: 'R\$ ${pendente.toInt()}',
+                                          ),
+                                          Container(
+                                            width: 1,
+                                            height: 30,
+                                            color: Colors.white.withValues(
+                                              alpha: 0.15,
+                                            ),
+                                          ),
+                                          _HeroMiniStat(
+                                            label: 'INADIMPL.',
+                                            value:
+                                                '${_finData?.totalInadimplentes ?? 0}',
+                                            suffix: ' alunos',
+                                          ),
+                                          Container(
+                                            width: 1,
+                                            height: 30,
+                                            color: Colors.white.withValues(
+                                              alpha: 0.15,
+                                            ),
+                                          ),
+                                          _HeroMiniStat(
+                                            label: 'TICKET',
+                                            value:
+                                                'R\$ ${_finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
@@ -564,6 +586,7 @@ class _PersonalDashboardScreenState
                                 value: alunosAtivos.toString(),
                                 accent: primary,
                                 isDark: isDark,
+                                onTap: () => context.go('/alunos'),
                               ),
                             ),
                             const SizedBox(width: 9),
@@ -574,6 +597,7 @@ class _PersonalDashboardScreenState
                                 value: checkinsHoje.toString(),
                                 accent: EagleTokens.good,
                                 isDark: isDark,
+                                onTap: () => context.push('/relatorios/global'),
                               ),
                             ),
                             const SizedBox(width: 9),
@@ -584,6 +608,8 @@ class _PersonalDashboardScreenState
                                 value: riscoAlto.toString(),
                                 accent: EagleTokens.warn,
                                 isDark: isDark,
+                                onTap:
+                                    () => context.push('/dashboard/qualidade'),
                               ),
                             ),
                           ],
@@ -612,13 +638,18 @@ class _PersonalDashboardScreenState
                     ),
 
                     // SECTION: PRECISA DE ATENÇÃO
-                    if (_finData != null &&
-                        _finData!.vencimentosProximos.isNotEmpty) ...[
+                    if (alunosEmRisco.isNotEmpty ||
+                        (_finData != null &&
+                            _finData!.vencimentosProximos.isNotEmpty)) ...[
                       const SliverToBoxAdapter(child: SizedBox(height: 28)),
                       SliverToBoxAdapter(
                         child: _SectionTitle(
                           title: 'Precisa de atenção',
-                          action: 'Ver tudo',
+                          action:
+                              riscoAlto > 1
+                                  ? 'Ver tudo · +${riscoAlto - 1}'
+                                  : 'Ver tudo',
+                          onAction: () => context.push('/dashboard/qualidade'),
                           isDark: isDark,
                         ),
                       ),
@@ -632,19 +663,45 @@ class _PersonalDashboardScreenState
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             scrollDirection: Axis.horizontal,
                             itemCount:
-                                _finData!.vencimentosProximos.take(3).length,
+                                [
+                                  ...alunosEmRisco.take(4),
+                                  ...(_finData?.vencimentosProximos ?? const [])
+                                      .take(2),
+                                ].length,
                             separatorBuilder:
                                 (_, __) => const SizedBox(width: 12),
                             itemBuilder: (context, index) {
-                              final v = _finData!.vencimentosProximos[index];
+                              final riskItems = alunosEmRisco.take(4).toList();
+                              if (index < riskItems.length) {
+                                final aluno = riskItems[index];
+                                return _AttentionCard(
+                                  nome: aluno.nome,
+                                  objetivo: aluno.objetivo,
+                                  titulo:
+                                      aluno.inadimplente
+                                          ? 'Inadimplente'
+                                          : 'Risco de aderência',
+                                  subt:
+                                      aluno.inadimplente
+                                          ? 'Financeiro e aderência exigem contato'
+                                          : 'Acompanhar antes de perder ritmo',
+                                  acao: 'Revisar',
+                                  isDark: isDark,
+                                  onTap:
+                                      () => context.push('/alunos/${aluno.id}'),
+                                );
+                              }
+                              final v =
+                                  (_finData!.vencimentosProximos)[index -
+                                      riskItems.length];
                               return _AttentionCard(
                                 nome: v.alunoNome,
-                                tipo: 'overdue',
                                 titulo: 'Inadimplente',
                                 subt:
                                     'R\$ ${v.valor.toStringAsFixed(0)} pendente',
                                 acao: 'Cobrar',
                                 isDark: isDark,
+                                onTap: () => context.go('/financeiro'),
                               );
                             },
                           ),
@@ -685,79 +742,104 @@ class _PersonalDashboardScreenState
                           16,
                           MediaQuery.of(context).padding.bottom + 90,
                         ),
-                        child: GridView.count(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 9,
-                          crossAxisSpacing: 10,
-                          childAspectRatio: shortcutAspectRatio,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _ShortcutBtn(
-                              icon: 'spark',
-                              label: 'IA Copiloto',
-                              isDark: isDark,
-                              onTap: () => context.go('/ia/copiloto'),
+                            _ToolGroupLabel(label: 'Operação', isDark: isDark),
+                            const SizedBox(height: 8),
+                            GridView.count(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 9,
+                              crossAxisSpacing: 10,
+                              childAspectRatio: shortcutAspectRatio,
+                              children: [
+                                _ShortcutBtn(
+                                  icon: 'spark',
+                                  label: 'IA Copiloto',
+                                  isDark: isDark,
+                                  onTap: () => context.go('/ia/copiloto'),
+                                ),
+                                _ShortcutBtn(
+                                  icon: 'plus',
+                                  label: 'Novo aluno',
+                                  isDark: isDark,
+                                  onTap: () => context.push('/alunos/novo'),
+                                ),
+                                _ShortcutBtn(
+                                  icon: 'calendar',
+                                  label: 'Agenda',
+                                  isDark: isDark,
+                                  onTap: () => context.go('/agenda'),
+                                ),
+                                _ShortcutBtn(
+                                  icon: 'chat',
+                                  label: 'Mensagens',
+                                  isDark: isDark,
+                                  onTap: () => context.push('/chat/inbox'),
+                                ),
+                                _ShortcutBtn(
+                                  icon: 'pix',
+                                  label: 'Financeiro',
+                                  isDark: isDark,
+                                  onTap: () => context.go('/financeiro'),
+                                ),
+                                _ShortcutBtn(
+                                  icon: 'dumbbell',
+                                  label: 'Exercícios',
+                                  isDark: isDark,
+                                  onTap: () => context.push('/exercicios'),
+                                ),
+                              ],
                             ),
-                            _ShortcutBtn(
-                              icon: 'plus',
-                              label: 'Novo aluno',
+                            const SizedBox(height: 16),
+                            _ToolGroupLabel(
+                              label: 'Crescimento',
                               isDark: isDark,
-                              onTap: () => context.push('/alunos/novo'),
                             ),
-                            _ShortcutBtn(
-                              icon: 'calendar',
-                              label: 'Agenda',
-                              isDark: isDark,
-                              onTap: () => context.go('/agenda'),
-                            ),
-                            _ShortcutBtn(
-                              icon: 'chat',
-                              label: 'Mensagens',
-                              isDark: isDark,
-                              onTap: () => context.push('/chat/inbox'),
-                            ),
-                            _ShortcutBtn(
-                              icon: 'article',
-                              label: 'Feed',
-                              isDark: isDark,
-                              onTap: () => context.push('/feed'),
-                            ),
-                            _ShortcutBtn(
-                              icon: 'pix',
-                              label: 'Financeiro',
-                              isDark: isDark,
-                              onTap: () => context.go('/financeiro'),
-                            ),
-                            _ShortcutBtn(
-                              icon: 'trend',
-                              label: 'Leads',
-                              isDark: isDark,
-                              onTap: () => context.push('/leads'),
-                            ),
-                            _ShortcutBtn(
-                              icon: 'spark',
-                              label: 'Qualidade',
-                              isDark: isDark,
-                              onTap: () => context.push('/dashboard/qualidade'),
-                            ),
-                            _ShortcutBtn(
-                              icon: 'dumbbell',
-                              label: 'Exercicios',
-                              isDark: isDark,
-                              onTap: () => context.push('/exercicios'),
-                            ),
-                            _ShortcutBtn(
-                              icon: 'bell',
-                              label: 'Broadcasts',
-                              isDark: isDark,
-                              onTap: () => context.push('/broadcasts'),
-                            ),
-                            _ShortcutBtn(
-                              icon: 'chat',
-                              label: 'Suporte',
-                              isDark: isDark,
-                              onTap: () => context.push('/suporte'),
+                            const SizedBox(height: 8),
+                            GridView.count(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 9,
+                              crossAxisSpacing: 10,
+                              childAspectRatio: shortcutAspectRatio,
+                              children: [
+                                _ShortcutBtn(
+                                  icon: 'article',
+                                  label: 'Feed',
+                                  isDark: isDark,
+                                  onTap: () => context.push('/feed'),
+                                ),
+                                _ShortcutBtn(
+                                  icon: 'trend',
+                                  label: 'Leads',
+                                  isDark: isDark,
+                                  onTap: () => context.push('/leads'),
+                                ),
+                                _ShortcutBtn(
+                                  icon: 'spark',
+                                  label: 'Qualidade',
+                                  isDark: isDark,
+                                  onTap:
+                                      () =>
+                                          context.push('/dashboard/qualidade'),
+                                ),
+                                _ShortcutBtn(
+                                  icon: 'bell',
+                                  label: 'Broadcasts',
+                                  isDark: isDark,
+                                  onTap: () => context.push('/broadcasts'),
+                                ),
+                                _ShortcutBtn(
+                                  icon: 'chat',
+                                  label: 'Suporte',
+                                  isDark: isDark,
+                                  onTap: () => context.push('/suporte'),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -914,12 +996,14 @@ class _QuickTile extends StatelessWidget {
   final String label, value;
   final Color accent;
   final bool isDark;
+  final VoidCallback? onTap;
   const _QuickTile({
     required this.icon,
     required this.label,
     required this.value,
     required this.accent,
     required this.isDark,
+    this.onTap,
   });
 
   @override
@@ -927,63 +1011,67 @@ class _QuickTile extends StatelessWidget {
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
 
-    return Container(
-      height: 92,
-      padding: const EdgeInsets.fromLTRB(11, 11, 11, 10),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: accent.withValues(alpha: isDark ? 0.22 : 0.13),
-          width: 1,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        height: 92,
+        padding: const EdgeInsets.fromLTRB(11, 11, 11, 10),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: accent.withValues(alpha: isDark ? 0.22 : 0.13),
+            width: 1,
+          ),
+          boxShadow: [
+            if (!isDark)
+              BoxShadow(
+                color: const Color(0xFF0B1220).withValues(alpha: 0.035),
+                blurRadius: 22,
+                offset: const Offset(0, 12),
+              ),
+          ],
         ),
-        boxShadow: [
-          if (!isDark)
-            BoxShadow(
-              color: const Color(0xFF0B1220).withValues(alpha: 0.035),
-              blurRadius: 22,
-              offset: const Offset(0, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(child: FxIcon(name: icon, size: 14, color: accent)),
             ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
-              borderRadius: BorderRadius.circular(12),
+            const Spacer(),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.w800,
+                color: ink,
+                height: 1,
+                letterSpacing: -0.4,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            child: Center(child: FxIcon(name: icon, size: 14, color: accent)),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 21,
-              fontWeight: FontWeight.w800,
-              color: ink,
-              height: 1,
-              letterSpacing: -0.4,
+            const SizedBox(height: 3),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: ink,
+                height: 1.1,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: ink,
-              height: 1.1,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1044,15 +1132,18 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _AttentionCard extends StatelessWidget {
-  final String nome, tipo, titulo, subt, acao;
+  final String nome, titulo, subt, acao;
+  final String? objetivo;
   final bool isDark;
+  final VoidCallback? onTap;
   const _AttentionCard({
     required this.nome,
-    required this.tipo,
     required this.titulo,
     required this.subt,
     required this.acao,
+    this.objetivo,
     required this.isDark,
+    this.onTap,
   });
 
   @override
@@ -1064,101 +1155,107 @@ class _AttentionCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final accent = EagleTokens.bad; // simplificado para overdue
 
-    return Container(
-      width: 240,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-          width: 1,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: 240,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+            width: 1,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: primary,
-                child: Text(
-                  fxInitials(nome),
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: primary,
+                  child: Text(
+                    fxInitials(nome),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      nome,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: ink,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        nome,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: ink,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Objetivo não definido',
-                      style: TextStyle(fontSize: 11, color: mute),
-                    ),
-                  ],
+                      Text(
+                        objetivo?.trim().isNotEmpty == true
+                            ? objetivo!.trim()
+                            : 'Objetivo não definido',
+                        style: TextStyle(fontSize: 11, color: mute),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Container(
-                width: 5,
-                height: 5,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: accent,
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Container(
+                  width: 5,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: accent,
+                  ),
                 ),
+                const SizedBox(width: 5),
+                Text(
+                  titulo.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: accent,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subt,
+              style: TextStyle(fontSize: 12.5, color: ink, height: 1.35),
+            ),
+            const Spacer(),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 9),
+              decoration: BoxDecoration(
+                color: primarySoft,
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 5),
-              Text(
-                titulo.toUpperCase(),
+              alignment: Alignment.center,
+              child: Text(
+                '$acao →',
                 style: TextStyle(
-                  fontSize: 11.5,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: accent,
-                  letterSpacing: 0.5,
+                  color: primary,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subt,
-            style: TextStyle(fontSize: 12.5, color: ink, height: 1.35),
-          ),
-          const Spacer(),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 9),
-            decoration: BoxDecoration(
-              color: primarySoft,
-              borderRadius: BorderRadius.circular(12),
             ),
-            alignment: Alignment.center,
-            child: Text(
-              '$acao →',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: primary,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1236,6 +1333,26 @@ class _ShortcutBtn extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ToolGroupLabel extends StatelessWidget {
+  final String label;
+  final bool isDark;
+
+  const _ToolGroupLabel({required this.label, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: TextStyle(
+        color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+        fontSize: 11,
+        fontWeight: FontWeight.w900,
+        letterSpacing: 0.75,
       ),
     );
   }
@@ -1320,7 +1437,10 @@ class _CommandCenterSection extends ConsumerWidget {
       if (copilotAcoes.isNotEmpty)
         _CommandActionItem(
           icon: 'zap',
-          title: 'Revisar tarefa do Copiloto',
+          title:
+              copilotAcoes.first.titulo.isNotEmpty
+                  ? copilotAcoes.first.titulo
+                  : 'Revisar tarefa IA',
           subtitle: copilotAcoes.first.descricao,
           route: '/dashboard/command-center/copiloto',
           tone: _CommandActionTone.primary,
@@ -2004,7 +2124,8 @@ class _AderenciaSemanaWidget extends StatelessWidget {
         return async.when(
           loading:
               () => Container(
-                height: 180,
+                height: 184,
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: cardBg,
                   borderRadius: BorderRadius.circular(22),
@@ -2013,11 +2134,46 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-                alignment: Alignment.center,
-                child: const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                child: Column(
+                  children: List.generate(3, (index) {
+                    return Expanded(
+                      child: Shimmer.fromColors(
+                        baseColor: primary.withValues(alpha: 0.08),
+                        highlightColor: primary.withValues(alpha: 0.18),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Container(
+                                height: 16,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Container(
+                              width: 54,
+                              height: 18,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
                 ),
               ),
           error:
@@ -2048,9 +2204,31 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-                child: Text(
-                  'Sem dados de check-in na semana.',
-                  style: TextStyle(color: mute),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: primarySoft,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Center(
+                        child: FxIcon(
+                          name: 'circle-check',
+                          color: primary,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Sem check-ins nesta semana. Quando alunos treinarem, a aderência aparece aqui.',
+                        style: TextStyle(color: mute, height: 1.3),
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
@@ -2067,80 +2245,83 @@ class _AderenciaSemanaWidget extends StatelessWidget {
               child: Column(
                 children: List.generate(items.length, (index) {
                   final a = items[index];
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      border:
-                          index < items.length - 1
-                              ? Border(
-                                bottom: BorderSide(
-                                  color:
-                                      isDark
-                                          ? EagleTokens.darkLine
-                                          : EagleTokens.line,
-                                  width: 0.5,
-                                ),
-                              )
-                              : null,
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: primarySoft,
-                          child: Text(
-                            fxInitials(a.nome),
-                            style: TextStyle(
-                              color: isDark ? primaryAccent : primary,
-                              fontWeight: FontWeight.bold,
+                  return InkWell(
+                    onTap: () => context.push('/alunos/${a.alunoId}'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        border:
+                            index < items.length - 1
+                                ? Border(
+                                  bottom: BorderSide(
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkLine
+                                            : EagleTokens.line,
+                                    width: 0.5,
+                                  ),
+                                )
+                                : null,
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: primarySoft,
+                            child: Text(
+                              fxInitials(a.nome),
+                              style: TextStyle(
+                                color: isDark ? primaryAccent : primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                a.nome,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: ink,
-                                  letterSpacing: -0.1,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  a.nome,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: ink,
+                                    letterSpacing: -0.1,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${a.objetivo ?? 'Objetivo'} · ${a.totalCheckinsSemana} check-ins',
-                                style: TextStyle(fontSize: 12, color: mute),
-                              ),
-                            ],
-                          ),
-                        ),
-                        FxSparkline(
-                          data: a.sparkline,
-                          width: 56,
-                          height: 22,
-                          color: isDark ? primaryAccent : primary,
-                        ),
-                        const SizedBox(width: 14),
-                        SizedBox(
-                          width: 40,
-                          child: Text(
-                            '${a.aderenciaPercent}%',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                              color: ink,
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${a.objetivo ?? 'Objetivo'} · ${a.totalCheckinsSemana} check-ins',
+                                  style: TextStyle(fontSize: 12, color: mute),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
+                          FxSparkline(
+                            data: a.sparkline,
+                            width: 56,
+                            height: 22,
+                            color: isDark ? primaryAccent : primary,
+                          ),
+                          const SizedBox(width: 14),
+                          SizedBox(
+                            width: 40,
+                            child: Text(
+                              '${a.aderenciaPercent}%',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                                color: ink,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }),
