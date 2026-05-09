@@ -75,6 +75,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   // BUG-21: tempo real de geração
   int _geracaoMs = 0;
   Map<String, dynamic>? _proximaAcao;
+  bool _tarefaCriada = false;
+  bool _tarefaPersistida = false;
   final _modes = ['Treino', 'Dieta', 'Progressão'];
 
   String get _mode => _modes[_modeIdx];
@@ -438,6 +440,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       _gerado = false;
       _erro = null;
       _proximaAcao = null;
+      _tarefaCriada = false;
+      _tarefaPersistida = false;
     });
   }
 
@@ -460,6 +464,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       _gerado = false;
       _erro = null;
       _geracaoMs = 0;
+      _tarefaCriada = false;
+      _tarefaPersistida = false;
     });
     final stopwatch = Stopwatch()..start();
     try {
@@ -545,13 +551,31 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
             'COPILOT_${_modeDisplay.toUpperCase()}_STUDENT_${_selectedAlunoId!}',
         createdFromInsight: true,
       );
+      final actionKey = (acao['actionKey'] ?? '').toString();
+      var persisted = actionKey.isNotEmpty;
+      if (persisted) {
+        try {
+          final abertas = await ref
+              .read(dashboardRepositoryProvider)
+              .getIaCommandActions(status: 'ABERTO', alunoId: _selectedAlunoId);
+          persisted = abertas.any((item) => item.actionKey == actionKey);
+        } catch (_) {
+          persisted = false;
+        }
+      }
       if (!mounted) return;
-      setState(() => _proximaAcao = acao);
+      setState(() {
+        _proximaAcao = acao;
+        _tarefaCriada = true;
+        _tarefaPersistida = persisted;
+      });
       ref.invalidate(commandCenterProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Tarefa criada para ${_selectedAlunoNome ?? "aluno"} no Command Center.',
+            persisted
+                ? 'Tarefa salva no Command Center.'
+                : 'Tarefa criada. Confirme no Command Center.',
           ),
           action: SnackBarAction(
             label: 'Ver',
@@ -923,6 +947,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
         setState(() {
           _gerado = false;
           _proximaAcao = null;
+          _tarefaCriada = false;
+          _tarefaPersistida = false;
           _erro = null;
         });
         break;
@@ -1331,6 +1357,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                   index: e.key,
                                   insight: ins,
                                   isLast: e.key == insights.length - 1,
+                                  highlighted: e.key == 0,
                                   line: line,
                                   primarySoft: primarySoft,
                                   brand: brand,
@@ -1439,26 +1466,57 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                   ],
                 ),
               ),
-              if (_proximaAcao != null)
+              if (_tarefaCriada && _proximaAcao != null)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(13),
                     decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: line),
+                      color:
+                          _tarefaPersistida
+                              ? BrandPalette.softer(brand)
+                              : cardBg,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color:
+                            _tarefaPersistida
+                                ? brand.withValues(alpha: 0.22)
+                                : line,
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Tarefa criada no Command Center',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w900,
-                          ),
+                        Row(
+                          children: [
+                            Icon(
+                              _tarefaPersistida
+                                  ? Icons.check_circle_outline
+                                  : Icons.sync_problem_outlined,
+                              color: brand,
+                              size: 17,
+                            ),
+                            const SizedBox(width: 7),
+                            Expanded(
+                              child: Text(
+                                _tarefaPersistida
+                                    ? 'Tarefa salva no Command Center'
+                                    : 'Tarefa criada, verifique a lista',
+                                style: TextStyle(
+                                  color: ink,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                            _CopilotTinyTypeChip(
+                              label:
+                                  (_proximaAcao!['status'] ?? 'ABERTO')
+                                      .toString(),
+                              color: brand,
+                              background: Colors.white.withValues(alpha: 0.72),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -1486,7 +1544,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                   Icons.space_dashboard_outlined,
                                   size: 16,
                                 ),
-                                label: const Text('Command Center'),
+                                label: const Text('Ver tarefa'),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -1836,6 +1894,7 @@ class _CopilotInsightItem extends StatefulWidget {
     required this.index,
     required this.insight,
     required this.isLast,
+    required this.highlighted,
     required this.line,
     required this.primarySoft,
     required this.brand,
@@ -1847,6 +1906,7 @@ class _CopilotInsightItem extends StatefulWidget {
   final int index;
   final Map<String, dynamic> insight;
   final bool isLast;
+  final bool highlighted;
   final Color line;
   final Color primarySoft;
   final Color brand;
@@ -1890,31 +1950,51 @@ class _CopilotInsightItemState extends State<_CopilotInsightItem> {
               ? () => setState(() => _expanded = !_expanded)
               : null,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        margin:
+            widget.highlighted
+                ? const EdgeInsets.fromLTRB(10, 10, 10, 8)
+                : EdgeInsets.zero,
+        padding:
+            widget.highlighted
+                ? const EdgeInsets.all(14)
+                : const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
         decoration: BoxDecoration(
-          border: Border(
-            bottom:
-                widget.isLast
-                    ? BorderSide.none
-                    : BorderSide(color: widget.line, width: 0.5),
-          ),
+          color:
+              widget.highlighted
+                  ? widget.primarySoft.withValues(alpha: 0.38)
+                  : Colors.transparent,
+          borderRadius: BorderRadius.circular(widget.highlighted ? 16 : 0),
+          border:
+              widget.highlighted
+                  ? Border.all(color: widget.brand.withValues(alpha: 0.18))
+                  : Border(
+                    bottom:
+                        widget.isLast
+                            ? BorderSide.none
+                            : BorderSide(color: widget.line, width: 0.5),
+                  ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 34,
-              height: 34,
+              width: widget.highlighted ? 38 : 30,
+              height: widget.highlighted ? 38 : 30,
               decoration: BoxDecoration(
-                color: widget.primarySoft,
-                borderRadius: BorderRadius.circular(10),
+                color:
+                    widget.highlighted
+                        ? widget.brand.withValues(alpha: 0.12)
+                        : widget.primarySoft,
+                borderRadius: BorderRadius.circular(
+                  widget.highlighted ? 12 : 9,
+                ),
               ),
               child: Center(
                 child: Text(
                   '${widget.index + 1}',
                   style: TextStyle(
                     color: widget.brand,
-                    fontSize: 12.5,
+                    fontSize: widget.highlighted ? 13 : 12,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -1929,14 +2009,31 @@ class _CopilotInsightItemState extends State<_CopilotInsightItem> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Text(
-                          titulo,
-                          style: TextStyle(
-                            color: widget.ink,
-                            fontSize: 13.4,
-                            fontWeight: FontWeight.w800,
-                            height: 1.2,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (widget.highlighted) ...[
+                              Text(
+                                'Mais importante',
+                                style: TextStyle(
+                                  color: widget.brand,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.7,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                            ],
+                            Text(
+                              titulo,
+                              style: TextStyle(
+                                color: widget.ink,
+                                fontSize: widget.highlighted ? 14 : 13,
+                                fontWeight: FontWeight.w900,
+                                height: 1.2,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       if (tipo.isNotEmpty) ...[
@@ -1953,15 +2050,15 @@ class _CopilotInsightItemState extends State<_CopilotInsightItem> {
                     const SizedBox(height: 6),
                     Text(
                       detalhe,
-                      maxLines: _expanded ? null : 3,
+                      maxLines: _expanded ? null : (widget.highlighted ? 4 : 2),
                       overflow:
                           _expanded
                               ? TextOverflow.visible
                               : TextOverflow.ellipsis,
                       style: TextStyle(
                         color: widget.mute,
-                        fontSize: 12.7,
-                        height: 1.42,
+                        fontSize: widget.highlighted ? 12.7 : 12.2,
+                        height: widget.highlighted ? 1.42 : 1.34,
                       ),
                     ),
                     if (detalhe.length > 150) ...[
