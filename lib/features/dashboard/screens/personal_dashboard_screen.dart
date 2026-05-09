@@ -1548,7 +1548,7 @@ class _CommandCenterSection extends ConsumerWidget {
                     copilotAcoes.isEmpty
                         ? 'Sem tarefas'
                         : '${copilotAcoes.length} aberta${copilotAcoes.length == 1 ? '' : 's'}',
-                onTap: () => context.go('/dashboard/command-center/copiloto'),
+                onTap: () => context.push('/dashboard/command-center/copiloto'),
               ),
               card(
                 icon: 'message-circle',

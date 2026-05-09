@@ -35,7 +35,11 @@ class CopilotActionsScreen extends ConsumerWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: ink, size: 18),
-          onPressed: () => context.go('/dashboard/personal'),
+          onPressed:
+              () =>
+                  context.canPop()
+                      ? context.pop()
+                      : context.go('/dashboard/personal'),
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
