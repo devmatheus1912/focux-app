@@ -2268,18 +2268,15 @@ class _ActionMiniChip extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: OutlinedButton.icon(
+      child: ActionChip(
         onPressed: onTap,
-        icon: Icon(icon, size: 15),
+        avatar: Icon(icon, size: 15, color: primary),
         label: Text(label),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: primary,
-          side: BorderSide(color: primary.withValues(alpha: 0.22)),
-          visualDensity: VisualDensity.compact,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(999),
-          ),
-        ),
+        labelStyle: TextStyle(color: primary, fontWeight: FontWeight.w800),
+        side: BorderSide(color: primary.withValues(alpha: 0.22)),
+        backgroundColor: primary.withValues(alpha: 0.06),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
       ),
     );
   }
