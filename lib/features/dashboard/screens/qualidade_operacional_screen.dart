@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/brand_palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 
@@ -50,12 +52,10 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncData = ref.watch(qualidadeProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
+      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -63,83 +63,145 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => safePopOrGo(context, '/dashboard/personal'),
         ),
-        title: const Text('Qualidade Operacional'),
+        title: Text(
+          'Qualidade Operacional',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 17),
+        ),
       ),
       body: asyncData.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:
-            (e, _) => Center(
-              child: Text(
-                'Erro: $e',
-                style: const TextStyle(color: EagleTokens.bad),
-              ),
-            ),
-        data: (data) => _QualidadeBody(data: data),
+        error: (e, _) => Center(
+          child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad)),
+        ),
+        data: (data) => _QualidadeBody(data: data, isDark: isDark),
       ),
     );
   }
 }
 
+// ─── Body ─────────────────────────────────────────────────────────────────────
+
 class _QualidadeBody extends StatelessWidget {
   final QualidadeOperacionalData data;
-
-  const _QualidadeBody({required this.data});
-
-  Color get _scoreColor {
-    if (data.score >= 80) return const Color(0xFF22C55E);
-    if (data.score >= 50) return const Color(0xFFF59E0B);
-    return const Color(0xFFEF4444);
-  }
+  final bool isDark;
+  const _QualidadeBody({required this.data, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final accent = BrandPalette.accent(primary);
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final lineBg = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    final scoreColor = data.score >= 80
+        ? EagleTokens.good
+        : data.score >= 50
+            ? EagleTokens.warn
+            : EagleTokens.bad;
+
+    final scoreLabel = data.score >= 80
+        ? 'Excelente'
+        : data.score >= 50
+            ? 'Bom'
+            : 'Atenção';
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header com o Score Geral
+          // ── Hero Score Card (brand gradient) ──
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [_scoreColor.withValues(alpha: 0.8), _scoreColor],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
+              gradient: EagleTokens.heroGradientFrom(primary, dark: isDark),
+              borderRadius: BorderRadius.circular(EagleTokens.radiusXl),
+              boxShadow: [
+                BoxShadow(
+                  color: primary.withValues(alpha: isDark ? 0.25 : 0.18),
+                  blurRadius: 32,
+                  offset: const Offset(0, 12),
+                ),
+              ],
             ),
             child: Column(
               children: [
-                const Text(
-                  'Focux Score™',
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(EagleTokens.radiusPill),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.verified_rounded, color: Colors.white.withValues(alpha: 0.7), size: 13),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Focux Score™',
+                            style: GoogleFonts.outfit(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 Text(
-                  '${data.score}/100',
-                  style: const TextStyle(
+                  '${data.score}',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 64,
+                    fontWeight: FontWeight.w800,
                     color: Colors.white,
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
+                    height: 1,
+                    letterSpacing: -2,
+                  ),
+                ),
+                Text(
+                  '/100',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.5),
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // Progress arc
+                SizedBox(
+                  height: 6,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: LinearProgressIndicator(
+                      value: data.score / 100,
+                      backgroundColor: Colors.white.withValues(alpha: 0.12),
+                      valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.85)),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: Colors.white.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     data.recomendacao,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w500,
+                      height: 1.35,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -147,142 +209,319 @@ class _QualidadeBody extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 32),
 
-          // Ticket Médio Comparativo
-          const Text(
-            'Precificação (Ticket Médio)',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          _ComparativoCard(
-            labelSua: 'Seu Ticket',
-            valorSua: 'R\$ ${data.ticketPessoal.toStringAsFixed(2)}',
-            labelMercado: 'Mercado Focux',
-            valorMercado: 'R\$ ${data.ticketMercado.toStringAsFixed(2)}',
-            acimaDoMercado: data.ticketPessoal >= data.ticketMercado,
-          ),
           const SizedBox(height: 24),
 
-          // Retenção Comparativa
-          const Text(
-            'Saúde da Base (Retenção)',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          _ComparativoCard(
-            labelSua: 'Sua Retenção',
-            valorSua: '${data.retencaoPessoal}%',
-            labelMercado: 'Mercado Focux',
-            valorMercado: '${data.retencaoMercado}%',
-            acimaDoMercado: data.retencaoPessoal >= data.retencaoMercado,
+          // ── Score Breakdown ──
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(EagleTokens.radiusLg),
+              border: Border.all(color: lineBg),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 28, height: 28,
+                      decoration: BoxDecoration(
+                        color: scoreColor.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.analytics_rounded, size: 14, color: scoreColor),
+                    ),
+                    const SizedBox(width: 10),
+                    Text('Diagnóstico', style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: ink)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _ScoreRow(label: 'Precificação', value: _ticketScore(), color: _ticketScoreColor(), isDark: isDark),
+                const SizedBox(height: 10),
+                _ScoreRow(label: 'Retenção', value: _retencaoScore(), color: _retencaoScoreColor(), isDark: isDark),
+                const SizedBox(height: 10),
+                _ScoreRow(label: 'Score geral', value: data.score, color: scoreColor, isDark: isDark),
+              ],
+            ),
           ),
 
-          const SizedBox(height: 32),
-          const Text(
-            'Nota: O Mercado Focux é baseado na média de todos os personais da plataforma (dados anonimizados).',
-            style: TextStyle(fontSize: 12, color: EagleTokens.inkMute),
-            textAlign: TextAlign.center,
+          const SizedBox(height: 16),
+
+          // ── Ticket Médio ──
+          _MetricCompareCard(
+            icon: Icons.attach_money_rounded,
+            title: 'Ticket Médio',
+            yourLabel: 'Seu Ticket',
+            yourValue: 'R\$ ${data.ticketPessoal.toStringAsFixed(0)}',
+            marketLabel: 'Mercado',
+            marketValue: 'R\$ ${data.ticketMercado.toStringAsFixed(0)}',
+            isAbove: data.ticketPessoal >= data.ticketMercado,
+            ratio: data.ticketMercado > 0 ? data.ticketPessoal / (data.ticketPessoal + data.ticketMercado) : 0.5,
+            isDark: isDark,
+            cardBg: cardBg,
+            lineBg: lineBg,
+            ink: ink,
+            mute: mute,
+            primary: primary,
+            accent: accent,
+          ),
+
+          const SizedBox(height: 12),
+
+          // ── Retenção ──
+          _MetricCompareCard(
+            icon: Icons.favorite_rounded,
+            title: 'Saúde da Base',
+            yourLabel: 'Sua Retenção',
+            yourValue: '${data.retencaoPessoal}%',
+            marketLabel: 'Mercado',
+            marketValue: '${data.retencaoMercado}%',
+            isAbove: data.retencaoPessoal >= data.retencaoMercado,
+            ratio: data.retencaoPessoal / 100,
+            isDark: isDark,
+            cardBg: cardBg,
+            lineBg: lineBg,
+            ink: ink,
+            mute: mute,
+            primary: primary,
+            accent: accent,
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── Status Badge ──
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: scoreColor.withValues(alpha: isDark ? 0.08 : 0.05),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: scoreColor.withValues(alpha: 0.15)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 8, height: 8,
+                  decoration: BoxDecoration(color: scoreColor, shape: BoxShape.circle),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Status: $scoreLabel • Baseado em dados anonimizados da plataforma Focux',
+                    style: TextStyle(fontSize: 11, color: mute, fontWeight: FontWeight.w500, height: 1.3),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+
+  int _ticketScore() {
+    if (data.ticketMercado <= 0) return 100;
+    final ratio = data.ticketPessoal / data.ticketMercado;
+    return (ratio * 50).clamp(0, 100).round();
+  }
+
+  Color _ticketScoreColor() {
+    final s = _ticketScore();
+    if (s >= 80) return EagleTokens.good;
+    if (s >= 50) return EagleTokens.warn;
+    return EagleTokens.bad;
+  }
+
+  int _retencaoScore() => data.retencaoPessoal.clamp(0, 100);
+
+  Color _retencaoScoreColor() {
+    if (data.retencaoPessoal >= 80) return EagleTokens.good;
+    if (data.retencaoPessoal >= 50) return EagleTokens.warn;
+    return EagleTokens.bad;
+  }
 }
 
-class _ComparativoCard extends StatelessWidget {
-  final String labelSua;
-  final String valorSua;
-  final String labelMercado;
-  final String valorMercado;
-  final bool acimaDoMercado;
+// ─── Score Row ────────────────────────────────────────────────────────────────
 
-  const _ComparativoCard({
-    required this.labelSua,
-    required this.valorSua,
-    required this.labelMercado,
-    required this.valorMercado,
-    required this.acimaDoMercado,
+class _ScoreRow extends StatelessWidget {
+  final String label;
+  final int value;
+  final Color color;
+  final bool isDark;
+  const _ScoreRow({required this.label, required this.value, required this.color, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: Text(label, style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600)),
+        ),
+        Expanded(
+          flex: 5,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: SizedBox(
+              height: 5,
+              child: LinearProgressIndicator(
+                value: value / 100,
+                backgroundColor: color.withValues(alpha: isDark ? 0.10 : 0.08),
+                valueColor: AlwaysStoppedAnimation(color),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 32,
+          child: Text(
+            '$value',
+            style: GoogleFonts.jetBrainsMono(fontSize: 12, fontWeight: FontWeight.w700, color: ink),
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Metric Compare Card ──────────────────────────────────────────────────────
+
+class _MetricCompareCard extends StatelessWidget {
+  final IconData icon;
+  final String title, yourLabel, yourValue, marketLabel, marketValue;
+  final bool isAbove;
+  final double ratio;
+  final bool isDark;
+  final Color cardBg, lineBg, ink, mute, primary, accent;
+
+  const _MetricCompareCard({
+    required this.icon, required this.title,
+    required this.yourLabel, required this.yourValue,
+    required this.marketLabel, required this.marketValue,
+    required this.isAbove, required this.ratio,
+    required this.isDark, required this.cardBg, required this.lineBg,
+    required this.ink, required this.mute, required this.primary, required this.accent,
   });
 
   @override
   Widget build(BuildContext context) {
+    final statusColor = isAbove ? EagleTokens.good : EagleTokens.warn;
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
+        color: cardBg,
+        borderRadius: BorderRadius.circular(EagleTokens.radiusLg),
+        border: Border.all(color: lineBg),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
+          if (!isDark)
+            BoxShadow(
+              color: const Color(0xFF111318).withValues(alpha: 0.03),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    labelSua,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: EagleTokens.inkMute,
+              Container(
+                width: 30, height: 30,
+                decoration: BoxDecoration(
+                  color: (isDark ? accent : primary).withValues(alpha: isDark ? 0.14 : 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 15, color: isDark ? accent : primary),
+              ),
+              const SizedBox(width: 10),
+              Text(title, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: ink)),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: isDark ? 0.12 : 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isAbove ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                      size: 11, color: statusColor,
                     ),
+                    const SizedBox(width: 3),
+                    Text(
+                      isAbove ? 'Acima' : 'Abaixo',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: statusColor),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 18),
+
+          // Comparison bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: SizedBox(
+              height: 6,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: (ratio * 100).round().clamp(5, 95),
+                    child: Container(color: isDark ? accent : primary),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        valorSua,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      if (acimaDoMercado)
-                        const Icon(
-                          Icons.arrow_upward,
-                          color: EagleTokens.good,
-                          size: 20,
-                        )
-                      else
-                        const Icon(
-                          Icons.arrow_downward,
-                          color: EagleTokens.warn,
-                          size: 20,
-                        ),
-                    ],
+                  Expanded(
+                    flex: (100 - (ratio * 100).round()).clamp(5, 95),
+                    child: Container(color: mute.withValues(alpha: 0.20)),
                   ),
                 ],
               ),
-              Container(width: 1, height: 40, color: const Color(0xFFE5E7EB)),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    labelMercado,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: EagleTokens.inkMute,
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // Values row
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(yourLabel, style: TextStyle(fontSize: 10.5, color: mute, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 3),
+                    Text(
+                      yourValue,
+                      style: GoogleFonts.jetBrainsMono(fontSize: 22, fontWeight: FontWeight.w700, color: ink, letterSpacing: -0.5),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    valorMercado,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: EagleTokens.inkMute,
+                  ],
+                ),
+              ),
+              Container(width: 1, height: 36, color: lineBg),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(marketLabel, style: TextStyle(fontSize: 10.5, color: mute, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 3),
+                    Text(
+                      marketValue,
+                      style: GoogleFonts.jetBrainsMono(fontSize: 22, fontWeight: FontWeight.w500, color: mute, letterSpacing: -0.5),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
