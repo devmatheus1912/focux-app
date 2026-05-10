@@ -6,6 +6,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
 
@@ -306,23 +307,26 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                           separatorBuilder:
                               (_, __) => const SizedBox(height: 12),
                           itemBuilder:
-                              (context, i) => _TreinoCard(
-                                treino: filteredTreinos[i],
+                              (context, i) => FxStaggerItem(
                                 index: i,
-                                isDark: isDark,
-                                primary: primary,
-                                selectionMode: _selectionMode,
-                                selected: _selectedIds.contains(
-                                  filteredTreinos[i].id,
+                                child: _TreinoCard(
+                                  treino: filteredTreinos[i],
+                                  index: i,
+                                  isDark: isDark,
+                                  primary: primary,
+                                  selectionMode: _selectionMode,
+                                  selected: _selectedIds.contains(
+                                    filteredTreinos[i].id,
+                                  ),
+                                  onToggleSelection:
+                                      () =>
+                                          _toggleSelection(filteredTreinos[i].id),
+                                  onStartSelection:
+                                      () =>
+                                          _startSelection(filteredTreinos[i].id),
+                                  onDelete:
+                                      () => _deleteTreinos([filteredTreinos[i]]),
                                 ),
-                                onToggleSelection:
-                                    () =>
-                                        _toggleSelection(filteredTreinos[i].id),
-                                onStartSelection:
-                                    () =>
-                                        _startSelection(filteredTreinos[i].id),
-                                onDelete:
-                                    () => _deleteTreinos([filteredTreinos[i]]),
                               ),
                         ),
                       ),

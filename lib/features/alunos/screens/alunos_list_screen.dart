@@ -11,6 +11,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../core/widgets/fx_motion.dart';
 
 enum AlunoFiltro { todos, ativos, inadimplentes, risco, novos }
 
@@ -858,13 +859,16 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                                   (_, __) => const SizedBox(height: 10),
                               itemBuilder: (context, i) {
                                 final a = filtrados[i];
-                                return _AlunoCardFX(
-                                  aluno: a,
-                                  modoSelecao: _modoSelecao,
-                                  isSelected: _selecionados.contains(a.id),
-                                  onToggle: () => _toggleSelecionado(a.id),
-                                  onLongPress:
-                                      _modoSelecao ? null : _toggleModoSelecao,
+                                return FxStaggerItem(
+                                  index: i,
+                                  child: _AlunoCardFX(
+                                    aluno: a,
+                                    modoSelecao: _modoSelecao,
+                                    isSelected: _selecionados.contains(a.id),
+                                    onToggle: () => _toggleSelecionado(a.id),
+                                    onLongPress:
+                                        _modoSelecao ? null : _toggleModoSelecao,
+                                  ),
                                 );
                               },
                             ),

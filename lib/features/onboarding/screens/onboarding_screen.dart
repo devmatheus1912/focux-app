@@ -36,6 +36,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       subtitle:
           'Cadastre alunos, monte treinos e acompanhe a evolução de cada um em tempo real.',
       accent: Color(0xFF80C8FF),
+      orbitIcons: [Icons.people_alt_rounded, Icons.timeline_rounded, Icons.calendar_month_rounded],
       metrics: [
         _MetricChip(label: 'Alunos ativos', value: '∞', icon: Icons.people_alt_rounded),
         _MetricChip(label: 'Treinos/mês', value: '500+', icon: Icons.calendar_today_rounded),
@@ -53,6 +54,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       subtitle:
           'Gere treinos e dietas personalizados em segundos. A IA aprende com o histórico de cada aluno.',
       accent: Color(0xFFA0CCFF),
+      orbitIcons: [Icons.psychology_rounded, Icons.auto_graph_rounded, Icons.restaurant_rounded],
       metrics: [
         _MetricChip(label: 'Geração', value: '<10s', icon: Icons.bolt_rounded),
         _MetricChip(label: 'Personalização', value: '100%', icon: Icons.tune_rounded),
@@ -70,6 +72,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       subtitle:
           'Cobranças, inadimplências e relatórios automatizados. Você foca no que importa: resultados.',
       accent: Color(0xFFB8D9FF),
+      orbitIcons: [Icons.trending_up_rounded, Icons.pie_chart_rounded, Icons.account_balance_wallet_rounded],
       metrics: [
         _MetricChip(label: 'Cobranças', value: 'Auto', icon: Icons.receipt_long_rounded),
         _MetricChip(label: 'Inadimplentes', value: 'Alertas', icon: Icons.notifications_active_rounded),
@@ -407,6 +410,7 @@ class _OBData {
   final Color accent;
   final List<_MetricChip> metrics;
   final List<String> features;
+  final List<IconData> orbitIcons;
   const _OBData({
     required this.icon,
     required this.title,
@@ -414,6 +418,7 @@ class _OBData {
     required this.accent,
     required this.metrics,
     required this.features,
+    required this.orbitIcons,
   });
 }
 
@@ -458,6 +463,36 @@ class _OBPageWidget extends StatelessWidget {
     required this.fade,
   });
 
+  List<Widget> _buildOrbitIcons(_OBData d) {
+    // Position 3 orbiting icons at 120° intervals around center
+    const positions = [
+      Alignment(-0.95, -0.75),  // top-left
+      Alignment(0.95, -0.30),   // right
+      Alignment(-0.70, 0.85),   // bottom-left
+    ];
+    return List.generate(d.orbitIcons.length, (i) {
+      return Align(
+        alignment: positions[i],
+        child: Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.10),
+            ),
+          ),
+          child: Icon(
+            d.orbitIcons[i],
+            size: 15,
+            color: d.accent.withValues(alpha: 0.5),
+          ),
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -467,52 +502,65 @@ class _OBPageWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // ── Animated Icon ──
+            // ── Composite Illustration ──
             Transform.scale(
               scale: iconScale.value,
-              child: Container(
-                width: 96,
-                height: 96,
-                margin: const EdgeInsets.only(bottom: 24, top: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.12),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: data.accent.withValues(alpha: 0.32),
-                      blurRadius: 32,
-                      spreadRadius: -8,
+              child: SizedBox(
+                width: 140,
+                height: 140,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Orbiting satellite icons
+                    ..._buildOrbitIcons(data),
+                    // Main glass icon
+                    Container(
+                      width: 88,
+                      height: 88,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(26),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.12),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: data.accent.withValues(alpha: 0.32),
+                            blurRadius: 32,
+                            spreadRadius: -8,
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(26),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: RadialGradient(
+                                    colors: [
+                                      data.accent.withValues(alpha: 0.14),
+                                      Colors.transparent,
+                                    ],
+                                    stops: const [0.0, 0.7],
+                                  ),
+                                ),
+                              ),
+                              Icon(data.icon, color: data.accent, size: 38),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: RadialGradient(
-                              colors: [
-                                data.accent.withValues(alpha: 0.14),
-                                Colors.transparent,
-                              ],
-                              stops: const [0.0, 0.7],
-                            ),
-                          ),
-                        ),
-                        Icon(data.icon, color: data.accent, size: 42),
-                      ],
-                    ),
-                  ),
-                ),
               ),
             ),
+
+            const SizedBox(height: 16),
 
             // ── Title — staggered slide ──
             Transform.translate(
