@@ -41,6 +41,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         _MetricChip(label: 'Treinos/mês', value: '500+', icon: Icons.calendar_today_rounded),
         _MetricChip(label: 'Evolução', value: 'Real-time', icon: Icons.trending_up_rounded),
       ],
+      features: [
+        'Fichas de treino ilimitadas',
+        'Acompanhamento de evolução corporal',
+        'Agenda integrada com check-in',
+      ],
     ),
     _OBData(
       icon: Icons.auto_awesome_rounded,
@@ -53,6 +58,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         _MetricChip(label: 'Personalização', value: '100%', icon: Icons.tune_rounded),
         _MetricChip(label: 'Modelos IA', value: '3+', icon: Icons.psychology_rounded),
       ],
+      features: [
+        'Progressão automática de cargas',
+        'Substituição inteligente de exercícios',
+        'Copiloto com sugestões em tempo real',
+      ],
     ),
     _OBData(
       icon: Icons.attach_money_rounded,
@@ -64,6 +74,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         _MetricChip(label: 'Cobranças', value: 'Auto', icon: Icons.receipt_long_rounded),
         _MetricChip(label: 'Inadimplentes', value: 'Alertas', icon: Icons.notifications_active_rounded),
         _MetricChip(label: 'Relatórios', value: 'PDF', icon: Icons.description_rounded),
+      ],
+      features: [
+        'Controle de mensalidades por aluno',
+        'Alertas automáticos de inadimplência',
+        'Relatório financeiro exportável',
       ],
     ),
   ];
@@ -391,12 +406,14 @@ class _OBData {
   final String title, subtitle;
   final Color accent;
   final List<_MetricChip> metrics;
+  final List<String> features;
   const _OBData({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.accent,
     required this.metrics,
+    required this.features,
   });
 }
 
@@ -551,6 +568,62 @@ class _OBPageWidget extends StatelessWidget {
                   children: data.metrics.map((m) => Expanded(
                     child: _MetricChipWidget(metric: m, accent: data.accent),
                   )).toList(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // ── Feature checklist — fills the dead space ──
+            Transform.translate(
+              offset: Offset(0, metricsSlide.value * 0.7),
+              child: Opacity(
+                opacity: fade.value.clamp(0.0, 1.0),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.07),
+                    ),
+                  ),
+                  child: Column(
+                    children: data.features.asMap().entries.map((e) {
+                      final isLast = e.key == data.features.length - 1;
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 22,
+                              height: 22,
+                              decoration: BoxDecoration(
+                                color: data.accent.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              child: Icon(
+                                Icons.check_rounded,
+                                size: 13,
+                                color: data.accent.withValues(alpha: 0.8),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                e.value,
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.6),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ),
