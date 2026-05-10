@@ -426,7 +426,7 @@ class AlunoDetailScreen extends ConsumerWidget {
               aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Ação' : 'OK';
           final medida =
               aluno.peso == null
-                  ? 'Pendente'
+                  ? 'Falta'
                   : '${aluno.peso!.toStringAsFixed(1)} kg';
           final contexto =
               aluno.equipamentosDisponiveis.isEmpty
@@ -554,45 +554,14 @@ class AlunoDetailScreen extends ConsumerWidget {
                 actions: [
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.more_horiz_rounded),
-                    tooltip: 'Ações do aluno',
+                    tooltip: 'Mais opções',
                     onSelected: (value) async {
-                      if (value == 'senha') {
-                        await _confirmarGerarSenha(context, ref, aluno);
-                        return;
-                      }
-                      if (value == 'editar') {
-                        final updated = await context.push<bool>(
-                          '/alunos/$alunoId/editar',
-                          extra: aluno,
-                        );
-                        if (updated == true) {
-                          ref.invalidate(alunoProvider(alunoId));
-                        }
-                        return;
-                      }
                       if (value == 'excluir') {
                         await _confirmarExclusao(context, ref, aluno);
                       }
                     },
                     itemBuilder:
                         (ctx) => const [
-                          PopupMenuItem(
-                            value: 'senha',
-                            child: ListTile(
-                              leading: Icon(Icons.key_outlined),
-                              title: Text('Gerar nova senha'),
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'editar',
-                            child: ListTile(
-                              leading: Icon(Icons.edit_outlined),
-                              title: Text('Editar aluno'),
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                          ),
-                          PopupMenuDivider(),
                           PopupMenuItem(
                             value: 'excluir',
                             child: ListTile(
