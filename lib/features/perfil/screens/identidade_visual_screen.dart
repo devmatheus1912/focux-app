@@ -93,11 +93,8 @@ class _IdentidadeVisualScreenState
   Color _corSecundaria = const Color(0xFF0097A7);
   bool _salvando = false;
   bool _uploadingLogo = false;
-  bool _uploadingVideo = false;
-  bool _uploadingHeroPhoto = false;
   bool _uploadingBioPhoto = false;
   bool _perfilLoaded = false;
-  final bool _showManualVideoUrl = false;
   String? _logoUrl;
   late List<String> _sectionOrder = _defaultSectionOrder();
   final Set<String> _hiddenSections = {};
@@ -300,75 +297,6 @@ class _IdentidadeVisualScreenState
     }
   }
 
-  Future<void> _pickPresentationVideo(String plano) async {
-    final file = await ImagePicker().pickVideo(
-      source: ImageSource.gallery,
-      maxDuration: const Duration(minutes: 5),
-    );
-    if (file == null || !mounted) return;
-    setState(() => _uploadingVideo = true);
-    try {
-      final url = await MediaUploadService(
-        ref.read(apiClientProvider),
-      ).uploadBytes(
-        bytes: await file.readAsBytes(),
-        filename: file.name,
-        folder: 'landing/apresentacao',
-        resourceType: 'video',
-      );
-      if (mounted) {
-        setState(() => _videoCtrl.text = url);
-        await _salvar(
-          plano,
-          successMessage: 'Video de apresentacao enviado e salvo na landing.',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
-      }
-    } finally {
-      if (mounted) setState(() => _uploadingVideo = false);
-    }
-  }
-
-  Future<void> _pickHeroPhoto(String plano) async {
-    final file = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 88,
-      maxWidth: 1800,
-    );
-    if (file == null || !mounted) return;
-    setState(() => _uploadingHeroPhoto = true);
-    try {
-      final url = await MediaUploadService(
-        ref.read(apiClientProvider),
-      ).uploadBytes(
-        bytes: await file.readAsBytes(),
-        filename: file.name,
-        folder: 'landing/hero',
-        resourceType: 'image',
-      );
-      if (mounted) {
-        setState(() => _heroImageCtrl.text = url);
-        await _salvar(
-          plano,
-          successMessage: 'Foto principal enviada e salva na landing.',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
-      }
-    } finally {
-      if (mounted) setState(() => _uploadingHeroPhoto = false);
-    }
-  }
-
   Future<void> _pickBioPhoto(String plano) async {
     final file = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -443,16 +371,10 @@ class _IdentidadeVisualScreenState
         if (_domCtrl.text.trim().isNotEmpty) {
           body['dominioCustomizado'] = _domCtrl.text.trim();
         }
-        if (_videoCtrl.text.trim().isNotEmpty) {
-          body['videoUrl'] = _videoCtrl.text.trim();
-        }
+        body['videoUrl'] = '';
         body['trackingId'] = _trackingCtrl.text.trim();
-        final typedHeroUrl = _heroImageCtrl.text.trim();
         body['heroPrompt'] = '';
-        body['heroImageUrl'] =
-            typedHeroUrl.isEmpty || _isAiGeneratedHeroUrl(typedHeroUrl)
-                ? ''
-                : typedHeroUrl;
+        body['heroImageUrl'] = '';
         final typedBioUrl = _bioImageCtrl.text.trim();
         body['bioImageUrl'] =
             typedBioUrl.isEmpty || _isAiGeneratedHeroUrl(typedBioUrl)
@@ -487,14 +409,6 @@ class _IdentidadeVisualScreenState
   bool _isAiGeneratedHeroUrl(String url) {
     final value = url.trim().toLowerCase();
     return value.contains('image.pollinations.ai/prompt/');
-  }
-
-  bool _isDirectVideoUrl(String url) {
-    final clean = url.toLowerCase().split('?').first;
-    return clean.endsWith('.mp4') ||
-        clean.endsWith('.webm') ||
-        clean.endsWith('.mov') ||
-        clean.endsWith('.m4v');
   }
 
   void _moveSection(String key, int delta) {
@@ -539,10 +453,11 @@ class _IdentidadeVisualScreenState
     final publicLandingUrl =
         slug == null ? null : '${Env.publicWebUrl}/p/$slug';
     final nomePersonal = perfil?.nome ?? '';
-    final heroPhotoUrl = _heroImageCtrl.text.trim();
-    final heroPhotoReady = heroPhotoUrl.isNotEmpty;
+    final heroPhotoUrl = '';
+    final heroPhotoReady = false;
     final bioPhotoUrl = _bioImageCtrl.text.trim();
     final bioPhotoReady = bioPhotoUrl.isNotEmpty;
+    final videoReady = false;
     final servicesCount = _buildServicosPayload().length;
     final packagesCount = _buildPacotesPayload().length;
     final faqCount = _buildFaqPayload().length;
@@ -550,9 +465,7 @@ class _IdentidadeVisualScreenState
       heroTitle: _heroTitleCtrl.text,
       bio: _descCtrl.text,
       specialty: _espCtrl.text,
-      heroPhotoReady: heroPhotoReady,
       bioPhotoReady: bioPhotoReady,
-      videoReady: _videoCtrl.text.trim().isNotEmpty,
       servicesCount: servicesCount,
       packagesCount: packagesCount,
       faqCount: faqCount,
@@ -607,8 +520,7 @@ class _IdentidadeVisualScreenState
               servicesCount: servicesCount,
               packagesCount: packagesCount,
               faqCount: faqCount,
-              heroPhotoReady: heroPhotoReady,
-              videoReady: _videoCtrl.text.trim().isNotEmpty,
+              bioPhotoReady: bioPhotoReady,
               onCopySlug:
                   slug == null
                       ? null
@@ -1031,128 +943,9 @@ class _IdentidadeVisualScreenState
                       const SizedBox(height: 16),
                       _LandingEditorCard(
                         isDark: isDark,
-                        title: 'Video de apresentacao',
+                        title: 'Foto do personal na landing',
                         subtitle:
-                            'Suba um video curto seu. Ele aparece como player dentro da primeira tela da landing.',
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (_showManualVideoUrl) ...[
-                              TextFormField(
-                                controller: _videoCtrl,
-                                enabled: isEnterprise,
-                                decoration: const InputDecoration(
-                                  labelText: 'URL do vídeo de apresentação',
-                                  hintText: 'https://cdn.focux.app/video.mp4',
-                                  helperText:
-                                      'Use MP4/WebM para player embutido. YouTube/Vimeo abrem em link externo.',
-                                  helperMaxLines: 2,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                            ],
-                            OutlinedButton.icon(
-                              onPressed:
-                                  isEnterprise && !_uploadingVideo
-                                      ? () => _pickPresentationVideo(plano)
-                                      : null,
-                              icon:
-                                  _uploadingVideo
-                                      ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                      : const Icon(Icons.video_call_outlined),
-                              label: Text(
-                                _uploadingVideo
-                                    ? 'Enviando video...'
-                                    : _videoCtrl.text.trim().isEmpty
-                                    ? 'Subir video de apresentacao'
-                                    : 'Trocar video de apresentacao',
-                              ),
-                            ),
-                            if (_videoCtrl.text.trim().isNotEmpty) ...[
-                              const SizedBox(height: 10),
-                              _LandingMediaStatusCard(
-                                isDark: isDark,
-                                icon: Icons.play_circle_outline,
-                                title: 'Video enviado para a landing',
-                                subtitle:
-                                    _isDirectVideoUrl(_videoCtrl.text.trim())
-                                        ? 'Vai abrir em player embutido na primeira tela.'
-                                        : 'Arquivo enviado. Se nao aparecer como player, envie em MP4, WebM, MOV ou M4V.',
-                                url: _videoCtrl.text.trim(),
-                                showUrl: false,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _LandingEditorCard(
-                        isDark: isDark,
-                        title: 'Foto principal da landing',
-                        subtitle:
-                            'Suba uma foto real sua, do seu estudio ou de um atendimento. Essa foto vira o impacto visual da primeira tela.',
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _HeroPhotoPreview(
-                              isDark: isDark,
-                              url: heroPhotoUrl,
-                              primary: _corPrimaria,
-                              secondary: _corSecundaria,
-                              name: nomePersonal,
-                              slogan: _sloganCtrl.text.trim(),
-                            ),
-                            const SizedBox(height: 12),
-                            OutlinedButton.icon(
-                              onPressed:
-                                  isEnterprise && !_uploadingHeroPhoto
-                                      ? () => _pickHeroPhoto(plano)
-                                      : null,
-                              icon:
-                                  _uploadingHeroPhoto
-                                      ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                      : const Icon(Icons.add_photo_alternate),
-                              label: Text(
-                                _uploadingHeroPhoto
-                                    ? 'Enviando foto...'
-                                    : heroPhotoReady
-                                    ? 'Trocar foto principal'
-                                    : 'Subir foto principal',
-                              ),
-                            ),
-                            if (heroPhotoReady) ...[
-                              const SizedBox(height: 10),
-                              _LandingMediaStatusCard(
-                                isDark: isDark,
-                                icon: Icons.photo_camera_back_outlined,
-                                title: 'Foto conectada ao hero',
-                                subtitle:
-                                    'A landing usa esta foto com recorte premium, overlay e assinatura visual da marca.',
-                                url: heroPhotoUrl,
-                                showUrl: false,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _LandingEditorCard(
-                        isDark: isDark,
-                        title: 'Foto pessoal da bio',
-                        subtitle:
-                            'Suba uma foto sua separada para a secao Sobre. Ideal: retrato profissional, voce atendendo aluno ou imagem de autoridade, sem repetir a foto de capa.',
+                            'Esta e a unica foto que o personal precisa subir. A landing usa um palco 3D no hero e esta imagem aparece na bio.',
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -1234,7 +1027,7 @@ class _IdentidadeVisualScreenState
                         specialty: _espCtrl.text.trim(),
                         heroPhotoReady: heroPhotoReady,
                         bioPhotoReady: bioPhotoReady,
-                        videoReady: _videoCtrl.text.trim().isNotEmpty,
+                        videoReady: videoReady,
                         aboutReady: _descCtrl.text.trim().isNotEmpty,
                         servicesCount: servicesCount,
                         packagesCount: packagesCount,
@@ -1298,9 +1091,7 @@ int _landingReadinessScore({
   required String heroTitle,
   required String bio,
   required String specialty,
-  required bool heroPhotoReady,
   required bool bioPhotoReady,
-  required bool videoReady,
   required int servicesCount,
   required int packagesCount,
   required int faqCount,
@@ -1312,12 +1103,10 @@ int _landingReadinessScore({
   if (heroTitle.trim().isNotEmpty || hasAutoHeadlineBase) score += 14;
   if (bio.trim().isNotEmpty) score += 14;
   if (specialty.trim().isNotEmpty) score += 10;
-  if (heroPhotoReady) score += 16;
-  if (bioPhotoReady) score += 12;
-  if (videoReady) score += 10;
-  if (servicesCount >= 2) score += 10;
-  if (packagesCount >= 1) score += 8;
-  if (faqCount >= 2) score += 6;
+  if (bioPhotoReady) score += 22;
+  if (servicesCount >= 2) score += 18;
+  if (packagesCount >= 1) score += 14;
+  if (faqCount >= 2) score += 8;
   return score.clamp(0, 100);
 }
 
@@ -1331,8 +1120,7 @@ class _LandingReadinessHeader extends StatelessWidget {
   final int servicesCount;
   final int packagesCount;
   final int faqCount;
-  final bool heroPhotoReady;
-  final bool videoReady;
+  final bool bioPhotoReady;
   final VoidCallback? onCopySlug;
   final VoidCallback? onOpenLanding;
 
@@ -1346,8 +1134,7 @@ class _LandingReadinessHeader extends StatelessWidget {
     required this.servicesCount,
     required this.packagesCount,
     required this.faqCount,
-    required this.heroPhotoReady,
-    required this.videoReady,
+    required this.bioPhotoReady,
     required this.onCopySlug,
     required this.onOpenLanding,
   });
@@ -1440,14 +1227,8 @@ class _LandingReadinessHeader extends StatelessWidget {
             runSpacing: 7,
             children: [
               _ReadinessMiniChip(
-                label: heroPhotoReady ? 'Foto real OK' : 'Falta foto',
-                ok: heroPhotoReady,
-                primary: primary,
-                isDark: isDark,
-              ),
-              _ReadinessMiniChip(
-                label: videoReady ? 'Video OK' : 'Video opcional',
-                ok: videoReady,
+                label: bioPhotoReady ? 'Foto da bio OK' : 'Falta foto da bio',
+                ok: bioPhotoReady,
                 primary: primary,
                 isDark: isDark,
               ),
@@ -2319,109 +2100,6 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _HeroPhotoPreview extends StatelessWidget {
-  final bool isDark;
-  final String url;
-  final Color primary;
-  final Color secondary;
-  final String name;
-  final String slogan;
-
-  const _HeroPhotoPreview({
-    required this.isDark,
-    required this.url,
-    required this.primary,
-    required this.secondary,
-    required this.name,
-    required this.slogan,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final hasPhoto = url.trim().isNotEmpty;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: AspectRatio(
-        aspectRatio: 16 / 10,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (hasPhoto)
-              Image.network(
-                url,
-                fit: BoxFit.cover,
-                errorBuilder:
-                    (_, __, ___) => _PremiumHeroPreviewCanvas(
-                      primary: primary,
-                      secondary: secondary,
-                    ),
-              )
-            else
-              _PremiumHeroPreviewCanvas(primary: primary, secondary: secondary),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    const Color(0xFF050814).withValues(alpha: 0.88),
-                    const Color(0xFF050814).withValues(alpha: 0.44),
-                    primary.withValues(alpha: 0.20),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: 16,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    hasPhoto ? 'FOTO REAL DA LANDING' : 'ASSINATURA PREMIUM',
-                    style: TextStyle(
-                      color: primary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 7),
-                  Text(
-                    slogan.isNotEmpty ? slogan : name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      height: 1.02,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    hasPhoto
-                        ? 'Recorte com overlay, contraste e identidade visual.'
-                        : 'Envie uma foto para deixar a primeira dobra humana.',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.74),
-                      fontSize: 12,
-                      height: 1.35,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _BioPhotoPreview extends StatelessWidget {
   final bool isDark;
   final String url;
@@ -2678,31 +2356,13 @@ class _LandingPremiumPlanner extends StatelessWidget {
         icon: Icons.campaign_outlined,
       ),
       _PlannerItem(
-        title: 'Foto real de autoridade',
-        detail:
-            heroPhotoReady
-                ? 'Foto principal pronta para a primeira dobra.'
-                : 'Suba uma foto sua, do estudio ou de um atendimento real.',
-        done: heroPhotoReady,
-        icon: Icons.photo_camera_back_outlined,
-      ),
-      _PlannerItem(
-        title: 'Foto pessoal da bio',
+        title: 'Foto do personal',
         detail:
             bioPhotoReady
-                ? 'Retrato conectado a secao Sobre.'
-                : 'Suba um retrato separado para nao repetir a capa.',
+                ? 'Retrato conectado a bio da landing.'
+                : 'Suba uma foto sua de autoridade para a bio da landing.',
         done: bioPhotoReady,
         icon: Icons.person_pin_outlined,
-      ),
-      _PlannerItem(
-        title: 'Video de apresentacao',
-        detail:
-            videoReady
-                ? 'Player conectado ao hero da landing.'
-                : 'Grave 30 a 90 segundos explicando para quem e seu metodo.',
-        done: videoReady,
-        icon: Icons.play_circle_outline,
       ),
       _PlannerItem(
         title: 'Oferta comparavel',
