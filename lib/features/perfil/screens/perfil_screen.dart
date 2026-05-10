@@ -315,6 +315,7 @@ class _PerfilBody extends StatelessWidget {
     final accent = primaryColor;
     final profileScore = _profileScore(perfil, dashboard);
     final publicUrl = _publicProfileUrl(perfil);
+    final displayPublicUrl = _displayPublicProfileUrl(perfil, publicUrl);
     final bioText =
         (perfil.descricaoProfissional ?? dashboard.descricaoProfissional ?? '')
             .trim();
@@ -553,7 +554,7 @@ class _PerfilBody extends StatelessWidget {
                             primary: primaryColor,
                             secondary: secondaryColor,
                             profileName: perfil.nome,
-                            publicUrl: publicUrl,
+                            publicUrl: displayPublicUrl,
                             isDark: isDark,
                           ),
                           const SizedBox(height: 12),
@@ -1877,13 +1878,17 @@ bool _hasWallet(PerfilPersonal perfil) =>
 bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
 
 String? _publicProfileUrl(PerfilPersonal perfil) {
-  final domain = perfil.dominioCustomizado?.trim();
-  if (domain != null && domain.isNotEmpty) {
-    return domain.startsWith('http') ? domain : 'https://$domain';
-  }
   final slug = perfil.slug?.trim();
   if (slug == null || slug.isEmpty) return null;
   return '${Env.publicWebUrl}/p/$slug';
+}
+
+String? _displayPublicProfileUrl(PerfilPersonal perfil, String? canonicalUrl) {
+  final domain = perfil.dominioCustomizado?.trim();
+  if (domain != null && domain.isNotEmpty) {
+    return '$domain aguardando CNAME';
+  }
+  return canonicalUrl;
 }
 
 String _buildSubtitle(PerfilPersonal perfil) {
