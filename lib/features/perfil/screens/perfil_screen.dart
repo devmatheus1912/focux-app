@@ -397,7 +397,7 @@ class _PerfilBody extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 12),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Row(
@@ -410,7 +410,7 @@ class _PerfilBody extends StatelessWidget {
                                 onTap: onPickPhoto,
                                 loading: uploadingPhoto,
                               ),
-                              const SizedBox(width: 16),
+                              const SizedBox(width: 14),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,7 +418,7 @@ class _PerfilBody extends StatelessWidget {
                                     _PlanPill(
                                       label: _formatProfilePlan(perfil.plano),
                                     ),
-                                    const SizedBox(height: 9),
+                                    const SizedBox(height: 7),
                                     Text(
                                       perfil.nome,
                                       maxLines: 2,
@@ -430,7 +430,7 @@ class _PerfilBody extends StatelessWidget {
                                             height: 0.98,
                                           ),
                                     ),
-                                    const SizedBox(height: 7),
+                                    const SizedBox(height: 5),
                                     Text(
                                       _buildSubtitle(perfil),
                                       maxLines: 2,
@@ -447,7 +447,7 @@ class _PerfilBody extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 14),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: _HeroQuickActions(
@@ -457,7 +457,7 @@ class _PerfilBody extends StatelessWidget {
                             onPlans: () => context.push('/planos'),
                           ),
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 14),
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.black.withValues(alpha: 0.18),
@@ -473,7 +473,7 @@ class _PerfilBody extends StatelessWidget {
                               return Expanded(
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 13,
+                                    vertical: 10,
                                     horizontal: 8,
                                   ),
                                   decoration: BoxDecoration(
@@ -534,7 +534,7 @@ class _PerfilBody extends StatelessWidget {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 96),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _CardSection(
@@ -763,7 +763,7 @@ class _PerfilBody extends StatelessWidget {
                           icon: const Icon(
                             Icons.account_balance_wallet_outlined,
                           ),
-                          label: const Text('Carteira PIX'),
+                          label: const Text('PIX'),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -856,7 +856,7 @@ class _HeroQuickActions extends StatelessWidget {
     final actions = [
       (Icons.palette_outlined, 'Marca', onBrand),
       (Icons.public_outlined, 'Landing', onLanding),
-      (Icons.account_balance_wallet_outlined, 'Wallet', onWallet),
+      (Icons.account_balance_wallet_outlined, 'PIX', onWallet),
       (Icons.workspace_premium_outlined, 'Plano', onPlans),
     ];
 
@@ -871,7 +871,7 @@ class _HeroQuickActions extends StatelessWidget {
                       onTap: item.$3,
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
-                        height: 58,
+                        height: 52,
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(16),
@@ -883,7 +883,7 @@ class _HeroQuickActions extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(item.$1, color: Colors.white, size: 18),
-                            const SizedBox(height: 5),
+                            const SizedBox(height: 4),
                             Text(
                               item.$2,
                               maxLines: 1,
@@ -951,8 +951,8 @@ class _Avatar extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         Container(
-          width: 92,
-          height: 92,
+          width: 82,
+          height: 82,
           padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
@@ -976,7 +976,7 @@ class _Avatar extends StatelessWidget {
                     ? Text(
                       _initials(nome),
                       style: TextStyle(
-                        fontSize: 30,
+                        fontSize: 27,
                         fontWeight: FontWeight.w900,
                         color: primaryColor,
                       ),
@@ -1350,9 +1350,9 @@ class _CompletenessCard extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(accent),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           if (complete)
-            _NextGainStrip(accent: accent, isDark: isDark)
+            _ReadyFocusStrip(accent: accent, isDark: isDark)
           else
             Wrap(
               spacing: 7,
@@ -1362,7 +1362,7 @@ class _CompletenessCard extends StatelessWidget {
                       .map((item) => _ChecklistChip(item: item, accent: accent))
                       .toList(),
             ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -1377,7 +1377,7 @@ class _CompletenessCard extends StatelessWidget {
                 child: FilledButton.icon(
                   onPressed: onLanding,
                   icon: const Icon(Icons.tune_outlined, size: 18),
-                  label: const Text('Otimizar landing'),
+                  label: const Text('Otimizar'),
                 ),
               ),
             ],
@@ -1421,77 +1421,45 @@ class _ReadyStamp extends StatelessWidget {
   }
 }
 
-class _NextGainStrip extends StatelessWidget {
+class _ReadyFocusStrip extends StatelessWidget {
   final Color accent;
   final bool isDark;
 
-  const _NextGainStrip({required this.accent, required this.isDark});
+  const _ReadyFocusStrip({required this.accent, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final gains = [
-      (
-        Icons.public_outlined,
-        'Perfil publico',
-        'Revisar oferta e prova social',
-      ),
-      (Icons.bolt_outlined, 'Conversao', 'Ajustar CTA da landing'),
-      (
-        Icons.workspace_premium_outlined,
-        'Premium',
-        'Manter identidade consistente',
-      ),
-    ];
 
-    return Column(
-      children:
-          gains
-              .map(
-                (gain) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: accent.withValues(alpha: isDark ? 0.16 : 0.08),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(gain.$1, color: accent, size: 15),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              gain.$2,
-                              style: TextStyle(
-                                color: ink,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 1),
-                            Text(
-                              gain.$3,
-                              style: TextStyle(
-                                color: mute,
-                                fontSize: 11.5,
-                                height: 1.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-              .toList(),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+      decoration: BoxDecoration(
+        color:
+            isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : EagleTokens.lineSoft,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.bolt_outlined, color: accent, size: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Proximo ganho: ajustar oferta, CTA e prova social.',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: mute,
+                fontSize: 11.8,
+                height: 1.25,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
