@@ -20,6 +20,13 @@ final alunoCopilotoActionProvider =
       return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
     });
 
+final alunoOpenIaActionsProvider =
+    FutureProvider.family<List<FilaAcaoResumo>, int>((ref, alunoId) async {
+      return ref
+          .read(dashboardRepositoryProvider)
+          .getIaCommandActions(status: 'ABERTO', alunoId: alunoId);
+    });
+
 final alunoScoreSnapshotsProvider = FutureProvider.family<
   List<FocuxScoreSnapshotResumo>,
   int
@@ -1256,34 +1263,6 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     return 'Revisar treino e propor a próxima evolução de ${aluno.objetivo ?? "objetivo"}.';
   }
 
-  // ignore: unused_element
-  Future<void> _atribuir(
-    BuildContext context,
-    WidgetRef ref,
-    String acao,
-  ) async {
-    try {
-      await IaRepository(ref.read(apiClientProvider)).salvarAcaoCopiloto(
-        alunoId: aluno.id,
-        acao: acao,
-        motivo:
-            'Aluno 360: ação prescrita a partir de perfil, autonomia e risco.',
-      );
-      ref.invalidate(commandCenterProvider);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ação enviada para ${aluno.nome}.')),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Não foi possível atribuir: $e')),
-        );
-      }
-    }
-  }
-
   void _prepararMensagem(BuildContext context, String acao) {
     context.push(
       '/alunos/${aluno.id}/chat',
@@ -1291,12 +1270,49 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _criarTarefaCopiloto(
+  FilaAcaoResumo? _firstOpenCopilotAction(List<FilaAcaoResumo>? actions) {
+    for (final item in actions ?? const <FilaAcaoResumo>[]) {
+      if (item.status.toUpperCase() != 'ABERTO') continue;
+      final source = (item.source ?? '').toUpperCase();
+      final mode = (item.sourceMode ?? '').toUpperCase();
+      if (item.tipo == 'IA_COPILOTO' ||
+          source == 'ALUNO_360' ||
+          mode == 'ALUNO_360' ||
+          item.createdFromInsight) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  Future<bool> _criarTarefaCopiloto(
     BuildContext context,
     WidgetRef ref,
     String acao,
   ) async {
     try {
+      final existing = _firstOpenCopilotAction(
+        await ref
+            .read(dashboardRepositoryProvider)
+            .getIaCommandActions(status: 'ABERTO', alunoId: aluno.id),
+      );
+      if (existing != null) {
+        ref.invalidate(alunoOpenIaActionsProvider(aluno.id));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Tarefa ja aberta no Command Center.'),
+              action: SnackBarAction(
+                label: 'Ver',
+                onPressed:
+                    () => context.push('/dashboard/command-center/copiloto'),
+              ),
+            ),
+          );
+        }
+        return true;
+      }
+
       final saved = await IaRepository(
         ref.read(apiClientProvider),
       ).salvarAcaoCopiloto(
@@ -1319,6 +1335,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
         persisted = abertas.any((item) => item.actionKey == actionKey);
       }
       ref.invalidate(commandCenterProvider);
+      ref.invalidate(alunoOpenIaActionsProvider(aluno.id));
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1340,12 +1357,14 @@ class _Aluno360CopilotCard extends ConsumerWidget {
           ),
         );
       }
+      return persisted;
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Nao foi possivel criar tarefa: $e')),
         );
       }
+      return false;
     }
   }
 
@@ -1369,6 +1388,8 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final actionAsync = ref.watch(alunoCopilotoActionProvider(aluno.id));
+    final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
+    final openTask = _firstOpenCopilotAction(openActionsAsync.valueOrNull);
     final resumo = resumoAsync.valueOrNull;
     final signals = _signals(context, aluno, resumo);
     final fallback = _fallbackAction(aluno, resumo);
@@ -1488,11 +1509,33 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
+          openActionsAsync.maybeWhen(
+            loading:
+                () => const _CopilotTaskStatus(
+                  icon: Icons.sync_rounded,
+                  title: 'Sincronizando tarefas',
+                  subtitle: 'Checando Command Center antes de criar.',
+                ),
+            data:
+                (_) =>
+                    openTask == null
+                        ? const SizedBox.shrink()
+                        : const _CopilotTaskStatus(
+                          icon: Icons.task_alt_rounded,
+                          title: 'Tarefa aberta',
+                          subtitle:
+                              'Ja existe no Command Center. Sem duplicar.',
+                        ),
+            orElse: () => const SizedBox.shrink(),
+          ),
+          if (openActionsAsync.isLoading || openTask != null)
+            const SizedBox(height: 10),
           actionAsync.maybeWhen(
             data:
                 (action) => _Aluno360ActionRow(
                   aluno: aluno,
                   primary: primary,
+                  existingTask: openTask,
                   acao:
                       (action['acao'] ??
                               action['mensagem'] ??
@@ -1506,6 +1549,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                 () => _Aluno360ActionRow(
                   aluno: aluno,
                   primary: primary,
+                  existingTask: openTask,
                   acao: fallback,
                   onAssign: (acao) => _criarTarefaCopiloto(context, ref, acao),
                   onPrepareMessage: (acao) => _prepararMensagem(context, acao),
@@ -2266,32 +2310,132 @@ class _CopilotPrescription extends StatelessWidget {
   }
 }
 
-class _Aluno360ActionRow extends StatelessWidget {
+class _CopilotTaskStatus extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _CopilotTaskStatus({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: isDark ? 0.12 : 0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: primary.withValues(alpha: 0.16)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: primary, size: 17),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Aluno360ActionRow extends StatefulWidget {
   final Aluno aluno;
   final Color primary;
+  final FilaAcaoResumo? existingTask;
   final String acao;
-  final Future<void> Function(String acao) onAssign;
+  final Future<bool> Function(String acao) onAssign;
   final void Function(String acao) onPrepareMessage;
 
   const _Aluno360ActionRow({
     required this.aluno,
     required this.primary,
+    required this.existingTask,
     required this.acao,
     required this.onAssign,
     required this.onPrepareMessage,
   });
 
   @override
+  State<_Aluno360ActionRow> createState() => _Aluno360ActionRowState();
+}
+
+class _Aluno360ActionRowState extends State<_Aluno360ActionRow> {
+  bool _creating = false;
+  bool _created = false;
+
+  Future<void> _handlePrimary() async {
+    if (widget.existingTask != null || _created) {
+      context.push('/dashboard/command-center/copiloto');
+      return;
+    }
+    setState(() => _creating = true);
+    final created = await widget.onAssign(widget.acao);
+    if (!mounted) return;
+    setState(() {
+      _creating = false;
+      _created = created;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final hasTask = widget.existingTask != null || _created;
+    final primaryLabel =
+        hasTask ? 'Ver tarefa' : (_creating ? 'Criando...' : 'Criar tarefa');
     return Row(
       children: [
         Expanded(
           child: FilledButton.icon(
-            onPressed: () => onAssign(acao),
-            icon: const Icon(Icons.task_alt_rounded, size: 17),
-            label: const Text('Criar tarefa'),
+            onPressed: _creating ? null : _handlePrimary,
+            icon:
+                _creating
+                    ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : Icon(
+                      hasTask
+                          ? Icons.open_in_new_rounded
+                          : Icons.task_alt_rounded,
+                      size: 17,
+                    ),
+            label: Text(primaryLabel),
             style: FilledButton.styleFrom(
-              backgroundColor: primary,
+              backgroundColor: widget.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -2300,26 +2444,32 @@ class _Aluno360ActionRow extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         SizedBox(
-          width: 98,
+          width: 112,
           height: 44,
           child: InkWell(
-            onTap: () => onPrepareMessage(acao),
+            onTap: () => widget.onPrepareMessage(widget.acao),
             borderRadius: BorderRadius.circular(14),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.04),
+                color: widget.primary.withValues(alpha: 0.04),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: primary.withValues(alpha: 0.28)),
+                border: Border.all(
+                  color: widget.primary.withValues(alpha: 0.28),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.chat_bubble_outline, size: 15, color: primary),
+                  Icon(
+                    Icons.chat_bubble_outline,
+                    size: 15,
+                    color: widget.primary,
+                  ),
                   const SizedBox(width: 6),
                   Text(
-                    'Msg',
+                    'Enviar msg',
                     style: TextStyle(
-                      color: primary,
+                      color: widget.primary,
                       fontSize: 12,
                       fontWeight: FontWeight.w900,
                     ),
