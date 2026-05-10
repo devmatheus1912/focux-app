@@ -8,7 +8,9 @@ void main() {
       'Boa tarde Matheus',
     );
     expect(
-      formatChatTextForDisplay('Serie pesada\nDor no ombro\nSerie pesada\nDor no ombro'),
+      formatChatTextForDisplay(
+        'Serie pesada\nDor no ombro\nSerie pesada\nDor no ombro',
+      ),
       'Serie pesada\nDor no ombro',
     );
   });
@@ -17,6 +19,15 @@ void main() {
     expect(
       formatChatTextForDisplay('Treino ok\nSenti dor no joelho'),
       'Treino ok\nSenti dor no joelho',
+    );
+  });
+
+  test('removes lightweight markdown from copilot drafts', () {
+    expect(
+      formatChatTextForDisplay(
+        'Oi, Beatriz. **Contate Beatriz imediatamente**. `ok`',
+      ),
+      'Oi, Beatriz. Contate Beatriz imediatamente. ok',
     );
   });
 }

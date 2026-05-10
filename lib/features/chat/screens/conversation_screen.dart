@@ -350,17 +350,56 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     if (normalized.isEmpty) return false;
     for (final msg in _msgs.reversed.take(8)) {
       if (!_isMine(msg)) continue;
-      if (_normalizeOutgoingText(msg.conteudo) == normalized) return true;
+      final sent = _normalizeOutgoingText(msg.conteudo);
+      if (sent == normalized || _looksLikeSameCopilotAction(sent, normalized)) {
+        return true;
+      }
     }
     return false;
   }
 
   String _normalizeOutgoingText(String value) {
+    return normalizeChatText(
+      value,
+    ).replaceAll(RegExp(r'\s+'), ' ').trim().toLowerCase();
+  }
+
+  bool _looksLikeSameCopilotAction(String a, String b) {
+    final aWords = _meaningfulWords(a);
+    final bWords = _meaningfulWords(b);
+    if (aWords.length < 5 || bWords.length < 5) return false;
+    final overlap = aWords.intersection(bWords).length;
+    final smaller =
+        aWords.length < bWords.length ? aWords.length : bWords.length;
+    return overlap >= 5 && overlap / smaller >= 0.62;
+  }
+
+  Set<String> _meaningfulWords(String value) {
+    const stop = {
+      'oi',
+      'me',
+      'com',
+      'para',
+      'pelo',
+      'pela',
+      'seu',
+      'sua',
+      'que',
+      'uma',
+      'um',
+      'agora',
+      'quando',
+      'fizer',
+      'combinado',
+      'responde',
+      'aqui',
+      'ok',
+      'plano',
+    };
     return value
-        .replaceAll(RegExp(r'\*\*|__|`'), '')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim()
-        .toLowerCase();
+        .split(RegExp(r'[^a-z0-9áéíóúâêôãõç]+', caseSensitive: false))
+        .where((word) => word.length > 2 && !stop.contains(word))
+        .toSet();
   }
 
   void _captureAlunoId(ChatMsg msg) {
@@ -626,7 +665,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   Future<void> _editMessage(ChatMsg msg) async {
     if (!_canEditMessage(msg)) return;
-    final ctrl = TextEditingController(text: msg.conteudo);
+    final ctrl = TextEditingController(
+      text: formatChatTextForDisplay(msg.conteudo),
+    );
     final next = await showDialog<String>(
       context: context,
       builder:
@@ -866,7 +907,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           onTap: () async {
                             Navigator.pop(context);
                             await Clipboard.setData(
-                              ClipboardData(text: msg.conteudo),
+                              ClipboardData(
+                                text: formatChatTextForDisplay(msg.conteudo),
+                              ),
                             );
                             if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(

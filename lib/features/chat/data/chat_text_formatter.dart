@@ -1,5 +1,5 @@
 String formatChatTextForDisplay(String raw) {
-  final trimmed = raw.trim();
+  final trimmed = normalizeChatText(raw);
   if (trimmed.isEmpty) return '';
 
   final lines = trimmed
@@ -20,4 +20,11 @@ String formatChatTextForDisplay(String raw) {
   }
 
   return firstHalf.join('\n').trim();
+}
+
+String normalizeChatText(String raw) {
+  return raw
+      .replaceAll(RegExp(r'\*\*|__|`'), '')
+      .replaceAll(RegExp(r'^\s*[-•]\s*', multiLine: true), '')
+      .trim();
 }
