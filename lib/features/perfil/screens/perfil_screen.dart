@@ -451,10 +451,10 @@ class _PerfilBody extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: _HeroQuickActions(
-                            onEditPerfil: onEditPerfil,
                             onBrand: () => context.push('/identidade-visual'),
                             onLanding: () => context.push('/landing-config'),
                             onWallet: () => context.push('/perfil/wallet'),
+                            onPlans: () => context.push('/planos'),
                           ),
                         ),
                         const SizedBox(height: 18),
@@ -578,8 +578,14 @@ class _PerfilBody extends StatelessWidget {
                     accent: accent,
                     isDark: isDark,
                     items: _profileChecklist(perfil, dashboard),
-                    onEdit: onEditPerfil,
-                    onReview: onEditPerfil,
+                    onPublicProfile:
+                        publicUrl == null
+                            ? () => context.push('/landing-config')
+                            : () => launchUrl(
+                              Uri.parse(publicUrl),
+                              mode: LaunchMode.externalApplication,
+                            ),
+                    onLanding: () => context.push('/landing-config'),
                   ),
                   const SizedBox(height: 12),
                   _CardSection(
@@ -753,9 +759,11 @@ class _PerfilBody extends StatelessWidget {
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: onEditPerfil,
-                          icon: const Icon(Icons.edit_outlined),
-                          label: const Text('Editar perfil'),
+                          onPressed: () => context.push('/perfil/wallet'),
+                          icon: const Icon(
+                            Icons.account_balance_wallet_outlined,
+                          ),
+                          label: const Text('Carteira PIX'),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -831,25 +839,25 @@ class _PlanPill extends StatelessWidget {
 }
 
 class _HeroQuickActions extends StatelessWidget {
-  final VoidCallback onEditPerfil;
   final VoidCallback onBrand;
   final VoidCallback onLanding;
   final VoidCallback onWallet;
+  final VoidCallback onPlans;
 
   const _HeroQuickActions({
-    required this.onEditPerfil,
     required this.onBrand,
     required this.onLanding,
     required this.onWallet,
+    required this.onPlans,
   });
 
   @override
   Widget build(BuildContext context) {
     final actions = [
-      (Icons.edit_outlined, 'Editar', onEditPerfil),
       (Icons.palette_outlined, 'Marca', onBrand),
       (Icons.public_outlined, 'Landing', onLanding),
       (Icons.account_balance_wallet_outlined, 'Wallet', onWallet),
+      (Icons.workspace_premium_outlined, 'Plano', onPlans),
     ];
 
     return Row(
@@ -1261,16 +1269,16 @@ class _CompletenessCard extends StatelessWidget {
   final Color accent;
   final bool isDark;
   final List<_ProfileChecklistItem> items;
-  final VoidCallback onEdit;
-  final VoidCallback onReview;
+  final VoidCallback onPublicProfile;
+  final VoidCallback onLanding;
 
   const _CompletenessCard({
     required this.score,
     required this.accent,
     required this.isDark,
     required this.items,
-    required this.onEdit,
-    required this.onReview,
+    required this.onPublicProfile,
+    required this.onLanding,
   });
 
   @override
@@ -1359,17 +1367,17 @@ class _CompletenessCard extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: onEdit,
-                  icon: const Icon(Icons.edit_outlined, size: 18),
-                  label: Text(complete ? 'Refinar dados' : 'Completar dados'),
+                  onPressed: onPublicProfile,
+                  icon: const Icon(Icons.north_east, size: 18),
+                  label: Text(complete ? 'Ver publico' : 'Ver preview'),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: onReview,
-                  icon: const Icon(Icons.fact_check_outlined, size: 18),
-                  label: const Text('Revisar dados'),
+                  onPressed: onLanding,
+                  icon: const Icon(Icons.tune_outlined, size: 18),
+                  label: const Text('Otimizar landing'),
                 ),
               ),
             ],
