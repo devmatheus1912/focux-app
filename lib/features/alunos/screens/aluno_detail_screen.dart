@@ -401,11 +401,10 @@ class AlunoDetailScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (aluno) {
-          // Fake mock data for UI parity until we get these from backend
-          final aderencia = "85%";
-          final streak = "12d";
-          final prs = "3";
-          final treinos = "45";
+          final aderencia = "--";
+          final streak = "--";
+          final prs = "--";
+          final treinos = "--";
 
           return CustomScrollView(
             slivers: [
@@ -634,6 +633,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       _EvolucaoInteligenteCard(
+                        alunoId: alunoId,
+                        alunoNome: aluno.nome,
                         evolucaoAsync: evolucaoAsync,
                         isDark: isDark,
                       ),
@@ -780,11 +781,18 @@ class AlunoDetailScreen extends ConsumerWidget {
                               height: 72,
                               child:
                                   aluno.peso == null
-                                      ? _EmptyMiniState(
-                                        icon: Icons.monitor_weight_outlined,
-                                        text:
-                                            'Registre a primeira medida para acompanhar evolução.',
-                                        isDark: isDark,
+                                      ? InkWell(
+                                        borderRadius: BorderRadius.circular(14),
+                                        onTap:
+                                            () => context.push(
+                                              '/alunos/$alunoId/evolucao',
+                                              extra: aluno.nome,
+                                            ),
+                                        child: _EmptyMiniState(
+                                          icon: Icons.monitor_weight_outlined,
+                                          text: 'Registrar primeira medida',
+                                          isDark: isDark,
+                                        ),
                                       )
                                       : FxSparkline(
                                         data: const [
@@ -865,8 +873,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           _ModuleTile(
                             icon: Icons.fitness_center,
                             label: 'Treinos',
-                            sub: '45 vinculados',
-                            badge: 'Ativo',
+                            sub: 'Sem dados recentes',
+                            badge: 'Abrir',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -919,8 +927,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           _ModuleTile(
                             icon: Icons.assessment_outlined,
                             label: 'Aderência',
-                            sub: '85% semanal',
-                            badge: 'OK',
+                            sub: 'Sem dados',
+                            badge: 'Abrir',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -1281,13 +1289,74 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   }
 
   void _prepararMensagem(BuildContext context, String acao) {
-    Clipboard.setData(ClipboardData(text: _mensagemPronta(aluno, acao)));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Mensagem copiada. Cole no chat se quiser enviar.'),
-      ),
+    final message = _mensagemPronta(aluno, acao);
+    final primary = Theme.of(context).colorScheme.primary;
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder:
+          (sheetContext) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Mensagem sugerida',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: BrandPalette.softer(primary),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(message, style: const TextStyle(height: 1.35)),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: message));
+                            Navigator.pop(sheetContext);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Mensagem copiada.'),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.copy_rounded, size: 16),
+                          label: const Text('Copiar'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () {
+                            Navigator.pop(sheetContext);
+                            context.push(
+                              '/alunos/${aluno.id}/chat',
+                              extra: {'nome': aluno.nome},
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 16,
+                          ),
+                          label: const Text('Abrir chat'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
     );
-    context.push('/alunos/${aluno.id}/chat', extra: {'nome': aluno.nome});
   }
 
   FilaAcaoResumo? _firstOpenCopilotAction(List<FilaAcaoResumo>? actions) {
@@ -1406,6 +1475,20 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     return 'Oi, $primeiroNome. Notei que você se afastou um pouco dos treinos. Quer retomar? Me responde por aqui que eu ajusto o plano.';
   }
 
+  String _displayAction(Aluno aluno, String acao) {
+    final lower = _cleanCopilotText(acao).toLowerCase();
+    if (lower.contains('financeir') || lower.contains('inadimpl')) {
+      return 'Alinhar pendência financeira antes de qualquer ajuste.';
+    }
+    if (lower.contains('perfil') || lower.contains('medida')) {
+      return 'Completar dados do perfil para melhorar a prescrição.';
+    }
+    if (lower.contains('treino') || lower.contains('carga')) {
+      return 'Ajustar treino e orientar próximo check-in.';
+    }
+    return 'Retomar contato e ajustar plano com base na resposta.';
+  }
+
   String _cleanCopilotText(String value) {
     return value
         .replaceAll(RegExp(r'\*\*|__|`'), '')
@@ -1425,6 +1508,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
     final openTask = _firstOpenCopilotAction(openActionsAsync.valueOrNull);
     final resumo = resumoAsync.valueOrNull;
+    final profileCompletion = _perfilCompletion(aluno);
     final signals = _signals(context, aluno, resumo);
     final fallback = _fallbackAction(aluno, resumo);
 
@@ -1497,6 +1581,29 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                     .toList(),
           ),
           const SizedBox(height: 10),
+          if (profileCompletion < 80) ...[
+            SizedBox(
+              width: double.infinity,
+              height: 40,
+              child: OutlinedButton.icon(
+                onPressed:
+                    () => context.push(
+                      '/alunos/${aluno.id}/editar',
+                      extra: aluno,
+                    ),
+                icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
+                label: const Text('Completar perfil'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primary,
+                  side: BorderSide(color: primary.withValues(alpha: 0.28)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
@@ -1529,7 +1636,8 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                                 action['tipo'] ??
                                 'Próxima melhor ação')
                             .toString(),
-                    action: _cleanCopilotText(
+                    action: _displayAction(
+                      aluno,
                       (action['acao'] ??
                               action['mensagem'] ??
                               action['descricao'] ??
@@ -1598,10 +1706,14 @@ class _Aluno360CopilotCard extends ConsumerWidget {
 }
 
 class _EvolucaoInteligenteCard extends StatelessWidget {
+  final int alunoId;
+  final String alunoNome;
   final AsyncValue<EvolucaoInteligente> evolucaoAsync;
   final bool isDark;
 
   const _EvolucaoInteligenteCard({
+    required this.alunoId,
+    required this.alunoNome,
     required this.evolucaoAsync,
     required this.isDark,
   });
@@ -1761,6 +1873,31 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
               Text(
                 ev.proximaAcao,
                 style: TextStyle(color: ink, fontSize: 13, height: 1.3),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 40,
+                child: OutlinedButton.icon(
+                  onPressed:
+                      () => context.push(
+                        '/alunos/$alunoId/treinos-list',
+                        extra: alunoNome,
+                      ),
+                  icon: const Icon(Icons.fitness_center_rounded, size: 16),
+                  label: Text(
+                    ev.sinal == 'SEM_DADOS'
+                        ? 'Pedir check-in'
+                        : 'Ajustar treino',
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: primary,
+                    side: BorderSide(color: primary.withValues(alpha: 0.32)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                  ),
+                ),
               ),
               if (ev.sugerirCopiloto) ...[
                 const SizedBox(height: 10),
