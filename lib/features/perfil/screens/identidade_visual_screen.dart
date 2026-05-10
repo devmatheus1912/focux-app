@@ -625,7 +625,7 @@ class _IdentidadeVisualScreenState
                 onChanged: (value) => setState(() => _editorTab = value),
                 isDark: isDark,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
             ],
 
             AbsorbPointer(
@@ -638,7 +638,7 @@ class _IdentidadeVisualScreenState
                       TextFormField(
                         controller: _descCtrl,
                         enabled: isPremiumOrAbove,
-                        maxLines: 3,
+                        maxLines: 2,
                         maxLength: 500,
                         decoration: const InputDecoration(
                           labelText: 'Descrição profissional',
@@ -665,12 +665,13 @@ class _IdentidadeVisualScreenState
                           hintText: 'seuperfil',
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      _LandingEditorCard(
+                      const SizedBox(height: 16),
+                      _LandingAccordionCard(
                         isDark: isDark,
                         title: 'Controle editorial',
                         subtitle:
                             'Personalize a primeira dobra e escolha a ordem das secoes para sua landing nao parecer template.',
+                        icon: Icons.edit_note_outlined,
                         child: _LandingEditorialControls(
                           isPremiumOrAbove: isPremiumOrAbove,
                           isDark: isDark,
@@ -1297,7 +1298,10 @@ int _landingReadinessScore({
   required int faqCount,
 }) {
   var score = 0;
-  if (heroTitle.trim().isNotEmpty) score += 14;
+  final hasBio = bio.trim().isNotEmpty;
+  final hasSpecialty = specialty.trim().isNotEmpty;
+  final hasAutoHeadlineBase = hasBio && hasSpecialty;
+  if (heroTitle.trim().isNotEmpty || hasAutoHeadlineBase) score += 14;
   if (bio.trim().isNotEmpty) score += 14;
   if (specialty.trim().isNotEmpty) score += 10;
   if (heroPhotoReady) score += 16;
@@ -1347,7 +1351,7 @@ class _LandingReadinessHeader extends StatelessWidget {
     final missingOffer = servicesCount < 2 || packagesCount < 1 || faqCount < 2;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: card,
         borderRadius: BorderRadius.circular(22),
@@ -1359,8 +1363,8 @@ class _LandingReadinessHeader extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   color: primary.withValues(alpha: isDark ? 0.20 : 0.10),
                   borderRadius: BorderRadius.circular(16),
@@ -1373,10 +1377,12 @@ class _LandingReadinessHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Landing $score% pronta',
+                      score >= 100
+                          ? 'Landing pronta'
+                          : 'Landing $score% pronta',
                       style: TextStyle(
                         color: ink,
-                        fontSize: 18,
+                        fontSize: 17,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -1405,7 +1411,7 @@ class _LandingReadinessHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
@@ -1418,7 +1424,7 @@ class _LandingReadinessHeader extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation(primary),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 7,
             runSpacing: 7,
@@ -1456,7 +1462,7 @@ class _LandingReadinessHeader extends StatelessWidget {
             ],
           ),
           if (slug != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
               decoration: BoxDecoration(
