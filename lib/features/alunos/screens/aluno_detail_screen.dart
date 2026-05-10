@@ -50,20 +50,18 @@ final alunoTimeline360ApiProvider =
 
 int _perfilCompletion(Aluno aluno) {
   final fields = [
+    aluno.nome,
+    aluno.email,
     aluno.telefone,
     aluno.whatsapp,
     aluno.objetivo,
     aluno.genero,
-    aluno.fotoUrl,
-    aluno.dataNascimento,
-    aluno.peso,
-    aluno.altura,
+    aluno.tipoConsultoria,
   ];
   final filled =
       fields.where((value) {
         if (value == null) return false;
-        if (value is String) return value.trim().isNotEmpty;
-        return true;
+        return value.trim().isNotEmpty;
       }).length;
   return ((filled / fields.length) * 100).round().clamp(0, 100);
 }
@@ -1268,26 +1266,13 @@ class _Aluno360CopilotCard extends ConsumerWidget {
           detail: 'Define foco da prescrição e do Copiloto.',
           route: 'edit',
         ),
-      if ((aluno.genero ?? '').trim().isEmpty || aluno.dataNascimento == null)
+      if ((aluno.genero ?? '').trim().isEmpty ||
+          (aluno.tipoConsultoria ?? '').trim().isEmpty)
         const _ProfileGap(
           icon: Icons.badge_outlined,
-          title: 'Dados pessoais',
-          detail: 'Nascimento e contexto básico para leitura 360.',
+          title: 'Perfil do aluno',
+          detail: 'Gênero e consultoria usados no atendimento.',
           route: 'edit',
-        ),
-      if (aluno.peso == null || aluno.altura == null)
-        const _ProfileGap(
-          icon: Icons.monitor_weight_outlined,
-          title: 'Medidas base',
-          detail: 'Peso e altura para evolução e comparativos.',
-          route: 'measures',
-        ),
-      if (aluno.equipamentosDisponiveis.isEmpty)
-        const _ProfileGap(
-          icon: Icons.tune_rounded,
-          title: 'Equipamentos',
-          detail: 'Evita sugestão fora da realidade do aluno.',
-          route: 'equipment',
         ),
     ];
   }
