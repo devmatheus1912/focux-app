@@ -542,6 +542,17 @@ class _IdentidadeVisualScreenState
     final servicesCount = _buildServicosPayload().length;
     final packagesCount = _buildPacotesPayload().length;
     final faqCount = _buildFaqPayload().length;
+    final landingScore = _landingReadinessScore(
+      heroTitle: _heroTitleCtrl.text,
+      bio: _descCtrl.text,
+      specialty: _espCtrl.text,
+      heroPhotoReady: heroPhotoReady,
+      bioPhotoReady: bioPhotoReady,
+      videoReady: _videoCtrl.text.trim().isNotEmpty,
+      servicesCount: servicesCount,
+      packagesCount: packagesCount,
+      faqCount: faqCount,
+    );
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
@@ -599,15 +610,15 @@ class _IdentidadeVisualScreenState
             // SECTION A — Landing page content (PREMIUM+)
             _SectionHeader(text: 'Sua landing page', isDark: isDark),
             const SizedBox(height: 8),
-            _LandingCoachCard(
+            _LandingReadinessHeader(
               isDark: isDark,
-              title: 'Direcao criativa',
-              tips: const [
-                'Escolha uma promessa clara: emagrecimento, performance, hipertrofia ou saude.',
-                'Use fotos e videos reais para passar confianca antes do aluno chamar.',
-                'Deixe preco, servicos e duvidas frequentes simples de comparar.',
-                'Escolha uma direcao editorial: a landing fica unica pela foto real, promessa, cores, video e oferta do personal.',
-              ],
+              score: landingScore,
+              primary: themePrimary,
+              servicesCount: servicesCount,
+              packagesCount: packagesCount,
+              faqCount: faqCount,
+              heroPhotoReady: heroPhotoReady,
+              videoReady: _videoCtrl.text.trim().isNotEmpty,
             ),
             const SizedBox(height: 12),
 
@@ -1330,6 +1341,219 @@ class _IdentidadeVisualScreenState
   }
 }
 
+int _landingReadinessScore({
+  required String heroTitle,
+  required String bio,
+  required String specialty,
+  required bool heroPhotoReady,
+  required bool bioPhotoReady,
+  required bool videoReady,
+  required int servicesCount,
+  required int packagesCount,
+  required int faqCount,
+}) {
+  var score = 0;
+  if (heroTitle.trim().isNotEmpty) score += 14;
+  if (bio.trim().isNotEmpty) score += 14;
+  if (specialty.trim().isNotEmpty) score += 10;
+  if (heroPhotoReady) score += 16;
+  if (bioPhotoReady) score += 12;
+  if (videoReady) score += 10;
+  if (servicesCount >= 2) score += 10;
+  if (packagesCount >= 1) score += 8;
+  if (faqCount >= 2) score += 6;
+  return score.clamp(0, 100);
+}
+
+class _LandingReadinessHeader extends StatelessWidget {
+  final bool isDark;
+  final int score;
+  final Color primary;
+  final int servicesCount;
+  final int packagesCount;
+  final int faqCount;
+  final bool heroPhotoReady;
+  final bool videoReady;
+
+  const _LandingReadinessHeader({
+    required this.isDark,
+    required this.score,
+    required this.primary,
+    required this.servicesCount,
+    required this.packagesCount,
+    required this.faqCount,
+    required this.heroPhotoReady,
+    required this.videoReady,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final missingOffer = servicesCount < 2 || packagesCount < 1 || faqCount < 2;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: card,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: isDark ? 0.20 : 0.10),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(Icons.auto_awesome, color: primary, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Landing $score% pronta',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      missingOffer
+                          ? 'Complete oferta comparavel para vender melhor.'
+                          : 'Base forte: promessa, midia e oferta alinhadas.',
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 12.2,
+                        height: 1.25,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '$score%',
+                style: TextStyle(
+                  color: primary,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              minHeight: 8,
+              value: score / 100,
+              backgroundColor:
+                  isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : EagleTokens.lineSoft,
+              valueColor: AlwaysStoppedAnimation(primary),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            children: [
+              _ReadinessMiniChip(
+                label: heroPhotoReady ? 'Foto real OK' : 'Falta foto',
+                ok: heroPhotoReady,
+                primary: primary,
+                isDark: isDark,
+              ),
+              _ReadinessMiniChip(
+                label: videoReady ? 'Video OK' : 'Video opcional',
+                ok: videoReady,
+                primary: primary,
+                isDark: isDark,
+              ),
+              _ReadinessMiniChip(
+                label: '$servicesCount servicos',
+                ok: servicesCount >= 2,
+                primary: primary,
+                isDark: isDark,
+              ),
+              _ReadinessMiniChip(
+                label: '$packagesCount planos',
+                ok: packagesCount >= 1,
+                primary: primary,
+                isDark: isDark,
+              ),
+              _ReadinessMiniChip(
+                label: '$faqCount FAQs',
+                ok: faqCount >= 2,
+                primary: primary,
+                isDark: isDark,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadinessMiniChip extends StatelessWidget {
+  final String label;
+  final bool ok;
+  final Color primary;
+  final bool isDark;
+
+  const _ReadinessMiniChip({
+    required this.label,
+    required this.ok,
+    required this.primary,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = ok ? EagleTokens.good : primary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.16 : 0.09),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            ok ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 13,
+            color: color,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11.2,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _LandingEditorTabs extends StatelessWidget {
   final int selected;
   final ValueChanged<int> onChanged;
@@ -2042,71 +2266,6 @@ class _SectionHeader extends StatelessWidget {
         fontWeight: FontWeight.w700,
         color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
         letterSpacing: 1.0,
-      ),
-    );
-  }
-}
-
-class _LandingCoachCard extends StatelessWidget {
-  final String title;
-  final List<String> tips;
-  final bool isDark;
-
-  const _LandingCoachCard({
-    required this.title,
-    required this.tips,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: primary.withValues(alpha: isDark ? 0.16 : 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primary.withValues(alpha: 0.24)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.auto_awesome, color: primary, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  color: ink,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          for (final tip in tips)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.check_circle, color: primary, size: 15),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      tip,
-                      style: TextStyle(color: mute, height: 1.35),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
       ),
     );
   }
