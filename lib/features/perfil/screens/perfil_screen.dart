@@ -343,450 +343,451 @@ class _PerfilBody extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: bg,
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(0, 0, 0, 6),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    transform: const GradientRotation(160 * math.pi / 180),
-                    colors:
-                        isDark
-                            ? const [Color(0xFF2A44A8), Color(0xFF060D28)]
-                            : [primaryColor, secondaryColor],
-                  ),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(0, 0, 0, 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  transform: const GradientRotation(160 * math.pi / 180),
+                  colors:
+                      isDark
+                          ? const [Color(0xFF2A44A8), Color(0xFF060D28)]
+                          : [primaryColor, secondaryColor],
                 ),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: CustomPaint(painter: _ProfileTexturePainter()),
-                      ),
+              ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: CustomPaint(painter: _ProfileTexturePainter()),
                     ),
-                    Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(18, 10, 18, 0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _HeroAction(
-                                icon: Icons.arrow_back_ios_new,
-                                onTap:
-                                    () => safePopOrGo(
-                                      context,
-                                      '/dashboard/personal',
+                  ),
+                  Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          18,
+                          MediaQuery.paddingOf(context).top + 10,
+                          18,
+                          0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _HeroAction(
+                              icon: Icons.arrow_back_ios_new,
+                              onTap:
+                                  () => safePopOrGo(
+                                    context,
+                                    '/dashboard/personal',
+                                  ),
+                            ),
+                            Text(
+                              'Perfil',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.1,
+                              ),
+                            ),
+                            _HeroAction(
+                              icon: Icons.edit_outlined,
+                              onTap: onEditPerfil,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _Avatar(
+                              nome: perfil.nome,
+                              logoUrl: perfil.logoUrl ?? dashboard.logoUrl,
+                              primaryColor: primaryColor,
+                              onTap: onPickPhoto,
+                              loading: uploadingPhoto,
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _PlanPill(
+                                    label: _formatProfilePlan(perfil.plano),
+                                  ),
+                                  const SizedBox(height: 7),
+                                  Text(
+                                    perfil.nome,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.headlineSmall
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w900,
+                                          height: 0.98,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    _buildSubtitle(perfil),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12.5,
+                                      height: 1.25,
                                     ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Perfil',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.1,
-                                ),
-                              ),
-                              _HeroAction(
-                                icon: Icons.edit_outlined,
-                                onTap: onEditPerfil,
-                              ),
-                            ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _HeroQuickActions(
+                          onBrand: () => context.push('/identidade-visual'),
+                          onLanding: () => context.push('/landing-config'),
+                          onWallet: () => context.push('/perfil/wallet'),
+                          onPlans: () => context.push('/planos'),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.18),
+                          border: Border(
+                            top: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.12),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              _Avatar(
-                                nome: perfil.nome,
-                                logoUrl: perfil.logoUrl ?? dashboard.logoUrl,
-                                primaryColor: primaryColor,
-                                onTap: onPickPhoto,
-                                loading: uploadingPhoto,
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
+                        child: Row(
+                          children: List.generate(stats.length, (index) {
+                            final item = stats[index];
+                            return Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                  horizontal: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  border:
+                                      index < stats.length - 1
+                                          ? Border(
+                                            right: BorderSide(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.10,
+                                              ),
+                                            ),
+                                          )
+                                          : null,
+                                ),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    _PlanPill(
-                                      label: _formatProfilePlan(perfil.plano),
+                                    Icon(
+                                      item.icon,
+                                      size: 15,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.78,
+                                      ),
                                     ),
-                                    const SizedBox(height: 7),
+                                    const SizedBox(height: 4),
                                     Text(
-                                      perfil.nome,
-                                      maxLines: 2,
+                                      item.value,
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.headlineSmall
-                                          ?.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w900,
-                                            height: 0.98,
-                                          ),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0,
+                                      ),
                                     ),
-                                    const SizedBox(height: 5),
+                                    const SizedBox(height: 2),
                                     Text(
-                                      _buildSubtitle(perfil),
-                                      maxLines: 2,
+                                      item.label,
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
                                         color: Colors.white70,
-                                        fontSize: 12.5,
-                                        height: 1.25,
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: _HeroQuickActions(
-                            onBrand: () => context.push('/identidade-visual'),
-                            onLanding: () => context.push('/landing-config'),
-                            onWallet: () => context.push('/perfil/wallet'),
-                            onPlans: () => context.push('/planos'),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.18),
-                            border: Border(
-                              top: BorderSide(
-                                color: Colors.white.withValues(alpha: 0.12),
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            children: List.generate(stats.length, (index) {
-                              final item = stats[index];
-                              return Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
-                                    horizontal: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    border:
-                                        index < stats.length - 1
-                                            ? Border(
-                                              right: BorderSide(
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.10,
-                                                ),
-                                              ),
-                                            )
-                                            : null,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        item.icon,
-                                        size: 15,
-                                        color: Colors.white.withValues(
-                                          alpha: 0.78,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        item.value,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 0,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        item.label,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 10.5,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 96),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  _CardSection(
-                    title: 'Identidade visual',
-                    subtitle:
-                        'Marca aplicada no app, landing page e white-label.',
-                    trailingLabel: 'Abrir',
-                    onTap: () => context.push('/identidade-visual'),
-                    isDark: isDark,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _BrandPreview(
-                          primary: primaryColor,
-                          secondary: secondaryColor,
-                          profileName: perfil.nome,
-                          publicUrl: publicUrl,
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 9,
-                          runSpacing: 9,
-                          children: [
-                            ...swatches.map(
-                              (color) => _ColorSwatch(
-                                color: color,
-                                borderColor: line,
-                                selected: color == primaryColor,
-                              ),
-                            ),
-                            _AddSwatch(borderColor: line, mute: mute),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _CompletenessCard(
-                    score: profileScore,
-                    accent: accent,
-                    isDark: isDark,
-                    items: _profileChecklist(perfil, dashboard),
-                    onPublicProfile:
-                        publicUrl == null
-                            ? () => context.push('/landing-config')
-                            : () => launchUrl(
-                              Uri.parse(publicUrl),
-                              mode: LaunchMode.externalApplication,
-                            ),
-                    onLanding: () => context.push('/landing-config'),
-                  ),
-                  const SizedBox(height: 12),
-                  _CardSection(
-                    title: 'Informações',
-                    subtitle:
-                        'Dados vistos em contratos, alunos e canais publicos.',
-                    isDark: isDark,
-                    child: Column(
-                      children: [
-                        _InfoTile(
-                          icon: Icons.email_outlined,
-                          label: 'Email',
-                          value: perfil.email,
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                        ),
-                        _InfoTile(
-                          icon: Icons.badge_outlined,
-                          label: 'CREF',
-                          value: perfil.cref ?? 'Nao informado',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                        ),
-                        _InfoTile(
-                          icon: Icons.trending_up_outlined,
-                          label: 'Especialidade',
-                          value:
-                              perfil.especialidades ??
-                              perfil.especialidade ??
-                              'Nao informada',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                        ),
-                        _InfoTile(
-                          icon: Icons.alternate_email,
-                          label: 'Instagram',
-                          value: _formatInstagram(
-                            perfil.instagram ?? dashboard.instagram,
-                          ),
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          showDivider: false,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (bioText.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    _CardSection(
-                      title: 'Bio profissional',
-                      subtitle: 'Texto usado como prova de autoridade.',
-                      isDark: isDark,
-                      child: Text(
-                        bioText,
-                        style: TextStyle(color: ink, height: 1.55),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  _CardSection(
-                    title: 'Conta e plano',
-                    subtitle: 'Acesso, billing, IA, documentos e seguranca.',
-                    isDark: isDark,
-                    child: Column(
-                      children: [
-                        _ActionTile(
-                          icon: Icons.auto_awesome_outlined,
-                          label: 'Copiloto IA',
-                          value: '${_formatPlanLabel(perfil.plano)} ativo',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          onTap: () => context.go('/ia/copiloto'),
-                        ),
-                        _ActionTile(
-                          icon: Icons.workspace_premium_outlined,
-                          label: 'Planos e assinatura',
-                          value: 'Gerenciar',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          onTap: () => context.push('/planos'),
-                        ),
-                        _ActionTile(
-                          icon: Icons.public_outlined,
-                          label: 'Landing page',
-                          value: publicUrl == null ? 'Configurar' : 'Editar',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          onTap: () => context.push('/landing-config'),
-                        ),
-                        _ActionTile(
-                          icon: Icons.account_balance_wallet_outlined,
-                          label: 'Carteira e PIX',
-                          value: _hasWallet(perfil) ? 'Completa' : 'Configurar',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          onTap: () => context.push('/perfil/wallet'),
-                        ),
-                        _ActionTile(
-                          icon: Icons.bolt_outlined,
-                          label: 'Migracao Magica',
-                          value: 'Abrir ferramenta',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          onTap: () => context.push('/migracao-magica'),
-                        ),
-                        _ActionTile(
-                          icon: Icons.description_outlined,
-                          label: 'Termos de uso',
-                          value: '',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          onTap:
-                              () => launchUrl(
-                                Uri.parse(
-                                  'https://focux-backend-production.up.railway.app/termos.html',
-                                ),
-                                mode: LaunchMode.externalApplication,
-                              ),
-                        ),
-                        _ActionTile(
-                          icon: Icons.privacy_tip_outlined,
-                          label: 'Politica de privacidade',
-                          value: '',
-                          accent: accent,
-                          mute: mute,
-                          line: line,
-                          onTap:
-                              () => launchUrl(
-                                Uri.parse(
-                                  'https://focux-backend-production.up.railway.app/privacidade.html',
-                                ),
-                                mode: LaunchMode.externalApplication,
-                              ),
-                        ),
-                        _ActionTile(
-                          icon: Icons.logout,
-                          label: 'Sair da conta',
-                          value: '',
-                          accent: EagleTokens.bad,
-                          mute: mute,
-                          line: line,
-                          danger: true,
-                          onTap: onLogout,
-                        ),
-                        _ActionTile(
-                          icon: Icons.delete_forever_outlined,
-                          label: 'Excluir minha conta',
-                          value: '',
-                          accent: EagleTokens.bad,
-                          mute: mute,
-                          line: line,
-                          danger: true,
-                          showDivider: false,
-                          onTap: () => _showDeleteAccountDialog(context),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => context.push('/perfil/wallet'),
-                          icon: const Icon(
-                            Icons.account_balance_wallet_outlined,
-                          ),
-                          label: const Text('PIX'),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed:
-                              publicUrl == null
-                                  ? () => context.push('/landing-config')
-                                  : () => launchUrl(
-                                    Uri.parse(publicUrl),
-                                    mode: LaunchMode.externalApplication,
-                                  ),
-                          icon: const Icon(Icons.north_east),
-                          label: const Text('Ver perfil publico'),
+                            );
+                          }),
                         ),
                       ),
                     ],
                   ),
-                ]),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 96),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _CardSection(
+                  title: 'Identidade visual',
+                  subtitle:
+                      'Marca aplicada no app, landing page e white-label.',
+                  trailingLabel: 'Abrir',
+                  onTap: () => context.push('/identidade-visual'),
+                  isDark: isDark,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _BrandPreview(
+                        primary: primaryColor,
+                        secondary: secondaryColor,
+                        profileName: perfil.nome,
+                        publicUrl: publicUrl,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 9,
+                        runSpacing: 9,
+                        children: [
+                          ...swatches.map(
+                            (color) => _ColorSwatch(
+                              color: color,
+                              borderColor: line,
+                              selected: color == primaryColor,
+                            ),
+                          ),
+                          _AddSwatch(borderColor: line, mute: mute),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _CompletenessCard(
+                  score: profileScore,
+                  accent: accent,
+                  isDark: isDark,
+                  items: _profileChecklist(perfil, dashboard),
+                  onPublicProfile:
+                      publicUrl == null
+                          ? () => context.push('/landing-config')
+                          : () => launchUrl(
+                            Uri.parse(publicUrl),
+                            mode: LaunchMode.externalApplication,
+                          ),
+                  onLanding: () => context.push('/landing-config'),
+                ),
+                const SizedBox(height: 12),
+                _CardSection(
+                  title: 'Informações',
+                  subtitle:
+                      'Dados vistos em contratos, alunos e canais publicos.',
+                  isDark: isDark,
+                  child: Column(
+                    children: [
+                      _InfoTile(
+                        icon: Icons.email_outlined,
+                        label: 'Email',
+                        value: perfil.email,
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                      ),
+                      _InfoTile(
+                        icon: Icons.badge_outlined,
+                        label: 'CREF',
+                        value: perfil.cref ?? 'Nao informado',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                      ),
+                      _InfoTile(
+                        icon: Icons.trending_up_outlined,
+                        label: 'Especialidade',
+                        value:
+                            perfil.especialidades ??
+                            perfil.especialidade ??
+                            'Nao informada',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                      ),
+                      _InfoTile(
+                        icon: Icons.alternate_email,
+                        label: 'Instagram',
+                        value: _formatInstagram(
+                          perfil.instagram ?? dashboard.instagram,
+                        ),
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        showDivider: false,
+                      ),
+                    ],
+                  ),
+                ),
+                if (bioText.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _CardSection(
+                    title: 'Bio profissional',
+                    subtitle: 'Texto usado como prova de autoridade.',
+                    isDark: isDark,
+                    child: Text(
+                      bioText,
+                      style: TextStyle(color: ink, height: 1.55),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                _CardSection(
+                  title: 'Conta e plano',
+                  subtitle: 'Acesso, billing, IA, documentos e seguranca.',
+                  isDark: isDark,
+                  child: Column(
+                    children: [
+                      _ActionTile(
+                        icon: Icons.auto_awesome_outlined,
+                        label: 'Copiloto IA',
+                        value: '${_formatPlanLabel(perfil.plano)} ativo',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => context.go('/ia/copiloto'),
+                      ),
+                      _ActionTile(
+                        icon: Icons.workspace_premium_outlined,
+                        label: 'Planos e assinatura',
+                        value: 'Gerenciar',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => context.push('/planos'),
+                      ),
+                      _ActionTile(
+                        icon: Icons.public_outlined,
+                        label: 'Landing page',
+                        value: publicUrl == null ? 'Configurar' : 'Editar',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => context.push('/landing-config'),
+                      ),
+                      _ActionTile(
+                        icon: Icons.account_balance_wallet_outlined,
+                        label: 'Carteira e PIX',
+                        value: _hasWallet(perfil) ? 'Completa' : 'Configurar',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => context.push('/perfil/wallet'),
+                      ),
+                      _ActionTile(
+                        icon: Icons.bolt_outlined,
+                        label: 'Migracao Magica',
+                        value: 'Abrir ferramenta',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => context.push('/migracao-magica'),
+                      ),
+                      _ActionTile(
+                        icon: Icons.description_outlined,
+                        label: 'Termos de uso',
+                        value: '',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap:
+                            () => launchUrl(
+                              Uri.parse(
+                                'https://focux-backend-production.up.railway.app/termos.html',
+                              ),
+                              mode: LaunchMode.externalApplication,
+                            ),
+                      ),
+                      _ActionTile(
+                        icon: Icons.privacy_tip_outlined,
+                        label: 'Politica de privacidade',
+                        value: '',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap:
+                            () => launchUrl(
+                              Uri.parse(
+                                'https://focux-backend-production.up.railway.app/privacidade.html',
+                              ),
+                              mode: LaunchMode.externalApplication,
+                            ),
+                      ),
+                      _ActionTile(
+                        icon: Icons.logout,
+                        label: 'Sair da conta',
+                        value: '',
+                        accent: EagleTokens.bad,
+                        mute: mute,
+                        line: line,
+                        danger: true,
+                        onTap: onLogout,
+                      ),
+                      _ActionTile(
+                        icon: Icons.delete_forever_outlined,
+                        label: 'Excluir minha conta',
+                        value: '',
+                        accent: EagleTokens.bad,
+                        mute: mute,
+                        line: line,
+                        danger: true,
+                        showDivider: false,
+                        onTap: () => _showDeleteAccountDialog(context),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => context.push('/perfil/wallet'),
+                        icon: const Icon(Icons.account_balance_wallet_outlined),
+                        label: const Text('PIX'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed:
+                            publicUrl == null
+                                ? () => context.push('/landing-config')
+                                : () => launchUrl(
+                                  Uri.parse(publicUrl),
+                                  mode: LaunchMode.externalApplication,
+                                ),
+                        icon: const Icon(Icons.north_east),
+                        label: const Text('Ver perfil publico'),
+                      ),
+                    ),
+                  ],
+                ),
+              ]),
+            ),
+          ),
+        ],
       ),
     );
   }
