@@ -1281,10 +1281,13 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   }
 
   void _prepararMensagem(BuildContext context, String acao) {
-    context.push(
-      '/alunos/${aluno.id}/chat',
-      extra: {'nome': aluno.nome, 'draft': _mensagemPronta(aluno, acao)},
+    Clipboard.setData(ClipboardData(text: _mensagemPronta(aluno, acao)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Mensagem copiada. Cole no chat se quiser enviar.'),
+      ),
     );
+    context.push('/alunos/${aluno.id}/chat', extra: {'nome': aluno.nome});
   }
 
   FilaAcaoResumo? _firstOpenCopilotAction(List<FilaAcaoResumo>? actions) {
@@ -2475,7 +2478,9 @@ class _Aluno360ActionRowState extends State<_Aluno360ActionRow> {
           width: 112,
           height: 44,
           child: InkWell(
-            onTap: () => widget.onPrepareMessage(widget.acao),
+            onTap: () {
+              widget.onPrepareMessage(widget.acao);
+            },
             borderRadius: BorderRadius.circular(14),
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -2495,7 +2500,7 @@ class _Aluno360ActionRowState extends State<_Aluno360ActionRow> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Enviar msg',
+                    'Abrir chat',
                     style: TextStyle(
                       color: widget.primary,
                       fontSize: 12,
