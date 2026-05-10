@@ -1000,6 +1000,8 @@ class _QuickTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final numVal = int.tryParse(value) ?? 0;
 
     return InkWell(
       onTap: onTap,
@@ -1026,14 +1028,40 @@ class _QuickTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(child: FxIcon(name: icon, size: 14, color: accent)),
+            Row(
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(child: FxIcon(name: icon, size: 14, color: accent)),
+                ),
+                const Spacer(),
+                // Micro-status badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: numVal > 0
+                        ? accent.withValues(alpha: isDark ? 0.12 : 0.07)
+                        : (isDark
+                            ? Colors.white.withValues(alpha: 0.04)
+                            : const Color(0xFFF5F5F3)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    numVal > 0 ? 'ativo' : '—',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      color: numVal > 0 ? accent : mute,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const Spacer(),
             Text(
@@ -1271,6 +1299,7 @@ class _ShortcutBtn extends StatelessWidget {
     final primaryAccent = BrandPalette.accent(primary);
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return InkWell(
       onTap: onTap,
@@ -1292,11 +1321,16 @@ class _ShortcutBtn extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              width: 32,
-              height: 32,
+              width: 34,
+              height: 34,
               decoration: BoxDecoration(
-                color: (isDark ? primaryAccent : primary).withValues(
-                  alpha: isDark ? 0.14 : 0.09,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    (isDark ? primaryAccent : primary).withValues(alpha: isDark ? 0.20 : 0.12),
+                    (isDark ? primaryAccent : primary).withValues(alpha: isDark ? 0.08 : 0.04),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1322,6 +1356,11 @@ class _ShortcutBtn extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 16,
+              color: mute.withValues(alpha: 0.5),
             ),
           ],
         ),
