@@ -9,7 +9,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../providers/treinos_provider.dart';
 
 const _niveis = ['INICIANTE', 'INTERMEDIARIO', 'AVANCADO'];
-const _niveisLabel = ['Iniciante', 'Intermediario', 'Avancado'];
+const _niveisLabel = ['Iniciante', 'Intermediário', 'Avançado'];
 const _niveisIcon = [
   Icons.eco_rounded,
   Icons.speed_rounded,
@@ -19,8 +19,8 @@ const _niveisCor = [EagleTokens.good, EagleTokens.warn, EagleTokens.bad];
 
 const _objetivoPresets = [
   _TreinoPreset('Hipertrofia', 'Volume e carga', Icons.trending_up_rounded),
-  _TreinoPreset('Emagrecimento', 'Ritmo e aderencia', Icons.bolt_rounded),
-  _TreinoPreset('Forca', 'Base e progressao', Icons.fitness_center_rounded),
+  _TreinoPreset('Emagrecimento', 'Ritmo e aderência', Icons.bolt_rounded),
+  _TreinoPreset('Força', 'Base e progressão', Icons.fitness_center_rounded),
   _TreinoPreset('Condicionamento', 'Capacidade geral', Icons.speed_rounded),
 ];
 
@@ -152,7 +152,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
             : _objetivoCtrl.text.trim();
     final previewLevel =
         _nivel == null
-            ? 'Nivel em aberto'
+            ? 'Nível em aberto'
             : _niveisLabel[_niveis.indexOf(_nivel!)];
 
     return Scaffold(
@@ -253,7 +253,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                         const SizedBox(height: 20),
                         _SectionKicker(
                           title: 'Dados essenciais',
-                          action: canSubmit ? 'Pronto' : 'Nome obrigatorio',
+                          action: canSubmit ? 'Pronto' : 'Nome obrigatório',
                           isDark: isDark,
                         ),
                         const SizedBox(height: 10),
@@ -284,7 +284,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                         const SizedBox(height: 14),
                         _FxField(
                           controller: _descricaoCtrl,
-                          label: 'Descricao (opcional)',
+                          label: 'Descrição (opcional)',
                           icon: Icons.notes_rounded,
                           isDark: isDark,
                           maxLines: 2,
@@ -414,7 +414,7 @@ class _CreationHero extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: const Text(
-                  'Criacao guiada',
+                  'Criação guiada',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 11,
@@ -438,7 +438,7 @@ class _CreationHero extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           Text(
-            'Monte a base agora. Os exercicios entram no proximo passo.',
+            'Monte a base agora. Os exercícios entram no próximo passo.',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.72),
               fontSize: 12.2,
