@@ -1393,12 +1393,17 @@ class _Aluno360CopilotCard extends ConsumerWidget {
         aluno.nome.trim().isEmpty
             ? 'tudo bem'
             : aluno.nome.trim().split(' ').first;
-    final cleanAction = _cleanCopilotText(acao);
-    final action =
-        cleanAction.length > 96
-            ? '${cleanAction.substring(0, 96).trim()}...'
-            : cleanAction;
-    return 'Oi, $primeiroNome. $action Quer retomar? Me responde com um ok que eu ajusto o plano.';
+    final lower = _cleanCopilotText(acao).toLowerCase();
+    if (lower.contains('financeir') || lower.contains('inadimpl')) {
+      return 'Oi, $primeiroNome. Preciso alinhar uma pendência rápida para manter seu acesso sem bloqueio. Me responde por aqui?';
+    }
+    if (lower.contains('perfil') || lower.contains('medida')) {
+      return 'Oi, $primeiroNome. Quero completar alguns dados seus para ajustar melhor o plano. Me responde por aqui?';
+    }
+    if (lower.contains('treino') || lower.contains('carga')) {
+      return 'Oi, $primeiroNome. Quero ajustar seu treino para o próximo passo com segurança. Me responde por aqui?';
+    }
+    return 'Oi, $primeiroNome. Notei que você se afastou um pouco dos treinos. Quer retomar? Me responde por aqui que eu ajusto o plano.';
   }
 
   String _cleanCopilotText(String value) {
