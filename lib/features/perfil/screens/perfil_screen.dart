@@ -579,7 +579,7 @@ class _PerfilBody extends StatelessWidget {
                     isDark: isDark,
                     items: _profileChecklist(perfil, dashboard),
                     onEdit: onEditPerfil,
-                    onBrand: () => context.push('/identidade-visual'),
+                    onReview: onEditPerfil,
                   ),
                   const SizedBox(height: 12),
                   _CardSection(
@@ -1262,7 +1262,7 @@ class _CompletenessCard extends StatelessWidget {
   final bool isDark;
   final List<_ProfileChecklistItem> items;
   final VoidCallback onEdit;
-  final VoidCallback onBrand;
+  final VoidCallback onReview;
 
   const _CompletenessCard({
     required this.score,
@@ -1270,7 +1270,7 @@ class _CompletenessCard extends StatelessWidget {
     required this.isDark,
     required this.items,
     required this.onEdit,
-    required this.onBrand,
+    required this.onReview,
   });
 
   @override
@@ -1367,9 +1367,9 @@ class _CompletenessCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: onBrand,
-                  icon: const Icon(Icons.palette_outlined, size: 18),
-                  label: Text(complete ? 'Polir marca' : 'Ajustar marca'),
+                  onPressed: onReview,
+                  icon: const Icon(Icons.fact_check_outlined, size: 18),
+                  label: const Text('Revisar dados'),
                 ),
               ),
             ],
