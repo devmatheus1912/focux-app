@@ -865,7 +865,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           _ModuleTile(
                             icon: Icons.fitness_center,
                             label: 'Treinos',
-                            sub: 'Treinos vinculados',
+                            sub: '45 vinculados',
+                            badge: 'Ativo',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -880,6 +881,10 @@ class AlunoDetailScreen extends ConsumerWidget {
                                 aluno.equipamentosDisponiveis.isEmpty
                                     ? 'Sem restricao'
                                     : '${aluno.equipamentosDisponiveis.length} marcados',
+                            badge:
+                                aluno.equipamentosDisponiveis.isEmpty
+                                    ? 'Base'
+                                    : 'OK',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -890,6 +895,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                             icon: Icons.auto_awesome,
                             label: 'IA Progresso',
                             sub: 'Sugerir carga',
+                            badge: 'IA',
                             highlight: true,
                             isDark: isDark,
                             onTap:
@@ -901,7 +907,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           _ModuleTile(
                             icon: Icons.show_chart,
                             label: 'Medidas',
-                            sub: 'Corpo e PRs',
+                            sub: 'Sem medida',
+                            badge: 'Pendente',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -912,7 +919,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           _ModuleTile(
                             icon: Icons.assessment_outlined,
                             label: 'Aderência',
-                            sub: 'Check-ins',
+                            sub: '85% semanal',
+                            badge: 'OK',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -923,7 +931,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           _ModuleTile(
                             icon: Icons.flag_outlined,
                             label: 'Sucesso',
-                            sub: 'Onboarding',
+                            sub: 'Acompanhar',
+                            badge: 'P2',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -935,6 +944,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                             icon: Icons.people,
                             label: 'Anamnese',
                             sub: 'Completa ✓',
+                            badge: 'OK',
                             isDark: isDark,
                             onTap:
                                 () => context.push('/alunos/$alunoId/anamnese'),
@@ -946,13 +956,18 @@ class AlunoDetailScreen extends ConsumerWidget {
                                 aluno.statusFinanceiro == 'INADIMPLENTE'
                                     ? 'Em atraso'
                                     : 'Em dia',
+                            badge:
+                                aluno.statusFinanceiro == 'INADIMPLENTE'
+                                    ? 'Ação'
+                                    : 'OK',
                             isDark: isDark,
                             onTap: () => context.push('/financeiro'),
                           ),
                           _ModuleTile(
                             icon: Icons.chat,
                             label: 'Chat',
-                            sub: 'Comunicação',
+                            sub: 'Última ação',
+                            badge: 'Pronto',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -964,6 +979,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                             icon: Icons.restaurant_menu,
                             label: 'Dieta',
                             sub: 'Plano atual',
+                            badge: 'Abrir',
                             isDark: isDark,
                             onTap:
                                 () =>
@@ -973,6 +989,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                             icon: Icons.video_camera_back,
                             label: 'Feedback',
                             sub: 'Análise de vídeo',
+                            badge: 'Novo',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -1373,11 +1390,20 @@ class _Aluno360CopilotCard extends ConsumerWidget {
         aluno.nome.trim().isEmpty
             ? 'tudo bem'
             : aluno.nome.trim().split(' ').first;
-    final objetivo =
-        aluno.objetivo == null || aluno.objetivo!.trim().isEmpty
-            ? 'seu objetivo'
-            : aluno.objetivo!.trim();
-    return 'Oi, $primeiroNome! Passei pelo seu acompanhamento agora e o próximo passo para $objetivo é: $acao Me responde aqui com um ok quando fizer, combinado?';
+    final cleanAction = _cleanCopilotText(acao);
+    final action =
+        cleanAction.length > 96
+            ? '${cleanAction.substring(0, 96).trim()}...'
+            : cleanAction;
+    return 'Oi, $primeiroNome. $action Quer retomar? Me responde com um ok que eu ajusto o plano.';
+  }
+
+  String _cleanCopilotText(String value) {
+    return value
+        .replaceAll(RegExp(r'\*\*|__|`'), '')
+        .replaceAll(RegExp(r'^\s*[-•]\s*', multiLine: true), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
   }
 
   @override
@@ -1495,12 +1521,13 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                                 action['tipo'] ??
                                 'Próxima melhor ação')
                             .toString(),
-                    action:
-                        (action['acao'] ??
-                                action['mensagem'] ??
-                                action['descricao'] ??
-                                fallback)
-                            .toString(),
+                    action: _cleanCopilotText(
+                      (action['acao'] ??
+                              action['mensagem'] ??
+                              action['descricao'] ??
+                              fallback)
+                          .toString(),
+                    ),
                     reason:
                         (action['motivo'] ?? 'Baseado nos sinais atuais.')
                             .toString(),
@@ -1536,12 +1563,13 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                   aluno: aluno,
                   primary: primary,
                   existingTask: openTask,
-                  acao:
-                      (action['acao'] ??
-                              action['mensagem'] ??
-                              action['descricao'] ??
-                              fallback)
-                          .toString(),
+                  acao: _cleanCopilotText(
+                    (action['acao'] ??
+                            action['mensagem'] ??
+                            action['descricao'] ??
+                            fallback)
+                        .toString(),
+                  ),
                   onAssign: (acao) => _criarTarefaCopiloto(context, ref, acao),
                   onPrepareMessage: (acao) => _prepararMensagem(context, acao),
                 ),
@@ -2916,6 +2944,7 @@ class _ModuleTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final String sub;
+  final String? badge;
   final bool isDark;
   final bool highlight;
   final VoidCallback onTap;
@@ -2924,6 +2953,7 @@ class _ModuleTile extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.sub,
+    this.badge,
     required this.isDark,
     this.highlight = false,
     required this.onTap,
@@ -2972,16 +3002,44 @@ class _ModuleTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: highlight ? primary : ink,
-                      letterSpacing: -0.2,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: highlight ? primary : ink,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ),
+                      if (badge != null) ...[
+                        const SizedBox(width: 5),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            badge!,
+                            maxLines: 1,
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 8.8,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   Text(
                     sub,

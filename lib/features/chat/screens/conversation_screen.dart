@@ -84,6 +84,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   bool _loadingOlder = false;
   bool _loadFailed = false;
   bool _hasMoreMessages = false;
+  bool _initialDraftChecked = false;
   int? _alunoId;
   int? _nextBeforeId;
   ChatMsg? _replyingTo;
@@ -165,6 +166,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         _loadFailed = false;
         _loading = false;
       });
+      _dedupeInitialDraft();
       await _markRead();
       _scrollToBottom(animated: false);
     } catch (_) {
@@ -281,6 +283,15 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   Future<void> _sendText() async {
     final text = _ctrl.text.trim();
     if (text.isEmpty || _sending || _uploading) return;
+    if (_isDuplicateOutgoing(text)) {
+      HapticFeedback.selectionClick();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Mensagem recente ja enviada.')),
+        );
+      }
+      return;
+    }
     final replyToMessageId = _replyingTo?.id;
     _ctrl.clear();
     HapticFeedback.lightImpact();
@@ -317,6 +328,39 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         setState(() => _sending = false);
       }
     }
+  }
+
+  void _dedupeInitialDraft() {
+    if (_initialDraftChecked) return;
+    _initialDraftChecked = true;
+    final draft = widget.initialDraft?.trim();
+    if (draft == null || draft.isEmpty) return;
+    if (!_isDuplicateOutgoing(draft)) return;
+    setState(() {
+      _ctrl.clear();
+      _composerHasText = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Mensagem recente ja existe no chat.')),
+    );
+  }
+
+  bool _isDuplicateOutgoing(String text) {
+    final normalized = _normalizeOutgoingText(text);
+    if (normalized.isEmpty) return false;
+    for (final msg in _msgs.reversed.take(8)) {
+      if (!_isMine(msg)) continue;
+      if (_normalizeOutgoingText(msg.conteudo) == normalized) return true;
+    }
+    return false;
+  }
+
+  String _normalizeOutgoingText(String value) {
+    return value
+        .replaceAll(RegExp(r'\*\*|__|`'), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim()
+        .toLowerCase();
   }
 
   void _captureAlunoId(ChatMsg msg) {
