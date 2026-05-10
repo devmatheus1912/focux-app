@@ -868,6 +868,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                                     onToggle: () => _toggleSelecionado(a.id),
                                     onLongPress:
                                         _modoSelecao ? null : _toggleModoSelecao,
+                                    activeFiltro: _filtro,
                                   ),
                                 );
                               },
@@ -1209,6 +1210,8 @@ class _AlunoCardFX extends ConsumerStatefulWidget {
   final bool isSelected;
   final VoidCallback? onToggle;
   final VoidCallback? onLongPress;
+  /// Active filter — used to suppress redundant status badges.
+  final AlunoFiltro activeFiltro;
 
   const _AlunoCardFX({
     required this.aluno,
@@ -1216,6 +1219,7 @@ class _AlunoCardFX extends ConsumerStatefulWidget {
     this.isSelected = false,
     this.onToggle,
     this.onLongPress,
+    this.activeFiltro = AlunoFiltro.todos,
   });
 
   @override
@@ -1384,13 +1388,16 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                           displayName,
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                             color: ink,
+                            letterSpacing: -0.15,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (statusText != 'ATIVO') ...[
+                      // Only show badge when it adds information
+                      // (suppress when the active filter already implies the status)
+                      if (_shouldShowBadge(statusText, widget.activeFiltro)) ...[
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -1443,17 +1450,21 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                         width: 7,
                         height: 7,
                         decoration: BoxDecoration(
-                          color: aderColor,
+                          color: weeklyCheckins == 0
+                              ? mute.withValues(alpha: 0.3)
+                              : aderColor,
                           shape: BoxShape.circle,
                         ),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        aderenciaPercent == null ? '--%' : '$aderenciaPercent%',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: aderColor,
+                        aderenciaPercent == null ? '—' : '$aderenciaPercent%',
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 12.5,
+                          fontWeight: weeklyCheckins > 0
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: weeklyCheckins > 0 ? aderColor : mute,
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -1481,6 +1492,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
 
             // Adherence rail + Chevron
             Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 _AdherenceRail(
@@ -1489,8 +1501,12 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                   line: line,
                   isEmpty: weeklyCheckins == 0,
                 ),
-                const SizedBox(height: 10),
-                Icon(Icons.chevron_right, size: 16, color: mute),
+                const SizedBox(height: 6),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: mute.withValues(alpha: 0.5),
+                ),
               ],
             ),
           ],
@@ -1604,6 +1620,22 @@ class _AdherenceRail extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Returns true if the status badge should be shown on the card.
+/// When a filter is active that already implies the status, the badge is
+/// redundant and just adds visual noise to every card.
+bool _shouldShowBadge(String statusText, AlunoFiltro activeFiltro) {
+  if (statusText == 'ATIVO') return false; // Never show badge for active
+  // Suppress when the filter already communicates the status
+  if (statusText == 'RISCO ALTO' && activeFiltro == AlunoFiltro.risco) {
+    return false;
+  }
+  if (statusText == 'INADIMPLENTE' &&
+      activeFiltro == AlunoFiltro.inadimplentes) {
+    return false;
+  }
+  return true;
 }
 
 String? _resolveMediaUrl(String? value) {

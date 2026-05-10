@@ -130,7 +130,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Nao foi possivel remover: $e')));
+      ).showSnackBar(SnackBar(content: Text('Não foi possível remover: $e')));
     }
   }
 
@@ -280,7 +280,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                   : 'Plano do aluno',
                           action:
                               _query.trim().isEmpty
-                                  ? '${treinos.length} planos'
+                                  ? '${treinos.length} ${treinos.length == 1 ? 'plano' : 'planos'}'
                                   : '${filteredTreinos.length} de ${treinos.length}',
                           isDark: isDark,
                         ),
@@ -381,8 +381,8 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                 ? '$subject sai do aluno, mas continua na sua biblioteca.'
                 : '$subject saem destes alunos, mas continuam na sua biblioteca.'
             : count == 1
-            ? '$subject sai da biblioteca. Historicos ja concluidos continuam preservados.'
-            : '$subject saem da biblioteca. Historicos ja concluidos continuam preservados.';
+            ? '$subject sai da biblioteca. Históricos já concluídos continuam preservados.'
+            : '$subject saem da biblioteca. Históricos já concluídos continuam preservados.';
 
     return SafeArea(
       top: false,
@@ -483,7 +483,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                       child: Text(
                         unlinkOnly
                             ? 'O aluno perde o acesso a este plano.'
-                            : 'Historico e execucoes antigas nao sao apagados.',
+                            : 'Histórico e execuções antigas não são apagados.',
                         style: TextStyle(
                           color: mute,
                           fontSize: 12,
@@ -970,7 +970,7 @@ class _LibraryControls extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                'Acoes em lote',
+                                'Ações em lote',
                                 style: TextStyle(
                                   color: mute,
                                   fontSize: 11,
@@ -982,7 +982,7 @@ class _LibraryControls extends StatelessWidget {
                         ),
                         IconButton(
                           onPressed: onCancelSelection,
-                          tooltip: 'Cancelar selecao',
+                          tooltip: 'Cancelar seleção',
                           style: IconButton.styleFrom(
                             backgroundColor:
                                 isDark
@@ -1037,7 +1037,7 @@ class _LibraryControls extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Operacoes da biblioteca',
+                                'Operações da biblioteca',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -1435,7 +1435,7 @@ class _TreinoCard extends StatelessWidget {
                   )
                 else
                   PopupMenuButton<String>(
-                    tooltip: 'Acoes do treino',
+                    tooltip: 'Ações do treino',
                     padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -1485,7 +1485,7 @@ class _TreinoCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Acoes',
+                            'Ações',
                             style: TextStyle(
                               color: mute,
                               fontSize: 11,
@@ -1543,25 +1543,48 @@ class _TreinoCard extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(999),
                     child: LinearProgressIndicator(
-                      minHeight: 6,
+                      minHeight: hasExercises ? 4 : 6,
                       value: hasExercises ? 1 : 0.28,
                       backgroundColor:
                           isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
                       valueColor: AlwaysStoppedAnimation(
-                        hasExercises ? primary : EagleTokens.warn,
+                        hasExercises
+                            ? EagleTokens.good.withValues(alpha: isDark ? 0.5 : 0.35)
+                            : EagleTokens.warn,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  hasExercises ? '~${estimatedMinutes}min' : 'finalizar',
-                  style: TextStyle(
-                    color: hasExercises ? mute : EagleTokens.warn,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w900,
+                if (hasExercises)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle_rounded,
+                        size: 13,
+                        color: EagleTokens.good.withValues(alpha: isDark ? 0.7 : 0.55),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '~${estimatedMinutes}min',
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Text(
+                    'finalizar',
+                    style: TextStyle(
+                      color: EagleTokens.warn,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
-                ),
               ],
             ),
           ],
