@@ -1700,26 +1700,6 @@ class _ProfileTexturePainter extends CustomPainter {
         Paint()
           ..color = Colors.white.withValues(alpha: 0.032)
           ..strokeWidth = 0.5;
-    final beamPaint =
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white.withValues(alpha: 0.18),
-              Colors.white.withValues(alpha: 0),
-            ],
-          ).createShader(Offset.zero & size);
-
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(size.width * 0.78, size.height * 0.20),
-        width: 150,
-        height: 110,
-      ),
-      beamPaint,
-    );
-
     const step = 34.0;
     for (double x = 0; x < size.width; x += step) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
