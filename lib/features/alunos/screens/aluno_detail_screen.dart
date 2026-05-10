@@ -1251,6 +1251,221 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     return 'Revisar treino e propor a próxima evolução de ${aluno.objetivo ?? "objetivo"}.';
   }
 
+  List<_ProfileGap> _profileGaps(Aluno aluno) {
+    return [
+      if ((aluno.telefone ?? '').trim().isEmpty &&
+          (aluno.whatsapp ?? '').trim().isEmpty)
+        const _ProfileGap(
+          icon: Icons.call_outlined,
+          title: 'Contato',
+          detail: 'Telefone ou WhatsApp para acionar o aluno.',
+          route: 'edit',
+        ),
+      if ((aluno.objetivo ?? '').trim().isEmpty)
+        const _ProfileGap(
+          icon: Icons.flag_outlined,
+          title: 'Objetivo',
+          detail: 'Define foco da prescrição e do Copiloto.',
+          route: 'edit',
+        ),
+      if ((aluno.genero ?? '').trim().isEmpty || aluno.dataNascimento == null)
+        const _ProfileGap(
+          icon: Icons.badge_outlined,
+          title: 'Dados pessoais',
+          detail: 'Nascimento e contexto básico para leitura 360.',
+          route: 'edit',
+        ),
+      if (aluno.peso == null || aluno.altura == null)
+        const _ProfileGap(
+          icon: Icons.monitor_weight_outlined,
+          title: 'Medidas base',
+          detail: 'Peso e altura para evolução e comparativos.',
+          route: 'measures',
+        ),
+      if (aluno.equipamentosDisponiveis.isEmpty)
+        const _ProfileGap(
+          icon: Icons.tune_rounded,
+          title: 'Equipamentos',
+          detail: 'Evita sugestão fora da realidade do aluno.',
+          route: 'equipment',
+        ),
+    ];
+  }
+
+  Future<void> _showProfileGaps(BuildContext context, Aluno aluno) async {
+    final gaps = _profileGaps(aluno);
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    Future<void> go(String route, BuildContext sheetContext) async {
+      Navigator.of(sheetContext).pop();
+      if (route == 'measures') {
+        await context.push('/alunos/${aluno.id}/evolucao', extra: aluno.nome);
+        return;
+      }
+      if (route == 'equipment') {
+        await context.push('/alunos/${aluno.id}/equipamentos');
+        return;
+      }
+      await context.push('/alunos/${aluno.id}/editar', extra: aluno);
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      backgroundColor: bg,
+      builder:
+          (sheetContext) => SafeArea(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                4,
+                20,
+                20 + MediaQuery.of(sheetContext).padding.bottom,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          Icons.fact_check_outlined,
+                          color: primary,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Completar perfil',
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              gaps.isEmpty
+                                  ? 'Perfil pronto para decisões da IA.'
+                                  : '${gaps.length} lacuna(s) afetam a prescrição.',
+                              style: TextStyle(color: mute, fontSize: 12.5),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (gaps.isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: EagleTokens.good.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: EagleTokens.good.withValues(alpha: 0.18),
+                        ),
+                      ),
+                      child: const Text('Nada pendente no perfil agora.'),
+                    )
+                  else
+                    ...gaps.map(
+                      (gap) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () => go(gap.route, sheetContext),
+                          child: Container(
+                            padding: const EdgeInsets.all(13),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: line),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    color: BrandPalette.soft(
+                                      primary,
+                                      dark: isDark,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    gap.icon,
+                                    color: primary,
+                                    size: 18,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        gap.title,
+                                        style: TextStyle(
+                                          color: ink,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        gap.detail,
+                                        style: TextStyle(
+                                          color: mute,
+                                          fontSize: 12,
+                                          height: 1.25,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(Icons.chevron_right_rounded, color: mute),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: OutlinedButton.icon(
+                      onPressed: () => go('edit', sheetContext),
+                      icon: const Icon(Icons.edit_outlined, size: 16),
+                      label: const Text('Abrir edição completa'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
+  }
+
   void _prepararMensagem(BuildContext context, String acao) {
     final message = _mensagemPronta(aluno, acao);
     final primary = Theme.of(context).colorScheme.primary;
@@ -1549,11 +1764,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               width: double.infinity,
               height: 40,
               child: OutlinedButton.icon(
-                onPressed:
-                    () => context.push(
-                      '/alunos/${aluno.id}/editar',
-                      extra: aluno,
-                    ),
+                onPressed: () => _showProfileGaps(context, aluno),
                 icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
                 label: const Text('Completar perfil'),
                 style: OutlinedButton.styleFrom(
@@ -2430,6 +2641,20 @@ class _Aluno360Signal {
     required this.value,
     required this.detail,
     required this.color,
+  });
+}
+
+class _ProfileGap {
+  final IconData icon;
+  final String title;
+  final String detail;
+  final String route;
+
+  const _ProfileGap({
+    required this.icon,
+    required this.title,
+    required this.detail,
+    required this.route,
   });
 }
 
