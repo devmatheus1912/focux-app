@@ -471,7 +471,7 @@ class _CardAderencia extends StatelessWidget {
                     children: [
                       Text(
                         '${taxa.toInt()}%',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.outfit(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
                           color: cor,
@@ -514,7 +514,7 @@ class _AderenciaRingPainter extends CustomPainter {
       center,
       r,
       Paint()
-        ..color = const Color(0xFFE6E6E0)
+        ..color = const Color(0xFFE4E5E7)
         ..strokeWidth = sw
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round,

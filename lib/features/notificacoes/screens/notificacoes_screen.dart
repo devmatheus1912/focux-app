@@ -379,7 +379,7 @@ class _RadarNotificationGroup extends StatelessWidget {
           boxShadow: [
             if (!isDark && unread)
               BoxShadow(
-                color: const Color(0xFF0B1220).withValues(alpha: 0.035),
+                color: const Color(0xFF111318).withValues(alpha: 0.035),
                 blurRadius: 22,
                 offset: const Offset(0, 12),
               ),
@@ -666,7 +666,7 @@ class _NotificationTile extends StatelessWidget {
             boxShadow: [
               if (!isDark && unread)
                 BoxShadow(
-                  color: const Color(0xFF0B1220).withValues(alpha: 0.035),
+                  color: const Color(0xFF111318).withValues(alpha: 0.035),
                   blurRadius: 22,
                   offset: const Offset(0, 12),
                 ),

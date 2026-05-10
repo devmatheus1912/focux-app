@@ -337,7 +337,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                     Expanded(
                       child: Text(
                         'Organizar alunos',
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.outfit(
                           color: ink,
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
@@ -527,7 +527,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                             const SizedBox(height: 2),
                             Text(
                               'Alunos',
-                              style: GoogleFonts.spaceGrotesk(
+                              style: GoogleFonts.outfit(
                                 fontSize: 32,
                                 color: ink,
                                 fontWeight: FontWeight.w700,
@@ -1163,7 +1163,7 @@ class _EmptyAlunosState extends StatelessWidget {
             Text(
               hasQuery ? 'Nenhum aluno encontrado' : 'Nenhum aluno cadastrado',
               textAlign: TextAlign.center,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.outfit(
                 color: ink,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -1276,18 +1276,18 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
     final palette =
         isDark
             ? const [
-              Color(0xFF2B4A9E),
+              Color(0xFF3454D1),
               Color(0xFF3D5FBE),
-              Color(0xFF1F3881),
+              Color(0xFF2A44A8),
               Color(0xFF4A6FD1),
               Color(0xFF243B7A),
               Color(0xFF6482D9),
             ]
             : const [
-              Color(0xFF2B4A9E),
+              Color(0xFF3454D1),
               Color(0xFF3D5FBE),
               Color(0xFF6482D9),
-              Color(0xFF1F3881),
+              Color(0xFF2A44A8),
               Color(0xFF4A6FD1),
               Color(0xFF8DA4E2),
             ];

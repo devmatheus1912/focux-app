@@ -284,7 +284,7 @@ class _TreinoDetailBody extends StatelessWidget {
         SliverAppBar(
           expandedHeight: 300,
           pinned: true,
-          backgroundColor: isDark ? const Color(0xFF0A0F1E) : primaryDeep,
+          backgroundColor: isDark ? const Color(0xFF0D0F14) : primaryDeep,
           iconTheme: const IconThemeData(color: Colors.white),
           flexibleSpace: FlexibleSpaceBar(
             background: Stack(
@@ -299,7 +299,7 @@ class _TreinoDetailBody extends StatelessWidget {
                       transform: const GradientRotation(160 * math.pi / 180),
                       colors:
                           isDark
-                              ? [primaryDeep, const Color(0xFF0A0F1E)]
+                              ? [primaryDeep, const Color(0xFF0D0F14)]
                               : [primary, primaryDeep],
                       stops: const [0.0, 0.85],
                     ),

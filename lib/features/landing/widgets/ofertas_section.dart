@@ -37,7 +37,7 @@ class OfertasSection extends StatelessWidget {
 
         return Container(
           padding: EdgeInsets.fromLTRB(wide ? 56 : 16, 30, wide ? 56 : 16, 32),
-          color: const Color(0xFF0A0F1E),
+          color: const Color(0xFF0D0F14),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1100),

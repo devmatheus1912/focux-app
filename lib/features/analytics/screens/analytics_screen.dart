@@ -318,7 +318,7 @@ class _KpiCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             value,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.outfit(
               color: ink,
               fontSize: 26,
               fontWeight: FontWeight.w700,

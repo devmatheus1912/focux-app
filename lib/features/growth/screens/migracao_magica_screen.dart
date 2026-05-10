@@ -235,7 +235,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                   gradient:
                       isDark
                           ? LinearGradient(
-                            colors: [brandDeep, const Color(0xFF0A0F1E)],
+                            colors: [brandDeep, const Color(0xFF0D0F14)],
                           )
                           : LinearGradient(colors: [brand, brandDeep]),
                 ),

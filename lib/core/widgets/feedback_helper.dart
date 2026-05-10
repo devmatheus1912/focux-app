@@ -10,7 +10,7 @@ class FeedbackHelper {
   }
 
   static void showInfo(BuildContext context, String message) {
-    _showSnackbar(context, message, Colors.blue.shade700, Icons.info);
+    _showSnackbar(context, message, Theme.of(context).colorScheme.primary, Icons.info);
   }
 
   static void _showSnackbar(BuildContext context, String message, Color color, IconData icon) {

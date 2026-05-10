@@ -110,13 +110,13 @@ class _State extends ConsumerState<ModoPresencialScreen> {
   Widget build(BuildContext context) {
     if (_loading) {
       return const Scaffold(
-        backgroundColor: Color(0xFF0A0F1E),
+        backgroundColor: Color(0xFF0D0F14),
         body: Center(child: CircularProgressIndicator(color: Colors.white)),
       );
     }
     if (_exec == null || _exec!.exercicios.isEmpty) {
       return Scaffold(
-        backgroundColor: const Color(0xFF0A0F1E),
+        backgroundColor: const Color(0xFF0D0F14),
         body: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
           const Icon(Icons.error_outline, color: Colors.white54, size: 48),
           const SizedBox(height: 16),
@@ -133,7 +133,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0F1E),
+      backgroundColor: const Color(0xFF0D0F14),
       body: SafeArea(
         child: _resting ? _restView(primary) : _trainingView(ex, total, done, primary),
       ),

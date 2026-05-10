@@ -14,8 +14,8 @@ import '../providers/perfil_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 
 const _coresPredefinidas = [
-  Color(0xFF3B5FE2),
-  Color(0xFF1E3A8A),
+  Color(0xFF3454D1),
+  Color(0xFF2A44A8),
   Color(0xFF0097A7),
   Color(0xFF22C55E),
   Color(0xFFF59E0B),
@@ -87,7 +87,7 @@ class _IdentidadeVisualScreenState
   final _packageDescCtrls = List.generate(3, (_) => TextEditingController());
   final _faqQuestionCtrls = List.generate(4, (_) => TextEditingController());
   final _faqAnswerCtrls = List.generate(4, (_) => TextEditingController());
-  Color _corPrimaria = const Color(0xFF3B5FE2);
+  Color _corPrimaria = const Color(0xFF3454D1);
   Color _corSecundaria = const Color(0xFF0097A7);
   bool _salvando = false;
   bool _uploadingLogo = false;

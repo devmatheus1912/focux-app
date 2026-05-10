@@ -707,7 +707,7 @@ class _WorkoutHeader extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             duration,
-            style: GoogleFonts.spaceGrotesk(
+            style: GoogleFonts.outfit(
               color: ink,
               fontSize: 56,
               fontWeight: FontWeight.w600,
@@ -2608,7 +2608,7 @@ class _RestTimerDock extends StatelessWidget {
                   ),
                   Text(
                     '$seconds',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.outfit(
                       fontSize: 42,
                       fontWeight: FontWeight.w600,
                       color: ink,

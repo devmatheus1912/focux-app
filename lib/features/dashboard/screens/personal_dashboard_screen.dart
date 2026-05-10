@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -394,8 +395,8 @@ class _PersonalDashboardScreenState
                                     colors:
                                         isDark
                                             ? const [
-                                              Color(0xFF1C3273),
-                                              Color(0xFF0F1E4A),
+                                              Color(0xFF2A44A8),
+                                              Color(0xFF0F1A4A),
                                             ]
                                             : [primary, primaryDeep],
                                     begin: begin,
@@ -403,9 +404,7 @@ class _PersonalDashboardScreenState
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(
-                                        0xFF2B4A9E,
-                                      ).withValues(alpha: 0.4),
+                                      color: primary.withValues(alpha: 0.4),
                                       blurRadius: 40,
                                       offset: const Offset(0, 20),
                                       spreadRadius: -20,
@@ -465,12 +464,12 @@ class _PersonalDashboardScreenState
                                                 builder:
                                                     (ctx, _) => Text(
                                                       'R\$ ${_counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-                                                      style: const TextStyle(
+                                                      style: GoogleFonts.jetBrainsMono(
                                                         color: Colors.white,
-                                                        fontSize: 44,
+                                                        fontSize: 42,
                                                         fontWeight:
                                                             FontWeight.w600,
-                                                        letterSpacing: -1,
+                                                        letterSpacing: -0.5,
                                                         height: 1,
                                                       ),
                                                     ),
@@ -813,89 +812,123 @@ class _PersonalDashboardScreenState
   }
 
   Widget _buildShimmerLoading(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      child: Column(
-        children: [
-          Shimmer.fromColors(
-            baseColor: EagleTokens.line,
-            highlightColor: EagleTokens.lineSoft,
-            child: Container(height: 200, color: Colors.white),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final base = isDark ? EagleTokens.darkCard : EagleTokens.line;
+    final highlight = isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft;
+
+    Widget bone(double w, double h, {double radius = 12}) => Container(
+          width: w,
+          height: h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(radius),
           ),
-          Transform.translate(
-            offset: const Offset(0, -24),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Shimmer.fromColors(
-                          baseColor: EagleTokens.line,
-                          highlightColor: EagleTokens.lineSoft,
-                          child: Container(
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Shimmer.fromColors(
-                          baseColor: EagleTokens.line,
-                          highlightColor: EagleTokens.lineSoft,
-                          child: Container(
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Shimmer.fromColors(
-                          baseColor: EagleTokens.line,
-                          highlightColor: EagleTokens.lineSoft,
-                          child: Container(
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Shimmer.fromColors(
-                          baseColor: EagleTokens.line,
-                          highlightColor: EagleTokens.lineSoft,
-                          child: Container(
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+        );
+
+    return Shimmer.fromColors(
+      baseColor: base,
+      highlightColor: highlight,
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header bar (logo + greeting + icons) ──
+            Row(
+              children: [
+                bone(28, 28, radius: 8),
+                const SizedBox(width: 10),
+                bone(100, 14),
+                const Spacer(),
+                bone(36, 36, radius: 18),
+                const SizedBox(width: 8),
+                bone(36, 36, radius: 18),
+                const SizedBox(width: 8),
+                bone(36, 36, radius: 18),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            bone(180, 11),
+
+            const SizedBox(height: 18),
+
+            // ── Hero revenue card ──
+            bone(double.infinity, 220, radius: 28),
+
+            const SizedBox(height: 18),
+
+            // ── 3 Stat tiles (Ativos, Check-ins, Risco) ──
+            Row(
+              children: [
+                Expanded(child: bone(double.infinity, 92, radius: 20)),
+                const SizedBox(width: 9),
+                Expanded(child: bone(double.infinity, 92, radius: 20)),
+                const SizedBox(width: 9),
+                Expanded(child: bone(double.infinity, 92, radius: 20)),
+              ],
+            ),
+
+            const SizedBox(height: 28),
+
+            // ── Section title ──
+            bone(140, 16),
+
+            const SizedBox(height: 14),
+
+            // ── Command center items ──
+            for (int i = 0; i < 3; i++) ...[
+              Padding(
+                padding: EdgeInsets.only(bottom: i < 2 ? 10 : 0),
+                child: Row(
+                  children: [
+                    bone(40, 40, radius: 12),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          bone(160, 13),
+                          const SizedBox(height: 6),
+                          bone(100, 10),
+                        ],
+                      ),
+                    ),
+                    bone(28, 28, radius: 8),
+                  ],
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 28),
+
+            // ── Aderência section ──
+            bone(120, 16),
+            const SizedBox(height: 14),
+            for (int i = 0; i < 4; i++) ...[
+              Padding(
+                padding: EdgeInsets.only(bottom: i < 3 ? 8 : 0),
+                child: Row(
+                  children: [
+                    bone(36, 36, radius: 18),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          bone(140, 12),
+                          const SizedBox(height: 5),
+                          bone(80, 9),
+                        ],
+                      ),
+                    ),
+                    bone(40, 14, radius: 7),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -937,9 +970,9 @@ class _HeroMiniStat extends StatelessWidget {
                 ),
             ],
           ),
-          style: const TextStyle(
+          style: GoogleFonts.jetBrainsMono(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -984,7 +1017,7 @@ class _QuickTile extends StatelessWidget {
           boxShadow: [
             if (!isDark)
               BoxShadow(
-                color: const Color(0xFF0B1220).withValues(alpha: 0.035),
+                color: const Color(0xFF111318).withValues(alpha: 0.035),
                 blurRadius: 22,
                 offset: const Offset(0, 12),
               ),
@@ -1005,12 +1038,12 @@ class _QuickTile extends StatelessWidget {
             const Spacer(),
             Text(
               value,
-              style: TextStyle(
+              style: GoogleFonts.jetBrainsMono(
                 fontSize: 21,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: ink,
                 height: 1,
-                letterSpacing: -0.4,
+                letterSpacing: -0.5,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -1859,7 +1892,7 @@ class _CommandActionPanel extends StatelessWidget {
         boxShadow: [
           if (!isDark)
             BoxShadow(
-              color: const Color(0xFF0B1220).withValues(alpha: 0.045),
+              color: const Color(0xFF111318).withValues(alpha: 0.045),
               blurRadius: 30,
               offset: const Offset(0, 16),
             ),

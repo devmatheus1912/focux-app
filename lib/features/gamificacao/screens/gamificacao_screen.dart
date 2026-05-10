@@ -428,7 +428,7 @@ class _StreakHeroStatic extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors:
-              dark ? [brandDeep, const Color(0xFF0A0F1E)] : [brand, brandDeep],
+              dark ? [brandDeep, const Color(0xFF0D0F14)] : [brand, brandDeep],
         ),
         borderRadius: BorderRadius.circular(26),
       ),
@@ -455,7 +455,7 @@ class _StreakHeroStatic extends StatelessWidget {
                       children: [
                         Text(
                           '$streak dias',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.outfit(
                             color: Colors.white,
                             fontSize: 44,
                             fontWeight: FontWeight.w600,

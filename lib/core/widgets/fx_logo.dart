@@ -30,11 +30,11 @@ class FxLogo extends StatelessWidget {
 
     if (!showLabel) return mark;
 
-    final wordmarkColor = light ? Colors.white : const Color(0xFF0A0F1E);
+    final wordmarkColor = light ? Colors.white : const Color(0xFF0D0F14);
     final muteColor =
         light
             ? Colors.white.withValues(alpha: 0.60)
-            : const Color(0xFF0A0F1E).withValues(alpha: 0.50);
+            : const Color(0xFF0D0F14).withValues(alpha: 0.50);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -51,7 +51,7 @@ class FxLogo extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: 'FOCUX',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.outfit(
                       fontSize: iconSize * 0.55,
                       fontWeight: FontWeight.w700,
                       color: wordmarkColor,
@@ -62,7 +62,7 @@ class FxLogo extends StatelessWidget {
                   WidgetSpan(child: SizedBox(width: iconSize * 0.14)),
                   TextSpan(
                     text: 'PERSONAL',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.outfit(
                       fontSize: iconSize * 0.55,
                       fontWeight: FontWeight.w400,
                       color: muteColor,
@@ -105,7 +105,7 @@ class _FxMarkTile extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3B5FE2).withValues(alpha: 0.28),
+            color: const Color(0xFF3454D1).withValues(alpha: 0.28),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),

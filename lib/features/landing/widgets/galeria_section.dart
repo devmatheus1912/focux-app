@@ -29,7 +29,7 @@ class GaleriaSection extends StatelessWidget {
         final tileWidth = wide ? (contentWidth - 24) / 3 : contentWidth;
 
         return Container(
-          color: const Color(0xFF0A0F1E),
+          color: const Color(0xFF0D0F14),
           padding: EdgeInsets.fromLTRB(
             horizontalPadding,
             wide ? 48 : 32,

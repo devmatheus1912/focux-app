@@ -28,8 +28,8 @@ class AuthShell extends StatelessWidget {
                         Color(0xFF020818),
                       ]
                       : const [
-                        Color(0xFF1836A0),
-                        Color(0xFF0D1B5C),
+                        Color(0xFF0F1A4A),
+                        Color(0xFF0F1A4A),
                         Color(0xFF070F33),
                       ],
               stops: const [0.0, 0.55, 1.0],
@@ -315,7 +315,7 @@ class AuthField extends StatelessWidget {
   }
 }
 
-class AuthPrimaryButton extends StatelessWidget {
+class AuthPrimaryButton extends StatefulWidget {
   const AuthPrimaryButton({
     super.key,
     required this.label,
@@ -330,71 +330,102 @@ class AuthPrimaryButton extends StatelessWidget {
   final bool isLoading;
 
   @override
+  State<AuthPrimaryButton> createState() => _AuthPrimaryButtonState();
+}
+
+class _AuthPrimaryButtonState extends State<AuthPrimaryButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+      reverseDuration: const Duration(milliseconds: 280),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 0.97).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              primary,
-              isLoading
-                  ? primary.withValues(alpha: 0.45)
-                  : BrandPalette.deep(primary),
-            ],
-          ),
-          boxShadow: [
-            if (!isLoading)
-              BoxShadow(
-                color: primary.withValues(alpha: 0.28),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-          ],
-        ),
-        child: ElevatedButton(
-          onPressed: isLoading ? null : onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            disabledBackgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
+    return GestureDetector(
+      onTapDown: widget.isLoading ? null : (_) => _ctrl.forward(),
+      onTapUp: widget.isLoading
+          ? null
+          : (_) {
+              _ctrl.reverse();
+              widget.onPressed?.call();
+            },
+      onTapCancel: widget.isLoading ? null : () => _ctrl.reverse(),
+      child: AnimatedBuilder(
+        animation: _scale,
+        builder: (_, child) => Transform.scale(scale: _scale.value, child: child),
+        child: SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  primary,
+                  widget.isLoading
+                      ? primary.withValues(alpha: 0.45)
+                      : BrandPalette.deep(primary),
+                ],
+              ),
+              boxShadow: [
+                if (!widget.isLoading)
+                  BoxShadow(
+                    color: primary.withValues(alpha: 0.28),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+              ],
+            ),
+            child: Center(
+              child: widget.isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (widget.icon != null) ...[
+                          Icon(widget.icon, size: 16, color: Colors.white),
+                          const SizedBox(width: 8),
+                        ],
+                        Text(
+                          widget.label,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ),
-          child:
-              isLoading
-                  ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                  : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (icon != null) ...[
-                        Icon(icon, size: 16, color: Colors.white),
-                        const SizedBox(width: 8),
-                      ],
-                      Text(
-                        label,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
         ),
       ),
     );

@@ -38,7 +38,7 @@ class HeroSection extends StatelessWidget {
 
     return Container(
       constraints: BoxConstraints(minHeight: minHeight),
-      color: const Color(0xFF0A0F1E),
+      color: const Color(0xFF0D0F14),
       child: Stack(
         children: [
           Positioned.fill(

@@ -187,9 +187,9 @@ class _PerfilBody extends StatelessWidget {
     final swatches = <Color>[
       primaryColor,
       secondaryColor,
-      const Color(0xFF7CC0FF),
+      const Color(0xFF7BA3F0),
       Colors.white,
-      const Color(0xFF0B1220),
+      const Color(0xFF111318),
     ];
 
     return Scaffold(
@@ -205,7 +205,7 @@ class _PerfilBody extends StatelessWidget {
                   transform: const GradientRotation(160 * math.pi / 180),
                   colors:
                       isDark
-                          ? const [Color(0xFF1C3273), Color(0xFF060D28)]
+                          ? const [Color(0xFF2A44A8), Color(0xFF060D28)]
                           : [primaryColor, secondaryColor],
                 ),
               ),

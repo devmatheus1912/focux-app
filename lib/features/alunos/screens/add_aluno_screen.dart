@@ -212,7 +212,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                 const SizedBox(height: 16),
                 Text(
                   'Aluno cadastrado',
-                  style: GoogleFonts.spaceGrotesk(
+                  style: GoogleFonts.outfit(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.6,
@@ -460,7 +460,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                         const SizedBox(height: 2),
                         Text(
                           'Novo aluno',
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.outfit(
                             color: ink,
                             fontSize: 30,
                             fontWeight: FontWeight.w700,

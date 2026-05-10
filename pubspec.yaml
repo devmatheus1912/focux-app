@@ -82,12 +82,12 @@ flutter_launcher_icons:
   remove_alpha_ios: true
 
 flutter_native_splash:
-  color: "#070E2A"
+  color: "#0D0F14"
   image: "assets/images/logo_icon.png"
   android_12:
-    color: "#070E2A"
+    color: "#0D0F14"
     image: "assets/images/logo_icon_padded.png"
-    icon_background_color: "#070E2A"
+    icon_background_color: "#0D0F14"
   android: true
   ios: true
   fullscreen: true

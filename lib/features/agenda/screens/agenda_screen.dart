@@ -620,7 +620,7 @@ class _AgendaEmptyState extends StatelessWidget {
                 children: [
                   Text(
                     'Dia livre',
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.outfit(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: EagleTokens.ink,
@@ -643,7 +643,7 @@ class _AgendaEmptyState extends StatelessWidget {
         const SizedBox(height: 14),
         Text(
           'Nenhum atendimento marcado. Use este espaço para encaixar uma avaliação, retorno ou sessão avulsa.',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.outfit(
             fontSize: 12,
             height: 1.35,
             color: EagleTokens.inkMute,
@@ -723,7 +723,7 @@ class _AgendaEventSheet extends StatelessWidget {
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.spaceGrotesk(
+                        style: GoogleFonts.outfit(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
                           color: EagleTokens.ink,
@@ -734,7 +734,7 @@ class _AgendaEventSheet extends StatelessWidget {
                         agendamento.alunoNome,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.outfit(
                           fontSize: 12,
                           color: EagleTokens.inkMute,
                         ),
@@ -806,7 +806,7 @@ class _AgendaInfoTile extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.outfit(
             fontSize: 10,
             fontWeight: FontWeight.w700,
             color: EagleTokens.inkMute,
@@ -817,7 +817,7 @@ class _AgendaInfoTile extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.outfit(
             fontSize: 13,
             fontWeight: FontWeight.w800,
             color: EagleTokens.ink,
@@ -1032,7 +1032,7 @@ class _AgendaAlunoButton extends StatelessWidget {
                   aluno?.nome ?? 'Aluno',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.outfit(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
                     color:
@@ -1044,7 +1044,7 @@ class _AgendaAlunoButton extends StatelessWidget {
                   aluno?.email ?? 'Selecione quem será atendido',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.outfit(
                     fontSize: 11,
                     color: EagleTokens.inkMute,
                   ),
@@ -1083,7 +1083,7 @@ class _AgendaAlunoAvatar extends StatelessWidget {
                 : Center(
                   child: Text(
                     _initials(aluno?.nome ?? ''),
-                    style: GoogleFonts.spaceGrotesk(
+                    style: GoogleFonts.outfit(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                       color: EagleTokens.brandInk,
@@ -1163,7 +1163,7 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                         children: [
                           Text(
                             'Selecionar aluno',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.outfit(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
                               color: EagleTokens.ink,
@@ -1251,7 +1251,7 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                                       aluno.nome,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.inter(
+                                      style: GoogleFonts.outfit(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w800,
                                         color: EagleTokens.ink,
@@ -1266,7 +1266,7 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                                       ].join(' · '),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.inter(
+                                      style: GoogleFonts.outfit(
                                         fontSize: 11,
                                         color: EagleTokens.inkMute,
                                       ),
@@ -1361,7 +1361,7 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
             const SizedBox(height: 18),
             Text(
               widget.title,
-              style: GoogleFonts.spaceGrotesk(
+              style: GoogleFonts.outfit(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: EagleTokens.ink,
@@ -1396,7 +1396,7 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                         children: [
                           Text(
                             _weekLabel(day.weekday),
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.outfit(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color:
@@ -1406,7 +1406,7 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                           const SizedBox(height: 4),
                           Text(
                             '${day.day}',
-                            style: GoogleFonts.spaceGrotesk(
+                            style: GoogleFonts.outfit(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               color: selected ? Colors.white : EagleTokens.ink,

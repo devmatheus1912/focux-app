@@ -103,7 +103,7 @@ class PersonalPublicLandingScreen extends ConsumerWidget {
     final dataAsync = ref.watch(_publicPersonalProvider(slug));
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0F1E),
+      backgroundColor: const Color(0xFF0D0F14),
       body: dataAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => _NotAvailableView(slug: slug),
@@ -129,7 +129,7 @@ class _NotAvailableView extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF0D1B3E), Color(0xFF0A0F1E)],
+          colors: [Color(0xFF111821), Color(0xFF0D0F14)],
         ),
       ),
       child: Center(

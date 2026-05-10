@@ -307,7 +307,7 @@ class _LockedScreen extends ConsumerWidget {
                 ElevatedButton(
                   onPressed: () => context.push('/planos'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2B4A9E),
+                    backgroundColor: const Color(0xFF3454D1),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 32, vertical: 12),
                     shape: RoundedRectangleBorder(

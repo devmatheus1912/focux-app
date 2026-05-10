@@ -139,7 +139,7 @@ class FxDock extends StatelessWidget {
                         const SizedBox(height: 3),
                         Text(
                           item.label,
-                          style: GoogleFonts.spaceGrotesk(
+                          style: GoogleFonts.outfit(
                             fontSize: compact ? 9 : 10,
                             fontWeight: FontWeight.w600,
                             color: color,

@@ -1721,7 +1721,7 @@ class _StudentToolsSection extends StatelessWidget {
         boxShadow: [
           if (!isDark)
             BoxShadow(
-              color: const Color(0xFF0B1220).withValues(alpha: 0.045),
+              color: const Color(0xFF111318).withValues(alpha: 0.045),
               blurRadius: 28,
               offset: const Offset(0, 14),
             ),
