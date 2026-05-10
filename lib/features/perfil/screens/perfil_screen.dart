@@ -96,15 +96,34 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     final dashboardAsync = ref.watch(dashboardProvider);
 
     return perfilAsync.when(
-      loading:
-          () =>
-              const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (error, _) => Scaffold(body: Center(child: Text('Erro: $error'))),
+      loading: () => const _PerfilLoadingScaffold(),
+      error:
+          (error, _) => _PerfilErrorScaffold(
+            error: error,
+            onRetry: () => ref.invalidate(perfilProvider),
+          ),
       data:
           (perfil) => dashboardAsync.when(
             loading:
-                () => const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
+                () => _PerfilBody(
+                  perfil: perfil,
+                  dashboard: DashboardData(
+                    totalAlunos: 0,
+                    alunosAtivos: 0,
+                    planoAtual: perfil.plano,
+                    limiteAlunos: 0,
+                    nomePersonal: perfil.nome,
+                    logoUrl: perfil.logoUrl,
+                    corPrimaria: perfil.corPrimaria,
+                    corSecundaria: perfil.corSecundaria,
+                    descricaoProfissional: perfil.descricaoProfissional,
+                    instagram: perfil.instagram,
+                  ),
+                  uploadingPhoto: _uploadingPhoto,
+                  loadingMetrics: true,
+                  onPickPhoto: _pickAndUploadPhoto,
+                  onEditPerfil: () => _openEditPerfil(perfil),
+                  onLogout: _logout,
                 ),
             error:
                 (_, __) => _PerfilBody(
@@ -140,10 +159,127 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
   }
 }
 
+class _PerfilLoadingScaffold extends StatelessWidget {
+  const _PerfilLoadingScaffold();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final surface = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Scaffold(
+      backgroundColor: bg,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Container(
+                height: 286,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(26),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF3158D5), Color(0xFF101B42)],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              for (final height in [132.0, 178.0, 228.0])
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Container(
+                    height: height,
+                    decoration: BoxDecoration(
+                      color: surface,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: line),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PerfilErrorScaffold extends StatelessWidget {
+  final Object error;
+  final VoidCallback onRetry;
+
+  const _PerfilErrorScaffold({required this.error, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Scaffold(
+      backgroundColor: bg,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 58,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: EagleTokens.badSoft,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: const Icon(
+                    Icons.cloud_off_outlined,
+                    color: EagleTokens.bad,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Perfil indisponivel',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: ink,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  friendlyError(
+                    error,
+                    fallback: 'Nao foi possivel carregar seus dados agora.',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: mute, height: 1.35),
+                ),
+                const SizedBox(height: 18),
+                FilledButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Tentar novamente'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _PerfilBody extends StatelessWidget {
   final PerfilPersonal perfil;
   final DashboardData dashboard;
   final bool uploadingPhoto;
+  final bool loadingMetrics;
   final VoidCallback onPickPhoto;
   final VoidCallback onEditPerfil;
   final VoidCallback onLogout;
@@ -152,6 +288,7 @@ class _PerfilBody extends StatelessWidget {
     required this.perfil,
     required this.dashboard,
     required this.uploadingPhoto,
+    this.loadingMetrics = false,
     required this.onPickPhoto,
     required this.onEditPerfil,
     required this.onLogout,
@@ -176,18 +313,36 @@ class _PerfilBody extends StatelessWidget {
       fallback: BrandPalette.deep(themePrimary),
     );
     final accent = primaryColor;
+    final planLabel = _formatPlanLabel(perfil.plano);
+    final profileScore = _profileScore(perfil, dashboard);
+    final publicUrl = _publicProfileUrl(perfil);
+    final bioText =
+        (perfil.descricaoProfissional ?? dashboard.descricaoProfissional ?? '')
+            .trim();
 
     final stats = [
-      ('Alunos', dashboard.totalAlunos.toString()),
-      ('Treinos', '0'),
-      ('Meses', '0'),
-      ('Avaliação', '5.0'),
+      _ProfileStat(
+        label: 'Alunos',
+        value: loadingMetrics ? '--' : dashboard.totalAlunos.toString(),
+        icon: Icons.groups_2_outlined,
+      ),
+      _ProfileStat(
+        label: 'Ativos',
+        value: loadingMetrics ? '--' : dashboard.alunosAtivos.toString(),
+        icon: Icons.bolt_outlined,
+      ),
+      _ProfileStat(label: 'Marca', value: '$profileScore%', icon: Icons.tune),
+      _ProfileStat(
+        label: 'Plano',
+        value: planLabel,
+        icon: Icons.workspace_premium_outlined,
+      ),
     ];
 
     final swatches = <Color>[
       primaryColor,
       secondaryColor,
-      const Color(0xFF7BA3F0),
+      BrandPalette.soft(primaryColor),
       Colors.white,
       const Color(0xFF111318),
     ];
@@ -198,6 +353,7 @@ class _PerfilBody extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: Container(
+              margin: const EdgeInsets.fromLTRB(0, 0, 0, 6),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -213,7 +369,7 @@ class _PerfilBody extends StatelessWidget {
                 children: [
                   Positioned.fill(
                     child: IgnorePointer(
-                      child: CustomPaint(painter: _GridTexturePainter()),
+                      child: CustomPaint(painter: _ProfileTexturePainter()),
                     ),
                   ),
                   SafeArea(
@@ -237,7 +393,8 @@ class _PerfilBody extends StatelessWidget {
                                 'Perfil',
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.1,
                                 ),
                               ),
                               _HeroAction(
@@ -247,69 +404,67 @@ class _PerfilBody extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 22),
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            _Avatar(
-                              nome: perfil.nome,
-                              logoUrl: perfil.logoUrl ?? dashboard.logoUrl,
-                              primaryColor: primaryColor,
-                              onTap: onPickPhoto,
-                              loading: uploadingPhoto,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          perfil.nome,
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _buildSubtitle(perfil),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
+                        const SizedBox(height: 18),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const Icon(
-                                Icons.star_rounded,
-                                color: EagleTokens.gold,
-                                size: 14,
+                              _Avatar(
+                                nome: perfil.nome,
+                                logoUrl: perfil.logoUrl ?? dashboard.logoUrl,
+                                primaryColor: primaryColor,
+                                onTap: onPickPhoto,
+                                loading: uploadingPhoto,
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'PLANO ${_formatProfilePlan(perfil.plano)}',
-                                style: const TextStyle(
-                                  color: EagleTokens.gold,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.3,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _PlanPill(
+                                      label: _formatProfilePlan(perfil.plano),
+                                    ),
+                                    const SizedBox(height: 9),
+                                    Text(
+                                      perfil.nome,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.headlineSmall
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w900,
+                                            height: 0.98,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 7),
+                                    Text(
+                                      _buildSubtitle(perfil),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12.5,
+                                        height: 1.25,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 22),
+                        const SizedBox(height: 18),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: _HeroQuickActions(
+                            onEditPerfil: onEditPerfil,
+                            onBrand: () => context.push('/identidade-visual'),
+                            onLanding: () => context.push('/landing-config'),
+                            onWallet: () => context.push('/perfil/wallet'),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.black.withValues(alpha: 0.18),
@@ -325,7 +480,7 @@ class _PerfilBody extends StatelessWidget {
                               return Expanded(
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
+                                    vertical: 13,
                                     horizontal: 8,
                                   ),
                                   decoration: BoxDecoration(
@@ -342,19 +497,28 @@ class _PerfilBody extends StatelessWidget {
                                   ),
                                   child: Column(
                                     children: [
+                                      Icon(
+                                        item.icon,
+                                        size: 15,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.78,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
                                       Text(
-                                        item.$2,
+                                        item.value,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w700,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 0,
                                         ),
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        item.$1,
+                                        item.label,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
@@ -383,38 +547,53 @@ class _PerfilBody extends StatelessWidget {
               delegate: SliverChildListDelegate([
                 _CardSection(
                   title: 'Identidade visual',
-                  trailingLabel: 'Editar',
+                  subtitle:
+                      'Marca aplicada no app, landing page e white-label.',
+                  trailingLabel: 'Abrir',
                   onTap: () => context.push('/identidade-visual'),
                   isDark: isDark,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _BrandPreview(
+                        primary: primaryColor,
+                        secondary: secondaryColor,
+                        profileName: perfil.nome,
+                        publicUrl: publicUrl,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 12),
                       Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
+                        spacing: 9,
+                        runSpacing: 9,
                         children: [
                           ...swatches.map(
-                            (color) =>
-                                _ColorSwatch(color: color, borderColor: line),
+                            (color) => _ColorSwatch(
+                              color: color,
+                              borderColor: line,
+                              selected: color == primaryColor,
+                            ),
                           ),
                           _AddSwatch(borderColor: line, mute: mute),
                         ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Cores aplicadas na sua marca, landing page e experiencia white-label.',
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 13,
-                          height: 1.4,
-                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 12),
+                _CompletenessCard(
+                  score: profileScore,
+                  accent: accent,
+                  isDark: isDark,
+                  items: _profileChecklist(perfil, dashboard),
+                  onEdit: onEditPerfil,
+                  onBrand: () => context.push('/identidade-visual'),
+                ),
+                const SizedBox(height: 12),
                 _CardSection(
                   title: 'Informações',
+                  subtitle:
+                      'Dados vistos em contratos, alunos e canais publicos.',
                   isDark: isDark,
                   child: Column(
                     children: [
@@ -459,19 +638,14 @@ class _PerfilBody extends StatelessWidget {
                     ],
                   ),
                 ),
-                if ((perfil.descricaoProfissional ??
-                        dashboard.descricaoProfissional ??
-                        '')
-                    .trim()
-                    .isNotEmpty) ...[
+                if (bioText.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   _CardSection(
                     title: 'Bio profissional',
+                    subtitle: 'Texto usado como prova de autoridade.',
                     isDark: isDark,
                     child: Text(
-                      perfil.descricaoProfissional ??
-                          dashboard.descricaoProfissional ??
-                          '',
+                      bioText,
                       style: TextStyle(color: ink, height: 1.55),
                     ),
                   ),
@@ -479,6 +653,7 @@ class _PerfilBody extends StatelessWidget {
                 const SizedBox(height: 12),
                 _CardSection(
                   title: 'Conta e plano',
+                  subtitle: 'Acesso, billing, IA, documentos e seguranca.',
                   isDark: isDark,
                   child: Column(
                     children: [
@@ -501,6 +676,24 @@ class _PerfilBody extends StatelessWidget {
                         onTap: () => context.push('/planos'),
                       ),
                       _ActionTile(
+                        icon: Icons.public_outlined,
+                        label: 'Landing page',
+                        value: publicUrl == null ? 'Configurar' : 'Editar',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => context.push('/landing-config'),
+                      ),
+                      _ActionTile(
+                        icon: Icons.account_balance_wallet_outlined,
+                        label: 'Carteira e PIX',
+                        value: _hasWallet(perfil) ? 'Completa' : 'Configurar',
+                        accent: accent,
+                        mute: mute,
+                        line: line,
+                        onTap: () => context.push('/perfil/wallet'),
+                      ),
+                      _ActionTile(
                         icon: Icons.bolt_outlined,
                         label: 'Migracao Magica',
                         value: 'Abrir ferramenta',
@@ -516,10 +709,13 @@ class _PerfilBody extends StatelessWidget {
                         accent: accent,
                         mute: mute,
                         line: line,
-                        onTap: () => launchUrl(
-                          Uri.parse('https://focux-backend-production.up.railway.app/termos.html'),
-                          mode: LaunchMode.externalApplication,
-                        ),
+                        onTap:
+                            () => launchUrl(
+                              Uri.parse(
+                                'https://focux-backend-production.up.railway.app/termos.html',
+                              ),
+                              mode: LaunchMode.externalApplication,
+                            ),
                       ),
                       _ActionTile(
                         icon: Icons.privacy_tip_outlined,
@@ -528,10 +724,13 @@ class _PerfilBody extends StatelessWidget {
                         accent: accent,
                         mute: mute,
                         line: line,
-                        onTap: () => launchUrl(
-                          Uri.parse('https://focux-backend-production.up.railway.app/privacidade.html'),
-                          mode: LaunchMode.externalApplication,
-                        ),
+                        onTap:
+                            () => launchUrl(
+                              Uri.parse(
+                                'https://focux-backend-production.up.railway.app/privacidade.html',
+                              ),
+                              mode: LaunchMode.externalApplication,
+                            ),
                       ),
                       _ActionTile(
                         icon: Icons.logout,
@@ -570,9 +769,9 @@ class _PerfilBody extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: FilledButton.icon(
-                        onPressed: () => context.push('/paywall'),
+                        onPressed: () => context.push('/landing-config'),
                         icon: const Icon(Icons.north_east),
-                        label: const Text('Ver upgrades'),
+                        label: const Text('Landing page'),
                       ),
                     ),
                   ],
@@ -582,6 +781,120 @@ class _PerfilBody extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ProfileStat {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _ProfileStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+}
+
+class _PlanPill extends StatelessWidget {
+  final String label;
+
+  const _PlanPill({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.star_rounded, color: EagleTokens.gold, size: 13),
+          const SizedBox(width: 5),
+          Text(
+            'PLANO $label',
+            style: const TextStyle(
+              color: EagleTokens.gold,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.35,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroQuickActions extends StatelessWidget {
+  final VoidCallback onEditPerfil;
+  final VoidCallback onBrand;
+  final VoidCallback onLanding;
+  final VoidCallback onWallet;
+
+  const _HeroQuickActions({
+    required this.onEditPerfil,
+    required this.onBrand,
+    required this.onLanding,
+    required this.onWallet,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final actions = [
+      (Icons.edit_outlined, 'Editar', onEditPerfil),
+      (Icons.palette_outlined, 'Marca', onBrand),
+      (Icons.public_outlined, 'Landing', onLanding),
+      (Icons.account_balance_wallet_outlined, 'Wallet', onWallet),
+    ];
+
+    return Row(
+      children:
+          actions
+              .map(
+                (item) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: InkWell(
+                      onTap: item.$3,
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        height: 58,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.15),
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(item.$1, color: Colors.white, size: 18),
+                            const SizedBox(height: 5),
+                            Text(
+                              item.$2,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
     );
   }
 }
@@ -630,38 +943,53 @@ class _Avatar extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        CircleAvatar(
-          radius: 44,
-          backgroundColor: Colors.white,
-          backgroundImage:
-              logoUrl != null && logoUrl!.isNotEmpty
-                  ? NetworkImage(logoUrl!)
-                  : null,
-          child:
-              logoUrl == null || logoUrl!.isEmpty
-                  ? Text(
-                    _initials(nome),
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      color: primaryColor,
-                    ),
-                  )
-                  : null,
+        Container(
+          width: 92,
+          height: 92,
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withValues(alpha: 0.92),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x33000000),
+                blurRadius: 20,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
+          child: CircleAvatar(
+            backgroundColor: Colors.white,
+            backgroundImage:
+                logoUrl != null && logoUrl!.isNotEmpty
+                    ? NetworkImage(logoUrl!)
+                    : null,
+            child:
+                logoUrl == null || logoUrl!.isEmpty
+                    ? Text(
+                      _initials(nome),
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w900,
+                        color: primaryColor,
+                      ),
+                    )
+                    : null,
+          ),
         ),
         Positioned(
-          right: 0,
-          bottom: 0,
+          right: 1,
+          bottom: 1,
           child: InkWell(
             onTap: loading ? null : onTap,
             borderRadius: BorderRadius.circular(26),
             child: Container(
-              width: 26,
-              height: 26,
+              width: 30,
+              height: 30,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: primaryColor,
                 shape: BoxShape.circle,
-                border: Border.all(color: primaryColor, width: 2),
+                border: Border.all(color: Colors.white, width: 2.5),
               ),
               child:
                   loading
@@ -669,10 +997,10 @@ class _Avatar extends StatelessWidget {
                         padding: const EdgeInsets.all(6),
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: primaryColor,
+                          color: Colors.white,
                         ),
                       )
-                      : Icon(Icons.edit, size: 14, color: primaryColor),
+                      : const Icon(Icons.edit, size: 14, color: Colors.white),
             ),
           ),
         ),
@@ -683,6 +1011,7 @@ class _Avatar extends StatelessWidget {
 
 class _CardSection extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final String? trailingLabel;
   final VoidCallback? onTap;
   final bool isDark;
@@ -692,6 +1021,7 @@ class _CardSection extends StatelessWidget {
     required this.title,
     required this.isDark,
     required this.child,
+    this.subtitle,
     this.trailingLabel,
     this.onTap,
   });
@@ -701,16 +1031,25 @@ class _CardSection extends StatelessWidget {
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final accent = Theme.of(context).colorScheme.primary;
 
-    return Container(
+    final content = Container(
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: line),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.025),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -720,30 +1059,51 @@ class _CardSection extends StatelessWidget {
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                       color: ink,
                     ),
                   ),
                 ),
                 if (trailingLabel != null)
-                  InkWell(
-                    onTap: onTap,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: isDark ? 0.14 : 0.08),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                     child: Text(
                       trailingLabel!,
                       style: TextStyle(
                         color: accent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
               ],
             ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 3),
+              Text(
+                subtitle!,
+                style: TextStyle(color: mute, fontSize: 12, height: 1.3),
+              ),
+            ],
             const SizedBox(height: 12),
             child,
           ],
         ),
       ),
+    );
+
+    if (onTap == null) return content;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: content,
     );
   }
 }
@@ -751,8 +1111,13 @@ class _CardSection extends StatelessWidget {
 class _ColorSwatch extends StatelessWidget {
   final Color color;
   final Color borderColor;
+  final bool selected;
 
-  const _ColorSwatch({required this.color, required this.borderColor});
+  const _ColorSwatch({
+    required this.color,
+    required this.borderColor,
+    this.selected = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -763,8 +1128,11 @@ class _ColorSwatch extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color == Colors.white ? borderColor : Colors.transparent,
-          width: 1.5,
+          color:
+              selected
+                  ? Colors.black.withValues(alpha: 0.42)
+                  : (color == Colors.white ? borderColor : Colors.transparent),
+          width: selected ? 2 : 1.5,
         ),
         boxShadow: const [
           BoxShadow(
@@ -794,6 +1162,259 @@ class _AddSwatch extends StatelessWidget {
         border: Border.all(color: borderColor, style: BorderStyle.solid),
       ),
       child: Icon(Icons.add, size: 16, color: mute),
+    );
+  }
+}
+
+class _BrandPreview extends StatelessWidget {
+  final Color primary;
+  final Color secondary;
+  final String profileName;
+  final String? publicUrl;
+  final bool isDark;
+
+  const _BrandPreview({
+    required this.primary,
+    required this.secondary,
+    required this.profileName,
+    required this.publicUrl,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [primary, secondary],
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(Icons.fitness_center, color: primary, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  profileName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  publicUrl ?? 'Landing ainda sem slug',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.74),
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              'LIVE',
+              style: TextStyle(
+                color: ink,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CompletenessCard extends StatelessWidget {
+  final int score;
+  final Color accent;
+  final bool isDark;
+  final List<_ProfileChecklistItem> items;
+  final VoidCallback onEdit;
+  final VoidCallback onBrand;
+
+  const _CompletenessCard({
+    required this.score,
+    required this.accent,
+    required this.isDark,
+    required this.items,
+    required this.onEdit,
+    required this.onBrand,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Prontidao comercial',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Perfil pronto para vender, atender e parecer premium.',
+                      style: TextStyle(color: mute, fontSize: 12, height: 1.3),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '$score%',
+                style: TextStyle(
+                  color: accent,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: score / 100,
+              minHeight: 8,
+              backgroundColor:
+                  isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : EagleTokens.lineSoft,
+              valueColor: AlwaysStoppedAnimation<Color>(accent),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            children:
+                items
+                    .map((item) => _ChecklistChip(item: item, accent: accent))
+                    .toList(),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: onEdit,
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('Completar dados'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: onBrand,
+                  icon: const Icon(Icons.palette_outlined, size: 18),
+                  label: const Text('Ajustar marca'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChecklistChip extends StatelessWidget {
+  final _ProfileChecklistItem item;
+  final Color accent;
+
+  const _ChecklistChip({required this.item, required this.accent});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color =
+        item.done
+            ? accent
+            : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color:
+            item.done
+                ? accent.withValues(alpha: isDark ? 0.16 : 0.09)
+                : (isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : EagleTokens.lineSoft),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            item.done ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 14,
+            color: color,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            item.label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -979,20 +1600,39 @@ class _LeadingIcon extends StatelessWidget {
   }
 }
 
-class _GridTexturePainter extends CustomPainter {
+class _ProfileTexturePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
+    final gridPaint =
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.06)
+          ..color = Colors.white.withValues(alpha: 0.032)
           ..strokeWidth = 0.5;
+    final beamPaint =
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: 0.18),
+              Colors.white.withValues(alpha: 0),
+            ],
+          ).createShader(Offset.zero & size);
 
-    const step = 26.0;
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * 0.78, size.height * 0.20),
+        width: 150,
+        height: 110,
+      ),
+      beamPaint,
+    );
+
+    const step = 34.0;
     for (double x = 0; x < size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
     }
     for (double y = 0; y < size.height; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
   }
 
@@ -1003,43 +1643,108 @@ class _GridTexturePainter extends CustomPainter {
 void _showDeleteAccountDialog(BuildContext context) {
   showDialog(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: const Text('Excluir conta'),
-      content: const Text(
-        'Esta ação é irreversível. Todos os seus dados pessoais serão anonimizados '
-        'conforme a LGPD (Art. 18). Dados financeiros serão mantidos por 5 anos '
-        'conforme legislação fiscal.\n\n'
-        'Deseja realmente excluir sua conta?',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(ctx).pop(),
-          child: const Text('Cancelar'),
+    builder:
+        (ctx) => AlertDialog(
+          title: const Text('Excluir conta'),
+          content: const Text(
+            'Esta ação é irreversível. Todos os seus dados pessoais serão anonimizados '
+            'conforme a LGPD (Art. 18). Dados financeiros serão mantidos por 5 anos '
+            'conforme legislação fiscal.\n\n'
+            'Deseja realmente excluir sua conta?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
+              onPressed: () async {
+                Navigator.of(ctx).pop();
+                try {
+                  final dio = ApiClient().dio;
+                  await dio.delete('/api/lgpd/me/delete');
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Conta excluída com sucesso.'),
+                    ),
+                  );
+                  GoRouter.of(context).go('/login');
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+                }
+              },
+              child: const Text('Excluir definitivamente'),
+            ),
+          ],
         ),
-        FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
-          onPressed: () async {
-            Navigator.of(ctx).pop();
-            try {
-              final dio = ApiClient().dio;
-              await dio.delete('/api/lgpd/me/delete');
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Conta excluída com sucesso.')),
-              );
-              GoRouter.of(context).go('/login');
-            } catch (e) {
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(friendlyError(e))),
-              );
-            }
-          },
-          child: const Text('Excluir definitivamente'),
-        ),
-      ],
-    ),
   );
+}
+
+class _ProfileChecklistItem {
+  final String label;
+  final bool done;
+
+  const _ProfileChecklistItem(this.label, this.done);
+}
+
+List<_ProfileChecklistItem> _profileChecklist(
+  PerfilPersonal perfil,
+  DashboardData dashboard,
+) {
+  return [
+    _ProfileChecklistItem(
+      'Foto',
+      _hasText(perfil.logoUrl ?? dashboard.logoUrl),
+    ),
+    _ProfileChecklistItem('CREF', _hasText(perfil.cref)),
+    _ProfileChecklistItem(
+      'Especialidade',
+      _hasText(perfil.especialidades ?? perfil.especialidade),
+    ),
+    _ProfileChecklistItem(
+      'Bio',
+      _hasText(perfil.descricaoProfissional ?? dashboard.descricaoProfissional),
+    ),
+    _ProfileChecklistItem(
+      'Instagram',
+      _hasText(perfil.instagram ?? dashboard.instagram),
+    ),
+    _ProfileChecklistItem(
+      'Cores',
+      _hasText(perfil.corPrimaria ?? dashboard.corPrimaria),
+    ),
+    _ProfileChecklistItem('Landing', _hasText(perfil.slug)),
+    _ProfileChecklistItem('PIX', _hasWallet(perfil)),
+  ];
+}
+
+int _profileScore(PerfilPersonal perfil, DashboardData dashboard) {
+  final items = _profileChecklist(perfil, dashboard);
+  final done = items.where((item) => item.done).length;
+  return ((done / items.length) * 100).round();
+}
+
+bool _hasWallet(PerfilPersonal perfil) =>
+    _hasText(perfil.chavePix) ||
+    (_hasText(perfil.banco) &&
+        _hasText(perfil.agencia) &&
+        _hasText(perfil.conta));
+
+bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
+
+String? _publicProfileUrl(PerfilPersonal perfil) {
+  final domain = perfil.dominioCustomizado?.trim();
+  if (domain != null && domain.isNotEmpty) {
+    return domain.startsWith('http') ? domain : 'https://$domain';
+  }
+  final slug = perfil.slug?.trim();
+  if (slug == null || slug.isEmpty) return null;
+  return 'focux.app/$slug';
 }
 
 String _buildSubtitle(PerfilPersonal perfil) {
