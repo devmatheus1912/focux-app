@@ -570,23 +570,6 @@ class _IdentidadeVisualScreenState
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => safePopOrGo(context, '/dashboard/personal'),
                 ),
-        actions: [
-          if (isPremiumOrAbove)
-            TextButton(
-              onPressed: _salvando ? null : () => _salvar(plano),
-              child:
-                  _salvando
-                      ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                      : const Text(
-                        'Salvar',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-            ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -614,49 +597,17 @@ class _IdentidadeVisualScreenState
               isDark: isDark,
               score: landingScore,
               primary: themePrimary,
+              slug: slug,
+              canOpenLanding: isPremiumOrAbove && slug != null,
               servicesCount: servicesCount,
               packagesCount: packagesCount,
               faqCount: faqCount,
               heroPhotoReady: heroPhotoReady,
               videoReady: _videoCtrl.text.trim().isNotEmpty,
-            ),
-            const SizedBox(height: 12),
-
-            // Slug display
-            if (slug != null && isPremiumOrAbove) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.link,
-                      size: 16,
-                      color:
-                          isDark
-                              ? EagleTokens.darkInkMute
-                              : EagleTokens.inkMute,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'focux.app/p/$slug',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.copy, size: 16),
-                      onPressed: () {
+              onCopySlug:
+                  slug == null
+                      ? null
+                      : () {
                         Clipboard.setData(
                           ClipboardData(text: 'https://focux.app/p/$slug'),
                         );
@@ -664,23 +615,9 @@ class _IdentidadeVisualScreenState
                           const SnackBar(content: Text('Link copiado!')),
                         );
                       },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.open_in_new, size: 16),
-                  label: const Text('Ver minha landing page'),
-                  onPressed: () => context.go('/p/$slug'),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
+              onOpenLanding: slug == null ? null : () => context.go('/p/$slug'),
+            ),
+            const SizedBox(height: 12),
 
             if (isPremiumOrAbove) ...[
               _LandingEditorTabs(
@@ -750,11 +687,13 @@ class _IdentidadeVisualScreenState
                     ],
                     if (_editorTab == 1) ...[
                       const SizedBox(height: 16),
-                      _LandingEditorCard(
+                      _LandingAccordionCard(
                         isDark: isDark,
                         title: 'Servicos em destaque',
                         subtitle:
                             'Mostre o que voce entrega na pratica. Isso alimenta a secao publica da landing.',
+                        icon: Icons.sell_outlined,
+                        initiallyExpanded: servicesCount < 2,
                         child: Column(
                           children: [
                             for (
@@ -789,11 +728,12 @@ class _IdentidadeVisualScreenState
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _LandingEditorCard(
+                      _LandingAccordionCard(
                         isDark: isDark,
                         title: 'Destaques de conversao',
                         subtitle:
                             'Escolha o plano, depoimento e foto que devem aparecer como prioridade. Ajuste tambem os botoes das etapas principais.',
+                        icon: Icons.stacked_line_chart_outlined,
                         child: _LandingConversionHighlights(
                           isPremiumOrAbove: isPremiumOrAbove,
                           isDark: isDark,
@@ -817,11 +757,13 @@ class _IdentidadeVisualScreenState
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _LandingEditorCard(
+                      _LandingAccordionCard(
                         isDark: isDark,
                         title: 'Pacotes e valores',
                         subtitle:
                             'Cadastre ate 3 opcoes de entrada para o aluno entender seu ticket.',
+                        icon: Icons.payments_outlined,
+                        initiallyExpanded: packagesCount < 1,
                         child: Column(
                           children: [
                             for (
@@ -874,11 +816,13 @@ class _IdentidadeVisualScreenState
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _LandingEditorCard(
+                      _LandingAccordionCard(
                         isDark: isDark,
                         title: 'FAQ de venda',
                         subtitle:
                             'Responda as duvidas que mais travam a decisao antes do aluno chamar voce.',
+                        icon: Icons.help_outline,
+                        initiallyExpanded: faqCount < 2,
                         child: Column(
                           children: [
                             for (
@@ -1369,21 +1313,29 @@ class _LandingReadinessHeader extends StatelessWidget {
   final bool isDark;
   final int score;
   final Color primary;
+  final String? slug;
+  final bool canOpenLanding;
   final int servicesCount;
   final int packagesCount;
   final int faqCount;
   final bool heroPhotoReady;
   final bool videoReady;
+  final VoidCallback? onCopySlug;
+  final VoidCallback? onOpenLanding;
 
   const _LandingReadinessHeader({
     required this.isDark,
     required this.score,
     required this.primary,
+    required this.slug,
+    required this.canOpenLanding,
     required this.servicesCount,
     required this.packagesCount,
     required this.faqCount,
     required this.heroPhotoReady,
     required this.videoReady,
+    required this.onCopySlug,
+    required this.onOpenLanding,
   });
 
   @override
@@ -1503,6 +1455,65 @@ class _LandingReadinessHeader extends StatelessWidget {
               ),
             ],
           ),
+          if (slug != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
+              decoration: BoxDecoration(
+                color:
+                    isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : EagleTokens.paper,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: line),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.link, size: 15, color: mute),
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: Text(
+                      'focux.app/p/$slug',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 12.2,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Copiar link',
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints.tightFor(
+                      width: 34,
+                      height: 34,
+                    ),
+                    icon: Icon(Icons.copy, size: 16, color: mute),
+                    onPressed: onCopySlug,
+                  ),
+                  if (canOpenLanding) ...[
+                    const SizedBox(width: 4),
+                    FilledButton.tonalIcon(
+                      onPressed: onOpenLanding,
+                      icon: const Icon(Icons.open_in_new, size: 15),
+                      label: const Text('Ver'),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(62, 34),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1681,21 +1692,7 @@ class _LandingEditorialControls extends StatelessWidget {
           decoration: const InputDecoration(
             labelText: 'Titulo principal do hero',
             hintText: 'Ex: O corpo forte que combina com sua rotina',
-            helperText: 'Se ficar vazio, a Focux cria uma headline pelo nicho.',
-            helperMaxLines: 2,
-          ),
-        ),
-        const SizedBox(height: 10),
-        TextFormField(
-          controller: heroSubtitleCtrl,
-          enabled: isPremiumOrAbove,
-          maxLines: 3,
-          maxLength: 320,
-          decoration: const InputDecoration(
-            labelText: 'Texto de apoio',
-            hintText:
-                'Ex: Treino, check-ins e ajustes para evoluir com clareza.',
-            alignLabelWithHint: true,
+            counterText: '',
           ),
         ),
         const SizedBox(height: 10),
@@ -1706,40 +1703,75 @@ class _LandingEditorialControls extends StatelessWidget {
           decoration: const InputDecoration(
             labelText: 'Botao principal',
             hintText: 'Ex: Quero minha avaliacao',
+            counterText: '',
           ),
         ),
         const SizedBox(height: 12),
-        Text(
-          'Ordem e visibilidade',
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Hero e rodape ficam fixos. Reordene o restante para destacar o que mais vende seu trabalho.',
-          style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
-        ),
-        const SizedBox(height: 10),
-        _SectionOrderSummaryButton(
-          visibleCount: visibleCount,
-          totalCount: orderedOptions.length,
-          firstLabel:
-              orderedOptions.isEmpty ? 'Hero' : orderedOptions.first.label,
-          primary: primary,
-          isDark: isDark,
-          enabled: isPremiumOrAbove,
-          onTap:
-              () => _showSectionOrderSheet(
-                context,
-                orderedOptions,
-                hiddenSections,
-                primary,
-                isDark,
-                isPremiumOrAbove,
-                onMove,
-                onToggle,
+        Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: EdgeInsets.zero,
+            dense: true,
+            title: Text(
+              'Texto de apoio e ordem',
+              style: TextStyle(
+                color: mute,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w900,
               ),
+            ),
+            children: [
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: heroSubtitleCtrl,
+                enabled: isPremiumOrAbove,
+                maxLines: 3,
+                maxLength: 320,
+                decoration: const InputDecoration(
+                  labelText: 'Texto de apoio',
+                  hintText:
+                      'Ex: Treino, check-ins e ajustes para evoluir com clareza.',
+                  alignLabelWithHint: true,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Ordem e visibilidade',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Hero e rodape ficam fixos. Reordene o restante para destacar o que mais vende seu trabalho.',
+                style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+              ),
+              const SizedBox(height: 10),
+              _SectionOrderSummaryButton(
+                visibleCount: visibleCount,
+                totalCount: orderedOptions.length,
+                firstLabel:
+                    orderedOptions.isEmpty
+                        ? 'Hero'
+                        : orderedOptions.first.label,
+                primary: primary,
+                isDark: isDark,
+                enabled: isPremiumOrAbove,
+                onTap:
+                    () => _showSectionOrderSheet(
+                      context,
+                      orderedOptions,
+                      hiddenSections,
+                      primary,
+                      isDark,
+                      isPremiumOrAbove,
+                      onMove,
+                      onToggle,
+                    ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -3124,6 +3156,87 @@ class _LandingEditorCard extends StatelessWidget {
           const SizedBox(height: 16),
           child,
         ],
+      ),
+    );
+  }
+}
+
+class _LandingAccordionCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Widget child;
+  final bool isDark;
+  final bool initiallyExpanded;
+
+  const _LandingAccordionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.child,
+    required this.isDark,
+    this.initiallyExpanded = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: line),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: ExpansionTile(
+          initiallyExpanded: initiallyExpanded,
+          tilePadding: const EdgeInsets.fromLTRB(14, 10, 12, 10),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+          leading: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: isDark ? 0.20 : 0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 17, color: primary),
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              color: ink,
+              fontSize: 14.2,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: Text(
+              subtitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: mute, fontSize: 11.8, height: 1.25),
+            ),
+          ),
+          iconColor: primary,
+          collapsedIconColor: mute,
+          children: [
+            Container(
+              height: 1,
+              margin: const EdgeInsets.only(bottom: 14),
+              color: line,
+            ),
+            child,
+          ],
+        ),
       ),
     );
   }
