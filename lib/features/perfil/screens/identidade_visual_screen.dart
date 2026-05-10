@@ -102,6 +102,7 @@ class _IdentidadeVisualScreenState
   int _featuredPackageIndex = 0;
   int _featuredTestimonialIndex = 0;
   int _featuredPhotoIndex = 0;
+  int _editorTab = 0;
 
   static List<String> _defaultSectionOrder() =>
       _landingSectionCatalog.map((item) => item.key).toList();
@@ -670,236 +671,255 @@ class _IdentidadeVisualScreenState
               const SizedBox(height: 16),
             ],
 
+            if (isPremiumOrAbove) ...[
+              _LandingEditorTabs(
+                selected: _editorTab,
+                onChanged: (value) => setState(() => _editorTab = value),
+                isDark: isDark,
+              ),
+              const SizedBox(height: 16),
+            ],
+
             AbsorbPointer(
               absorbing: !isPremiumOrAbove,
               child: Opacity(
                 opacity: isPremiumOrAbove ? 1.0 : 0.35,
                 child: Column(
                   children: [
-                    TextFormField(
-                      controller: _descCtrl,
-                      enabled: isPremiumOrAbove,
-                      maxLines: 3,
-                      maxLength: 500,
-                      decoration: const InputDecoration(
-                        labelText: 'Descrição profissional',
-                        hintText: 'Descreva sua trajetória e metodologia...',
-                        alignLabelWithHint: true,
+                    if (_editorTab == 0) ...[
+                      TextFormField(
+                        controller: _descCtrl,
+                        enabled: isPremiumOrAbove,
+                        maxLines: 3,
+                        maxLength: 500,
+                        decoration: const InputDecoration(
+                          labelText: 'Descrição profissional',
+                          hintText: 'Descreva sua trajetória e metodologia...',
+                          alignLabelWithHint: true,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _espCtrl,
-                      enabled: isPremiumOrAbove,
-                      decoration: const InputDecoration(
-                        labelText: 'Especialidades',
-                        hintText: 'Ex: Musculação, Funcional, Emagrecimento',
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _espCtrl,
+                        enabled: isPremiumOrAbove,
+                        decoration: const InputDecoration(
+                          labelText: 'Especialidades',
+                          hintText: 'Ex: Musculação, Funcional, Emagrecimento',
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _instaCtrl,
-                      enabled: isPremiumOrAbove,
-                      decoration: const InputDecoration(
-                        labelText: 'Instagram',
-                        prefixText: '@',
-                        hintText: 'seuperfil',
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _instaCtrl,
+                        enabled: isPremiumOrAbove,
+                        decoration: const InputDecoration(
+                          labelText: 'Instagram',
+                          prefixText: '@',
+                          hintText: 'seuperfil',
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    _LandingEditorCard(
-                      isDark: isDark,
-                      title: 'Controle editorial',
-                      subtitle:
-                          'Personalize a primeira dobra e escolha a ordem das secoes para sua landing nao parecer template.',
-                      child: _LandingEditorialControls(
-                        isPremiumOrAbove: isPremiumOrAbove,
+                      const SizedBox(height: 20),
+                      _LandingEditorCard(
                         isDark: isDark,
-                        primary: themePrimary,
-                        heroTitleCtrl: _heroTitleCtrl,
-                        heroSubtitleCtrl: _heroSubtitleCtrl,
-                        primaryCtaCtrl: _primaryCtaCtrl,
-                        sectionOrder: _sectionOrder,
-                        hiddenSections: _hiddenSections,
-                        onMove: _moveSection,
-                        onToggle: _toggleSection,
+                        title: 'Controle editorial',
+                        subtitle:
+                            'Personalize a primeira dobra e escolha a ordem das secoes para sua landing nao parecer template.',
+                        child: _LandingEditorialControls(
+                          isPremiumOrAbove: isPremiumOrAbove,
+                          isDark: isDark,
+                          primary: themePrimary,
+                          heroTitleCtrl: _heroTitleCtrl,
+                          heroSubtitleCtrl: _heroSubtitleCtrl,
+                          primaryCtaCtrl: _primaryCtaCtrl,
+                          sectionOrder: _sectionOrder,
+                          hiddenSections: _hiddenSections,
+                          onMove: _moveSection,
+                          onToggle: _toggleSection,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    _LandingEditorCard(
-                      isDark: isDark,
-                      title: 'Servicos em destaque',
-                      subtitle:
-                          'Mostre o que voce entrega na pratica. Isso alimenta a secao publica da landing.',
-                      child: Column(
-                        children: [
-                          for (
-                            var i = 0;
-                            i < _serviceTitleCtrls.length;
-                            i++
-                          ) ...[
-                            TextFormField(
-                              controller: _serviceTitleCtrls[i],
-                              enabled: isPremiumOrAbove,
-                              decoration: InputDecoration(
-                                labelText: 'Servico ${i + 1}',
-                                hintText: 'Ex: Consultoria online',
+                    ],
+                    if (_editorTab == 1) ...[
+                      const SizedBox(height: 16),
+                      _LandingEditorCard(
+                        isDark: isDark,
+                        title: 'Servicos em destaque',
+                        subtitle:
+                            'Mostre o que voce entrega na pratica. Isso alimenta a secao publica da landing.',
+                        child: Column(
+                          children: [
+                            for (
+                              var i = 0;
+                              i < _serviceTitleCtrls.length;
+                              i++
+                            ) ...[
+                              TextFormField(
+                                controller: _serviceTitleCtrls[i],
+                                enabled: isPremiumOrAbove,
+                                decoration: InputDecoration(
+                                  labelText: 'Servico ${i + 1}',
+                                  hintText: 'Ex: Consultoria online',
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 10),
-                            TextFormField(
-                              controller: _serviceDescCtrls[i],
-                              enabled: isPremiumOrAbove,
-                              maxLines: 2,
-                              decoration: const InputDecoration(
-                                labelText: 'Descricao',
-                                hintText:
-                                    'Explique o formato, frequencia e para quem esse servico faz sentido.',
-                                alignLabelWithHint: true,
+                              const SizedBox(height: 10),
+                              TextFormField(
+                                controller: _serviceDescCtrls[i],
+                                enabled: isPremiumOrAbove,
+                                maxLines: 2,
+                                decoration: const InputDecoration(
+                                  labelText: 'Descricao',
+                                  hintText:
+                                      'Explique o formato, frequencia e para quem esse servico faz sentido.',
+                                  alignLabelWithHint: true,
+                                ),
                               ),
-                            ),
-                            if (i != _serviceTitleCtrls.length - 1)
-                              const SizedBox(height: 16),
+                              if (i != _serviceTitleCtrls.length - 1)
+                                const SizedBox(height: 16),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    _LandingEditorCard(
-                      isDark: isDark,
-                      title: 'Destaques de conversao',
-                      subtitle:
-                          'Escolha o plano, depoimento e foto que devem aparecer como prioridade. Ajuste tambem os botoes das etapas principais.',
-                      child: _LandingConversionHighlights(
-                        isPremiumOrAbove: isPremiumOrAbove,
+                      const SizedBox(height: 16),
+                      _LandingEditorCard(
                         isDark: isDark,
-                        primary: themePrimary,
-                        featuredPackageIndex: _featuredPackageIndex,
-                        featuredTestimonialIndex: _featuredTestimonialIndex,
-                        featuredPhotoIndex: _featuredPhotoIndex,
-                        offerCtaCtrl: _offerCtaCtrl,
-                        finalCtaCtrl: _finalCtaCtrl,
-                        contactCtaCtrl: _contactCtaCtrl,
-                        onPackageChanged:
-                            (value) =>
-                                setState(() => _featuredPackageIndex = value),
-                        onTestimonialChanged:
-                            (value) => setState(
-                              () => _featuredTestimonialIndex = value,
-                            ),
-                        onPhotoChanged:
-                            (value) =>
-                                setState(() => _featuredPhotoIndex = value),
+                        title: 'Destaques de conversao',
+                        subtitle:
+                            'Escolha o plano, depoimento e foto que devem aparecer como prioridade. Ajuste tambem os botoes das etapas principais.',
+                        child: _LandingConversionHighlights(
+                          isPremiumOrAbove: isPremiumOrAbove,
+                          isDark: isDark,
+                          primary: themePrimary,
+                          featuredPackageIndex: _featuredPackageIndex,
+                          featuredTestimonialIndex: _featuredTestimonialIndex,
+                          featuredPhotoIndex: _featuredPhotoIndex,
+                          offerCtaCtrl: _offerCtaCtrl,
+                          finalCtaCtrl: _finalCtaCtrl,
+                          contactCtaCtrl: _contactCtaCtrl,
+                          onPackageChanged:
+                              (value) =>
+                                  setState(() => _featuredPackageIndex = value),
+                          onTestimonialChanged:
+                              (value) => setState(
+                                () => _featuredTestimonialIndex = value,
+                              ),
+                          onPhotoChanged:
+                              (value) =>
+                                  setState(() => _featuredPhotoIndex = value),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    _LandingEditorCard(
-                      isDark: isDark,
-                      title: 'Pacotes e valores',
-                      subtitle:
-                          'Cadastre ate 3 opcoes de entrada para o aluno entender seu ticket.',
-                      child: Column(
-                        children: [
-                          for (
-                            var i = 0;
-                            i < _packageNameCtrls.length;
-                            i++
-                          ) ...[
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _packageNameCtrls[i],
-                                    enabled: isPremiumOrAbove,
-                                    decoration: InputDecoration(
-                                      labelText: 'Pacote ${i + 1}',
-                                      hintText: 'Ex: Plano mensal',
+                      const SizedBox(height: 16),
+                      _LandingEditorCard(
+                        isDark: isDark,
+                        title: 'Pacotes e valores',
+                        subtitle:
+                            'Cadastre ate 3 opcoes de entrada para o aluno entender seu ticket.',
+                        child: Column(
+                          children: [
+                            for (
+                              var i = 0;
+                              i < _packageNameCtrls.length;
+                              i++
+                            ) ...[
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _packageNameCtrls[i],
+                                      enabled: isPremiumOrAbove,
+                                      decoration: InputDecoration(
+                                        labelText: 'Pacote ${i + 1}',
+                                        hintText: 'Ex: Plano mensal',
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                SizedBox(
-                                  width: 132,
-                                  child: TextFormField(
-                                    controller: _packagePriceCtrls[i],
-                                    enabled: isPremiumOrAbove,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Preco',
-                                      hintText: 'R\$ 297',
+                                  const SizedBox(width: 12),
+                                  SizedBox(
+                                    width: 132,
+                                    child: TextFormField(
+                                      controller: _packagePriceCtrls[i],
+                                      enabled: isPremiumOrAbove,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Preco',
+                                        hintText: 'R\$ 297',
+                                      ),
                                     ),
                                   ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              TextFormField(
+                                controller: _packageDescCtrls[i],
+                                enabled: isPremiumOrAbove,
+                                maxLines: 2,
+                                decoration: const InputDecoration(
+                                  labelText: 'Descricao do pacote',
+                                  hintText:
+                                      'Ex: Treino personalizado, ajustes semanais e suporte no chat.',
+                                  alignLabelWithHint: true,
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            TextFormField(
-                              controller: _packageDescCtrls[i],
-                              enabled: isPremiumOrAbove,
-                              maxLines: 2,
-                              decoration: const InputDecoration(
-                                labelText: 'Descricao do pacote',
-                                hintText:
-                                    'Ex: Treino personalizado, ajustes semanais e suporte no chat.',
-                                alignLabelWithHint: true,
                               ),
-                            ),
-                            if (i != _packageNameCtrls.length - 1)
-                              const SizedBox(height: 16),
+                              if (i != _packageNameCtrls.length - 1)
+                                const SizedBox(height: 16),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    _LandingEditorCard(
-                      isDark: isDark,
-                      title: 'FAQ de venda',
-                      subtitle:
-                          'Responda as duvidas que mais travam a decisao antes do aluno chamar voce.',
-                      child: Column(
-                        children: [
-                          for (
-                            var i = 0;
-                            i < _faqQuestionCtrls.length;
-                            i++
-                          ) ...[
-                            TextFormField(
-                              controller: _faqQuestionCtrls[i],
-                              enabled: isPremiumOrAbove,
-                              decoration: InputDecoration(
-                                labelText: 'Pergunta ${i + 1}',
-                                hintText: 'Ex: Preciso treinar todos os dias?',
+                      const SizedBox(height: 16),
+                      _LandingEditorCard(
+                        isDark: isDark,
+                        title: 'FAQ de venda',
+                        subtitle:
+                            'Responda as duvidas que mais travam a decisao antes do aluno chamar voce.',
+                        child: Column(
+                          children: [
+                            for (
+                              var i = 0;
+                              i < _faqQuestionCtrls.length;
+                              i++
+                            ) ...[
+                              TextFormField(
+                                controller: _faqQuestionCtrls[i],
+                                enabled: isPremiumOrAbove,
+                                decoration: InputDecoration(
+                                  labelText: 'Pergunta ${i + 1}',
+                                  hintText:
+                                      'Ex: Preciso treinar todos os dias?',
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 10),
-                            TextFormField(
-                              controller: _faqAnswerCtrls[i],
-                              enabled: isPremiumOrAbove,
-                              maxLines: 2,
-                              decoration: const InputDecoration(
-                                labelText: 'Resposta',
-                                hintText:
-                                    'Explique de forma simples, direta e segura.',
-                                alignLabelWithHint: true,
+                              const SizedBox(height: 10),
+                              TextFormField(
+                                controller: _faqAnswerCtrls[i],
+                                enabled: isPremiumOrAbove,
+                                maxLines: 2,
+                                decoration: const InputDecoration(
+                                  labelText: 'Resposta',
+                                  hintText:
+                                      'Explique de forma simples, direta e segura.',
+                                  alignLabelWithHint: true,
+                                ),
                               ),
-                            ),
-                            if (i != _faqQuestionCtrls.length - 1)
-                              const SizedBox(height: 16),
+                              if (i != _faqQuestionCtrls.length - 1)
+                                const SizedBox(height: 16),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
             ),
 
-            const SizedBox(height: 28),
+            if (_editorTab >= 2) const SizedBox(height: 28),
 
             // SECTION B — Brand / Enterprise
-            _SectionHeader(text: 'Identidade Visual', isDark: isDark),
-            const SizedBox(height: 8),
+            if (_editorTab >= 2) ...[
+              _SectionHeader(
+                text: _editorTab == 2 ? 'Midia e marca' : 'Preview',
+                isDark: isDark,
+              ),
+              const SizedBox(height: 8),
+            ],
 
-            if (!isEnterprise) ...[
+            if (_editorTab >= 2 && !isEnterprise) ...[
               _PaywallCard(
                 icon: Icons.palette_outlined,
                 title: '🔒 Recurso Enterprise',
@@ -918,351 +938,357 @@ class _IdentidadeVisualScreenState
                 opacity: isEnterprise ? 1.0 : 0.35,
                 child: Column(
                   children: [
-                    // Logo upload
-                    Center(
-                      child: Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          CircleAvatar(
-                            radius: 48,
-                            backgroundColor:
-                                isDark
-                                    ? EagleTokens.darkCard
-                                    : themePrimarySoft,
-                            backgroundImage:
-                                _logoUrl != null
-                                    ? NetworkImage(_logoUrl!)
-                                    : null,
-                            child:
-                                _logoUrl == null
-                                    ? Text(
-                                      nomePersonal.isNotEmpty
-                                          ? nomePersonal[0].toUpperCase()
-                                          : '?',
-                                      style: TextStyle(
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.w700,
-                                        color:
-                                            isDark
-                                                ? EagleTokens.darkInk
-                                                : themePrimary,
-                                      ),
-                                    )
-                                    : null,
-                          ),
-                          GestureDetector(
-                            onTap: isEnterprise ? _pickLogo : null,
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color:
-                                    isEnterprise ? _corPrimaria : themePrimary,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color:
-                                      isDark
-                                          ? EagleTokens.darkBg
-                                          : EagleTokens.paper,
-                                  width: 2,
-                                ),
-                              ),
+                    if (_editorTab == 2) ...[
+                      // Logo upload
+                      Center(
+                        child: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            CircleAvatar(
+                              radius: 48,
+                              backgroundColor:
+                                  isDark
+                                      ? EagleTokens.darkCard
+                                      : themePrimarySoft,
+                              backgroundImage:
+                                  _logoUrl != null
+                                      ? NetworkImage(_logoUrl!)
+                                      : null,
                               child:
-                                  _uploadingLogo
-                                      ? const Padding(
-                                        padding: EdgeInsets.all(6),
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
+                                  _logoUrl == null
+                                      ? Text(
+                                        nomePersonal.isNotEmpty
+                                            ? nomePersonal[0].toUpperCase()
+                                            : '?',
+                                        style: TextStyle(
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.w700,
+                                          color:
+                                              isDark
+                                                  ? EagleTokens.darkInk
+                                                  : themePrimary,
                                         ),
                                       )
-                                      : const Icon(
-                                        Icons.camera_alt,
-                                        size: 14,
-                                        color: Colors.white,
-                                      ),
+                                      : null,
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Slogan
-                    TextFormField(
-                      controller: _sloganCtrl,
-                      enabled: isEnterprise,
-                      maxLength: 200,
-                      decoration: const InputDecoration(
-                        labelText: 'Slogan',
-                        hintText:
-                            'Ex: Transformando vidas através do movimento',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Cor principal
-                    Text(
-                      'Cor principal',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    _ColorPicker(
-                      selected: _corPrimaria,
-                      onSelect:
-                          isEnterprise
-                              ? (c) => setState(() => _corPrimaria = c)
-                              : null,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Cor secundária
-                    Text(
-                      'Cor secundária',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    _ColorPicker(
-                      selected: _corSecundaria,
-                      onSelect:
-                          isEnterprise
-                              ? (c) => setState(() => _corSecundaria = c)
-                              : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _domCtrl,
-                      enabled: isEnterprise,
-                      decoration: const InputDecoration(
-                        labelText: 'Domínio customizado',
-                        hintText: 'Ex: treino.seudominio.com.br',
-                        helperText:
-                            'Configure um CNAME apontando para focux.app',
-                        helperMaxLines: 2,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _LandingEditorCard(
-                      isDark: isDark,
-                      title: 'Video de apresentacao',
-                      subtitle:
-                          'Suba um video curto seu. Ele aparece como player dentro da primeira tela da landing.',
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (_showManualVideoUrl) ...[
-                            TextFormField(
-                              controller: _videoCtrl,
-                              enabled: isEnterprise,
-                              decoration: const InputDecoration(
-                                labelText: 'URL do vídeo de apresentação',
-                                hintText: 'https://cdn.focux.app/video.mp4',
-                                helperText:
-                                    'Use MP4/WebM para player embutido. YouTube/Vimeo abrem em link externo.',
-                                helperMaxLines: 2,
+                            GestureDetector(
+                              onTap: isEnterprise ? _pickLogo : null,
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color:
+                                      isEnterprise
+                                          ? _corPrimaria
+                                          : themePrimary,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkBg
+                                            : EagleTokens.paper,
+                                    width: 2,
+                                  ),
+                                ),
+                                child:
+                                    _uploadingLogo
+                                        ? const Padding(
+                                          padding: EdgeInsets.all(6),
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                        : const Icon(
+                                          Icons.camera_alt,
+                                          size: 14,
+                                          color: Colors.white,
+                                        ),
                               ),
                             ),
-                            const SizedBox(height: 12),
                           ],
-                          OutlinedButton.icon(
-                            onPressed:
-                                isEnterprise && !_uploadingVideo
-                                    ? () => _pickPresentationVideo(plano)
-                                    : null,
-                            icon:
-                                _uploadingVideo
-                                    ? const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                    : const Icon(Icons.video_call_outlined),
-                            label: Text(
-                              _uploadingVideo
-                                  ? 'Enviando video...'
-                                  : _videoCtrl.text.trim().isEmpty
-                                  ? 'Subir video de apresentacao'
-                                  : 'Trocar video de apresentacao',
-                            ),
-                          ),
-                          if (_videoCtrl.text.trim().isNotEmpty) ...[
-                            const SizedBox(height: 10),
-                            _LandingMediaStatusCard(
-                              isDark: isDark,
-                              icon: Icons.play_circle_outline,
-                              title: 'Video enviado para a landing',
-                              subtitle:
-                                  _isDirectVideoUrl(_videoCtrl.text.trim())
-                                      ? 'Vai abrir em player embutido na primeira tela.'
-                                      : 'Arquivo enviado. Se nao aparecer como player, envie em MP4, WebM, MOV ou M4V.',
-                              url: _videoCtrl.text.trim(),
-                              showUrl: false,
-                            ),
-                          ],
-                        ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    _LandingEditorCard(
-                      isDark: isDark,
-                      title: 'Foto principal da landing',
-                      subtitle:
-                          'Suba uma foto real sua, do seu estudio ou de um atendimento. Essa foto vira o impacto visual da primeira tela.',
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _HeroPhotoPreview(
-                            isDark: isDark,
-                            url: heroPhotoUrl,
-                            primary: _corPrimaria,
-                            secondary: _corSecundaria,
-                            name: nomePersonal,
-                            slogan: _sloganCtrl.text.trim(),
-                          ),
-                          const SizedBox(height: 12),
-                          OutlinedButton.icon(
-                            onPressed:
-                                isEnterprise && !_uploadingHeroPhoto
-                                    ? () => _pickHeroPhoto(plano)
-                                    : null,
-                            icon:
-                                _uploadingHeroPhoto
-                                    ? const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                    : const Icon(Icons.add_photo_alternate),
-                            label: Text(
-                              _uploadingHeroPhoto
-                                  ? 'Enviando foto...'
-                                  : heroPhotoReady
-                                  ? 'Trocar foto principal'
-                                  : 'Subir foto principal',
-                            ),
-                          ),
-                          if (heroPhotoReady) ...[
-                            const SizedBox(height: 10),
-                            _LandingMediaStatusCard(
-                              isDark: isDark,
-                              icon: Icons.photo_camera_back_outlined,
-                              title: 'Foto conectada ao hero',
-                              subtitle:
-                                  'A landing usa esta foto com recorte premium, overlay e assinatura visual da marca.',
-                              url: heroPhotoUrl,
-                              showUrl: false,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _LandingEditorCard(
-                      isDark: isDark,
-                      title: 'Foto pessoal da bio',
-                      subtitle:
-                          'Suba uma foto sua separada para a secao Sobre. Ideal: retrato profissional, voce atendendo aluno ou imagem de autoridade, sem repetir a foto de capa.',
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _BioPhotoPreview(
-                            isDark: isDark,
-                            url: bioPhotoUrl,
-                            primary: _corPrimaria,
-                            name: nomePersonal,
-                          ),
-                          const SizedBox(height: 12),
-                          OutlinedButton.icon(
-                            onPressed:
-                                isEnterprise && !_uploadingBioPhoto
-                                    ? () => _pickBioPhoto(plano)
-                                    : null,
-                            icon:
-                                _uploadingBioPhoto
-                                    ? const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                    : const Icon(Icons.person_pin_outlined),
-                            label: Text(
-                              _uploadingBioPhoto
-                                  ? 'Enviando foto...'
-                                  : bioPhotoReady
-                                  ? 'Trocar foto da bio'
-                                  : 'Subir foto da bio',
-                            ),
-                          ),
-                          if (bioPhotoReady) ...[
-                            const SizedBox(height: 10),
-                            _LandingMediaStatusCard(
-                              isDark: isDark,
-                              icon: Icons.person_outline,
-                              title: 'Foto conectada a bio',
-                              subtitle:
-                                  'A secao Sobre usa esta foto separada para contar quem e o personal sem repetir a capa.',
-                              url: bioPhotoUrl,
-                              showUrl: false,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _LandingEditorCard(
-                      isDark: isDark,
-                      title: 'Publicacao e campanha',
-                      subtitle:
-                          'Use tracking para saber de onde veio o aluno. O dominio customizado fica acima, junto da marca.',
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            controller: _trackingCtrl,
-                            enabled: isEnterprise,
-                            decoration: const InputDecoration(
-                              labelText: 'Tracking de campanha',
-                              hintText: 'Ex: campanha-instagram-abril',
-                              helperText:
-                                  'Entra nos links de cadastro da landing para medir origem.',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _LandingPremiumPlanner(
-                      isDark: isDark,
-                      primary: _corPrimaria,
-                      secondary: _corSecundaria,
-                      name: nomePersonal,
-                      slogan: _sloganCtrl.text.trim(),
-                      specialty: _espCtrl.text.trim(),
-                      heroPhotoReady: heroPhotoReady,
-                      bioPhotoReady: bioPhotoReady,
-                      videoReady: _videoCtrl.text.trim().isNotEmpty,
-                      aboutReady: _descCtrl.text.trim().isNotEmpty,
-                      servicesCount: servicesCount,
-                      packagesCount: packagesCount,
-                      faqCount: faqCount,
-                    ),
-                    const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-                    // Preview
-                    _PremiumLandingPreviewCard(
-                      primary: _corPrimaria,
-                      secondary: _corSecundaria,
-                      logoUrl: _logoUrl,
-                      heroPhotoUrl: heroPhotoUrl,
-                      name: nomePersonal,
-                      slogan: _sloganCtrl.text.trim(),
-                      specialty: _espCtrl.text.trim(),
-                    ),
+                      // Slogan
+                      TextFormField(
+                        controller: _sloganCtrl,
+                        enabled: isEnterprise,
+                        maxLength: 200,
+                        decoration: const InputDecoration(
+                          labelText: 'Slogan',
+                          hintText:
+                              'Ex: Transformando vidas através do movimento',
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Cor principal
+                      Text(
+                        'Cor principal',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      _ColorPicker(
+                        selected: _corPrimaria,
+                        onSelect:
+                            isEnterprise
+                                ? (c) => setState(() => _corPrimaria = c)
+                                : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Cor secundária
+                      Text(
+                        'Cor secundária',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      _ColorPicker(
+                        selected: _corSecundaria,
+                        onSelect:
+                            isEnterprise
+                                ? (c) => setState(() => _corSecundaria = c)
+                                : null,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _domCtrl,
+                        enabled: isEnterprise,
+                        decoration: const InputDecoration(
+                          labelText: 'Domínio customizado',
+                          hintText: 'Ex: treino.seudominio.com.br',
+                          helperText:
+                              'Configure um CNAME apontando para focux.app',
+                          helperMaxLines: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _LandingEditorCard(
+                        isDark: isDark,
+                        title: 'Video de apresentacao',
+                        subtitle:
+                            'Suba um video curto seu. Ele aparece como player dentro da primeira tela da landing.',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (_showManualVideoUrl) ...[
+                              TextFormField(
+                                controller: _videoCtrl,
+                                enabled: isEnterprise,
+                                decoration: const InputDecoration(
+                                  labelText: 'URL do vídeo de apresentação',
+                                  hintText: 'https://cdn.focux.app/video.mp4',
+                                  helperText:
+                                      'Use MP4/WebM para player embutido. YouTube/Vimeo abrem em link externo.',
+                                  helperMaxLines: 2,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                            OutlinedButton.icon(
+                              onPressed:
+                                  isEnterprise && !_uploadingVideo
+                                      ? () => _pickPresentationVideo(plano)
+                                      : null,
+                              icon:
+                                  _uploadingVideo
+                                      ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                      : const Icon(Icons.video_call_outlined),
+                              label: Text(
+                                _uploadingVideo
+                                    ? 'Enviando video...'
+                                    : _videoCtrl.text.trim().isEmpty
+                                    ? 'Subir video de apresentacao'
+                                    : 'Trocar video de apresentacao',
+                              ),
+                            ),
+                            if (_videoCtrl.text.trim().isNotEmpty) ...[
+                              const SizedBox(height: 10),
+                              _LandingMediaStatusCard(
+                                isDark: isDark,
+                                icon: Icons.play_circle_outline,
+                                title: 'Video enviado para a landing',
+                                subtitle:
+                                    _isDirectVideoUrl(_videoCtrl.text.trim())
+                                        ? 'Vai abrir em player embutido na primeira tela.'
+                                        : 'Arquivo enviado. Se nao aparecer como player, envie em MP4, WebM, MOV ou M4V.',
+                                url: _videoCtrl.text.trim(),
+                                showUrl: false,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _LandingEditorCard(
+                        isDark: isDark,
+                        title: 'Foto principal da landing',
+                        subtitle:
+                            'Suba uma foto real sua, do seu estudio ou de um atendimento. Essa foto vira o impacto visual da primeira tela.',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _HeroPhotoPreview(
+                              isDark: isDark,
+                              url: heroPhotoUrl,
+                              primary: _corPrimaria,
+                              secondary: _corSecundaria,
+                              name: nomePersonal,
+                              slogan: _sloganCtrl.text.trim(),
+                            ),
+                            const SizedBox(height: 12),
+                            OutlinedButton.icon(
+                              onPressed:
+                                  isEnterprise && !_uploadingHeroPhoto
+                                      ? () => _pickHeroPhoto(plano)
+                                      : null,
+                              icon:
+                                  _uploadingHeroPhoto
+                                      ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                      : const Icon(Icons.add_photo_alternate),
+                              label: Text(
+                                _uploadingHeroPhoto
+                                    ? 'Enviando foto...'
+                                    : heroPhotoReady
+                                    ? 'Trocar foto principal'
+                                    : 'Subir foto principal',
+                              ),
+                            ),
+                            if (heroPhotoReady) ...[
+                              const SizedBox(height: 10),
+                              _LandingMediaStatusCard(
+                                isDark: isDark,
+                                icon: Icons.photo_camera_back_outlined,
+                                title: 'Foto conectada ao hero',
+                                subtitle:
+                                    'A landing usa esta foto com recorte premium, overlay e assinatura visual da marca.',
+                                url: heroPhotoUrl,
+                                showUrl: false,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _LandingEditorCard(
+                        isDark: isDark,
+                        title: 'Foto pessoal da bio',
+                        subtitle:
+                            'Suba uma foto sua separada para a secao Sobre. Ideal: retrato profissional, voce atendendo aluno ou imagem de autoridade, sem repetir a foto de capa.',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _BioPhotoPreview(
+                              isDark: isDark,
+                              url: bioPhotoUrl,
+                              primary: _corPrimaria,
+                              name: nomePersonal,
+                            ),
+                            const SizedBox(height: 12),
+                            OutlinedButton.icon(
+                              onPressed:
+                                  isEnterprise && !_uploadingBioPhoto
+                                      ? () => _pickBioPhoto(plano)
+                                      : null,
+                              icon:
+                                  _uploadingBioPhoto
+                                      ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                      : const Icon(Icons.person_pin_outlined),
+                              label: Text(
+                                _uploadingBioPhoto
+                                    ? 'Enviando foto...'
+                                    : bioPhotoReady
+                                    ? 'Trocar foto da bio'
+                                    : 'Subir foto da bio',
+                              ),
+                            ),
+                            if (bioPhotoReady) ...[
+                              const SizedBox(height: 10),
+                              _LandingMediaStatusCard(
+                                isDark: isDark,
+                                icon: Icons.person_outline,
+                                title: 'Foto conectada a bio',
+                                subtitle:
+                                    'A secao Sobre usa esta foto separada para contar quem e o personal sem repetir a capa.',
+                                url: bioPhotoUrl,
+                                showUrl: false,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _LandingEditorCard(
+                        isDark: isDark,
+                        title: 'Publicacao e campanha',
+                        subtitle:
+                            'Use tracking para saber de onde veio o aluno. O dominio customizado fica acima, junto da marca.',
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _trackingCtrl,
+                              enabled: isEnterprise,
+                              decoration: const InputDecoration(
+                                labelText: 'Tracking de campanha',
+                                hintText: 'Ex: campanha-instagram-abril',
+                                helperText:
+                                    'Entra nos links de cadastro da landing para medir origem.',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    if (_editorTab == 3) ...[
+                      const SizedBox(height: 16),
+                      _LandingPremiumPlanner(
+                        isDark: isDark,
+                        primary: _corPrimaria,
+                        secondary: _corSecundaria,
+                        name: nomePersonal,
+                        slogan: _sloganCtrl.text.trim(),
+                        specialty: _espCtrl.text.trim(),
+                        heroPhotoReady: heroPhotoReady,
+                        bioPhotoReady: bioPhotoReady,
+                        videoReady: _videoCtrl.text.trim().isNotEmpty,
+                        aboutReady: _descCtrl.text.trim().isNotEmpty,
+                        servicesCount: servicesCount,
+                        packagesCount: packagesCount,
+                        faqCount: faqCount,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Preview
+                      _PremiumLandingPreviewCard(
+                        primary: _corPrimaria,
+                        secondary: _corSecundaria,
+                        logoUrl: _logoUrl,
+                        heroPhotoUrl: heroPhotoUrl,
+                        name: nomePersonal,
+                        slogan: _sloganCtrl.text.trim(),
+                        specialty: _espCtrl.text.trim(),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -1304,6 +1330,82 @@ class _IdentidadeVisualScreenState
   }
 }
 
+class _LandingEditorTabs extends StatelessWidget {
+  final int selected;
+  final ValueChanged<int> onChanged;
+  final bool isDark;
+
+  const _LandingEditorTabs({
+    required this.selected,
+    required this.onChanged,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
+    final tabs = const [
+      (Icons.tune_outlined, 'Essencial'),
+      (Icons.sell_outlined, 'Oferta'),
+      (Icons.photo_camera_back_outlined, 'Midia'),
+      (Icons.desktop_mac_outlined, 'Preview'),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children: List.generate(tabs.length, (index) {
+          final tab = tabs[index];
+          final active = selected == index;
+          return Expanded(
+            child: InkWell(
+              onTap: () => onChanged(index),
+              borderRadius: BorderRadius.circular(14),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color:
+                      active
+                          ? primary.withValues(alpha: isDark ? 0.22 : 0.10)
+                          : Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(tab.$1, size: 17, color: active ? primary : mute),
+                    const SizedBox(height: 4),
+                    Text(
+                      tab.$2,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: active ? ink : mute,
+                        fontSize: 10.5,
+                        fontWeight: active ? FontWeight.w900 : FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
 class _LandingEditorialControls extends StatelessWidget {
   final bool isPremiumOrAbove;
   final bool isDark;
@@ -1340,6 +1442,10 @@ class _LandingEditorialControls extends StatelessWidget {
             .where(optionsByKey.containsKey)
             .map((key) => optionsByKey[key]!)
             .toList();
+    final visibleCount =
+        orderedOptions
+            .where((option) => !hiddenSections.contains(option.key))
+            .length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1391,21 +1497,219 @@ class _LandingEditorialControls extends StatelessWidget {
           style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
         ),
         const SizedBox(height: 10),
-        for (var i = 0; i < orderedOptions.length; i++) ...[
-          _LandingSectionControlTile(
-            option: orderedOptions[i],
-            index: i,
-            total: orderedOptions.length,
-            visible: !hiddenSections.contains(orderedOptions[i].key),
-            primary: primary,
-            isDark: isDark,
-            enabled: isPremiumOrAbove,
-            onMove: onMove,
-            onToggle: onToggle,
-          ),
-          if (i != orderedOptions.length - 1) const SizedBox(height: 8),
-        ],
+        _SectionOrderSummaryButton(
+          visibleCount: visibleCount,
+          totalCount: orderedOptions.length,
+          firstLabel:
+              orderedOptions.isEmpty ? 'Hero' : orderedOptions.first.label,
+          primary: primary,
+          isDark: isDark,
+          enabled: isPremiumOrAbove,
+          onTap:
+              () => _showSectionOrderSheet(
+                context,
+                orderedOptions,
+                hiddenSections,
+                primary,
+                isDark,
+                isPremiumOrAbove,
+                onMove,
+                onToggle,
+              ),
+        ),
       ],
+    );
+  }
+}
+
+void _showSectionOrderSheet(
+  BuildContext context,
+  List<_LandingSectionOption> orderedOptions,
+  Set<String> hiddenSections,
+  Color primary,
+  bool isDark,
+  bool enabled,
+  void Function(String key, int delta) onMove,
+  void Function(String key, bool visible) onToggle,
+) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+    ),
+    builder: (context) {
+      var localOptions = List<_LandingSectionOption>.from(orderedOptions);
+      final localHidden = Set<String>.from(hiddenSections);
+      return StatefulBuilder(
+        builder: (context, setSheetState) {
+          return SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Ordem da landing',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Reordene so quando isso mudar a conversao. Hero e rodape continuam fixos.',
+                    style: TextStyle(
+                      color:
+                          isDark
+                              ? EagleTokens.darkInkMute
+                              : EagleTokens.inkMute,
+                      fontSize: 12.5,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Flexible(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: localOptions.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final option = localOptions[index];
+                        return _LandingSectionControlTile(
+                          option: option,
+                          index: index,
+                          total: localOptions.length,
+                          visible: !localHidden.contains(option.key),
+                          primary: primary,
+                          isDark: isDark,
+                          enabled: enabled,
+                          onMove: (key, delta) {
+                            onMove(key, delta);
+                            setSheetState(() {
+                              final next = (index + delta).clamp(
+                                0,
+                                localOptions.length - 1,
+                              );
+                              if (next == index) return;
+                              final moved = localOptions.removeAt(index);
+                              localOptions.insert(next, moved);
+                            });
+                          },
+                          onToggle: (key, visible) {
+                            onToggle(key, visible);
+                            setSheetState(() {
+                              if (visible) {
+                                localHidden.remove(key);
+                              } else {
+                                localHidden.add(key);
+                              }
+                            });
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Concluir ordem'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+class _SectionOrderSummaryButton extends StatelessWidget {
+  final int visibleCount;
+  final int totalCount;
+  final String firstLabel;
+  final Color primary;
+  final bool isDark;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _SectionOrderSummaryButton({
+    required this.visibleCount,
+    required this.totalCount,
+    required this.firstLabel,
+    required this.primary,
+    required this.isDark,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return InkWell(
+      onTap: enabled ? onTap : null,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color:
+              isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : const Color(0xFFF5F7FB),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color:
+                isDark ? EagleTokens.darkLine : primary.withValues(alpha: 0.18),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: primary.withValues(alpha: isDark ? 0.18 : 0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.view_agenda_outlined, color: primary, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$visibleCount/$totalCount secoes visiveis',
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Primeiro bloco: $firstLabel',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.tune_outlined, color: primary, size: 18),
+          ],
+        ),
+      ),
     );
   }
 }
