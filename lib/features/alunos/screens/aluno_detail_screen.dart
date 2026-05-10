@@ -1292,8 +1292,36 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     ];
   }
 
-  Future<void> _showProfileGaps(BuildContext context, Aluno aluno) async {
+  Future<void> _openProfileGap(
+    BuildContext context,
+    Aluno aluno,
+    _ProfileGap gap,
+  ) async {
+    if (gap.route == 'measures') {
+      await context.push('/alunos/${aluno.id}/evolucao', extra: aluno.nome);
+      return;
+    }
+    if (gap.route == 'equipment') {
+      await context.push('/alunos/${aluno.id}/equipamentos');
+      return;
+    }
+    await context.push('/alunos/${aluno.id}/editar', extra: aluno);
+  }
+
+  Future<void> _completeProfile(BuildContext context, Aluno aluno) async {
     final gaps = _profileGaps(aluno);
+    if (gaps.length == 1) {
+      await _openProfileGap(context, aluno, gaps.first);
+      return;
+    }
+    await _showProfileGapSheet(context, aluno, gaps);
+  }
+
+  Future<void> _showProfileGapSheet(
+    BuildContext context,
+    Aluno aluno,
+    List<_ProfileGap> gaps,
+  ) async {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? EagleTokens.darkCard : EagleTokens.card;
@@ -1301,17 +1329,9 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
-    Future<void> go(String route, BuildContext sheetContext) async {
+    Future<void> go(_ProfileGap gap, BuildContext sheetContext) async {
       Navigator.of(sheetContext).pop();
-      if (route == 'measures') {
-        await context.push('/alunos/${aluno.id}/evolucao', extra: aluno.nome);
-        return;
-      }
-      if (route == 'equipment') {
-        await context.push('/alunos/${aluno.id}/equipamentos');
-        return;
-      }
-      await context.push('/alunos/${aluno.id}/editar', extra: aluno);
+      await _openProfileGap(context, aluno, gap);
     }
 
     await showModalBottomSheet<void>(
@@ -1392,7 +1412,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                         padding: const EdgeInsets.only(bottom: 10),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(16),
-                          onTap: () => go(gap.route, sheetContext),
+                          onTap: () => go(gap, sheetContext),
                           child: Container(
                             padding: const EdgeInsets.all(13),
                             decoration: BoxDecoration(
@@ -1449,16 +1469,14 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 44,
-                    child: OutlinedButton.icon(
-                      onPressed: () => go('edit', sheetContext),
-                      icon: const Icon(Icons.edit_outlined, size: 16),
-                      label: const Text('Abrir edição completa'),
+                  if (gaps.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        'Para ajustes gerais, use Editar nas ações rápidas.',
+                        style: TextStyle(color: mute, fontSize: 12),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -1764,9 +1782,13 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               width: double.infinity,
               height: 40,
               child: OutlinedButton.icon(
-                onPressed: () => _showProfileGaps(context, aluno),
+                onPressed: () => _completeProfile(context, aluno),
                 icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
-                label: const Text('Completar perfil'),
+                label: Text(
+                  _profileGaps(aluno).length > 1
+                      ? 'Resolver lacunas'
+                      : 'Completar perfil',
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: primary,
                   side: BorderSide(color: primary.withValues(alpha: 0.28)),
