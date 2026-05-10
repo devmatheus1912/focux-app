@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/env.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../perfil/providers/perfil_provider.dart';
@@ -39,7 +40,7 @@ class LandingPageConfigScreen extends ConsumerWidget {
             Theme.of(context).colorScheme.primary,
           );
           final slug = perfil.slug ?? 'seu-perfil';
-          final publicUrl = 'https://focux.app/p/$slug';
+          final publicUrl = '${Env.publicWebUrl}/p/$slug';
           final servicesCount = perfil.servicos.length;
           final packagesCount = perfil.pacotes.length;
           final faqCount = perfil.faq.length;

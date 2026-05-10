@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/api/media_upload_service.dart';
+import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -534,6 +536,8 @@ class _IdentidadeVisualScreenState
     final themePrimarySoft = BrandPalette.soft(themePrimary, dark: isDark);
 
     final slug = perfil?.slug;
+    final publicLandingUrl =
+        slug == null ? null : '${Env.publicWebUrl}/p/$slug';
     final nomePersonal = perfil?.nome ?? '';
     final heroPhotoUrl = _heroImageCtrl.text.trim();
     final heroPhotoReady = heroPhotoUrl.isNotEmpty;
@@ -598,6 +602,7 @@ class _IdentidadeVisualScreenState
               score: landingScore,
               primary: themePrimary,
               slug: slug,
+              publicUrl: publicLandingUrl,
               canOpenLanding: isPremiumOrAbove && slug != null,
               servicesCount: servicesCount,
               packagesCount: packagesCount,
@@ -609,13 +614,16 @@ class _IdentidadeVisualScreenState
                       ? null
                       : () {
                         Clipboard.setData(
-                          ClipboardData(text: 'https://focux.app/p/$slug'),
+                          ClipboardData(text: publicLandingUrl!),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Link copiado!')),
                         );
                       },
-              onOpenLanding: slug == null ? null : () => context.go('/p/$slug'),
+              onOpenLanding:
+                  slug == null
+                      ? null
+                      : () => launchUrl(Uri.parse(publicLandingUrl!)),
             ),
             const SizedBox(height: 12),
 
@@ -1318,6 +1326,7 @@ class _LandingReadinessHeader extends StatelessWidget {
   final int score;
   final Color primary;
   final String? slug;
+  final String? publicUrl;
   final bool canOpenLanding;
   final int servicesCount;
   final int packagesCount;
@@ -1332,6 +1341,7 @@ class _LandingReadinessHeader extends StatelessWidget {
     required this.score,
     required this.primary,
     required this.slug,
+    required this.publicUrl,
     required this.canOpenLanding,
     required this.servicesCount,
     required this.packagesCount,
@@ -1461,7 +1471,7 @@ class _LandingReadinessHeader extends StatelessWidget {
               ),
             ],
           ),
-          if (slug != null) ...[
+          if (slug != null && publicUrl != null) ...[
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
@@ -1479,7 +1489,7 @@ class _LandingReadinessHeader extends StatelessWidget {
                   const SizedBox(width: 7),
                   Expanded(
                     child: Text(
-                      'focux.app/p/$slug',
+                      publicUrl!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

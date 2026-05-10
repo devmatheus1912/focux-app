@@ -9,6 +9,7 @@ import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/media_upload_service.dart';
+import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -1882,7 +1883,7 @@ String? _publicProfileUrl(PerfilPersonal perfil) {
   }
   final slug = perfil.slug?.trim();
   if (slug == null || slug.isEmpty) return null;
-  return 'https://focux.app/$slug';
+  return '${Env.publicWebUrl}/p/$slug';
 }
 
 String _buildSubtitle(PerfilPersonal perfil) {

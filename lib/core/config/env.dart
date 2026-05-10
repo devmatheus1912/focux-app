@@ -17,8 +17,22 @@ class Env {
     defaultValue: 'https://focux-backend-production.up.railway.app',
   );
 
+  /// Public URL used for shareable landing links.
+  ///
+  /// Today the canonical `focux.app` domain points to another web project, so
+  /// the default uses the Railway backend HTML fallback. Override with
+  /// `--dart-define=PUBLIC_WEB_URL=https://focux.app` after DNS/Vercel is wired
+  /// to the Focux Personal web surface.
+  static const String publicWebUrl = String.fromEnvironment(
+    'PUBLIC_WEB_URL',
+    defaultValue: 'https://focux-backend-production.up.railway.app',
+  );
+
   /// WebSocket base URL. Derived from [apiUrl] but overridable via `WS_URL`.
-  static const String _wsOverride = String.fromEnvironment('WS_URL', defaultValue: '');
+  static const String _wsOverride = String.fromEnvironment(
+    'WS_URL',
+    defaultValue: '',
+  );
 
   /// OAuth client id used by Google Sign-In (web client, used as serverClientId
   /// on Android). Public identifier, safe to ship hardcoded. Override via
@@ -40,7 +54,8 @@ class Env {
 
   /// Whether we are running against a non-prod backend (used to gate debug
   /// affordances like staging banners and dev-only buttons).
-  static bool get isProd => apiUrl.contains('focux-backend.onrender.com')
-      || apiUrl.contains('up.railway.app')
-      || apiUrl.contains('api.focux.app');
+  static bool get isProd =>
+      apiUrl.contains('focux-backend.onrender.com') ||
+      apiUrl.contains('up.railway.app') ||
+      apiUrl.contains('api.focux.app');
 }
