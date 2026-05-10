@@ -48,6 +48,26 @@ final alunoTimeline360ApiProvider =
       ).buscarTimeline360(alunoId);
     });
 
+int _perfilCompletion(Aluno aluno) {
+  final fields = [
+    aluno.telefone,
+    aluno.whatsapp,
+    aluno.objetivo,
+    aluno.genero,
+    aluno.fotoUrl,
+    aluno.dataNascimento,
+    aluno.peso,
+    aluno.altura,
+  ];
+  final filled =
+      fields.where((value) {
+        if (value == null) return false;
+        if (value is String) return value.trim().isNotEmpty;
+        return true;
+      }).length;
+  return ((filled / fields.length) * 100).round().clamp(0, 100);
+}
+
 class AlunoDetailScreen extends ConsumerWidget {
   final int alunoId;
   const AlunoDetailScreen({super.key, required this.alunoId});
@@ -401,10 +421,17 @@ class AlunoDetailScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (aluno) {
-          final aderencia = "--";
-          final streak = "--";
-          final prs = "--";
-          final treinos = "--";
+          final perfil = '${_perfilCompletion(aluno)}%';
+          final financeiro =
+              aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Ação' : 'OK';
+          final medida =
+              aluno.peso == null
+                  ? 'Pendente'
+                  : '${aluno.peso!.toStringAsFixed(1)} kg';
+          final contexto =
+              aluno.equipamentosDisponiveis.isEmpty
+                  ? 'Base'
+                  : '${aluno.equipamentosDisponiveis.length} eq.';
 
           return CustomScrollView(
             slivers: [
@@ -494,30 +521,28 @@ class AlunoDetailScreen extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                _HeroStat(label: 'Aderência', value: aderencia),
+                                _HeroStat(label: 'Perfil', value: perfil),
                                 Container(
                                   width: 1,
                                   height: 24,
                                   color: Colors.white.withValues(alpha: 0.2),
                                 ),
                                 _HeroStat(
-                                  label: 'Streak',
-                                  value: streak,
-                                  icon: Icons.local_fire_department,
-                                  iconColor: const Color(0xFFFFD37A),
+                                  label: 'Financeiro',
+                                  value: financeiro,
                                 ),
                                 Container(
                                   width: 1,
                                   height: 24,
                                   color: Colors.white.withValues(alpha: 0.2),
                                 ),
-                                _HeroStat(label: 'PRs · mês', value: prs),
+                                _HeroStat(label: 'Medida', value: medida),
                                 Container(
                                   width: 1,
                                   height: 24,
                                   color: Colors.white.withValues(alpha: 0.2),
                                 ),
-                                _HeroStat(label: 'Treinos', value: treinos),
+                                _HeroStat(label: 'Contexto', value: contexto),
                               ],
                             ),
                           ],
@@ -594,7 +619,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                     top: 16,
                     left: 16,
                     right: 16,
-                    bottom: 80,
+                    bottom: 118,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -874,7 +899,6 @@ class AlunoDetailScreen extends ConsumerWidget {
                             icon: Icons.fitness_center,
                             label: 'Treinos',
                             sub: 'Sem dados recentes',
-                            badge: 'Abrir',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -889,10 +913,6 @@ class AlunoDetailScreen extends ConsumerWidget {
                                 aluno.equipamentosDisponiveis.isEmpty
                                     ? 'Sem restricao'
                                     : '${aluno.equipamentosDisponiveis.length} marcados',
-                            badge:
-                                aluno.equipamentosDisponiveis.isEmpty
-                                    ? 'Base'
-                                    : 'OK',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -928,7 +948,6 @@ class AlunoDetailScreen extends ConsumerWidget {
                             icon: Icons.assessment_outlined,
                             label: 'Aderência',
                             sub: 'Sem dados',
-                            badge: 'Abrir',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -940,7 +959,6 @@ class AlunoDetailScreen extends ConsumerWidget {
                             icon: Icons.flag_outlined,
                             label: 'Sucesso',
                             sub: 'Acompanhar',
-                            badge: 'P2',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -952,7 +970,6 @@ class AlunoDetailScreen extends ConsumerWidget {
                             icon: Icons.people,
                             label: 'Anamnese',
                             sub: 'Completa ✓',
-                            badge: 'OK',
                             isDark: isDark,
                             onTap:
                                 () => context.push('/alunos/$alunoId/anamnese'),
@@ -967,7 +984,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                             badge:
                                 aluno.statusFinanceiro == 'INADIMPLENTE'
                                     ? 'Ação'
-                                    : 'OK',
+                                    : null,
                             isDark: isDark,
                             onTap: () => context.push('/financeiro'),
                           ),
@@ -975,7 +992,6 @@ class AlunoDetailScreen extends ConsumerWidget {
                             icon: Icons.chat,
                             label: 'Chat',
                             sub: 'Última ação',
-                            badge: 'Pronto',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -987,7 +1003,6 @@ class AlunoDetailScreen extends ConsumerWidget {
                             icon: Icons.restaurant_menu,
                             label: 'Dieta',
                             sub: 'Plano atual',
-                            badge: 'Abrir',
                             isDark: isDark,
                             onTap:
                                 () =>
@@ -997,7 +1012,6 @@ class AlunoDetailScreen extends ConsumerWidget {
                             icon: Icons.video_camera_back,
                             label: 'Feedback',
                             sub: 'Análise de vídeo',
-                            badge: 'Novo',
                             isDark: isDark,
                             onTap:
                                 () => context.push(
@@ -1198,26 +1212,6 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     required this.resumoAsync,
     required this.isDark,
   });
-
-  int _perfilCompletion(Aluno aluno) {
-    final fields = [
-      aluno.telefone,
-      aluno.whatsapp,
-      aluno.objetivo,
-      aluno.genero,
-      aluno.fotoUrl,
-      aluno.dataNascimento,
-      aluno.peso,
-      aluno.altura,
-    ];
-    final filled =
-        fields.where((value) {
-          if (value == null) return false;
-          if (value is String) return value.trim().isNotEmpty;
-          return true;
-        }).length;
-    return ((filled / fields.length) * 100).round().clamp(0, 100);
-  }
 
   List<_Aluno360Signal> _signals(
     BuildContext context,
@@ -1747,6 +1741,118 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
     }
   }
 
+  void _openCheckinMessage(BuildContext context) {
+    final firstName =
+        alunoNome.trim().isEmpty ? 'aluno' : alunoNome.trim().split(' ').first;
+    final message =
+        'Oi, $firstName. Como foi seu último treino? Me manda carga, repetições e qualquer sensação fora do normal.';
+    final primary = Theme.of(context).colorScheme.primary;
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder:
+          (sheetContext) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(13),
+                        ),
+                        child: Icon(
+                          Icons.message_outlined,
+                          color: primary,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Mensagem de check-in',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            SizedBox(height: 3),
+                            Text(
+                              'Revise antes de enviar ao aluno.',
+                              style: TextStyle(fontSize: 12.5),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: primary.withValues(alpha: 0.16),
+                      ),
+                    ),
+                    child: Text(message, style: const TextStyle(height: 1.35)),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            await Clipboard.setData(
+                              ClipboardData(text: message),
+                            );
+                            if (sheetContext.mounted) {
+                              Navigator.of(sheetContext).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Mensagem copiada.'),
+                                ),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.copy_rounded, size: 16),
+                          label: const Text('Copiar'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () {
+                            Navigator.of(sheetContext).pop();
+                            context.push(
+                              '/alunos/$alunoId/chat',
+                              extra: alunoNome,
+                            );
+                          },
+                          icon: const Icon(Icons.chat_bubble_outline, size: 16),
+                          label: const Text('Abrir chat'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -1880,10 +1986,12 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
                 height: 40,
                 child: OutlinedButton.icon(
                   onPressed:
-                      () => context.push(
-                        '/alunos/$alunoId/treinos-list',
-                        extra: alunoNome,
-                      ),
+                      ev.sinal == 'SEM_DADOS'
+                          ? () => _openCheckinMessage(context)
+                          : () => context.push(
+                            '/alunos/$alunoId/treinos-list',
+                            extra: alunoNome,
+                          ),
                   icon: const Icon(Icons.fitness_center_rounded, size: 16),
                   label: Text(
                     ev.sinal == 'SEM_DADOS'
@@ -2923,15 +3031,8 @@ class _MiniAutonomyChip extends StatelessWidget {
 class _HeroStat extends StatelessWidget {
   final String label;
   final String value;
-  final IconData? icon;
-  final Color? iconColor;
 
-  const _HeroStat({
-    required this.label,
-    required this.value,
-    this.icon,
-    this.iconColor,
-  });
+  const _HeroStat({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -2948,22 +3049,14 @@ class _HeroStat extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Row(
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 14, color: iconColor),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ],
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.5,
+          ),
         ),
       ],
     );
