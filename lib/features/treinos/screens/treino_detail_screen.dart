@@ -75,18 +75,18 @@ class _TreinoDetailBody extends StatelessWidget {
         return SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
             child: Container(
-              padding: const EdgeInsets.fromLTRB(18, 10, 18, 16),
+              padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
               decoration: BoxDecoration(
                 color: card,
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(34),
                 border: Border.all(color: border),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.14),
-                    blurRadius: 34,
-                    offset: const Offset(0, 18),
+                    blurRadius: 44,
+                    offset: const Offset(0, 24),
                   ),
                 ],
               ),
@@ -101,19 +101,54 @@ class _TreinoDetailBody extends StatelessWidget {
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Opções do treino',
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color:
+                              isDark
+                                  ? Colors.white.withValues(alpha: 0.06)
+                                  : EagleTokens.brandSofter,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          Icons.tune_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 20,
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Opções do treino',
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 19,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.4,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Organize, publique ou replique este treino.',
+                              style: TextStyle(
+                                color: mute,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   _MenuActionTile(
                     icon: Icons.add_circle_outline,
                     label: 'Adicionar exercício',
@@ -282,9 +317,9 @@ class _TreinoDetailBody extends StatelessWidget {
       slivers: [
         // Hero AppBar
         SliverAppBar(
-          expandedHeight: 300,
+          expandedHeight: 318,
           pinned: true,
-          backgroundColor: isDark ? const Color(0xFF0D0F14) : primaryDeep,
+          backgroundColor: isDark ? const Color(0xFF0A0C12) : primaryDeep,
           iconTheme: const IconThemeData(color: Colors.white),
           flexibleSpace: FlexibleSpaceBar(
             background: Stack(
@@ -299,9 +334,15 @@ class _TreinoDetailBody extends StatelessWidget {
                       transform: const GradientRotation(160 * math.pi / 180),
                       colors:
                           isDark
-                              ? [primaryDeep, const Color(0xFF0D0F14)]
-                              : [primary, primaryDeep],
-                      stops: const [0.0, 0.85],
+                              ? [
+                                const Color(0xFF121A32),
+                                const Color(0xFF080A12),
+                              ]
+                              : [
+                                const Color(0xFF263B96),
+                                const Color(0xFF14205A),
+                              ],
+                      stops: const [0.0, 1.0],
                     ),
                   ),
                 ),
@@ -309,7 +350,7 @@ class _TreinoDetailBody extends StatelessWidget {
                 CustomPaint(painter: const _GridTexturePainter()),
                 // Content
                 Container(
-                  padding: const EdgeInsets.fromLTRB(22, 96, 22, 0),
+                  padding: const EdgeInsets.fromLTRB(22, 94, 22, 22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -319,46 +360,40 @@ class _TreinoDetailBody extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Container(
-                            width: 88,
-                            height: 88,
+                            width: 78,
+                            height: 78,
+                            padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(22),
+                              borderRadius: BorderRadius.circular(25),
                               border: Border.all(
                                 color: Colors.white.withValues(alpha: 0.12),
                               ),
-                              boxShadow: const [
+                              boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 30,
-                                  offset: Offset(0, 12),
+                                  color: Colors.black.withValues(alpha: 0.18),
+                                  blurRadius: 34,
+                                  offset: const Offset(0, 16),
                                 ),
                               ],
                             ),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Icon(
-                                  Icons.fitness_center,
-                                  size: 44,
-                                  color: Colors.white.withValues(alpha: 0.9),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(19),
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Colors.white.withValues(alpha: 0.18),
+                                    Colors.white.withValues(alpha: 0.05),
+                                  ],
                                 ),
-                                Positioned(
-                                  bottom: 8,
-                                  left: 10,
-                                  child: Text(
-                                    'TREINO',
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.7,
-                                      ),
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 1.0,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
+                              child: Icon(
+                                Icons.fitness_center_rounded,
+                                size: 35,
+                                color: Colors.white.withValues(alpha: 0.92),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -372,11 +407,11 @@ class _TreinoDetailBody extends StatelessWidget {
                                     'ALUNO FOCO',
                                     style: TextStyle(
                                       color: Colors.white.withValues(
-                                        alpha: 0.6,
+                                        alpha: 0.68,
                                       ),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.8,
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 1.1,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -384,10 +419,10 @@ class _TreinoDetailBody extends StatelessWidget {
                                     treino.nome,
                                     style: const TextStyle(
                                       color: Colors.white,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: -0.5,
-                                      height: 1.1,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -0.8,
+                                      height: 1.02,
                                     ),
                                   ),
                                   const SizedBox(height: 8),
@@ -457,19 +492,22 @@ class _TreinoDetailBody extends StatelessWidget {
                                       }
                                     });
                               },
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(18),
                               child: Container(
-                                height: 48,
+                                height: 52,
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
+                                  color: const Color(0xFFF8FAFF),
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.65),
+                                  ),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withValues(
-                                        alpha: 0.10,
+                                        alpha: 0.16,
                                       ),
-                                      blurRadius: 18,
-                                      offset: const Offset(0, 8),
+                                      blurRadius: 26,
+                                      offset: const Offset(0, 14),
                                     ),
                                   ],
                                 ),
@@ -479,15 +517,15 @@ class _TreinoDetailBody extends StatelessWidget {
                                     Icon(
                                       Icons.play_arrow_rounded,
                                       color: primary,
-                                      size: 20,
+                                      size: 19,
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
                                       'Adicionar exercício',
                                       style: TextStyle(
                                         color: primary,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w900,
                                       ),
                                     ),
                                   ],
@@ -498,13 +536,13 @@ class _TreinoDetailBody extends StatelessWidget {
                           const SizedBox(width: 10),
                           InkWell(
                             onTap: () => _openMenu(context),
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(18),
                             child: Container(
-                              width: 48,
-                              height: 48,
+                              width: 52,
+                              height: 52,
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(16),
+                                color: Colors.white.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(18),
                                 border: Border.all(
                                   color: Colors.white.withValues(alpha: 0.12),
                                 ),
@@ -530,7 +568,7 @@ class _TreinoDetailBody extends StatelessWidget {
         // Stats Ribbon — design: Duração / Exercícios / Volume
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
             child: Builder(
               builder: (context) {
                 // Estimated duration: 3–4 min per exercise (rough)
@@ -544,29 +582,39 @@ class _TreinoDetailBody extends StatelessWidget {
                       0;
                   vol += te.series * reps * (te.cargaKg ?? 0);
                 }
-                return Row(
-                  children: [
-                    _MiniMetric(
-                      label: 'Duração',
-                      value: '~${durMin}min',
-                      isDark: isDark,
-                    ),
-                    const SizedBox(width: 8),
-                    _MiniMetric(
-                      label: 'Exercícios',
-                      value: '${treino.exercicios.length}',
-                      isDark: isDark,
-                    ),
-                    const SizedBox(width: 8),
-                    _MiniMetric(
-                      label: 'Volume',
-                      value:
-                          vol > 0
-                              ? '${(vol / 1000).toStringAsFixed(1)}t'
-                              : '${grouped.keys.length} ${grouped.keys.length == 1 ? 'grupo' : 'grupos'}',
-                      isDark: isDark,
-                    ),
-                  ],
+                return Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color:
+                        isDark
+                            ? Colors.white.withValues(alpha: 0.04)
+                            : Colors.black.withValues(alpha: 0.035),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    children: [
+                      _MiniMetric(
+                        label: 'Duração',
+                        value: '~${durMin}min',
+                        isDark: isDark,
+                      ),
+                      const SizedBox(width: 5),
+                      _MiniMetric(
+                        label: 'Exercícios',
+                        value: '${treino.exercicios.length}',
+                        isDark: isDark,
+                      ),
+                      const SizedBox(width: 5),
+                      _MiniMetric(
+                        label: 'Volume',
+                        value:
+                            vol > 0
+                                ? '${(vol / 1000).toStringAsFixed(1)}t'
+                                : '${grouped.keys.length} ${grouped.keys.length == 1 ? 'grupo' : 'grupos'}',
+                        isDark: isDark,
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -1108,11 +1156,24 @@ class _MenuActionTile extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           decoration: BoxDecoration(
-            color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            color:
+                isDark
+                    ? Colors.white.withValues(alpha: 0.035)
+                    : const Color(0xFFFEFEFF),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: border),
+            boxShadow:
+                isDark
+                    ? null
+                    : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.018),
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
           ),
           child: Row(
             children: [
@@ -1131,8 +1192,8 @@ class _MenuActionTile extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: ink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 13.8,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
@@ -1470,10 +1531,10 @@ class _MiniMetric extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 13),
         decoration: BoxDecoration(
           color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color:
                 isDark
@@ -1485,9 +1546,9 @@ class _MiniMetric extends StatelessWidget {
                   ? null
                   : [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.025),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
+                      color: Colors.black.withValues(alpha: 0.035),
+                      blurRadius: 22,
+                      offset: const Offset(0, 12),
                     ),
                   ],
         ),
@@ -1497,8 +1558,8 @@ class _MiniMetric extends StatelessWidget {
               label,
               style: TextStyle(
                 color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 2),
@@ -1506,8 +1567,8 @@ class _MiniMetric extends StatelessWidget {
               value,
               style: TextStyle(
                 color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
                 letterSpacing: -0.2,
               ),
             ),
@@ -1807,18 +1868,18 @@ class _ExerciseActionsSheet extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 16),
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
           decoration: BoxDecoration(
             color: card,
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(34),
             border: Border.all(color: border),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.14),
-                blurRadius: 34,
-                offset: const Offset(0, 18),
+                blurRadius: 44,
+                offset: const Offset(0, 24),
               ),
             ],
           ),
@@ -1837,25 +1898,53 @@ class _ExerciseActionsSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 18),
-              Text(
-                'Ações do exercício',
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: mute,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color:
+                          isDark
+                              ? Colors.white.withValues(alpha: 0.06)
+                              : EagleTokens.brandSofter,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      Icons.bolt_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Ações do exercício',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 19,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.4,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               if (canMoveUp)
@@ -1926,12 +2015,15 @@ class _ExerciseActionTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           decoration: BoxDecoration(
-            color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            color:
+                isDark
+                    ? Colors.white.withValues(alpha: 0.035)
+                    : const Color(0xFFFEFEFF),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: border),
           ),
           child: Row(
@@ -1951,8 +2043,8 @@ class _ExerciseActionTile extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: ink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 13.8,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
