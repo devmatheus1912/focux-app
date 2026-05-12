@@ -317,7 +317,7 @@ class _TreinoDetailBody extends StatelessWidget {
       slivers: [
         // Hero AppBar
         SliverAppBar(
-          expandedHeight: 318,
+          expandedHeight: 268,
           pinned: true,
           backgroundColor: isDark ? const Color(0xFF0A0C12) : primaryDeep,
           iconTheme: const IconThemeData(color: Colors.white),
@@ -350,7 +350,7 @@ class _TreinoDetailBody extends StatelessWidget {
                 CustomPaint(painter: const _GridTexturePainter()),
                 // Content
                 Container(
-                  padding: const EdgeInsets.fromLTRB(22, 94, 22, 22),
+                  padding: const EdgeInsets.fromLTRB(20, 72, 20, 18),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -360,12 +360,12 @@ class _TreinoDetailBody extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Container(
-                            width: 78,
-                            height: 78,
-                            padding: const EdgeInsets.all(6),
+                            width: 64,
+                            height: 64,
+                            padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(25),
+                              borderRadius: BorderRadius.circular(22),
                               border: Border.all(
                                 color: Colors.white.withValues(alpha: 0.12),
                               ),
@@ -379,7 +379,7 @@ class _TreinoDetailBody extends StatelessWidget {
                             ),
                             child: Container(
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(19),
+                                borderRadius: BorderRadius.circular(17),
                                 gradient: LinearGradient(
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
@@ -391,12 +391,12 @@ class _TreinoDetailBody extends StatelessWidget {
                               ),
                               child: Icon(
                                 Icons.fitness_center_rounded,
-                                size: 35,
+                                size: 29,
                                 color: Colors.white.withValues(alpha: 0.92),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 14),
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: 4),
@@ -409,7 +409,7 @@ class _TreinoDetailBody extends StatelessWidget {
                                       color: Colors.white.withValues(
                                         alpha: 0.68,
                                       ),
-                                      fontSize: 10.5,
+                                      fontSize: 10,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: 1.1,
                                     ),
@@ -419,7 +419,7 @@ class _TreinoDetailBody extends StatelessWidget {
                                     treino.nome,
                                     style: const TextStyle(
                                       color: Colors.white,
-                                      fontSize: 25,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: -0.8,
                                       height: 1.02,
@@ -471,7 +471,7 @@ class _TreinoDetailBody extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 16),
 
                       // Action row
                       Row(
@@ -494,7 +494,7 @@ class _TreinoDetailBody extends StatelessWidget {
                               },
                               borderRadius: BorderRadius.circular(18),
                               child: Container(
-                                height: 52,
+                                height: 48,
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF8FAFF),
                                   borderRadius: BorderRadius.circular(18),
@@ -538,8 +538,8 @@ class _TreinoDetailBody extends StatelessWidget {
                             onTap: () => _openMenu(context),
                             borderRadius: BorderRadius.circular(18),
                             child: Container(
-                              width: 52,
-                              height: 52,
+                              width: 48,
+                              height: 48,
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(18),
@@ -556,7 +556,7 @@ class _TreinoDetailBody extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 6),
                     ],
                   ),
                 ),
@@ -568,7 +568,7 @@ class _TreinoDetailBody extends StatelessWidget {
         // Stats Ribbon — design: Duração / Exercícios / Volume
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
             child: Builder(
               builder: (context) {
                 // Estimated duration: 3–4 min per exercise (rough)
@@ -582,38 +582,51 @@ class _TreinoDetailBody extends StatelessWidget {
                       0;
                   vol += te.series * reps * (te.cargaKg ?? 0);
                 }
-                return Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color:
-                        isDark
-                            ? Colors.white.withValues(alpha: 0.04)
-                            : Colors.black.withValues(alpha: 0.035),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Row(
-                    children: [
-                      _MiniMetric(
-                        label: 'Duração',
-                        value: '~${durMin}min',
-                        isDark: isDark,
-                      ),
-                      const SizedBox(width: 5),
-                      _MiniMetric(
-                        label: 'Exercícios',
-                        value: '${treino.exercicios.length}',
-                        isDark: isDark,
-                      ),
-                      const SizedBox(width: 5),
-                      _MiniMetric(
-                        label: 'Volume',
-                        value:
-                            vol > 0
-                                ? '${(vol / 1000).toStringAsFixed(1)}t'
-                                : '${grouped.keys.length} ${grouped.keys.length == 1 ? 'grupo' : 'grupos'}',
-                        isDark: isDark,
-                      ),
-                    ],
+                return Transform.translate(
+                  offset: const Offset(0, -18),
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color:
+                          isDark
+                              ? const Color(0xFF111522)
+                              : const Color(0xFFEDEFF5),
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow:
+                          isDark
+                              ? null
+                              : [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.06),
+                                  blurRadius: 28,
+                                  offset: const Offset(0, 14),
+                                ),
+                              ],
+                    ),
+                    child: Row(
+                      children: [
+                        _MiniMetric(
+                          label: 'Duração',
+                          value: '~${durMin}min',
+                          isDark: isDark,
+                        ),
+                        const SizedBox(width: 5),
+                        _MiniMetric(
+                          label: 'Exercícios',
+                          value: '${treino.exercicios.length}',
+                          isDark: isDark,
+                        ),
+                        const SizedBox(width: 5),
+                        _MiniMetric(
+                          label: 'Volume',
+                          value:
+                              vol > 0
+                                  ? '${(vol / 1000).toStringAsFixed(1)}t'
+                                  : '${grouped.keys.length} ${grouped.keys.length == 1 ? 'grupo' : 'grupos'}',
+                          isDark: isDark,
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -624,17 +637,17 @@ class _TreinoDetailBody extends StatelessWidget {
         // Exercise list grouped
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Exercícios',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w900,
                     color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                    letterSpacing: -0.5,
+                    letterSpacing: -0.8,
                   ),
                 ),
                 Container(
@@ -695,9 +708,18 @@ class _TreinoDetailBody extends StatelessWidget {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 4, 4, 10),
+                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
                       child: Row(
                         children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: primary.withValues(alpha: 0.85),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 9),
                           Text(
                             entry.key.toUpperCase(),
                             style: TextStyle(
@@ -706,21 +728,11 @@ class _TreinoDetailBody extends StatelessWidget {
                                       ? EagleTokens.darkInkMute
                                       : EagleTokens.inkMute,
                               fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.3,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Container(
-                              height: 0.5,
-                              color:
-                                  isDark
-                                      ? EagleTokens.darkLine
-                                      : EagleTokens.line,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
+                          const Spacer(),
                           Text(
                             '${entry.value.length} ex.',
                             style: TextStyle(
@@ -729,7 +741,7 @@ class _TreinoDetailBody extends StatelessWidget {
                                       ? EagleTokens.darkInkMute
                                       : EagleTokens.inkMute,
                               fontSize: 11,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
@@ -739,11 +751,25 @@ class _TreinoDetailBody extends StatelessWidget {
                       margin: const EdgeInsets.only(bottom: 14),
                       decoration: BoxDecoration(
                         color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(28),
                         border: Border.all(
                           color:
-                              isDark ? EagleTokens.darkLine : EagleTokens.line,
+                              isDark
+                                  ? EagleTokens.darkLine
+                                  : EagleTokens.line.withValues(alpha: 0.72),
                         ),
+                        boxShadow:
+                            isDark
+                                ? null
+                                : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(
+                                      alpha: 0.035,
+                                    ),
+                                    blurRadius: 26,
+                                    offset: const Offset(0, 16),
+                                  ),
+                                ],
                       ),
                       child: Column(
                         children:
@@ -1531,10 +1557,10 @@ class _MiniMetric extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 13),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-          borderRadius: BorderRadius.circular(20),
+          color: isDark ? const Color(0xFF191D29) : Colors.white,
+          borderRadius: BorderRadius.circular(19),
           border: Border.all(
             color:
                 isDark
@@ -1558,8 +1584,8 @@ class _MiniMetric extends StatelessWidget {
               label,
               style: TextStyle(
                 color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w600,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 2),
@@ -1567,7 +1593,7 @@ class _MiniMetric extends StatelessWidget {
               value,
               style: TextStyle(
                 color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                fontSize: 14,
+                fontSize: 14.5,
                 fontWeight: FontWeight.w900,
                 letterSpacing: -0.2,
               ),
@@ -1620,7 +1646,7 @@ class _ExercicioRow extends StatelessWidget {
     final trustColor = _trustColor(te.exercicio, primary);
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
       decoration: BoxDecoration(
         border:
             isLast ? null : Border(bottom: BorderSide(color: line, width: 0.5)),
@@ -1628,11 +1654,12 @@ class _ExercicioRow extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              color: primarySoft,
-              borderRadius: BorderRadius.circular(10),
+              color: primary.withValues(alpha: isDark ? 0.18 : 0.10),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: primary.withValues(alpha: 0.10)),
             ),
             alignment: Alignment.center,
             child: Text(
@@ -1640,11 +1667,11 @@ class _ExercicioRow extends StatelessWidget {
               style: TextStyle(
                 color: primary,
                 fontSize: 14,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 13),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1653,9 +1680,9 @@ class _ExercicioRow extends StatelessWidget {
                   te.exercicio.nome,
                   style: TextStyle(
                     color: ink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.2,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -1665,8 +1692,8 @@ class _ExercicioRow extends StatelessWidget {
                       '${te.series}×${te.repeticoes}',
                       style: TextStyle(
                         color: ink,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 12.2,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -1683,8 +1710,8 @@ class _ExercicioRow extends StatelessWidget {
                       '${te.cargaKg ?? 0}kg',
                       style: TextStyle(
                         color: ink,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 12.2,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -1766,17 +1793,23 @@ class _ExercicioRow extends StatelessWidget {
               if (action == 'substitute') onSubstitute();
               if (action == 'remove') onRemove();
             },
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             child: Container(
-              width: 36,
-              height: 36,
+              width: 38,
+              height: 38,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color:
                     isDark
-                        ? Colors.white.withValues(alpha: 0.04)
-                        : EagleTokens.brandSofter.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(14),
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : const Color(0xFFF8F9FC),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color:
+                      isDark
+                          ? Colors.white.withValues(alpha: 0.04)
+                          : EagleTokens.lineSoft,
+                ),
               ),
               child: Icon(Icons.more_vert_rounded, color: mute, size: 18),
             ),
