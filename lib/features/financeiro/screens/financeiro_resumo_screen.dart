@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -62,232 +63,411 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
+
     return Scaffold(
       body: Column(
         children: [
           // Month/year picker
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.chevron_left),
-                  onPressed: _mesAnterior,
-                  tooltip: 'Mês anterior',
+                _NavArrow(
+                  icon: Icons.chevron_left_rounded,
+                  onTap: _mesAnterior,
+                  isDark: isDark,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 16),
                 Text(
                   '${_meses[_mes]} $_ano',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold),
+                  style: GoogleFonts.outfit(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: ink,
+                    letterSpacing: -0.3,
+                  ),
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right),
-                  onPressed: _mesProximo,
-                  tooltip: 'Próximo mês',
+                const SizedBox(width: 16),
+                _NavArrow(
+                  icon: Icons.chevron_right_rounded,
+                  onTap: _mesProximo,
+                  isDark: isDark,
                 ),
               ],
             ),
           ),
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ? _buildLoading(isDark)
                 : _erro != null
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.error_outline, size: 48, color: EagleTokens.bad),
-                            const SizedBox(height: 8),
-                            Text('Erro ao carregar resumo', style: TextStyle(color: cs.error)),
-                            const SizedBox(height: 4),
-                            Text(_erro!, style: const TextStyle(fontSize: 12), textAlign: TextAlign.center),
-                            const SizedBox(height: 16),
-                            FilledButton.icon(
-                              onPressed: _carregar,
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Tentar novamente'),
-                            ),
-                          ],
-                        ),
-                      )
+                    ? _buildError(isDark, ink, mute, primary)
                     : _resumo == null
-                        ? const Center(child: Text('Sem dados para exibir.'))
-                        : ListView(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            children: [
-                              _DonutChartCard(resumo: _resumo!),
-                              const SizedBox(height: 16),
-                              _ResumoCard(
-                                titulo: 'Total recebido',
-                                valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}',
-                                icone: Icons.check_circle,
-                                cor: EagleTokens.good,
-                              ),
-                              _ResumoCard(
-                                titulo: 'Total previsto',
-                                valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}',
-                                icone: Icons.trending_up,
-                                cor: cs.primary,
-                              ),
-                              _ResumoCard(
-                                titulo: 'Inadimplentes',
-                                valor: '${_resumo!.inadimplentes}',
-                                icone: Icons.warning_amber,
-                                cor: EagleTokens.bad,
-                              ),
-                              _ResumoCard(
-                                titulo: 'Ticket médio',
-                                valor: 'R\$ ${_resumo!.ticketMedio.toStringAsFixed(2)}',
-                                icone: Icons.receipt_long,
-                                cor: cs.primary,
-                              ),
-                              _ResumoCard(
-                                titulo: 'Acumulado anual',
-                                valor: 'R\$ ${_resumo!.acumuladoAnual.toStringAsFixed(2)}',
-                                icone: Icons.savings,
-                                cor: const Color(0xFF7C3AED),
-                              ),
-                            ],
-                          ),
+                        ? _buildEmpty(isDark, ink, mute, primary)
+                        : _buildContent(isDark, ink, mute, primary),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildLoading(bool isDark) {
+    return const Center(
+      child: SizedBox(
+        width: 28,
+        height: 28,
+        child: CircularProgressIndicator(strokeWidth: 2.5),
+      ),
+    );
+  }
+
+  Widget _buildError(bool isDark, Color ink, Color mute, Color primary) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(Icons.cloud_off_rounded, color: EagleTokens.bad, size: 24),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Erro ao carregar resumo',
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: ink,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Verifique sua conexão e tente novamente.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: _carregar,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Tentar novamente'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: primary,
+                side: BorderSide(color: primary.withValues(alpha: 0.3)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmpty(bool isDark, Color ink, Color mute, Color primary) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: isDark ? 0.15 : 0.08),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(Icons.analytics_rounded, color: primary, size: 24),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Sem dados para exibir',
+            style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: ink),
+          ),
+          const SizedBox(height: 4),
+          Text('Nenhuma mensalidade neste período.', style: TextStyle(color: mute, fontSize: 13)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(bool isDark, Color ink, Color mute, Color primary) {
+    final r = _resumo!;
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+      children: [
+        _DonutChartCard(resumo: r, isDark: isDark),
+        const SizedBox(height: 16),
+        _MetricRow(
+          label: 'Total recebido',
+          value: 'R\$ ${r.totalRecebido.toStringAsFixed(0)}',
+          icon: Icons.check_circle_rounded,
+          color: EagleTokens.good,
+          isDark: isDark,
+        ),
+        _MetricRow(
+          label: 'Total previsto',
+          value: 'R\$ ${r.totalPrevisto.toStringAsFixed(0)}',
+          icon: Icons.trending_up_rounded,
+          color: primary,
+          isDark: isDark,
+        ),
+        _MetricRow(
+          label: 'Inadimplentes',
+          value: '${r.inadimplentes}',
+          icon: Icons.warning_amber_rounded,
+          color: EagleTokens.bad,
+          isDark: isDark,
+        ),
+        _MetricRow(
+          label: 'Ticket médio',
+          value: 'R\$ ${r.ticketMedio.toStringAsFixed(0)}',
+          icon: Icons.receipt_long_rounded,
+          color: primary,
+          isDark: isDark,
+        ),
+        _MetricRow(
+          label: 'Acumulado anual',
+          value: 'R\$ ${r.acumuladoAnual.toStringAsFixed(0)}',
+          icon: Icons.savings_rounded,
+          color: EagleTokens.good,
+          isDark: isDark,
+          isLast: true,
+        ),
+      ],
+    );
+  }
 }
+
+// ─── Navigational arrow ─────────────────────────────────────────────────
+
+class _NavArrow extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool isDark;
+  const _NavArrow({required this.icon, required this.onTap, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: line),
+        ),
+        child: Icon(icon, size: 20, color: ink),
+      ),
+    );
+  }
+}
+
+// ─── Donut chart ─────────────────────────────────────────────────────────
 
 class _DonutChartCard extends StatelessWidget {
   final ResumoMensal resumo;
-  const _DonutChartCard({required this.resumo});
+  final bool isDark;
+  const _DonutChartCard({required this.resumo, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
     final double recebido = resumo.totalRecebido;
     final double previsto = resumo.totalPrevisto;
     final double pendente = previsto > recebido ? (previsto - recebido) : 0;
-    
+
     final bool isEmpty = previsto == 0;
     final double percentRecebido = isEmpty ? 0 : (recebido / previsto * 100).clamp(0, 100);
 
-    return Card(
-      elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 180,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  PieChart(
-                    PieChartData(
-                      sectionsSpace: 2,
-                      centerSpaceRadius: 60,
-                      startDegreeOffset: -90,
-                      sections: isEmpty
-                          ? [PieChartSectionData(value: 1, color: EagleTokens.inkMute.withValues(alpha: 0.3), radius: 20, showTitle: false)]
-                          : [
+    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: card,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 180,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                PieChart(
+                  PieChartData(
+                    sectionsSpace: 2,
+                    centerSpaceRadius: 60,
+                    startDegreeOffset: -90,
+                    sections: isEmpty
+                        ? [PieChartSectionData(value: 1, color: mute.withValues(alpha: 0.2), radius: 20, showTitle: false)]
+                        : [
+                            PieChartSectionData(
+                              value: recebido,
+                              color: EagleTokens.good,
+                              radius: 24,
+                              showTitle: false,
+                            ),
+                            if (pendente > 0)
                               PieChartSectionData(
-                                value: recebido,
-                                color: EagleTokens.good,
-                                radius: 24,
+                                value: pendente,
+                                color: EagleTokens.warn.withValues(alpha: 0.5),
+                                radius: 20,
                                 showTitle: false,
                               ),
-                              if (pendente > 0)
-                                PieChartSectionData(
-                                  value: pendente,
-                                  color: EagleTokens.warn.withValues(alpha: 0.5),
-                                  radius: 20,
-                                  showTitle: false,
-                                ),
-                            ],
+                          ],
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${percentRecebido.toStringAsFixed(0)}%',
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        color: ink,
+                        letterSpacing: -0.5,
+                      ),
                     ),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('${percentRecebido.toStringAsFixed(0)}%',
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                      const Text('Recebido', style: TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
-                    ],
-                  ),
-                ],
-              ),
+                    Text(
+                      'RECEBIDO',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.2,
+                        color: mute,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            if (!isEmpty) ...[
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _LegendItem(color: EagleTokens.good, label: 'Recebido'),
-                  const SizedBox(width: 16),
-                  _LegendItem(color: EagleTokens.warn.withValues(alpha: 0.5), label: 'Pendente'),
-                ],
-              ),
-            ],
+          ),
+          if (!isEmpty) ...[
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _LegendDot(color: EagleTokens.good, label: 'Recebido', mute: mute),
+                const SizedBox(width: 20),
+                _LegendDot(color: EagleTokens.warn.withValues(alpha: 0.5), label: 'Pendente', mute: mute),
+              ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 }
 
-class _LegendItem extends StatelessWidget {
+// ─── Legend ───────────────────────────────────────────────────────────────
+
+class _LegendDot extends StatelessWidget {
   final Color color;
   final String label;
-
-  const _LegendItem({required this.color, required this.label});
+  final Color mute;
+  const _LegendDot({required this.color, required this.label, required this.mute});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4)),
+        ),
+        const SizedBox(width: 6),
+        Text(label, style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600)),
       ],
     );
   }
 }
 
-class _ResumoCard extends StatelessWidget {
-  final String titulo;
-  final String valor;
-  final IconData icone;
-  final Color cor;
+// ─── Metric row (replaces Card+ListTile) ─────────────────────────────────
 
-  const _ResumoCard({
-    required this.titulo,
-    required this.valor,
-    required this.icone,
-    required this.cor,
+class _MetricRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+  final bool isDark;
+  final bool isLast;
+
+  const _MetricRow({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+    required this.isDark,
+    this.isLast = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        leading: CircleAvatar(
-          backgroundColor: cor.withValues(alpha: 0.15),
-          child: Icon(icone, color: cor),
-        ),
-        title: Text(titulo, style: const TextStyle(fontWeight: FontWeight.w500)),
-        trailing: Text(
-          valor,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: cor,
+    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: isLast ? 0 : 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: isDark ? 0.18 : 0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 18),
           ),
-        ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: mute,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: ink,
+            ),
+          ),
+        ],
       ),
     );
   }

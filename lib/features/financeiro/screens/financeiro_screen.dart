@@ -297,6 +297,43 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     }
   }
 
+  InputDecoration _fxDeco(String label, {IconData? icon, String? hint}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      labelStyle: TextStyle(color: mute, fontSize: 13.5, fontWeight: FontWeight.w600),
+      hintStyle: TextStyle(color: mute.withValues(alpha: 0.5), fontSize: 13.5),
+      prefixIcon: icon != null ? Icon(icon, size: 20, color: mute) : null,
+      filled: true,
+      fillColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: line),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: line),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: primary, width: 1.6),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: EagleTokens.bad),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: EagleTokens.bad, width: 1.6),
+      ),
+    );
+  }
+
   Future<void> _editarMensalidade(Mensalidade m) async {
     const statuses = ['PENDENTE', 'PAGO', 'ATRASADO'];
     final valorCtrl = TextEditingController(text: m.valor.toStringAsFixed(2));
@@ -307,11 +344,14 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     bool salvando = false;
     final formKey = GlobalKey<FormState>();
 
+    final isDarkSheet = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDarkSheet ? EagleTokens.darkCard : EagleTokens.card;
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: sheetBg,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder:
           (ctx) => StatefulBuilder(
@@ -331,12 +371,13 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                       children: [
                         Row(
                           children: [
-                            const Expanded(
+                            Expanded(
                               child: Text(
                                 'Editar Mensalidade',
-                                style: TextStyle(
+                                style: GoogleFonts.outfit(
                                   fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
                                 ),
                               ),
                             ),
@@ -349,11 +390,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: valorCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Valor (R\$)',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.attach_money),
-                          ),
+                          decoration: _fxDeco('Valor (R\$)', icon: Icons.attach_money),
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
@@ -378,12 +415,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: mesReferenciaCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Mês Referência',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.calendar_month),
-                            hintText: '2026-04-01',
-                          ),
+                          decoration: _fxDeco('Mês Referência', icon: Icons.calendar_month, hint: '2026-04-01'),
                           readOnly: true,
                           onTap: () async {
                             final now = DateTime.now();
@@ -414,11 +446,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
                           value: selectedStatus,
-                          decoration: const InputDecoration(
-                            labelText: 'Status',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.flag),
-                          ),
+                          decoration: _fxDeco('Status', icon: Icons.flag),
                           items:
                               statuses
                                   .map(
@@ -668,11 +696,14 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     int? alunoSelecionadoId;
     bool salvando = false;
 
+    final isDarkSheet2 = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg2 = isDarkSheet2 ? EagleTokens.darkCard : EagleTokens.card;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: sheetBg2,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder:
           (ctx) => StatefulBuilder(
@@ -692,12 +723,13 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                       children: [
                         Row(
                           children: [
-                            const Expanded(
+                            Expanded(
                               child: Text(
                                 'Nova Mensalidade',
-                                style: TextStyle(
+                                style: GoogleFonts.outfit(
                                   fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
                                 ),
                               ),
                             ),
@@ -722,11 +754,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                               data:
                                   (alunos) => DropdownButtonFormField<int>(
                                     value: alunoSelecionadoId,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Aluno',
-                                      border: OutlineInputBorder(),
-                                      prefixIcon: Icon(Icons.person),
-                                    ),
+                                    decoration: _fxDeco('Aluno', icon: Icons.person),
                                     items:
                                         alunos
                                             .map(
@@ -750,11 +778,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: valorCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Valor (R\$)',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.attach_money),
-                          ),
+                          decoration: _fxDeco('Valor (R\$)', icon: Icons.attach_money),
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
@@ -779,12 +803,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: mesReferenciaCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Mes Referencia',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.calendar_month),
-                            hintText: '2026-04-01',
-                          ),
+                          decoration: _fxDeco('Mês Referência', icon: Icons.calendar_month, hint: '2026-04-01'),
                           readOnly: true,
                           onTap: () async {
                             final now = DateTime.now();
@@ -886,14 +905,18 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
           heroTag: 'atualizar',
           onPressed: _atualizarAtrasos,
           tooltip: 'Atualizar atrasos',
-          child: const Icon(Icons.sync),
+          backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+          foregroundColor: Theme.of(context).colorScheme.primary,
+          elevation: 0,
+          child: const Icon(Icons.sync_rounded, size: 20),
         ),
         const SizedBox(height: 8),
         FloatingActionButton(
           heroTag: 'nova',
           onPressed: _abrirFormularioNovaMensalidade,
           tooltip: 'Nova Mensalidade',
-          child: const Icon(Icons.add),
+          elevation: 0,
+          child: const Icon(Icons.add_rounded),
         ),
       ],
     ),
@@ -905,18 +928,58 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
             controller: _searchCtrl,
             decoration: InputDecoration(
               hintText: 'Buscar por nome do aluno...',
-              prefixIcon: const Icon(Icons.search),
+              hintStyle: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? EagleTokens.darkInkMute
+                    : EagleTokens.inkMute,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+              ),
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? EagleTokens.darkInkMute
+                    : EagleTokens.inkMute,
+                size: 20,
+              ),
               suffixIcon:
                   _searchCtrl.text.isNotEmpty
                       ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear_rounded, size: 18),
                         onPressed: () {
                           _searchCtrl.clear();
                           setState(() => _filtered = _mensalidades);
                         },
                       )
                       : null,
-              border: const OutlineInputBorder(),
+              filled: true,
+              fillColor: Theme.of(context).brightness == Brightness.dark
+                  ? EagleTokens.darkCard
+                  : EagleTokens.card,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? EagleTokens.darkLine
+                      : EagleTokens.line,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? EagleTokens.darkLine
+                      : EagleTokens.line,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 1.6,
+                ),
+              ),
               isDense: true,
             ),
           ),
