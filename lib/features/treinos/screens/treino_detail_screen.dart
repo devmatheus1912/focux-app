@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../alunos/data/aluno_repository.dart';
@@ -23,17 +25,25 @@ class TreinoDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final treinoAsync = ref.watch(treinoProvider(treinoId));
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
       body: treinoAsync.when(
         loading:
-            () => Center(
-              child: CircularProgressIndicator(
-                color: Theme.of(context).colorScheme.primary,
+            () => const SafeArea(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20, 86, 20, 0),
+                child: SkeletonList(count: 6),
               ),
             ),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        error:
+            (e, _) => _DetailErrorState(
+              isDark: isDark,
+              primary: primary,
+              onRetry: () => ref.invalidate(treinoProvider(treinoId)),
+              onBack: () => context.pop(),
+            ),
         data:
             (treino) => _TreinoDetailBody(
               treino: treino,
@@ -217,15 +227,11 @@ class _TreinoDetailBody extends StatelessWidget {
           ref.invalidate(treinosProvider);
           ref.invalidate(treinosDoAlunoProvider(selected));
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Treino atribuido ao aluno.')),
-            );
+            FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
           }
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+            FeedbackHelper.showError(context, friendlyError(e));
           }
         }
         break;
@@ -234,15 +240,11 @@ class _TreinoDetailBody extends StatelessWidget {
           await repo.duplicar(treinoId);
           ref.invalidate(treinosProvider);
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Treino duplicado com sucesso.')),
-            );
+            FeedbackHelper.showSuccess(context, 'Treino duplicado com sucesso.');
           }
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+            FeedbackHelper.showError(context, friendlyError(e));
           }
         }
         break;
@@ -250,15 +252,11 @@ class _TreinoDetailBody extends StatelessWidget {
         try {
           await repo.salvarComoTemplate(treinoId);
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Treino salvo como template.')),
-            );
+            FeedbackHelper.showSuccess(context, 'Treino salvo como template.');
           }
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+            FeedbackHelper.showError(context, friendlyError(e));
           }
         }
         break;
@@ -277,16 +275,12 @@ class _TreinoDetailBody extends StatelessWidget {
           await repo.excluirTreino(treinoId);
           ref.invalidate(treinosProvider);
           if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Treino excluido.')));
+            FeedbackHelper.showSuccess(context, 'Treino excluído.');
             context.pop(true);
           }
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+            FeedbackHelper.showError(context, friendlyError(e));
           }
         }
         break;
@@ -641,8 +635,22 @@ class _TreinoDetailBody extends StatelessWidget {
         ),
 
         if (treino.exercicios.isEmpty)
-          const SliverFillRemaining(
-            child: Center(child: Text('Nenhum exercício no treino.')),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: _EmptyExercisesState(
+              isDark: isDark,
+              primary: primary,
+              onAdd: () {
+                HapticFeedback.mediumImpact();
+                context
+                    .push<bool>('/treinos/$treinoId/exercicios/add')
+                    .then((added) {
+                  if (added == true) {
+                    ref.invalidate(treinoProvider(treinoId));
+                  }
+                });
+              },
+            ),
           )
         else ...[
           ...grouped.entries.map(
@@ -744,12 +752,9 @@ class _TreinoDetailBody extends StatelessWidget {
                                   ref.invalidate(treinoProvider(treinoId));
                                 } catch (error) {
                                   if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Erro ao reordenar: $error',
-                                        ),
-                                      ),
+                                    FeedbackHelper.showError(
+                                      context,
+                                      'Erro ao reordenar: $error',
                                     );
                                   }
                                 }
@@ -776,14 +781,9 @@ class _TreinoDetailBody extends StatelessWidget {
                                     ref.invalidate(treinoProvider(treinoId));
                                   } catch (error) {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(
+                                      FeedbackHelper.showError(
                                         context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Erro ao duplicar: $error',
-                                          ),
-                                        ),
+                                        'Erro ao duplicar: $error',
                                       );
                                     }
                                   }
@@ -815,14 +815,9 @@ class _TreinoDetailBody extends StatelessWidget {
                                               );
                                             } catch (error) {
                                               if (context.mounted) {
-                                                ScaffoldMessenger.of(
+                                                FeedbackHelper.showError(
                                                   context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      'Erro ao substituir: $error',
-                                                    ),
-                                                  ),
+                                                  'Erro ao substituir: $error',
                                                 );
                                               }
                                             }
@@ -857,10 +852,9 @@ class _TreinoDetailBody extends StatelessWidget {
                                       ref.invalidate(treinoProvider(treinoId));
                                     } catch (e) {
                                       if (context.mounted) {
-                                        ScaffoldMessenger.of(
+                                        FeedbackHelper.showError(
                                           context,
-                                        ).showSnackBar(
-                                          SnackBar(content: Text('Erro: $e')),
+                                          'Erro ao remover: $e',
                                         );
                                       }
                                     }
@@ -2157,4 +2151,184 @@ class _GridTexturePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _DetailErrorState extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onRetry;
+  final VoidCallback onBack;
+
+  const _DetailErrorState({
+    required this.isDark,
+    required this.primary,
+    required this.onRetry,
+    required this.onBack,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+
+    return SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: EagleTokens.bad.withValues(alpha: isDark ? 0.16 : 0.09),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: const Icon(
+                  Icons.cloud_off_rounded,
+                  color: EagleTokens.bad,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'Falha ao carregar treino',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.25,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Verifique a conexão e tente novamente. Se o problema persistir, volte e reabra.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: mute,
+                  fontSize: 13,
+                  height: 1.4,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: onBack,
+                    icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                    label: const Text('Voltar'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: ink,
+                      side: BorderSide(color: line),
+                      minimumSize: const Size(120, 44),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  FilledButton.icon(
+                    onPressed: onRetry,
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: const Text('Tentar novamente'),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyExercisesState extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onAdd;
+
+  const _EmptyExercisesState({
+    required this.isDark,
+    required this.primary,
+    required this.onAdd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 12, 28, 120),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 78,
+            height: 78,
+            decoration: BoxDecoration(
+              color: BrandPalette.soft(primary, dark: isDark),
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(
+                color: primary.withValues(alpha: isDark ? 0.12 : 0.08),
+              ),
+            ),
+            child: Icon(
+              Icons.fitness_center_rounded,
+              color: primary,
+              size: 34,
+            ),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'Nenhum exercício ainda',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ink,
+              fontSize: 19,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.25,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Adicione exercícios da biblioteca curada para montar este treino.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: mute,
+              fontSize: 13,
+              height: 1.4,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 18),
+          FilledButton.icon(
+            onPressed: onAdd,
+            icon: const Icon(Icons.add_rounded),
+            label: const Text(
+              'Adicionar exercício',
+              style: TextStyle(fontWeight: FontWeight.w900),
+            ),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(200, 48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

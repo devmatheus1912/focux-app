@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../data/treino_repository.dart';
@@ -119,18 +120,13 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
         ref.invalidate(treinosDoAlunoProvider(widget.alunoId!));
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            count == 1 ? 'Treino removido.' : '$count treinos removidos.',
-          ),
-        ),
+      FeedbackHelper.showSuccess(
+        context,
+        count == 1 ? 'Treino removido.' : '$count treinos removidos.',
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Não foi possível remover: $e')));
+      FeedbackHelper.showError(context, 'Não foi possível remover: $e');
     }
   }
 

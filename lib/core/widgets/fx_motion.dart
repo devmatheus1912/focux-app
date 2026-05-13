@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
 /// Tactile spring button — scales down on press, bounces back on release.
+/// Uses real spring physics for premium, weighty feel instead of linear curves.
 /// Use this wrapper around any CTA, card, or interactive element for
 /// premium tactile feedback without managing AnimationControllers manually.
 ///
@@ -31,16 +33,27 @@ class _FxSpringButtonState extends State<FxSpringButton>
   late AnimationController _ctrl;
   late Animation<double> _scale;
 
+  // Spring config: stiffness 260 + damping 18 = snappy with subtle overshoot
+  static const _spring = SpringDescription(mass: 1, stiffness: 260, damping: 18);
+
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 120),
-      reverseDuration: const Duration(milliseconds: 280),
+    _ctrl = AnimationController.unbounded(vsync: this);
+    _scale = _ctrl.drive(
+      Tween<double>(begin: 1.0, end: widget.pressScale),
     );
-    _scale = Tween<double>(begin: 1.0, end: widget.pressScale).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+  }
+
+  void _press() {
+    _ctrl.animateWith(
+      SpringSimulation(_spring, _ctrl.value, 1.0, 0),
+    );
+  }
+
+  void _release() {
+    _ctrl.animateWith(
+      SpringSimulation(_spring, _ctrl.value, 0.0, 0),
     );
   }
 
@@ -53,18 +66,18 @@ class _FxSpringButtonState extends State<FxSpringButton>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: widget.onTap != null ? (_) => _ctrl.forward() : null,
+      onTapDown: widget.onTap != null ? (_) => _press() : null,
       onTapUp: widget.onTap != null
           ? (_) {
-              _ctrl.reverse();
+              _release();
               widget.onTap!();
             }
           : null,
-      onTapCancel: widget.onTap != null ? () => _ctrl.reverse() : null,
+      onTapCancel: widget.onTap != null ? () => _release() : null,
       child: AnimatedBuilder(
         animation: _scale,
         builder: (_, child) => Transform.scale(
-          scale: _scale.value,
+          scale: 1.0 - (_scale.value * (1.0 - widget.pressScale)),
           child: child,
         ),
         child: widget.child,
@@ -75,6 +88,7 @@ class _FxSpringButtonState extends State<FxSpringButton>
 
 /// Staggered fade-slide animation for list items.
 /// Wraps any child in a slide-up + fade-in animation with configurable delay.
+/// Uses a deceleration curve for premium feel — items glide in and settle.
 ///
 /// ```dart
 /// ListView.builder(
@@ -144,6 +158,29 @@ class _FxStaggerItemState extends State<FxStaggerItem>
         ),
       ),
       child: widget.child,
+    );
+  }
+}
+
+/// Animated scale wrapper for selection state changes.
+/// Provides subtle scale feedback when items are selected/deselected.
+class FxSelectionScale extends StatelessWidget {
+  final bool selected;
+  final Widget child;
+
+  const FxSelectionScale({
+    super.key,
+    required this.selected,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: selected ? 0.97 : 1.0,
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOutCubic,
+      child: child,
     );
   }
 }

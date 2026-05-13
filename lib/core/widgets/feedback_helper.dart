@@ -1,35 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import '../theme/design_tokens.dart';
+
+/// Premium snackbar feedback — uses design tokens, tinted fills,
+/// and haptic feedback for every state.
 class FeedbackHelper {
   static void showSuccess(BuildContext context, String message) {
-    _showSnackbar(context, message, Colors.green.shade700, Icons.check_circle);
+    HapticFeedback.mediumImpact();
+    _showSnackbar(
+      context,
+      message,
+      fill: EagleTokens.good,
+      icon: Icons.check_circle_rounded,
+    );
   }
 
   static void showError(BuildContext context, String message) {
-    _showSnackbar(context, message, Colors.red.shade700, Icons.error);
+    HapticFeedback.heavyImpact();
+    _showSnackbar(
+      context,
+      message,
+      fill: EagleTokens.bad,
+      icon: Icons.error_outline_rounded,
+    );
   }
 
   static void showInfo(BuildContext context, String message) {
-    _showSnackbar(context, message, Theme.of(context).colorScheme.primary, Icons.info);
+    HapticFeedback.selectionClick();
+    _showSnackbar(
+      context,
+      message,
+      fill: Theme.of(context).colorScheme.primary,
+      icon: Icons.info_outline_rounded,
+    );
   }
 
-  static void _showSnackbar(BuildContext context, String message, Color color, IconData icon) {
+  static void showWarn(BuildContext context, String message) {
+    HapticFeedback.selectionClick();
+    _showSnackbar(
+      context,
+      message,
+      fill: EagleTokens.warn,
+      icon: Icons.warning_amber_rounded,
+    );
+  }
+
+  static void _showSnackbar(
+    BuildContext context,
+    String message, {
+    required Color fill,
+    required IconData icon,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final snackFill = isDark ? EagleTokens.darkCardHi : EagleTokens.ink;
+
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            Icon(icon, color: Colors.white),
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: fill.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Icon(icon, color: fill, size: 16),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: Text(message, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600))),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13.5,
+                ),
+              ),
+            ),
           ],
         ),
-        backgroundColor: color,
+        backgroundColor: snackFill,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 4),
-        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(EagleTokens.radiusMd),
+        ),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        duration: const Duration(seconds: 3),
+        elevation: 0,
       ),
     );
   }
