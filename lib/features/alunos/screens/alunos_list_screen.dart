@@ -10,6 +10,7 @@ import '../providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_motion.dart';
 
@@ -80,28 +81,15 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   Future<void> _excluirSelecionados() async {
     final total = _selecionados.length;
-    final confirmar = await showDialog<bool>(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final confirmar = await showModalBottomSheet<bool>(
       context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Excluir alunos?'),
-            content: Text(
-              '${_plural(total, 'aluno selecionado', 'alunos selecionados')} '
-              '${total == 1 ? 'será excluído' : 'serão excluídos'} permanentemente. '
-              'Esta ação não pode ser desfeita.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Excluir'),
-              ),
-            ],
-          ),
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.34),
+      builder: (_) => _ExcluirAlunosSheet(
+        count: total,
+        isDark: isDark,
+      ),
     );
     if (confirmar != true) return;
 
@@ -117,9 +105,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     }
     if (mounted) {
       ref.invalidate(alunosProvider);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(_deletedMessage(sucesso))));
+      FeedbackHelper.showSuccess(context, _deletedMessage(sucesso));
       setState(() {
         _modoSelecao = false;
         _selecionados.clear();
@@ -462,8 +448,18 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     return Scaffold(
       backgroundColor: bg,
       body: alunosAsync.when(
-        loading: () => const SkeletonList(count: 6),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        loading: () => const SafeArea(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16, 86, 16, 0),
+            child: SkeletonList(count: 6),
+          ),
+        ),
+        error:
+            (e, _) => _AlunosErrorState(
+              isDark: isDark,
+              primary: primary,
+              onRetry: () => ref.invalidate(alunosProvider),
+            ),
         data: (alunos) {
           final filtrados = _filtrarAlunos(alunos);
           final ativosCount = alunos.where((a) => a.status == 'ATIVO').length;
@@ -1345,6 +1341,14 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                     width: 1.5,
                   )
                   : Border.all(color: line),
+          boxShadow: [
+            if (!isDark && !isSelected)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 14,
+                offset: const Offset(0, 4),
+              ),
+          ],
         ),
         child: Row(
           children: [
@@ -1450,9 +1454,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                         width: 7,
                         height: 7,
                         decoration: BoxDecoration(
-                          color: weeklyCheckins == 0
-                              ? mute.withValues(alpha: 0.3)
-                              : aderColor,
+                          color: aderColor,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -1687,4 +1689,213 @@ String _prettyObjective(String? value) {
     'forca' => 'Força',
     _ => normalized[0].toUpperCase() + normalized.substring(1),
   };
+}
+
+// ──────────────────────────────────────────────
+// Premium delete confirmation bottom sheet
+// ──────────────────────────────────────────────
+class _ExcluirAlunosSheet extends StatelessWidget {
+  final int count;
+  final bool isDark;
+
+  const _ExcluirAlunosSheet({required this.count, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+    final label = count == 1
+        ? '1 aluno selecionado será excluído permanentemente.'
+        : '$count alunos selecionados serão excluídos permanentemente.';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? EagleTokens.darkCard : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        24 + MediaQuery.of(context).padding.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 42,
+            height: 4,
+            decoration: BoxDecoration(
+              color: line,
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          const SizedBox(height: 22),
+          Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              color: EagleTokens.bad.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.delete_outline_rounded,
+              color: EagleTokens.bad,
+              size: 26,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Excluir alunos?',
+            style: GoogleFonts.outfit(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.6,
+              color: ink,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: mute, fontSize: 13.4, height: 1.35),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Esta ação não pode ser desfeita.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: EagleTokens.bad.withValues(alpha: 0.78),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 22),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                HapticFeedback.heavyImpact();
+                Navigator.of(context).pop(true);
+              },
+              icon: const Icon(Icons.delete_outline_rounded, size: 18),
+              label: Text('Excluir $count ${count == 1 ? 'aluno' : 'alunos'}'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: EagleTokens.bad,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(
+                  color: mute,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Premium composed error state
+// ──────────────────────────────────────────────
+class _AlunosErrorState extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onRetry;
+
+  const _AlunosErrorState({
+    required this.isDark,
+    required this.primary,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.wifi_off_rounded,
+                  color: EagleTokens.bad,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Erro ao carregar alunos',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  color: ink,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Verifique sua conexão e tente novamente.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+              ),
+              const SizedBox(height: 22),
+              OutlinedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text('Tentar novamente'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primary,
+                  side: BorderSide(color: primary.withValues(alpha: 0.35)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
