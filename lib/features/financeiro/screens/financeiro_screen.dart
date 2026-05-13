@@ -554,9 +554,9 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                     children: [
                       DropdownButtonFormField<String>(
                         value: tipoSelecionado,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Tipo',
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                         ),
                         items:
                             tipos
@@ -572,9 +572,9 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: obsCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Observacao (opcional)',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: 'Observação (opcional)',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                         ),
                         maxLines: 2,
                       ),

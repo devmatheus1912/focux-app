@@ -245,9 +245,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
                         value: tipo,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Tipo',
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                           prefixIcon: Icon(Icons.category),
                         ),
                         items:
@@ -275,9 +275,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: descCtrl,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Descrição *',
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                           alignLabelWithHint: true,
                         ),
                         maxLines: 3,

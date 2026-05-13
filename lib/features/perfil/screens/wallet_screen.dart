@@ -144,9 +144,9 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     value: _tipoChavePix,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Tipo de chave PIX',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                     ),
                     items: _tiposChavePix
                         .map((tipo) => DropdownMenuItem(
@@ -159,10 +159,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _chavePixCtrl,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Chave PIX',
                       hintText: 'CPF, e-mail, telefone ou chave aleatória',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -172,10 +172,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _bancoCtrl,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Banco',
                       hintText: 'Ex.: Nubank, Itaú, Bradesco',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -185,9 +185,9 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                         flex: 2,
                         child: TextFormField(
                           controller: _agenciaCtrl,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Agência',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                           ),
                           keyboardType: TextInputType.number,
                         ),
@@ -197,9 +197,9 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                         flex: 3,
                         child: TextFormField(
                           controller: _contaCtrl,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Conta',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                           ),
                           keyboardType: TextInputType.number,
                         ),

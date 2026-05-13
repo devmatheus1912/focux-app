@@ -187,9 +187,9 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
       child: Row(children: [
         Expanded(child: TextField(
           controller: _ctrl,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: 'Pergunte ao assistente...',
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
           ),
           maxLines: null,
           textInputAction: TextInputAction.send,

@@ -436,9 +436,9 @@ class _ChatComposer extends StatelessWidget {
               onSubmitted: (_) {
                 if (!sending) onSend();
               },
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Mensagem para o suporte',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 isDense: true,
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 12,
@@ -654,9 +654,9 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _tituloCtrl,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Titulo *',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 prefixIcon: Icon(Icons.title_rounded),
               ),
               validator:
@@ -668,9 +668,9 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _descricaoCtrl,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Descricao *',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 prefixIcon: Icon(Icons.description_outlined),
                 alignLabelWithHint: true,
               ),
@@ -684,9 +684,9 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: _severidade,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Severidade *',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 prefixIcon: Icon(Icons.warning_amber_rounded),
               ),
               items:
@@ -716,9 +716,9 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _classeCtrl,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Classe afetada',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 prefixIcon: Icon(Icons.code_rounded),
                 hintText: 'Ex: TreinoService',
               ),

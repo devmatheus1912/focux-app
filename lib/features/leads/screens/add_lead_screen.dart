@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 
@@ -45,8 +47,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
       if (mounted) safePopOrGo(context, '/leads');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showError(context, 'Erro ao salvar lead');
       }
     }
     if (mounted) setState(() => _saving = false);
@@ -68,22 +69,19 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           TextFormField(
             controller: _nome,
-            decoration: const InputDecoration(
-                labelText: 'Nome *', border: OutlineInputBorder()),
+            decoration: FxInputDeco.build(context, 'Nome *', icon: Icons.person_rounded),
             validator: (v) => v == null || v.isEmpty ? 'Informe o nome' : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _telefone,
-            decoration: const InputDecoration(
-                labelText: 'Telefone / WhatsApp', border: OutlineInputBorder()),
+            decoration: FxInputDeco.build(context, 'Telefone / WhatsApp', icon: Icons.phone_rounded),
             keyboardType: TextInputType.phone,
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             value: _origem,
-            decoration: const InputDecoration(
-                labelText: 'Origem', border: OutlineInputBorder()),
+            decoration: FxInputDeco.build(context, 'Origem', icon: Icons.source_rounded),
             items: _origens
                 .map((o) => DropdownMenuItem(value: o, child: Text(o)))
                 .toList(),
@@ -92,15 +90,12 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
           const SizedBox(height: 12),
           TextFormField(
             controller: _objetivo,
-            decoration: const InputDecoration(
-                labelText: 'Objetivo (ex: emagrecer, hipertrofiar)',
-                border: OutlineInputBorder()),
+            decoration: FxInputDeco.build(context, 'Objetivo', icon: Icons.flag_rounded, hint: 'ex: emagrecer, hipertrofiar'),
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _observacoes,
-            decoration: const InputDecoration(
-                labelText: 'Observações', border: OutlineInputBorder()),
+            decoration: FxInputDeco.build(context, 'Observações', icon: Icons.notes_rounded),
             maxLines: 3,
           ),
           const SizedBox(height: 24),
@@ -110,7 +105,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                 ? const SizedBox(
                     width: 16, height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Icon(Icons.save),
+                : const Icon(Icons.save_rounded),
             label: Text(_saving ? 'Salvando...' : 'Salvar Lead'),
           ),
         ]),

@@ -86,8 +86,8 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
               controller: notesCtrl,
               minLines: 3,
               maxLines: 6,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 hintText: 'Notas tecnicas, fonte do video ou motivo da decisao',
               ),
             ),

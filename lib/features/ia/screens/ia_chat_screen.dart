@@ -116,9 +116,9 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
         child: Row(children: [
           Expanded(child: TextField(
             controller: _ctrl,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Pergunte sobre treino, dieta...',
-              border: OutlineInputBorder(),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
             ),
             maxLines: null,
             textInputAction: TextInputAction.send,

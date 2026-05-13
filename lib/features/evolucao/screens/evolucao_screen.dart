@@ -192,9 +192,9 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                   const SizedBox(height: 10),
                   TextField(
                     controller: obsCtrl,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Observação',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                     ),
                     maxLines: 2,
                   ),
@@ -256,9 +256,9 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                 children: [
                   TextField(
                     controller: exercicioCtrl,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Exercício',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -266,17 +266,17 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                   const SizedBox(height: 10),
                   TextField(
                     controller: unidadeCtrl,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Unidade (kg, reps...)',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                     ),
                   ),
                   const SizedBox(height: 10),
                   TextField(
                     controller: obsCtrl,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Observação',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                     ),
                     maxLines: 2,
                   ),
@@ -592,7 +592,7 @@ class _CampoNumerico extends StatelessWidget {
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(
         labelText: label,
-        border: const OutlineInputBorder(),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       ),
     );
   }

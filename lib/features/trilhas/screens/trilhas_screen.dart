@@ -3,6 +3,7 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -155,18 +156,18 @@ class TrilhasScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               TextField(
                 controller: tituloCtrl,
-                decoration: const InputDecoration(labelText: 'Título da trilha', border: OutlineInputBorder()),
+                decoration: FxInputDeco.build(context, 'Título da trilha'),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: descCtrl,
-                decoration: const InputDecoration(labelText: 'Descrição (opcional)', border: OutlineInputBorder()),
+                decoration: FxInputDeco.build(context, 'Descrição (opcional)'),
                 maxLines: 2,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 value: metaTipo,
-                decoration: const InputDecoration(labelText: 'Tipo de meta', border: OutlineInputBorder()),
+                decoration: FxInputDeco.build(context, 'Tipo de meta'),
                 items: const [
                   DropdownMenuItem(value: 'TREINOS', child: Text('Número de treinos')),
                   DropdownMenuItem(value: 'PESO', child: Text('Meta de peso')),

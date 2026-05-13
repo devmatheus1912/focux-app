@@ -3,6 +3,7 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -134,13 +135,13 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
               const SizedBox(height: 16),
               TextField(
                 controller: usuarioIdCtrl,
-                decoration: const InputDecoration(labelText: 'ID do Usuário/Assistente', border: OutlineInputBorder()),
+                decoration: FxInputDeco.build(context, 'ID do Usuário/Assistente'),
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: recursoSelecionado,
-                decoration: const InputDecoration(labelText: 'Recurso', border: OutlineInputBorder()),
+                decoration: FxInputDeco.build(context, 'Recurso'),
                 items: const [
                   DropdownMenuItem(value: 'FINANCEIRO', child: Text('Financeiro')),
                   DropdownMenuItem(value: 'TREINOS', child: Text('Treinos')),
@@ -152,7 +153,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: nivelSelecionado,
-                decoration: const InputDecoration(labelText: 'Nível de Acesso', border: OutlineInputBorder()),
+                decoration: FxInputDeco.build(context, 'Nível de Acesso'),
                 items: const [
                   DropdownMenuItem(value: 'READ', child: Text('Leitura (READ)')),
                   DropdownMenuItem(value: 'WRITE', child: Text('Edição (WRITE)')),

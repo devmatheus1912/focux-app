@@ -5,6 +5,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 
 class AcoesMassaScreen extends ConsumerStatefulWidget {
   const AcoesMassaScreen({super.key});
@@ -271,7 +272,7 @@ class _BottomSheetAcoesState extends State<_BottomSheetAcoes> {
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             value: _statusSelecionado,
-            decoration: const InputDecoration(labelText: 'Novo status', border: OutlineInputBorder()),
+            decoration: FxInputDeco.build(context, 'Novo status'),
             items: ['ATIVO', 'INATIVO', 'BLOQUEADO']
                 .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                 .toList(),

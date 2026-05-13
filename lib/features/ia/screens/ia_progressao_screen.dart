@@ -90,17 +90,17 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _objetivo,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Objetivo (ex: hipertrofia, força)',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _historico,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Histórico de treinos (cargas e repetições recentes)',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                     hintText: 'Ex: Supino 80kg 3x8, Agachamento 100kg 4x6...',
                   ),
                   maxLines: 5,

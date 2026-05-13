@@ -146,7 +146,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
             content: TextField(
               controller: ctrl,
               maxLines: 3,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(14))),
             ),
             actions: [
               TextButton(

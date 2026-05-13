@@ -186,9 +186,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                             const SizedBox(height: 16),
                             DropdownButtonFormField<String>(
                               value: tipoSelecionado,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Tipo de post',
-                                border: OutlineInputBorder(),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                                 prefixIcon: Icon(Icons.category),
                               ),
                               items: const [
@@ -227,9 +227,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                             const SizedBox(height: 12),
                             TextFormField(
                               controller: tituloCtrl,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Título',
-                                border: OutlineInputBorder(),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                                 prefixIcon: Icon(Icons.title),
                               ),
                               validator:
@@ -241,9 +241,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                             const SizedBox(height: 12),
                             TextFormField(
                               controller: conteudoCtrl,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Conteúdo',
-                                border: OutlineInputBorder(),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                                 prefixIcon: Icon(Icons.text_fields),
                                 alignLabelWithHint: true,
                               ),
