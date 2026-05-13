@@ -8,7 +8,7 @@ void main() {
       'lib/features/alimentar/screens/alimentar_screen.dart',
       'lib/features/alimentar/screens/plano_alimentar_detail_screen.dart',
       'lib/features/agenda/screens/agenda_screen.dart',
-      'lib/features/avaliacao/screens/avaliacao_screen.dart',
+      'lib/features/avaliacao/screens/evolucao_comparativo_screen.dart',
     ]) {
       final source = File(path).readAsStringSync();
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/router/safe_navigation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/avaliacao_repository.dart';
@@ -57,6 +58,7 @@ class _EvolucaoComparativoScreenState
       final c = await AvaliacaoRepository(
         ref.read(apiClientProvider),
       ).comparativo(widget.alunoId);
+      if (!mounted) return;
       setState(() {
         _comparativo = c;
         _loading = false;
@@ -64,6 +66,7 @@ class _EvolucaoComparativoScreenState
     } catch (e) {
       final msg = e.toString();
       final eh404 = msg.contains('404') || msg.contains('Not Found');
+      if (!mounted) return;
       setState(() {
         _erro =
             eh404
@@ -84,6 +87,10 @@ class _EvolucaoComparativoScreenState
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+        ),
         title: Text('Evolução de ${widget.alunoNome}'),
       ),
       body:

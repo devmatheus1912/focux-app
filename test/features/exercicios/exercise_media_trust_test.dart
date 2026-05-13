@@ -47,25 +47,32 @@ void main() {
   });
 
   test('workout builder and detail expose prescription trust UI', () {
-    final builder = File(
-      'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
-    ).readAsStringSync();
-    final detail = File(
-      'lib/features/exercicios/screens/exercicio_detail_screen.dart',
-    ).readAsStringSync();
-    final treinoDetail = File(
-      'lib/features/treinos/screens/treino_detail_screen.dart',
-    ).readAsStringSync();
+    final builder =
+        File(
+          'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
+        ).readAsStringSync();
+    final detail =
+        File(
+          'lib/features/exercicios/screens/exercicio_detail_screen.dart',
+        ).readAsStringSync();
+    final treinoDetail =
+        File(
+          'lib/features/treinos/screens/treino_detail_screen.dart',
+        ).readAsStringSync();
 
-    expect(builder, contains('_SelectedExerciseTrustPanel'));
+    expect(builder, contains('_ExercisePickerCard'));
+    expect(builder, contains('_ExerciseMediaStatus'));
+    expect(builder, contains('mediaTrustLevel'));
+    expect(builder, contains('onUploadVideo'));
     expect(detail, contains('_PrescriptionReadinessPanel'));
     expect(treinoDetail, contains('mediaTrustLabel'));
   });
 
   test('exercise media import surface exposes editorial approval controls', () {
-    final list = File(
-      'lib/features/exercicios/screens/exercicios_list_screen.dart',
-    ).readAsStringSync();
+    final list =
+        File(
+          'lib/features/exercicios/screens/exercicios_list_screen.dart',
+        ).readAsStringSync();
 
     expect(list, contains('Aprovar editorialmente'));
     expect(list, contains('Notas editoriais padrao'));

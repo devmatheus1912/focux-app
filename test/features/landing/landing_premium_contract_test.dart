@@ -190,13 +190,10 @@ void main() {
     expect(identidade, isNot(contains('_applyHeroAsBackground')));
     expect(identidade, isNot(contains('Briefing para IA')));
     expect(identidade, isNot(contains("'URL manual de imagem'")));
-    expect(identidade, contains('Foto principal da landing'));
-    expect(identidade, contains('Foto pessoal da bio'));
-    expect(identidade, contains('_pickHeroPhoto'));
+    expect(identidade, contains('Foto principal da galeria'));
+    expect(identidade, contains('Foto do personal na landing'));
     expect(identidade, contains('_pickBioPhoto'));
-    expect(identidade, contains("folder: 'landing/hero'"));
     expect(identidade, contains("folder: 'landing/bio'"));
-    expect(identidade, contains('_HeroPhotoPreview'));
     expect(identidade, contains('_BioPhotoPreview'));
     expect(identidade, contains('_LandingPremiumPlanner'));
     expect(identidade, contains('_LandingEditorialControls'));
@@ -215,11 +212,9 @@ void main() {
     expect(identidade, isNot(contains('WebHtmlElementStrategy.prefer')));
     expect(identidade, contains("body['heroImageUrl']"));
     expect(identidade, contains("body['bioImageUrl']"));
-    expect(identidade, contains('Video de apresentacao enviado e salvo'));
-    expect(identidade, contains('_pickPresentationVideo'));
-    expect(identidade, contains("resourceType: 'video'"));
-    expect(identidade, contains('Subir video de apresentacao'));
-    expect(identidade, contains('Trocar video de apresentacao'));
+    expect(identidade, contains('A landing usa um palco 3D no hero'));
+    expect(identidade, contains('Subir foto da bio'));
+    expect(identidade, contains('Trocar foto da bio'));
     expect(identidade, contains('_LandingMediaStatusCard'));
   });
 

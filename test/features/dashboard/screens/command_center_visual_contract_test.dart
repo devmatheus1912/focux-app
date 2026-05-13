@@ -6,27 +6,21 @@ void main() {
   test('command center autonomy bottlenecks keep compact layout safe', () {
     final widget =
         File(
-          'lib/features/dashboard/screens/command_center_widget.dart',
+          'lib/features/dashboard/screens/personal_dashboard_screen.dart',
         ).readAsStringSync();
 
-    expect(widget, contains('class _AutonomiaGargaloTile'));
-    expect(widget, contains('final compact = constraints.maxWidth < 360'));
-    expect(widget, contains('IconButton.filledTonal'));
-    expect(widget, contains('BoxConstraints(maxWidth: 150)'));
-    expect(widget, contains('BoxConstraints(maxWidth: 52)'));
-    expect(widget, contains('maxLines: 3'));
-    expect(widget, contains('Expanded(child: copy)'));
-    expect(widget, contains('class _FocuxRadarSection'));
-    expect(widget, contains('class _AlunoScoreTile'));
-    expect(widget, contains("'Radar Focux'"));
-    expect(widget, contains('score.proximaAcao'));
-    expect(widget, contains('score.risco'));
-    expect(widget, contains('score.deltaScore'));
-    expect(widget, contains('_deltaLabel'));
-    expect(widget, contains('runFocuxScoreSnapshots'));
-    expect(widget, contains('class _FocuxScoreHistorySheet'));
-    expect(widget, contains('getFocuxScoreSnapshots(score.alunoId)'));
-    expect(widget, contains('class _ScoreHistoryRow'));
-    expect(widget, contains('class _ScoreBar'));
+    expect(widget, contains('class _CommandCenterSection'));
+    expect(widget, contains('commandCenterProvider'));
+    expect(widget, contains('chatInboxProvider'));
+    expect(widget, contains("'Central de Comando'"));
+    expect(widget, contains('A melhor próxima ação'));
+    expect(widget, contains('class _CommandActionPanel'));
+    expect(widget, contains('class _CommandActionTile'));
+    expect(widget, contains('_showCommandActionsSheet'));
+    expect(widget, contains("PageStorageKey('personal-command-modules')"));
+    expect(widget, contains('scrollDirection: Axis.horizontal'));
+    expect(widget, contains('Shimmer.fromColors'));
+    expect(widget, contains('maxLines: 2'));
+    expect(widget, contains('TextOverflow.ellipsis'));
   });
 }

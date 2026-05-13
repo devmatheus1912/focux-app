@@ -56,11 +56,20 @@ void main() {
   test('router guards private deep links without a stored session', () {
     final router = File('lib/core/router/app_router.dart').readAsStringSync();
 
-    expect(router, contains('redirect: (context, state) async => _authRedirect(state)'));
-    expect(router, contains('refreshListenable: SessionInvalidator.listenable'));
+    expect(
+      router,
+      contains('redirect: (context, state) async => _authRedirect(state)'),
+    );
+    expect(
+      router,
+      contains('refreshListenable: SessionInvalidator.listenable'),
+    );
     expect(router, contains('Future<String?> _authRedirect'));
     expect(router, contains('SecureStorage.getToken()'));
-    expect(router, contains("return from.isEmpty ? '/login' : '/login?from=\$from'"));
+    expect(
+      router,
+      contains("return from.isEmpty ? '/login' : '/login?from=\$from'"),
+    );
     expect(router, contains('bool _isPublicLocation'));
 
     for (final publicPath in [
@@ -85,10 +94,20 @@ void main() {
   });
 
   test('safe navigation provides fallback for direct opened screens', () {
-    final helper = File('lib/core/router/safe_navigation.dart').readAsStringSync();
-    final checkin = File('lib/features/checkin/screens/checkin_screen.dart').readAsStringSync();
-    final copilot = File('lib/features/ia/screens/ia_copiloto_screen.dart').readAsStringSync();
-    final chat = File('lib/features/chat/screens/conversation_screen.dart').readAsStringSync();
+    final helper =
+        File('lib/core/router/safe_navigation.dart').readAsStringSync();
+    final checkin =
+        File(
+          'lib/features/checkin/screens/checkin_screen.dart',
+        ).readAsStringSync();
+    final copilot =
+        File(
+          'lib/features/ia/screens/ia_copiloto_screen.dart',
+        ).readAsStringSync();
+    final chat =
+        File(
+          'lib/features/chat/screens/conversation_screen.dart',
+        ).readAsStringSync();
 
     expect(helper, contains('void safePopOrGo'));
     expect(helper, contains('context.canPop()'));
@@ -96,19 +115,49 @@ void main() {
     expect(helper, contains('void safePopOr'));
     expect(checkin, contains("safePopOrGo(context, '/checkin/treinos')"));
     expect(copilot, contains('safePopOr('));
-    expect(chat, contains("_isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal'"));
+    expect(
+      chat,
+      contains("_isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal'"),
+    );
   });
 
   test('operational screens use safe fallback navigation', () {
-    final agenda = File('lib/features/agenda/screens/agenda_screen.dart').readAsStringSync();
-    final alertas = File('lib/features/alertas/screens/alertas_screen.dart').readAsStringSync();
-    final financeiro = File('lib/features/financeiro/screens/financeiro_screen.dart').readAsStringSync();
-    final leadsKanban = File('lib/features/leads/screens/leads_kanban_screen.dart').readAsStringSync();
-    final leadDetail = File('lib/features/leads/screens/lead_detail_screen.dart').readAsStringSync();
-    final assinatura = File('lib/features/assinatura/screens/assinatura_screen.dart').readAsStringSync();
-    final avaliacao = File('lib/features/avaliacao/screens/avaliacao_screen.dart').readAsStringSync();
-    final alimentar = File('lib/features/alimentar/screens/alimentar_screen.dart').readAsStringSync();
-    final planoAlimentar = File('lib/features/alimentar/screens/plano_alimentar_detail_screen.dart').readAsStringSync();
+    final agenda =
+        File(
+          'lib/features/agenda/screens/agenda_screen.dart',
+        ).readAsStringSync();
+    final alertas =
+        File(
+          'lib/features/alertas/screens/alertas_screen.dart',
+        ).readAsStringSync();
+    final financeiro =
+        File(
+          'lib/features/financeiro/screens/financeiro_screen.dart',
+        ).readAsStringSync();
+    final leadsKanban =
+        File(
+          'lib/features/leads/screens/leads_kanban_screen.dart',
+        ).readAsStringSync();
+    final leadDetail =
+        File(
+          'lib/features/leads/screens/lead_detail_screen.dart',
+        ).readAsStringSync();
+    final assinatura =
+        File(
+          'lib/features/assinatura/screens/assinatura_screen.dart',
+        ).readAsStringSync();
+    final avaliacao =
+        File(
+          'lib/features/avaliacao/screens/evolucao_comparativo_screen.dart',
+        ).readAsStringSync();
+    final alimentar =
+        File(
+          'lib/features/alimentar/screens/alimentar_screen.dart',
+        ).readAsStringSync();
+    final planoAlimentar =
+        File(
+          'lib/features/alimentar/screens/plano_alimentar_detail_screen.dart',
+        ).readAsStringSync();
 
     expect(agenda, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(alertas, contains("safePopOrGo(context, '/dashboard/personal')"));
@@ -116,26 +165,63 @@ void main() {
     expect(leadsKanban, contains("safePopOrGo(context, '/leads')"));
     expect(leadDetail, contains("safePopOrGo(context, '/leads')"));
     expect(assinatura, contains("safePopOrGo(context, '/planos')"));
-    expect(avaliacao, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
-    expect(alimentar, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
-    expect(planoAlimentar, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}/alimentar')"));
+    expect(
+      avaliacao,
+      contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"),
+    );
+    expect(
+      alimentar,
+      contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"),
+    );
+    expect(
+      planoAlimentar,
+      contains("safePopOrGo(context, '/alunos/\${widget.alunoId}/alimentar')"),
+    );
   });
 
   test('residual back controls keep safe fallbacks', () {
-    final featureGate = File('lib/core/widgets/feature_gate.dart').readAsStringSync();
-    final alunosList = File('lib/features/alunos/screens/alunos_list_screen.dart').readAsStringSync();
-    final acoesMassa = File('lib/features/alunos/screens/acoes_massa_screen.dart').readAsStringSync();
-    final exerciciosList = File('lib/features/exercicios/screens/exercicios_list_screen.dart').readAsStringSync();
-    final identidade = File('lib/features/perfil/screens/identidade_visual_screen.dart').readAsStringSync();
-    final agenda = File('lib/features/agenda/screens/agenda_screen.dart').readAsStringSync();
-    final avaliacao = File('lib/features/avaliacao/screens/avaliacao_screen.dart').readAsStringSync();
+    final featureGate =
+        File('lib/core/widgets/feature_gate.dart').readAsStringSync();
+    final alunosList =
+        File(
+          'lib/features/alunos/screens/alunos_list_screen.dart',
+        ).readAsStringSync();
+    final acoesMassa =
+        File(
+          'lib/features/alunos/screens/acoes_massa_screen.dart',
+        ).readAsStringSync();
+    final exerciciosList =
+        File(
+          'lib/features/exercicios/screens/exercicios_list_screen.dart',
+        ).readAsStringSync();
+    final identidade =
+        File(
+          'lib/features/perfil/screens/identidade_visual_screen.dart',
+        ).readAsStringSync();
+    final agenda =
+        File(
+          'lib/features/agenda/screens/agenda_screen.dart',
+        ).readAsStringSync();
+    final avaliacao =
+        File(
+          'lib/features/avaliacao/screens/evolucao_comparativo_screen.dart',
+        ).readAsStringSync();
 
-    expect(featureGate, contains('safePopOr(context, () => goToRoleHome(context, ref))'));
+    expect(
+      featureGate,
+      contains('safePopOr(context, () => goToRoleHome(context, ref))'),
+    );
     expect(alunosList, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(acoesMassa, contains("safePopOrGo(context, '/alunos')"));
-    expect(exerciciosList, contains("safePopOrGo(context, '/dashboard/personal')"));
+    expect(
+      exerciciosList,
+      contains("safePopOrGo(context, '/dashboard/personal')"),
+    );
     expect(identidade, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(agenda, contains("safePopOrGo(context, '/agenda')"));
-    expect(avaliacao, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
+    expect(
+      avaliacao,
+      contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"),
+    );
   });
 }

@@ -10,7 +10,7 @@ void main() {
         ).readAsStringSync();
 
     expect(screen, contains('class _Aluno360CopilotCard'));
-    expect(screen, contains("'Aluno 360'"));
+    expect(screen, contains('Aluno 360'));
     expect(screen, contains('class _Aluno360TimelineCard'));
     expect(screen, contains("'Linha do tempo 360'"));
     expect(screen, contains('alunoScoreSnapshotsProvider'));
@@ -24,10 +24,10 @@ void main() {
     expect(screen, contains('class _CopilotPrescription'));
     expect(screen, contains('Clipboard.setData'));
     expect(screen, contains('_mensagemPronta'));
-    expect(screen, contains("'Atribuir'"));
-    expect(screen, contains("'Copiar mensagem'"));
-    expect(screen, contains("'Mensagem'"));
-    expect(screen, contains("'Evoluir treino'"));
-    expect(screen, contains('perfil, autonomia, financeiro'));
+    expect(screen, contains("'Criar tarefa'"));
+    expect(screen, contains("'Copiar'"));
+    expect(screen, contains("'Mensagem sugerida'"));
+    expect(screen, contains("'Abrir chat'"));
+    expect(screen, contains('perfil, autonomia e financeiro'));
   });
 }
