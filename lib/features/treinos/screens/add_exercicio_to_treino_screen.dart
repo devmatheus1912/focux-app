@@ -356,20 +356,20 @@ class _AddExercicioToTreinoScreenState
                       Text(
                         'NOVO ITEM',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: mute,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.2,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.6,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Text(
                         'Adicionar Exercício',
-                        style: TextStyle(
-                          fontSize: 28,
+                        style: GoogleFonts.outfit(
+                          fontSize: 26,
                           color: ink,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.6,
                         ),
                       ),
                     ],
@@ -443,67 +443,25 @@ class _AddExercicioToTreinoScreenState
                                 Expanded(
                                   child: TextFormField(
                                     controller: _seriesCtrl,
-                                    decoration: InputDecoration(
-                                      labelText: 'Séries',
-                                      filled: true,
-                                      fillColor:
-                                          isDark
-                                              ? EagleTokens.darkCardHi
-                                              : EagleTokens.card,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                        borderSide: BorderSide(
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkLine
-                                                  : EagleTokens.line,
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                        borderSide: BorderSide(
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkLine
-                                                  : EagleTokens.line,
-                                        ),
-                                      ),
+                                    decoration: _fxInputDecoration(
+                                      label: 'Séries',
+                                      isDark: isDark,
+                                      primary: primary,
                                     ),
                                     keyboardType: TextInputType.number,
-                                    style: TextStyle(color: ink),
+                                    style: TextStyle(color: ink, fontWeight: FontWeight.w700),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: TextFormField(
                                     controller: _repCtrl,
-                                    decoration: InputDecoration(
-                                      labelText: 'Repetições',
-                                      filled: true,
-                                      fillColor:
-                                          isDark
-                                              ? EagleTokens.darkCardHi
-                                              : EagleTokens.card,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                        borderSide: BorderSide(
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkLine
-                                                  : EagleTokens.line,
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                        borderSide: BorderSide(
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkLine
-                                                  : EagleTokens.line,
-                                        ),
-                                      ),
+                                    decoration: _fxInputDecoration(
+                                      label: 'Repetições',
+                                      isDark: isDark,
+                                      primary: primary,
                                     ),
-                                    style: TextStyle(color: ink),
+                                    style: TextStyle(color: ink, fontWeight: FontWeight.w700),
                                   ),
                                 ),
                               ],
@@ -514,71 +472,29 @@ class _AddExercicioToTreinoScreenState
                                 Expanded(
                                   child: TextFormField(
                                     controller: _descansoCtrl,
-                                    decoration: InputDecoration(
-                                      labelText: 'Descanso (segundos)',
-                                      filled: true,
-                                      fillColor:
-                                          isDark
-                                              ? EagleTokens.darkCardHi
-                                              : EagleTokens.card,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                        borderSide: BorderSide(
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkLine
-                                                  : EagleTokens.line,
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                        borderSide: BorderSide(
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkLine
-                                                  : EagleTokens.line,
-                                        ),
-                                      ),
+                                    decoration: _fxInputDecoration(
+                                      label: 'Descanso (segundos)',
+                                      isDark: isDark,
+                                      primary: primary,
                                     ),
                                     keyboardType: TextInputType.number,
-                                    style: TextStyle(color: ink),
+                                    style: TextStyle(color: ink, fontWeight: FontWeight.w700),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: TextFormField(
                                     controller: _cargaCtrl,
-                                    decoration: InputDecoration(
-                                      labelText: 'Carga alvo (kg)',
-                                      filled: true,
-                                      fillColor:
-                                          isDark
-                                              ? EagleTokens.darkCardHi
-                                              : EagleTokens.card,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                        borderSide: BorderSide(
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkLine
-                                                  : EagleTokens.line,
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                        borderSide: BorderSide(
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkLine
-                                                  : EagleTokens.line,
-                                        ),
-                                      ),
+                                    decoration: _fxInputDecoration(
+                                      label: 'Carga alvo (kg)',
+                                      isDark: isDark,
+                                      primary: primary,
                                     ),
                                     keyboardType:
                                         const TextInputType.numberWithOptions(
                                           decimal: true,
                                         ),
-                                    style: TextStyle(color: ink),
+                                    style: TextStyle(color: ink, fontWeight: FontWeight.w700),
                                   ),
                                 ),
                               ],
@@ -595,36 +511,14 @@ class _AddExercicioToTreinoScreenState
                               const SizedBox(height: 16),
                               TextFormField(
                                 controller: _grupoSupersetCtrl,
-                                decoration: InputDecoration(
-                                  labelText: 'Grupo do superset',
-                                  helperText:
-                                      'Use o mesmo numero em exercicios que devem ficar juntos.',
-                                  filled: true,
-                                  fillColor:
-                                      isDark
-                                          ? EagleTokens.darkCardHi
-                                          : EagleTokens.card,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                      color:
-                                          isDark
-                                              ? EagleTokens.darkLine
-                                              : EagleTokens.line,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                      color:
-                                          isDark
-                                              ? EagleTokens.darkLine
-                                              : EagleTokens.line,
-                                    ),
-                                  ),
+                                decoration: _fxInputDecoration(
+                                  label: 'Grupo do superset',
+                                  helper: 'Use o mesmo numero em exercicios que devem ficar juntos.',
+                                  isDark: isDark,
+                                  primary: primary,
                                 ),
                                 keyboardType: TextInputType.number,
-                                style: TextStyle(color: ink),
+                                style: TextStyle(color: ink, fontWeight: FontWeight.w700),
                               ),
                             ],
                             if (_tipoSerie == 'DROPSET') ...[
@@ -640,35 +534,14 @@ class _AddExercicioToTreinoScreenState
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _observacoesCtrl,
-                              decoration: InputDecoration(
-                                labelText: 'Observacoes de execucao',
-                                filled: true,
-                                fillColor:
-                                    isDark
-                                        ? EagleTokens.darkCardHi
-                                        : EagleTokens.card,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                  borderSide: BorderSide(
-                                    color:
-                                        isDark
-                                            ? EagleTokens.darkLine
-                                            : EagleTokens.line,
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                  borderSide: BorderSide(
-                                    color:
-                                        isDark
-                                            ? EagleTokens.darkLine
-                                            : EagleTokens.line,
-                                  ),
-                                ),
+                              decoration: _fxInputDecoration(
+                                label: 'Observações de execução',
+                                isDark: isDark,
+                                primary: primary,
                               ),
                               minLines: 2,
                               maxLines: 4,
-                              style: TextStyle(color: ink),
+                              style: TextStyle(color: ink, fontWeight: FontWeight.w700),
                             ),
                             if (_error != null) ...[
                               const SizedBox(height: 16),
@@ -710,8 +583,29 @@ class _AddExercicioToTreinoScreenState
                             const SizedBox(height: 32),
                             SizedBox(
                               height: 56,
-                              child: ElevatedButton(
+                              child: ElevatedButton.icon(
                                 onPressed: _loading ? null : _submit,
+                                icon: _loading
+                                    ? const SizedBox.shrink()
+                                    : const Icon(Icons.add_rounded, size: 20),
+                                label:
+                                    _loading
+                                        ? SizedBox(
+                                          height: 22,
+                                          width: 22,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            color: Colors.white.withValues(alpha: 0.8),
+                                          ),
+                                        )
+                                        : const Text(
+                                          'Adicionar ao Treino',
+                                          style: TextStyle(
+                                            fontSize: 15.5,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: -0.2,
+                                          ),
+                                        ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: primary,
                                   foregroundColor: Colors.white,
@@ -723,23 +617,6 @@ class _AddExercicioToTreinoScreenState
                                   ),
                                   elevation: 0,
                                 ),
-                                child:
-                                    _loading
-                                        ? const SizedBox(
-                                          height: 22,
-                                          width: 22,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.5,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                        : const Text(
-                                          'Adicionar ao Treino',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
                               ),
                             ),
                           ],
@@ -771,15 +648,15 @@ class _PrescriptionSectionHeader extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 30,
-          height: 30,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
             color: primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: BorderRadius.circular(13),
           ),
-          child: Icon(Icons.edit_note_rounded, color: primary, size: 18),
+          child: Icon(Icons.edit_note_rounded, color: primary, size: 20),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -788,19 +665,20 @@ class _PrescriptionSectionHeader extends StatelessWidget {
                 'Prescrição do exercício',
                 style: TextStyle(
                   color: ink,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w900,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.15,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 3),
               Text(
                 'Ajuste séries, carga, descanso e observações antes de salvar.',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: mute,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -851,19 +729,19 @@ class _AddExerciseTabStrip extends StatelessWidget {
                         _labels[i],
                         style: TextStyle(
                           color: selectedIndex == i ? primary : mute,
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight:
                               selectedIndex == i
-                                  ? FontWeight.w900
-                                  : FontWeight.w700,
-                          letterSpacing: 0,
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                          letterSpacing: -0.1,
                         ),
                       ),
                       const SizedBox(height: 10),
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 180),
-                        width: selectedIndex == i ? 36 : 0,
-                        height: 3,
+                        width: selectedIndex == i ? 40 : 0,
+                        height: 3.5,
                         decoration: BoxDecoration(
                           color: primary,
                           borderRadius: BorderRadius.circular(999),
@@ -2068,10 +1946,10 @@ class _PresetSelector extends StatelessWidget {
     final card = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: line),
       ),
       child: Column(
@@ -2174,10 +2052,10 @@ class _SerieTypeSelector extends StatelessWidget {
     ];
 
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: line),
       ),
       child: Column(
@@ -2345,4 +2223,44 @@ class _ExercicioErrorState extends StatelessWidget {
       ),
     );
   }
+}
+
+// ──────────────────────────────────────────────
+// Centralized premium InputDecoration factory
+// ──────────────────────────────────────────────
+InputDecoration _fxInputDecoration({
+  required String label,
+  required bool isDark,
+  required Color primary,
+  String? helper,
+}) {
+  final fillColor = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
+  final lineColor = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
+  return InputDecoration(
+    labelText: label,
+    helperText: helper,
+    filled: true,
+    fillColor: fillColor,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: lineColor),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: lineColor),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: primary, width: 1.6),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: const BorderSide(color: EagleTokens.bad),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: const BorderSide(color: EagleTokens.bad, width: 1.6),
+    ),
+  );
 }
