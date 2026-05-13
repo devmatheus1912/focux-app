@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../exercicios/data/enums.dart';
@@ -141,9 +144,7 @@ class _AddExercicioToTreinoScreenState
         props: {'exId': exercicio.id, 'treinoId': widget.treinoId},
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${exercicio.nome} adicionado.')),
-        );
+        FeedbackHelper.showSuccess(context, '${exercicio.nome} adicionado.');
       }
     } catch (_) {
       if (mounted) {
@@ -188,9 +189,7 @@ class _AddExercicioToTreinoScreenState
     if (file == null || !mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _mediaLoading = true);
-    messenger.showSnackBar(
-      SnackBar(content: Text('Enviando vídeo de ${exercicio.nome}...')),
-    );
+    FeedbackHelper.showSuccess(context, 'Enviando vídeo de ${exercicio.nome}...');
     try {
       final updated = await ref
           .read(exercicioRepositoryProvider)
@@ -207,23 +206,14 @@ class _AddExercicioToTreinoScreenState
       if (!mounted) return;
       setState(() => _selecionado = updated);
       messenger.clearSnackBars();
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Vídeo enviado. A prévia pode levar alguns segundos para liberar.',
-          ),
-          backgroundColor: EagleTokens.good,
-        ),
+      FeedbackHelper.showSuccess(
+        context,
+        'Vídeo enviado. A prévia pode levar alguns segundos para liberar.',
       );
     } catch (e) {
       if (!mounted) return;
       messenger.clearSnackBars();
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(friendlyError(e)),
-          backgroundColor: EagleTokens.bad,
-        ),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       if (mounted) {
         setState(() => _mediaLoading = false);
@@ -242,7 +232,6 @@ class _AddExercicioToTreinoScreenState
           (sheetContext) => _RemoveExerciseVideoSheet(exercicio: exercicio),
     );
     if (confirmed != true || !mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
     setState(() => _mediaLoading = true);
     try {
       final updated = await ref
@@ -255,20 +244,10 @@ class _AddExercicioToTreinoScreenState
       ref.invalidate(exerciciosProvider);
       if (!mounted) return;
       setState(() => _selecionado = updated);
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Vídeo removido do exercício.'),
-          backgroundColor: EagleTokens.good,
-        ),
-      );
+      FeedbackHelper.showSuccess(context, 'Vídeo removido do exercício.');
     } catch (e) {
       if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(friendlyError(e)),
-          backgroundColor: EagleTokens.bad,
-        ),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       if (mounted) {
         setState(() => _mediaLoading = false);
@@ -405,15 +384,15 @@ class _AddExercicioToTreinoScreenState
             Expanded(
               child: exerciciosAsync.when(
                 loading:
-                    () => Center(
-                      child: CircularProgressIndicator(color: primary),
+                    () => const Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: SkeletonList(count: 4),
                     ),
                 error:
-                    (e, _) => Center(
-                      child: Text(
-                        'Erro: $e',
-                        style: TextStyle(color: EagleTokens.bad),
-                      ),
+                    (e, _) => _ExercicioErrorState(
+                      isDark: isDark,
+                      primary: primary,
+                      onRetry: () => ref.invalidate(exerciciosProvider),
                     ),
                 data:
                     (exercicios) => SingleChildScrollView(
@@ -2284,6 +2263,85 @@ class _ModeHint extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Premium composed error state for exercise loading
+// ──────────────────────────────────────────────
+class _ExercicioErrorState extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onRetry;
+
+  const _ExercicioErrorState({
+    required this.isDark,
+    required this.primary,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.fitness_center_rounded,
+                color: EagleTokens.bad,
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Erro ao carregar exercícios',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                color: ink,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.3,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Verifique sua conexão e tente novamente.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+            ),
+            const SizedBox(height: 18),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Tentar novamente'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: primary,
+                side: BorderSide(color: primary.withValues(alpha: 0.35)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
