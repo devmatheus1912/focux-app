@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,19 +45,64 @@ class _FinanceiroDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) {
+      return const Center(
+        child: SizedBox(
+          width: 28,
+          height: 28,
+          child: CircularProgressIndicator(strokeWidth: 2.5),
+        ),
+      );
+    }
     if (_data == null) {
+      final isDarkErr = Theme.of(context).brightness == Brightness.dark;
+      final inkErr = isDarkErr ? EagleTokens.darkInk : EagleTokens.ink;
+      final muteErr = isDarkErr ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+      final primaryErr = Theme.of(context).colorScheme.primary;
       return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Erro ao carregar dashboard.'),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: _load,
-              child: const Text('Tentar novamente'),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: EagleTokens.bad.withValues(alpha: isDarkErr ? 0.18 : 0.08),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Icon(Icons.cloud_off_rounded, color: EagleTokens.bad, size: 24),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Erro ao carregar',
+                style: GoogleFonts.outfit(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: inkErr,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Verifique sua conexão e tente novamente.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: muteErr, fontSize: 13, height: 1.35),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: _load,
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text('Tentar novamente'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primaryErr,
+                  side: BorderSide(color: primaryErr.withValues(alpha: 0.3)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -91,11 +137,11 @@ class _FinanceiroDashboardScreenState
                 children: [
                   Text(
                     'Vencimentos',
-                    style: TextStyle(
+                    style: GoogleFonts.outfit(
                       fontSize: 18,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                      letterSpacing: -0.2,
+                      letterSpacing: -0.3,
                     ),
                   ),
                   Text(
@@ -126,11 +172,11 @@ class _FinanceiroDashboardScreenState
               padding: const EdgeInsets.fromLTRB(20, 22, 20, 10),
               child: Text(
                 'Top alunos · acumulado',
-                style: TextStyle(
+                style: GoogleFonts.outfit(
                   fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                  letterSpacing: -0.2,
+                  letterSpacing: -0.3,
                 ),
               ),
             ),
@@ -554,9 +600,9 @@ class _MiniMetric extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
               letterSpacing: -0.5,
               color: ink,
             ),
