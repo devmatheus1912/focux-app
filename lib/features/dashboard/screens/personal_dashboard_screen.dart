@@ -126,7 +126,17 @@ class _PersonalDashboardScreenState
           bottom: false,
           child: dashboardAsync.when(
             loading: () => _buildShimmerLoading(context),
-            error: (e, _) => Center(child: Text(friendlyError(e))),
+            error:
+                (e, _) => _DashboardErrorState(
+                  isDark: isDark,
+                  primary: primary,
+                  message: friendlyError(e),
+                  onRetry: () {
+                    ref.invalidate(dashboardProvider);
+                    ref.invalidate(commandCenterProvider);
+                    ref.invalidate(alunosProvider);
+                  },
+                ),
             data: (data) {
               final screenWidth = MediaQuery.sizeOf(context).width;
               final isCompactPhone = screenWidth < 390;
@@ -450,14 +460,17 @@ class _PersonalDashboardScreenState
                                         textBaseline: TextBaseline.alphabetic,
                                         children: [
                                           _loadingFin
-                                              ? const SizedBox(
-                                                width: 24,
-                                                height: 24,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                      color: Colors.white,
-                                                      strokeWidth: 2,
-                                                    ),
+                                              ? Shimmer.fromColors(
+                                                baseColor: Colors.white.withValues(alpha: 0.15),
+                                                highlightColor: Colors.white.withValues(alpha: 0.30),
+                                                child: Container(
+                                                  width: 180,
+                                                  height: 42,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                ),
                                               )
                                               : AnimatedBuilder(
                                                 animation: _counterAnim,
@@ -1120,9 +1133,9 @@ class _SectionTitle extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: GoogleFonts.outfit(
               fontSize: 20,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
               letterSpacing: -0.5,
             ),
@@ -1382,7 +1395,7 @@ class _ToolGroupLabel extends StatelessWidget {
       style: TextStyle(
         color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
         fontSize: 11,
-        fontWeight: FontWeight.w900,
+        fontWeight: FontWeight.w700,
         letterSpacing: 0.75,
       ),
     );
@@ -1616,9 +1629,9 @@ class _CommandCenterSection extends ConsumerWidget {
                 children: [
                   Text(
                     'Central de Comando',
-                    style: TextStyle(
+                    style: GoogleFonts.outfit(
                       fontSize: 22,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: ink,
                       letterSpacing: -0.8,
                     ),
@@ -2218,9 +2231,43 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-                child: Text(
-                  'Erro ao carregar aderência: $e',
-                  style: TextStyle(color: mute),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(
+                        Icons.wifi_off_rounded,
+                        color: EagleTokens.bad,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Falha ao carregar aderência',
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Verifique sua conexão e puxe para atualizar.',
+                            style: TextStyle(color: mute, fontSize: 12, height: 1.25),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
           data: (items) {
@@ -2344,8 +2391,8 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                             child: Text(
                               '${a.aderenciaPercent}%',
                               textAlign: TextAlign.right,
-                              style: TextStyle(
-                                fontSize: 17,
+                              style: GoogleFonts.jetBrainsMono(
+                                fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: ink,
                               ),
@@ -2361,6 +2408,87 @@ class _AderenciaSemanaWidget extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Premium Error State — replaces raw Text(friendlyError)
+// ─────────────────────────────────────────────────────────────────────────────
+class _DashboardErrorState extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final String message;
+  final VoidCallback onRetry;
+
+  const _DashboardErrorState({
+    required this.isDark,
+    required this.primary,
+    required this.message,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.cloud_off_rounded,
+                color: EagleTokens.bad,
+                size: 26,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Algo saiu do ar',
+              style: GoogleFonts.outfit(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: ink,
+                letterSpacing: -0.3,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+            ),
+            const SizedBox(height: 20),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Tentar novamente'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: primary,
+                side: BorderSide(
+                  color: primary.withValues(alpha: 0.3),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
