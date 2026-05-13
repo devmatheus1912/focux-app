@@ -7,6 +7,7 @@ import '../providers/perfil_provider.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 /// Tela de configuração de dados de pagamento (Wallet / PIX).
 class WalletScreen extends ConsumerStatefulWidget {
@@ -97,7 +98,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,title: const Text('Wallet / Pagamentos')),
       body: perfilAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (e, _) => Center(child: Text(friendlyError(e))),
         data: (perfil) {
           _preencherDadosAtuais(perfil);
@@ -270,7 +271,7 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const FxLoading();
     if (_resumo == null) return const SizedBox.shrink();
     final primary = Theme.of(context).colorScheme.primary;
 

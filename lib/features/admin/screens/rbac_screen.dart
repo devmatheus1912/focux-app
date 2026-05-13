@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -67,7 +68,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
         ],
       ),
       body: permissoesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (permissoes) {
           if (permissoes.isEmpty) {

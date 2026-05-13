@@ -20,6 +20,7 @@ import '../widgets/ofertas_section.dart';
 import '../widgets/powered_by_footer.dart';
 import '../widgets/tecnologia_section.dart';
 import '../widgets/faq_section.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 // ---------------------------------------------------------------------------
 // Provider
@@ -105,7 +106,7 @@ class PersonalPublicLandingScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF0D0F14),
       body: dataAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (e, _) => _NotAvailableView(slug: slug),
         data: (data) => _LandingContent(slug: slug, data: data),
       ),

@@ -18,6 +18,7 @@ import '../data/aluno_autonomy_plan.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import 'progresso_semanal_widget.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 final minhasMedidasDashboardProvider = FutureProvider<List<MedidaCorporal>>((
   ref,
@@ -754,7 +755,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
         loading:
             () => const SizedBox(
               height: 96,
-              child: Center(child: CircularProgressIndicator()),
+              child: FxLoading(),
             ),
         error:
             (_, __) => Text(

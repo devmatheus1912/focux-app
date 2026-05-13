@@ -17,6 +17,7 @@ import '../../../features/subscription/services/iap_service.dart';
 
 import '../data/assinatura_repository.dart';
 import '../providers/assinatura_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class AssinaturaScreen extends ConsumerStatefulWidget {
   final String? initialPlan;
@@ -338,7 +339,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         title: const Text('Assinatura'),
       ),
       body: planosAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (error, _) => Center(child: Text('Erro: $error')),
         data: (planos) {
           final sortedPlans = [...planos]..sort(
@@ -638,7 +639,7 @@ class _TrialInfoCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: line),
         ),
-        child: const Center(child: CircularProgressIndicator()),
+        child: const FxLoading(),
       );
     }
 

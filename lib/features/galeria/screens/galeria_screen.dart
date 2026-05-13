@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/galeria_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class GaleriaScreen extends ConsumerStatefulWidget {
   const GaleriaScreen({super.key});
@@ -81,7 +82,7 @@ class _State extends ConsumerState<GaleriaScreen> {
           if (!_uploading && _fotos.length < 9)
             IconButton(icon: const Icon(Icons.add_photo_alternate_outlined), onPressed: _add),
         ]),
-      body: _loading ? const Center(child: CircularProgressIndicator())
+      body: _loading ? const FxLoading()
           : _fotos.isEmpty
               ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
                   Icon(Icons.photo_library_outlined, size: 64,

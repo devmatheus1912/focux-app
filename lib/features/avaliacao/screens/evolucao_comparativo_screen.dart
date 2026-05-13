@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/avaliacao_repository.dart';
 import '../../evolucao/data/evolucao_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 String _fmtData(String? iso) {
   if (iso == null || iso.isEmpty) return '—';
@@ -86,7 +87,7 @@ class _EvolucaoComparativoScreenState
       ),
       body:
           _loading
-              ? const Center(child: CircularProgressIndicator())
+              ? const FxLoading()
               : _erro != null
               ? Center(
                 child: Padding(

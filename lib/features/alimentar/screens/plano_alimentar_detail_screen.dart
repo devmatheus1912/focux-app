@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alimentar_repository.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class PlanoAlimentarDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -259,7 +260,7 @@ class _PlanoAlimentarDetailScreenState
           Expanded(
             child:
                 _loading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const FxLoading()
                     : _refeicoes.isEmpty
                     ? const Center(
                       child: Text(

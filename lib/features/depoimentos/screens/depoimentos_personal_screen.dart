@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class DepoimentosPersonalScreen extends ConsumerStatefulWidget {
   const DepoimentosPersonalScreen({super.key});
@@ -43,7 +44,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
       appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0,
         title: const Text('Depoimentos'),
         actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: _load)]),
-      body: _loading ? const Center(child: CircularProgressIndicator())
+      body: _loading ? const FxLoading()
           : (_items == null || _items!.isEmpty)
               ? Center(child: Text('Nenhum depoimento ainda.',
                   style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute)))

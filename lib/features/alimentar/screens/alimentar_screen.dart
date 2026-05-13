@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alimentar_repository.dart';
 import 'plano_alimentar_detail_screen.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class AlimentarScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -70,7 +71,7 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
       ),
       body:
           _loading
-              ? const Center(child: CircularProgressIndicator())
+              ? const FxLoading()
               : _planos.isEmpty
               ? const Center(child: Text('Nenhum plano alimentar criado.'))
               : ListView.builder(

@@ -4,6 +4,7 @@ import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class AgendaAlunoScreen extends ConsumerStatefulWidget {
   const AgendaAlunoScreen({super.key});
@@ -56,7 +57,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
     body: RefreshIndicator(
       onRefresh: _load,
       child: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const FxLoading()
           : _ags.isEmpty
               ? ListView(children: const [
                   Padding(

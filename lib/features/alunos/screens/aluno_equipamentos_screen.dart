@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../providers/alunos_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class AlunoEquipamentosScreen extends ConsumerStatefulWidget {
   const AlunoEquipamentosScreen({super.key, required this.alunoId});
@@ -61,7 +62,7 @@ class _AlunoEquipamentosScreenState
         ],
       ),
       body: alunoAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (aluno) {
           _selected ??= {...aluno.equipamentosDisponiveis};

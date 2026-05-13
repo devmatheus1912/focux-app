@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 const _kCols = ['LEAD', 'TESTE', 'ATIVO', 'INADIMPLENTE', 'CANCELADO'];
 const _kLabels = {
@@ -229,7 +230,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
               ),
 
             if (_loading)
-              const Expanded(child: Center(child: CircularProgressIndicator()))
+              const Expanded(child: FxLoading())
             else ...[
               // Summary row
               Padding(

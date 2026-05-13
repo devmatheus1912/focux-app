@@ -13,6 +13,7 @@ import '../../checkin/data/checkin_repository.dart';
 import '../../checkin/providers/checkin_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import 'aluno_dashboard_screen.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class AlunoActivationScreen extends ConsumerWidget {
   const AlunoActivationScreen({super.key});
@@ -66,7 +67,7 @@ class AlunoActivationScreen extends ConsumerWidget {
         ],
       ),
       body: alunoAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(32),

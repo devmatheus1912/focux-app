@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/anamnese_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class AnamneseScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -210,7 +211,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: FxLoading());
     }
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;

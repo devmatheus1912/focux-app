@@ -7,6 +7,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_logo.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/suporte_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 const _severidades = ['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'];
 
@@ -820,7 +821,7 @@ class _MeusTicketsTabState extends ConsumerState<_MeusTicketsTab> {
   }
 
   Widget _buildContent(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const FxLoading();
     if (_erro != null) {
       return Center(
         child: Column(

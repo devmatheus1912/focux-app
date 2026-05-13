@@ -13,6 +13,7 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../anamnese/data/anamnese_repository.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 final minhasMedidasProvider = FutureProvider<List<MedidaCorporal>>((ref) async {
   final repo = EvolucaoRepository(ref.read(apiClientProvider));
@@ -626,7 +627,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
         ],
       ),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (aluno) {
           _loadIfNeeded(aluno);
@@ -913,7 +914,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                         loading:
                             () => const Padding(
                               padding: EdgeInsets.symmetric(vertical: 12),
-                              child: Center(child: CircularProgressIndicator()),
+                              child: FxLoading(),
                             ),
                         error:
                             (e, _) => Padding(

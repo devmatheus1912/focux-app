@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 // ─── Model ───────────────────────────────────────────────────────────────────
 
@@ -69,7 +70,7 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
         ),
       ),
       body: asyncData.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (e, _) => Center(
           child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad)),
         ),

@@ -13,6 +13,7 @@ import '../providers/exercicios_provider.dart';
 import 'widgets/exercicios_batch_actions.dart';
 import 'widgets/exercicios_filter_bar.dart';
 import 'widgets/exercicios_list_view.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 // Legacy editorial import contract still lives in repository/tests:
 // "Aprovar editorialmente", "Notas editoriais padrao",
@@ -427,7 +428,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
             ),
             Expanded(
               child: asyncList.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const FxLoading(),
                 error:
                     (e, _) => Center(
                       child: Padding(

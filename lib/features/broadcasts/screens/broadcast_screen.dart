@@ -5,6 +5,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/broadcast_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 final _broadcastRepositoryProvider = Provider<BroadcastRepository>(
   (ref) => BroadcastRepository(ref.read(apiClientProvider)),
@@ -215,7 +216,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
               historicoAsync.when(
                 loading: () => const Padding(
                   padding: EdgeInsets.all(24),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: FxLoading(),
                 ),
                 error: (e, _) => _StateCard(text: 'Erro ao carregar historico: $e'),
                 data: (lista) {

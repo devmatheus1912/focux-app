@@ -15,6 +15,7 @@ import '../data/financeiro_repository.dart';
 import 'financeiro_dashboard_screen.dart';
 import 'financeiro_resumo_screen.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class FinanceiroScreen extends ConsumerStatefulWidget {
   const FinanceiroScreen({super.key});
@@ -652,7 +653,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                     carregando
                         ? const SizedBox(
                           height: 80,
-                          child: Center(child: CircularProgressIndicator()),
+                          child: FxLoading(),
                         )
                         : erro != null
                         ? Text('Erro ao gerar PIX: $erro')

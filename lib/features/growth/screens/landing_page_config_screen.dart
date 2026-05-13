@@ -7,6 +7,7 @@ import '../../../core/config/env.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../perfil/providers/perfil_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class LandingPageConfigScreen extends ConsumerWidget {
   const LandingPageConfigScreen({super.key});
@@ -22,7 +23,7 @@ class LandingPageConfigScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: bg,
       body: perfilAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error:
             (error, _) => Center(
               child: Padding(

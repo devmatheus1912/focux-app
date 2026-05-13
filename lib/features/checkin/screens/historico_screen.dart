@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class HistoricoCheckinScreen extends ConsumerWidget {
   const HistoricoCheckinScreen({super.key});
@@ -25,7 +26,7 @@ class HistoricoCheckinScreen extends ConsumerWidget {
         title: const Text('Histórico de Treinos'),
       ),
       body: historicoAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error:
             (e, _) => FxEmptyState(
               icon: 'alert-triangle',

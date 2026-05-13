@@ -4,6 +4,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class AcoesMassaScreen extends ConsumerStatefulWidget {
   const AcoesMassaScreen({super.key});
@@ -182,7 +183,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
         ],
       ),
       body: alunosAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (alunos) => alunos.isEmpty
             ? const Center(child: Text('Nenhum aluno cadastrado.'))
@@ -208,7 +209,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
                     const Positioned.fill(
                       child: ColoredBox(
                         color: Color(0x44000000),
-                        child: Center(child: CircularProgressIndicator()),
+                        child: FxLoading(),
                       ),
                     ),
                 ],

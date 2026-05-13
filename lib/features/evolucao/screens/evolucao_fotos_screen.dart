@@ -6,6 +6,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class EvolucaoFotosScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -117,7 +118,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
       ),
       body:
           _loading
-              ? const Center(child: CircularProgressIndicator())
+              ? const FxLoading()
               : _fotos.isEmpty
               ? _empty(primary)
               : _content(isDark, primary),

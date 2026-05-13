@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class AlertaDetalheScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -69,7 +70,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const FxLoading()
           : _erro != null
               ? Center(
                   child: Padding(

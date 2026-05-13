@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class _IaMsg {
   final String texto;
@@ -81,7 +82,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                   if (i == _msgs.length) {
                     return const Padding(
                       padding: EdgeInsets.all(8),
-                      child: Center(child: CircularProgressIndicator()),
+                      child: FxLoading(),
                     );
                   }
                   final m = _msgs[i];

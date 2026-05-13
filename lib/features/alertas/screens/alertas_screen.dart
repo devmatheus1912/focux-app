@@ -6,6 +6,7 @@ import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
   const AlertasScreen({super.key});
@@ -339,7 +340,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
             ),
 
             if (_loading)
-              const Expanded(child: Center(child: CircularProgressIndicator()))
+              const Expanded(child: FxLoading())
             else ...[
               // Config strip
               if (_config != null)

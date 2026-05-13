@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -103,7 +104,7 @@ class TrilhasScreen extends ConsumerWidget {
         ],
       ),
       body: trilhasAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad))),
         data: (trilhas) {
           if (trilhas.isEmpty) {

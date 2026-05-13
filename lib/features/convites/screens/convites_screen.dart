@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/convite_repository.dart';
 import '../providers/convite_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class ConvitesScreen extends ConsumerStatefulWidget {
   const ConvitesScreen({super.key});
@@ -60,7 +61,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
             ),
             if (_loading) ...[
               const SizedBox(height: 24),
-              const Center(child: CircularProgressIndicator()),
+              const FxLoading(),
             ],
             if (_error != null) ...[
               const SizedBox(height: 16),

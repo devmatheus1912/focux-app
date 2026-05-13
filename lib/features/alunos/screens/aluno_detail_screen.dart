@@ -14,6 +14,7 @@ import '../../../core/widgets/fx_sparkline.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../ia/data/ia_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 final alunoCopilotoActionProvider =
     FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
@@ -416,7 +417,7 @@ class AlunoDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: bg,
       body: alunoAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (aluno) {
           final perfil = '${_perfilCompletion(aluno)}%';

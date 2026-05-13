@@ -9,6 +9,7 @@ import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class ExercicioDetailScreen extends ConsumerStatefulWidget {
   final int exercicioId;
@@ -1174,7 +1175,7 @@ class _VideoPlayerState extends State<_VideoPlayer> {
     if (!_ready) {
       return const SizedBox(
         height: 200,
-        child: Center(child: CircularProgressIndicator()),
+        child: FxLoading(),
       );
     }
     final controller = _ctrl;

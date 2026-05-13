@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/onboarding_provider.dart';
 import '../../perfil/providers/perfil_provider.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class SetupOnboardingWidget extends ConsumerWidget {
   const SetupOnboardingWidget({super.key});
@@ -13,7 +14,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
     final statusAsync = ref.watch(onboardingStatusProvider);
 
     return statusAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const FxLoading(),
       error: (e, _) => const SizedBox.shrink(),
       data: (data) {
         if (data.progressoPercentual == 100) return const SizedBox.shrink();

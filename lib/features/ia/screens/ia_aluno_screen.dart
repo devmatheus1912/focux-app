@@ -8,6 +8,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/chat/data/chat_repository.dart';
 import '../data/ia_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class IaAlunoScreen extends ConsumerStatefulWidget {
   const IaAlunoScreen({super.key});
@@ -153,7 +154,7 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
                 if (i == _msgs.length) {
                   return const Padding(
                     padding: EdgeInsets.all(8),
-                    child: Center(child: CircularProgressIndicator()),
+                    child: FxLoading(),
                   );
                 }
                 final m = _msgs[i];

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/health/health_service.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 /// Screen showing synced Apple Health / Google Fit data.
 ///
@@ -85,7 +86,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
         elevation: 0,
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const FxLoading()
           : !_authorized
               ? _buildAuthPrompt(primary)
               : _buildDashboard(isDark, primary),

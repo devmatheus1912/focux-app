@@ -3,6 +3,7 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class EngajamentoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -85,7 +86,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const FxLoading()
           : _erro != null
               ? Center(child: Text('Erro: $_erro'))
               : _eventos.isEmpty

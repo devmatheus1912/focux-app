@@ -3,6 +3,7 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
@@ -34,7 +35,7 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
         ],
       ),
       body: sugestoesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const FxLoading(),
         error: (e, _) => Center(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const Icon(Icons.error_outline, size: 48, color: EagleTokens.bad),

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class AgendaScreen extends ConsumerStatefulWidget {
   const AgendaScreen({super.key});
@@ -371,7 +372,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
             Expanded(
               child:
                   _loading
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const FxLoading()
                       : ListView.builder(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                         itemCount:

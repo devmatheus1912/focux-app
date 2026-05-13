@@ -9,6 +9,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 class RelatorioScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -256,7 +257,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             if (_carregando)
               const SizedBox(
                 height: 200,
-                child: Center(child: CircularProgressIndicator()),
+                child: FxLoading(),
               )
             else if (_erro != null)
               Card(

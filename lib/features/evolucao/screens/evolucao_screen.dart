@@ -6,6 +6,7 @@ import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
+import '../../../core/widgets/fx_loading.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
 
@@ -366,7 +367,7 @@ class _TabMedidas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return medidasAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const FxLoading(),
       error: (e, _) => Center(child: Text('Erro: $e')),
       data: (lista) {
         if (lista.isEmpty) {
@@ -478,7 +479,7 @@ class _TabRecordes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return recordesAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const FxLoading(),
       error: (e, _) => Center(child: Text('Erro: $e')),
       data: (lista) {
         if (lista.isEmpty) {

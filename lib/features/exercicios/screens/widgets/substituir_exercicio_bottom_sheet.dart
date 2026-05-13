@@ -6,6 +6,7 @@ import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../data/substituicao_engine.dart';
 import '../../providers/exercicios_provider.dart';
+import '../../../../core/widgets/fx_loading.dart';
 
 class SubstituirExercicioBottomSheet extends ConsumerWidget {
   const SubstituirExercicioBottomSheet({
@@ -33,7 +34,7 @@ class SubstituirExercicioBottomSheet extends ConsumerWidget {
           loading:
               () => const SizedBox(
                 height: 220,
-                child: Center(child: CircularProgressIndicator()),
+                child: FxLoading(),
               ),
           error:
               (error, _) => SizedBox(
