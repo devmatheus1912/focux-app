@@ -26,6 +26,7 @@ import '../../../core/utils/fx_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 enum ConversationMode { personal, aluno }
 
@@ -656,9 +657,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       setState(() => _upsertMessage(updated));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Nao foi possivel reagir: $e')));
+        FeedbackHelper.showSuccess(context, 'Nao foi possivel reagir: $e');
       }
     }
   }
@@ -712,9 +711,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       setState(() => _upsertMessage(updated));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Nao foi possivel editar: $e')));
+      FeedbackHelper.showSuccess(context, 'Nao foi possivel editar: $e');
     }
   }
 
@@ -751,9 +748,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       setState(() => _upsertMessage(updated));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Nao foi possivel apagar: $e')));
+      FeedbackHelper.showSuccess(context, 'Nao foi possivel apagar: $e');
     }
   }
 

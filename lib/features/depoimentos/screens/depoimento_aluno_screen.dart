@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class DepoimentoAlunoScreen extends ConsumerStatefulWidget {
   const DepoimentoAlunoScreen({super.key});
@@ -28,7 +29,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
           .submeter(texto: _textoCtrl.text.trim(), nota: _nota);
       if (mounted) setState(() => _enviado = true);
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      if (mounted) FeedbackHelper.showSuccess(context, 'Erro: $e');
     } finally {
       if (mounted) setState(() => _enviando = false);
     }

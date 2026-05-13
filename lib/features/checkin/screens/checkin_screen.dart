@@ -13,6 +13,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
   final int treinoId;
@@ -72,9 +73,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       setState(() {
         _loading = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      FeedbackHelper.showSuccess(context, 'Erro: $e');
       safePopOrGo(context, '/checkin/treinos');
     }
   }
@@ -113,9 +112,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
   }
@@ -181,9 +178,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
   }
@@ -225,9 +220,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
   }
@@ -307,9 +300,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       safePopOrGo(context, '/checkin/treinos');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     } finally {
       if (mounted) {

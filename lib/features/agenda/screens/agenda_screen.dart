@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class AgendaScreen extends ConsumerStatefulWidget {
   const AgendaScreen({super.key});
@@ -909,9 +910,7 @@ class _NovoAgendamentoScreenState
     }
     final alunoId = _alunoId;
     if (alunoId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Selecione um aluno.')));
+      FeedbackHelper.showSuccess(context, 'Selecione um aluno.');
       return;
     }
     final inicio = _inicio!;
@@ -930,9 +929,7 @@ class _NovoAgendamentoScreenState
       if (mounted) safePopOrGo(context, '/agenda');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
     if (mounted) setState(() => _saving = false);

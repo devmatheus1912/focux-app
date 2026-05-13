@@ -7,6 +7,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alimentar_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class PlanoAlimentarDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -60,9 +61,7 @@ class _PlanoAlimentarDetailScreenState
       await repo.excluirRefeicao(widget.alunoId, widget.plano.id, r.id);
       if (mounted) {
         setState(() => _refeicoes.removeWhere((x) => x.id == r.id));
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Refeição removida.')));
+        FeedbackHelper.showSuccess(context, 'Refeição removida.');
       }
     } catch (e) {
       if (mounted) {
@@ -175,9 +174,7 @@ class _PlanoAlimentarDetailScreenState
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro na IA: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro na IA: $e');
       }
     }
   }
@@ -513,9 +510,7 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
     if (mounted) setState(() => _saving = false);

@@ -6,6 +6,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alimentar_repository.dart';
 import 'plano_alimentar_detail_screen.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class AlimentarScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -252,9 +253,7 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
     if (mounted) {

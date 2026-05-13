@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
 
@@ -226,9 +227,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     }
                   } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+                      FeedbackHelper.showSuccess(context, 'Erro: $e');
                     }
                   }
                 },
@@ -310,9 +309,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     }
                   } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+                      FeedbackHelper.showSuccess(context, 'Erro: $e');
                     }
                   }
                 },

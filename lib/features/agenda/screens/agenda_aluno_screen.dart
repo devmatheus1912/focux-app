@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class AgendaAlunoScreen extends ConsumerStatefulWidget {
   const AgendaAlunoScreen({super.key});
@@ -36,8 +37,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
     try {
       await AgendaRepository(ref.read(apiClientProvider)).confirmarPresenca(ag.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Presença confirmada!')));
+        FeedbackHelper.showSuccess(context, 'Presença confirmada!');
         _load();
       }
     } catch (e) {

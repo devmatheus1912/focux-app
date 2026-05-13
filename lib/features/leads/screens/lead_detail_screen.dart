@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 const _statusOpcoes = ['LEAD', 'TESTE', 'ATIVO', 'INADIMPLENTE', 'CANCELADO'];
 const _statusLabels = {
@@ -103,9 +104,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
   }
@@ -133,16 +132,12 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     try {
       await LeadRepository(ref.read(apiClientProvider)).converter(_lead.id);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Lead convertido!')));
+        FeedbackHelper.showSuccess(context, 'Lead convertido!');
         safePopOrGo(context, '/leads');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
   }
@@ -172,9 +167,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       if (mounted) safePopOrGo(context, '/leads');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
   }
@@ -211,9 +204,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
   }

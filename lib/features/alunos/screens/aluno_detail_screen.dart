@@ -15,6 +15,7 @@ import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../ia/data/ia_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 final alunoCopilotoActionProvider =
     FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
@@ -101,16 +102,12 @@ class AlunoDetailScreen extends ConsumerWidget {
     try {
       await AlunoRepository(ref.read(apiClientProvider)).excluirAluno(aluno.id);
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Aluno excluído.')));
+        FeedbackHelper.showSuccess(context, 'Aluno excluído.');
         safePopOrGo(context, '/alunos');
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
   }

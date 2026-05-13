@@ -7,6 +7,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/galeria_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class GaleriaScreen extends ConsumerStatefulWidget {
   const GaleriaScreen({super.key});
@@ -31,7 +32,7 @@ class _State extends ConsumerState<GaleriaScreen> {
 
   Future<void> _add() async {
     if (_fotos.length >= 9) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Limite de 9 fotos atingido.')));
+      FeedbackHelper.showSuccess(context, 'Limite de 9 fotos atingido.');
       return;
     }
     final file = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 80, maxWidth: 1200);
@@ -48,7 +49,7 @@ class _State extends ConsumerState<GaleriaScreen> {
       await GaleriaRepository(ref.read(apiClientProvider)).adicionar(fotoUrl: url, ordem: _fotos.length);
       await _load();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      if (mounted) FeedbackHelper.showSuccess(context, 'Erro: $e');
     } finally { if (mounted) setState(() => _uploading = false); }
   }
 
@@ -65,7 +66,7 @@ class _State extends ConsumerState<GaleriaScreen> {
       await GaleriaRepository(ref.read(apiClientProvider)).deletar(id);
       await _load();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      if (mounted) FeedbackHelper.showSuccess(context, 'Erro: $e');
     }
   }
 

@@ -14,6 +14,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 const _coresPredefinidas = [
   Color(0xFF3454D1),
@@ -288,9 +289,7 @@ class _IdentidadeVisualScreenState
       if (mounted) setState(() => _logoUrl = url);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro upload: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro upload: $e');
       }
     } finally {
       if (mounted) setState(() => _uploadingLogo = false);
@@ -397,9 +396,7 @@ class _IdentidadeVisualScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     } finally {
       if (mounted) setState(() => _salvando = false);

@@ -7,6 +7,7 @@ import 'package:printing/printing.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/anamnese_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class AnamneseScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -194,15 +195,11 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
         'restricoesAlimentares': _restricoesCtrl.text,
       });
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Anamnese salva!')));
+        FeedbackHelper.showSuccess(context, 'Anamnese salva!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
     if (mounted) setState(() => _saving = false);

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
   const AlertasScreen({super.key});
@@ -105,9 +106,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
   }
@@ -119,15 +118,11 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       ).resolver(alerta.alunoId);
       setState(() => _alertas.removeWhere((a) => a.alunoId == alerta.alunoId));
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Alerta resolvido!')));
+        FeedbackHelper.showSuccess(context, 'Alerta resolvido!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
   }
@@ -169,15 +164,11 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
         ref.read(apiClientProvider),
       ).enviarMensagemChat(alerta.alunoId, ctrl.text.trim());
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Mensagem enviada!')));
+        FeedbackHelper.showSuccess(context, 'Mensagem enviada!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
   }

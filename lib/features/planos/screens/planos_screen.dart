@@ -7,6 +7,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/planos_repository.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class PlanosScreen extends ConsumerStatefulWidget {
   const PlanosScreen({super.key});
@@ -40,9 +41,7 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
       context.go('/dashboard/personal');
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erro ao ativar trial: $error')));
+      FeedbackHelper.showSuccess(context, 'Erro ao ativar trial: $error');
     } finally {
       if (mounted) setState(() => _startingTrial = false);
     }

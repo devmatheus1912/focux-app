@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_logo.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/suporte_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 const _severidades = ['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'];
 
@@ -102,9 +103,7 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
         );
         _enviandoChat = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erro no chat: $e')));
+      FeedbackHelper.showSuccess(context, 'Erro no chat: $e');
       _scrollToBottom();
     }
   }

@@ -4,6 +4,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class DepoimentosPersonalScreen extends ConsumerStatefulWidget {
   const DepoimentosPersonalScreen({super.key});
@@ -31,7 +32,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
       await DepoimentoRepository(ref.read(apiClientProvider)).aprovar(id, aprovado: aprovado);
       await _load();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e')));
+      if (mounted) FeedbackHelper.showSuccess(context, 'Erro: $e');
     }
   }
 

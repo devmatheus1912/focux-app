@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feedback_video_repository.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 
 class FeedbackVideoScreen extends ConsumerStatefulWidget {
   final int? alunoId;
@@ -233,9 +234,7 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
         exercicioId == null ||
         video.isEmpty ||
         com.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Preencha todos os campos')));
+      FeedbackHelper.showSuccess(context, 'Preencha todos os campos');
       return;
     }
 
@@ -250,9 +249,7 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
       widget.onSalvo();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showSuccess(context, 'Erro: $e');
       }
     }
     if (mounted) setState(() => _salvando = false);
