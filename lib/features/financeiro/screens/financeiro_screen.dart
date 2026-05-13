@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/feature_gate.dart';
@@ -97,22 +99,22 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'ESTE MES',
+                            'ESTE MÊS',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 11,
                               color: mute,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.2,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.6,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 4),
                           Text(
                             'Financeiro',
-                            style: TextStyle(
-                              fontSize: 32,
+                            style: GoogleFonts.outfit(
+                              fontSize: 30,
                               color: ink,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: -0.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.6,
                             ),
                           ),
                         ],
@@ -460,24 +462,12 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                       if (ctx.mounted) Navigator.of(ctx).pop();
                                       _load();
                                       if (mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Mensalidade atualizada!',
-                                            ),
-                                          ),
-                                        );
+                                        FeedbackHelper.showSuccess(context, 'Mensalidade atualizada!');
                                       }
                                     } catch (e) {
                                       setModalState(() => salvando = false);
                                       if (ctx.mounted) {
-                                        ScaffoldMessenger.of(ctx).showSnackBar(
-                                          SnackBar(
-                                            content: Text(friendlyError(e)),
-                                          ),
-                                        );
+                                        FeedbackHelper.showError(ctx, friendlyError(e));
                                       }
                                     }
                                   },
@@ -509,15 +499,11 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
       ).atualizarAtrasos();
       _load();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mensalidades atualizadas!')),
-        );
+        FeedbackHelper.showSuccess(context, 'Mensalidades atualizadas!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -584,15 +570,11 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
         ref.read(apiClientProvider),
       ).registrarContato(m.id, tipoSelecionado!, obsCtrl.text.trim());
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Contato registrado!')));
+        FeedbackHelper.showSuccess(context, 'Contato registrado!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -603,9 +585,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
       _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -664,11 +644,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                 Clipboard.setData(
                                   ClipboardData(text: pix!.pixCopiaECola),
                                 );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Codigo PIX copiado!'),
-                                  ),
-                                );
+                                FeedbackHelper.showSuccess(context, 'Código PIX copiado!');
                               },
                             ),
                           ],
@@ -869,24 +845,12 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                       if (ctx.mounted) Navigator.of(ctx).pop();
                                       _load();
                                       if (mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Mensalidade lancada com sucesso!',
-                                            ),
-                                          ),
-                                        );
+                                        FeedbackHelper.showSuccess(context, 'Mensalidade lançada com sucesso!');
                                       }
                                     } catch (e) {
                                       setModalState(() => salvando = false);
                                       if (ctx.mounted) {
-                                        ScaffoldMessenger.of(ctx).showSnackBar(
-                                          SnackBar(
-                                            content: Text(friendlyError(e)),
-                                          ),
-                                        );
+                                        FeedbackHelper.showError(ctx, friendlyError(e));
                                       }
                                     }
                                   },
@@ -960,11 +924,11 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Text(
-            'HISTORICO DE TRANSACOES',
+            'HISTÓRICO DE TRANSAÇÕES',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
+              letterSpacing: 1.4,
               color:
                   Theme.of(context).brightness == Brightness.dark
                       ? EagleTokens.darkInkMute
@@ -975,65 +939,121 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
         Expanded(
           child:
               _loading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? _buildMensalidadesLoading(context)
                   : _filtered.isEmpty
-                  ? const Center(child: Text('Nenhuma mensalidade encontrada.'))
+                  ? _buildMensalidadesEmpty(context)
                   : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
                     itemCount: _filtered.length,
                     itemBuilder: (_, i) {
                       final m = _filtered[i];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          title: Text(m.alunoNome),
-                          subtitle: Text(
-                            '${m.mesReferencia.substring(0, 7)} - R\$ ${m.valor.toStringAsFixed(2)}',
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Chip(
-                                label: Text(m.status),
-                                backgroundColor: _statusColor(
-                                  m.status,
-                                ).withValues(alpha: 0.15),
-                                labelStyle: TextStyle(
-                                  color: _statusColor(m.status),
-                                  fontSize: 12,
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.edit, size: 20),
-                                tooltip: 'Editar mensalidade',
-                                onPressed: () => _editarMensalidade(m),
-                              ),
-                              if (m.status == 'PENDENTE' ||
-                                  m.status == 'ATRASADO') ...[
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.phone_in_talk,
-                                    size: 20,
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final primary = Theme.of(context).colorScheme.primary;
+                      final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+                      final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+                      final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+                      final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+                      final statusColor = _statusColor(m.status);
+                      final isPending = m.status == 'PENDENTE' || m.status == 'ATRASADO';
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: card,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: line),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        m.alunoNome,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          color: ink,
+                                          letterSpacing: -0.15,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        m.mesReferencia.substring(0, 7),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: mute,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  tooltip: 'Registrar contato',
-                                  onPressed: () => _registrarContato(m),
                                 ),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.pix,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
+                                const SizedBox(width: 8),
+                                Text(
+                                  'R\$ ${m.valor.toStringAsFixed(0)}',
+                                  style: GoogleFonts.jetBrainsMono(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: ink,
                                   ),
-                                  onPressed: () => _mostrarPix(m.id),
-                                  tooltip: 'Gerar PIX',
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.check_circle_outline),
-                                  onPressed: () => _pagar(m.id),
                                 ),
                               ],
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withValues(alpha: isDark ? 0.18 : 0.10),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    m.status,
+                                    style: TextStyle(
+                                      color: statusColor,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                _MiniAction(
+                                  icon: Icons.edit_rounded,
+                                  color: mute,
+                                  onTap: () => _editarMensalidade(m),
+                                ),
+                                if (isPending) ...[
+                                  const SizedBox(width: 6),
+                                  _MiniAction(
+                                    icon: Icons.phone_in_talk_rounded,
+                                    color: mute,
+                                    onTap: () => _registrarContato(m),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  _MiniAction(
+                                    icon: Icons.pix_rounded,
+                                    color: primary,
+                                    onTap: () => _mostrarPix(m.id),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  _MiniAction(
+                                    icon: Icons.check_circle_outline_rounded,
+                                    color: EagleTokens.good,
+                                    onTap: () => _pagar(m.id),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -1042,4 +1062,92 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
       ],
     ),
   );
+
+  Widget _buildMensalidadesLoading(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+      itemCount: 5,
+      itemBuilder: (_, __) => Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Container(
+          height: 82,
+          decoration: BoxDecoration(
+            color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+            ),
+          ),
+          child: const SizedBox.shrink(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMensalidadesEmpty(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: isDark ? 0.15 : 0.08),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(Icons.receipt_long_rounded, color: primary, size: 24),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Nenhuma mensalidade',
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: ink,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Toque + para lançar a primeira.',
+            style: TextStyle(color: mute, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniAction extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+  const _MiniAction({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: isDark ? 0.14 : 0.07),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, size: 16, color: color),
+      ),
+    );
+  }
 }
