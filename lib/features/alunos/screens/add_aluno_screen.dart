@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../providers/alunos_provider.dart';
 
 const _generos = ['Masculino', 'Feminino', 'Outro'];
@@ -304,15 +305,11 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                       await Clipboard.setData(ClipboardData(text: texto));
                       if (ctx.mounted) Navigator.of(ctx).pop();
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              hasWhatsapp
-                                  ? 'Mensagem copiada. Abra o WhatsApp e envie ao aluno.'
-                                  : 'Convite copiado.',
-                            ),
-                            duration: const Duration(seconds: 4),
-                          ),
+                        FeedbackHelper.showSuccess(
+                          context,
+                          hasWhatsapp
+                              ? 'Mensagem copiada. Abra o WhatsApp e envie ao aluno.'
+                              : 'Convite copiado.',
                         );
                         context.pop(true);
                       }
@@ -347,9 +344,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                         HapticFeedback.mediumImpact();
                         if (ctx.mounted) Navigator.of(ctx).pop();
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Mensagem copiada.')),
-                          );
+                          FeedbackHelper.showSuccess(context, 'Mensagem copiada.');
                           context.pop(true);
                         }
                       },
@@ -695,11 +690,18 @@ class _SectionCard extends StatelessWidget {
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 15),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
       decoration: BoxDecoration(
         color: isDark ? EagleTokens.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(EagleTokens.radiusXl),
         border: Border.all(color: line.withValues(alpha: 0.86)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -919,8 +921,8 @@ class _FxFormField extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: primary.withValues(alpha: 0.42),
-                width: 1.3,
+                color: primary.withValues(alpha: 0.68),
+                width: 1.5,
               ),
             ),
             errorBorder: OutlineInputBorder(
@@ -990,17 +992,18 @@ class _OptionChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
           color:
               selected
-                  ? primary.withValues(alpha: isDark ? 0.2 : 0.1)
+                  ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
                   : (isDark
                       ? Colors.white.withValues(alpha: 0.05)
                       : EagleTokens.paper),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: selected ? primary.withValues(alpha: 0.48) : line,
+            color: selected ? primary.withValues(alpha: 0.58) : line,
+            width: selected ? 1.4 : 1.0,
           ),
         ),
         child: Row(
@@ -1015,7 +1018,7 @@ class _OptionChip extends StatelessWidget {
               style: TextStyle(
                 color: selected ? primary : ink,
                 fontSize: 12.5,
-                fontWeight: FontWeight.w800,
+                fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
               ),
             ),
           ],
@@ -1234,21 +1237,30 @@ class _BottomSubmitBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (!canSubmit) ...[
-              SizedBox(
-                height: 34,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: isDark ? 0.10 : 0.05),
+                  borderRadius: BorderRadius.circular(999),
+                ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 14,
+                      color: mute,
+                    ),
+                    const SizedBox(width: 7),
                     Flexible(
                       child: Text(
                         helper,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: mute,
                           fontSize: 12,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
