@@ -35,9 +35,10 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
       vsync: this,
       duration: const Duration(milliseconds: 2600),
     )..repeat(reverse: true);
-    _float = Tween<double>(begin: 0, end: -8).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _float = Tween<double>(
+      begin: 0,
+      end: -8,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -62,33 +63,36 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
             // ── Floating icon with glass container ──
             AnimatedBuilder(
               animation: _float,
-              builder: (_, __) => Transform.translate(
-                offset: Offset(0, _float.value),
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: isDark ? 0.12 : 0.07),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: primary.withValues(alpha: isDark ? 0.18 : 0.10),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: primary.withValues(alpha: 0.12),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
-                        spreadRadius: -4,
+              builder:
+                  (_, __) => Transform.translate(
+                    offset: Offset(0, _float.value),
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: isDark ? 0.12 : 0.07),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: primary.withValues(
+                            alpha: isDark ? 0.18 : 0.10,
+                          ),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primary.withValues(alpha: 0.12),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
+                            spreadRadius: -4,
+                          ),
+                        ],
                       ),
-                    ],
+                      child: Icon(
+                        widget.icon,
+                        size: 32,
+                        color: primary.withValues(alpha: 0.7),
+                      ),
+                    ),
                   ),
-                  child: Icon(
-                    widget.icon,
-                    size: 32,
-                    color: primary.withValues(alpha: 0.7),
-                  ),
-                ),
-              ),
             ),
 
             const SizedBox(height: 28),
@@ -131,8 +135,9 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
                 child: FilledButton.tonal(
                   onPressed: widget.onAction,
                   style: FilledButton.styleFrom(
-                    backgroundColor:
-                        primary.withValues(alpha: isDark ? 0.15 : 0.08),
+                    backgroundColor: primary.withValues(
+                      alpha: isDark ? 0.15 : 0.08,
+                    ),
                     foregroundColor: primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

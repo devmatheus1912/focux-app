@@ -8,6 +8,8 @@ import '../../financeiro/data/financeiro_repository.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 /// Tela de configuração de dados de pagamento (Wallet / PIX).
 class WalletScreen extends ConsumerStatefulWidget {
@@ -63,7 +65,8 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     try {
       final repo = ref.read(perfilRepositoryProvider);
       await repo.atualizarWallet({
-        if (_chavePixCtrl.text.isNotEmpty) 'chavePix': _chavePixCtrl.text.trim(),
+        if (_chavePixCtrl.text.isNotEmpty)
+          'chavePix': _chavePixCtrl.text.trim(),
         if (_tipoChavePix != null) 'tipoChavePix': _tipoChavePix,
         if (_bancoCtrl.text.isNotEmpty) 'banco': _bancoCtrl.text.trim(),
         if (_agenciaCtrl.text.isNotEmpty) 'agencia': _agenciaCtrl.text.trim(),
@@ -72,14 +75,18 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       // Invalida o cache do perfil para refletir os novos dados
       ref.invalidate(perfilProvider);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Dados de pagamento salvos com sucesso!')),
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(
+            content: Text('Dados de pagamento salvos com sucesso!'),
+          ),
         );
         context.pop(true);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(content: Text(friendlyError(e))),
         );
       }
@@ -93,10 +100,15 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final perfilAsync = ref.watch(perfilProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark
+              ? EagleTokens.darkBg
+              : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,title: const Text('Wallet / Pagamentos')),
+        elevation: 0,
+        title: const Text('Wallet / Pagamentos'),
+      ),
       body: perfilAsync.when(
         loading: () => const FxLoading(),
         error: (e, _) => Center(child: Text(friendlyError(e))),
@@ -118,14 +130,20 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                         children: [
                           Icon(
                             Icons.account_balance_wallet,
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            color:
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'Configure suas chaves PIX e dados bancários para receber pagamentos dos alunos.',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer,
                               ),
                             ),
                           ),
@@ -140,20 +158,28 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   const SizedBox(height: 20),
 
                   // Seção PIX
-                  Text('Dados PIX', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Dados PIX',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     value: _tipoChavePix,
                     decoration: InputDecoration(
                       labelText: 'Tipo de chave PIX',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
-                    items: _tiposChavePix
-                        .map((tipo) => DropdownMenuItem(
-                              value: tipo,
-                              child: Text(_labelTipoChave(tipo)),
-                            ))
-                        .toList(),
+                    items:
+                        _tiposChavePix
+                            .map(
+                              (tipo) => DropdownMenuItem(
+                                value: tipo,
+                                child: Text(_labelTipoChave(tipo)),
+                              ),
+                            )
+                            .toList(),
                     onChanged: (v) => setState(() => _tipoChavePix = v),
                   ),
                   const SizedBox(height: 12),
@@ -162,20 +188,27 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                     decoration: InputDecoration(
                       labelText: 'Chave PIX',
                       hintText: 'CPF, e-mail, telefone ou chave aleatória',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
 
                   // Seção bancária
-                  Text('Dados Bancários', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Dados Bancários',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _bancoCtrl,
                     decoration: InputDecoration(
                       labelText: 'Banco',
                       hintText: 'Ex.: Nubank, Itaú, Bradesco',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -187,7 +220,9 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                           controller: _agenciaCtrl,
                           decoration: InputDecoration(
                             labelText: 'Agência',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                            border: FxInputDeco.outlineBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                           keyboardType: TextInputType.number,
                         ),
@@ -199,7 +234,9 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                           controller: _contaCtrl,
                           decoration: InputDecoration(
                             labelText: 'Conta',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                            border: FxInputDeco.outlineBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                           keyboardType: TextInputType.number,
                         ),
@@ -211,13 +248,14 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   // Botão salvar
                   FilledButton.icon(
                     onPressed: _carregando ? null : _salvar,
-                    icon: _carregando
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.save),
+                    icon:
+                        _carregando
+                            ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: FxLoading(strokeWidth: 2),
+                            )
+                            : const Icon(Icons.save),
                     label: const Text('Salvar dados'),
                   ),
                 ],
@@ -263,8 +301,14 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
       final now = DateTime.now();
       final repo = FinanceiroRepository(ref.read(apiClientProvider));
       final res = await repo.resumoMensal(now.year, now.month);
-      if (mounted) setState(() { _resumo = res; _loading = false; });
-    } catch (e) { debugPrint('[Focux] Error: $e');
+      if (mounted) {
+        setState(() {
+          _resumo = res;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -281,14 +325,29 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Resumo do Mês', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text(
+              'Resumo do Mês',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _Stat(label: 'Recebido', valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}', color: EagleTokens.good),
-                _Stat(label: 'Previsto', valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}', color: primary),
-                _Stat(label: 'Inadimplentes', valor: '${_resumo!.inadimplentes}', color: EagleTokens.bad),
+                _Stat(
+                  label: 'Recebido',
+                  valor: 'R\$ ${_resumo!.totalRecebido.toStringAsFixed(2)}',
+                  color: EagleTokens.good,
+                ),
+                _Stat(
+                  label: 'Previsto',
+                  valor: 'R\$ ${_resumo!.totalPrevisto.toStringAsFixed(2)}',
+                  color: primary,
+                ),
+                _Stat(
+                  label: 'Inadimplentes',
+                  valor: '${_resumo!.inadimplentes}',
+                  color: EagleTokens.bad,
+                ),
               ],
             ),
           ],
@@ -308,11 +367,19 @@ class _Stat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute)),
-        Text(valor, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
+        ),
+        Text(
+          valor,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
       ],
     );
   }
 }
-
-

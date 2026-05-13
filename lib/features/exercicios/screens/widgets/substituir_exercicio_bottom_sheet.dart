@@ -31,11 +31,7 @@ class SubstituirExercicioBottomSheet extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
         child: asyncList.when(
-          loading:
-              () => const SizedBox(
-                height: 220,
-                child: FxLoading(),
-              ),
+          loading: () => const SizedBox(height: 220, child: FxLoading()),
           error:
               (error, _) => SizedBox(
                 height: 220,

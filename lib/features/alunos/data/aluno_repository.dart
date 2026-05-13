@@ -49,35 +49,39 @@ class Aluno {
     if (nasc == null) return null;
     final now = DateTime.now();
     int age = now.year - nasc.year;
-    if (now.month < nasc.month || (now.month == nasc.month && now.day < nasc.day)) age--;
+    if (now.month < nasc.month ||
+        (now.month == nasc.month && now.day < nasc.day)) {
+      age--;
+    }
     return age;
   }
 
   factory Aluno.fromJson(Map<String, dynamic> json) => Aluno(
-        id: json['id'] as int,
-        nome: json['nome'] as String,
-        email: json['email'] as String? ?? '',
-        objetivo: json['objetivo'] as String?,
-        status: json['status'] as String,
-        fotoUrl: json['fotoUrl'] as String?,
-        inadimplente: json['inadimplente'] as bool? ?? false,
-        emRisco: json['emRisco'] as bool? ?? false,
-        telefone: json['telefone'] as String?,
-        whatsapp: json['whatsapp'] as String?,
-        genero: json['genero'] as String?,
-        tipoConsultoria: json['tipoConsultoria'] as String?,
-        statusFinanceiro: json['statusFinanceiro'] as String? ?? 'ATIVO',
-        senhaProvisoria: json['senhaProvisoria'] as String?,
-        peso: json['peso']?.toDouble(),
-        altura: json['altura']?.toDouble(),
-        dataNascimento: json['dataNascimento'] as String?,
-        equipamentosDisponiveis: parseEnumCsv(
+    id: json['id'] as int,
+    nome: json['nome'] as String,
+    email: json['email'] as String? ?? '',
+    objetivo: json['objetivo'] as String?,
+    status: json['status'] as String,
+    fotoUrl: json['fotoUrl'] as String?,
+    inadimplente: json['inadimplente'] as bool? ?? false,
+    emRisco: json['emRisco'] as bool? ?? false,
+    telefone: json['telefone'] as String?,
+    whatsapp: json['whatsapp'] as String?,
+    genero: json['genero'] as String?,
+    tipoConsultoria: json['tipoConsultoria'] as String?,
+    statusFinanceiro: json['statusFinanceiro'] as String? ?? 'ATIVO',
+    senhaProvisoria: json['senhaProvisoria'] as String?,
+    peso: json['peso']?.toDouble(),
+    altura: json['altura']?.toDouble(),
+    dataNascimento: json['dataNascimento'] as String?,
+    equipamentosDisponiveis:
+        parseEnumCsv(
           Equipamento.values,
           json['equipamentosDisponiveis'] ??
               json['equipamentosDisponiveisCsv'] ??
               json['equipamentos_disponiveis'],
         ).toSet(),
-      );
+  );
 }
 
 class AlunoAutonomiaEvento {
@@ -113,9 +117,10 @@ class AlunoAutonomiaEvento {
         priority: json['priority'] as String?,
         done: json['done'] as bool? ?? false,
         profileCompletion: (json['profileCompletion'] as num?)?.toInt(),
-        criadoEm: json['criadoEm'] == null
-            ? null
-            : DateTime.tryParse(json['criadoEm'].toString()),
+        criadoEm:
+            json['criadoEm'] == null
+                ? null
+                : DateTime.tryParse(json['criadoEm'].toString()),
       );
 }
 
@@ -227,9 +232,10 @@ class AlunoAutonomiaResumo {
         gargaloTitulo: json['gargaloTitulo'] as String?,
         gargaloPrioridade: json['gargaloPrioridade'] as String?,
         gargaloUltimaAcao: json['gargaloUltimaAcao'] as String?,
-        gargaloCriadoEm: json['gargaloCriadoEm'] == null
-            ? null
-            : DateTime.tryParse(json['gargaloCriadoEm'].toString()),
+        gargaloCriadoEm:
+            json['gargaloCriadoEm'] == null
+                ? null
+                : DateTime.tryParse(json['gargaloCriadoEm'].toString()),
       );
 }
 
@@ -257,21 +263,26 @@ class AlunoRepository {
     String? genero,
     String? tipoConsultoria,
   }) async {
-    final response = await _dio.post('/api/alunos', data: {
-      'nome': nome,
-      'email': email,
-      if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-      if (whatsapp != null && whatsapp.isNotEmpty) 'whatsapp': whatsapp,
-      if (genero != null && genero.isNotEmpty) 'genero': genero,
-      if (tipoConsultoria != null && tipoConsultoria.isNotEmpty)
-        'tipoConsultoria': tipoConsultoria,
-    });
+    final response = await _dio.post(
+      '/api/alunos',
+      data: {
+        'nome': nome,
+        'email': email,
+        if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+        if (whatsapp != null && whatsapp.isNotEmpty) 'whatsapp': whatsapp,
+        if (genero != null && genero.isNotEmpty) 'genero': genero,
+        if (tipoConsultoria != null && tipoConsultoria.isNotEmpty)
+          'tipoConsultoria': tipoConsultoria,
+      },
+    );
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<void> atualizarStatusFinanceiro(int alunoId, String status) async {
-    await _dio.patch('/api/alunos/$alunoId/status-financeiro',
-        data: {'status': status});
+    await _dio.patch(
+      '/api/alunos/$alunoId/status-financeiro',
+      data: {'status': status},
+    );
   }
 
   Future<Aluno> atualizarAluno(int id, Map<String, dynamic> data) async {
@@ -289,9 +300,7 @@ class AlunoRepository {
   ) async {
     await _dio.patch(
       '/api/alunos/$alunoId/equipamentos',
-      data: {
-        'equipamentos': equipamentos.map((e) => e.backendName).toList(),
-      },
+      data: {'equipamentos': equipamentos.map((e) => e.backendName).toList()},
     );
   }
 
@@ -309,13 +318,13 @@ class AlunoRepository {
 
   Future<AlunoAutonomiaResumo> buscarAutonomiaResumo(int alunoId) async {
     final response = await _dio.get('/api/alunos/$alunoId/autonomia/resumo');
-    return AlunoAutonomiaResumo.fromJson(
-      response.data as Map<String, dynamic>,
-    );
+    return AlunoAutonomiaResumo.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<EvolucaoInteligente> buscarEvolucaoInteligente(int alunoId) async {
-    final response = await _dio.get('/api/alunos/$alunoId/evolucao-inteligente');
+    final response = await _dio.get(
+      '/api/alunos/$alunoId/evolucao-inteligente',
+    );
     return EvolucaoInteligente.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -357,15 +366,18 @@ class AlunoRepository {
     bool? done,
     int? profileCompletion,
   }) async {
-    await _dio.post('/api/aluno/autonomia/eventos', data: {
-      'taskId': taskId,
-      'taskTitle': taskTitle,
-      'action': action,
-      if (route != null) 'route': route,
-      if (priority != null) 'priority': priority,
-      if (done != null) 'done': done,
-      if (profileCompletion != null) 'profileCompletion': profileCompletion,
-    });
+    await _dio.post(
+      '/api/aluno/autonomia/eventos',
+      data: {
+        'taskId': taskId,
+        'taskTitle': taskTitle,
+        'action': action,
+        if (route != null) 'route': route,
+        if (priority != null) 'priority': priority,
+        if (done != null) 'done': done,
+        if (profileCompletion != null) 'profileCompletion': profileCompletion,
+      },
+    );
   }
 
   // Telefone getter helper (nao esta no modelo ainda)

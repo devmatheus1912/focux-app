@@ -255,10 +255,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             ),
             const SizedBox(height: 20),
             if (_carregando)
-              const SizedBox(
-                height: 200,
-                child: FxLoading(),
-              )
+              const SizedBox(height: 200, child: FxLoading())
             else if (_erro != null)
               Card(
                 color: theme.colorScheme.errorContainer,
@@ -563,7 +560,7 @@ class _CardInfo extends StatelessWidget {
             Text(
               valor,
               style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 4),
@@ -626,7 +623,7 @@ class _CardComparativo extends StatelessWidget {
                     Text(
                       '${comparativo.aderenciaAtual.toStringAsFixed(1)}%',
                       style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
                         color: theme.colorScheme.primary,
                       ),
                     ),
@@ -655,7 +652,7 @@ class _CardComparativo extends StatelessWidget {
                       Text(
                         deltaText,
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                           color: deltaColor,
                           fontSize: 13,
                         ),
@@ -675,7 +672,7 @@ class _CardComparativo extends StatelessWidget {
                     Text(
                       '${comparativo.aderenciaAnterior.toStringAsFixed(1)}%',
                       style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
                         color: EagleTokens.inkMute,
                       ),
                     ),

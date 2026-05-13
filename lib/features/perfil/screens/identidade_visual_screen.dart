@@ -15,6 +15,7 @@ import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 const _coresPredefinidas = [
   Color(0xFF3454D1),
@@ -322,9 +323,10 @@ class _IdentidadeVisualScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     } finally {
       if (mounted) setState(() => _uploadingBioPhoto = false);
@@ -389,9 +391,10 @@ class _IdentidadeVisualScreenState
       }
       ref.invalidate(perfilProvider);
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(successMessage)));
+          SnackBar(content: Text(successMessage)),
+        );
         if (widget.isSetup) context.pop(true);
       }
     } catch (e) {
@@ -525,7 +528,8 @@ class _IdentidadeVisualScreenState
                         Clipboard.setData(
                           ClipboardData(text: publicLandingUrl!),
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        FeedbackHelper.showSnackBar(
+                          context,
                           const SnackBar(content: Text('Link copiado!')),
                         );
                       },
@@ -867,7 +871,7 @@ class _IdentidadeVisualScreenState
                                     _uploadingLogo
                                         ? const Padding(
                                           padding: EdgeInsets.all(6),
-                                          child: CircularProgressIndicator(
+                                          child: FxLoading(
                                             strokeWidth: 2,
                                             color: Colors.white,
                                           ),
@@ -963,9 +967,7 @@ class _IdentidadeVisualScreenState
                                       ? const SizedBox(
                                         width: 16,
                                         height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
+                                        child: FxLoading(strokeWidth: 2),
                                       )
                                       : const Icon(Icons.person_pin_outlined),
                               label: Text(
@@ -1066,7 +1068,7 @@ class _IdentidadeVisualScreenState
                           ? const SizedBox(
                             height: 20,
                             width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: FxLoading(strokeWidth: 2),
                           )
                           : Text(
                             widget.isSetup

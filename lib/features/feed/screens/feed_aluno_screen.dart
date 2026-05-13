@@ -9,6 +9,8 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../data/feed_repository.dart';
 import '../widgets/feed_comments_sheet.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class FeedAlunoScreen extends ConsumerStatefulWidget {
   const FeedAlunoScreen({super.key});
@@ -59,9 +61,10 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     }
   }
@@ -124,7 +127,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       body: SafeArea(
         child:
             _loading
-                ? Center(child: CircularProgressIndicator(color: primary))
+                ? Center(child: FxLoading(color: primary))
                 : _posts.isEmpty
                 ? Center(
                   child: Column(
@@ -230,7 +233,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                                       p.titulo,
                                       style: const TextStyle(
                                         fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),

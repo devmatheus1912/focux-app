@@ -86,10 +86,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.34),
-      builder: (_) => _ExcluirAlunosSheet(
-        count: total,
-        isDark: isDark,
-      ),
+      builder: (_) => _ExcluirAlunosSheet(count: total, isDark: isDark),
     );
     if (confirmar != true) return;
 
@@ -448,12 +445,13 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     return Scaffold(
       backgroundColor: bg,
       body: alunosAsync.when(
-        loading: () => const SafeArea(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16, 86, 16, 0),
-            child: SkeletonList(count: 6),
-          ),
-        ),
+        loading:
+            () => const SafeArea(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16, 86, 16, 0),
+                child: SkeletonList(count: 6),
+              ),
+            ),
         error:
             (e, _) => _AlunosErrorState(
               isDark: isDark,
@@ -863,7 +861,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                                     isSelected: _selecionados.contains(a.id),
                                     onToggle: () => _toggleSelecionado(a.id),
                                     onLongPress:
-                                        _modoSelecao ? null : _toggleModoSelecao,
+                                        _modoSelecao
+                                            ? null
+                                            : _toggleModoSelecao,
                                     activeFiltro: _filtro,
                                   ),
                                 );
@@ -1206,6 +1206,7 @@ class _AlunoCardFX extends ConsumerStatefulWidget {
   final bool isSelected;
   final VoidCallback? onToggle;
   final VoidCallback? onLongPress;
+
   /// Active filter — used to suppress redundant status badges.
   final AlunoFiltro activeFiltro;
 
@@ -1401,7 +1402,10 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                       ),
                       // Only show badge when it adds information
                       // (suppress when the active filter already implies the status)
-                      if (_shouldShowBadge(statusText, widget.activeFiltro)) ...[
+                      if (_shouldShowBadge(
+                        statusText,
+                        widget.activeFiltro,
+                      )) ...[
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -1429,7 +1433,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                                 style: TextStyle(
                                   color: statusColor,
                                   fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w700,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -1463,9 +1467,10 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                         aderenciaPercent == null ? '—' : '$aderenciaPercent%',
                         style: GoogleFonts.jetBrainsMono(
                           fontSize: 12.5,
-                          fontWeight: weeklyCheckins > 0
-                              ? FontWeight.w700
-                              : FontWeight.w500,
+                          fontWeight:
+                              weeklyCheckins > 0
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
                           color: weeklyCheckins > 0 ? aderColor : mute,
                         ),
                       ),
@@ -1571,7 +1576,7 @@ class _AlunoInitials extends StatelessWidget {
         style: const TextStyle(
           color: Colors.white,
           fontSize: 18,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -1706,9 +1711,10 @@ class _ExcluirAlunosSheet extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
-    final label = count == 1
-        ? '1 aluno selecionado será excluído permanentemente.'
-        : '$count alunos selecionados serão excluídos permanentemente.';
+    final label =
+        count == 1
+            ? '1 aluno selecionado será excluído permanentemente.'
+            : '$count alunos selecionados serão excluídos permanentemente.';
 
     return Container(
       decoration: BoxDecoration(
@@ -1806,10 +1812,7 @@ class _ExcluirAlunosSheet extends StatelessWidget {
               ),
               child: Text(
                 'Cancelar',
-                style: TextStyle(
-                  color: mute,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(color: mute, fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -1849,7 +1852,9 @@ class _AlunosErrorState extends StatelessWidget {
                 width: 58,
                 height: 58,
                 decoration: BoxDecoration(
-                  color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
+                  color: EagleTokens.bad.withValues(
+                    alpha: isDark ? 0.18 : 0.08,
+                  ),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(

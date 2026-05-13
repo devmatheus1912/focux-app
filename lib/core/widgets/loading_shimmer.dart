@@ -15,32 +15,33 @@ class ShimmerListLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark
-        ? EagleTokens.surfaceDark.withValues(alpha: 0.8)
-        : const Color(0xFFE0E0E0);
-    final highlightColor = isDark
-        ? const Color(0xFF252540)
-        : const Color(0xFFF5F5F5);
+    final baseColor =
+        isDark
+            ? EagleTokens.surfaceDark.withValues(alpha: 0.8)
+            : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF252540) : const Color(0xFFF5F5F5);
 
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: itemCount,
       padding: const EdgeInsets.all(16),
-      itemBuilder: (ctx, i) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Shimmer.fromColors(
-          baseColor: baseColor,
-          highlightColor: highlightColor,
-          child: Container(
-            height: itemHeight,
-            decoration: BoxDecoration(
-              color: isDark ? EagleTokens.surfaceDark : Colors.white,
-              borderRadius: BorderRadius.circular(20.0),
+      itemBuilder:
+          (ctx, i) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Shimmer.fromColors(
+              baseColor: baseColor,
+              highlightColor: highlightColor,
+              child: Container(
+                height: itemHeight,
+                decoration: BoxDecoration(
+                  color: isDark ? EagleTokens.surfaceDark : Colors.white,
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 }
@@ -53,12 +54,12 @@ class ShimmerCardLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark
-        ? EagleTokens.surfaceDark.withValues(alpha: 0.8)
-        : const Color(0xFFE0E0E0);
-    final highlightColor = isDark
-        ? const Color(0xFF252540)
-        : const Color(0xFFF5F5F5);
+    final baseColor =
+        isDark
+            ? EagleTokens.surfaceDark.withValues(alpha: 0.8)
+            : const Color(0xFFE0E0E0);
+    final highlightColor =
+        isDark ? const Color(0xFF252540) : const Color(0xFFF5F5F5);
 
     return Shimmer.fromColors(
       baseColor: baseColor,

@@ -34,27 +34,25 @@ class _FxSpringButtonState extends State<FxSpringButton>
   late Animation<double> _scale;
 
   // Spring config: stiffness 260 + damping 18 = snappy with subtle overshoot
-  static const _spring = SpringDescription(mass: 1, stiffness: 260, damping: 18);
+  static const _spring = SpringDescription(
+    mass: 1,
+    stiffness: 260,
+    damping: 18,
+  );
 
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController.unbounded(vsync: this);
-    _scale = _ctrl.drive(
-      Tween<double>(begin: 1.0, end: widget.pressScale),
-    );
+    _scale = _ctrl.drive(Tween<double>(begin: 1.0, end: widget.pressScale));
   }
 
   void _press() {
-    _ctrl.animateWith(
-      SpringSimulation(_spring, _ctrl.value, 1.0, 0),
-    );
+    _ctrl.animateWith(SpringSimulation(_spring, _ctrl.value, 1.0, 0));
   }
 
   void _release() {
-    _ctrl.animateWith(
-      SpringSimulation(_spring, _ctrl.value, 0.0, 0),
-    );
+    _ctrl.animateWith(SpringSimulation(_spring, _ctrl.value, 0.0, 0));
   }
 
   @override
@@ -67,19 +65,21 @@ class _FxSpringButtonState extends State<FxSpringButton>
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: widget.onTap != null ? (_) => _press() : null,
-      onTapUp: widget.onTap != null
-          ? (_) {
-              _release();
-              widget.onTap!();
-            }
-          : null,
+      onTapUp:
+          widget.onTap != null
+              ? (_) {
+                _release();
+                widget.onTap!();
+              }
+              : null,
       onTapCancel: widget.onTap != null ? () => _release() : null,
       child: AnimatedBuilder(
         animation: _scale,
-        builder: (_, child) => Transform.scale(
-          scale: 1.0 - (_scale.value * (1.0 - widget.pressScale)),
-          child: child,
-        ),
+        builder:
+            (_, child) => Transform.scale(
+              scale: 1.0 - (_scale.value * (1.0 - widget.pressScale)),
+              child: child,
+            ),
         child: widget.child,
       ),
     );
@@ -150,13 +150,11 @@ class _FxStaggerItemState extends State<FxStaggerItem>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _ctrl,
-      builder: (_, child) => Opacity(
-        opacity: _fade.value,
-        child: Transform.translate(
-          offset: _slide.value,
-          child: child,
-        ),
-      ),
+      builder:
+          (_, child) => Opacity(
+            opacity: _fade.value,
+            child: Transform.translate(offset: _slide.value, child: child),
+          ),
       child: widget.child,
     );
   }

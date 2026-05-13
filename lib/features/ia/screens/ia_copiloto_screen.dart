@@ -10,6 +10,8 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/router/role_home.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../data/ia_repository.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
 
@@ -138,7 +140,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     final alunos = await ref.read(alunosProvider.future);
     if (!mounted) return;
     if (alunos.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(
           content: Text('Você ainda não possui alunos cadastrados.'),
         ),
@@ -290,15 +293,15 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                               horizontal: 14,
                               vertical: 12,
                             ),
-                            border: OutlineInputBorder(
+                            border: FxInputDeco.outlineBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide(color: line),
                             ),
-                            enabledBorder: OutlineInputBorder(
+                            enabledBorder: FxInputDeco.outlineBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide(color: line),
                             ),
-                            focusedBorder: OutlineInputBorder(
+                            focusedBorder: FxInputDeco.outlineBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide(color: primary),
                             ),
@@ -570,7 +573,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
         _tarefaPersistida = persisted;
       });
       ref.invalidate(commandCenterProvider);
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(
           content: Text(
             persisted
@@ -585,7 +589,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       );
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Não foi possível atribuir agora.')),
       );
     }
@@ -705,11 +710,11 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                       hintText: 'Descreva a tarefa para revisar depois',
                       hintStyle: TextStyle(color: mute),
                       contentPadding: const EdgeInsets.all(14),
-                      enabledBorder: OutlineInputBorder(
+                      enabledBorder: FxInputDeco.outlineBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide(color: line),
                       ),
-                      focusedBorder: OutlineInputBorder(
+                      focusedBorder: FxInputDeco.outlineBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide(color: brand, width: 1.2),
                       ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../core/health/health_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 /// Screen showing synced Apple Health / Google Fit data.
 ///
@@ -46,13 +47,22 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       if (granted) {
         await _loadData();
       } else {
-        if (mounted) setState(() { _loading = false; });
+        if (mounted) {
+          setState(() {
+            _loading = false;
+          });
+        }
       }
     } catch (_) {
       if (mounted) {
-        setState(() { _loading = false; });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Saúde não disponível neste dispositivo')),
+        setState(() {
+          _loading = false;
+        });
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(
+            content: Text('Saúde não disponível neste dispositivo'),
+          ),
         );
       }
     }
@@ -69,7 +79,11 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
         });
       }
     } catch (_) {
-      if (mounted) setState(() { _loading = false; });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -85,9 +99,10 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: _loading
-          ? const FxLoading()
-          : !_authorized
+      body:
+          _loading
+              ? const FxLoading()
+              : !_authorized
               ? _buildAuthPrompt(primary)
               : _buildDashboard(isDark, primary),
     );
@@ -109,13 +124,17 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               child: Icon(Icons.favorite, size: 64, color: primary),
             ),
             const SizedBox(height: 24),
-            const Text('Conecte seu Apple Health\nou Google Fit',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text(
+              'Conecte seu Apple Health\nou Google Fit',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 12),
-            Text('Sincronize passos, frequência cardíaca, calorias e sono para acompanhar sua saúde.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 15, color: EagleTokens.inkMute)),
+            Text(
+              'Sincronize passos, frequência cardíaca, calorias e sono para acompanhar sua saúde.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 15, color: EagleTokens.inkMute),
+            ),
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
@@ -123,10 +142,19 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               child: ElevatedButton.icon(
                 onPressed: _requestAccess,
                 icon: const Icon(Icons.sync, color: Colors.white),
-                label: const Text('Conectar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                label: const Text(
+                  'Conectar',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
               ),
             ),
@@ -143,36 +171,79 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('Resumo de Hoje', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : EagleTokens.ink)),
+          Text(
+            'Resumo de Hoje',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : EagleTokens.ink,
+            ),
+          ),
           const SizedBox(height: 16),
-          Row(children: [
-            Expanded(child: _MetricCard(
-              icon: Icons.directions_walk, label: 'Passos',
-              value: '${s.steps}', color: const Color(0xFF22C55E), isDark: isDark)),
-            const SizedBox(width: 12),
-            Expanded(child: _MetricCard(
-              icon: Icons.local_fire_department, label: 'Calorias',
-              value: '${s.caloriesBurned.toInt()} kcal', color: const Color(0xFFF59E0B), isDark: isDark)),
-          ]),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricCard(
+                  icon: Icons.directions_walk,
+                  label: 'Passos',
+                  value: '${s.steps}',
+                  color: const Color(0xFF22C55E),
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _MetricCard(
+                  icon: Icons.local_fire_department,
+                  label: 'Calorias',
+                  value: '${s.caloriesBurned.toInt()} kcal',
+                  color: const Color(0xFFF59E0B),
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
-          Row(children: [
-            Expanded(child: _MetricCard(
-              icon: Icons.favorite, label: 'FC Média',
-              value: s.avgHeartRate > 0 ? '${s.avgHeartRate.toInt()} bpm' : '--',
-              color: const Color(0xFFEF4444), isDark: isDark)),
-            const SizedBox(width: 12),
-            Expanded(child: _MetricCard(
-              icon: Icons.bedtime, label: 'Sono',
-              value: s.sleepHours > 0 ? '${s.sleepHours.toStringAsFixed(1)}h' : '--',
-              color: const Color(0xFF8B5CF6), isDark: isDark)),
-          ]),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricCard(
+                  icon: Icons.favorite,
+                  label: 'FC Média',
+                  value:
+                      s.avgHeartRate > 0
+                          ? '${s.avgHeartRate.toInt()} bpm'
+                          : '--',
+                  color: const Color(0xFFEF4444),
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _MetricCard(
+                  icon: Icons.bedtime,
+                  label: 'Sono',
+                  value:
+                      s.sleepHours > 0
+                          ? '${s.sleepHours.toStringAsFixed(1)}h'
+                          : '--',
+                  color: const Color(0xFF8B5CF6),
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
           OutlinedButton.icon(
             onPressed: () async {
               HapticFeedback.mediumImpact();
               await HealthService.revokeAccess();
-              if (mounted) setState(() { _authorized = false; _summary = null; });
+              if (mounted) {
+                setState(() {
+                  _authorized = false;
+                  _summary = null;
+                });
+              }
             },
             icon: const Icon(Icons.link_off, size: 18),
             label: const Text('Desconectar saúde'),
@@ -192,8 +263,11 @@ class _MetricCard extends StatelessWidget {
   final bool isDark;
 
   const _MetricCard({
-    required this.icon, required this.label,
-    required this.value, required this.color, required this.isDark,
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.isDark,
   });
 
   @override
@@ -203,22 +277,44 @@ class _MetricCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? EagleTokens.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: isDark ? null : [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
+        boxShadow:
+            isDark
+                ? null
+                : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : EagleTokens.ink,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(fontSize: 13, color: EagleTokens.inkMute),
+          ),
         ],
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        const SizedBox(height: 12),
-        Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : EagleTokens.ink)),
-        const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 13, color: EagleTokens.inkMute)),
-      ]),
     );
   }
 }

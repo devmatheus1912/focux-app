@@ -8,6 +8,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../perfil/providers/perfil_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class LandingPageConfigScreen extends ConsumerWidget {
   const LandingPageConfigScreen({super.key});
@@ -239,7 +240,8 @@ class LandingPageConfigScreen extends ConsumerWidget {
                                   Clipboard.setData(
                                     ClipboardData(text: publicUrl),
                                   );
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  FeedbackHelper.showSnackBar(
+                                    context,
                                     const SnackBar(
                                       content: Text('Link copiado!'),
                                     ),
@@ -383,7 +385,8 @@ class LandingPageConfigScreen extends ConsumerWidget {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             Clipboard.setData(ClipboardData(text: publicUrl));
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            FeedbackHelper.showSnackBar(
+                              context,
                               const SnackBar(
                                 content: Text('Link da landing copiado.'),
                               ),

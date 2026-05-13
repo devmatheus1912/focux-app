@@ -10,6 +10,9 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feed_repository.dart';
 import '../widgets/feed_comments_sheet.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key});
@@ -56,9 +59,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       await _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     }
   }
@@ -69,9 +73,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       await _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     }
   }
@@ -86,9 +91,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     }
   }
@@ -172,7 +178,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                     'Nova Publicação',
                                     style: TextStyle(
                                       fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ),
@@ -188,7 +194,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               value: tipoSelecionado,
                               decoration: InputDecoration(
                                 labelText: 'Tipo de post',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                                border: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                                 prefixIcon: Icon(Icons.category),
                               ),
                               items: const [
@@ -229,7 +237,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               controller: tituloCtrl,
                               decoration: InputDecoration(
                                 labelText: 'Título',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                                border: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                                 prefixIcon: Icon(Icons.title),
                               ),
                               validator:
@@ -243,7 +253,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               controller: conteudoCtrl,
                               decoration: InputDecoration(
                                 labelText: 'Conteúdo',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                                border: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                                 prefixIcon: Icon(Icons.text_fields),
                                 alignLabelWithHint: true,
                               ),
@@ -270,9 +282,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                         ? const SizedBox(
                                           width: 18,
                                           height: 18,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
+                                          child: FxLoading(strokeWidth: 2),
                                         )
                                         : Icon(
                                           tipoSelecionado == 'VIDEO'
@@ -379,9 +389,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                             setModalState(
                                               () => salvando = false,
                                             );
-                                            ScaffoldMessenger.of(
+                                            FeedbackHelper.showSnackBar(
                                               ctx,
-                                            ).showSnackBar(
                                               SnackBar(
                                                 content: Text(friendlyError(e)),
                                               ),
@@ -394,7 +403,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                       ? const SizedBox(
                                         width: 18,
                                         height: 18,
-                                        child: CircularProgressIndicator(
+                                        child: FxLoading(
                                           strokeWidth: 2,
                                           color: EagleTokens.darkInk,
                                         ),
@@ -415,7 +424,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       if (created != true || !mounted) return;
       await _load();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Publicação criada com sucesso!')),
       );
     });
@@ -479,7 +489,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       body: SafeArea(
         child:
             _loading
-                ? Center(child: CircularProgressIndicator(color: primary))
+                ? Center(child: FxLoading(color: primary))
                 : _posts.isEmpty
                 ? _EmptyFeed(primary: primary)
                 : RefreshIndicator(
@@ -589,7 +599,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                       p.titulo,
                                       style: const TextStyle(
                                         fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),

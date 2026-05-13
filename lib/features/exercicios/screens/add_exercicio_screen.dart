@@ -6,6 +6,8 @@ import '../../../core/theme/design_tokens.dart';
 import '../data/enums.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AddExercicioScreen extends ConsumerStatefulWidget {
   const AddExercicioScreen({super.key});
@@ -408,10 +410,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                         ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
+                          child: FxLoading(strokeWidth: 2, color: Colors.white),
                         )
                         : const Text(
                           'Cadastrar exercício',
@@ -754,8 +753,10 @@ class _TextInput extends StatelessWidget {
           horizontal: 14,
           vertical: 14,
         ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-        enabledBorder: OutlineInputBorder(
+        border: FxInputDeco.outlineBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        enabledBorder: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide(
             color:
@@ -869,10 +870,10 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
                 horizontal: 14,
                 vertical: 14,
               ),
-              border: OutlineInputBorder(
+              border: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
-              enabledBorder: OutlineInputBorder(
+              enabledBorder: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide(color: borderColor),
               ),
@@ -1170,13 +1171,13 @@ class _EnumPickerFullScreenState<T extends Enum>
                       horizontal: 12,
                       vertical: 12,
                     ),
-                    border: OutlineInputBorder(
+                    border: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
                         color: isDark ? EagleTokens.darkLine : EagleTokens.line,
                       ),
                     ),
-                    enabledBorder: OutlineInputBorder(
+                    enabledBorder: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
                         color: isDark ? EagleTokens.darkLine : EagleTokens.line,
@@ -1328,13 +1329,13 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                       horizontal: 12,
                       vertical: 12,
                     ),
-                    border: OutlineInputBorder(
+                    border: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
                         color: isDark ? EagleTokens.darkLine : EagleTokens.line,
                       ),
                     ),
-                    enabledBorder: OutlineInputBorder(
+                    enabledBorder: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
                         color: isDark ? EagleTokens.darkLine : EagleTokens.line,

@@ -27,21 +27,23 @@ class Lead {
   });
 
   factory Lead.fromJson(Map<String, dynamic> j) => Lead(
-        id: (j['id'] as num).toInt(),
-        nome: j['nome'] as String,
-        telefone: j['telefone'] as String?,
-        origem: j['origem'] as String?,
-        objetivo: j['objetivo'] as String?,
-        observacoes: j['observacoes'] as String?,
-        status: j['status'] as String,
-        criadoEm: (j['criadoEm'] as String).substring(0, 10),
-        convertidoEm: j['convertidoEm'] != null
+    id: (j['id'] as num).toInt(),
+    nome: j['nome'] as String,
+    telefone: j['telefone'] as String?,
+    origem: j['origem'] as String?,
+    objetivo: j['objetivo'] as String?,
+    observacoes: j['observacoes'] as String?,
+    status: j['status'] as String,
+    criadoEm: (j['criadoEm'] as String).substring(0, 10),
+    convertidoEm:
+        j['convertidoEm'] != null
             ? (j['convertidoEm'] as String).substring(0, 10)
             : null,
-        proximoContato: j['proximoContato'] != null
+    proximoContato:
+        j['proximoContato'] != null
             ? (j['proximoContato'] as String).substring(0, 10)
             : null,
-      );
+  );
 }
 
 class LeadInteracao {
@@ -60,12 +62,12 @@ class LeadInteracao {
   });
 
   factory LeadInteracao.fromJson(Map<String, dynamic> j) => LeadInteracao(
-        id: (j['id'] as num).toInt(),
-        leadId: (j['leadId'] as num).toInt(),
-        tipo: j['tipo'] as String,
-        descricao: j['descricao'] as String,
-        dataInteracao: j['dataInteracao'] as String?,
-      );
+    id: (j['id'] as num).toInt(),
+    leadId: (j['leadId'] as num).toInt(),
+    tipo: j['tipo'] as String,
+    descricao: j['descricao'] as String,
+    dataInteracao: j['dataInteracao'] as String?,
+  );
 }
 
 class LeadRepository {
@@ -73,9 +75,13 @@ class LeadRepository {
   LeadRepository(ApiClient c) : _dio = c.dio;
 
   Future<List<Lead>> listar({String? status}) async {
-    final r = await _dio.get('/api/leads',
-        queryParameters: status != null ? {'status': status} : null);
-    return (r.data as List).map((e) => Lead.fromJson(e as Map<String, dynamic>)).toList();
+    final r = await _dio.get(
+      '/api/leads',
+      queryParameters: status != null ? {'status': status} : null,
+    );
+    return (r.data as List)
+        .map((e) => Lead.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Lead> criar({
@@ -85,13 +91,17 @@ class LeadRepository {
     String? objetivo,
     String? observacoes,
   }) async {
-    final r = await _dio.post('/api/leads', data: {
-      'nome': nome,
-      if (telefone != null && telefone.isNotEmpty) 'telefone': telefone,
-      if (origem != null && origem.isNotEmpty) 'origem': origem,
-      if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-      if (observacoes != null && observacoes.isNotEmpty) 'observacoes': observacoes,
-    });
+    final r = await _dio.post(
+      '/api/leads',
+      data: {
+        'nome': nome,
+        if (telefone != null && telefone.isNotEmpty) 'telefone': telefone,
+        if (origem != null && origem.isNotEmpty) 'origem': origem,
+        if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+        if (observacoes != null && observacoes.isNotEmpty)
+          'observacoes': observacoes,
+      },
+    );
     return Lead.fromJson(r.data as Map<String, dynamic>);
   }
 
@@ -120,9 +130,14 @@ class LeadRepository {
   }
 
   Future<LeadInteracao> adicionarInteracao(
-      int leadId, String tipo, String descricao) async {
-    final r = await _dio.post('/api/leads/$leadId/interacoes',
-        data: {'tipo': tipo, 'descricao': descricao});
+    int leadId,
+    String tipo,
+    String descricao,
+  ) async {
+    final r = await _dio.post(
+      '/api/leads/$leadId/interacoes',
+      data: {'tipo': tipo, 'descricao': descricao},
+    );
     return LeadInteracao.fromJson(r.data as Map<String, dynamic>);
   }
 }

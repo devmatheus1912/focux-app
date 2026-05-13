@@ -15,10 +15,20 @@ class SuporteTicket {
   final String? criadoEm;
   final String? resolvidoEm;
 
-  SuporteTicket({required this.id, this.personalId, this.nomePessoal,
-    required this.titulo, required this.descricao, required this.severidade,
-    required this.status, this.classeAfetada, this.sugestaoIa,
-    this.respostaAdmin, this.criadoEm, this.resolvidoEm});
+  SuporteTicket({
+    required this.id,
+    this.personalId,
+    this.nomePessoal,
+    required this.titulo,
+    required this.descricao,
+    required this.severidade,
+    required this.status,
+    this.classeAfetada,
+    this.sugestaoIa,
+    this.respostaAdmin,
+    this.criadoEm,
+    this.resolvidoEm,
+  });
 
   factory SuporteTicket.fromJson(Map<String, dynamic> j) => SuporteTicket(
     id: j['id'] as int,
@@ -46,12 +56,16 @@ class SuporteRepository {
     required String severidade,
     String? classeAfetada,
   }) async {
-    final r = await _dio.post('/api/suporte/tickets', data: {
-      'titulo': titulo,
-      'descricao': descricao,
-      'severidade': severidade,
-      if (classeAfetada != null && classeAfetada.isNotEmpty) 'classeAfetada': classeAfetada,
-    });
+    final r = await _dio.post(
+      '/api/suporte/tickets',
+      data: {
+        'titulo': titulo,
+        'descricao': descricao,
+        'severidade': severidade,
+        if (classeAfetada != null && classeAfetada.isNotEmpty)
+          'classeAfetada': classeAfetada,
+      },
+    );
     return SuporteTicket.fromJson(r.data as Map<String, dynamic>);
   }
 
@@ -63,10 +77,10 @@ class SuporteRepository {
   }
 
   Future<String> chat(String mensagem, {int? ticketId}) async {
-    final r = await _dio.post('/api/suporte/chat', data: {
-      'mensagem': mensagem,
-      if (ticketId != null) 'ticketId': ticketId,
-    });
+    final r = await _dio.post(
+      '/api/suporte/chat',
+      data: {'mensagem': mensagem, if (ticketId != null) 'ticketId': ticketId},
+    );
     return (r.data as Map<String, dynamic>)['resposta'] as String;
   }
 }

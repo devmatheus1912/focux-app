@@ -77,18 +77,28 @@ void main() {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 64, height: 64,
+                    width: 64,
+                    height: 64,
                     decoration: BoxDecoration(
                       color: Colors.red.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.error_outline, color: Colors.redAccent, size: 30),
+                    child: const Icon(
+                      Icons.error_outline,
+                      color: Colors.redAccent,
+                      size: 30,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Text(
                     'Algo deu errado nesta tela.\nVolte e tente novamente.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5, decoration: TextDecoration.none),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      height: 1.5,
+                      decoration: TextDecoration.none,
+                    ),
                   ),
                 ],
               ),
@@ -142,8 +152,9 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       );
       final perfil = PerfilPersonal.fromJson(r.data as Map<String, dynamic>);
       if (!mounted) return;
-      ref.read(primaryColorProvider.notifier).state =
-          _safePrimaryColor(perfil.corPrimaria);
+      ref.read(primaryColorProvider.notifier).state = _safePrimaryColor(
+        perfil.corPrimaria,
+      );
       if (perfil.logoUrl != null && perfil.logoUrl!.isNotEmpty) {
         ref.read(logoUrlProvider.notifier).state = perfil.logoUrl;
       }
@@ -167,8 +178,9 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       final data = response.data as Map<String, dynamic>;
       if (!mounted) return;
       final corPrimaria = data['corPrimaria'] as String?;
-      ref.read(primaryColorProvider.notifier).state =
-          _safePrimaryColor(corPrimaria);
+      ref.read(primaryColorProvider.notifier).state = _safePrimaryColor(
+        corPrimaria,
+      );
       final logoUrl = data['logoUrl'] as String?;
       if (logoUrl != null && logoUrl.isNotEmpty) {
         ref.read(logoUrlProvider.notifier).state = logoUrl;
@@ -199,7 +211,8 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
   @override
   Widget build(BuildContext context) {
     ref.listen<AuthStatus>(authProvider, (previous, next) {
-      if (next == AuthStatus.authenticated && previous != AuthStatus.authenticated) {
+      if (next == AuthStatus.authenticated &&
+          previous != AuthStatus.authenticated) {
         _loadCustomTheme();
       } else if (next == AuthStatus.unauthenticated &&
           previous == AuthStatus.authenticated) {
@@ -220,7 +233,11 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
       locale: const Locale('pt', 'BR'),
-      supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US'), Locale('es', 'ES')],
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+        Locale('en', 'US'),
+        Locale('es', 'ES'),
+      ],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

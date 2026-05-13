@@ -15,11 +15,11 @@ class AderenciaData {
   });
 
   factory AderenciaData.fromJson(Map<String, dynamic> j) => AderenciaData(
-        diasAnalisados: j['diasAnalisados'] as int,
-        treinosConcluidos: j['treinosConcluidos'] as int,
-        treinosTotal: j['treinosTotal'] as int,
-        taxaAderenciaPercent: (j['taxaAderenciaPercent'] as num).toDouble(),
-      );
+    diasAnalisados: j['diasAnalisados'] as int,
+    treinosConcluidos: j['treinosConcluidos'] as int,
+    treinosTotal: j['treinosTotal'] as int,
+    taxaAderenciaPercent: (j['taxaAderenciaPercent'] as num).toDouble(),
+  );
 }
 
 class ResumoAluno {
@@ -38,12 +38,12 @@ class ResumoAluno {
   });
 
   factory ResumoAluno.fromJson(Map<String, dynamic> j) => ResumoAluno(
-        alunoId: j['alunoId'] as int,
-        alunoNome: j['alunoNome'] as String,
-        totalTreinos: (j['totalTreinos'] as num).toInt(),
-        treinosConcluidos: (j['treinosConcluidos'] as num).toInt(),
-        ultimoTreino: j['ultimoTreino'] as String?,
-      );
+    alunoId: j['alunoId'] as int,
+    alunoNome: j['alunoNome'] as String,
+    totalTreinos: (j['totalTreinos'] as num).toInt(),
+    treinosConcluidos: (j['treinosConcluidos'] as num).toInt(),
+    ultimoTreino: j['ultimoTreino'] as String?,
+  );
 }
 
 class ComparativoPeriodo {
@@ -85,15 +85,17 @@ class ResumoGlobal {
   });
 
   factory ResumoGlobal.fromJson(Map<String, dynamic> j) => ResumoGlobal(
-        aderenciaMediaGeral: (j['aderenciaMediaGeral'] as num).toDouble(),
-        totalAlunos: (j['totalAlunos'] as num).toInt(),
-        maisComprometidos: (j['maisComprometidos'] as List)
+    aderenciaMediaGeral: (j['aderenciaMediaGeral'] as num).toDouble(),
+    totalAlunos: (j['totalAlunos'] as num).toInt(),
+    maisComprometidos:
+        (j['maisComprometidos'] as List)
             .map((e) => ResumoAluno.fromJson(e as Map<String, dynamic>))
             .toList(),
-        menosComprometidos: (j['menosComprometidos'] as List)
+    menosComprometidos:
+        (j['menosComprometidos'] as List)
             .map((e) => ResumoAluno.fromJson(e as Map<String, dynamic>))
             .toList(),
-      );
+  );
 }
 
 class RelatorioRepository {
@@ -101,11 +103,21 @@ class RelatorioRepository {
 
   RelatorioRepository(ApiClient c) : _dio = c.dio;
 
-  Future<AderenciaData> aderencia(int alunoId, {int dias = 30,
-      DateTime? inicio, DateTime? fim}) async {
+  Future<AderenciaData> aderencia(
+    int alunoId, {
+    int dias = 30,
+    DateTime? inicio,
+    DateTime? fim,
+  }) async {
     final Map<String, dynamic> params = {'dias': dias};
-    if (inicio != null) params['inicio'] = '${inicio.year.toString().padLeft(4,'0')}-${inicio.month.toString().padLeft(2,'0')}-${inicio.day.toString().padLeft(2,'0')}';
-    if (fim != null) params['fim'] = '${fim.year.toString().padLeft(4,'0')}-${fim.month.toString().padLeft(2,'0')}-${fim.day.toString().padLeft(2,'0')}';
+    if (inicio != null) {
+      params['inicio'] =
+          '${inicio.year.toString().padLeft(4, '0')}-${inicio.month.toString().padLeft(2, '0')}-${inicio.day.toString().padLeft(2, '0')}';
+    }
+    if (fim != null) {
+      params['fim'] =
+          '${fim.year.toString().padLeft(4, '0')}-${fim.month.toString().padLeft(2, '0')}-${fim.day.toString().padLeft(2, '0')}';
+    }
     final r = await _dio.get(
       '/api/relatorios/aderencia/$alunoId',
       queryParameters: params,

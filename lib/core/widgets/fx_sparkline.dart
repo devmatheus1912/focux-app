@@ -54,16 +54,17 @@ class _SparklinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (data.length < 2) return;
 
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
 
     double maxVal = data.reduce((a, b) => a > b ? a : b);
     double minVal = data.reduce((a, b) => a < b ? a : b);
-    
+
     // Add some padding so the stroke doesn't get cut off
     final padding = strokeWidth / 2;
     final w = size.width - (padding * 2);
@@ -99,27 +100,31 @@ class _SparklinePainter extends CustomPainter {
     canvas.drawCircle(
       Offset(lastX, lastY),
       2.5,
-      Paint()..color = color..style = PaintingStyle.fill,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.fill,
     );
 
     if (!fill) return;
 
     // Optional: add a subtle gradient fill under the line
-    final fillPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          color.withValues(alpha: 0.2),
-          color.withValues(alpha: 0.0),
-        ],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+    final fillPaint =
+        Paint()
+          ..style = PaintingStyle.fill
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              color.withValues(alpha: 0.2),
+              color.withValues(alpha: 0.0),
+            ],
+          ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
-    final fillPath = Path.from(path)
-      ..lineTo(padding + w, size.height)
-      ..lineTo(padding, size.height)
-      ..close();
+    final fillPath =
+        Path.from(path)
+          ..lineTo(padding + w, size.height)
+          ..lineTo(padding, size.height)
+          ..close();
 
     canvas.drawPath(fillPath, fillPaint);
   }
@@ -127,8 +132,8 @@ class _SparklinePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SparklinePainter oldDelegate) {
     return oldDelegate.data != data ||
-           oldDelegate.color != color ||
-           oldDelegate.strokeWidth != strokeWidth ||
-           oldDelegate.fill != fill;
+        oldDelegate.color != color ||
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.fill != fill;
   }
 }

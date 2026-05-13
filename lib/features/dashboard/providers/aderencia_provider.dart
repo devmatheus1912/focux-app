@@ -24,15 +24,20 @@ class AderenciaAlunoResumo {
 ///
 /// Backend já expõe `/api/alunos/{id}/aderencia-semanal` retornando 7 pontos:
 /// `[{data: 'YYYY-MM-DD', checkins: N}, ...]`
-final aderenciaTop3Provider = FutureProvider<List<AderenciaAlunoResumo>>((ref) async {
+final aderenciaTop3Provider = FutureProvider<List<AderenciaAlunoResumo>>((
+  ref,
+) async {
   final repo = ref.read(alunoRepositoryProvider);
   final alunos = await ref.watch(alunosProvider.future);
 
   // Mantém apenas alunos ativos (quando disponível) e limita para evitar N+1 pesado.
-  final candidatos = alunos
-      .where((a) => a.status == 'ATIVO')
-      .take(12) // trade-off: evita muitas chamadas em contas com muitos alunos
-      .toList();
+  final candidatos =
+      alunos
+          .where((a) => a.status == 'ATIVO')
+          .take(
+            12,
+          ) // trade-off: evita muitas chamadas em contas com muitos alunos
+          .toList();
 
   final items = <AderenciaAlunoResumo>[];
   for (final a in candidatos) {
@@ -61,4 +66,3 @@ final aderenciaTop3Provider = FutureProvider<List<AderenciaAlunoResumo>>((ref) a
   items.sort((x, y) => y.aderenciaPercent.compareTo(x.aderenciaPercent));
   return items.take(3).toList(growable: false);
 });
-

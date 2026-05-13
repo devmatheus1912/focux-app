@@ -18,14 +18,18 @@ class PlanoSucesso {
   });
 
   factory PlanoSucesso.fromJson(Map<String, dynamic> json) => PlanoSucesso(
-        id: json['id'],
-        personalId: json['personalId'],
-        objetivoPrincipal: json['objetivoPrincipal'],
-        status: json['status'],
-        dataInicio: DateTime.parse(json['dataInicio']),
-        proximaRevisao: json['proximaRevisao'] != null ? DateTime.parse(json['proximaRevisao']) : DateTime.now(),
-        marcos: (json['marcos'] as List).map((m) => MarcoSucesso.fromJson(m)).toList(),
-      );
+    id: json['id'],
+    personalId: json['personalId'],
+    objetivoPrincipal: json['objetivoPrincipal'],
+    status: json['status'],
+    dataInicio: DateTime.parse(json['dataInicio']),
+    proximaRevisao:
+        json['proximaRevisao'] != null
+            ? DateTime.parse(json['proximaRevisao'])
+            : DateTime.now(),
+    marcos:
+        (json['marcos'] as List).map((m) => MarcoSucesso.fromJson(m)).toList(),
+  );
 }
 
 class MarcoSucesso {
@@ -33,11 +37,15 @@ class MarcoSucesso {
   final String titulo;
   final bool atingido;
 
-  MarcoSucesso({required this.id, required this.titulo, required this.atingido});
+  MarcoSucesso({
+    required this.id,
+    required this.titulo,
+    required this.atingido,
+  });
 
   factory MarcoSucesso.fromJson(Map<String, dynamic> json) => MarcoSucesso(
-        id: json['id'],
-        titulo: json['titulo'],
-        atingido: json['atingido'],
-      );
+    id: json['id'],
+    titulo: json['titulo'],
+    atingido: json['atingido'],
+  );
 }

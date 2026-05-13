@@ -6,8 +6,9 @@ final analyticsRepositoryProvider = Provider<AnalyticsRepository>(
   (ref) => AnalyticsRepository(ref.read(apiClientProvider)),
 );
 
-final analyticsDashboardProvider =
-    FutureProvider.autoDispose<AnalyticsDashboard>((ref) async {
+final analyticsDashboardProvider = FutureProvider.autoDispose<
+  AnalyticsDashboard
+>((ref) async {
   final repo = ref.read(analyticsRepositoryProvider);
 
   // Fetch main dashboard + WAU + cohort in parallel for richer data

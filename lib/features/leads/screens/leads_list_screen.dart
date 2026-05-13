@@ -7,6 +7,7 @@ import '../data/lead_repository.dart';
 import 'lead_detail_screen.dart';
 import 'add_lead_screen.dart';
 import 'leads_kanban_screen.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class LeadsListScreen extends ConsumerStatefulWidget {
   const LeadsListScreen({super.key});
@@ -129,7 +130,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       ),
       body:
           _loading
-              ? Center(child: CircularProgressIndicator(color: primary))
+              ? Center(child: FxLoading(color: primary))
               : _leads.isEmpty
               ? Center(
                 child: Column(

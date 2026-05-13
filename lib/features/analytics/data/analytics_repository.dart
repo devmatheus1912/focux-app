@@ -23,14 +23,14 @@ class FunilAtivacao {
   });
 
   factory FunilAtivacao.fromJson(Map<String, dynamic> j) => FunilAtivacao(
-        cadastrados: (j['cadastrados'] as num).toInt(),
-        fizeram1Checkin: (j['fizeram1Checkin'] as num).toInt(),
-        fizeram3Checkins: (j['fizeram3Checkins'] as num).toInt(),
-        ativos30Dias: (j['ativos30Dias'] as num).toInt(),
-        taxaAtivacao: (j['taxaAtivacao'] as num).toDouble(),
-        taxaEngajamento: (j['taxaEngajamento'] as num).toDouble(),
-        taxaRetencao: (j['taxaRetencao'] as num).toDouble(),
-      );
+    cadastrados: (j['cadastrados'] as num).toInt(),
+    fizeram1Checkin: (j['fizeram1Checkin'] as num).toInt(),
+    fizeram3Checkins: (j['fizeram3Checkins'] as num).toInt(),
+    ativos30Dias: (j['ativos30Dias'] as num).toInt(),
+    taxaAtivacao: (j['taxaAtivacao'] as num).toDouble(),
+    taxaEngajamento: (j['taxaEngajamento'] as num).toDouble(),
+    taxaRetencao: (j['taxaRetencao'] as num).toDouble(),
+  );
 }
 
 class WauSemanal {
@@ -40,9 +40,9 @@ class WauSemanal {
   const WauSemanal({required this.semana, required this.usuarios});
 
   factory WauSemanal.fromJson(Map<String, dynamic> j) => WauSemanal(
-        semana: j['semana'] as String,
-        usuarios: (j['usuarios'] as num).toInt(),
-      );
+    semana: j['semana'] as String,
+    usuarios: (j['usuarios'] as num).toInt(),
+  );
 }
 
 class CohortRetencao {
@@ -63,13 +63,13 @@ class CohortRetencao {
   });
 
   factory CohortRetencao.fromJson(Map<String, dynamic> j) => CohortRetencao(
-        mesEntrada: j['mesEntrada'] as String,
-        cadastrados: (j['cadastrados'] as num).toInt(),
-        ativosD7: (j['ativosD7'] as num).toInt(),
-        ativosD30: (j['ativosD30'] as num).toInt(),
-        retencaoD7: (j['retencaoD7'] as num).toDouble(),
-        retencaoD30: (j['retencaoD30'] as num).toDouble(),
-      );
+    mesEntrada: j['mesEntrada'] as String,
+    cadastrados: (j['cadastrados'] as num).toInt(),
+    ativosD7: (j['ativosD7'] as num).toInt(),
+    ativosD30: (j['ativosD30'] as num).toInt(),
+    retencaoD7: (j['retencaoD7'] as num).toDouble(),
+    retencaoD30: (j['retencaoD30'] as num).toDouble(),
+  );
 }
 
 class AnalyticsDashboard {
@@ -106,15 +106,18 @@ class AnalyticsDashboard {
         taxaInadimplencia: (j['taxaInadimplencia'] as num).toDouble(),
         retencaoD7: (j['retencaoD7'] as num).toDouble(),
         retencaoD30: (j['retencaoD30'] as num).toDouble(),
-        funil: j['funil'] != null
-            ? FunilAtivacao.fromJson(j['funil'] as Map<String, dynamic>)
-            : null,
-        evolucaoWau: ((j['evolucaoWau'] as List?) ?? [])
-            .map((e) => WauSemanal.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        cohort: ((j['cohort'] as List?) ?? [])
-            .map((e) => CohortRetencao.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        funil:
+            j['funil'] != null
+                ? FunilAtivacao.fromJson(j['funil'] as Map<String, dynamic>)
+                : null,
+        evolucaoWau:
+            ((j['evolucaoWau'] as List?) ?? [])
+                .map((e) => WauSemanal.fromJson(e as Map<String, dynamic>))
+                .toList(),
+        cohort:
+            ((j['cohort'] as List?) ?? [])
+                .map((e) => CohortRetencao.fromJson(e as Map<String, dynamic>))
+                .toList(),
       );
 }
 
@@ -143,8 +146,10 @@ class AnalyticsRepository {
   }
 
   Future<List<CohortRetencao>> getCohort({int meses = 6}) async {
-    final r = await _dio.get('/api/analytics/cohort',
-        queryParameters: {'meses': meses});
+    final r = await _dio.get(
+      '/api/analytics/cohort',
+      queryParameters: {'meses': meses},
+    );
     return (r.data as List)
         .map((e) => CohortRetencao.fromJson(e as Map<String, dynamic>))
         .toList();

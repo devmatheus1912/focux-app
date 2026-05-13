@@ -23,8 +23,12 @@ class AlertaRisco {
     alunoNome: j['alunoNome'] as String,
     score: j['score'] as int,
     motivos: (j['motivos'] as List).map((e) => e as String).toList(),
-    diasSemTreino: j['diasSemTreino'] != null ? (j['diasSemTreino'] as num).toInt() : null,
-    aderenciaPercent: j['aderenciaPercent'] != null ? (j['aderenciaPercent'] as num).toDouble() : null,
+    diasSemTreino:
+        j['diasSemTreino'] != null ? (j['diasSemTreino'] as num).toInt() : null,
+    aderenciaPercent:
+        j['aderenciaPercent'] != null
+            ? (j['aderenciaPercent'] as num).toDouble()
+            : null,
   );
 }
 
@@ -32,12 +36,16 @@ class AlertasConfiguracao {
   final int diasSemTreino;
   final int aderenciaMinima;
 
-  AlertasConfiguracao({required this.diasSemTreino, required this.aderenciaMinima});
+  AlertasConfiguracao({
+    required this.diasSemTreino,
+    required this.aderenciaMinima,
+  });
 
-  factory AlertasConfiguracao.fromJson(Map<String, dynamic> j) => AlertasConfiguracao(
-    diasSemTreino: j['diasSemTreino'] as int,
-    aderenciaMinima: j['aderenciaMinima'] as int,
-  );
+  factory AlertasConfiguracao.fromJson(Map<String, dynamic> j) =>
+      AlertasConfiguracao(
+        diasSemTreino: j['diasSemTreino'] as int,
+        aderenciaMinima: j['aderenciaMinima'] as int,
+      );
 }
 
 class AlertaDetalhe {
@@ -60,14 +68,14 @@ class AlertaDetalhe {
   });
 
   factory AlertaDetalhe.fromJson(Map<String, dynamic> j) => AlertaDetalhe(
-        alunoId: (j['alunoId'] as num).toInt(),
-        alunoNome: j['alunoNome'] as String,
-        alunoEmail: j['alunoEmail'] as String,
-        ultimoTreino: j['ultimoTreino'] as String?,
-        checkIns30Dias: (j['checkIns30Dias'] as num).toInt(),
-        statusFinanceiro: j['statusFinanceiro'] as String,
-        sugestaoIa: j['sugestaoIa'] as String,
-      );
+    alunoId: (j['alunoId'] as num).toInt(),
+    alunoNome: j['alunoNome'] as String,
+    alunoEmail: j['alunoEmail'] as String,
+    ultimoTreino: j['ultimoTreino'] as String?,
+    checkIns30Dias: (j['checkIns30Dias'] as num).toInt(),
+    statusFinanceiro: j['statusFinanceiro'] as String,
+    sugestaoIa: j['sugestaoIa'] as String,
+  );
 }
 
 class AlertasRepository {
@@ -76,7 +84,9 @@ class AlertasRepository {
 
   Future<List<AlertaRisco>> listarRiscos() async {
     final r = await _dio.get('/api/alertas/risco');
-    return (r.data as List).map((e) => AlertaRisco.fromJson(e as Map<String, dynamic>)).toList();
+    return (r.data as List)
+        .map((e) => AlertaRisco.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<AlertasConfiguracao> getConfiguracao() async {
@@ -84,11 +94,17 @@ class AlertasRepository {
     return AlertasConfiguracao.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<AlertasConfiguracao> atualizarConfiguracao(int diasSemTreino, int aderenciaMinima) async {
-    final r = await _dio.put('/api/alertas/configuracao', data: {
-      'diasSemTreino': diasSemTreino,
-      'aderenciaMinima': aderenciaMinima,
-    });
+  Future<AlertasConfiguracao> atualizarConfiguracao(
+    int diasSemTreino,
+    int aderenciaMinima,
+  ) async {
+    final r = await _dio.put(
+      '/api/alertas/configuracao',
+      data: {
+        'diasSemTreino': diasSemTreino,
+        'aderenciaMinima': aderenciaMinima,
+      },
+    );
     return AlertasConfiguracao.fromJson(r.data as Map<String, dynamic>);
   }
 
@@ -102,8 +118,9 @@ class AlertasRepository {
   }
 
   Future<void> enviarMensagemChat(int alunoId, String mensagem) async {
-    await _dio.post('/api/alertas/aluno/$alunoId/mensagem-chat', data: {
-      'mensagem': mensagem,
-    });
+    await _dio.post(
+      '/api/alertas/aluno/$alunoId/mensagem-chat',
+      data: {'mensagem': mensagem},
+    );
   }
 }

@@ -21,11 +21,11 @@ class TrialStartPayload {
   });
 
   Map<String, dynamic> toJson() => {
-        if (_hasValue(subscriptionToken)) 'subscriptionToken': subscriptionToken,
-        if (_hasValue(platform)) 'platform': platform,
-        if (_hasValue(productId)) 'productId': productId,
-        if (_hasValue(transactionId)) 'transactionId': transactionId,
-      };
+    if (_hasValue(subscriptionToken)) 'subscriptionToken': subscriptionToken,
+    if (_hasValue(platform)) 'platform': platform,
+    if (_hasValue(productId)) 'productId': productId,
+    if (_hasValue(transactionId)) 'transactionId': transactionId,
+  };
 }
 
 class TrialStatus {
@@ -48,15 +48,14 @@ class TrialStatus {
   });
 
   factory TrialStatus.fromJson(Map<String, dynamic> j) => TrialStatus(
-        trialUsed: j['trialUsed'] as bool? ?? false,
-        trialAtivo: j['trialAtivo'] as bool? ?? false,
-        trialStartedAt: _parseDateTime(j['trialStartedAt']),
-        trialEndsAt: _parseDateTime(j['trialEndsAt']),
-        diasRestantes: (j['diasRestantes'] as num?)?.toInt() ?? 0,
-        planoAtual: subscriptionPlanFromApi(j['planoAtual'] as String?),
-        subscriptionTokenPresent:
-            j['subscriptionTokenPresent'] as bool? ?? false,
-      );
+    trialUsed: j['trialUsed'] as bool? ?? false,
+    trialAtivo: j['trialAtivo'] as bool? ?? false,
+    trialStartedAt: _parseDateTime(j['trialStartedAt']),
+    trialEndsAt: _parseDateTime(j['trialEndsAt']),
+    diasRestantes: (j['diasRestantes'] as num?)?.toInt() ?? 0,
+    planoAtual: subscriptionPlanFromApi(j['planoAtual'] as String?),
+    subscriptionTokenPresent: j['subscriptionTokenPresent'] as bool? ?? false,
+  );
 }
 
 class EnterpriseUpgradePreview {
@@ -103,12 +102,12 @@ class EnterpriseActivationPayload {
   });
 
   Map<String, dynamic> toJson() => {
-        'subscriptionToken': subscriptionToken,
-        'platform': platform,
-        'productId': productId,
-        if (_hasValue(transactionId)) 'transactionId': transactionId,
-        'billingCycleEndsAt': billingCycleEndsAt.toIso8601String(),
-      };
+    'subscriptionToken': subscriptionToken,
+    'platform': platform,
+    'productId': productId,
+    if (_hasValue(transactionId)) 'transactionId': transactionId,
+    'billingCycleEndsAt': billingCycleEndsAt.toIso8601String(),
+  };
 }
 
 class EnterpriseActivationResult {
@@ -155,22 +154,21 @@ class SubscriptionMetadata {
   });
 
   TrialStartPayload toTrialPayload() => TrialStartPayload(
-        subscriptionToken: subscriptionToken,
-        platform: platform,
-        productId: productId,
-        transactionId: transactionId,
-      );
+    subscriptionToken: subscriptionToken,
+    platform: platform,
+    productId: productId,
+    transactionId: transactionId,
+  );
 
   EnterpriseActivationPayload toEnterpriseActivationPayload({
     required DateTime billingCycleEndsAt,
-  }) =>
-      EnterpriseActivationPayload(
-        subscriptionToken: subscriptionToken,
-        platform: platform,
-        productId: productId,
-        transactionId: transactionId,
-        billingCycleEndsAt: billingCycleEndsAt,
-      );
+  }) => EnterpriseActivationPayload(
+    subscriptionToken: subscriptionToken,
+    platform: platform,
+    productId: productId,
+    transactionId: transactionId,
+    billingCycleEndsAt: billingCycleEndsAt,
+  );
 }
 
 /// Snapshot autoritativo do plano atual conforme retornado pelo backend
@@ -230,23 +228,23 @@ class PlanoFeatures {
   }
 
   Map<String, dynamic> toJson() => {
-        'plano': plano.name,
-        if (planoNomeOriginal != null) 'planoNomeOriginal': planoNomeOriginal,
-        if (limiteAlunos != null) 'limiteAlunos': limiteAlunos,
-        if (limiteIaMensal != null) 'limiteIaMensal': limiteIaMensal,
-        if (validoAte != null) 'validoAte': validoAte!.toIso8601String(),
-        'fromCache': fromCache,
-        if (cacheSavedAt != null) 'cacheSavedAt': cacheSavedAt!.toIso8601String(),
-        if (syncWarning != null) 'syncWarning': syncWarning,
-        'features': {
-          'financeiro': financeiro,
-          'agenda': agenda,
-          'relatorios': relatorios,
-          'whiteLabel': whiteLabel,
-          'iaCopiloto': iaCopiloto,
-          'iaIlimitada': iaIlimitada,
-        },
-      };
+    'plano': plano.name,
+    if (planoNomeOriginal != null) 'planoNomeOriginal': planoNomeOriginal,
+    if (limiteAlunos != null) 'limiteAlunos': limiteAlunos,
+    if (limiteIaMensal != null) 'limiteIaMensal': limiteIaMensal,
+    if (validoAte != null) 'validoAte': validoAte!.toIso8601String(),
+    'fromCache': fromCache,
+    if (cacheSavedAt != null) 'cacheSavedAt': cacheSavedAt!.toIso8601String(),
+    if (syncWarning != null) 'syncWarning': syncWarning,
+    'features': {
+      'financeiro': financeiro,
+      'agenda': agenda,
+      'relatorios': relatorios,
+      'whiteLabel': whiteLabel,
+      'iaCopiloto': iaCopiloto,
+      'iaIlimitada': iaIlimitada,
+    },
+  };
 
   PlanoFeatures copyWithOperationalState({
     bool? fromCache,
@@ -318,11 +316,9 @@ class PlanosRepository {
 
   Future<PlanoFeatures> getPlanoFeaturesFresh() async {
     final r = await _dio.get('/api/planos/me');
-    final features = PlanoFeatures.fromJson(r.data as Map<String, dynamic>)
-        .copyWithOperationalState(
-      fromCache: false,
-      syncWarning: null,
-    );
+    final features = PlanoFeatures.fromJson(
+      r.data as Map<String, dynamic>,
+    ).copyWithOperationalState(fromCache: false, syncWarning: null);
     await _savePlanoFeaturesCache(features);
     return features;
   }
@@ -350,9 +346,10 @@ class PlanosRepository {
       final decoded = jsonDecode(raw) as Map<String, dynamic>;
       final isWrapped = decoded.containsKey('data');
       final savedAt = isWrapped ? _parseDateTime(decoded['savedAt']) : null;
-      final data = isWrapped
-          ? Map<String, dynamic>.from(decoded['data'] as Map)
-          : decoded;
+      final data =
+          isWrapped
+              ? Map<String, dynamic>.from(decoded['data'] as Map)
+              : decoded;
       return PlanoFeatures.fromJson(data).copyWithOperationalState(
         fromCache: true,
         cacheSavedAt: savedAt,

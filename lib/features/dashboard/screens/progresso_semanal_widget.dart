@@ -47,7 +47,7 @@ class ProgressoSemanalWidget extends ConsumerWidget {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 17,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   Container(
@@ -71,7 +71,7 @@ class ProgressoSemanalWidget extends ConsumerWidget {
                           '$streakDays dias',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
@@ -129,7 +129,7 @@ class ProgressoSemanalWidget extends ConsumerWidget {
                                   color:
                                       isToday ? Colors.white : Colors.white54,
                                   fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                     ),
@@ -153,7 +153,7 @@ class ProgressoSemanalWidget extends ConsumerWidget {
                     '$completedThisWeek/$weeklyGoal',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],

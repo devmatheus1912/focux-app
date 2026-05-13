@@ -71,9 +71,13 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
       ),
       body: asyncData.when(
         loading: () => const FxLoading(),
-        error: (e, _) => Center(
-          child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad)),
-        ),
+        error:
+            (e, _) => Center(
+              child: Text(
+                'Erro: $e',
+                style: const TextStyle(color: EagleTokens.bad),
+              ),
+            ),
         data: (data) => _QualidadeBody(data: data, isDark: isDark),
       ),
     );
@@ -96,15 +100,17 @@ class _QualidadeBody extends StatelessWidget {
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final lineBg = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
-    final scoreColor = data.score >= 80
-        ? EagleTokens.good
-        : data.score >= 50
+    final scoreColor =
+        data.score >= 80
+            ? EagleTokens.good
+            : data.score >= 50
             ? EagleTokens.warn
             : EagleTokens.bad;
 
-    final scoreLabel = data.score >= 80
-        ? 'Excelente'
-        : data.score >= 50
+    final scoreLabel =
+        data.score >= 80
+            ? 'Excelente'
+            : data.score >= 50
             ? 'Bom'
             : 'Atenção';
 
@@ -133,15 +139,24 @@ class _QualidadeBody extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(EagleTokens.radiusPill),
+                        borderRadius: BorderRadius.circular(
+                          EagleTokens.radiusPill,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.verified_rounded, color: Colors.white.withValues(alpha: 0.7), size: 13),
+                          Icon(
+                            Icons.verified_rounded,
+                            color: Colors.white.withValues(alpha: 0.7),
+                            size: 13,
+                          ),
                           const SizedBox(width: 5),
                           Text(
                             'Focux Score™',
@@ -185,13 +200,18 @@ class _QualidadeBody extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: data.score / 100,
                       backgroundColor: Colors.white.withValues(alpha: 0.12),
-                      valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.85)),
+                      valueColor: AlwaysStoppedAnimation(
+                        Colors.white.withValues(alpha: 0.85),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(12),
@@ -227,23 +247,50 @@ class _QualidadeBody extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      width: 28, height: 28,
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
                         color: scoreColor.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(Icons.analytics_rounded, size: 14, color: scoreColor),
+                      child: Icon(
+                        Icons.analytics_rounded,
+                        size: 14,
+                        color: scoreColor,
+                      ),
                     ),
                     const SizedBox(width: 10),
-                    Text('Diagnóstico', style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: ink)),
+                    Text(
+                      'Diagnóstico',
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: ink,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                _ScoreRow(label: 'Precificação', value: _ticketScore(), color: _ticketScoreColor(), isDark: isDark),
+                _ScoreRow(
+                  label: 'Precificação',
+                  value: _ticketScore(),
+                  color: _ticketScoreColor(),
+                  isDark: isDark,
+                ),
                 const SizedBox(height: 10),
-                _ScoreRow(label: 'Retenção', value: _retencaoScore(), color: _retencaoScoreColor(), isDark: isDark),
+                _ScoreRow(
+                  label: 'Retenção',
+                  value: _retencaoScore(),
+                  color: _retencaoScoreColor(),
+                  isDark: isDark,
+                ),
                 const SizedBox(height: 10),
-                _ScoreRow(label: 'Score geral', value: data.score, color: scoreColor, isDark: isDark),
+                _ScoreRow(
+                  label: 'Score geral',
+                  value: data.score,
+                  color: scoreColor,
+                  isDark: isDark,
+                ),
               ],
             ),
           ),
@@ -259,7 +306,11 @@ class _QualidadeBody extends StatelessWidget {
             marketLabel: 'Mercado',
             marketValue: 'R\$ ${data.ticketMercado.toStringAsFixed(0)}',
             isAbove: data.ticketPessoal >= data.ticketMercado,
-            ratio: data.ticketMercado > 0 ? data.ticketPessoal / (data.ticketPessoal + data.ticketMercado) : 0.5,
+            ratio:
+                data.ticketMercado > 0
+                    ? data.ticketPessoal /
+                        (data.ticketPessoal + data.ticketMercado)
+                    : 0.5,
             isDark: isDark,
             cardBg: cardBg,
             lineBg: lineBg,
@@ -303,14 +354,23 @@ class _QualidadeBody extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: 8, height: 8,
-                  decoration: BoxDecoration(color: scoreColor, shape: BoxShape.circle),
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: scoreColor,
+                    shape: BoxShape.circle,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     'Status: $scoreLabel • Baseado em dados anonimizados da plataforma Focux',
-                    style: TextStyle(fontSize: 11, color: mute, fontWeight: FontWeight.w500, height: 1.3),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: mute,
+                      fontWeight: FontWeight.w500,
+                      height: 1.3,
+                    ),
                   ),
                 ),
               ],
@@ -350,7 +410,12 @@ class _ScoreRow extends StatelessWidget {
   final int value;
   final Color color;
   final bool isDark;
-  const _ScoreRow({required this.label, required this.value, required this.color, required this.isDark});
+  const _ScoreRow({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +425,14 @@ class _ScoreRow extends StatelessWidget {
       children: [
         Expanded(
           flex: 3,
-          child: Text(label, style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600)),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: mute,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
         Expanded(
           flex: 5,
@@ -381,7 +453,11 @@ class _ScoreRow extends StatelessWidget {
           width: 32,
           child: Text(
             '$value',
-            style: GoogleFonts.jetBrainsMono(fontSize: 12, fontWeight: FontWeight.w700, color: ink),
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: ink,
+            ),
             textAlign: TextAlign.right,
           ),
         ),
@@ -401,12 +477,21 @@ class _MetricCompareCard extends StatelessWidget {
   final Color cardBg, lineBg, ink, mute, primary, accent;
 
   const _MetricCompareCard({
-    required this.icon, required this.title,
-    required this.yourLabel, required this.yourValue,
-    required this.marketLabel, required this.marketValue,
-    required this.isAbove, required this.ratio,
-    required this.isDark, required this.cardBg, required this.lineBg,
-    required this.ink, required this.mute, required this.primary, required this.accent,
+    required this.icon,
+    required this.title,
+    required this.yourLabel,
+    required this.yourValue,
+    required this.marketLabel,
+    required this.marketValue,
+    required this.isAbove,
+    required this.ratio,
+    required this.isDark,
+    required this.cardBg,
+    required this.lineBg,
+    required this.ink,
+    required this.mute,
+    required this.primary,
+    required this.accent,
   });
 
   @override
@@ -435,15 +520,25 @@ class _MetricCompareCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 30, height: 30,
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
-                  color: (isDark ? accent : primary).withValues(alpha: isDark ? 0.14 : 0.08),
+                  color: (isDark ? accent : primary).withValues(
+                    alpha: isDark ? 0.14 : 0.08,
+                  ),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, size: 15, color: isDark ? accent : primary),
               ),
               const SizedBox(width: 10),
-              Text(title, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: ink)),
+              Text(
+                title,
+                style: GoogleFonts.outfit(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: ink,
+                ),
+              ),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -455,13 +550,20 @@ class _MetricCompareCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      isAbove ? Icons.trending_up_rounded : Icons.trending_down_rounded,
-                      size: 11, color: statusColor,
+                      isAbove
+                          ? Icons.trending_up_rounded
+                          : Icons.trending_down_rounded,
+                      size: 11,
+                      color: statusColor,
                     ),
                     const SizedBox(width: 3),
                     Text(
                       isAbove ? 'Acima' : 'Abaixo',
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: statusColor),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: statusColor,
+                      ),
                     ),
                   ],
                 ),
@@ -500,11 +602,23 @@ class _MetricCompareCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(yourLabel, style: TextStyle(fontSize: 10.5, color: mute, fontWeight: FontWeight.w600)),
+                    Text(
+                      yourLabel,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: mute,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 3),
                     Text(
                       yourValue,
-                      style: GoogleFonts.jetBrainsMono(fontSize: 22, fontWeight: FontWeight.w700, color: ink, letterSpacing: -0.5),
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: ink,
+                        letterSpacing: -0.5,
+                      ),
                     ),
                   ],
                 ),
@@ -515,11 +629,23 @@ class _MetricCompareCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(marketLabel, style: TextStyle(fontSize: 10.5, color: mute, fontWeight: FontWeight.w600)),
+                    Text(
+                      marketLabel,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: mute,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 3),
                     Text(
                       marketValue,
-                      style: GoogleFonts.jetBrainsMono(fontSize: 22, fontWeight: FontWeight.w500, color: mute, letterSpacing: -0.5),
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w500,
+                        color: mute,
+                        letterSpacing: -0.5,
+                      ),
                     ),
                   ],
                 ),

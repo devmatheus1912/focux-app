@@ -16,13 +16,13 @@ final alunoProvider = FutureProvider.family<Aluno, int>((ref, id) async {
 
 final alunoAutonomiaEventosProvider =
     FutureProvider.family<List<AlunoAutonomiaEvento>, int>((ref, id) async {
-  return ref.read(alunoRepositoryProvider).listarAutonomiaEventos(id);
-});
+      return ref.read(alunoRepositoryProvider).listarAutonomiaEventos(id);
+    });
 
 final alunoAutonomiaResumoProvider =
     FutureProvider.family<AlunoAutonomiaResumo, int>((ref, id) async {
-  return ref.read(alunoRepositoryProvider).buscarAutonomiaResumo(id);
-});
+      return ref.read(alunoRepositoryProvider).buscarAutonomiaResumo(id);
+    });
 
 /// Perfil do aluno autenticado (endpoint /api/alunos/me).
 final alunoMeProvider = FutureProvider<Aluno>((ref) async {

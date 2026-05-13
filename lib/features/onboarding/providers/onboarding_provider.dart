@@ -7,6 +7,7 @@ final onboardingRepositoryProvider = Provider<OnboardingRepository>(
   (ref) => OnboardingRepository(ref.read(apiClientProvider)),
 );
 
-final onboardingStatusProvider = FutureProvider.autoDispose<OnboardingStatusData>((ref) async {
-  return ref.read(onboardingRepositoryProvider).getStatus();
-});
+final onboardingStatusProvider =
+    FutureProvider.autoDispose<OnboardingStatusData>((ref) async {
+      return ref.read(onboardingRepositoryProvider).getStatus();
+    });

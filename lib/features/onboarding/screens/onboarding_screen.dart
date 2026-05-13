@@ -36,11 +36,27 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       subtitle:
           'Cadastre alunos, monte treinos e acompanhe a evolução de cada um em tempo real.',
       accent: Color(0xFF80C8FF),
-      orbitIcons: [Icons.people_alt_rounded, Icons.timeline_rounded, Icons.calendar_month_rounded],
+      orbitIcons: [
+        Icons.people_alt_rounded,
+        Icons.timeline_rounded,
+        Icons.calendar_month_rounded,
+      ],
       metrics: [
-        _MetricChip(label: 'Alunos ativos', value: '∞', icon: Icons.people_alt_rounded),
-        _MetricChip(label: 'Treinos/mês', value: '500+', icon: Icons.calendar_today_rounded),
-        _MetricChip(label: 'Evolução', value: 'Real-time', icon: Icons.trending_up_rounded),
+        _MetricChip(
+          label: 'Alunos ativos',
+          value: '∞',
+          icon: Icons.people_alt_rounded,
+        ),
+        _MetricChip(
+          label: 'Treinos/mês',
+          value: '500+',
+          icon: Icons.calendar_today_rounded,
+        ),
+        _MetricChip(
+          label: 'Evolução',
+          value: 'Real-time',
+          icon: Icons.trending_up_rounded,
+        ),
       ],
       features: [
         'Fichas de treino ilimitadas',
@@ -54,11 +70,23 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       subtitle:
           'Gere treinos e dietas personalizados em segundos. A IA aprende com o histórico de cada aluno.',
       accent: Color(0xFFA0CCFF),
-      orbitIcons: [Icons.psychology_rounded, Icons.auto_graph_rounded, Icons.restaurant_rounded],
+      orbitIcons: [
+        Icons.psychology_rounded,
+        Icons.auto_graph_rounded,
+        Icons.restaurant_rounded,
+      ],
       metrics: [
         _MetricChip(label: 'Geração', value: '<10s', icon: Icons.bolt_rounded),
-        _MetricChip(label: 'Personalização', value: '100%', icon: Icons.tune_rounded),
-        _MetricChip(label: 'Modelos IA', value: '3+', icon: Icons.psychology_rounded),
+        _MetricChip(
+          label: 'Personalização',
+          value: '100%',
+          icon: Icons.tune_rounded,
+        ),
+        _MetricChip(
+          label: 'Modelos IA',
+          value: '3+',
+          icon: Icons.psychology_rounded,
+        ),
       ],
       features: [
         'Progressão automática de cargas',
@@ -72,11 +100,27 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       subtitle:
           'Cobranças, inadimplências e relatórios automatizados. Você foca no que importa: resultados.',
       accent: Color(0xFFB8D9FF),
-      orbitIcons: [Icons.trending_up_rounded, Icons.pie_chart_rounded, Icons.account_balance_wallet_rounded],
+      orbitIcons: [
+        Icons.trending_up_rounded,
+        Icons.pie_chart_rounded,
+        Icons.account_balance_wallet_rounded,
+      ],
       metrics: [
-        _MetricChip(label: 'Cobranças', value: 'Auto', icon: Icons.receipt_long_rounded),
-        _MetricChip(label: 'Inadimplentes', value: 'Alertas', icon: Icons.notifications_active_rounded),
-        _MetricChip(label: 'Relatórios', value: 'PDF', icon: Icons.description_rounded),
+        _MetricChip(
+          label: 'Cobranças',
+          value: 'Auto',
+          icon: Icons.receipt_long_rounded,
+        ),
+        _MetricChip(
+          label: 'Inadimplentes',
+          value: 'Alertas',
+          icon: Icons.notifications_active_rounded,
+        ),
+        _MetricChip(
+          label: 'Relatórios',
+          value: 'PDF',
+          icon: Icons.description_rounded,
+        ),
       ],
       features: [
         'Controle de mensalidades por aluno',
@@ -191,27 +235,28 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             // Ambient glow — follows accent
             AnimatedBuilder(
               animation: _entryCtrl,
-              builder: (_, __) => Positioned(
-                top: -60,
-                right: -60,
-                child: Opacity(
-                  opacity: _fade.value,
-                  child: Container(
-                    width: 280,
-                    height: 280,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          _pages[_current].accent.withValues(alpha: 0.22),
-                          Colors.transparent,
-                        ],
-                        stops: const [0.0, 0.7],
+              builder:
+                  (_, __) => Positioned(
+                    top: -60,
+                    right: -60,
+                    child: Opacity(
+                      opacity: _fade.value,
+                      child: Container(
+                        width: 280,
+                        height: 280,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              _pages[_current].accent.withValues(alpha: 0.22),
+                              Colors.transparent,
+                            ],
+                            stops: const [0.0, 0.7],
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
             ),
 
             // Bottom ambient glow
@@ -272,14 +317,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       controller: _page,
                       itemCount: _pages.length,
                       onPageChanged: _onPageChanged,
-                      itemBuilder: (_, i) => _OBPageWidget(
-                        data: _pages[i],
-                        iconScale: _iconScale,
-                        titleSlide: _titleSlide,
-                        subtitleSlide: _subtitleSlide,
-                        metricsSlide: _metricsSlide,
-                        fade: _fade,
-                      ),
+                      itemBuilder:
+                          (_, i) => _OBPageWidget(
+                            data: _pages[i],
+                            iconScale: _iconScale,
+                            titleSlide: _titleSlide,
+                            subtitleSlide: _subtitleSlide,
+                            metricsSlide: _metricsSlide,
+                            fade: _fade,
+                          ),
                     ),
                   ),
 
@@ -291,11 +337,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       children: List.generate(
                         _pages.length,
                         (i) => GestureDetector(
-                          onTap: () => _page.animateToPage(
-                            i,
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeOutCubic,
-                          ),
+                          onTap:
+                              () => _page.animateToPage(
+                                i,
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeOutCubic,
+                              ),
                           child: _SlideDot(active: _current == i),
                         ),
                       ),
@@ -333,9 +380,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  _current < 2
-                                      ? 'Próximo →'
-                                      : 'Começar agora',
+                                  _current < 2 ? 'Próximo →' : 'Começar agora',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
@@ -466,9 +511,9 @@ class _OBPageWidget extends StatelessWidget {
   List<Widget> _buildOrbitIcons(_OBData d) {
     // Position 3 orbiting icons at 120° intervals around center
     const positions = [
-      Alignment(-0.95, -0.75),  // top-left
-      Alignment(0.95, -0.30),   // right
-      Alignment(-0.70, 0.85),   // bottom-left
+      Alignment(-0.95, -0.75), // top-left
+      Alignment(0.95, -0.30), // right
+      Alignment(-0.70, 0.85), // bottom-left
     ];
     return List.generate(d.orbitIcons.length, (i) {
       return Align(
@@ -479,9 +524,7 @@ class _OBPageWidget extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.10),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
           ),
           child: Icon(
             d.orbitIcons[i],
@@ -497,230 +540,248 @@ class _OBPageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: fade,
-      builder: (_, __) => Padding(
-        padding: const EdgeInsets.only(left: 24, right: 24, top: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // ── Composite Illustration ──
-            Transform.scale(
-              scale: iconScale.value,
-              child: SizedBox(
-                width: 140,
-                height: 140,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Orbiting satellite icons
-                    ..._buildOrbitIcons(data),
-                    // Main glass icon
-                    Container(
-                      width: 88,
-                      height: 88,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(26),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.12),
+      builder:
+          (_, __) => Padding(
+            padding: const EdgeInsets.only(left: 24, right: 24, top: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // ── Composite Illustration ──
+                Transform.scale(
+                  scale: iconScale.value,
+                  child: SizedBox(
+                    width: 140,
+                    height: 140,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Orbiting satellite icons
+                        ..._buildOrbitIcons(data),
+                        // Main glass icon
+                        Container(
+                          width: 88,
+                          height: 88,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(26),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.12),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: data.accent.withValues(alpha: 0.32),
+                                blurRadius: 32,
+                                spreadRadius: -8,
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(26),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      gradient: RadialGradient(
+                                        colors: [
+                                          data.accent.withValues(alpha: 0.14),
+                                          Colors.transparent,
+                                        ],
+                                        stops: const [0.0, 0.7],
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(data.icon, color: data.accent, size: 38),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: data.accent.withValues(alpha: 0.32),
-                            blurRadius: 32,
-                            spreadRadius: -8,
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // ── Title — staggered slide ──
+                Transform.translate(
+                  offset: Offset(0, titleSlide.value),
+                  child: Opacity(
+                    opacity: fade.value.clamp(0.0, 1.0),
+                    child: Text(
+                      data.title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.85,
+                        height: 1.15,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // ── Subtitle — staggered slide ──
+                Transform.translate(
+                  offset: Offset(0, subtitleSlide.value),
+                  child: Opacity(
+                    opacity: fade.value.clamp(0.0, 1.0),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 320),
+                      child: Text(
+                        data.subtitle,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.65),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          height: 1.6,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // ── Metric Chips — visual anchor filling dead space ──
+                Transform.translate(
+                  offset: Offset(0, metricsSlide.value),
+                  child: Opacity(
+                    opacity: fade.value.clamp(0.0, 1.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children:
+                          data.metrics
+                              .map(
+                                (m) => Expanded(
+                                  child: _MetricChipWidget(
+                                    metric: m,
+                                    accent: data.accent,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // ── Feature checklist — fills the dead space ──
+                Transform.translate(
+                  offset: Offset(0, metricsSlide.value * 0.7),
+                  child: Opacity(
+                    opacity: fade.value.clamp(0.0, 1.0),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.04),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.07),
+                        ),
+                      ),
+                      child: Column(
+                        children:
+                            data.features.asMap().entries.map((e) {
+                              final isLast = e.key == data.features.length - 1;
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: isLast ? 0 : 12,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 22,
+                                      height: 22,
+                                      decoration: BoxDecoration(
+                                        color: data.accent.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                        borderRadius: BorderRadius.circular(7),
+                                      ),
+                                      child: Icon(
+                                        Icons.check_rounded,
+                                        size: 13,
+                                        color: data.accent.withValues(
+                                          alpha: 0.8,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        e.value,
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.6,
+                                          ),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const Spacer(),
+
+                // ── Feature highlight bar ──
+                Transform.translate(
+                  offset: Offset(0, metricsSlide.value * 0.5),
+                  child: Opacity(
+                    opacity: (fade.value * 0.8).clamp(0.0, 1.0),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.04),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.06),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.verified_rounded,
+                            size: 14,
+                            color: data.accent.withValues(alpha: 0.6),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Usado por +200 personal trainers',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.40),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(26),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  gradient: RadialGradient(
-                                    colors: [
-                                      data.accent.withValues(alpha: 0.14),
-                                      Colors.transparent,
-                                    ],
-                                    stops: const [0.0, 0.7],
-                                  ),
-                                ),
-                              ),
-                              Icon(data.icon, color: data.accent, size: 38),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // ── Title — staggered slide ──
-            Transform.translate(
-              offset: Offset(0, titleSlide.value),
-              child: Opacity(
-                opacity: fade.value.clamp(0.0, 1.0),
-                child: Text(
-                  data.title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.85,
-                    height: 1.15,
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // ── Subtitle — staggered slide ──
-            Transform.translate(
-              offset: Offset(0, subtitleSlide.value),
-              child: Opacity(
-                opacity: fade.value.clamp(0.0, 1.0),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 320),
-                  child: Text(
-                    data.subtitle,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.65),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      height: 1.6,
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-
-            const SizedBox(height: 32),
-
-            // ── Metric Chips — visual anchor filling dead space ──
-            Transform.translate(
-              offset: Offset(0, metricsSlide.value),
-              child: Opacity(
-                opacity: fade.value.clamp(0.0, 1.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: data.metrics.map((m) => Expanded(
-                    child: _MetricChipWidget(metric: m, accent: data.accent),
-                  )).toList(),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // ── Feature checklist — fills the dead space ──
-            Transform.translate(
-              offset: Offset(0, metricsSlide.value * 0.7),
-              child: Opacity(
-                opacity: fade.value.clamp(0.0, 1.0),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.07),
-                    ),
-                  ),
-                  child: Column(
-                    children: data.features.asMap().entries.map((e) {
-                      final isLast = e.key == data.features.length - 1;
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 22,
-                              height: 22,
-                              decoration: BoxDecoration(
-                                color: data.accent.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(7),
-                              ),
-                              child: Icon(
-                                Icons.check_rounded,
-                                size: 13,
-                                color: data.accent.withValues(alpha: 0.8),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                e.value,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.6),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  height: 1.3,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-            ),
-
-            const Spacer(),
-
-            // ── Feature highlight bar ──
-            Transform.translate(
-              offset: Offset(0, metricsSlide.value * 0.5),
-              child: Opacity(
-                opacity: (fade.value * 0.8).clamp(0.0, 1.0),
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.06),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.verified_rounded,
-                        size: 14,
-                        color: data.accent.withValues(alpha: 0.6),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Usado por +200 personal trainers',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.40),
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 }
@@ -742,9 +803,7 @@ class _MetricChipWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Column(
         children: [
@@ -802,9 +861,10 @@ class _SpringButtonState extends State<_SpringButton>
       duration: const Duration(milliseconds: 150),
       reverseDuration: const Duration(milliseconds: 300),
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.96).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.96,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -824,10 +884,8 @@ class _SpringButtonState extends State<_SpringButton>
       onTapCancel: () => _ctrl.reverse(),
       child: AnimatedBuilder(
         animation: _scale,
-        builder: (_, child) => Transform.scale(
-          scale: _scale.value,
-          child: child,
-        ),
+        builder:
+            (_, child) => Transform.scale(scale: _scale.value, child: child),
         child: widget.child,
       ),
     );
@@ -841,10 +899,11 @@ class _SpringButtonState extends State<_SpringButton>
 class _AuthGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final p = Paint()
-      ..color = Colors.white.withValues(alpha: 0.05)
-      ..strokeWidth = 0.5
-      ..style = PaintingStyle.stroke;
+    final p =
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.05)
+          ..strokeWidth = 0.5
+          ..style = PaintingStyle.stroke;
     for (double x = 0; x < size.width; x += 30) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), p);
     }

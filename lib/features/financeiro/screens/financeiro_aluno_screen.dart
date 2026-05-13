@@ -5,12 +5,14 @@ import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class FinanceiroAlunoScreen extends ConsumerStatefulWidget {
   const FinanceiroAlunoScreen({super.key});
 
   @override
-  ConsumerState<FinanceiroAlunoScreen> createState() => _FinanceiroAlunoScreenState();
+  ConsumerState<FinanceiroAlunoScreen> createState() =>
+      _FinanceiroAlunoScreenState();
 }
 
 class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
@@ -19,8 +21,19 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
   String? _erro;
 
   static const _mesesNomes = [
-    '', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+    '',
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
   ];
 
   @override
@@ -30,21 +43,39 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
   }
 
   Future<void> _carregar() async {
-    setState(() { _loading = true; _erro = null; });
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
-      final result = await FinanceiroRepository(ref.read(apiClientProvider))
-          .minhasMensalidades();
-      if (mounted) setState(() { _mensalidades = result; _loading = false; });
+      final result =
+          await FinanceiroRepository(
+            ref.read(apiClientProvider),
+          ).minhasMensalidades();
+      if (mounted) {
+        setState(() {
+          _mensalidades = result;
+          _loading = false;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() { _erro = friendlyError(e); _loading = false; });
+      if (mounted) {
+        setState(() {
+          _erro = friendlyError(e);
+          _loading = false;
+        });
+      }
     }
   }
 
   Color _statusColor(String s) {
     switch (s) {
-      case 'PAGO': return EagleTokens.good;
-      case 'ATRASADO': return EagleTokens.bad;
-      default: return EagleTokens.warn;
+      case 'PAGO':
+        return EagleTokens.good;
+      case 'ATRASADO':
+        return EagleTokens.bad;
+      default:
+        return EagleTokens.warn;
     }
   }
 
@@ -90,31 +121,33 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
           ),
         ],
       ),
-      body: _loading
-          ? const Center(
-              child: SizedBox(
-                width: 28,
-                height: 28,
-                child: CircularProgressIndicator(strokeWidth: 2.5),
-              ),
-            )
-          : _erro != null
+      body:
+          _loading
+              ? const Center(
+                child: SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: FxLoading(strokeWidth: 2.5),
+                ),
+              )
+              : _erro != null
               ? _buildError(isDark, ink, mute, primary)
               : _mensalidades.isEmpty
-                  ? _buildEmpty(isDark, ink, mute, primary)
-                  : RefreshIndicator(
-                      onRefresh: _carregar,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                        itemCount: _mensalidades.length,
-                        itemBuilder: (_, i) => _MensalidadeCard(
-                          m: _mensalidades[i],
-                          isDark: isDark,
-                          formatarMes: _formatarMes,
-                          statusColor: _statusColor,
-                        ),
+              ? _buildEmpty(isDark, ink, mute, primary)
+              : RefreshIndicator(
+                onRefresh: _carregar,
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                  itemCount: _mensalidades.length,
+                  itemBuilder:
+                      (_, i) => _MensalidadeCard(
+                        m: _mensalidades[i],
+                        isDark: isDark,
+                        formatarMes: _formatarMes,
+                        statusColor: _statusColor,
                       ),
-                    ),
+                ),
+              ),
     );
   }
 
@@ -132,12 +165,20 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                 color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: const Icon(Icons.cloud_off_rounded, color: EagleTokens.bad, size: 24),
+              child: const Icon(
+                Icons.cloud_off_rounded,
+                color: EagleTokens.bad,
+                size: 24,
+              ),
             ),
             const SizedBox(height: 14),
             Text(
               'Erro ao carregar',
-              style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: ink),
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: ink,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -153,8 +194,13 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: primary,
                 side: BorderSide(color: primary.withValues(alpha: 0.3)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -180,7 +226,11 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
           const SizedBox(height: 14),
           Text(
             'Nenhuma mensalidade',
-            style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: ink),
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: ink,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -251,7 +301,10 @@ class _MensalidadeCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: sColor.withValues(alpha: isDark ? 0.18 : 0.10),
                   borderRadius: BorderRadius.circular(10),

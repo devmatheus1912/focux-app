@@ -5,12 +5,14 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class AlertasConfigScreen extends ConsumerStatefulWidget {
   const AlertasConfigScreen({super.key});
 
   @override
-  ConsumerState<AlertasConfigScreen> createState() => _AlertasConfigScreenState();
+  ConsumerState<AlertasConfigScreen> createState() =>
+      _AlertasConfigScreenState();
 }
 
 class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
@@ -58,7 +60,8 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
       final repo = AlertasRepository(ref.read(apiClientProvider));
       await repo.atualizarConfiguracao(_diasSemTreino, _aderenciaMinima);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(
             content: Text('Configurações salvas com sucesso!'),
             backgroundColor: EagleTokens.good,
@@ -67,7 +70,8 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(content: Text(friendlyError(e))),
         );
       }
@@ -82,190 +86,227 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
     final primary = theme.colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark
+              ? EagleTokens.darkBg
+              : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text('Configurar Alertas'),
       ),
-      body: _loading
-          ? const FxLoading()
-          : _erro != null
+      body:
+          _loading
+              ? const FxLoading()
+              : _erro != null
               ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.error_outline,
-                            size: 48, color: theme.colorScheme.error),
-                        const SizedBox(height: 12),
-                        Text('Erro ao carregar: $_erro',
-                            textAlign: TextAlign.center),
-                        const SizedBox(height: 12),
-                        FilledButton(
-                            onPressed: _load,
-                            child: const Text('Tentar novamente')),
-                      ],
-                    ),
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.calendar_month_outlined,
-                                      color: primary),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Dias sem treino',
-                                    style: theme.textTheme.titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.w600),
-                                  ),
-                                  const Spacer(),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: primary
-                                          .withValues(alpha: 0.12),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      '$_diasSemTreino dias',
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: primary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Alerta quando o aluno não treina por X dias consecutivos',
-                                style: theme.textTheme.bodySmall
-                                    ?.copyWith(color: EagleTokens.inkMute),
-                              ),
-                              Slider(
-                                value: _diasSemTreino.toDouble(),
-                                min: 1,
-                                max: 30,
-                                divisions: 29,
-                                label: '$_diasSemTreino dias',
-                                onChanged: (v) =>
-                                    setState(() => _diasSemTreino = v.toInt()),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('1 dia',
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: EagleTokens.inkMute)),
-                                  Text('30 dias',
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: EagleTokens.inkMute)),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: theme.colorScheme.error,
                       ),
-                      const SizedBox(height: 16),
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.trending_down_outlined,
-                                      color: EagleTokens.warn),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Aderência mínima (%)',
-                                    style: theme.textTheme.titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.w600),
-                                  ),
-                                  const Spacer(),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: EagleTokens.warn
-                                          .withValues(alpha: 0.12),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      '$_aderenciaMinima%',
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: EagleTokens.warn,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Alerta quando a taxa de aderência cair abaixo deste valor',
-                                style: theme.textTheme.bodySmall
-                                    ?.copyWith(color: EagleTokens.inkMute),
-                              ),
-                              Slider(
-                                value: _aderenciaMinima.toDouble(),
-                                min: 10,
-                                max: 90,
-                                divisions: 16,
-                                label: '$_aderenciaMinima%',
-                                activeColor: EagleTokens.warn,
-                                onChanged: (v) =>
-                                    setState(() => _aderenciaMinima = v.toInt()),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('10%',
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: EagleTokens.inkMute)),
-                                  Text('90%',
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: EagleTokens.inkMute)),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Erro ao carregar: $_erro',
+                        textAlign: TextAlign.center,
                       ),
-                      const Spacer(),
+                      const SizedBox(height: 12),
                       FilledButton(
-                        onPressed: _salvando ? null : _salvar,
-                        child: _salvando
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white),
-                              )
-                            : const Text('Salvar'),
+                        onPressed: _load,
+                        child: const Text('Tentar novamente'),
                       ),
                     ],
                   ),
                 ),
+              )
+              : Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.calendar_month_outlined,
+                                  color: primary,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  'Dias sem treino',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: primary.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '$_diasSemTreino dias',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Alerta quando o aluno não treina por X dias consecutivos',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: EagleTokens.inkMute,
+                              ),
+                            ),
+                            Slider(
+                              value: _diasSemTreino.toDouble(),
+                              min: 1,
+                              max: 30,
+                              divisions: 29,
+                              label: '$_diasSemTreino dias',
+                              onChanged:
+                                  (v) => setState(
+                                    () => _diasSemTreino = v.toInt(),
+                                  ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '1 dia',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: EagleTokens.inkMute,
+                                  ),
+                                ),
+                                Text(
+                                  '30 dias',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: EagleTokens.inkMute,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.trending_down_outlined,
+                                  color: EagleTokens.warn,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  'Aderência mínima (%)',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: EagleTokens.warn.withValues(
+                                      alpha: 0.12,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '$_aderenciaMinima%',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: EagleTokens.warn,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Alerta quando a taxa de aderência cair abaixo deste valor',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: EagleTokens.inkMute,
+                              ),
+                            ),
+                            Slider(
+                              value: _aderenciaMinima.toDouble(),
+                              min: 10,
+                              max: 90,
+                              divisions: 16,
+                              label: '$_aderenciaMinima%',
+                              activeColor: EagleTokens.warn,
+                              onChanged:
+                                  (v) => setState(
+                                    () => _aderenciaMinima = v.toInt(),
+                                  ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '10%',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: EagleTokens.inkMute,
+                                  ),
+                                ),
+                                Text(
+                                  '90%',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: EagleTokens.inkMute,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    FilledButton(
+                      onPressed: _salvando ? null : _salvar,
+                      child:
+                          _salvando
+                              ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: FxLoading(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                              : const Text('Salvar'),
+                    ),
+                  ],
+                ),
+              ),
     );
   }
 }

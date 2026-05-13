@@ -351,27 +351,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           height: 1.5,
                         ),
                         children: [
-                          const TextSpan(text: 'Ao criar, você concorda com os '),
+                          const TextSpan(
+                            text: 'Ao criar, você concorda com os ',
+                          ),
                           TextSpan(
                             text: 'Termos de uso',
                             style: TextStyle(color: primary),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () => launchUrl(
-                                    Uri.parse(
-                                        'https://focux-backend-production.up.railway.app/termos.html'),
-                                    mode: LaunchMode.externalApplication,
-                                  ),
+                            recognizer:
+                                TapGestureRecognizer()
+                                  ..onTap =
+                                      () => launchUrl(
+                                        Uri.parse(
+                                          'https://focux-backend-production.up.railway.app/termos.html',
+                                        ),
+                                        mode: LaunchMode.externalApplication,
+                                      ),
                           ),
                           const TextSpan(text: ' e a '),
                           TextSpan(
                             text: 'Política de privacidade',
                             style: TextStyle(color: primary),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () => launchUrl(
-                                    Uri.parse(
-                                        'https://focux-backend-production.up.railway.app/privacidade.html'),
-                                    mode: LaunchMode.externalApplication,
-                                  ),
+                            recognizer:
+                                TapGestureRecognizer()
+                                  ..onTap =
+                                      () => launchUrl(
+                                        Uri.parse(
+                                          'https://focux-backend-production.up.railway.app/privacidade.html',
+                                        ),
+                                        mode: LaunchMode.externalApplication,
+                                      ),
                           ),
                           const TextSpan(text: '.'),
                         ],

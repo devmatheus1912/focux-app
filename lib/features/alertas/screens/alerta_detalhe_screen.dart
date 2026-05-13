@@ -17,7 +17,8 @@ class AlertaDetalheScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AlertaDetalheScreen> createState() => _AlertaDetalheScreenState();
+  ConsumerState<AlertaDetalheScreen> createState() =>
+      _AlertaDetalheScreenState();
 }
 
 class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
@@ -60,7 +61,10 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark
+              ? EagleTokens.darkBg
+              : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -69,34 +73,42 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
           IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
         ],
       ),
-      body: _loading
-          ? const FxLoading()
-          : _erro != null
+      body:
+          _loading
+              ? const FxLoading()
+              : _erro != null
               ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.error_outline,
-                            size: 48, color: theme.colorScheme.error),
-                        const SizedBox(height: 12),
-                        Text('Erro ao carregar: $_erro',
-                            textAlign: TextAlign.center),
-                        const SizedBox(height: 12),
-                        FilledButton(
-                            onPressed: _load, child: const Text('Tentar novamente')),
-                      ],
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: theme.colorScheme.error,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Erro ao carregar: $_erro',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: _load,
+                        child: const Text('Tentar novamente'),
+                      ),
+                    ],
                   ),
-                )
+                ),
+              )
               : _detalhe == null
-                  ? const SizedBox.shrink()
-                  : _Body(
-                      detalhe: _detalhe!,
-                      alunoId: widget.alunoId,
-                      alunoNome: widget.alunoNome,
-                    ),
+              ? const SizedBox.shrink()
+              : _Body(
+                detalhe: _detalhe!,
+                alunoId: widget.alunoId,
+                alunoNome: widget.alunoNome,
+              ),
     );
   }
 }
@@ -141,10 +153,11 @@ class _Body extends StatelessWidget {
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.bar_chart),
                   label: const Text('Ver relatório'),
-                  onPressed: () => context.push(
-                    '/alunos/$alunoId/relatorio',
-                    extra: alunoNome,
-                  ),
+                  onPressed:
+                      () => context.push(
+                        '/alunos/$alunoId/relatorio',
+                        extra: alunoNome,
+                      ),
                 ),
               ),
             ],
@@ -175,18 +188,17 @@ class _CardUltimoTreino extends StatelessWidget {
                 children: [
                   Text(
                     'Último Treino',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(color: EagleTokens.inkMute),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: EagleTokens.inkMute,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     ultimoTreino ?? 'Sem treinos recentes',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: ultimoTreino == null ? EagleTokens.inkMute : null,
-                        ),
+                      fontWeight: FontWeight.w600,
+                      color: ultimoTreino == null ? EagleTokens.inkMute : null,
+                    ),
                   ),
                 ],
               ),
@@ -223,18 +235,17 @@ class _CardCheckIns extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   'Check-ins (30d)',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(color: EagleTokens.inkMute),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(color: EagleTokens.inkMute),
                 ),
                 const Spacer(),
                 Text(
                   '$checkIns',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: _cor,
-                      ),
+                    fontWeight: FontWeight.w700,
+                    color: _cor,
+                  ),
                 ),
               ],
             ),
@@ -259,10 +270,14 @@ class _CardFinanceiro extends StatelessWidget {
 
   Color _cor(String s) {
     final lower = s.toLowerCase();
-    if (lower.contains('em dia') || lower.contains('ok') || lower.contains('ativo')) {
+    if (lower.contains('em dia') ||
+        lower.contains('ok') ||
+        lower.contains('ativo')) {
       return EagleTokens.good;
     }
-    if (lower.contains('atraso') || lower.contains('inadimplente') || lower.contains('cancelado')) {
+    if (lower.contains('atraso') ||
+        lower.contains('inadimplente') ||
+        lower.contains('cancelado')) {
       return EagleTokens.bad;
     }
     return EagleTokens.warn;
@@ -283,10 +298,9 @@ class _CardFinanceiro extends StatelessWidget {
               children: [
                 Text(
                   'Situação Financeira',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(color: EagleTokens.inkMute),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(color: EagleTokens.inkMute),
                 ),
                 const SizedBox(height: 6),
                 Chip(
@@ -328,8 +342,10 @@ class _CardSugestaoIa extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.lightbulb,
-                    color: theme.colorScheme.onSecondaryContainer),
+                Icon(
+                  Icons.lightbulb,
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Sugestão da IA',

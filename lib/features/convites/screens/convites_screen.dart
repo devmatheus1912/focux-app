@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/convite_repository.dart';
 import '../providers/convite_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class ConvitesScreen extends ConsumerStatefulWidget {
   const ConvitesScreen({super.key});
@@ -19,20 +20,31 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
   String? _error;
 
   Future<void> _gerar() async {
-    setState(() { _loading = true; _error = null; _convite = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+      _convite = null;
+    });
     try {
       final convite = await ref.read(conviteRepositoryProvider).gerar();
-      setState(() { _convite = convite; });
+      setState(() {
+        _convite = convite;
+      });
     } catch (e) {
-      setState(() { _error = 'Erro ao gerar convite. Tente novamente.'; });
+      setState(() {
+        _error = 'Erro ao gerar convite. Tente novamente.';
+      });
     } finally {
-      setState(() { _loading = false; });
+      setState(() {
+        _loading = false;
+      });
     }
   }
 
   void _copiar(String texto) {
     Clipboard.setData(ClipboardData(text: texto));
-    ScaffoldMessenger.of(context).showSnackBar(
+    FeedbackHelper.showSnackBar(
+      context,
       const SnackBar(content: Text('Link copiado!')),
     );
   }
@@ -40,10 +52,15 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark
+              ? EagleTokens.darkBg
+              : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,title: const Text('Convidar Aluno')),
+        elevation: 0,
+        title: const Text('Convidar Aluno'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -59,10 +76,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
               label: const Text('Gerar novo link'),
               onPressed: _loading ? null : _gerar,
             ),
-            if (_loading) ...[
-              const SizedBox(height: 24),
-              const FxLoading(),
-            ],
+            if (_loading) ...[const SizedBox(height: 24), const FxLoading()],
             if (_error != null) ...[
               const SizedBox(height: 16),
               Text(_error!, style: const TextStyle(color: EagleTokens.bad)),
@@ -77,12 +91,15 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                     children: [
                       const Text(
                         'Link gerado',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         _convite!.link,
-                        style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       OutlinedButton.icon(
@@ -97,7 +114,9 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
               const SizedBox(height: 12),
               Text(
                 'Compartilhe este link com o aluno. Ele expira em 24h e pode ser usado uma única vez.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute),
               ),
             ],
           ],

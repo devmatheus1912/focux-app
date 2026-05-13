@@ -7,6 +7,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class MeusTreinosScreen extends ConsumerWidget {
   const MeusTreinosScreen({super.key});
@@ -35,11 +36,7 @@ class MeusTreinosScreen extends ConsumerWidget {
                     onBack: () => safePopOrGo(context, '/dashboard/aluno'),
                     onRefresh: () => ref.invalidate(meusTreinosProvider),
                   ),
-                  Expanded(
-                    child: Center(
-                      child: CircularProgressIndicator(color: primary),
-                    ),
-                  ),
+                  Expanded(child: Center(child: FxLoading(color: primary))),
                 ],
               ),
           error:

@@ -47,9 +47,10 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
           // Progress bar
           if (_running)
             LinearProgressIndicator(
-              value: _currentIndex >= 0
-                  ? (_currentIndex + 1) / qaSmokeRoutes.length
-                  : null,
+              value:
+                  _currentIndex >= 0
+                      ? (_currentIndex + 1) / qaSmokeRoutes.length
+                      : null,
             ),
 
           // Stats bar
@@ -60,16 +61,23 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
               children: [
                 _statChip('Total', qaSmokeRoutes.length, Colors.blue),
                 const SizedBox(width: 8),
-                _statChip('✅', _results.values.where((r) => r.ok).length,
-                    Colors.green),
-                const SizedBox(width: 8),
-                _statChip('❌', _results.values.where((r) => !r.ok).length,
-                    Colors.red),
+                _statChip(
+                  '✅',
+                  _results.values.where((r) => r.ok).length,
+                  Colors.green,
+                ),
                 const SizedBox(width: 8),
                 _statChip(
-                    '⏳',
-                    qaSmokeRoutes.length - _results.length,
-                    Colors.orange),
+                  '❌',
+                  _results.values.where((r) => !r.ok).length,
+                  Colors.red,
+                ),
+                const SizedBox(width: 8),
+                _statChip(
+                  '⏳',
+                  qaSmokeRoutes.length - _results.length,
+                  Colors.orange,
+                ),
               ],
             ),
           ),
@@ -96,9 +104,10 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                       '${route.authMode} • ${route.path}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark
-                            ? EagleTokens.darkInkMute
-                            : EagleTokens.inkMute,
+                        color:
+                            isDark
+                                ? EagleTokens.darkInkMute
+                                : EagleTokens.inkMute,
                       ),
                     ),
                     trailing: Row(
@@ -126,7 +135,7 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                 Text(
                   'API Endpoints (${qaSmokeEndpoints.length})',
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                     color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
                   ),
                 ),
@@ -179,7 +188,10 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
       child: Text(
         '$label: $count',
         style: TextStyle(
-            fontSize: 12, fontWeight: FontWeight.w600, color: color),
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
       ),
     );
   }
@@ -216,9 +228,14 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(4),
       ),
-      child: Text(method,
-          style: TextStyle(
-              fontSize: 10, fontWeight: FontWeight.bold, color: color)),
+      child: Text(
+        method,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
     );
   }
 
@@ -271,7 +288,12 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
       }
     }
 
-    if (mounted) setState(() { _running = false; _currentIndex = -1; });
+    if (mounted) {
+      setState(() {
+        _running = false;
+        _currentIndex = -1;
+      });
+    }
   }
 
   void _resetResults() {

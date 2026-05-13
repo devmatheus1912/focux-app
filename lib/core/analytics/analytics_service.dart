@@ -41,14 +41,24 @@ class AnalyticsService {
     final payload = <String, Object?>{'event': event, ...?props};
     if (kDebugMode) debugPrint('[Analytics] $payload');
     try {
-      await FirebaseCrashlytics.instance.log('event=$event '
-          '${props == null ? '' : props.entries.map((e) => '${e.key}=${e.value}').join(' ')}');
+      await FirebaseCrashlytics.instance.log(
+        'event=$event '
+        '${props == null ? '' : props.entries.map((e) => '${e.key}=${e.value}').join(' ')}',
+      );
     } catch (_) {}
   }
 
-  Future<void> recordError(Object error, StackTrace? stack, {String? reason}) async {
+  Future<void> recordError(
+    Object error,
+    StackTrace? stack, {
+    String? reason,
+  }) async {
     try {
-      await FirebaseCrashlytics.instance.recordError(error, stack, reason: reason);
+      await FirebaseCrashlytics.instance.recordError(
+        error,
+        stack,
+        reason: reason,
+      );
     } catch (e) {
       if (kDebugMode) debugPrint('[Analytics] recordError failed: $e');
     }

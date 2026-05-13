@@ -18,6 +18,8 @@ import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class PerfilScreen extends ConsumerStatefulWidget {
   const PerfilScreen({super.key});
@@ -54,12 +56,14 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
       ref.invalidate(dashboardProvider);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Foto atualizada com sucesso.')),
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(
           content: Text(
             friendlyError(
@@ -956,10 +960,7 @@ class _Avatar extends StatelessWidget {
                   loading
                       ? Padding(
                         padding: const EdgeInsets.all(6),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
+                        child: FxLoading(strokeWidth: 2, color: Colors.white),
                       )
                       : const Icon(Icons.edit, size: 14, color: Colors.white),
             ),
@@ -1805,7 +1806,8 @@ void _showDeleteAccountDialog(BuildContext context) {
                   final dio = ApiClient().dio;
                   await dio.delete('/api/lgpd/me/delete');
                   if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  FeedbackHelper.showSnackBar(
+                    context,
                     const SnackBar(
                       content: Text('Conta excluída com sucesso.'),
                     ),
@@ -1813,9 +1815,10 @@ void _showDeleteAccountDialog(BuildContext context) {
                   GoRouter.of(context).go('/login');
                 } catch (e) {
                   if (!context.mounted) return;
-                  ScaffoldMessenger.of(
+                  FeedbackHelper.showSnackBar(
                     context,
-                  ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+                    SnackBar(content: Text(friendlyError(e))),
+                  );
                 }
               },
               child: const Text('Excluir definitivamente'),

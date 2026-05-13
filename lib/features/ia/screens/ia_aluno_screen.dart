@@ -9,6 +9,8 @@ import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/chat/data/chat_repository.dart';
 import '../data/ia_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class IaAlunoScreen extends ConsumerStatefulWidget {
   const IaAlunoScreen({super.key});
@@ -45,18 +47,24 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen>
     } catch (_) {}
 
     try {
-      final msgs = await ChatRepository(ref.read(apiClientProvider)).historicoAluno();
+      final msgs =
+          await ChatRepository(ref.read(apiClientProvider)).historicoAluno();
       final id = msgs.isNotEmpty ? msgs.first.alunoId : null;
       if (id != null && mounted) setState(() => _alunoId = id);
-    } catch (e) { debugPrint('[Focux] Error: $e');}
+    } catch (e) {
+      debugPrint('[Focux] Error: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+    backgroundColor:
+        Theme.of(context).brightness == Brightness.dark
+            ? EagleTokens.darkBg
+            : EagleTokens.paper,
+    appBar: AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
       title: const Text('Assistente IA'),
       bottom: TabBar(
         controller: _tabs,
@@ -117,10 +125,14 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
     try {
       final repo = IaRepository(ref.read(apiClientProvider));
       final resposta = await repo.chat(text, alunoId: widget.alunoId);
-      if (mounted) setState(() => _msgs.add(_IaMsg(texto: resposta, isUser: false)));
+      if (mounted) {
+        setState(() => _msgs.add(_IaMsg(texto: resposta, isUser: false)));
+      }
     } catch (e) {
       if (mounted) {
-        setState(() => _msgs.add(_IaMsg(texto: friendlyError(e), isUser: false)));
+        setState(
+          () => _msgs.add(_IaMsg(texto: friendlyError(e), isUser: false)),
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -135,74 +147,99 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
   }
 
   @override
-  Widget build(BuildContext context) => Column(children: [
-    Expanded(
-      child: _msgs.isEmpty
-          ? const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Pergunte sobre treino, dieta ou saúde!'),
-                SizedBox(height: 16),
-                IaSafetyDisclaimer(),
-              ],
-            )
-          : ListView.builder(
-              controller: _scroll,
-              padding: const EdgeInsets.all(12),
-              itemCount: _msgs.length + (_loading ? 1 : 0),
-              itemBuilder: (_, i) {
-                if (i == _msgs.length) {
-                  return const Padding(
-                    padding: EdgeInsets.all(8),
-                    child: FxLoading(),
-                  );
-                }
-                final m = _msgs[i];
-                return Align(
-                  alignment: m.isUser ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.75),
-                    decoration: BoxDecoration(
-                      color: m.isUser
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(m.texto,
-                        style: TextStyle(color: m.isUser ? Colors.white : null)),
-                  ),
-                );
-              },
-            ),
-    ),
-    const Divider(height: 1),
-    Padding(
-      padding: EdgeInsets.only(
-        left: 12, right: 8, top: 8,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+  Widget build(BuildContext context) => Column(
+    children: [
+      Expanded(
+        child:
+            _msgs.isEmpty
+                ? const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Pergunte sobre treino, dieta ou saúde!'),
+                    SizedBox(height: 16),
+                    IaSafetyDisclaimer(),
+                  ],
+                )
+                : ListView.builder(
+                  controller: _scroll,
+                  padding: const EdgeInsets.all(12),
+                  itemCount: _msgs.length + (_loading ? 1 : 0),
+                  itemBuilder: (_, i) {
+                    if (i == _msgs.length) {
+                      return const Padding(
+                        padding: EdgeInsets.all(8),
+                        child: FxLoading(),
+                      );
+                    }
+                    final m = _msgs[i];
+                    return Align(
+                      alignment:
+                          m.isUser
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.75,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              m.isUser
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHigh,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          m.texto,
+                          style: TextStyle(
+                            color: m.isUser ? Colors.white : null,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
       ),
-      child: Row(children: [
-        Expanded(child: TextField(
-          controller: _ctrl,
-          decoration: InputDecoration(
-            hintText: 'Pergunte ao assistente...',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-          ),
-          maxLines: null,
-          textInputAction: TextInputAction.send,
-          onSubmitted: (_) => _enviar(),
-        )),
-        const SizedBox(width: 8),
-        IconButton.filled(
-          icon: const Icon(Icons.send),
-          onPressed: _loading ? null : _enviar,
+      const Divider(height: 1),
+      Padding(
+        padding: EdgeInsets.only(
+          left: 12,
+          right: 8,
+          top: 8,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 8,
         ),
-      ]),
-    ),
-  ]);
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _ctrl,
+                decoration: InputDecoration(
+                  hintText: 'Pergunte ao assistente...',
+                  border: FxInputDeco.outlineBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                maxLines: null,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => _enviar(),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton.filled(
+              icon: const Icon(Icons.send),
+              onPressed: _loading ? null : _enviar,
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 // ─── Progressão Tab ───────────────────────────────────────────────────────────
@@ -222,19 +259,26 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
   Future<void> _gerarProgressao() async {
     final id = widget.alunoId;
     if (id == null || id <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nao foi possivel identificar seu perfil de aluno.')),
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(
+          content: Text('Nao foi possivel identificar seu perfil de aluno.'),
+        ),
       );
       return;
     }
-    setState(() { _loading = true; _resultado = null; });
+    setState(() {
+      _loading = true;
+      _resultado = null;
+    });
     try {
       final repo = IaRepository(ref.read(apiClientProvider));
       final r = await repo.progressaoCarga(id);
       if (mounted) setState(() => _resultado = r);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(content: Text(friendlyError(e))),
         );
       }
@@ -245,34 +289,40 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
     padding: const EdgeInsets.all(16),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const Text(
-        'Progressão de Carga',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      const SizedBox(height: 8),
-      const Text(
-        'Gere recomendações personalizadas de progressão de carga com base no seu histórico de treinos.',
-        style: TextStyle(color: EagleTokens.inkMute),
-      ),
-      const SizedBox(height: 8),
-      const IaSafetyDisclaimer(compact: true),
-      const SizedBox(height: 20),
-      FilledButton.icon(
-        onPressed: _loading ? null : _gerarProgressao,
-        icon: _loading
-            ? const SizedBox(
-                width: 16, height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-            : const Icon(Icons.auto_awesome),
-        label: Text(_loading ? 'Analisando...' : 'Gerar Recomendações'),
-      ),
-      if (_resultado != null) ...[
-        const SizedBox(height: 20),
-        const Divider(),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Progressão de Carga',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        ),
         const SizedBox(height: 8),
-        MarkdownBody(data: _resultado!, selectable: true),
+        const Text(
+          'Gere recomendações personalizadas de progressão de carga com base no seu histórico de treinos.',
+          style: TextStyle(color: EagleTokens.inkMute),
+        ),
+        const SizedBox(height: 8),
+        const IaSafetyDisclaimer(compact: true),
+        const SizedBox(height: 20),
+        FilledButton.icon(
+          onPressed: _loading ? null : _gerarProgressao,
+          icon:
+              _loading
+                  ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: FxLoading(strokeWidth: 2, color: Colors.white),
+                  )
+                  : const Icon(Icons.auto_awesome),
+          label: Text(_loading ? 'Analisando...' : 'Gerar Recomendações'),
+        ),
+        if (_resultado != null) ...[
+          const SizedBox(height: 20),
+          const Divider(),
+          const SizedBox(height: 8),
+          MarkdownBody(data: _resultado!, selectable: true),
+        ],
       ],
-    ]),
+    ),
   );
 }

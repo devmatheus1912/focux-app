@@ -28,7 +28,10 @@ class HealthService {
   /// Returns true if access was granted.
   static Future<bool> requestAuthorization() async {
     try {
-      final granted = await _health.requestAuthorization(_types, permissions: _permissions);
+      final granted = await _health.requestAuthorization(
+        _types,
+        permissions: _permissions,
+      );
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_prefKey, granted);
       return granted;

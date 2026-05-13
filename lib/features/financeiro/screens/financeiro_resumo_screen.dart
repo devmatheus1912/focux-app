@@ -5,15 +5,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class FinanceiroResumoScreen extends ConsumerStatefulWidget {
   const FinanceiroResumoScreen({super.key});
 
   @override
-  ConsumerState<FinanceiroResumoScreen> createState() => _FinanceiroResumoScreenState();
+  ConsumerState<FinanceiroResumoScreen> createState() =>
+      _FinanceiroResumoScreenState();
 }
 
-class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen> {
+class _FinanceiroResumoScreenState
+    extends ConsumerState<FinanceiroResumoScreen> {
   late int _ano;
   late int _mes;
   bool _loading = false;
@@ -21,8 +24,19 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
   String? _erro;
 
   static const _meses = [
-    '', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+    '',
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
   ];
 
   @override
@@ -35,28 +49,50 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
   }
 
   Future<void> _carregar() async {
-    setState(() { _loading = true; _erro = null; });
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
-      final r = await FinanceiroRepository(ref.read(apiClientProvider))
-          .resumoMensal(_ano, _mes);
-      if (mounted) setState(() { _resumo = r; _loading = false; });
+      final r = await FinanceiroRepository(
+        ref.read(apiClientProvider),
+      ).resumoMensal(_ano, _mes);
+      if (mounted) {
+        setState(() {
+          _resumo = r;
+          _loading = false;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() { _erro = e.toString(); _loading = false; });
+      if (mounted) {
+        setState(() {
+          _erro = e.toString();
+          _loading = false;
+        });
+      }
     }
   }
 
   void _mesAnterior() {
     setState(() {
-      if (_mes == 1) { _mes = 12; _ano--; }
-      else { _mes--; }
+      if (_mes == 1) {
+        _mes = 12;
+        _ano--;
+      } else {
+        _mes--;
+      }
     });
     _carregar();
   }
 
   void _mesProximo() {
     setState(() {
-      if (_mes == 12) { _mes = 1; _ano++; }
-      else { _mes++; }
+      if (_mes == 12) {
+        _mes = 1;
+        _ano++;
+      } else {
+        _mes++;
+      }
     });
     _carregar();
   }
@@ -102,13 +138,14 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
             ),
           ),
           Expanded(
-            child: _loading
-                ? _buildLoading(isDark)
-                : _erro != null
+            child:
+                _loading
+                    ? _buildLoading(isDark)
+                    : _erro != null
                     ? _buildError(isDark, ink, mute, primary)
                     : _resumo == null
-                        ? _buildEmpty(isDark, ink, mute, primary)
-                        : _buildContent(isDark, ink, mute, primary),
+                    ? _buildEmpty(isDark, ink, mute, primary)
+                    : _buildContent(isDark, ink, mute, primary),
           ),
         ],
       ),
@@ -120,7 +157,7 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
       child: SizedBox(
         width: 28,
         height: 28,
-        child: CircularProgressIndicator(strokeWidth: 2.5),
+        child: FxLoading(strokeWidth: 2.5),
       ),
     );
   }
@@ -139,7 +176,11 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
                 color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: const Icon(Icons.cloud_off_rounded, color: EagleTokens.bad, size: 24),
+              child: const Icon(
+                Icons.cloud_off_rounded,
+                color: EagleTokens.bad,
+                size: 24,
+              ),
             ),
             const SizedBox(height: 14),
             Text(
@@ -164,8 +205,13 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
               style: OutlinedButton.styleFrom(
                 foregroundColor: primary,
                 side: BorderSide(color: primary.withValues(alpha: 0.3)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -191,10 +237,17 @@ class _FinanceiroResumoScreenState extends ConsumerState<FinanceiroResumoScreen>
           const SizedBox(height: 14),
           Text(
             'Sem dados para exibir',
-            style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: ink),
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: ink,
+            ),
           ),
           const SizedBox(height: 4),
-          Text('Nenhuma mensalidade neste período.', style: TextStyle(color: mute, fontSize: 13)),
+          Text(
+            'Nenhuma mensalidade neste período.',
+            style: TextStyle(color: mute, fontSize: 13),
+          ),
         ],
       ),
     );
@@ -255,7 +308,11 @@ class _NavArrow extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final bool isDark;
-  const _NavArrow({required this.icon, required this.onTap, required this.isDark});
+  const _NavArrow({
+    required this.icon,
+    required this.onTap,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -291,7 +348,8 @@ class _DonutChartCard extends StatelessWidget {
     final double pendente = previsto > recebido ? (previsto - recebido) : 0;
 
     final bool isEmpty = previsto == 0;
-    final double percentRecebido = isEmpty ? 0 : (recebido / previsto * 100).clamp(0, 100);
+    final double percentRecebido =
+        isEmpty ? 0 : (recebido / previsto * 100).clamp(0, 100);
 
     final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
@@ -317,23 +375,33 @@ class _DonutChartCard extends StatelessWidget {
                     sectionsSpace: 2,
                     centerSpaceRadius: 60,
                     startDegreeOffset: -90,
-                    sections: isEmpty
-                        ? [PieChartSectionData(value: 1, color: mute.withValues(alpha: 0.2), radius: 20, showTitle: false)]
-                        : [
-                            PieChartSectionData(
-                              value: recebido,
-                              color: EagleTokens.good,
-                              radius: 24,
-                              showTitle: false,
-                            ),
-                            if (pendente > 0)
+                    sections:
+                        isEmpty
+                            ? [
                               PieChartSectionData(
-                                value: pendente,
-                                color: EagleTokens.warn.withValues(alpha: 0.5),
+                                value: 1,
+                                color: mute.withValues(alpha: 0.2),
                                 radius: 20,
                                 showTitle: false,
                               ),
-                          ],
+                            ]
+                            : [
+                              PieChartSectionData(
+                                value: recebido,
+                                color: EagleTokens.good,
+                                radius: 24,
+                                showTitle: false,
+                              ),
+                              if (pendente > 0)
+                                PieChartSectionData(
+                                  value: pendente,
+                                  color: EagleTokens.warn.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                  radius: 20,
+                                  showTitle: false,
+                                ),
+                            ],
                   ),
                 ),
                 Column(
@@ -367,9 +435,17 @@ class _DonutChartCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _LegendDot(color: EagleTokens.good, label: 'Recebido', mute: mute),
+                _LegendDot(
+                  color: EagleTokens.good,
+                  label: 'Recebido',
+                  mute: mute,
+                ),
                 const SizedBox(width: 20),
-                _LegendDot(color: EagleTokens.warn.withValues(alpha: 0.5), label: 'Pendente', mute: mute),
+                _LegendDot(
+                  color: EagleTokens.warn.withValues(alpha: 0.5),
+                  label: 'Pendente',
+                  mute: mute,
+                ),
               ],
             ),
           ],
@@ -385,7 +461,11 @@ class _LegendDot extends StatelessWidget {
   final Color color;
   final String label;
   final Color mute;
-  const _LegendDot({required this.color, required this.label, required this.mute});
+  const _LegendDot({
+    required this.color,
+    required this.label,
+    required this.mute,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -394,10 +474,20 @@ class _LegendDot extends StatelessWidget {
         Container(
           width: 10,
           height: 10,
-          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4)),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(4),
+          ),
         ),
         const SizedBox(width: 6),
-        Text(label, style: TextStyle(fontSize: 12, color: mute, fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: mute,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }

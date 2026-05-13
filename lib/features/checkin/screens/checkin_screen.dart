@@ -14,6 +14,8 @@ import '../../../core/theme/design_tokens.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
   final int treinoId;
@@ -291,7 +293,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
         await _showEvolucaoPerformance(evolucoes);
         if (!mounted) return;
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(
             content: Text('Treino concluido. Historico atualizado.'),
           ),
@@ -428,7 +431,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     if (_loading) {
       return Scaffold(
         backgroundColor: bg,
-        body: Center(child: CircularProgressIndicator(color: brand)),
+        body: Center(child: FxLoading(color: brand)),
       );
     }
 
@@ -510,7 +513,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                     brandDeep: brandDeep,
                     dark: dark,
                     onApply: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      FeedbackHelper.showSnackBar(
+                        context,
                         const SnackBar(
                           content: Text(
                             'Sugestao registrada para a proxima serie.',
@@ -519,7 +523,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                       );
                     },
                     onSkip: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      FeedbackHelper.showSnackBar(
+                        context,
                         const SnackBar(
                           content: Text('Sugestao ignorada neste exercicio.'),
                         ),
@@ -538,7 +543,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                             ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: CircularProgressIndicator(
+                              child: FxLoading(
                                 strokeWidth: 2,
                                 color: Colors.white,
                               ),
@@ -1972,11 +1977,11 @@ class _SerieField extends StatelessWidget {
         filled: true,
         fillColor:
             dark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.lineSoft,
-        enabledBorder: OutlineInputBorder(
+        enabledBorder: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: line),
         ),
-        focusedBorder: OutlineInputBorder(
+        focusedBorder: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
             color: Theme.of(context).colorScheme.primary,
@@ -2268,7 +2273,7 @@ class _ExerciseVideoPreviewState extends State<_ExerciseVideoPreview> {
           border: Border.all(color: widget.brand.withValues(alpha: 0.22)),
         ),
         alignment: Alignment.center,
-        child: CircularProgressIndicator(color: widget.brand, strokeWidth: 2.5),
+        child: FxLoading(color: widget.brand, strokeWidth: 2.5),
       );
     }
 

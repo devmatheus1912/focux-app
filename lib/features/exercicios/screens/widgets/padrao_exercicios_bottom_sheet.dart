@@ -5,6 +5,7 @@ import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../providers/exercicios_provider.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class PadraoExerciciosBottomSheet extends ConsumerWidget {
   const PadraoExerciciosBottomSheet({
@@ -51,7 +52,7 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
                   child: SizedBox(
                     width: 28,
                     height: 28,
-                    child: CircularProgressIndicator(strokeWidth: 2.6),
+                    child: FxLoading(strokeWidth: 2.6),
                   ),
                 ),
             error:

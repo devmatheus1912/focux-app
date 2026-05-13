@@ -21,10 +21,7 @@ class OfflineCache {
     final prefs = await SharedPreferences.getInstance();
     final json = jsonEncode(data);
     await prefs.setString('$_prefix$key', json);
-    await prefs.setInt(
-      '$_tsPrefix$key',
-      DateTime.now().millisecondsSinceEpoch,
-    );
+    await prefs.setInt('$_tsPrefix$key', DateTime.now().millisecondsSinceEpoch);
   }
 
   /// Retrieve cached data for [key], or null if expired/missing.

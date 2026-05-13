@@ -20,13 +20,13 @@ class Broadcast {
   });
 
   factory Broadcast.fromJson(Map<String, dynamic> json) => Broadcast(
-        id: json['id'] as int,
-        titulo: json['titulo'] as String,
-        mensagem: json['mensagem'] as String,
-        tipoConsultoriaAlvo: json['tipoConsultoriaAlvo'] as String?,
-        enviadoEm: DateTime.parse(json['enviadoEm'] as String),
-        totalEnviados: json['totalEnviados'] as int,
-      );
+    id: json['id'] as int,
+    titulo: json['titulo'] as String,
+    mensagem: json['mensagem'] as String,
+    tipoConsultoriaAlvo: json['tipoConsultoriaAlvo'] as String?,
+    enviadoEm: DateTime.parse(json['enviadoEm'] as String),
+    totalEnviados: json['totalEnviados'] as int,
+  );
 }
 
 /// Repositório de broadcasts — envia notificações push em massa e lista histórico.
@@ -42,12 +42,15 @@ class BroadcastRepository {
     required String mensagem,
     String? tipoConsultoriaAlvo,
   }) async {
-    final response = await _dio.post('/api/broadcasts', data: {
-      'titulo': titulo,
-      'mensagem': mensagem,
-      if (tipoConsultoriaAlvo != null && tipoConsultoriaAlvo != 'TODOS')
-        'tipoConsultoriaAlvo': tipoConsultoriaAlvo,
-    });
+    final response = await _dio.post(
+      '/api/broadcasts',
+      data: {
+        'titulo': titulo,
+        'mensagem': mensagem,
+        if (tipoConsultoriaAlvo != null && tipoConsultoriaAlvo != 'TODOS')
+          'tipoConsultoriaAlvo': tipoConsultoriaAlvo,
+      },
+    );
     return Broadcast.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -55,6 +58,8 @@ class BroadcastRepository {
   Future<List<Broadcast>> listar() async {
     final response = await _dio.get('/api/broadcasts');
     final lista = response.data as List<dynamic>;
-    return lista.map((e) => Broadcast.fromJson(e as Map<String, dynamic>)).toList();
+    return lista
+        .map((e) => Broadcast.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

@@ -14,6 +14,7 @@ import '../../anamnese/data/anamnese_repository.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 final minhasMedidasProvider = FutureProvider<List<MedidaCorporal>>((ref) async {
   final repo = EvolucaoRepository(ref.read(apiClientProvider));
@@ -153,9 +154,10 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       await _save(silent: true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     } finally {
       if (mounted) {
@@ -199,15 +201,17 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       });
       ref.invalidate(alunoMeProvider);
       if (!silent && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(content: Text('Perfil do aluno atualizado.')),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     } finally {
       if (mounted) {
@@ -247,15 +251,17 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       await ref.read(apiClientProvider).dio.delete('/api/lgpd/me/delete');
       await ref.read(authProvider.notifier).logout();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Conta excluida com sucesso.')),
       );
       context.go('/login');
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      FeedbackHelper.showSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+        SnackBar(content: Text(friendlyError(e))),
+      );
     } finally {
       if (mounted) {
         setState(() => _deleting = false);
@@ -391,9 +397,10 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                 setModalState(() => fotoUrl = url);
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(
+                  FeedbackHelper.showSnackBar(
                     context,
-                  ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+                    SnackBar(content: Text(friendlyError(e))),
+                  );
                 }
               } finally {
                 if (ctx.mounted) {
@@ -430,14 +437,16 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                 }
                 if (!ctx.mounted || !mounted) return;
                 Navigator.of(ctx).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
+                FeedbackHelper.showSnackBar(
+                  context,
                   const SnackBar(content: Text('Nova medida registrada.')),
                 );
               } catch (e) {
                 if (!mounted) return;
-                ScaffoldMessenger.of(
+                FeedbackHelper.showSnackBar(
                   context,
-                ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+                  SnackBar(content: Text(friendlyError(e))),
+                );
               } finally {
                 if (ctx.mounted) {
                   setModalState(() => saving = false);
@@ -544,9 +553,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                 ? const SizedBox(
                                   width: 16,
                                   height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
+                                  child: FxLoading(strokeWidth: 2),
                                 )
                                 : const Icon(Icons.add_a_photo_outlined),
                         label: Text(
@@ -575,9 +582,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                   ? const SizedBox(
                                     width: 16,
                                     height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
+                                    child: FxLoading(strokeWidth: 2),
                                   )
                                   : const Icon(Icons.check_circle_outline),
                           label: const Text('Salvar medida'),
@@ -620,7 +625,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                     ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: FxLoading(strokeWidth: 2),
                     )
                     : const Text('Salvar'),
           ),
@@ -690,9 +695,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                             ? const SizedBox(
                                               width: 15,
                                               height: 15,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
+                                              child: FxLoading(strokeWidth: 2),
                                             )
                                             : const Icon(
                                               Icons.camera_alt,
@@ -1161,7 +1164,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                             ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: FxLoading(strokeWidth: 2),
                             )
                             : const Icon(Icons.delete_forever_outlined),
                     label: const Text('Excluir minha conta'),

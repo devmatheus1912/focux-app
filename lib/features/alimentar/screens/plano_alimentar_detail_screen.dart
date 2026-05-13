@@ -48,7 +48,8 @@ class _PlanoAlimentarDetailScreenState
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(content: Text(friendlyError(e))),
         );
       }
@@ -65,9 +66,10 @@ class _PlanoAlimentarDetailScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     }
   }
@@ -167,7 +169,8 @@ class _PlanoAlimentarDetailScreenState
       if (!mounted) return;
       await _load();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(content: Text('Dieta gerada com sucesso!')),
         );
       }
@@ -383,7 +386,7 @@ class _RefeicaoCard extends StatelessWidget {
                     child: Text(
                       r.nomeRefeicao,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
                         fontSize: 15,
                       ),
                     ),
@@ -487,7 +490,8 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
 
   Future<void> _salvar() async {
     if (_nome.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Nome da refeição é obrigatório.')),
       );
       return;
@@ -528,7 +532,7 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
           children: [
             const Text(
               'Nova Refeição',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 16),
             _field(_nome, 'Nome da refeição *'),
@@ -546,10 +550,7 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
                       ? const SizedBox(
                         height: 18,
                         width: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
+                        child: FxLoading(strokeWidth: 2, color: Colors.white),
                       )
                       : const Text('Adicionar Refeição'),
             ),

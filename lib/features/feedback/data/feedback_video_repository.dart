@@ -21,14 +21,14 @@ class FeedbackVideo {
   });
 
   factory FeedbackVideo.fromJson(Map<String, dynamic> j) => FeedbackVideo(
-        id: j['id'] as int,
-        alunoId: j['alunoId'] as int,
-        personalId: j['personalId'] as int?,
-        exercicioId: j['exercicioId'] as int,
-        videoUrl: j['videoUrl'] as String,
-        comentario: j['comentario'] as String,
-        criadoEm: DateTime.parse(j['criadoEm'] as String),
-      );
+    id: j['id'] as int,
+    alunoId: j['alunoId'] as int,
+    personalId: j['personalId'] as int?,
+    exercicioId: j['exercicioId'] as int,
+    videoUrl: j['videoUrl'] as String,
+    comentario: j['comentario'] as String,
+    criadoEm: DateTime.parse(j['criadoEm'] as String),
+  );
 }
 
 class FeedbackVideoRepository {
@@ -52,12 +52,15 @@ class FeedbackVideoRepository {
     required String videoUrl,
     required String comentario,
   }) async {
-    final r = await _dio.post('/api/feedback-videos', data: {
-      'alunoId': alunoId,
-      'exercicioId': exercicioId,
-      'videoUrl': videoUrl,
-      'comentario': comentario,
-    });
+    final r = await _dio.post(
+      '/api/feedback-videos',
+      data: {
+        'alunoId': alunoId,
+        'exercicioId': exercicioId,
+        'videoUrl': videoUrl,
+        'comentario': comentario,
+      },
+    );
     return FeedbackVideo.fromJson(r.data);
   }
 

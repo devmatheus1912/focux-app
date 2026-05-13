@@ -8,6 +8,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
 
@@ -195,7 +196,9 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     controller: obsCtrl,
                     decoration: InputDecoration(
                       labelText: 'Observação',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     maxLines: 2,
                   ),
@@ -221,7 +224,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     );
                     ref.invalidate(medidasProvider(widget.alunoId));
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      FeedbackHelper.showSnackBar(
+                        context,
                         const SnackBar(content: Text('Medida adicionada!')),
                       );
                     }
@@ -257,7 +261,9 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     controller: exercicioCtrl,
                     decoration: InputDecoration(
                       labelText: 'Exercício',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -267,7 +273,9 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     controller: unidadeCtrl,
                     decoration: InputDecoration(
                       labelText: 'Unidade (kg, reps...)',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -275,7 +283,9 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     controller: obsCtrl,
                     decoration: InputDecoration(
                       labelText: 'Observação',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     maxLines: 2,
                   ),
@@ -303,7 +313,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     );
                     ref.invalidate(recordesProvider(widget.alunoId));
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      FeedbackHelper.showSnackBar(
+                        context,
                         const SnackBar(content: Text('Recorde adicionado!')),
                       );
                     }
@@ -569,7 +580,7 @@ class _Chip extends StatelessWidget {
           ),
           Text(
             valor,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
           ),
         ],
       ),
@@ -589,7 +600,9 @@ class _CampoNumerico extends StatelessWidget {
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+        border: FxInputDeco.outlineBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
       ),
     );
   }

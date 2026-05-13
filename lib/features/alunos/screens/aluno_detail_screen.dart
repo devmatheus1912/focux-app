@@ -150,7 +150,8 @@ class AlunoDetailScreen extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(content: Text('Não foi possível gerar senha: $e')),
         );
       }
@@ -293,7 +294,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                       await Clipboard.setData(ClipboardData(text: mensagem));
                       if (ctx.mounted) Navigator.of(ctx).pop();
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        FeedbackHelper.showSnackBar(
+                          context,
                           SnackBar(
                             content: Text(
                               hasWhatsapp
@@ -332,7 +334,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                         HapticFeedback.mediumImpact();
                         if (ctx.mounted) Navigator.of(ctx).pop();
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          FeedbackHelper.showSnackBar(
+                            context,
                             const SnackBar(content: Text('Convite copiado.')),
                           );
                         }
@@ -476,7 +479,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                     style: TextStyle(
                                       color: primary,
                                       fontSize: 22,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ),
@@ -491,7 +494,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 22,
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w700,
                                           letterSpacing: -0.5,
                                         ),
                                         maxLines: 1,
@@ -1502,7 +1505,8 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                           onPressed: () {
                             Clipboard.setData(ClipboardData(text: message));
                             Navigator.pop(sheetContext);
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            FeedbackHelper.showSnackBar(
+                              context,
                               const SnackBar(
                                 content: Text('Mensagem copiada.'),
                               ),
@@ -1567,7 +1571,8 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       if (existing != null) {
         ref.invalidate(alunoOpenIaActionsProvider(aluno.id));
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          FeedbackHelper.showSnackBar(
+            context,
             SnackBar(
               content: const Text('Tarefa ja aberta no Command Center.'),
               action: SnackBarAction(
@@ -1605,7 +1610,8 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       ref.invalidate(commandCenterProvider);
       ref.invalidate(alunoOpenIaActionsProvider(aluno.id));
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(
             content: Text(
               persisted
@@ -1628,7 +1634,8 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       return persisted;
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(content: Text('Nao foi possivel criar tarefa: $e')),
         );
       }
@@ -2004,7 +2011,8 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
                             );
                             if (sheetContext.mounted) {
                               Navigator.of(sheetContext).pop();
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              FeedbackHelper.showSnackBar(
+                                context,
                                 const SnackBar(
                                   content: Text('Mensagem copiada.'),
                                 ),
@@ -2230,7 +2238,10 @@ class _Aluno360TimelineCard extends StatelessWidget {
     required this.isDark,
   });
 
-  static _Timeline360Item _itemFromApi(Timeline360Event e) {
+  static _Timeline360Item _itemFromApi(
+    Timeline360Event e, {
+    required Color primary,
+  }) {
     final at = DateTime.tryParse(e.ocorridoEm);
     final tipo = e.tipo;
     IconData icon;
@@ -2265,7 +2276,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
       default:
         if (tipo.startsWith('CHAT_')) {
           icon = Icons.chat_bubble_outline;
-          color = EagleTokens.brand;
+          color = primary;
           kind = 'Chat';
         } else {
           icon = Icons.bolt_outlined;
@@ -2287,10 +2298,13 @@ class _Aluno360TimelineCard extends StatelessWidget {
     );
   }
 
-  List<_Timeline360Item> _items() {
+  List<_Timeline360Item> _items(Color primary) {
     final api = timelineApiAsync.valueOrNull;
     if (api != null && api.isNotEmpty) {
-      return api.take(7).map(_itemFromApi).toList();
+      return api
+          .take(7)
+          .map((event) => _itemFromApi(event, primary: primary))
+          .toList();
     }
     final items = <_Timeline360Item>[];
     for (final snapshot in snapshotsAsync.valueOrNull ?? const []) {
@@ -2371,7 +2385,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
         eventosAsync.isLoading ||
         snapshotsAsync.isLoading ||
         timelineApiAsync.isLoading;
-    final items = _items();
+    final items = _items(primary);
     final visibleItems = items.take(3).toList();
     final hasMore = items.length > visibleItems.length;
 
@@ -2905,7 +2919,7 @@ class _Aluno360ActionRowState extends State<_Aluno360ActionRow> {
                     ? const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: FxLoading(strokeWidth: 2),
                     )
                     : Icon(
                       hasTask
@@ -3253,7 +3267,7 @@ class _HeroStat extends StatelessWidget {
           style: const TextStyle(
             color: Colors.white,
             fontSize: 20,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
             letterSpacing: -0.5,
           ),
         ),
@@ -3358,7 +3372,7 @@ class _MeasurementCard extends StatelessWidget {
                 style: TextStyle(
                   color: ink,
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: -0.5,
                 ),
               ),

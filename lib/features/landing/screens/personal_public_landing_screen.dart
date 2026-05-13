@@ -21,6 +21,7 @@ import '../widgets/powered_by_footer.dart';
 import '../widgets/tecnologia_section.dart';
 import '../widgets/faq_section.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 // ---------------------------------------------------------------------------
 // Provider
@@ -72,7 +73,8 @@ Future<void> _abrirStore(BuildContext context) async {
     } catch (_) {}
   }
   if (!ok && context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    FeedbackHelper.showSnackBar(
+      context,
       const SnackBar(
         content: Text('Não foi possível abrir a loja. Tente novamente.'),
       ),

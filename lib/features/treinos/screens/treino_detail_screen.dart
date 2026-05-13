@@ -240,7 +240,10 @@ class _TreinoDetailBody extends StatelessWidget {
           await repo.duplicar(treinoId);
           ref.invalidate(treinosProvider);
           if (context.mounted) {
-            FeedbackHelper.showSuccess(context, 'Treino duplicado com sucesso.');
+            FeedbackHelper.showSuccess(
+              context,
+              'Treino duplicado com sucesso.',
+            );
           }
         } catch (e) {
           if (context.mounted) {
@@ -616,7 +619,7 @@ class _TreinoDetailBody extends StatelessWidget {
                       color:
                           isDark
                               ? Colors.white.withValues(alpha: 0.08)
-                              : EagleTokens.brand.withValues(alpha: 0.08),
+                              : primary.withValues(alpha: 0.08),
                     ),
                   ),
                   child: Text(
@@ -642,9 +645,9 @@ class _TreinoDetailBody extends StatelessWidget {
               primary: primary,
               onAdd: () {
                 HapticFeedback.mediumImpact();
-                context
-                    .push<bool>('/treinos/$treinoId/exercicios/add')
-                    .then((added) {
+                context.push<bool>('/treinos/$treinoId/exercicios/add').then((
+                  added,
+                ) {
                   if (added == true) {
                     ref.invalidate(treinoProvider(treinoId));
                   }
@@ -982,6 +985,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).padding.bottom;
+    final primary = Theme.of(context).colorScheme.primary;
     final ink = widget.isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = widget.isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final border =
@@ -1034,9 +1038,9 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                       color: EagleTokens.brandSofter,
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.person_add_alt_1_rounded,
-                      color: EagleTokens.brand,
+                      color: primary,
                       size: 20,
                     ),
                   ),
@@ -1133,9 +1137,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                               border: Border.all(
                                 color:
                                     selected
-                                        ? EagleTokens.brand.withValues(
-                                          alpha: 0.28,
-                                        )
+                                        ? primary.withValues(alpha: 0.28)
                                         : border,
                               ),
                             ),
@@ -1147,7 +1149,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                   decoration: BoxDecoration(
                                     color:
                                         selected
-                                            ? EagleTokens.brand
+                                            ? primary
                                             : EagleTokens.brandSofter,
                                     borderRadius: BorderRadius.circular(14),
                                   ),
@@ -1155,10 +1157,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                   child: Text(
                                     initials,
                                     style: TextStyle(
-                                      color:
-                                          selected
-                                              ? Colors.white
-                                              : EagleTokens.brand,
+                                      color: selected ? Colors.white : primary,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w900,
                                     ),
@@ -1203,7 +1202,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                       : Icons.radio_button_unchecked_rounded,
                                   color:
                                       selected
-                                          ? EagleTokens.brand
+                                          ? primary
                                           : mute.withValues(alpha: 0.7),
                                   size: 20,
                                 ),
@@ -1245,8 +1244,8 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                               : () => Navigator.pop(context, selectedAlunoId),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size.fromHeight(46),
-                        backgroundColor: EagleTokens.brand,
-                        disabledBackgroundColor: EagleTokens.brand.withValues(
+                        backgroundColor: primary,
+                        disabledBackgroundColor: primary.withValues(
                           alpha: 0.28,
                         ),
                         shape: RoundedRectangleBorder(
@@ -1958,6 +1957,7 @@ class _DeleteTrainingSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final card = isDark ? EagleTokens.darkCard : Colors.white;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -2061,8 +2061,7 @@ class _DeleteTrainingSheet extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.history_rounded,
-                      color:
-                          isDark ? EagleTokens.darkInkMute : EagleTokens.brand,
+                      color: isDark ? EagleTokens.darkInkMute : primary,
                       size: 18,
                     ),
                     const SizedBox(width: 9),
@@ -2183,7 +2182,9 @@ class _DetailErrorState extends StatelessWidget {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: EagleTokens.bad.withValues(alpha: isDark ? 0.16 : 0.09),
+                  color: EagleTokens.bad.withValues(
+                    alpha: isDark ? 0.16 : 0.09,
+                  ),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: const Icon(
@@ -2284,11 +2285,7 @@ class _EmptyExercisesState extends StatelessWidget {
                 color: primary.withValues(alpha: isDark ? 0.12 : 0.08),
               ),
             ),
-            child: Icon(
-              Icons.fitness_center_rounded,
-              color: primary,
-              size: 34,
-            ),
+            child: Icon(Icons.fitness_center_rounded, color: primary, size: 34),
           ),
           const SizedBox(height: 18),
           Text(

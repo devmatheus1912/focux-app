@@ -384,8 +384,14 @@ class ChatRepository {
   // ── Fase 2: WhatsApp-level conversation management ─────────────────────────
 
   /// Pin, unpin, archive, unarchive, mute, unmute, or clear a conversation
-  Future<Map<String, dynamic>> conversationAction(int alunoId, String action) async {
-    final r = await _dio.post('/api/chat/conversas/$alunoId/action', data: {'action': action});
+  Future<Map<String, dynamic>> conversationAction(
+    int alunoId,
+    String action,
+  ) async {
+    final r = await _dio.post(
+      '/api/chat/conversas/$alunoId/action',
+      data: {'action': action},
+    );
     return r.data as Map<String, dynamic>;
   }
 
@@ -405,7 +411,10 @@ class ChatRepository {
 
   /// Global search across all conversations
   Future<List<ChatMsg>> globalSearch(String query) async {
-    final r = await _dio.get('/api/chat/inbox/search', queryParameters: {'q': query});
+    final r = await _dio.get(
+      '/api/chat/inbox/search',
+      queryParameters: {'q': query},
+    );
     return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
   }
 

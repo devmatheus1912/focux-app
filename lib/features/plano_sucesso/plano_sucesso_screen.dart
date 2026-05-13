@@ -75,7 +75,10 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                   Text(
                     'ALUNO #${widget.alunoId}',
                     style: TextStyle(
-                      color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                      color:
+                          isDark
+                              ? EagleTokens.darkInkMute
+                              : EagleTokens.inkMute,
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.8,
@@ -101,7 +104,9 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                 gradient: EagleTokens.heroGradient(dark: isDark),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.28),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.28),
                     blurRadius: 32,
                     offset: const Offset(0, 16),
                   ),
@@ -135,10 +140,15 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          pendentes.isEmpty ? 'Plano completo' : 'Proximo: ${pendentes.first.titulo}',
+                          pendentes.isEmpty
+                              ? 'Plano completo'
+                              : 'Proximo: ${pendentes.first.titulo}',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white70, fontSize: 13),
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -152,18 +162,25 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                 index: i + 1,
                 marco: plano.marcos[i],
                 atual: plano.marcos[i].id == atual,
-                onChanged: plano.marcos[i].atingido
-                    ? null
-                    : () async {
-                        try {
-                          await provider.atingirMarco(plano.marcos[i].id);
-                          if (!context.mounted) return;
-                          FeedbackHelper.showSuccess(context, 'Marco atingido!');
-                        } catch (_) {
-                          if (!context.mounted) return;
-                          FeedbackHelper.showError(context, 'Erro ao atualizar o marco.');
-                        }
-                      },
+                onChanged:
+                    plano.marcos[i].atingido
+                        ? null
+                        : () async {
+                          try {
+                            await provider.atingirMarco(plano.marcos[i].id);
+                            if (!context.mounted) return;
+                            FeedbackHelper.showSuccess(
+                              context,
+                              'Marco atingido!',
+                            );
+                          } catch (_) {
+                            if (!context.mounted) return;
+                            FeedbackHelper.showError(
+                              context,
+                              'Erro ao atualizar o marco.',
+                            );
+                          }
+                        },
               ),
           ],
         ),
@@ -184,10 +201,17 @@ class _SuccessRing extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          CustomPaint(size: const Size(80, 80), painter: _SuccessRingPainter(fraction: fraction)),
+          CustomPaint(
+            size: const Size(80, 80),
+            painter: _SuccessRingPainter(fraction: fraction),
+          ),
           Text(
             '${(fraction * 100).round()}%',
-            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ],
       ),
@@ -202,16 +226,18 @@ class _SuccessRingPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final track = Paint()
-      ..color = Colors.white.withValues(alpha: 0.18)
-      ..strokeWidth = 8
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    final active = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 8
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+    final track =
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.18)
+          ..strokeWidth = 8
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+    final active =
+        Paint()
+          ..color = Colors.white
+          ..strokeWidth = 8
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
     canvas.drawCircle(center, 32, track);
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: 32),
@@ -223,7 +249,8 @@ class _SuccessRingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SuccessRingPainter oldDelegate) => oldDelegate.fraction != fraction;
+  bool shouldRepaint(_SuccessRingPainter oldDelegate) =>
+      oldDelegate.fraction != fraction;
 }
 
 class _MarcoTile extends StatelessWidget {
@@ -247,7 +274,10 @@ class _MarcoTile extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final doneBg = isDark ? EagleTokens.good.withValues(alpha: 0.18) : EagleTokens.goodSoft;
+    final doneBg =
+        isDark
+            ? EagleTokens.good.withValues(alpha: 0.18)
+            : EagleTokens.goodSoft;
     final currentBg = brand.withValues(alpha: isDark ? 0.16 : 0.10);
 
     return InkWell(
@@ -267,20 +297,32 @@ class _MarcoTile extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: marco.atingido ? doneBg : (atual ? currentBg : (isDark ? Colors.white.withValues(alpha: 0.04) : EagleTokens.lineSoft)),
+                color:
+                    marco.atingido
+                        ? doneBg
+                        : (atual
+                            ? currentBg
+                            : (isDark
+                                ? Colors.white.withValues(alpha: 0.04)
+                                : EagleTokens.lineSoft)),
                 shape: BoxShape.circle,
               ),
               child: Center(
-                child: marco.atingido
-                    ? const Icon(Icons.check_rounded, size: 18, color: EagleTokens.good)
-                    : Text(
-                        '$index',
-                        style: TextStyle(
-                          color: atual ? brand : mute,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w900,
+                child:
+                    marco.atingido
+                        ? const Icon(
+                          Icons.check_rounded,
+                          size: 18,
+                          color: EagleTokens.good,
+                        )
+                        : Text(
+                          '$index',
+                          style: TextStyle(
+                            color: atual ? brand : mute,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
-                      ),
               ),
             ),
             const SizedBox(width: 12),
@@ -293,14 +335,19 @@ class _MarcoTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: marco.atingido ? EagleTokens.good : (atual ? brand : ink),
+                      color:
+                          marco.atingido
+                              ? EagleTokens.good
+                              : (atual ? brand : ink),
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    marco.atingido ? 'Etapa concluida.' : (atual ? 'Etapa atual do onboarding.' : 'Pendente.'),
+                    marco.atingido
+                        ? 'Etapa concluida.'
+                        : (atual ? 'Etapa atual do onboarding.' : 'Pendente.'),
                     style: TextStyle(color: mute, fontSize: 11.5),
                   ),
                 ],

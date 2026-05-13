@@ -31,8 +31,15 @@ class Mensalidade {
   final String status;
   final String? pagoEm;
 
-  Mensalidade({required this.id, required this.alunoId, required this.alunoNome,
-    required this.valor, required this.mesReferencia, required this.status, this.pagoEm});
+  Mensalidade({
+    required this.id,
+    required this.alunoId,
+    required this.alunoNome,
+    required this.valor,
+    required this.mesReferencia,
+    required this.status,
+    this.pagoEm,
+  });
 
   factory Mensalidade.fromJson(Map<String, dynamic> j) => Mensalidade(
     id: j['id'] as int,
@@ -52,8 +59,13 @@ class VencimentoItem {
   final String mesReferencia;
   final String status;
 
-  VencimentoItem({required this.mensalidadeId, required this.alunoNome,
-    required this.valor, required this.mesReferencia, required this.status});
+  VencimentoItem({
+    required this.mensalidadeId,
+    required this.alunoNome,
+    required this.valor,
+    required this.mesReferencia,
+    required this.status,
+  });
 
   factory VencimentoItem.fromJson(Map<String, dynamic> j) => VencimentoItem(
     mensalidadeId: j['mensalidadeId'] as int,
@@ -69,7 +81,11 @@ class TopAlunoItem {
   final String alunoNome;
   final double totalPago;
 
-  TopAlunoItem({required this.alunoId, required this.alunoNome, required this.totalPago});
+  TopAlunoItem({
+    required this.alunoId,
+    required this.alunoNome,
+    required this.totalPago,
+  });
 
   factory TopAlunoItem.fromJson(Map<String, dynamic> j) => TopAlunoItem(
     alunoId: j['alunoId'] as int,
@@ -84,10 +100,11 @@ class EvolucaoMensalItem {
 
   EvolucaoMensalItem({required this.mes, required this.recebido});
 
-  factory EvolucaoMensalItem.fromJson(Map<String, dynamic> j) => EvolucaoMensalItem(
-    mes: j['mes'] as String,
-    recebido: (j['recebido'] as num).toDouble(),
-  );
+  factory EvolucaoMensalItem.fromJson(Map<String, dynamic> j) =>
+      EvolucaoMensalItem(
+        mes: j['mes'] as String,
+        recebido: (j['recebido'] as num).toDouble(),
+      );
 }
 
 class FinanceiroDashboard {
@@ -101,25 +118,38 @@ class FinanceiroDashboard {
   final List<EvolucaoMensalItem> evolucaoMensal;
 
   FinanceiroDashboard({
-    required this.receitaMes, required this.receitaAcumulada,
-    required this.ticketMedio, required this.totalInadimplentes,
-    required this.previsaoReceita, required this.vencimentosProximos,
-    required this.topAlunos, required this.evolucaoMensal,
+    required this.receitaMes,
+    required this.receitaAcumulada,
+    required this.ticketMedio,
+    required this.totalInadimplentes,
+    required this.previsaoReceita,
+    required this.vencimentosProximos,
+    required this.topAlunos,
+    required this.evolucaoMensal,
   });
 
-  factory FinanceiroDashboard.fromJson(Map<String, dynamic> j) => FinanceiroDashboard(
-    receitaMes: (j['receitaMes'] as num).toDouble(),
-    receitaAcumulada: (j['receitaAcumulada'] as num).toDouble(),
-    ticketMedio: (j['ticketMedio'] as num).toDouble(),
-    totalInadimplentes: j['totalInadimplentes'] as int,
-    previsaoReceita: (j['previsaoReceita'] as num).toDouble(),
-    vencimentosProximos: (j['vencimentosProximos'] as List)
-        .map((e) => VencimentoItem.fromJson(e as Map<String, dynamic>)).toList(),
-    topAlunos: (j['topAlunos'] as List)
-        .map((e) => TopAlunoItem.fromJson(e as Map<String, dynamic>)).toList(),
-    evolucaoMensal: (j['evolucaoMensal'] as List)
-        .map((e) => EvolucaoMensalItem.fromJson(e as Map<String, dynamic>)).toList(),
-  );
+  factory FinanceiroDashboard.fromJson(Map<String, dynamic> j) =>
+      FinanceiroDashboard(
+        receitaMes: (j['receitaMes'] as num).toDouble(),
+        receitaAcumulada: (j['receitaAcumulada'] as num).toDouble(),
+        ticketMedio: (j['ticketMedio'] as num).toDouble(),
+        totalInadimplentes: j['totalInadimplentes'] as int,
+        previsaoReceita: (j['previsaoReceita'] as num).toDouble(),
+        vencimentosProximos:
+            (j['vencimentosProximos'] as List)
+                .map((e) => VencimentoItem.fromJson(e as Map<String, dynamic>))
+                .toList(),
+        topAlunos:
+            (j['topAlunos'] as List)
+                .map((e) => TopAlunoItem.fromJson(e as Map<String, dynamic>))
+                .toList(),
+        evolucaoMensal:
+            (j['evolucaoMensal'] as List)
+                .map(
+                  (e) => EvolucaoMensalItem.fromJson(e as Map<String, dynamic>),
+                )
+                .toList(),
+      );
 }
 
 class ResumoMensal {
@@ -140,10 +170,9 @@ class ResumoMensal {
   factory ResumoMensal.fromJson(Map<String, dynamic> j) => ResumoMensal(
     totalRecebido: (j['totalRecebido'] as num? ?? 0).toDouble(),
     totalPrevisto: (j['totalPrevisto'] as num? ?? 0).toDouble(),
-    inadimplentes: (j['inadimplentes'] as num? ??
-            j['totalInadimplentes'] as num? ??
-            0)
-        .toInt(),
+    inadimplentes:
+        (j['inadimplentes'] as num? ?? j['totalInadimplentes'] as num? ?? 0)
+            .toInt(),
     ticketMedio: (j['ticketMedio'] as num? ?? 0).toDouble(),
     acumuladoAnual: (j['acumuladoAnual'] as num? ?? 0).toDouble(),
   );
@@ -158,11 +187,19 @@ class FinanceiroRepository {
     return (r.data as List).map((e) => Mensalidade.fromJson(e)).toList();
   }
 
-  Future<void> registrarContato(int mensalidadeId, String tipo, String? observacao) async {
-    await _dio.post('/api/financeiro/mensalidades/$mensalidadeId/registrar-contato', data: {
-      'tipo': tipo,
-      if (observacao != null && observacao.isNotEmpty) 'observacao': observacao,
-    });
+  Future<void> registrarContato(
+    int mensalidadeId,
+    String tipo,
+    String? observacao,
+  ) async {
+    await _dio.post(
+      '/api/financeiro/mensalidades/$mensalidadeId/registrar-contato',
+      data: {
+        'tipo': tipo,
+        if (observacao != null && observacao.isNotEmpty)
+          'observacao': observacao,
+      },
+    );
   }
 
   Future<void> atualizarAtrasos() async {
@@ -179,12 +216,19 @@ class FinanceiroRepository {
     return (r.data as List).map((e) => Mensalidade.fromJson(e)).toList();
   }
 
-  Future<Mensalidade> criar(int alunoId, double valor, String mesReferencia) async {
-    final r = await _dio.post('/api/financeiro/mensalidades', data: {
-      'alunoId': alunoId,
-      'valor': valor,
-      'mesReferencia': mesReferencia,
-    });
+  Future<Mensalidade> criar(
+    int alunoId,
+    double valor,
+    String mesReferencia,
+  ) async {
+    final r = await _dio.post(
+      '/api/financeiro/mensalidades',
+      data: {
+        'alunoId': alunoId,
+        'valor': valor,
+        'mesReferencia': mesReferencia,
+      },
+    );
     return Mensalidade.fromJson(r.data);
   }
 
@@ -194,11 +238,18 @@ class FinanceiroRepository {
   }
 
   Future<PixData> gerarPix(int mensalidadeId) async {
-    final r = await _dio.post('/api/financeiro/mensalidades/$mensalidadeId/pix');
+    final r = await _dio.post(
+      '/api/financeiro/mensalidades/$mensalidadeId/pix',
+    );
     return PixData.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<Mensalidade> editarMensalidade(int id, {double? valor, String? mesReferencia, String? status}) async {
+  Future<Mensalidade> editarMensalidade(
+    int id, {
+    double? valor,
+    String? mesReferencia,
+    String? status,
+  }) async {
     final body = <String, dynamic>{};
     if (valor != null) body['valor'] = valor;
     if (mesReferencia != null) body['mesReferencia'] = mesReferencia;
@@ -208,7 +259,10 @@ class FinanceiroRepository {
   }
 
   Future<List<Mensalidade>> listarPorNome(String nome) async {
-    final r = await _dio.get('/api/financeiro/mensalidades', queryParameters: {'nomeAluno': nome});
+    final r = await _dio.get(
+      '/api/financeiro/mensalidades',
+      queryParameters: {'nomeAluno': nome},
+    );
     return (r.data as List).map((e) => Mensalidade.fromJson(e)).toList();
   }
 
@@ -224,7 +278,9 @@ class FinanceiroRepository {
     final r = await _dio.post('/api/financeiro/mensalidades/$id/cobrar-chat');
     final data = r.data;
     if (data is Map<String, dynamic>) {
-      return data['mensagem']?.toString() ?? data['message']?.toString() ?? 'Cobrança enviada!';
+      return data['mensagem']?.toString() ??
+          data['message']?.toString() ??
+          'Cobrança enviada!';
     }
     return data?.toString() ?? 'Cobrança enviada!';
   }

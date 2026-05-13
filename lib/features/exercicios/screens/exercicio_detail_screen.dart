@@ -10,6 +10,8 @@ import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class ExercicioDetailScreen extends ConsumerStatefulWidget {
   final int exercicioId;
@@ -35,7 +37,8 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     } catch (e) {
       debugPrint('[Focux] Error: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(content: Text('Erro ao atualizar favorito.')),
         );
       }
@@ -56,15 +59,17 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
       ref.invalidate(exercicioProvider(widget.exercicioId));
       ref.invalidate(exerciciosFilteredProvider);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Video proprio adicionado ao exercicio.')),
       );
     } catch (e) {
       debugPrint('[Focux] Error: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     } finally {
       if (mounted) setState(() => _uploadingVideo = false);
@@ -87,7 +92,9 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
               minLines: 3,
               maxLines: 6,
               decoration: InputDecoration(
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 hintText: 'Notas tecnicas, fonte do video ou motivo da decisao',
               ),
             ),
@@ -118,7 +125,8 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
       ref.invalidate(exerciciosFilteredProvider);
       ref.invalidate(exerciciosCuradoriaProvider);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(
           content: Text(
             'Curadoria marcada como ${_formatEditorialStatus(status)}.',
@@ -128,9 +136,10 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     } catch (e) {
       debugPrint('[Focux] Error: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     }
   }
@@ -211,10 +220,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
             ),
             Expanded(
               child: exercicioAsync.when(
-                loading:
-                    () => Center(
-                      child: CircularProgressIndicator(color: primary),
-                    ),
+                loading: () => Center(child: FxLoading(color: primary)),
                 error: (e, _) => Center(child: Text('Erro: $e')),
                 data:
                     (ex) => SingleChildScrollView(
@@ -1173,10 +1179,7 @@ class _VideoPlayerState extends State<_VideoPlayer> {
       );
     }
     if (!_ready) {
-      return const SizedBox(
-        height: 200,
-        child: FxLoading(),
-      );
+      return const SizedBox(height: 200, child: FxLoading());
     }
     final controller = _ctrl;
     if (controller == null) return const SizedBox.shrink();
@@ -1301,10 +1304,7 @@ class _OwnVideoPanel extends StatelessWidget {
                     ? const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
+                      child: FxLoading(strokeWidth: 2, color: Colors.white),
                     )
                     : Icon(
                       hasVideo ? Icons.sync_rounded : Icons.upload_rounded,

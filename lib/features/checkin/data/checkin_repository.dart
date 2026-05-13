@@ -60,7 +60,8 @@ class ExecucaoExercicio {
     this.seriesDetalhes = const [],
   });
 
-  factory ExecucaoExercicio.fromJson(Map<String, dynamic> j) => ExecucaoExercicio(
+  factory ExecucaoExercicio.fromJson(Map<String, dynamic> j) =>
+      ExecucaoExercicio(
         id: j['id'] as int,
         treinoExercicioId: j['treinoExercicioId'] as int,
         exercicioNome: j['exercicioNome'] as String,
@@ -87,9 +88,10 @@ class ExecucaoExercicio {
         feedbackAnterior: j['feedbackAnterior'] as String?,
         rpeAnterior: j['rpeAnterior'] as int?,
         dorAnterior: j['dorAnterior'] as bool?,
-        seriesDetalhes: (j['seriesDetalhes'] as List<dynamic>? ?? const [])
-            .map((e) => ExecucaoSerie.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        seriesDetalhes:
+            (j['seriesDetalhes'] as List<dynamic>? ?? const [])
+                .map((e) => ExecucaoSerie.fromJson(e as Map<String, dynamic>))
+                .toList(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -128,36 +130,35 @@ class ExecucaoExercicio {
     String? feedback,
     int? rpe,
     bool? dor,
-  }) =>
-      ExecucaoExercicio(
-        id: id,
-        treinoExercicioId: treinoExercicioId,
-        exercicioNome: exercicioNome,
-        gifUrl: gifUrl,
-        thumbnailUrl: thumbnailUrl,
-        videoUrl: videoUrl,
-        videoSource: videoSource,
-        licenseStatus: licenseStatus,
-        errosComuns: errosComuns,
-        contraindicacoes: contraindicacoes,
-        substitutos: substitutos,
-        series: series,
-        repeticoes: repeticoes,
-        cargaKg: cargaKg,
-        descansoSegundos: descansoSegundos,
-        observacoes: observacoes,
-        seriesFeitas: seriesFeitas ?? this.seriesFeitas,
-        concluido: concluido ?? this.concluido,
-        feedback: feedback ?? this.feedback,
-        rpe: rpe ?? this.rpe,
-        dor: dor ?? this.dor,
-        cargaAnteriorKg: cargaAnteriorKg,
-        seriesFeitasAnterior: seriesFeitasAnterior,
-        feedbackAnterior: feedbackAnterior,
-        rpeAnterior: rpeAnterior,
-        dorAnterior: dorAnterior,
-        seriesDetalhes: seriesDetalhes,
-      );
+  }) => ExecucaoExercicio(
+    id: id,
+    treinoExercicioId: treinoExercicioId,
+    exercicioNome: exercicioNome,
+    gifUrl: gifUrl,
+    thumbnailUrl: thumbnailUrl,
+    videoUrl: videoUrl,
+    videoSource: videoSource,
+    licenseStatus: licenseStatus,
+    errosComuns: errosComuns,
+    contraindicacoes: contraindicacoes,
+    substitutos: substitutos,
+    series: series,
+    repeticoes: repeticoes,
+    cargaKg: cargaKg,
+    descansoSegundos: descansoSegundos,
+    observacoes: observacoes,
+    seriesFeitas: seriesFeitas ?? this.seriesFeitas,
+    concluido: concluido ?? this.concluido,
+    feedback: feedback ?? this.feedback,
+    rpe: rpe ?? this.rpe,
+    dor: dor ?? this.dor,
+    cargaAnteriorKg: cargaAnteriorKg,
+    seriesFeitasAnterior: seriesFeitasAnterior,
+    feedbackAnterior: feedbackAnterior,
+    rpeAnterior: rpeAnterior,
+    dorAnterior: dorAnterior,
+    seriesDetalhes: seriesDetalhes,
+  );
 }
 
 class ExecucaoSerie {
@@ -182,15 +183,15 @@ class ExecucaoSerie {
   });
 
   factory ExecucaoSerie.fromJson(Map<String, dynamic> json) => ExecucaoSerie(
-        id: json['id'] as int,
-        numero: json['numero'] as int,
-        cargaKg: _toDouble(json['cargaKg']),
-        repeticoes: json['repeticoes'] as String?,
-        feedback: json['feedback'] as String?,
-        rpe: json['rpe'] as int?,
-        dor: json['dor'] as bool? ?? false,
-        criadoEm: json['criadoEm'] as String?,
-      );
+    id: json['id'] as int,
+    numero: json['numero'] as int,
+    cargaKg: _toDouble(json['cargaKg']),
+    repeticoes: json['repeticoes'] as String?,
+    feedback: json['feedback'] as String?,
+    rpe: json['rpe'] as int?,
+    dor: json['dor'] as bool? ?? false,
+    criadoEm: json['criadoEm'] as String?,
+  );
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -234,24 +235,25 @@ class ExecucaoTreino {
   });
 
   factory ExecucaoTreino.fromJson(Map<String, dynamic> j) => ExecucaoTreino(
-        id: j['id'] as int?,
-        treinoId: j['treinoId'] as int,
-        treinoNome: j['treinoNome'] as String,
-        status: j['status'] as String,
-        iniciadoEm: j['iniciadoEm'] as String?,
-        concluidoEm: j['concluidoEm'] as String?,
-        exercicios: (j['exercicios'] as List<dynamic>)
+    id: j['id'] as int?,
+    treinoId: j['treinoId'] as int,
+    treinoNome: j['treinoNome'] as String,
+    status: j['status'] as String,
+    iniciadoEm: j['iniciadoEm'] as String?,
+    concluidoEm: j['concluidoEm'] as String?,
+    exercicios:
+        (j['exercicios'] as List<dynamic>)
             .map((e) => ExecucaoExercicio.fromJson(e as Map<String, dynamic>))
             .toList(),
-        evolucoesCarga: (j['evolucoesCarga'] as List<dynamic>? ?? const [])
+    evolucoesCarga:
+        (j['evolucoesCarga'] as List<dynamic>? ?? const [])
             .map((e) => EvolucaoCarga.fromJson(e as Map<String, dynamic>))
             .toList(),
-        evolucoesPerformance:
-            (j['evolucoesPerformance'] as List<dynamic>? ?? const [])
-                .map((e) =>
-                    EvolucaoPerformance.fromJson(e as Map<String, dynamic>))
-                .toList(),
-      );
+    evolucoesPerformance:
+        (j['evolucoesPerformance'] as List<dynamic>? ?? const [])
+            .map((e) => EvolucaoPerformance.fromJson(e as Map<String, dynamic>))
+            .toList(),
+  );
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -286,14 +288,14 @@ class EvolucaoCarga {
   });
 
   factory EvolucaoCarga.fromJson(Map<String, dynamic> json) => EvolucaoCarga(
-        exercicioId: json['exercicioId'] as int,
-        exercicioNome: json['exercicioNome'] as String,
-        cargaAnteriorKg: _toDouble(json['cargaAnteriorKg']) ?? 0,
-        cargaAtualKg: _toDouble(json['cargaAtualKg']) ?? 0,
-        diferencaKg: _toDouble(json['diferencaKg']) ?? 0,
-        percentual: json['percentual'] as int?,
-        mensagem: json['mensagem'] as String? ?? '',
-      );
+    exercicioId: json['exercicioId'] as int,
+    exercicioNome: json['exercicioNome'] as String,
+    cargaAnteriorKg: _toDouble(json['cargaAnteriorKg']) ?? 0,
+    cargaAtualKg: _toDouble(json['cargaAtualKg']) ?? 0,
+    diferencaKg: _toDouble(json['diferencaKg']) ?? 0,
+    percentual: json['percentual'] as int?,
+    mensagem: json['mensagem'] as String? ?? '',
+  );
 }
 
 class EvolucaoPerformance {
@@ -340,11 +342,16 @@ class CheckinRepository {
 
   Future<List<ExecucaoTreino>> meusTreinos() async {
     final r = await _dio.get('/api/checkin/meus-treinos');
-    return (r.data as List).map((e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>)).toList();
+    return (r.data as List)
+        .map((e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<ExecucaoTreino> iniciar(int treinoId) async {
-    final r = await _dio.post('/api/checkin/iniciar', data: {'treinoId': treinoId});
+    final r = await _dio.post(
+      '/api/checkin/iniciar',
+      data: {'treinoId': treinoId},
+    );
     return ExecucaoTreino.fromJson(r.data as Map<String, dynamic>);
   }
 
@@ -383,7 +390,8 @@ class CheckinRepository {
       data: {
         'numero': numero,
         if (cargaKg != null) 'cargaKg': cargaKg,
-        if (repeticoes != null && repeticoes.isNotEmpty) 'repeticoes': repeticoes,
+        if (repeticoes != null && repeticoes.isNotEmpty)
+          'repeticoes': repeticoes,
         if (feedback != null) 'feedback': feedback,
         if (rpe != null) 'rpe': rpe,
         if (dor != null) 'dor': dor,
@@ -399,6 +407,8 @@ class CheckinRepository {
 
   Future<List<ExecucaoTreino>> historico() async {
     final r = await _dio.get('/api/checkin/historico');
-    return (r.data as List).map((e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>)).toList();
+    return (r.data as List)
+        .map((e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

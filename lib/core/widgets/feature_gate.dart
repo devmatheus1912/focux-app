@@ -7,6 +7,7 @@ import '../../features/planos/data/planos_repository.dart';
 import '../analytics/analytics_service.dart';
 import '../router/role_home.dart';
 import '../router/safe_navigation.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class FeatureGate extends ConsumerWidget {
   final SubscriptionPlan requiredPlan;
@@ -35,7 +36,7 @@ class FeatureGate extends ConsumerWidget {
 
     // BUG-01: em estado de loading, mostra indicador mas não bloqueia.
     if (featuresAsync.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: FxLoading());
     }
 
     // BUG-01: em estado de erro, NÃO colapsar para FREE.
@@ -58,9 +59,10 @@ class FeatureGate extends ConsumerWidget {
 
     final currentPlan = features.plano;
 
-    final hasAccess = capability != null
-        ? _resolveCapability(features, capability!)
-        : currentPlan.canAccess(requiredPlan);
+    final hasAccess =
+        capability != null
+            ? _resolveCapability(features, capability!)
+            : currentPlan.canAccess(requiredPlan);
 
     if (hasAccess || features.fromCache) {
       if (!hasAccess && features.fromCache) {
@@ -100,21 +102,25 @@ class FeatureGate extends ConsumerWidget {
     );
 
     // BUG-02+11: Default Locked UI com Scaffold (back button) + CTA → /planos
-    return _LockedScreen(
-      featureName: featureName,
-      requiredPlan: requiredPlan,
-    );
+    return _LockedScreen(featureName: featureName, requiredPlan: requiredPlan);
   }
 
   bool _resolveCapability(PlanoFeatures f, String cap) {
     switch (cap) {
-      case 'financeiro':   return f.financeiro;
-      case 'agenda':       return f.agenda;
-      case 'relatorios':   return f.relatorios;
-      case 'whiteLabel':   return f.whiteLabel;
-      case 'iaCopiloto':   return f.iaCopiloto;
-      case 'iaIlimitada':  return f.iaIlimitada;
-      default:             return false;
+      case 'financeiro':
+        return f.financeiro;
+      case 'agenda':
+        return f.agenda;
+      case 'relatorios':
+        return f.relatorios;
+      case 'whiteLabel':
+        return f.whiteLabel;
+      case 'iaCopiloto':
+        return f.iaCopiloto;
+      case 'iaIlimitada':
+        return f.iaIlimitada;
+      default:
+        return false;
     }
   }
 }
@@ -137,14 +143,17 @@ class _ErrorRetryScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.wifi_off_rounded, size: 56, color: Colors.grey),
+                const Icon(
+                  Icons.wifi_off_rounded,
+                  size: 56,
+                  color: Colors.grey,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Falha ao verificar plano',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
@@ -159,7 +168,10 @@ class _ErrorRetryScreen extends StatelessWidget {
                   icon: const Icon(Icons.refresh),
                   label: const Text('Tentar novamente'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -260,16 +272,12 @@ class _LockedScreen extends ConsumerWidget {
   final String featureName;
   final SubscriptionPlan requiredPlan;
 
-  const _LockedScreen({
-    required this.featureName,
-    required this.requiredPlan,
-  });
+  const _LockedScreen({required this.featureName, required this.requiredPlan});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final planLabel = requiredPlan == SubscriptionPlan.ENTERPRISE
-        ? 'Enterprise'
-        : 'Premium';
+    final planLabel =
+        requiredPlan == SubscriptionPlan.ENTERPRISE ? 'Enterprise' : 'Premium';
 
     return Scaffold(
       // BUG-02: AppBar com botão de voltar
@@ -291,10 +299,9 @@ class _LockedScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Text(
                   'Acesso Restrito',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -309,19 +316,26 @@ class _LockedScreen extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF3454D1),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
+                      horizontal: 32,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: const Text(
                     'Ver planos',
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: () => safePopOr(context, () => goToRoleHome(context, ref)),
+                  onPressed:
+                      () =>
+                          safePopOr(context, () => goToRoleHome(context, ref)),
                   child: const Text('Voltar'),
                 ),
               ],

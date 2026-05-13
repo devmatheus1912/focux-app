@@ -23,15 +23,15 @@ class Plano {
   });
 
   factory Plano.fromJson(Map<String, dynamic> json) => Plano(
-        id: json['id'] as int,
-        nome: json['nome'] as String,
-        precoMensal: (json['precoMensal'] as num).toDouble(),
-        limiteAlunos: json['limiteAlunos'] as int?,
-        temWhiteLabel: json['temWhiteLabel'] as bool,
-        temFinanceiro: json['temFinanceiro'] as bool,
-        temAgenda: json['temAgenda'] as bool,
-        temRelatorios: json['temRelatorios'] as bool,
-      );
+    id: json['id'] as int,
+    nome: json['nome'] as String,
+    precoMensal: (json['precoMensal'] as num).toDouble(),
+    limiteAlunos: json['limiteAlunos'] as int?,
+    temWhiteLabel: json['temWhiteLabel'] as bool,
+    temFinanceiro: json['temFinanceiro'] as bool,
+    temAgenda: json['temAgenda'] as bool,
+    temRelatorios: json['temRelatorios'] as bool,
+  );
 }
 
 class AssinaturaRepository {

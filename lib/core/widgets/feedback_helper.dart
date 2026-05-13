@@ -6,6 +6,19 @@ import '../theme/design_tokens.dart';
 /// Premium snackbar feedback — uses design tokens, tinted fills,
 /// and haptic feedback for every state.
 class FeedbackHelper {
+  static ScaffoldMessengerState messengerOf(BuildContext context) {
+    return ScaffoldMessenger.of(context);
+  }
+
+  static void showSnackBar(BuildContext context, SnackBar snackBar) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  static void hideCurrentSnackBar(BuildContext context) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
+
   static void showSuccess(BuildContext context, String message) {
     HapticFeedback.mediumImpact();
     _showSnackbar(

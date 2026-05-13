@@ -78,9 +78,10 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
 
       setState(() {
         _message = result.mensagem;
-        _hint = result.deliveryAvailable
-            ? 'Verifique sua caixa de entrada e spam.'
-            : 'Recuperação por e-mail não está configurada neste ambiente ainda.';
+        _hint =
+            result.deliveryAvailable
+                ? 'Verifique sua caixa de entrada e spam.'
+                : 'Recuperação por e-mail não está configurada neste ambiente ainda.';
       });
     } catch (error) {
       HapticFeedback.heavyImpact();
@@ -126,7 +127,8 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
     if (issue?.action.isNotEmpty == true) {
       return issue!.action;
     }
-    final actions = _environmentStatus?.nextActions
+    final actions =
+        _environmentStatus?.nextActions
             .where((action) => action.toLowerCase().contains('smtp'))
             .toList() ??
         const [];
@@ -173,11 +175,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                           color: Colors.white.withValues(alpha: 0.12),
                         ),
                       ),
-                      child: Icon(
-                        Icons.send_rounded,
-                        color: primary,
-                        size: 30,
-                      ),
+                      child: Icon(Icons.send_rounded, color: primary, size: 30),
                     ),
                     const SizedBox(height: 24),
                     const Text(
@@ -215,12 +213,14 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                               onTap: () => setState(() => _isAluno = false),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 180),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: !_isAluno
-                                      ? Colors.white.withValues(alpha: 0.18)
-                                      : Colors.transparent,
+                                  color:
+                                      !_isAluno
+                                          ? Colors.white.withValues(alpha: 0.18)
+                                          : Colors.transparent,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -230,9 +230,10 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                                     color: Colors.white.withValues(
                                       alpha: !_isAluno ? 1 : 0.55,
                                     ),
-                                    fontWeight: !_isAluno
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
+                                    fontWeight:
+                                        !_isAluno
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
                                     fontSize: 13,
                                   ),
                                 ),
@@ -244,12 +245,14 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                               onTap: () => setState(() => _isAluno = true),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 180),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: _isAluno
-                                      ? Colors.white.withValues(alpha: 0.18)
-                                      : Colors.transparent,
+                                  color:
+                                      _isAluno
+                                          ? Colors.white.withValues(alpha: 0.18)
+                                          : Colors.transparent,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -259,9 +262,10 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                                     color: Colors.white.withValues(
                                       alpha: _isAluno ? 1 : 0.55,
                                     ),
-                                    fontWeight: _isAluno
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
+                                    fontWeight:
+                                        _isAluno
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
                                     fontSize: 13,
                                   ),
                                 ),

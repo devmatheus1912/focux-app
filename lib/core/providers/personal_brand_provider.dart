@@ -36,7 +36,9 @@ class PersonalBrand {
   bool get isEnterprise => plano == 'ENTERPRISE';
 }
 
-final personalBrandProvider = FutureProvider.autoDispose<PersonalBrand>((ref) async {
+final personalBrandProvider = FutureProvider.autoDispose<PersonalBrand>((
+  ref,
+) async {
   final dio = ref.read(apiClientProvider).dio;
   final r = await dio.get('/api/aluno/personal-brand');
   return PersonalBrand.fromJson(r.data as Map<String, dynamic>);

@@ -7,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 const _statusOpcoes = ['LEAD', 'TESTE', 'ATIVO', 'INADIMPLENTE', 'CANCELADO'];
 const _statusLabels = {
@@ -94,7 +96,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       ).atualizar(_lead.id, {'status': novoStatus});
       setState(() => _lead = updated);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(
             content: Text(
               'Status atualizado para ${_statusLabels[novoStatus]}',
@@ -198,7 +201,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       ).atualizarProximoContato(_lead.id, dataStr);
       setState(() => _lead = updated);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(content: Text('Follow-up definido para $dataStr')),
         );
       }
@@ -238,7 +242,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                         value: tipo,
                         decoration: InputDecoration(
                           labelText: 'Tipo',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                          border: FxInputDeco.outlineBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                           prefixIcon: Icon(Icons.category),
                         ),
                         items:
@@ -268,7 +274,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                         controller: descCtrl,
                         decoration: InputDecoration(
                           labelText: 'Descrição *',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                          border: FxInputDeco.outlineBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                           alignLabelWithHint: true,
                         ),
                         maxLines: 3,
@@ -282,7 +290,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                           onPressed: () async {
                             final desc = descCtrl.text.trim();
                             if (desc.isEmpty) {
-                              ScaffoldMessenger.of(ctx).showSnackBar(
+                              FeedbackHelper.showSnackBar(
+                                ctx,
                                 const SnackBar(
                                   content: Text('Informe a descrição'),
                                 ),
@@ -296,7 +305,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                               ).adicionarInteracao(_lead.id, tipo, desc);
                               await _carregarInteracoes();
                               if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                FeedbackHelper.showSnackBar(
+                                  context,
                                   const SnackBar(
                                     content: Text('Interação registrada!'),
                                   ),
@@ -304,7 +314,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                               }
                             } catch (e) {
                               if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                FeedbackHelper.showSnackBar(
+                                  context,
                                   SnackBar(content: Text('Erro: $e')),
                                 );
                               }
@@ -390,7 +401,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
               child: Chip(
                 label: Text(
                   _statusLabels[_lead.status] ?? _lead.status,
-                  style: TextStyle(color: color, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: color, fontWeight: FontWeight.w700),
                 ),
                 backgroundColor: color.withValues(alpha: 0.12),
                 avatar: Icon(Icons.circle, size: 10, color: color),
@@ -567,10 +578,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
 
             if (_loadingInteracoes)
               const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: CircularProgressIndicator(),
-                ),
+                child: Padding(padding: EdgeInsets.all(16), child: FxLoading()),
               )
             else if (_interacoes.isEmpty)
               const Card(

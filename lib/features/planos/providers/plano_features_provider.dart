@@ -15,14 +15,14 @@ final _planosRepositoryProvider = Provider<PlanosRepository>(
 /// Stale-while-revalidate: se existir snapshot local, o gate usa esse dado
 /// imediatamente e atualiza em segundo plano. Assim uma oscilacao de rede nao
 /// derruba usuario pagante em uma tela de bloqueio falsa.
-final planoFeaturesProvider =
-    StateNotifierProvider<PlanoFeaturesNotifier, AsyncValue<PlanoFeatures>>(
-  (ref) {
-    final notifier = PlanoFeaturesNotifier(ref.read(_planosRepositoryProvider));
-    unawaited(notifier.bootstrap());
-    return notifier;
-  },
-);
+final planoFeaturesProvider = StateNotifierProvider<
+  PlanoFeaturesNotifier,
+  AsyncValue<PlanoFeatures>
+>((ref) {
+  final notifier = PlanoFeaturesNotifier(ref.read(_planosRepositoryProvider));
+  unawaited(notifier.bootstrap());
+  return notifier;
+});
 
 class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
   final PlanosRepository _repo;
@@ -73,10 +73,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
         unawaited(
           AnalyticsService.instance.track(
             ProductEvents.planGateRefreshFailed,
-            props: {
-              'plan': previous.plano.name,
-              'error': error.toString(),
-            },
+            props: {'plan': previous.plano.name, 'error': error.toString()},
           ),
         );
       } else {

@@ -86,7 +86,10 @@ const templateSplits = <TemplateSplit>[
         nome: 'Push',
         slots: [
           TemplateSlot.padrao(PadraoMovimento.pushHorizontal, 'Supino'),
-          TemplateSlot.padrao(PadraoMovimento.pushHorizontal, 'Supino variacao'),
+          TemplateSlot.padrao(
+            PadraoMovimento.pushHorizontal,
+            'Supino variacao',
+          ),
           TemplateSlot.padrao(PadraoMovimento.pushVertical, 'Desenvolvimento'),
           TemplateSlot.grupo(GrupoMuscular.ombroLateral, 'Lateral'),
           TemplateSlot.grupo(GrupoMuscular.triceps, 'Triceps'),

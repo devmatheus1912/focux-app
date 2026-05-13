@@ -62,7 +62,9 @@ String friendlyError(Object error, {String? fallback}) {
 
   // For non-Dio errors, use the message if short enough
   final msg = error.toString();
-  if (msg.length < 100 && !msg.contains('Exception') && !msg.contains('Error:')) {
+  if (msg.length < 100 &&
+      !msg.contains('Exception') &&
+      !msg.contains('Error:')) {
     return msg;
   }
 

@@ -24,7 +24,9 @@ class FcmService {
     if (token != null) {
       await _registrarToken(token, apiClient);
     }
-    messaging.onTokenRefresh.listen((newToken) => _registrarToken(newToken, apiClient));
+    messaging.onTokenRefresh.listen(
+      (newToken) => _registrarToken(newToken, apiClient),
+    );
 
     // Mensagem em foreground: notificação automática + deep link no tap manual.
     FirebaseMessaging.onMessage.listen((message) {

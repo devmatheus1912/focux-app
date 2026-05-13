@@ -6,6 +6,8 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/broadcast_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 final _broadcastRepositoryProvider = Provider<BroadcastRepository>(
   (ref) => BroadcastRepository(ref.read(apiClientProvider)),
@@ -42,7 +44,9 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _enviando = true);
     try {
-      final resultado = await ref.read(_broadcastRepositoryProvider).enviar(
+      final resultado = await ref
+          .read(_broadcastRepositoryProvider)
+          .enviar(
             titulo: _tituloCtrl.text.trim(),
             mensagem: _mensagemCtrl.text.trim(),
             tipoConsultoriaAlvo: _publicoAlvo == 'TODOS' ? null : _publicoAlvo,
@@ -52,7 +56,8 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
       setState(() => _publicoAlvo = 'TODOS');
       ref.invalidate(_broadcastHistoricoProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(
           content: Text('Enviado para ${resultado.totalEnviados} alunos.'),
           backgroundColor: EagleTokens.good,
@@ -60,7 +65,8 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(content: Text(friendlyError(e))),
       );
     } finally {
@@ -179,14 +185,17 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                         height: 48,
                         child: FilledButton.icon(
                           onPressed: _enviando ? null : _enviar,
-                          icon: _enviando
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Icon(Icons.send_rounded, size: 16),
-                          label: Text(_enviando ? 'Enviando...' : 'Enviar notificacao'),
+                          icon:
+                              _enviando
+                                  ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: FxLoading(strokeWidth: 2),
+                                  )
+                                  : const Icon(Icons.send_rounded, size: 16),
+                          label: Text(
+                            _enviando ? 'Enviando...' : 'Enviar notificacao',
+                          ),
                           style: FilledButton.styleFrom(
                             backgroundColor: brand,
                             shape: RoundedRectangleBorder(
@@ -214,14 +223,19 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
               ),
               const SizedBox(height: 12),
               historicoAsync.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(24),
-                  child: FxLoading(),
-                ),
-                error: (e, _) => _StateCard(text: 'Erro ao carregar historico: $e'),
+                loading:
+                    () => const Padding(
+                      padding: EdgeInsets.all(24),
+                      child: FxLoading(),
+                    ),
+                error:
+                    (e, _) =>
+                        _StateCard(text: 'Erro ao carregar historico: $e'),
                 data: (lista) {
                   if (lista.isEmpty) {
-                    return const _StateCard(text: 'Nenhum broadcast enviado ainda.');
+                    return const _StateCard(
+                      text: 'Nenhum broadcast enviado ainda.',
+                    );
                   }
                   return Column(
                     children: [
@@ -263,11 +277,19 @@ class _DesignField extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final fill = isDark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.paper;
+    final fill =
+        isDark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.paper;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: mute, fontSize: 11.5, fontWeight: FontWeight.w700)),
+        Text(
+          label,
+          style: TextStyle(
+            color: mute,
+            fontSize: 11.5,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         const SizedBox(height: 5),
         TextFormField(
           controller: controller,
@@ -280,17 +302,21 @@ class _DesignField extends StatelessWidget {
             filled: true,
             fillColor: fill,
             counterText: '',
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            border: OutlineInputBorder(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
+            border: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: line),
             ),
-            enabledBorder: OutlineInputBorder(
+            enabledBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: line),
             ),
           ),
-          validator: (v) => v == null || v.trim().isEmpty ? validatorText : null,
+          validator:
+              (v) => v == null || v.trim().isEmpty ? validatorText : null,
         ),
       ],
     );
@@ -321,12 +347,24 @@ class _AudienceChip extends StatelessWidget {
         height: 34,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? brand : (isDark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.paper),
+          color:
+              selected
+                  ? brand
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : EagleTokens.paper),
           borderRadius: BorderRadius.circular(10),
           border: selected ? null : Border.all(color: line),
-          boxShadow: selected
-              ? [BoxShadow(color: brand.withValues(alpha: 0.32), blurRadius: 10, offset: const Offset(0, 4))]
-              : null,
+          boxShadow:
+              selected
+                  ? [
+                    BoxShadow(
+                      color: brand.withValues(alpha: 0.32),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                  : null,
         ),
         child: Text(
           label,
@@ -373,7 +411,11 @@ class _BroadcastCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   broadcast.titulo,
-                  style: TextStyle(color: ink, fontSize: 14, fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
               Container(
@@ -384,7 +426,11 @@ class _BroadcastCard extends StatelessWidget {
                 ),
                 child: Text(
                   '${broadcast.totalEnviados} alunos',
-                  style: TextStyle(color: brand, fontSize: 11, fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    color: brand,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
@@ -405,7 +451,10 @@ class _BroadcastCard extends StatelessWidget {
               const SizedBox(width: 12),
               Icon(Icons.schedule_rounded, size: 13, color: mute),
               const SizedBox(width: 4),
-              Text(_formatarData(broadcast.enviadoEm), style: TextStyle(color: mute, fontSize: 11)),
+              Text(
+                _formatarData(broadcast.enviadoEm),
+                style: TextStyle(color: mute, fontSize: 11),
+              ),
             ],
           ),
         ],
@@ -435,12 +484,16 @@ class _StateCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? EagleTokens.darkCard : EagleTokens.card,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: isDark ? EagleTokens.darkLine : EagleTokens.line),
+        border: Border.all(
+          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+        ),
       ),
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: TextStyle(color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+        style: TextStyle(
+          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+        ),
       ),
     );
   }

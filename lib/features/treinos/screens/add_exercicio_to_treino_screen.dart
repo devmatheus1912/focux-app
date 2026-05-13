@@ -18,6 +18,8 @@ import '../../exercicios/screens/widgets/padrao_movimento_grid.dart';
 import '../../exercicios/screens/widgets/template_split_picker.dart';
 import '../data/workout_builder_preset.dart';
 import '../providers/treinos_provider.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
   final int treinoId;
@@ -187,9 +189,12 @@ class _AddExercicioToTreinoScreenState
     if (exercicio == null || _mediaLoading) return;
     final file = await _videoPicker.pickVideo(source: ImageSource.gallery);
     if (file == null || !mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = FeedbackHelper.messengerOf(context);
     setState(() => _mediaLoading = true);
-    FeedbackHelper.showSuccess(context, 'Enviando vídeo de ${exercicio.nome}...');
+    FeedbackHelper.showSuccess(
+      context,
+      'Enviando vídeo de ${exercicio.nome}...',
+    );
     try {
       final updated = await ref
           .read(exercicioRepositoryProvider)
@@ -449,7 +454,10 @@ class _AddExercicioToTreinoScreenState
                                       primary: primary,
                                     ),
                                     keyboardType: TextInputType.number,
-                                    style: TextStyle(color: ink, fontWeight: FontWeight.w700),
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -461,7 +469,10 @@ class _AddExercicioToTreinoScreenState
                                       isDark: isDark,
                                       primary: primary,
                                     ),
-                                    style: TextStyle(color: ink, fontWeight: FontWeight.w700),
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -478,7 +489,10 @@ class _AddExercicioToTreinoScreenState
                                       primary: primary,
                                     ),
                                     keyboardType: TextInputType.number,
-                                    style: TextStyle(color: ink, fontWeight: FontWeight.w700),
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -494,7 +508,10 @@ class _AddExercicioToTreinoScreenState
                                         const TextInputType.numberWithOptions(
                                           decimal: true,
                                         ),
-                                    style: TextStyle(color: ink, fontWeight: FontWeight.w700),
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -513,12 +530,16 @@ class _AddExercicioToTreinoScreenState
                                 controller: _grupoSupersetCtrl,
                                 decoration: _fxInputDecoration(
                                   label: 'Grupo do superset',
-                                  helper: 'Use o mesmo numero em exercicios que devem ficar juntos.',
+                                  helper:
+                                      'Use o mesmo numero em exercicios que devem ficar juntos.',
                                   isDark: isDark,
                                   primary: primary,
                                 ),
                                 keyboardType: TextInputType.number,
-                                style: TextStyle(color: ink, fontWeight: FontWeight.w700),
+                                style: TextStyle(
+                                  color: ink,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ],
                             if (_tipoSerie == 'DROPSET') ...[
@@ -541,7 +562,10 @@ class _AddExercicioToTreinoScreenState
                               ),
                               minLines: 2,
                               maxLines: 4,
-                              style: TextStyle(color: ink, fontWeight: FontWeight.w700),
+                              style: TextStyle(
+                                color: ink,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                             if (_error != null) ...[
                               const SizedBox(height: 16),
@@ -585,17 +609,23 @@ class _AddExercicioToTreinoScreenState
                               height: 56,
                               child: ElevatedButton.icon(
                                 onPressed: _loading ? null : _submit,
-                                icon: _loading
-                                    ? const SizedBox.shrink()
-                                    : const Icon(Icons.add_rounded, size: 20),
+                                icon:
+                                    _loading
+                                        ? const SizedBox.shrink()
+                                        : const Icon(
+                                          Icons.add_rounded,
+                                          size: 20,
+                                        ),
                                 label:
                                     _loading
                                         ? SizedBox(
                                           height: 22,
                                           width: 22,
-                                          child: CircularProgressIndicator(
+                                          child: FxLoading(
                                             strokeWidth: 2.5,
-                                            color: Colors.white.withValues(alpha: 0.8),
+                                            color: Colors.white.withValues(
+                                              alpha: 0.8,
+                                            ),
                                           ),
                                         )
                                         : const Text(
@@ -1343,6 +1373,7 @@ class _ExerciseVideoPreviewSheetState
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -1394,9 +1425,9 @@ class _ExerciseVideoPreviewSheetState
                       color: EagleTokens.brandSofter,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.play_circle_outline_rounded,
-                      color: EagleTokens.brand,
+                      color: primary,
                       size: 21,
                     ),
                   ),
@@ -1475,7 +1506,7 @@ class _ExerciseVideoPreviewSheetState
                               : 'Reproduzir',
                         ),
                         style: FilledButton.styleFrom(
-                          backgroundColor: EagleTokens.brand,
+                          backgroundColor: primary,
                           minimumSize: const Size.fromHeight(44),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
@@ -1521,10 +1552,7 @@ class _VideoPreparingPreview extends StatelessWidget {
           SizedBox(
             width: 26,
             height: 26,
-            child: CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 2.8,
-            ),
+            child: FxLoading(color: Colors.white, strokeWidth: 2.8),
           ),
           SizedBox(height: 12),
           Text(
@@ -1730,15 +1758,15 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                     horizontal: 14,
                     vertical: 14,
                   ),
-                  border: OutlineInputBorder(
+                  border: FxInputDeco.outlineBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide(color: line),
                   ),
-                  enabledBorder: OutlineInputBorder(
+                  enabledBorder: FxInputDeco.outlineBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide(color: line),
                   ),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: FxInputDeco.outlineBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide(color: primary, width: 1.4),
                   ),
@@ -2242,23 +2270,23 @@ InputDecoration _fxInputDecoration({
     helperText: helper,
     filled: true,
     fillColor: fillColor,
-    border: OutlineInputBorder(
+    border: FxInputDeco.outlineBorder(
       borderRadius: BorderRadius.circular(16),
       borderSide: BorderSide(color: lineColor),
     ),
-    enabledBorder: OutlineInputBorder(
+    enabledBorder: FxInputDeco.outlineBorder(
       borderRadius: BorderRadius.circular(16),
       borderSide: BorderSide(color: lineColor),
     ),
-    focusedBorder: OutlineInputBorder(
+    focusedBorder: FxInputDeco.outlineBorder(
       borderRadius: BorderRadius.circular(16),
       borderSide: BorderSide(color: primary, width: 1.6),
     ),
-    errorBorder: OutlineInputBorder(
+    errorBorder: FxInputDeco.outlineBorder(
       borderRadius: BorderRadius.circular(16),
       borderSide: const BorderSide(color: EagleTokens.bad),
     ),
-    focusedErrorBorder: OutlineInputBorder(
+    focusedErrorBorder: FxInputDeco.outlineBorder(
       borderRadius: BorderRadius.circular(16),
       borderSide: const BorderSide(color: EagleTokens.bad, width: 1.6),
     ),

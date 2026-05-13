@@ -22,7 +22,9 @@ class SetupOnboardingWidget extends ConsumerWidget {
         return Card(
           color: Theme.of(context).colorScheme.primaryContainer,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           margin: const EdgeInsets.only(bottom: 24),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -32,8 +34,19 @@ class SetupOnboardingWidget extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Sua Ativação', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    Text('${data.progressoPercentual}%', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+                    Text(
+                      'Sua Ativação',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      '${data.progressoPercentual}%',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -88,7 +101,11 @@ class _StepTile extends StatelessWidget {
   final bool isDone;
   final VoidCallback onTap;
 
-  const _StepTile({required this.title, required this.isDone, required this.onTap});
+  const _StepTile({
+    required this.title,
+    required this.isDone,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -109,13 +126,20 @@ class _StepTile extends StatelessWidget {
                 title,
                 style: TextStyle(
                   decoration: isDone ? TextDecoration.lineThrough : null,
-                  color: isDone ? EagleTokens.inkMute : Theme.of(context).textTheme.bodyLarge?.color,
+                  color:
+                      isDone
+                          ? EagleTokens.inkMute
+                          : Theme.of(context).textTheme.bodyLarge?.color,
                   fontWeight: isDone ? FontWeight.normal : FontWeight.w600,
                 ),
               ),
             ),
             if (!isDone)
-              const Icon(Icons.arrow_forward_ios, size: 14, color: EagleTokens.inkMute),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: EagleTokens.inkMute,
+              ),
           ],
         ),
       ),

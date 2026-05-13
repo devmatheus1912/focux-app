@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/enums.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class ExerciciosUiFilter {
   final String query;
@@ -90,7 +91,7 @@ class ExerciciosFilterBar extends StatelessWidget {
                         icon: const Icon(Icons.close_rounded),
                         onPressed: () => onChanged(filter.copyWith(query: '')),
                       ),
-              border: OutlineInputBorder(
+              border: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
@@ -109,9 +110,7 @@ class ExerciciosFilterBar extends StatelessWidget {
                   labels: TaxonomyLabels.modalidade,
                   onChanged: (v) => onChanged(filter.copyWith(modalidade: v)),
                   onClear:
-                      () => onChanged(
-                        filter.copyWith(clearModalidade: true),
-                      ),
+                      () => onChanged(filter.copyWith(clearModalidade: true)),
                 ),
                 _EnumChip<GrupoMuscular>(
                   label: 'Grupo',
@@ -143,8 +142,7 @@ class ExerciciosFilterBar extends StatelessWidget {
                 FilterChip(
                   label: const Text('Favoritos'),
                   selected: filter.favoritos,
-                  onSelected:
-                      (v) => onChanged(filter.copyWith(favoritos: v)),
+                  onSelected: (v) => onChanged(filter.copyWith(favoritos: v)),
                 ),
                 const SizedBox(width: 8),
                 FilterChip(

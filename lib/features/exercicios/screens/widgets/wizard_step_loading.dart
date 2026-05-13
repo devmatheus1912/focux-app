@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class WizardStepLoading extends StatelessWidget {
   const WizardStepLoading({super.key});
@@ -9,7 +10,7 @@ class WizardStepLoading extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(),
+          FxLoading(),
           SizedBox(height: 16),
           Text('Carregando biblioteca curada...'),
         ],

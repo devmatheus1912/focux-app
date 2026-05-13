@@ -24,16 +24,21 @@ class AlunoActivationScreen extends ConsumerWidget {
   }
 
   int _profileCompletion(Aluno aluno) {
-    final filled = [
-      aluno.telefone,
-      aluno.whatsapp,
-      aluno.objetivo,
-      aluno.genero,
-      aluno.peso?.toString(),
-      aluno.altura?.toString(),
-      aluno.dataNascimento,
-      aluno.fotoUrl,
-    ].where((value) => value != null && value.toString().trim().isNotEmpty).length;
+    final filled =
+        [
+              aluno.telefone,
+              aluno.whatsapp,
+              aluno.objetivo,
+              aluno.genero,
+              aluno.peso?.toString(),
+              aluno.altura?.toString(),
+              aluno.dataNascimento,
+              aluno.fotoUrl,
+            ]
+            .where(
+              (value) => value != null && value.toString().trim().isNotEmpty,
+            )
+            .length;
     return (filled / 8 * 100).round();
   }
 
@@ -52,15 +57,16 @@ class AlunoActivationScreen extends ConsumerWidget {
         automaticallyImplyLeading: false,
         actions: [
           alunoAsync.when(
-            data: (aluno) => TextButton(
-              onPressed: () async {
-                await _markSeen(aluno.id);
-                if (context.mounted) {
-                  context.go('/dashboard/aluno');
-                }
-              },
-              child: const Text('Pular'),
-            ),
+            data:
+                (aluno) => TextButton(
+                  onPressed: () async {
+                    await _markSeen(aluno.id);
+                    if (context.mounted) {
+                      context.go('/dashboard/aluno');
+                    }
+                  },
+                  child: const Text('Pular'),
+                ),
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
           ),
@@ -68,56 +74,63 @@ class AlunoActivationScreen extends ConsumerWidget {
       ),
       body: alunoAsync.when(
         loading: () => const FxLoading(),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: EagleTokens.bad.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(Icons.error_outline_rounded, color: EagleTokens.bad, size: 32),
+        error:
+            (e, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: EagleTokens.bad.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.error_outline_rounded,
+                        color: EagleTokens.bad,
+                        size: 32,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      friendlyError(e),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    FilledButton.icon(
+                      onPressed: () => ref.invalidate(alunoMeProvider),
+                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                      label: const Text('Tentar novamente'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () => context.go('/dashboard/aluno'),
+                      child: const Text('Ir para o dashboard'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  friendlyError(e),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                FilledButton.icon(
-                  onPressed: () => ref.invalidate(alunoMeProvider),
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text('Tentar novamente'),
-                ),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () => context.go('/dashboard/aluno'),
-                  child: const Text('Ir para o dashboard'),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
         data: (aluno) {
           final medidas = medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
-          final historico = historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
+          final historico =
+              historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
           final mensagens = chatAsync.valueOrNull ?? const <ChatMsg>[];
           final profileCompletion = _profileCompletion(aluno);
 
           final steps = <_ActivationStep>[
             _ActivationStep(
               title: 'Completar seu perfil',
-              description: 'Foto, objetivo, dados corporais e contato deixam o acompanhamento mais inteligente.',
+              description:
+                  'Foto, objetivo, dados corporais e contato deixam o acompanhamento mais inteligente.',
               done: profileCompletion >= 80,
               icon: Icons.person_outline,
               cta: 'Ir para perfil',
@@ -125,7 +138,8 @@ class AlunoActivationScreen extends ConsumerWidget {
             ),
             _ActivationStep(
               title: 'Registrar a primeira medida',
-              description: 'Seu corpo precisa de um ponto de partida para mostrar evolucao de verdade.',
+              description:
+                  'Seu corpo precisa de um ponto de partida para mostrar evolucao de verdade.',
               done: medidas.isNotEmpty,
               icon: Icons.straighten_outlined,
               cta: 'Registrar medida',
@@ -133,15 +147,19 @@ class AlunoActivationScreen extends ConsumerWidget {
             ),
             _ActivationStep(
               title: 'Fazer o primeiro treino',
-              description: 'Quando voce treina pelo app, o personal ganha historico para ajustar carga e frequencia.',
-              done: historico.any((item) => item.status.toUpperCase() == 'CONCLUIDO'),
+              description:
+                  'Quando voce treina pelo app, o personal ganha historico para ajustar carga e frequencia.',
+              done: historico.any(
+                (item) => item.status.toUpperCase() == 'CONCLUIDO',
+              ),
               icon: Icons.play_circle_outline,
               cta: 'Abrir treinos',
               route: '/checkin/treinos',
             ),
             _ActivationStep(
               title: 'Abrir seu chat com o personal',
-              description: 'Duvidas, feedback e alinhamento precisam acontecer no mesmo lugar do treino.',
+              description:
+                  'Duvidas, feedback e alinhamento precisam acontecer no mesmo lugar do treino.',
               done: mensagens.isNotEmpty,
               icon: Icons.chat_bubble_outline,
               cta: 'Abrir chat',
@@ -188,10 +206,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       const Text(
                         'Vamos organizar seu app para o personal acompanhar melhor seu progresso desde o primeiro dia.',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          height: 1.45,
-                        ),
+                        style: TextStyle(color: Colors.white70, height: 1.45),
                       ),
                       const SizedBox(height: 18),
                       Container(
@@ -256,7 +271,8 @@ class AlunoActivationScreen extends ConsumerWidget {
                     color: isDark ? EagleTokens.darkCard : EagleTokens.card,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                      color:
+                          isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
                     ),
                   ),
                   child: Column(
@@ -267,7 +283,10 @@ class AlunoActivationScreen extends ConsumerWidget {
                             ? 'Tudo pronto para comecar'
                             : 'Proximo melhor passo',
                         style: TextStyle(
-                          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                          color:
+                              isDark
+                                  ? EagleTokens.darkInkMute
+                                  : EagleTokens.inkMute,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
@@ -289,7 +308,10 @@ class AlunoActivationScreen extends ConsumerWidget {
                             ? 'Voce pode seguir para a home e usar o app normalmente.'
                             : nextStep.description,
                         style: TextStyle(
-                          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                          color:
+                              isDark
+                                  ? EagleTokens.darkInkMute
+                                  : EagleTokens.inkMute,
                           height: 1.45,
                         ),
                       ),
@@ -397,9 +419,10 @@ class _ActivationStepCard extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: step.done
-                  ? EagleTokens.good.withValues(alpha: 0.14)
-                  : BrandPalette.soft(primary, dark: isDark),
+              color:
+                  step.done
+                      ? EagleTokens.good.withValues(alpha: 0.14)
+                      : BrandPalette.soft(primary, dark: isDark),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
@@ -423,11 +446,7 @@ class _ActivationStepCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   step.description,
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 12.5,
-                    height: 1.45,
-                  ),
+                  style: TextStyle(color: mute, fontSize: 12.5, height: 1.45),
                 ),
               ],
             ),
@@ -435,24 +454,24 @@ class _ActivationStepCard extends StatelessWidget {
           const SizedBox(width: 12),
           step.done
               ? Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: EagleTokens.good.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: const Text(
-                    'Feito',
-                    style: TextStyle(
-                      color: EagleTokens.good,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                )
-              : TextButton(
-                  onPressed: onTap,
-                  child: Text(step.cta),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
                 ),
+                decoration: BoxDecoration(
+                  color: EagleTokens.good.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Text(
+                  'Feito',
+                  style: TextStyle(
+                    color: EagleTokens.good,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              )
+              : TextButton(onPressed: onTap, child: Text(step.cta)),
         ],
       ),
     );

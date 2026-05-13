@@ -18,6 +18,7 @@ import '../../../features/subscription/services/iap_service.dart';
 import '../data/assinatura_repository.dart';
 import '../providers/assinatura_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class AssinaturaScreen extends ConsumerStatefulWidget {
   final String? initialPlan;
@@ -179,7 +180,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(
           content: Text(
             purchasedPlan == SubscriptionPlan.ENTERPRISE
@@ -304,9 +306,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       _loadingCheckout = false;
       _syncingPurchase = false;
     });
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    FeedbackHelper.showSnackBar(context, SnackBar(content: Text(message)));
   }
 
   @override
@@ -583,7 +583,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(
+                            child: FxLoading(
                               strokeWidth: 2,
                               color: Colors.white,
                             ),

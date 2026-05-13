@@ -10,6 +10,9 @@ import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/chat_repository.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 final chatInboxProvider = FutureProvider<List<ChatInboxItem>>((ref) async {
   return ChatRepository(ref.read(apiClientProvider)).inbox();
@@ -142,7 +145,8 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       ref.invalidate(chatInboxUnreadProvider);
       ref.invalidate(chatInboxArchivedProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(
           content: Text(
             ids.length == 1 ? 'Mensagens excluidas' : 'Conversas excluidas',
@@ -152,7 +156,8 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       );
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(
           content: Text('Erro ao excluir mensagens'),
           behavior: SnackBarBehavior.floating,
@@ -180,7 +185,8 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
           'unmute': 'Notificações ativadas',
           'clear': 'Conversa limpa',
         };
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(
             content: Text(labels[action] ?? 'Ação aplicada'),
             duration: const Duration(seconds: 2),
@@ -190,7 +196,8 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(
             content: Text('Erro ao executar ação'),
             behavior: SnackBarBehavior.floating,
@@ -388,12 +395,13 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => _AlunoPickerSheet(
-        onSelect: (aluno) {
-          Navigator.pop(ctx);
-          context.push('/alunos/${aluno.id}/chat', extra: aluno.nome);
-        },
-      ),
+      builder:
+          (ctx) => _AlunoPickerSheet(
+            onSelect: (aluno) {
+              Navigator.pop(ctx);
+              context.push('/alunos/${aluno.id}/chat', extra: aluno.nome);
+            },
+          ),
     );
   }
 
@@ -408,7 +416,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     bool isArchived = false,
   }) {
     return async.when(
-      loading: () => Center(child: CircularProgressIndicator(color: primary)),
+      loading: () => Center(child: FxLoading(color: primary)),
       error:
           (e, _) => _InboxState(
             icon: Icons.wifi_off_rounded,
@@ -441,71 +449,70 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
               final item = items[index];
               final selected = _selectedAlunoIds.contains(item.alunoId);
               return Dismissible(
-                  key: Key('inbox-${item.alunoId}'),
-                  direction:
-                      _selectionActive
-                          ? DismissDirection.none
-                          : DismissDirection.horizontal,
-                  confirmDismiss: (direction) async {
-                    if (direction == DismissDirection.endToStart) {
-                      // Swipe left → archive/unarchive
-                      await _conversationAction(
-                        item.alunoId,
-                        isArchived ? 'unarchive' : 'archive',
-                      );
-                      return false;
-                    } else {
-                      // Swipe right → pin/unpin
-                      await _conversationAction(item.alunoId, 'pin');
-                      return false;
+                key: Key('inbox-${item.alunoId}'),
+                direction:
+                    _selectionActive
+                        ? DismissDirection.none
+                        : DismissDirection.horizontal,
+                confirmDismiss: (direction) async {
+                  if (direction == DismissDirection.endToStart) {
+                    // Swipe left → archive/unarchive
+                    await _conversationAction(
+                      item.alunoId,
+                      isArchived ? 'unarchive' : 'archive',
+                    );
+                    return false;
+                  } else {
+                    // Swipe right → pin/unpin
+                    await _conversationAction(item.alunoId, 'pin');
+                    return false;
+                  }
+                },
+                background: Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 24),
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(Icons.push_pin, color: primary),
+                ),
+                secondaryBackground: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 24),
+                  decoration: BoxDecoration(
+                    color: EagleTokens.warn.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(
+                    isArchived ? Icons.unarchive : Icons.archive,
+                    color: EagleTokens.warn,
+                  ),
+                ),
+                child: _InboxTile(
+                  item: item,
+                  isDark: isDark,
+                  selected: selected,
+                  selecting: _selectionActive,
+                  onTap: () {
+                    if (_selectionActive) {
+                      _toggleSelection(item.alunoId);
+                      return;
                     }
+                    context.push(
+                      '/alunos/${item.alunoId}/chat',
+                      extra: item.alunoNome,
+                    );
                   },
-                  background: Container(
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.only(left: 24),
-                    decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Icon(Icons.push_pin, color: primary),
-                  ),
-                  secondaryBackground: Container(
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 24),
-                    decoration: BoxDecoration(
-                      color: EagleTokens.warn.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Icon(
-                      isArchived ? Icons.unarchive : Icons.archive,
-                      color: EagleTokens.warn,
-                    ),
-                  ),
-                  child: _InboxTile(
-                    item: item,
-                    isDark: isDark,
-                    selected: selected,
-                    selecting: _selectionActive,
-                    onTap: () {
-                      if (_selectionActive) {
-                        _toggleSelection(item.alunoId);
-                        return;
-                      }
-                      context.push(
-                        '/alunos/${item.alunoId}/chat',
-                        extra: item.alunoNome,
-                      );
-                    },
-                    onLongPress: () => _toggleSelection(item.alunoId),
-                  ),
-                );
+                  onLongPress: () => _toggleSelection(item.alunoId),
+                ),
+              );
             },
           ),
         );
       },
     );
   }
-
 }
 
 class _AlunoPickerSheet extends ConsumerStatefulWidget {
@@ -586,7 +593,7 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
                     filled: true,
                     fillColor:
                         isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-                    border: OutlineInputBorder(
+                    border: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
                         color: isDark ? EagleTokens.darkLine : EagleTokens.line,
@@ -597,10 +604,7 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
                 const SizedBox(height: 12),
                 Expanded(
                   child: async.when(
-                    loading:
-                        () => Center(
-                          child: CircularProgressIndicator(color: primary),
-                        ),
+                    loading: () => Center(child: FxLoading(color: primary)),
                     error:
                         (_, __) => Center(
                           child: Text(
@@ -886,7 +890,10 @@ class _InboxTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? primary.withValues(alpha: 0.10) : cardBg,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: selected ? primary : line, width: selected ? 1.4 : 1),
+          border: Border.all(
+            color: selected ? primary : line,
+            width: selected ? 1.4 : 1,
+          ),
         ),
         child: Row(
           children: [

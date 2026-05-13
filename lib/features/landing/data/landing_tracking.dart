@@ -27,13 +27,15 @@ void trackLandingEvent({
   String? trackingId,
   String? path,
 }) {
-  unawaited(_trackLandingEvent(
-    slug: slug,
-    eventType: eventType,
-    source: source,
-    trackingId: trackingId,
-    path: path,
-  ));
+  unawaited(
+    _trackLandingEvent(
+      slug: slug,
+      eventType: eventType,
+      source: source,
+      trackingId: trackingId,
+      path: path,
+    ),
+  );
 }
 
 Future<void> _trackLandingEvent({
@@ -50,7 +52,8 @@ Future<void> _trackLandingEvent({
           headers: const {'Content-Type': 'application/json'},
           body: jsonEncode({
             'eventType': eventType,
-            if (source != null && source.trim().isNotEmpty) 'source': source.trim(),
+            if (source != null && source.trim().isNotEmpty)
+              'source': source.trim(),
             if (trackingId != null && trackingId.trim().isNotEmpty)
               'trackingId': trackingId.trim(),
             if (path != null && path.trim().isNotEmpty) 'path': path.trim(),

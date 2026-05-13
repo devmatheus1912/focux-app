@@ -10,7 +10,10 @@ final treinosProvider = FutureProvider<List<Treino>>((ref) async {
   return ref.watch(treinoRepositoryProvider).listar();
 });
 
-final treinosDoAlunoProvider = FutureProvider.family<List<Treino>, int>((ref, alunoId) async {
+final treinosDoAlunoProvider = FutureProvider.family<List<Treino>, int>((
+  ref,
+  alunoId,
+) async {
   return ref.watch(treinoRepositoryProvider).listarTreinosDoAluno(alunoId);
 });
 

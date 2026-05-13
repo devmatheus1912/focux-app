@@ -7,6 +7,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_dock.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 final iaActionsProvider = FutureProvider.family<List<FilaAcaoResumo>, String>((
   ref,
@@ -286,12 +287,14 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       if (!mounted) return;
       ref.invalidate(iaActionsProvider(_status));
       ref.invalidate(commandCenterProvider);
-      ScaffoldMessenger.of(
+      FeedbackHelper.showSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text(successMessage)));
+        SnackBar(content: Text(successMessage)),
+      );
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Não foi possível atualizar a tarefa.')),
       );
     }

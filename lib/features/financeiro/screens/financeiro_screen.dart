@@ -16,6 +16,7 @@ import 'financeiro_dashboard_screen.dart';
 import 'financeiro_resumo_screen.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class FinanceiroScreen extends ConsumerStatefulWidget {
   const FinanceiroScreen({super.key});
@@ -306,29 +307,33 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     return InputDecoration(
       labelText: label,
       hintText: hint,
-      labelStyle: TextStyle(color: mute, fontSize: 13.5, fontWeight: FontWeight.w600),
+      labelStyle: TextStyle(
+        color: mute,
+        fontSize: 13.5,
+        fontWeight: FontWeight.w600,
+      ),
       hintStyle: TextStyle(color: mute.withValues(alpha: 0.5), fontSize: 13.5),
       prefixIcon: icon != null ? Icon(icon, size: 20, color: mute) : null,
       filled: true,
       fillColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
+      border: FxInputDeco.outlineBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(color: line),
       ),
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: FxInputDeco.outlineBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(color: line),
       ),
-      focusedBorder: OutlineInputBorder(
+      focusedBorder: FxInputDeco.outlineBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(color: primary, width: 1.6),
       ),
-      errorBorder: OutlineInputBorder(
+      errorBorder: FxInputDeco.outlineBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: EagleTokens.bad),
       ),
-      focusedErrorBorder: OutlineInputBorder(
+      focusedErrorBorder: FxInputDeco.outlineBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: EagleTokens.bad, width: 1.6),
       ),
@@ -391,7 +396,10 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: valorCtrl,
-                          decoration: _fxDeco('Valor (R\$)', icon: Icons.attach_money),
+                          decoration: _fxDeco(
+                            'Valor (R\$)',
+                            icon: Icons.attach_money,
+                          ),
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
@@ -416,7 +424,11 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: mesReferenciaCtrl,
-                          decoration: _fxDeco('Mês Referência', icon: Icons.calendar_month, hint: '2026-04-01'),
+                          decoration: _fxDeco(
+                            'Mês Referência',
+                            icon: Icons.calendar_month,
+                            hint: '2026-04-01',
+                          ),
                           readOnly: true,
                           onTap: () async {
                             final now = DateTime.now();
@@ -491,12 +503,18 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                       if (ctx.mounted) Navigator.of(ctx).pop();
                                       _load();
                                       if (mounted) {
-                                        FeedbackHelper.showSuccess(context, 'Mensalidade atualizada!');
+                                        FeedbackHelper.showSuccess(
+                                          context,
+                                          'Mensalidade atualizada!',
+                                        );
                                       }
                                     } catch (e) {
                                       setModalState(() => salvando = false);
                                       if (ctx.mounted) {
-                                        FeedbackHelper.showError(ctx, friendlyError(e));
+                                        FeedbackHelper.showError(
+                                          ctx,
+                                          friendlyError(e),
+                                        );
                                       }
                                     }
                                   },
@@ -505,7 +523,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                   ? const SizedBox(
                                     width: 18,
                                     height: 18,
-                                    child: CircularProgressIndicator(
+                                    child: FxLoading(
                                       strokeWidth: 2,
                                       color: Colors.white,
                                     ),
@@ -556,7 +574,9 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         value: tipoSelecionado,
                         decoration: InputDecoration(
                           labelText: 'Tipo',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                          border: FxInputDeco.outlineBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
                         items:
                             tipos
@@ -574,7 +594,9 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         controller: obsCtrl,
                         decoration: InputDecoration(
                           labelText: 'Observação (opcional)',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                          border: FxInputDeco.outlineBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
                         maxLines: 2,
                       ),
@@ -651,10 +673,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                 title: const Text('PIX - Escaneie ou copie'),
                 content:
                     carregando
-                        ? const SizedBox(
-                          height: 80,
-                          child: FxLoading(),
-                        )
+                        ? const SizedBox(height: 80, child: FxLoading())
                         : erro != null
                         ? Text('Erro ao gerar PIX: $erro')
                         : Column(
@@ -673,7 +692,10 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                 Clipboard.setData(
                                   ClipboardData(text: pix!.pixCopiaECola),
                                 );
-                                FeedbackHelper.showSuccess(context, 'Código PIX copiado!');
+                                FeedbackHelper.showSuccess(
+                                  context,
+                                  'Código PIX copiado!',
+                                );
                               },
                             ),
                           ],
@@ -755,7 +777,10 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                               data:
                                   (alunos) => DropdownButtonFormField<int>(
                                     value: alunoSelecionadoId,
-                                    decoration: _fxDeco('Aluno', icon: Icons.person),
+                                    decoration: _fxDeco(
+                                      'Aluno',
+                                      icon: Icons.person,
+                                    ),
                                     items:
                                         alunos
                                             .map(
@@ -779,7 +804,10 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: valorCtrl,
-                          decoration: _fxDeco('Valor (R\$)', icon: Icons.attach_money),
+                          decoration: _fxDeco(
+                            'Valor (R\$)',
+                            icon: Icons.attach_money,
+                          ),
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
@@ -804,7 +832,11 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: mesReferenciaCtrl,
-                          decoration: _fxDeco('Mês Referência', icon: Icons.calendar_month, hint: '2026-04-01'),
+                          decoration: _fxDeco(
+                            'Mês Referência',
+                            icon: Icons.calendar_month,
+                            hint: '2026-04-01',
+                          ),
                           readOnly: true,
                           onTap: () async {
                             final now = DateTime.now();
@@ -865,12 +897,18 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                       if (ctx.mounted) Navigator.of(ctx).pop();
                                       _load();
                                       if (mounted) {
-                                        FeedbackHelper.showSuccess(context, 'Mensalidade lançada com sucesso!');
+                                        FeedbackHelper.showSuccess(
+                                          context,
+                                          'Mensalidade lançada com sucesso!',
+                                        );
                                       }
                                     } catch (e) {
                                       setModalState(() => salvando = false);
                                       if (ctx.mounted) {
-                                        FeedbackHelper.showError(ctx, friendlyError(e));
+                                        FeedbackHelper.showError(
+                                          ctx,
+                                          friendlyError(e),
+                                        );
                                       }
                                     }
                                   },
@@ -879,7 +917,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                   ? const SizedBox(
                                     width: 18,
                                     height: 18,
-                                    child: CircularProgressIndicator(
+                                    child: FxLoading(
                                       strokeWidth: 2,
                                       color: Colors.white,
                                     ),
@@ -906,7 +944,9 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
           heroTag: 'atualizar',
           onPressed: _atualizarAtrasos,
           tooltip: 'Atualizar atrasos',
-          backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.primary.withValues(alpha: 0.12),
           foregroundColor: Theme.of(context).colorScheme.primary,
           elevation: 0,
           child: const Icon(Icons.sync_rounded, size: 20),
@@ -930,17 +970,19 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
             decoration: InputDecoration(
               hintText: 'Buscar por nome do aluno...',
               hintStyle: TextStyle(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? EagleTokens.darkInkMute
-                    : EagleTokens.inkMute,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? EagleTokens.darkInkMute
+                        : EagleTokens.inkMute,
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
               ),
               prefixIcon: Icon(
                 Icons.search_rounded,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? EagleTokens.darkInkMute
-                    : EagleTokens.inkMute,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? EagleTokens.darkInkMute
+                        : EagleTokens.inkMute,
                 size: 20,
               ),
               suffixIcon:
@@ -954,27 +996,33 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                       )
                       : null,
               filled: true,
-              fillColor: Theme.of(context).brightness == Brightness.dark
-                  ? EagleTokens.darkCard
-                  : EagleTokens.card,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              border: OutlineInputBorder(
+              fillColor:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? EagleTokens.darkCard
+                      : EagleTokens.card,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              border: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? EagleTokens.darkLine
-                      : EagleTokens.line,
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? EagleTokens.darkLine
+                          : EagleTokens.line,
                 ),
               ),
-              enabledBorder: OutlineInputBorder(
+              enabledBorder: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? EagleTokens.darkLine
-                      : EagleTokens.line,
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? EagleTokens.darkLine
+                          : EagleTokens.line,
                 ),
               ),
-              focusedBorder: OutlineInputBorder(
+              focusedBorder: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(
                   color: Theme.of(context).colorScheme.primary,
@@ -1011,14 +1059,22 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                     itemCount: _filtered.length,
                     itemBuilder: (_, i) {
                       final m = _filtered[i];
-                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
                       final primary = Theme.of(context).colorScheme.primary;
-                      final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
-                      final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-                      final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-                      final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+                      final card =
+                          isDark ? EagleTokens.darkCard : EagleTokens.card;
+                      final ink =
+                          isDark ? EagleTokens.darkInk : EagleTokens.ink;
+                      final mute =
+                          isDark
+                              ? EagleTokens.darkInkMute
+                              : EagleTokens.inkMute;
+                      final line =
+                          isDark ? EagleTokens.darkLine : EagleTokens.line;
                       final statusColor = _statusColor(m.status);
-                      final isPending = m.status == 'PENDENTE' || m.status == 'ATRASADO';
+                      final isPending =
+                          m.status == 'PENDENTE' || m.status == 'ATRASADO';
                       return Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(14),
@@ -1034,7 +1090,8 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         m.alunoNome,
@@ -1074,9 +1131,14 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                             Row(
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: statusColor.withValues(alpha: isDark ? 0.18 : 0.10),
+                                    color: statusColor.withValues(
+                                      alpha: isDark ? 0.18 : 0.10,
+                                    ),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
@@ -1132,20 +1194,21 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
       itemCount: 5,
-      itemBuilder: (_, __) => Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Container(
-          height: 82,
-          decoration: BoxDecoration(
-            color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+      itemBuilder:
+          (_, __) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Container(
+              height: 82,
+              decoration: BoxDecoration(
+                color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                ),
+              ),
+              child: const SizedBox.shrink(),
             ),
           ),
-          child: const SizedBox.shrink(),
-        ),
-      ),
     );
   }
 

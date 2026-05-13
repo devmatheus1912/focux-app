@@ -4,7 +4,7 @@ import 'plano_sucesso_model.dart';
 
 class PlanoSucessoProvider with ChangeNotifier {
   final ApiClient _api = ApiClient();
-  
+
   PlanoSucesso? _plano;
   bool _isLoading = false;
 
@@ -32,9 +32,9 @@ class PlanoSucessoProvider with ChangeNotifier {
         final index = _plano!.marcos.indexWhere((m) => m.id == marcoId);
         if (index != -1) {
           _plano!.marcos[index] = MarcoSucesso(
-            id: marcoId, 
-            titulo: _plano!.marcos[index].titulo, 
-            atingido: true
+            id: marcoId,
+            titulo: _plano!.marcos[index].titulo,
+            atingido: true,
           );
           notifyListeners();
         }

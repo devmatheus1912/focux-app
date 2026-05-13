@@ -23,12 +23,12 @@ class PermissaoModel {
   });
 
   factory PermissaoModel.fromJson(Map<String, dynamic> j) => PermissaoModel(
-        id: j['id'],
-        personalOwnerId: j['personalOwnerId'],
-        usuarioConvidadoId: j['usuarioConvidadoId'],
-        recurso: j['recurso'],
-        nivelAcesso: j['nivelAcesso'],
-      );
+    id: j['id'],
+    personalOwnerId: j['personalOwnerId'],
+    usuarioConvidadoId: j['usuarioConvidadoId'],
+    recurso: j['recurso'],
+    nivelAcesso: j['nivelAcesso'],
+  );
 }
 
 // ─── Providers ────────────────────────────────────────────────────────────────
@@ -55,7 +55,10 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark
+              ? EagleTokens.darkBg
+              : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -77,9 +80,16 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shield_outlined, size: 64, color: const Color(0xFF9CA3AF)),
+                  Icon(
+                    Icons.shield_outlined,
+                    size: 64,
+                    color: const Color(0xFF9CA3AF),
+                  ),
                   const SizedBox(height: 16),
-                  const Text('Nenhuma permissão especial concedida.', style: TextStyle(color: EagleTokens.inkMute)),
+                  const Text(
+                    'Nenhuma permissão especial concedida.',
+                    style: TextStyle(color: EagleTokens.inkMute),
+                  ),
                 ],
               ),
             );
@@ -92,20 +102,36 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
               return Card(
                 elevation: 2,
                 margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: p.nivelAcesso == 'ADMIN' ? EagleTokens.bad.withValues(alpha: 0.1) : primary.withValues(alpha: 0.1),
+                    backgroundColor:
+                        p.nivelAcesso == 'ADMIN'
+                            ? EagleTokens.bad.withValues(alpha: 0.1)
+                            : primary.withValues(alpha: 0.1),
                     child: Icon(
                       p.nivelAcesso == 'ADMIN' ? Icons.security : Icons.vpn_key,
-                      color: p.nivelAcesso == 'ADMIN' ? EagleTokens.bad : primary,
+                      color:
+                          p.nivelAcesso == 'ADMIN' ? EagleTokens.bad : primary,
                     ),
                   ),
-                  title: Text('Recurso: ${p.recurso}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('ID Assistente: ${p.usuarioConvidadoId} • Nível: ${p.nivelAcesso}'),
+                  title: Text(
+                    'Recurso: ${p.recurso}',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  subtitle: Text(
+                    'ID Assistente: ${p.usuarioConvidadoId} • Nível: ${p.nivelAcesso}',
+                  ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: EagleTokens.bad),
-                    onPressed: () => _revogarAcesso(ref, p.usuarioConvidadoId, p.recurso),
+                    onPressed:
+                        () => _revogarAcesso(
+                          ref,
+                          p.usuarioConvidadoId,
+                          p.recurso,
+                        ),
                   ),
                 ),
               );
@@ -124,68 +150,111 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => StatefulBuilder(builder: (ctx, setState) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(16, 20, 16, MediaQuery.of(ctx).viewInsets.bottom + 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text('Conceder Acesso', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              TextField(
-                controller: usuarioIdCtrl,
-                decoration: FxInputDeco.build(context, 'ID do Usuário/Assistente'),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: recursoSelecionado,
-                decoration: FxInputDeco.build(context, 'Recurso'),
-                items: const [
-                  DropdownMenuItem(value: 'FINANCEIRO', child: Text('Financeiro')),
-                  DropdownMenuItem(value: 'TREINOS', child: Text('Treinos')),
-                  DropdownMenuItem(value: 'ALUNOS', child: Text('Alunos e CRM')),
-                  DropdownMenuItem(value: 'CONFIG', child: Text('Configurações')),
-                ],
-                onChanged: (v) => setState(() => recursoSelecionado = v!),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: nivelSelecionado,
-                decoration: FxInputDeco.build(context, 'Nível de Acesso'),
-                items: const [
-                  DropdownMenuItem(value: 'READ', child: Text('Leitura (READ)')),
-                  DropdownMenuItem(value: 'WRITE', child: Text('Edição (WRITE)')),
-                  DropdownMenuItem(value: 'ADMIN', child: Text('Administrador (ADMIN)')),
-                ],
-                onChanged: (v) => setState(() => nivelSelecionado = v!),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () async {
-                  if (usuarioIdCtrl.text.isEmpty) return;
-                  final api = ref.read(apiClientProvider);
-                  await api.dio.post('/api/rbac/permissoes', data: {
-                    'usuarioConvidadoId': int.parse(usuarioIdCtrl.text),
-                    'recurso': recursoSelecionado,
-                    'nivelAcesso': nivelSelecionado,
-                  });
-                  ref.invalidate(permissoesProvider);
-                  if (ctx.mounted) Navigator.pop(ctx);
-                },
-                child: const Text('Salvar'),
-              ),
-            ],
+      builder:
+          (ctx) => StatefulBuilder(
+            builder: (ctx, setState) {
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  20,
+                  16,
+                  MediaQuery.of(ctx).viewInsets.bottom + 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Conceder Acesso',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: usuarioIdCtrl,
+                      decoration: FxInputDeco.build(
+                        context,
+                        'ID do Usuário/Assistente',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: recursoSelecionado,
+                      decoration: FxInputDeco.build(context, 'Recurso'),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'FINANCEIRO',
+                          child: Text('Financeiro'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'TREINOS',
+                          child: Text('Treinos'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'ALUNOS',
+                          child: Text('Alunos e CRM'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'CONFIG',
+                          child: Text('Configurações'),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() => recursoSelecionado = v!),
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: nivelSelecionado,
+                      decoration: FxInputDeco.build(context, 'Nível de Acesso'),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'READ',
+                          child: Text('Leitura (READ)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'WRITE',
+                          child: Text('Edição (WRITE)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'ADMIN',
+                          child: Text('Administrador (ADMIN)'),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() => nivelSelecionado = v!),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (usuarioIdCtrl.text.isEmpty) return;
+                        final api = ref.read(apiClientProvider);
+                        await api.dio.post(
+                          '/api/rbac/permissoes',
+                          data: {
+                            'usuarioConvidadoId': int.parse(usuarioIdCtrl.text),
+                            'recurso': recursoSelecionado,
+                            'nivelAcesso': nivelSelecionado,
+                          },
+                        );
+                        ref.invalidate(permissoesProvider);
+                        if (ctx.mounted) Navigator.pop(ctx);
+                      },
+                      child: const Text('Salvar'),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-        );
-      }),
     );
   }
 
   void _revogarAcesso(WidgetRef ref, int usuarioId, String recurso) async {
     final api = ref.read(apiClientProvider);
-    await api.dio.delete('/api/rbac/permissoes/$recurso?usuarioConvidadoId=$usuarioId');
+    await api.dio.delete(
+      '/api/rbac/permissoes/$recurso?usuarioConvidadoId=$usuarioId',
+    );
     ref.invalidate(permissoesProvider);
   }
 }

@@ -13,14 +13,19 @@ class MarcoModel {
   final int ordem;
   final bool concluido;
 
-  MarcoModel({required this.id, required this.titulo, required this.ordem, required this.concluido});
+  MarcoModel({
+    required this.id,
+    required this.titulo,
+    required this.ordem,
+    required this.concluido,
+  });
 
   factory MarcoModel.fromJson(Map<String, dynamic> j) => MarcoModel(
-        id: j['id'],
-        titulo: j['titulo'],
-        ordem: j['ordem'],
-        concluido: j['concluido'] ?? false,
-      );
+    id: j['id'],
+    titulo: j['titulo'],
+    ordem: j['ordem'],
+    concluido: j['concluido'] ?? false,
+  );
 }
 
 class TrilhaModel {
@@ -51,26 +56,35 @@ class TrilhaModel {
   });
 
   factory TrilhaModel.fromJson(Map<String, dynamic> j) => TrilhaModel(
-        id: j['id'],
-        alunoId: j['alunoId'],
-        titulo: j['titulo'],
-        descricao: j['descricao'],
-        metaTipo: j['metaTipo'] ?? 'TREINOS',
-        metaValor: j['metaValor'] != null ? (j['metaValor'] as num).toDouble() : null,
-        valorAtual: (j['valorAtual'] ?? 0).toDouble(),
-        percentualConclusao: (j['percentualConclusao'] ?? 0).toDouble(),
-        concluida: j['concluida'] ?? false,
-        dataFim: j['dataFim'],
-        marcos: (j['marcos'] as List? ?? []).map((e) => MarcoModel.fromJson(e as Map<String, dynamic>)).toList(),
-      );
+    id: j['id'],
+    alunoId: j['alunoId'],
+    titulo: j['titulo'],
+    descricao: j['descricao'],
+    metaTipo: j['metaTipo'] ?? 'TREINOS',
+    metaValor:
+        j['metaValor'] != null ? (j['metaValor'] as num).toDouble() : null,
+    valorAtual: (j['valorAtual'] ?? 0).toDouble(),
+    percentualConclusao: (j['percentualConclusao'] ?? 0).toDouble(),
+    concluida: j['concluida'] ?? false,
+    dataFim: j['dataFim'],
+    marcos:
+        (j['marcos'] as List? ?? [])
+            .map((e) => MarcoModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+  );
 }
 
 // ─── Providers ────────────────────────────────────────────────────────────────
 
-final trilhasAlunoProvider = FutureProvider.family<List<TrilhaModel>, int>((ref, alunoId) async {
+final trilhasAlunoProvider = FutureProvider.family<List<TrilhaModel>, int>((
+  ref,
+  alunoId,
+) async {
   final api = ref.read(apiClientProvider);
   final res = await api.dio.get('/api/trilhas/aluno/$alunoId');
-  return (res.data as List).map((e) => TrilhaModel.fromJson(e as Map<String, dynamic>)).toList();
+  return (res.data as List)
+      .map((e) => TrilhaModel.fromJson(e as Map<String, dynamic>))
+      .toList();
 });
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
@@ -79,14 +93,21 @@ class TrilhasScreen extends ConsumerWidget {
   final int alunoId;
   final String alunoNome;
 
-  const TrilhasScreen({super.key, required this.alunoId, required this.alunoNome});
+  const TrilhasScreen({
+    super.key,
+    required this.alunoId,
+    required this.alunoNome,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final trilhasAsync = ref.watch(trilhasAlunoProvider(alunoId));
 
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark
+              ? EagleTokens.darkBg
+              : EagleTokens.paper,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -94,7 +115,13 @@ class TrilhasScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Trilhas de Progresso', style: TextStyle(fontSize: 16)),
-            Text(alunoNome, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
+            Text(
+              alunoNome,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
           ],
         ),
         actions: [
@@ -106,7 +133,13 @@ class TrilhasScreen extends ConsumerWidget {
       ),
       body: trilhasAsync.when(
         loading: () => const FxLoading(),
-        error: (e, _) => Center(child: Text('Erro: $e', style: const TextStyle(color: EagleTokens.bad))),
+        error:
+            (e, _) => Center(
+              child: Text(
+                'Erro: $e',
+                style: const TextStyle(color: EagleTokens.bad),
+              ),
+            ),
         data: (trilhas) {
           if (trilhas.isEmpty) {
             return Center(
@@ -115,7 +148,10 @@ class TrilhasScreen extends ConsumerWidget {
                 children: [
                   Icon(Icons.route, size: 64, color: const Color(0xFFD1D5DB)),
                   const SizedBox(height: 16),
-                  const Text('Nenhuma trilha criada ainda', style: TextStyle(color: EagleTokens.inkMute)),
+                  const Text(
+                    'Nenhuma trilha criada ainda',
+                    style: TextStyle(color: EagleTokens.inkMute),
+                  ),
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
                     onPressed: () => _showCriarTrilha(context, ref),
@@ -129,7 +165,9 @@ class TrilhasScreen extends ConsumerWidget {
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: trilhas.length,
-            itemBuilder: (ctx, i) => _TrilhaCard(trilha: trilhas[i], alunoId: alunoId, ref: ref),
+            itemBuilder:
+                (ctx, i) =>
+                    _TrilhaCard(trilha: trilhas[i], alunoId: alunoId, ref: ref),
           );
         },
       ),
@@ -144,61 +182,101 @@ class TrilhasScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => StatefulBuilder(builder: (ctx, setState) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(16, 20, 16, MediaQuery.of(ctx).viewInsets.bottom + 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Nova Trilha', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              TextField(
-                controller: tituloCtrl,
-                decoration: FxInputDeco.build(context, 'Título da trilha'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: descCtrl,
-                decoration: FxInputDeco.build(context, 'Descrição (opcional)'),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: metaTipo,
-                decoration: FxInputDeco.build(context, 'Tipo de meta'),
-                items: const [
-                  DropdownMenuItem(value: 'TREINOS', child: Text('Número de treinos')),
-                  DropdownMenuItem(value: 'PESO', child: Text('Meta de peso')),
-                  DropdownMenuItem(value: 'MEDIDA', child: Text('Meta de medida')),
-                  DropdownMenuItem(value: 'CUSTOMIZADO', child: Text('Customizado')),
-                ],
-                onChanged: (v) => setState(() => metaTipo = v!),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (tituloCtrl.text.trim().isEmpty) return;
-                    final api = ref.read(apiClientProvider);
-                    await api.dio.post('/api/trilhas', data: {
-                      'alunoId': alunoId,
-                      'titulo': tituloCtrl.text.trim(),
-                      'descricao': descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
-                      'metaTipo': metaTipo,
-                    });
-                    ref.invalidate(trilhasAlunoProvider(alunoId));
-                    if (ctx.mounted) Navigator.pop(ctx);
-                  },
-                  child: const Text('Criar Trilha'),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder:
+          (ctx) => StatefulBuilder(
+            builder: (ctx, setState) {
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  20,
+                  16,
+                  MediaQuery.of(ctx).viewInsets.bottom + 20,
                 ),
-              ),
-            ],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Nova Trilha',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: tituloCtrl,
+                      decoration: FxInputDeco.build(
+                        context,
+                        'Título da trilha',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: descCtrl,
+                      decoration: FxInputDeco.build(
+                        context,
+                        'Descrição (opcional)',
+                      ),
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: metaTipo,
+                      decoration: FxInputDeco.build(context, 'Tipo de meta'),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'TREINOS',
+                          child: Text('Número de treinos'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'PESO',
+                          child: Text('Meta de peso'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'MEDIDA',
+                          child: Text('Meta de medida'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'CUSTOMIZADO',
+                          child: Text('Customizado'),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() => metaTipo = v!),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (tituloCtrl.text.trim().isEmpty) return;
+                          final api = ref.read(apiClientProvider);
+                          await api.dio.post(
+                            '/api/trilhas',
+                            data: {
+                              'alunoId': alunoId,
+                              'titulo': tituloCtrl.text.trim(),
+                              'descricao':
+                                  descCtrl.text.trim().isEmpty
+                                      ? null
+                                      : descCtrl.text.trim(),
+                              'metaTipo': metaTipo,
+                            },
+                          );
+                          ref.invalidate(trilhasAlunoProvider(alunoId));
+                          if (ctx.mounted) Navigator.pop(ctx);
+                        },
+                        child: const Text('Criar Trilha'),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-        );
-      }),
     );
   }
 }
@@ -210,7 +288,11 @@ class _TrilhaCard extends StatelessWidget {
   final int alunoId;
   final WidgetRef ref;
 
-  const _TrilhaCard({required this.trilha, required this.alunoId, required this.ref});
+  const _TrilhaCard({
+    required this.trilha,
+    required this.alunoId,
+    required this.ref,
+  });
 
   Color get _progressColor {
     if (trilha.concluida) return const Color(0xFF22C55E);
@@ -234,24 +316,41 @@ class _TrilhaCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(trilha.titulo,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  child: Text(
+                    trilha.titulo,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
                 ),
                 if (trilha.concluida)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF22C55E).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text('✓ CONCLUÍDA',
-                        style: TextStyle(fontSize: 10, color: Color(0xFF22C55E), fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      '✓ CONCLUÍDA',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF22C55E),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
               ],
             ),
             if (trilha.descricao != null) ...[
               const SizedBox(height: 4),
-              Text(trilha.descricao!, style: const TextStyle(fontSize: 12, color: Color(0xFF717171))),
+              Text(
+                trilha.descricao!,
+                style: const TextStyle(fontSize: 12, color: Color(0xFF717171)),
+              ),
             ],
             const SizedBox(height: 14),
 
@@ -259,9 +358,21 @@ class _TrilhaCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Progresso', style: TextStyle(fontSize: 12, color: const Color(0xFF4B5563))),
-                Text('${trilha.percentualConclusao.toStringAsFixed(0)}%',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: _progressColor, fontSize: 12)),
+                Text(
+                  'Progresso',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: const Color(0xFF4B5563),
+                  ),
+                ),
+                Text(
+                  '${trilha.percentualConclusao.toStringAsFixed(0)}%',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: _progressColor,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 6),
@@ -276,14 +387,19 @@ class _TrilhaCard extends StatelessWidget {
             // Marcos
             if (trilha.marcos.isNotEmpty) ...[
               const SizedBox(height: 14),
-              const Text('Marcos', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              const Text(
+                'Marcos',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              ),
               const SizedBox(height: 6),
-              ...trilha.marcos.map((m) => _MarcoTile(
-                    marco: m,
-                    trilhaId: trilha.id,
-                    alunoId: alunoId,
-                    ref: ref,
-                  )),
+              ...trilha.marcos.map(
+                (m) => _MarcoTile(
+                  marco: m,
+                  trilhaId: trilha.id,
+                  alunoId: alunoId,
+                  ref: ref,
+                ),
+              ),
             ],
           ],
         ),
@@ -298,7 +414,12 @@ class _MarcoTile extends StatelessWidget {
   final int alunoId;
   final WidgetRef ref;
 
-  const _MarcoTile({required this.marco, required this.trilhaId, required this.alunoId, required this.ref});
+  const _MarcoTile({
+    required this.marco,
+    required this.trilhaId,
+    required this.alunoId,
+    required this.ref,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -308,15 +429,19 @@ class _MarcoTile extends StatelessWidget {
       leading: IconButton(
         icon: Icon(
           marco.concluido ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: marco.concluido ? const Color(0xFF22C55E) : EagleTokens.inkMute,
+          color:
+              marco.concluido ? const Color(0xFF22C55E) : EagleTokens.inkMute,
         ),
-        onPressed: marco.concluido
-            ? null
-            : () async {
-                final api = ref.read(apiClientProvider);
-                await api.dio.post('/api/trilhas/$trilhaId/marcos/${marco.id}/concluir');
-                ref.invalidate(trilhasAlunoProvider(alunoId));
-              },
+        onPressed:
+            marco.concluido
+                ? null
+                : () async {
+                  final api = ref.read(apiClientProvider);
+                  await api.dio.post(
+                    '/api/trilhas/$trilhaId/marcos/${marco.id}/concluir',
+                  );
+                  ref.invalidate(trilhasAlunoProvider(alunoId));
+                },
       ),
       title: Text(
         marco.titulo,

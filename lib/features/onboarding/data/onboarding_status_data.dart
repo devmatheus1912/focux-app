@@ -18,12 +18,15 @@ class OnboardingStatusData {
   factory OnboardingStatusData.fromJson(Map<String, dynamic> json) {
     return OnboardingStatusData(
       perfilCompleto: json['perfilCompleto'] as bool? ?? false,
-      primeiroAlunoAdicionado: json['primeiroAlunoAdicionado'] as bool? ?? false,
+      primeiroAlunoAdicionado:
+          json['primeiroAlunoAdicionado'] as bool? ?? false,
       primeiroTreinoCriado: json['primeiroTreinoCriado'] as bool? ?? false,
-      pagamentoConfigurado: json['pagamentoConfigurado'] as bool? ??
+      pagamentoConfigurado:
+          json['pagamentoConfigurado'] as bool? ??
           json['primeiroPagamentoRecebido'] as bool? ??
           false,
-      primeiroPagamentoRecebido: json['primeiroPagamentoRecebido'] as bool? ?? false,
+      primeiroPagamentoRecebido:
+          json['primeiroPagamentoRecebido'] as bool? ?? false,
       progressoPercentual: json['progressoPercentual'] as int? ?? 0,
     );
   }

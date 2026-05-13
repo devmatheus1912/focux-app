@@ -8,6 +8,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 // BUG-03: ConumerStatefulWidget para acesso ao ref (apiClientProvider autenticado)
 class MigracaoMagicaScreen extends ConsumerStatefulWidget {
@@ -380,7 +381,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                     SizedBox(
                                       width: 20,
                                       height: 20,
-                                      child: CircularProgressIndicator(
+                                      child: FxLoading(
                                         color: Colors.white,
                                         strokeWidth: 2,
                                       ),
@@ -473,7 +474,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ),
@@ -557,7 +558,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             ? const SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: FxLoading(strokeWidth: 2),
                             )
                             : Row(
                               mainAxisSize: MainAxisSize.min,

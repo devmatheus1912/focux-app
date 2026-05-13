@@ -9,6 +9,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../providers/alunos_provider.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 const _generos = ['Masculino', 'Feminino', 'Outro'];
 const _tiposConsultoria = ['ONLINE', 'PRESENCIAL', 'HIBRIDO'];
@@ -344,7 +346,10 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                         HapticFeedback.mediumImpact();
                         if (ctx.mounted) Navigator.of(ctx).pop();
                         if (mounted) {
-                          FeedbackHelper.showSuccess(context, 'Mensagem copiada.');
+                          FeedbackHelper.showSuccess(
+                            context,
+                            'Mensagem copiada.',
+                          );
                           context.pop(true);
                         }
                       },
@@ -910,26 +915,26 @@ class _FxFormField extends StatelessWidget {
               horizontal: 16,
               vertical: 15,
             ),
-            border: OutlineInputBorder(
+            border: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: line),
             ),
-            enabledBorder: OutlineInputBorder(
+            enabledBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: line),
             ),
-            focusedBorder: OutlineInputBorder(
+            focusedBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
                 color: primary.withValues(alpha: 0.68),
                 width: 1.5,
               ),
             ),
-            errorBorder: OutlineInputBorder(
+            errorBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: const BorderSide(color: EagleTokens.bad),
             ),
-            focusedErrorBorder: OutlineInputBorder(
+            focusedErrorBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: const BorderSide(color: EagleTokens.bad, width: 1.3),
             ),
@@ -1238,7 +1243,10 @@ class _BottomSubmitBar extends StatelessWidget {
           children: [
             if (!canSubmit) ...[
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 9,
+                ),
                 decoration: BoxDecoration(
                   color: primary.withValues(alpha: isDark ? 0.10 : 0.05),
                   borderRadius: BorderRadius.circular(999),
@@ -1246,11 +1254,7 @@ class _BottomSubmitBar extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      size: 14,
-                      color: mute,
-                    ),
+                    Icon(Icons.info_outline_rounded, size: 14, color: mute),
                     const SizedBox(width: 7),
                     Flexible(
                       child: Text(
@@ -1303,7 +1307,7 @@ class _BottomSubmitBar extends StatelessWidget {
                               ? const SizedBox(
                                 width: 22,
                                 height: 22,
-                                child: CircularProgressIndicator(
+                                child: FxLoading(
                                   strokeWidth: 2.5,
                                   color: Colors.white,
                                 ),

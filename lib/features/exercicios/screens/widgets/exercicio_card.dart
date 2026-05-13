@@ -7,6 +7,7 @@ import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../providers/exercicios_provider.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class ExercicioCard extends ConsumerWidget {
   final Exercicio exercicio;
@@ -40,7 +41,8 @@ class ExercicioCard extends ConsumerWidget {
     } catch (e) {
       debugPrint('[Focux] Error: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(content: Text('Erro ao atualizar favorito.')),
         );
       }
@@ -72,17 +74,15 @@ class ExercicioCard extends ConsumerWidget {
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: onTapOverride ?? () => context.push('/exercicios/${exercicio.id}'),
+        onTap:
+            onTapOverride ?? () => context.push('/exercicios/${exercicio.id}'),
         onLongPress: onLongPress,
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color:
-                  selected
-                      ? Theme.of(context).colorScheme.primary
-                      : line,
+              color: selected ? Theme.of(context).colorScheme.primary : line,
               width: selected ? 2 : 1,
             ),
           ),
@@ -166,45 +166,45 @@ class ExercicioCard extends ConsumerWidget {
                 )
               else
                 PopupMenuButton<String>(
-                tooltip: 'Acoes do exercicio',
-                icon: Icon(Icons.more_vert_rounded, color: mute),
-                onSelected: (value) {
-                  if (value == 'video') onUploadVideo();
-                  if (value == 'delete') onDelete();
-                },
-                itemBuilder:
-                    (_) => [
-                      PopupMenuItem(
-                        value: 'video',
-                        child: Row(
-                          children: [
-                            Icon(
-                              hasVideo
-                                  ? Icons.swap_horiz_rounded
-                                  : Icons.upload_rounded,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(hasVideo ? 'Trocar video' : 'Subir video'),
-                          ],
+                  tooltip: 'Acoes do exercicio',
+                  icon: Icon(Icons.more_vert_rounded, color: mute),
+                  onSelected: (value) {
+                    if (value == 'video') onUploadVideo();
+                    if (value == 'delete') onDelete();
+                  },
+                  itemBuilder:
+                      (_) => [
+                        PopupMenuItem(
+                          value: 'video',
+                          child: Row(
+                            children: [
+                              Icon(
+                                hasVideo
+                                    ? Icons.swap_horiz_rounded
+                                    : Icons.upload_rounded,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(hasVideo ? 'Trocar video' : 'Subir video'),
+                            ],
+                          ),
                         ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.delete_outline_rounded,
-                              size: 20,
-                              color: EagleTokens.bad,
-                            ),
-                            SizedBox(width: 10),
-                            Text('Excluir'),
-                          ],
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete_outline_rounded,
+                                size: 20,
+                                color: EagleTokens.bad,
+                              ),
+                              SizedBox(width: 10),
+                              Text('Excluir'),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-              ),
+                      ],
+                ),
             ],
           ),
         ),

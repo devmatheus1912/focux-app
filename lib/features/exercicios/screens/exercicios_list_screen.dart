@@ -14,6 +14,7 @@ import 'widgets/exercicios_batch_actions.dart';
 import 'widgets/exercicios_filter_bar.dart';
 import 'widgets/exercicios_list_view.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 // Legacy editorial import contract still lives in repository/tests:
 // "Aprovar editorialmente", "Notas editoriais padrao",
@@ -76,7 +77,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   Future<void> _uploadVideo(Exercicio exercicio) async {
     final file = await _picker.pickVideo(source: ImageSource.gallery);
     if (file == null || !mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = FeedbackHelper.messengerOf(context);
     messenger.showSnackBar(
       SnackBar(content: Text('Enviando video de ${exercicio.nome}...')),
     );
@@ -142,7 +143,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       _selected.remove(exercicio.id);
       _refresh();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(
             content: Text('Exercicio excluido.'),
             backgroundColor: EagleTokens.good,
@@ -151,7 +153,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(
             content: Text(friendlyError(e)),
             backgroundColor: EagleTokens.bad,
@@ -172,9 +175,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       _refresh();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      FeedbackHelper.showSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+        SnackBar(content: Text(friendlyError(e))),
+      );
     }
   }
 
@@ -257,7 +261,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     });
     _refresh();
     if (blocked.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(
           content: Text(
             deleted.length == 1

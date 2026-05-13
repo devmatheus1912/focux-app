@@ -5,6 +5,7 @@ import '../../../core/utils/fx_utils.dart';
 import '../data/landing_tracking.dart';
 import '../models/public_personal_data.dart';
 import 'landing_design_helpers.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class HeroSection extends StatelessWidget {
   final PublicPersonalData data;
@@ -361,9 +362,7 @@ class _InlinePresentationVideoState extends State<_InlinePresentationVideo> {
     if (!_ready) {
       return SizedBox(
         height: frameHeight,
-        child: const Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
+        child: const Center(child: FxLoading(color: Colors.white)),
       );
     }
     final videoSize = _controller.value.size;

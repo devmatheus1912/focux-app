@@ -7,6 +7,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../data/analytics_repository.dart';
 import '../providers/analytics_provider.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key});
@@ -20,7 +21,7 @@ class AnalyticsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: dark ? EagleTokens.darkBg : EagleTokens.paper,
       body: async.when(
-        loading: () => Center(child: CircularProgressIndicator(color: primary)),
+        loading: () => Center(child: FxLoading(color: primary)),
         error:
             (e, _) => Center(
               child: Column(
@@ -874,7 +875,7 @@ class _InadimplenciaCard extends StatelessWidget {
               SizedBox(
                 width: 60,
                 height: 60,
-                child: CircularProgressIndicator(
+                child: FxLoading(
                   value: (churn / 100).clamp(0.0, 1.0),
                   strokeWidth: 6,
                   backgroundColor: (isGood ? EagleTokens.good : EagleTokens.bad)

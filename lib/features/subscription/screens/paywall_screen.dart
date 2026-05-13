@@ -9,6 +9,8 @@ import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
 import '../models/subscription_plan.dart';
 import '../services/iap_service.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key});
@@ -142,7 +144,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     if (_restoringPurchases) return;
 
     setState(() => _restoringPurchases = true);
-    ScaffoldMessenger.of(context).showSnackBar(
+    FeedbackHelper.showSnackBar(
+      context,
       const SnackBar(content: Text('Verificando compras anteriores...')),
     );
 
@@ -162,7 +165,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       if (!mounted) return;
 
       if (!result.storeAvailable) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(
             content: Text('A loja do dispositivo nao esta disponivel.'),
           ),
@@ -171,25 +175,29 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       }
 
       if (result.hasVerifiedPurchases) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(content: Text('Compras restauradas com sucesso.')),
         );
         return;
       }
 
       if (result.errors.isNotEmpty) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(result.errors.first.message)));
+          SnackBar(content: Text(result.errors.first.message)),
+        );
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Nenhuma compra anterior encontrada.')),
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(content: Text('Erro ao restaurar compras: $error')),
       );
     } finally {
@@ -329,7 +337,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                             ? const SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(
+                              child: FxLoading(
                                 strokeWidth: 2,
                                 color: Colors.white,
                               ),

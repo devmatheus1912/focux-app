@@ -10,6 +10,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class TreinosListScreen extends ConsumerWidget {
   final int? alunoId;
@@ -315,13 +316,16 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                     filteredTreinos[i].id,
                                   ),
                                   onToggleSelection:
-                                      () =>
-                                          _toggleSelection(filteredTreinos[i].id),
+                                      () => _toggleSelection(
+                                        filteredTreinos[i].id,
+                                      ),
                                   onStartSelection:
-                                      () =>
-                                          _startSelection(filteredTreinos[i].id),
+                                      () => _startSelection(
+                                        filteredTreinos[i].id,
+                                      ),
                                   onDelete:
-                                      () => _deleteTreinos([filteredTreinos[i]]),
+                                      () =>
+                                          _deleteTreinos([filteredTreinos[i]]),
                                 ),
                               ),
                         ),
@@ -1110,17 +1114,17 @@ class _LibraryControls extends StatelessWidget {
                 horizontal: 12,
                 vertical: 12,
               ),
-              enabledBorder: OutlineInputBorder(
+              enabledBorder: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(
                   color: isDark ? EagleTokens.darkLine : Colors.white,
                 ),
               ),
-              focusedBorder: OutlineInputBorder(
+              focusedBorder: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(color: primary.withValues(alpha: 0.42)),
               ),
-              border: OutlineInputBorder(
+              border: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
@@ -1545,7 +1549,9 @@ class _TreinoCard extends StatelessWidget {
                           isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
                       valueColor: AlwaysStoppedAnimation(
                         hasExercises
-                            ? EagleTokens.good.withValues(alpha: isDark ? 0.5 : 0.35)
+                            ? EagleTokens.good.withValues(
+                              alpha: isDark ? 0.5 : 0.35,
+                            )
                             : EagleTokens.warn,
                       ),
                     ),
@@ -1559,7 +1565,9 @@ class _TreinoCard extends StatelessWidget {
                       Icon(
                         Icons.check_circle_rounded,
                         size: 13,
-                        color: EagleTokens.good.withValues(alpha: isDark ? 0.7 : 0.55),
+                        color: EagleTokens.good.withValues(
+                          alpha: isDark ? 0.7 : 0.55,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Text(

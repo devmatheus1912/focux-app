@@ -5,7 +5,20 @@ import 'package:flutter/material.dart';
 class FxLoading extends StatelessWidget {
   final double size;
   final double strokeWidth;
-  const FxLoading({super.key, this.size = 28, this.strokeWidth = 2.5});
+  final Color? color;
+  final double? value;
+  final Color? backgroundColor;
+  final Animation<Color?>? valueColor;
+
+  const FxLoading({
+    super.key,
+    this.size = 28,
+    this.strokeWidth = 2.5,
+    this.color,
+    this.value,
+    this.backgroundColor,
+    this.valueColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +26,13 @@ class FxLoading extends StatelessWidget {
       child: SizedBox(
         width: size,
         height: size,
-        child: CircularProgressIndicator(strokeWidth: strokeWidth),
+        child: CircularProgressIndicator(
+          value: value,
+          strokeWidth: strokeWidth,
+          color: color,
+          backgroundColor: backgroundColor,
+          valueColor: valueColor,
+        ),
       ),
     );
   }

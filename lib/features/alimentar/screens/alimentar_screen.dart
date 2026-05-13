@@ -106,7 +106,7 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
                                   child: Text(
                                     p.nome,
                                     style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w700,
                                       fontSize: 16,
                                     ),
                                   ),

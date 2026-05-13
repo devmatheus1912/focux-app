@@ -76,19 +76,20 @@ class AppTheme {
     final primaryDeep = BrandPalette.deep(primary);
     final primaryAccent = BrandPalette.accent(primary);
     final onPrimary = _readableOn(primary);
-    final surface    = dark ? EagleTokens.darkCard    : EagleTokens.card;
-    final scaffold   = dark ? EagleTokens.darkBg      : EagleTokens.paper;
-    final onSurface  = dark ? EagleTokens.darkInk     : EagleTokens.ink;
+    final surface = dark ? EagleTokens.darkCard : EagleTokens.card;
+    final scaffold = dark ? EagleTokens.darkBg : EagleTokens.paper;
+    final onSurface = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final onSurfMute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final outline    = dark ? EagleTokens.darkLine    : EagleTokens.line;
+    final outline = dark ? EagleTokens.darkLine : EagleTokens.line;
 
     // Tinted shadow — subtle brand-tinted depth instead of flat gray
-    final shadowColor = dark
-        ? Colors.black.withValues(alpha: 0.5)
-        : Color.alphaBlend(
-            primary.withValues(alpha: 0.04),
-            Colors.black.withValues(alpha: 0.08),
-          );
+    final shadowColor =
+        dark
+            ? Colors.black.withValues(alpha: 0.5)
+            : Color.alphaBlend(
+              primary.withValues(alpha: 0.04),
+              Colors.black.withValues(alpha: 0.08),
+            );
 
     final cs = ColorScheme(
       brightness: dark ? Brightness.dark : Brightness.light,
@@ -115,29 +116,103 @@ class AppTheme {
       outlineVariant: outline.withValues(alpha: 0.5),
       shadow: shadowColor,
       scrim: Colors.black,
-      inverseSurface:    dark ? EagleTokens.card    : EagleTokens.darkCard,
-      onInverseSurface:  dark ? EagleTokens.ink     : EagleTokens.darkInk,
-      inversePrimary:    dark ? primary : primaryAccent,
+      inverseSurface: dark ? EagleTokens.card : EagleTokens.darkCard,
+      onInverseSurface: dark ? EagleTokens.ink : EagleTokens.darkInk,
+      inversePrimary: dark ? primary : primaryAccent,
       surfaceTint: primary,
     );
 
     // ── Text Theme (Outfit throughout, tight tracking on display) ─────
     final textTheme = TextTheme(
-      displayLarge:   _outfit(fontSize: 42, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: -0.5),
-      displayMedium:  _outfit(fontSize: 32, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: -0.3),
-      displaySmall:   _outfit(fontSize: 25, fontWeight: FontWeight.w700, color: onSurface, letterSpacing: -0.2),
-      headlineLarge:  _outfit(fontSize: 22, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: -0.2),
-      headlineMedium: _outfit(fontSize: 18, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: -0.1),
-      headlineSmall:  _outfit(fontSize: 16, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
-      titleLarge:     _outfit(fontSize: 15, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
-      titleMedium:    _outfit(fontSize: 13.5, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0),
-      titleSmall:     _outfit(fontSize: 12, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0.1),
-      bodyLarge:      _outfit(fontSize: 15, fontWeight: FontWeight.w400, color: onSurface, letterSpacing: 0),
-      bodyMedium:     _outfit(fontSize: 13, fontWeight: FontWeight.w400, color: onSurface, letterSpacing: 0),
-      bodySmall:      _outfit(fontSize: 11.5, fontWeight: FontWeight.w400, color: onSurfMute),
-      labelLarge:     _outfit(fontSize: 12.5, fontWeight: FontWeight.w600, color: onSurface, letterSpacing: 0.05),
-      labelMedium:    _mono(fontSize: 10.5, fontWeight: FontWeight.w500, color: onSurfMute, letterSpacing: 0.8),
-      labelSmall:     _mono(fontSize: 9.5, fontWeight: FontWeight.w500, color: onSurfMute, letterSpacing: 1.0),
+      displayLarge: _outfit(
+        fontSize: 42,
+        fontWeight: FontWeight.w700,
+        color: onSurface,
+        letterSpacing: -0.5,
+      ),
+      displayMedium: _outfit(
+        fontSize: 32,
+        fontWeight: FontWeight.w700,
+        color: onSurface,
+        letterSpacing: -0.3,
+      ),
+      displaySmall: _outfit(
+        fontSize: 25,
+        fontWeight: FontWeight.w700,
+        color: onSurface,
+        letterSpacing: -0.2,
+      ),
+      headlineLarge: _outfit(
+        fontSize: 22,
+        fontWeight: FontWeight.w600,
+        color: onSurface,
+        letterSpacing: -0.2,
+      ),
+      headlineMedium: _outfit(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: onSurface,
+        letterSpacing: -0.1,
+      ),
+      headlineSmall: _outfit(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: onSurface,
+        letterSpacing: 0,
+      ),
+      titleLarge: _outfit(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: onSurface,
+        letterSpacing: 0,
+      ),
+      titleMedium: _outfit(
+        fontSize: 13.5,
+        fontWeight: FontWeight.w600,
+        color: onSurface,
+        letterSpacing: 0,
+      ),
+      titleSmall: _outfit(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: onSurface,
+        letterSpacing: 0.1,
+      ),
+      bodyLarge: _outfit(
+        fontSize: 15,
+        fontWeight: FontWeight.w400,
+        color: onSurface,
+        letterSpacing: 0,
+      ),
+      bodyMedium: _outfit(
+        fontSize: 13,
+        fontWeight: FontWeight.w400,
+        color: onSurface,
+        letterSpacing: 0,
+      ),
+      bodySmall: _outfit(
+        fontSize: 11.5,
+        fontWeight: FontWeight.w400,
+        color: onSurfMute,
+      ),
+      labelLarge: _outfit(
+        fontSize: 12.5,
+        fontWeight: FontWeight.w600,
+        color: onSurface,
+        letterSpacing: 0.05,
+      ),
+      labelMedium: _mono(
+        fontSize: 10.5,
+        fontWeight: FontWeight.w500,
+        color: onSurfMute,
+        letterSpacing: 0.8,
+      ),
+      labelSmall: _mono(
+        fontSize: 9.5,
+        fontWeight: FontWeight.w500,
+        color: onSurfMute,
+        letterSpacing: 1.0,
+      ),
     );
 
     return ThemeData(
@@ -175,9 +250,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(EagleTokens.radiusLg),
-          side: BorderSide(
-            color: outline.withValues(alpha: dark ? 0.4 : 0.6),
-          ),
+          side: BorderSide(color: outline.withValues(alpha: dark ? 0.4 : 0.6)),
         ),
         margin: const EdgeInsets.symmetric(vertical: 6),
         clipBehavior: Clip.antiAlias,
@@ -188,7 +261,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
+        ),
         hintStyle: _outfit(color: onSurfMute, fontSize: 14),
         labelStyle: _outfit(color: onSurfMute, fontSize: 14),
         border: OutlineInputBorder(
@@ -256,9 +332,7 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
         side: BorderSide(color: outline.withValues(alpha: 0.5)),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(999),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       ),
 
@@ -271,11 +345,7 @@ class AppTheme {
         ),
       ),
 
-      dividerTheme: DividerThemeData(
-        color: outline,
-        thickness: 0.5,
-        space: 0,
-      ),
+      dividerTheme: DividerThemeData(color: outline, thickness: 0.5, space: 0),
 
       dialogTheme: DialogTheme(
         shape: RoundedRectangleBorder(
@@ -301,9 +371,10 @@ class AppTheme {
 
       // ── Navigation Bar: glass dock ──────────────────────────────────
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: dark
-            ? EagleTokens.darkCard.withValues(alpha: 0.92)
-            : Colors.white.withValues(alpha: 0.88),
+        backgroundColor:
+            dark
+                ? EagleTokens.darkCard.withValues(alpha: 0.92)
+                : Colors.white.withValues(alpha: 0.88),
         indicatorColor: dark ? EagleTokens.darkCardHi : primarySoft,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -348,23 +419,24 @@ class AppTheme {
       ),
 
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) =>
-            states.contains(WidgetState.selected)
-                ? Colors.white
-                : onSurfMute),
-        trackColor: WidgetStateProperty.resolveWith((states) =>
-            states.contains(WidgetState.selected) ? primary : outline),
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected) ? Colors.white : onSurfMute,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? primary : outline,
+        ),
       ),
 
       checkboxTheme: CheckboxThemeData(
-        fillColor: WidgetStateProperty.resolveWith((states) =>
-            states.contains(WidgetState.selected)
-                ? primary
-                : Colors.transparent),
-        checkColor: WidgetStateProperty.all(onPrimary),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected)
+                  ? primary
+                  : Colors.transparent,
         ),
+        checkColor: WidgetStateProperty.all(onPrimary),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         side: BorderSide(color: outline, width: 1.5),
       ),
     );

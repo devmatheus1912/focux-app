@@ -72,7 +72,8 @@ const workoutBuilderPresets = [
     repeticoes: '8-10 + drop',
     descansoSegundos: 90,
     tipoSerie: 'DROPSET',
-    observacoes: 'Apos a serie principal, reduzir a carga e continuar com boa tecnica.',
+    observacoes:
+        'Apos a serie principal, reduzir a carga e continuar com boa tecnica.',
   ),
 ];
 

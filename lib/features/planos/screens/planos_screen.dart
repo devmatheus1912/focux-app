@@ -8,6 +8,7 @@ import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/planos_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class PlanosScreen extends ConsumerStatefulWidget {
   const PlanosScreen({super.key});
@@ -31,7 +32,8 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
       );
       ref.invalidate(perfilProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(
           content: Text(
             'Trial Enterprise ativado. Você já pode usar os recursos avançados.',
@@ -686,10 +688,7 @@ class _PrimaryButton extends StatelessWidget {
                 ? const SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
+                  child: FxLoading(strokeWidth: 2, color: Colors.white),
                 )
                 : Text(
                   label,

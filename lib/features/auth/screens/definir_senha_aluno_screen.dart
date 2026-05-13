@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../providers/auth_provider.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class DefinirSenhaAlunoScreen extends ConsumerStatefulWidget {
   const DefinirSenhaAlunoScreen({super.key});
@@ -87,7 +89,9 @@ class _DefinirSenhaAlunoScreenState
     });
     HapticFeedback.mediumImpact();
     try {
-      await ref.read(authProvider.notifier).definirSenhaDefinitivaAluno(
+      await ref
+          .read(authProvider.notifier)
+          .definirSenhaDefinitivaAluno(
             _senhaAtualCtrl.text,
             _novaSenhaCtrl.text,
           );
@@ -140,10 +144,7 @@ class _DefinirSenhaAlunoScreenState
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: [
-                                primary,
-                                primary.withValues(alpha: 0.7),
-                              ],
+                              colors: [primary, primary.withValues(alpha: 0.7)],
                             ),
                             borderRadius: BorderRadius.circular(28),
                             boxShadow: [
@@ -179,11 +180,7 @@ class _DefinirSenhaAlunoScreenState
                     Text(
                       'Por segurança, defina uma senha pessoal\npara proteger sua conta.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: mute,
-                        height: 1.5,
-                      ),
+                      style: TextStyle(fontSize: 14, color: mute, height: 1.5),
                     ),
                     const SizedBox(height: 32),
 
@@ -194,15 +191,16 @@ class _DefinirSenhaAlunoScreenState
                         color: surface,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: line),
-                        boxShadow: isDark
-                            ? null
-                            : [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.04),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                        boxShadow:
+                            isDark
+                                ? null
+                                : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.04),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -226,29 +224,36 @@ class _DefinirSenhaAlunoScreenState
                                   color: mute,
                                   size: 20,
                                 ),
-                                onPressed: () => setState(
-                                    () => _showSenhaAtual = !_showSenhaAtual),
+                                onPressed:
+                                    () => setState(
+                                      () => _showSenhaAtual = !_showSenhaAtual,
+                                    ),
                               ),
-                              border: OutlineInputBorder(
+                              border: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
-                              enabledBorder: OutlineInputBorder(
+                              enabledBorder: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: BorderSide(color: line),
                               ),
-                              focusedBorder: OutlineInputBorder(
+                              focusedBorder: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(14),
-                                borderSide:
-                                    BorderSide(color: primary, width: 1.5),
+                                borderSide: BorderSide(
+                                  color: primary,
+                                  width: 1.5,
+                                ),
                               ),
                               filled: true,
-                              fillColor: isDark
-                                  ? Colors.white.withValues(alpha: 0.04)
-                                  : EagleTokens.paper,
+                              fillColor:
+                                  isDark
+                                      ? Colors.white.withValues(alpha: 0.04)
+                                      : EagleTokens.paper,
                             ),
-                            validator: (v) => v == null || v.isEmpty
-                                ? 'Informe a senha atual'
-                                : null,
+                            validator:
+                                (v) =>
+                                    v == null || v.isEmpty
+                                        ? 'Informe a senha atual'
+                                        : null,
                           ),
                           const SizedBox(height: 16),
 
@@ -271,25 +276,30 @@ class _DefinirSenhaAlunoScreenState
                                   color: mute,
                                   size: 20,
                                 ),
-                                onPressed: () => setState(
-                                    () => _showNovaSenha = !_showNovaSenha),
+                                onPressed:
+                                    () => setState(
+                                      () => _showNovaSenha = !_showNovaSenha,
+                                    ),
                               ),
-                              border: OutlineInputBorder(
+                              border: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
-                              enabledBorder: OutlineInputBorder(
+                              enabledBorder: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: BorderSide(color: line),
                               ),
-                              focusedBorder: OutlineInputBorder(
+                              focusedBorder: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(14),
-                                borderSide:
-                                    BorderSide(color: primary, width: 1.5),
+                                borderSide: BorderSide(
+                                  color: primary,
+                                  width: 1.5,
+                                ),
                               ),
                               filled: true,
-                              fillColor: isDark
-                                  ? Colors.white.withValues(alpha: 0.04)
-                                  : EagleTokens.paper,
+                              fillColor:
+                                  isDark
+                                      ? Colors.white.withValues(alpha: 0.04)
+                                      : EagleTokens.paper,
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) {
@@ -313,7 +323,8 @@ class _DefinirSenhaAlunoScreenState
                                       minHeight: 5,
                                       backgroundColor: line,
                                       valueColor: AlwaysStoppedAnimation(
-                                          _strengthColor()),
+                                        _strengthColor(),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -350,25 +361,31 @@ class _DefinirSenhaAlunoScreenState
                                   color: mute,
                                   size: 20,
                                 ),
-                                onPressed: () => setState(() =>
-                                    _showConfirmacao = !_showConfirmacao),
+                                onPressed:
+                                    () => setState(
+                                      () =>
+                                          _showConfirmacao = !_showConfirmacao,
+                                    ),
                               ),
-                              border: OutlineInputBorder(
+                              border: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
-                              enabledBorder: OutlineInputBorder(
+                              enabledBorder: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: BorderSide(color: line),
                               ),
-                              focusedBorder: OutlineInputBorder(
+                              focusedBorder: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(14),
-                                borderSide:
-                                    BorderSide(color: primary, width: 1.5),
+                                borderSide: BorderSide(
+                                  color: primary,
+                                  width: 1.5,
+                                ),
                               ),
                               filled: true,
-                              fillColor: isDark
-                                  ? Colors.white.withValues(alpha: 0.04)
-                                  : EagleTokens.paper,
+                              fillColor:
+                                  isDark
+                                      ? Colors.white.withValues(alpha: 0.04)
+                                      : EagleTokens.paper,
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) {
@@ -386,7 +403,9 @@ class _DefinirSenhaAlunoScreenState
                             const SizedBox(height: 14),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 10),
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
                               decoration: BoxDecoration(
                                 color: EagleTokens.bad.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(12),
@@ -396,8 +415,11 @@ class _DefinirSenhaAlunoScreenState
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.error_outline,
-                                      color: EagleTokens.bad, size: 18),
+                                  const Icon(
+                                    Icons.error_outline,
+                                    color: EagleTokens.bad,
+                                    size: 18,
+                                  ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
@@ -431,29 +453,30 @@ class _DefinirSenhaAlunoScreenState
                           ),
                           elevation: 0,
                         ),
-                        child: _loading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.shield_outlined, size: 20),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Salvar nova senha',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                        child:
+                            _loading
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: FxLoading(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
                                   ),
-                                ],
-                              ),
+                                )
+                                : const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.shield_outlined, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Salvar nova senha',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                       ),
                     ),
                     const SizedBox(height: 20),

@@ -29,8 +29,11 @@ class IaSafetyDisclaimer extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: Row(
           children: [
-            Icon(Icons.info_outline, size: 14,
-                color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute),
+            Icon(
+              Icons.info_outline,
+              size: 14,
+              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            ),
             const SizedBox(width: 6),
             Expanded(
               child: Text(
@@ -62,8 +65,11 @@ class IaSafetyDisclaimer extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.health_and_safety_outlined,
-              size: 20, color: Colors.amber.shade700),
+          Icon(
+            Icons.health_and_safety_outlined,
+            size: 20,
+            color: Colors.amber.shade700,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

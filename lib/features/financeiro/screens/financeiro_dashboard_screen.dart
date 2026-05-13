@@ -6,6 +6,7 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class FinanceiroDashboardScreen extends ConsumerStatefulWidget {
   const FinanceiroDashboardScreen({super.key});
@@ -50,7 +51,7 @@ class _FinanceiroDashboardScreenState
         child: SizedBox(
           width: 28,
           height: 28,
-          child: CircularProgressIndicator(strokeWidth: 2.5),
+          child: FxLoading(strokeWidth: 2.5),
         ),
       );
     }
@@ -69,10 +70,16 @@ class _FinanceiroDashboardScreenState
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: EagleTokens.bad.withValues(alpha: isDarkErr ? 0.18 : 0.08),
+                  color: EagleTokens.bad.withValues(
+                    alpha: isDarkErr ? 0.18 : 0.08,
+                  ),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: const Icon(Icons.cloud_off_rounded, color: EagleTokens.bad, size: 24),
+                child: const Icon(
+                  Icons.cloud_off_rounded,
+                  color: EagleTokens.bad,
+                  size: 24,
+                ),
               ),
               const SizedBox(height: 14),
               Text(
@@ -97,8 +104,13 @@ class _FinanceiroDashboardScreenState
                 style: OutlinedButton.styleFrom(
                   foregroundColor: primaryErr,
                   side: BorderSide(color: primaryErr.withValues(alpha: 0.3)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ],
@@ -232,7 +244,7 @@ class _FinanceiroDashboardScreenState
                                   '$rank',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w700,
                                     color: primary,
                                   ),
                                 ),
@@ -253,7 +265,7 @@ class _FinanceiroDashboardScreenState
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ),
@@ -363,7 +375,7 @@ class _HeroRing extends StatelessWidget {
                         '${(perc * 100).round()}%',
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: -0.5,
                           color: ink,
                         ),
@@ -448,7 +460,7 @@ class _HeroRing extends StatelessWidget {
                             '${data.totalInadimplentes} inadimpl.',
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w700,
                               color:
                                   isDark
                                       ? const Color(0xFFFF8B8B)
@@ -817,7 +829,7 @@ class _VencimentoRow extends StatelessWidget {
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),

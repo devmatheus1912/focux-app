@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/gamificacao_repository.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 final _gamificacaoRepoProvider = Provider<GamificacaoRepository>(
   (ref) => GamificacaoRepository(ref.read(apiClientProvider)),
@@ -322,7 +323,8 @@ class GamificacaoScreen extends ConsumerWidget {
                               Clipboard.setData(
                                 const ClipboardData(text: 'FOCUX20'),
                               );
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              FeedbackHelper.showSnackBar(
+                                context,
                                 const SnackBar(
                                   content: Text('Código copiado!'),
                                 ),
@@ -359,7 +361,8 @@ class GamificacaoScreen extends ConsumerWidget {
                                 'Use meu código FOCUX20 e ganhe 20% de desconto no primeiro mês do Focux Personal! https://focux.app',
                           ),
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        FeedbackHelper.showSnackBar(
+                          context,
                           const SnackBar(
                             content: Text(
                               'Convite copiado! Cole em qualquer app pra compartilhar.',

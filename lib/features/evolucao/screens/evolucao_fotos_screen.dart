@@ -141,7 +141,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
           const SizedBox(height: 24),
           const Text(
             'Nenhuma foto de evolução',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Text(
@@ -157,7 +157,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
               'Tirar Foto',
               style: TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
               ),
             ),
             style: ElevatedButton.styleFrom(
@@ -193,14 +193,14 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
               Text(
                 'Antes',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   color: EagleTokens.inkMute,
                 ),
               ),
               Text(
                 'Depois',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   color: EagleTokens.inkMute,
                 ),
               ),

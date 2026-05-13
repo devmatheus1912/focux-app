@@ -27,9 +27,12 @@ class TreinoExercicioItem {
     this.grupoSuperset,
   });
 
-  factory TreinoExercicioItem.fromJson(Map<String, dynamic> json) => TreinoExercicioItem(
+  factory TreinoExercicioItem.fromJson(Map<String, dynamic> json) =>
+      TreinoExercicioItem(
         id: json['id'] as int,
-        exercicio: Exercicio.fromJson(json['exercicio'] as Map<String, dynamic>),
+        exercicio: Exercicio.fromJson(
+          json['exercicio'] as Map<String, dynamic>,
+        ),
         series: json['series'] as int,
         repeticoes: json['repeticoes'] as String,
         cargaKg: (json['cargaKg'] as num?)?.toDouble(),
@@ -61,16 +64,17 @@ class Treino {
   });
 
   factory Treino.fromJson(Map<String, dynamic> json) => Treino(
-        id: json['id'] as int,
-        nome: json['nome'] as String,
-        descricao: json['descricao'] as String?,
-        objetivo: json['objetivo'] as String?,
-        nivel: json['nivel'] as String?,
-        isTemplate: json['isTemplate'] as bool? ?? false,
-        exercicios: ((json['exercicios'] as List<dynamic>?) ?? [])
+    id: json['id'] as int,
+    nome: json['nome'] as String,
+    descricao: json['descricao'] as String?,
+    objetivo: json['objetivo'] as String?,
+    nivel: json['nivel'] as String?,
+    isTemplate: json['isTemplate'] as bool? ?? false,
+    exercicios:
+        ((json['exercicios'] as List<dynamic>?) ?? [])
             .map((e) => TreinoExercicioItem.fromJson(e as Map<String, dynamic>))
             .toList(),
-      );
+  );
 }
 
 class TreinoRepository {
@@ -90,13 +94,21 @@ class TreinoRepository {
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<Treino> criar(String nome, String? descricao, String? objetivo, String? nivel) async {
-    final response = await _dio.post('/api/treinos', data: {
-      'nome': nome,
-      if (descricao != null && descricao.isNotEmpty) 'descricao': descricao,
-      if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-      if (nivel != null) 'nivel': nivel,
-    });
+  Future<Treino> criar(
+    String nome,
+    String? descricao,
+    String? objetivo,
+    String? nivel,
+  ) async {
+    final response = await _dio.post(
+      '/api/treinos',
+      data: {
+        'nome': nome,
+        if (descricao != null && descricao.isNotEmpty) 'descricao': descricao,
+        if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+        if (nivel != null) 'nivel': nivel,
+      },
+    );
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -112,18 +124,21 @@ class TreinoRepository {
     int? grupoSuperset,
     int? ordem,
   }) async {
-    final response = await _dio.post('/api/treinos/$treinoId/exercicios', data: {
-      'exercicioId': exercicioId,
-      'series': series,
-      'repeticoes': repeticoes,
-      'descansoSegundos': descanso,
-      if (cargaKg != null) 'cargaKg': cargaKg,
-      if (observacoes != null && observacoes.trim().isNotEmpty)
-        'observacoes': observacoes.trim(),
-      'tipoSerie': tipoSerie,
-      if (grupoSuperset != null) 'grupoSuperset': grupoSuperset,
-      if (ordem != null) 'ordem': ordem,
-    });
+    final response = await _dio.post(
+      '/api/treinos/$treinoId/exercicios',
+      data: {
+        'exercicioId': exercicioId,
+        'series': series,
+        'repeticoes': repeticoes,
+        'descansoSegundos': descanso,
+        if (cargaKg != null) 'cargaKg': cargaKg,
+        if (observacoes != null && observacoes.trim().isNotEmpty)
+          'observacoes': observacoes.trim(),
+        'tipoSerie': tipoSerie,
+        if (grupoSuperset != null) 'grupoSuperset': grupoSuperset,
+        if (ordem != null) 'ordem': ordem,
+      },
+    );
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 

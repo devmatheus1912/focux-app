@@ -7,14 +7,26 @@ class PlanoAlimentar {
   final int? caloriasDia, proteinaG, carboidratoG, gorduraG;
   final String? observacoes, criadoEm;
 
-  PlanoAlimentar({required this.id, required this.nome, this.caloriasDia,
-      this.proteinaG, this.carboidratoG, this.gorduraG, this.observacoes, this.criadoEm});
+  PlanoAlimentar({
+    required this.id,
+    required this.nome,
+    this.caloriasDia,
+    this.proteinaG,
+    this.carboidratoG,
+    this.gorduraG,
+    this.observacoes,
+    this.criadoEm,
+  });
 
   factory PlanoAlimentar.fromJson(Map<String, dynamic> j) => PlanoAlimentar(
-    id: j['id'] as int, nome: j['nome'] as String,
-    caloriasDia: j['caloriasDia'] as int?, proteinaG: j['proteinaG'] as int?,
-    carboidratoG: j['carboidratoG'] as int?, gorduraG: j['gorduraG'] as int?,
-    observacoes: j['observacoes'] as String?, criadoEm: j['criadoEm'] as String?,
+    id: j['id'] as int,
+    nome: j['nome'] as String,
+    caloriasDia: j['caloriasDia'] as int?,
+    proteinaG: j['proteinaG'] as int?,
+    carboidratoG: j['carboidratoG'] as int?,
+    gorduraG: j['gorduraG'] as int?,
+    observacoes: j['observacoes'] as String?,
+    criadoEm: j['criadoEm'] as String?,
   );
 }
 
@@ -67,29 +79,56 @@ class AlimentarRepository {
   }
 
   Future<PlanoAlimentar> criar(int alunoId, Map<String, dynamic> data) async =>
-      PlanoAlimentar.fromJson((await _dio.post('/api/alunos/$alunoId/planos-alimentares', data: data)).data);
+      PlanoAlimentar.fromJson(
+        (await _dio.post(
+          '/api/alunos/$alunoId/planos-alimentares',
+          data: data,
+        )).data,
+      );
 
   Future<List<Refeicao>> listarRefeicoes(int alunoId, int planoId) async {
-    final r = await _dio.get('/api/alunos/$alunoId/planos-alimentares/$planoId/refeicoes');
-    return (r.data as List).map((e) => Refeicao.fromJson(e as Map<String, dynamic>)).toList();
+    final r = await _dio.get(
+      '/api/alunos/$alunoId/planos-alimentares/$planoId/refeicoes',
+    );
+    return (r.data as List)
+        .map((e) => Refeicao.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
-  Future<Refeicao> criarRefeicao(int alunoId, int planoId, Map<String, dynamic> data) async {
-    final r = await _dio.post('/api/alunos/$alunoId/planos-alimentares/$planoId/refeicoes', data: data);
+  Future<Refeicao> criarRefeicao(
+    int alunoId,
+    int planoId,
+    Map<String, dynamic> data,
+  ) async {
+    final r = await _dio.post(
+      '/api/alunos/$alunoId/planos-alimentares/$planoId/refeicoes',
+      data: data,
+    );
     return Refeicao.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<void> excluirRefeicao(int alunoId, int planoId, int refeicaoId) async {
-    await _dio.delete('/api/alunos/$alunoId/planos-alimentares/$planoId/refeicoes/$refeicaoId');
+    await _dio.delete(
+      '/api/alunos/$alunoId/planos-alimentares/$planoId/refeicoes/$refeicaoId',
+    );
   }
 
-  Future<void> gerarDietaIa(int alunoId, int planoId, {String? objetivo, int? caloriasAlvo, int? numeroRefeicoes}) async {
-    await _dio.post('/api/ia/gerar-dieta-estruturada', data: {
-      'alunoId': alunoId,
-      'planoAlimentarId': planoId,
-      if (objetivo != null) 'objetivo': objetivo,
-      if (caloriasAlvo != null) 'caloriasAlvo': caloriasAlvo,
-      if (numeroRefeicoes != null) 'numeroRefeicoes': numeroRefeicoes,
-    });
+  Future<void> gerarDietaIa(
+    int alunoId,
+    int planoId, {
+    String? objetivo,
+    int? caloriasAlvo,
+    int? numeroRefeicoes,
+  }) async {
+    await _dio.post(
+      '/api/ia/gerar-dieta-estruturada',
+      data: {
+        'alunoId': alunoId,
+        'planoAlimentarId': planoId,
+        if (objetivo != null) 'objetivo': objetivo,
+        if (caloriasAlvo != null) 'caloriasAlvo': caloriasAlvo,
+        if (numeroRefeicoes != null) 'numeroRefeicoes': numeroRefeicoes,
+      },
+    );
   }
 }

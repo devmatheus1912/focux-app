@@ -7,10 +7,8 @@ class Convite {
 
   Convite({required this.token, required this.link});
 
-  factory Convite.fromJson(Map<String, dynamic> json) => Convite(
-        token: json['token'] as String,
-        link: json['link'] as String,
-      );
+  factory Convite.fromJson(Map<String, dynamic> json) =>
+      Convite(token: json['token'] as String, link: json['link'] as String);
 }
 
 class ConviteRepository {

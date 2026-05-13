@@ -752,11 +752,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
         border: Border.all(color: line),
       ),
       child: historicoAsync.when(
-        loading:
-            () => const SizedBox(
-              height: 96,
-              child: FxLoading(),
-            ),
+        loading: () => const SizedBox(height: 96, child: FxLoading()),
         error:
             (_, __) => Text(
               'Sua evolução de performance vai aparecer aqui assim que o histórico carregar.',

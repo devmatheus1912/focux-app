@@ -9,6 +9,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AgendaScreen extends ConsumerStatefulWidget {
   const AgendaScreen({super.key});
@@ -98,7 +99,8 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
               if (!mounted) return;
               Navigator.pop(context);
               _load();
-              ScaffoldMessenger.of(context).showSnackBar(
+              FeedbackHelper.showSnackBar(
+                context,
                 const SnackBar(content: Text('Agendamento excluído.')),
               );
             },
@@ -507,7 +509,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),
@@ -901,7 +903,8 @@ class _NovoAgendamentoScreenState
 
   Future<void> _salvar() async {
     if (!_canSave) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(
           content: Text('Selecione aluno, início e fim para agendar.'),
         ),
@@ -916,7 +919,8 @@ class _NovoAgendamentoScreenState
     final inicio = _inicio!;
     final fim = _fim!;
     if (!fim.isAfter(inicio)) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Fim deve ser após início.')),
       );
       return;
@@ -1006,58 +1010,59 @@ class _AgendaAlunoButton extends StatelessWidget {
   const _AgendaAlunoButton({required this.aluno, required this.onTap});
 
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(16),
-    child: Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: aluno == null ? Colors.white : EagleTokens.brandSofter,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: aluno == null ? EagleTokens.line : EagleTokens.brand,
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: aluno == null ? Colors.white : EagleTokens.brandSofter,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: aluno == null ? EagleTokens.line : primary),
+        ),
+        child: Row(
+          children: [
+            _AgendaAlunoAvatar(aluno: aluno),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    aluno?.nome ?? 'Aluno',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color:
+                          aluno == null ? EagleTokens.inkMute : EagleTokens.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    aluno?.email ?? 'Selecione quem sera atendido',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      fontSize: 11,
+                      color: EagleTokens.inkMute,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: EagleTokens.inkMute,
+            ),
+          ],
         ),
       ),
-      child: Row(
-        children: [
-          _AgendaAlunoAvatar(aluno: aluno),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  aluno?.nome ?? 'Aluno',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.outfit(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color:
-                        aluno == null ? EagleTokens.inkMute : EagleTokens.ink,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  aluno?.email ?? 'Selecione quem será atendido',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.outfit(
-                    fontSize: 11,
-                    color: EagleTokens.inkMute,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: EagleTokens.inkMute,
-          ),
-        ],
-      ),
-    ),
-  );
+    );
+  }
 }
 
 class _AgendaAlunoAvatar extends StatelessWidget {
@@ -1122,6 +1127,7 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final query = _search.text.trim().toLowerCase();
     final alunos =
         widget.alunos.where((aluno) {
@@ -1187,23 +1193,21 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                           prefixIcon: const Icon(Icons.search, size: 19),
                           filled: true,
                           fillColor: EagleTokens.card,
-                          border: OutlineInputBorder(
+                          border: FxInputDeco.outlineBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: const BorderSide(
                               color: EagleTokens.line,
                             ),
                           ),
-                          enabledBorder: OutlineInputBorder(
+                          enabledBorder: FxInputDeco.outlineBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: const BorderSide(
                               color: EagleTokens.line,
                             ),
                           ),
-                          focusedBorder: OutlineInputBorder(
+                          focusedBorder: FxInputDeco.outlineBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: EagleTokens.brand,
-                            ),
+                            borderSide: BorderSide(color: primary),
                           ),
                         ),
                       ),
@@ -1231,10 +1235,7 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                                     : EagleTokens.card,
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
-                              color:
-                                  selected
-                                      ? EagleTokens.brand
-                                      : EagleTokens.line,
+                              color: selected ? primary : EagleTokens.line,
                             ),
                           ),
                           child: Row(
@@ -1325,6 +1326,7 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final days = List.generate(
       14,
       (i) => DateTime.now().add(Duration(days: i)),
@@ -1382,11 +1384,10 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                       width: 58,
                       padding: const EdgeInsets.symmetric(vertical: 9),
                       decoration: BoxDecoration(
-                        color: selected ? EagleTokens.brand : EagleTokens.card,
+                        color: selected ? primary : EagleTokens.card,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color:
-                              selected ? EagleTokens.brand : EagleTokens.line,
+                          color: selected ? primary : EagleTokens.line,
                         ),
                       ),
                       child: Column(
@@ -1439,11 +1440,10 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                     child: Container(
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: selected ? EagleTokens.brand : EagleTokens.card,
+                        color: selected ? primary : EagleTokens.card,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color:
-                              selected ? EagleTokens.brand : EagleTokens.line,
+                          color: selected ? primary : EagleTokens.line,
                         ),
                       ),
                       child: Text(

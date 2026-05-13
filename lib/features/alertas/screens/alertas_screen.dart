@@ -8,6 +8,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
   const AlertasScreen({super.key});
@@ -141,7 +142,11 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
             content: TextField(
               controller: ctrl,
               maxLines: 3,
-              decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(14))),
+              decoration: InputDecoration(
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
             ),
             actions: [
               TextButton(
@@ -607,7 +612,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 14,
-                                              fontWeight: FontWeight.bold,
+                                              fontWeight: FontWeight.w700,
                                             ),
                                           ),
                                         ),

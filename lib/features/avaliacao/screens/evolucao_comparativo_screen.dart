@@ -6,6 +6,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/avaliacao_repository.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 String _fmtData(String? iso) {
   if (iso == null || iso.isEmpty) return '—';
@@ -141,7 +142,7 @@ class _EvolucaoComparativoScreenState
                         const Text(
                           'Primeira',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
                             color: EagleTokens.inkMute,
                           ),
                         ),
@@ -162,7 +163,7 @@ class _EvolucaoComparativoScreenState
                         const Text(
                           'Atual',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
                             color: EagleTokens.inkMute,
                           ),
                         ),
@@ -273,7 +274,7 @@ class _EvolucaoComparativoScreenState
           const SizedBox(height: 32),
           FilledButton.icon(
             onPressed: () async {
-              final messenger = ScaffoldMessenger.of(context);
+              final messenger = FeedbackHelper.messengerOf(context);
               try {
                 final repo = EvolucaoRepository(ref.read(apiClientProvider));
                 await repo.compartilharEvolucao(widget.alunoId);
@@ -300,7 +301,7 @@ class _EvolucaoComparativoScreenState
 
   Widget _headerRow() {
     const style = TextStyle(
-      fontWeight: FontWeight.bold,
+      fontWeight: FontWeight.w700,
       fontSize: 13,
       color: EagleTokens.inkMute,
     );

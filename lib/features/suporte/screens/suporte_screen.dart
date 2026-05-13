@@ -9,6 +9,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/suporte_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 const _severidades = ['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'];
 
@@ -126,7 +127,8 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
         ),
       );
     });
-    ScaffoldMessenger.of(context).showSnackBar(
+    FeedbackHelper.showSnackBar(
+      context,
       SnackBar(content: Text('Ticket #${ticket.id} criado com sucesso.')),
     );
     _scrollToBottom();
@@ -437,7 +439,9 @@ class _ChatComposer extends StatelessWidget {
               },
               decoration: InputDecoration(
                 hintText: 'Mensagem para o suporte',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 isDense: true,
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 12,
@@ -455,10 +459,7 @@ class _ChatComposer extends StatelessWidget {
                     ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
+                      child: FxLoading(strokeWidth: 2, color: Colors.white),
                     )
                     : const Icon(Icons.send_rounded),
           ),
@@ -563,11 +564,7 @@ class _TypingIndicator extends StatelessWidget {
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
+              SizedBox(width: 16, height: 16, child: FxLoading(strokeWidth: 2)),
               SizedBox(width: 8),
               Text('digitando...', style: TextStyle(fontSize: 12)),
             ],
@@ -618,9 +615,10 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _enviando = false);
-      ScaffoldMessenger.of(
+      FeedbackHelper.showSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+        SnackBar(content: Text(friendlyError(e))),
+      );
     }
   }
 
@@ -655,7 +653,9 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
               controller: _tituloCtrl,
               decoration: InputDecoration(
                 labelText: 'Titulo *',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 prefixIcon: Icon(Icons.title_rounded),
               ),
               validator:
@@ -669,7 +669,9 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
               controller: _descricaoCtrl,
               decoration: InputDecoration(
                 labelText: 'Descricao *',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 prefixIcon: Icon(Icons.description_outlined),
                 alignLabelWithHint: true,
               ),
@@ -685,7 +687,9 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
               value: _severidade,
               decoration: InputDecoration(
                 labelText: 'Severidade *',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 prefixIcon: Icon(Icons.warning_amber_rounded),
               ),
               items:
@@ -717,7 +721,9 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
               controller: _classeCtrl,
               decoration: InputDecoration(
                 labelText: 'Classe afetada',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 prefixIcon: Icon(Icons.code_rounded),
                 hintText: 'Ex: TreinoService',
               ),
@@ -730,10 +736,7 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
                       ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
+                        child: FxLoading(strokeWidth: 2, color: Colors.white),
                       )
                       : const Icon(Icons.send_rounded),
               label: const Text('Enviar ticket'),
@@ -960,7 +963,7 @@ class _TicketTileContent extends StatelessWidget {
                 ticket.severidade,
                 style: const TextStyle(
                   fontSize: 10,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               backgroundColor: sevColor.withValues(alpha: 0.15),
@@ -974,7 +977,7 @@ class _TicketTileContent extends StatelessWidget {
                 ticket.status,
                 style: const TextStyle(
                   fontSize: 10,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               backgroundColor: statusColor.withValues(alpha: 0.15),

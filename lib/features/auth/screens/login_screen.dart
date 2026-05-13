@@ -164,7 +164,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (account == null) return;
       final auth = await account.authentication;
       final idToken = auth.idToken;
-      debugPrint('[GoogleSignIn] account=${account.email} idToken=${idToken == null ? "null" : "len=${idToken.length}"}');
+      debugPrint(
+        '[GoogleSignIn] account=${account.email} idToken=${idToken == null ? "null" : "len=${idToken.length}"}',
+      );
       if (idToken == null || idToken.isEmpty) {
         throw StateError('Google nao retornou idToken.');
       }
@@ -244,8 +246,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         return 'Google ainda nao esta configurado neste ambiente. Use e-mail e senha por enquanto.';
       }
       if (statusCode == null) return 'Sem conexao com o servidor.';
-      final msg = (body is Map && body['message'] is String) ? body['message'] as String : null;
-      return msg != null && msg.isNotEmpty ? msg : 'Erro $statusCode no Google login.';
+      final msg =
+          (body is Map && body['message'] is String)
+              ? body['message'] as String
+              : null;
+      return msg != null && msg.isNotEmpty
+          ? msg
+          : 'Erro $statusCode no Google login.';
     }
     if (error is StateError) {
       return 'Google nao devolveu idToken. Verifique SHA-1 e google-services.json.';
@@ -312,7 +319,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     selected: !_isAluno,
                                     child: GestureDetector(
                                       onTap:
-                                          () => setState(() => _isAluno = false),
+                                          () =>
+                                              setState(() => _isAluno = false),
                                       child: AnimatedContainer(
                                         duration: const Duration(
                                           milliseconds: 180,
@@ -327,7 +335,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                                     alpha: 0.18,
                                                   )
                                                   : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                         child: Text(
                                           'Personal',
@@ -369,7 +379,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                                     alpha: 0.18,
                                                   )
                                                   : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                         child: Text(
                                           'Aluno',

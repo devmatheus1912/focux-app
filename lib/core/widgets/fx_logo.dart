@@ -120,12 +120,13 @@ class _FxMarkTile extends StatelessWidget {
       // mathematically equivalent (screen is commutative). The gradient shader
       // matches the tile background so eagle pixels are brightened/luminous.
       child: ShaderMask(
-        shaderCallback: (Rect bounds) => const RadialGradient(
-          center: Alignment(-0.3, -0.5),
-          radius: 1.0,
-          colors: [Color(0xFF122E65), Color(0xFF050B20)],
-          stops: [0.0, 1.0],
-        ).createShader(bounds),
+        shaderCallback:
+            (Rect bounds) => const RadialGradient(
+              center: Alignment(-0.3, -0.5),
+              radius: 1.0,
+              colors: [Color(0xFF122E65), Color(0xFF050B20)],
+              stops: [0.0, 1.0],
+            ).createShader(bounds),
         blendMode: BlendMode.screen,
         child: OverflowBox(
           maxWidth: size * 1.3,

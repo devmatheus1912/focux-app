@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/providers/auth_provider.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 String roleHomePath(WidgetRef ref) {
   final status = ref.read(authProvider);
@@ -29,7 +30,7 @@ class HomeRedirectScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final status = ref.watch(authProvider);
     if (status == AuthStatus.unknown) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: FxLoading()));
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

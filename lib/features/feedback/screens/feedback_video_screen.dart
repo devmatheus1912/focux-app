@@ -8,6 +8,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feedback_video_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class FeedbackVideoScreen extends ConsumerStatefulWidget {
   final int? alunoId;
@@ -56,7 +57,8 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       await launchUrl(uri);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(content: Text('Não foi possível abrir a URL')),
         );
       }
@@ -70,9 +72,10 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       setState(() {});
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     }
   }
@@ -140,7 +143,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       ),
       body:
           _loading
-              ? Center(child: CircularProgressIndicator(color: primary))
+              ? Center(child: FxLoading(color: primary))
               : _feedbacks.isEmpty
               ? const Center(child: Text('Nenhum feedback encontrado.'))
               : ListView.builder(
@@ -305,7 +308,7 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
                   ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: FxLoading(strokeWidth: 2),
                   )
                   : const Text('Salvar'),
         ),

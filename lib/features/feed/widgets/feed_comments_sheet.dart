@@ -4,6 +4,9 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../data/feed_repository.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class FeedCommentsSheet extends StatefulWidget {
   final int postId;
@@ -73,9 +76,10 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _sending = false);
-      ScaffoldMessenger.of(
+      FeedbackHelper.showSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+        SnackBar(content: Text(friendlyError(e))),
+      );
     }
   }
 
@@ -140,9 +144,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
               Expanded(
                 child:
                     _loading
-                        ? Center(
-                          child: CircularProgressIndicator(color: primary),
-                        )
+                        ? Center(child: FxLoading(color: primary))
                         : _comentarios.isEmpty
                         ? const Center(
                           child: Text('Seja o primeiro a comentar!'),
@@ -202,7 +204,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                                               c.alunoNome,
                                               style: TextStyle(
                                                 color: ink,
-                                                fontWeight: FontWeight.bold,
+                                                fontWeight: FontWeight.w700,
                                                 fontSize: 13,
                                               ),
                                             ),
@@ -245,15 +247,15 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                           filled: true,
                           fillColor:
                               isDark ? EagleTokens.darkBg : EagleTokens.paper,
-                          border: OutlineInputBorder(
+                          border: FxInputDeco.outlineBorder(
                             borderRadius: BorderRadius.circular(18),
                             borderSide: BorderSide(color: line),
                           ),
-                          enabledBorder: OutlineInputBorder(
+                          enabledBorder: FxInputDeco.outlineBorder(
                             borderRadius: BorderRadius.circular(18),
                             borderSide: BorderSide(color: line),
                           ),
-                          focusedBorder: OutlineInputBorder(
+                          focusedBorder: FxInputDeco.outlineBorder(
                             borderRadius: BorderRadius.circular(18),
                             borderSide: BorderSide(color: primary, width: 1.4),
                           ),
@@ -273,7 +275,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                               ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(
+                                child: FxLoading(
                                   strokeWidth: 2,
                                   color: EagleTokens.darkInk,
                                 ),

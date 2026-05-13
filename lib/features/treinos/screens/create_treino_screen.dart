@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../providers/treinos_provider.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 const _niveis = ['INICIANTE', 'INTERMEDIARIO', 'AVANCADO'];
 const _niveisLabel = ['Iniciante', 'Intermediário', 'Avançado'];
@@ -308,7 +310,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                                     ? const SizedBox(
                                       width: 22,
                                       height: 22,
-                                      child: CircularProgressIndicator(
+                                      child: FxLoading(
                                         strokeWidth: 2.5,
                                         color: Colors.white,
                                       ),
@@ -796,23 +798,23 @@ class _FxField extends StatelessWidget {
           horizontal: 16,
           vertical: 14,
         ),
-        border: OutlineInputBorder(
+        border: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
             color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
           ),
         ),
-        enabledBorder: OutlineInputBorder(
+        enabledBorder: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
             color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
           ),
         ),
-        focusedBorder: OutlineInputBorder(
+        focusedBorder: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: primary.withValues(alpha: 0.68)),
         ),
-        errorBorder: OutlineInputBorder(
+        errorBorder: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: EagleTokens.bad),
         ),

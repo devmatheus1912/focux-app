@@ -366,7 +366,7 @@ class _PersonalDashboardScreenState
                                               ),
                                               style: const TextStyle(
                                                 color: Colors.white,
-                                                fontWeight: FontWeight.bold,
+                                                fontWeight: FontWeight.w700,
                                                 fontSize: 14,
                                               ),
                                             ),
@@ -461,14 +461,19 @@ class _PersonalDashboardScreenState
                                         children: [
                                           _loadingFin
                                               ? Shimmer.fromColors(
-                                                baseColor: Colors.white.withValues(alpha: 0.15),
-                                                highlightColor: Colors.white.withValues(alpha: 0.30),
+                                                baseColor: Colors.white
+                                                    .withValues(alpha: 0.15),
+                                                highlightColor: Colors.white
+                                                    .withValues(alpha: 0.30),
                                                 child: Container(
                                                   width: 180,
                                                   height: 42,
                                                   decoration: BoxDecoration(
                                                     color: Colors.white,
-                                                    borderRadius: BorderRadius.circular(12),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
                                                   ),
                                                 ),
                                               )
@@ -477,14 +482,15 @@ class _PersonalDashboardScreenState
                                                 builder:
                                                     (ctx, _) => Text(
                                                       'R\$ ${_counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-                                                      style: GoogleFonts.jetBrainsMono(
-                                                        color: Colors.white,
-                                                        fontSize: 42,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        letterSpacing: -0.5,
-                                                        height: 1,
-                                                      ),
+                                                      style:
+                                                          GoogleFonts.jetBrainsMono(
+                                                            color: Colors.white,
+                                                            fontSize: 42,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            letterSpacing: -0.5,
+                                                            height: 1,
+                                                          ),
                                                     ),
                                               ),
                                           const SizedBox(width: 8),
@@ -830,13 +836,13 @@ class _PersonalDashboardScreenState
     final highlight = isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft;
 
     Widget bone(double w, double h, {double radius = 12}) => Container(
-          width: w,
-          height: h,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(radius),
-          ),
-        );
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
 
     return Shimmer.fromColors(
       baseColor: base,
@@ -1050,18 +1056,24 @@ class _QuickTile extends StatelessWidget {
                     color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Center(child: FxIcon(name: icon, size: 14, color: accent)),
+                  child: Center(
+                    child: FxIcon(name: icon, size: 14, color: accent),
+                  ),
                 ),
                 const Spacer(),
                 // Micro-status badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
-                    color: numVal > 0
-                        ? accent.withValues(alpha: isDark ? 0.12 : 0.07)
-                        : (isDark
-                            ? Colors.white.withValues(alpha: 0.04)
-                            : const Color(0xFFF5F5F3)),
+                    color:
+                        numVal > 0
+                            ? accent.withValues(alpha: isDark ? 0.12 : 0.07)
+                            : (isDark
+                                ? Colors.white.withValues(alpha: 0.04)
+                                : const Color(0xFFF5F5F3)),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -1341,8 +1353,12 @@ class _ShortcutBtn extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    (isDark ? primaryAccent : primary).withValues(alpha: isDark ? 0.20 : 0.12),
-                    (isDark ? primaryAccent : primary).withValues(alpha: isDark ? 0.08 : 0.04),
+                    (isDark ? primaryAccent : primary).withValues(
+                      alpha: isDark ? 0.20 : 0.12,
+                    ),
+                    (isDark ? primaryAccent : primary).withValues(
+                      alpha: isDark ? 0.08 : 0.04,
+                    ),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(12),
@@ -2237,7 +2253,9 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
+                        color: EagleTokens.bad.withValues(
+                          alpha: isDark ? 0.18 : 0.08,
+                        ),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: const Icon(
@@ -2262,7 +2280,11 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             'Verifique sua conexão e puxe para atualizar.',
-                            style: TextStyle(color: mute, fontSize: 12, height: 1.25),
+                            style: TextStyle(
+                              color: mute,
+                              fontSize: 12,
+                              height: 1.25,
+                            ),
                           ),
                         ],
                       ),
@@ -2353,7 +2375,7 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                               fxInitials(a.nome),
                               style: TextStyle(
                                 color: isDark ? primaryAccent : primary,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -2474,9 +2496,7 @@ class _DashboardErrorState extends StatelessWidget {
               label: const Text('Tentar novamente'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: primary,
-                side: BorderSide(
-                  color: primary.withValues(alpha: 0.3),
-                ),
+                side: BorderSide(color: primary.withValues(alpha: 0.3)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),

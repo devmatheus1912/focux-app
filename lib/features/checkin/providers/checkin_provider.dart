@@ -18,7 +18,10 @@ final meusTreinosProvider = FutureProvider<List<ExecucaoTreino>>((ref) async {
     return treinos;
   } catch (e) {
     // If network fails, try cached data
-    final cached = await OfflineCache.get<List>(_cacheKeyTreinos, ttl: const Duration(hours: 24));
+    final cached = await OfflineCache.get<List>(
+      _cacheKeyTreinos,
+      ttl: const Duration(hours: 24),
+    );
     if (cached != null) {
       return cached
           .cast<Map<String, dynamic>>()
@@ -29,7 +32,8 @@ final meusTreinosProvider = FutureProvider<List<ExecucaoTreino>>((ref) async {
   }
 });
 
-final historicoCheckinProvider = FutureProvider<List<ExecucaoTreino>>((ref) async {
+final historicoCheckinProvider = FutureProvider<List<ExecucaoTreino>>((
+  ref,
+) async {
   return ref.read(checkinRepositoryProvider).historico();
 });
-

@@ -48,10 +48,13 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
     HapticFeedback.mediumImpact();
 
     try {
-      await ApiClient().dio.post('/api/auth/resetar-senha', data: {
-        'token': _tokenController.text.trim(),
-        'novaSenha': _senhaController.text,
-      });
+      await ApiClient().dio.post(
+        '/api/auth/resetar-senha',
+        data: {
+          'token': _tokenController.text.trim(),
+          'novaSenha': _senhaController.text,
+        },
+      );
       if (!mounted) return;
       setState(() => _message = 'Senha alterada. Entre novamente.');
       Future<void>.delayed(const Duration(milliseconds: 900), () {
@@ -89,7 +92,10 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AuthBackButton(showLabel: true, onTap: () => context.go('/login')),
+                  AuthBackButton(
+                    showLabel: true,
+                    onTap: () => context.go('/login'),
+                  ),
                   const SizedBox(height: 28),
                   const Text(
                     'Nova senha',
@@ -116,8 +122,11 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
                     hintText: 'TOKEN',
                     icon: Icons.key_rounded,
                     textInputAction: TextInputAction.next,
-                    validator: (value) =>
-                        value == null || value.trim().isEmpty ? 'Informe o token.' : null,
+                    validator:
+                        (value) =>
+                            value == null || value.trim().isEmpty
+                                ? 'Informe o token.'
+                                : null,
                   ),
                   const SizedBox(height: 14),
                   AuthField(
@@ -128,7 +137,9 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
                     obscureText: true,
                     textInputAction: TextInputAction.next,
                     validator: (value) {
-                      if (value == null || value.length < 6) return 'Minimo 6 caracteres.';
+                      if (value == null || value.length < 6) {
+                        return 'Minimo 6 caracteres.';
+                      }
                       return null;
                     },
                   ),
@@ -142,17 +153,31 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _submit(),
                     validator: (value) {
-                      if (value != _senhaController.text) return 'As senhas nao conferem.';
+                      if (value != _senhaController.text) {
+                        return 'As senhas nao conferem.';
+                      }
                       return null;
                     },
                   ),
                   const SizedBox(height: 20),
                   if (_error != null) ...[
-                    Text(_error!, style: const TextStyle(color: Color(0xFFFFB6B6), fontSize: 12.5)),
+                    Text(
+                      _error!,
+                      style: const TextStyle(
+                        color: Color(0xFFFFB6B6),
+                        fontSize: 12.5,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                   ],
                   if (_message != null) ...[
-                    Text(_message!, style: const TextStyle(color: Color(0xFF8FE3B3), fontSize: 12.5)),
+                    Text(
+                      _message!,
+                      style: const TextStyle(
+                        color: Color(0xFF8FE3B3),
+                        fontSize: 12.5,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                   ],
                   AuthPrimaryButton(

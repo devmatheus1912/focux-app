@@ -6,11 +6,22 @@ class MedidaCorporal {
   final String data;
   final double? peso, cintura, quadril, braco;
   final String? fotoUrl;
-  MedidaCorporal({required this.id, required this.data, this.peso, this.cintura, this.quadril, this.braco, this.fotoUrl});
+  MedidaCorporal({
+    required this.id,
+    required this.data,
+    this.peso,
+    this.cintura,
+    this.quadril,
+    this.braco,
+    this.fotoUrl,
+  });
   factory MedidaCorporal.fromJson(Map<String, dynamic> j) => MedidaCorporal(
-    id: j['id'] as int, data: j['data'] as String,
-    peso: (j['peso'] as num?)?.toDouble(), cintura: (j['cintura'] as num?)?.toDouble(),
-    quadril: (j['quadril'] as num?)?.toDouble(), braco: (j['braco'] as num?)?.toDouble(),
+    id: j['id'] as int,
+    data: j['data'] as String,
+    peso: (j['peso'] as num?)?.toDouble(),
+    cintura: (j['cintura'] as num?)?.toDouble(),
+    quadril: (j['quadril'] as num?)?.toDouble(),
+    braco: (j['braco'] as num?)?.toDouble(),
     fotoUrl: j['fotoUrl'] as String?,
   );
 }
@@ -22,22 +33,38 @@ class RecordePessoal {
   final String data;
   final double? cargaKg;
   final int? repeticoes;
-  RecordePessoal({required this.id, required this.exercicioId, required this.exercicioNome, required this.data, this.cargaKg, this.repeticoes});
+  RecordePessoal({
+    required this.id,
+    required this.exercicioId,
+    required this.exercicioNome,
+    required this.data,
+    this.cargaKg,
+    this.repeticoes,
+  });
   factory RecordePessoal.fromJson(Map<String, dynamic> j) => RecordePessoal(
-    id: j['id'] as int, exercicioId: j['exercicioId'] as int,
-    exercicioNome: j['exercicioNome'] as String, data: j['data'] as String,
-    cargaKg: (j['cargaKg'] as num?)?.toDouble(), repeticoes: j['repeticoes'] as int?,
+    id: j['id'] as int,
+    exercicioId: j['exercicioId'] as int,
+    exercicioNome: j['exercicioNome'] as String,
+    data: j['data'] as String,
+    cargaKg: (j['cargaKg'] as num?)?.toDouble(),
+    repeticoes: j['repeticoes'] as int?,
   );
 }
 
 class EventoEngajamento {
   final String tipo, descricao;
   final String dataHora;
-  EventoEngajamento({required this.tipo, required this.descricao, required this.dataHora});
-  factory EventoEngajamento.fromJson(Map<String, dynamic> j) => EventoEngajamento(
-    tipo: j['tipo'] as String, descricao: j['descricao'] as String,
-    dataHora: j['dataHora'] as String,
-  );
+  EventoEngajamento({
+    required this.tipo,
+    required this.descricao,
+    required this.dataHora,
+  });
+  factory EventoEngajamento.fromJson(Map<String, dynamic> j) =>
+      EventoEngajamento(
+        tipo: j['tipo'] as String,
+        descricao: j['descricao'] as String,
+        dataHora: j['dataHora'] as String,
+      );
 }
 
 class EvolucaoRepository {
@@ -57,14 +84,17 @@ class EvolucaoRepository {
     double? braco,
     String? fotoUrl,
   }) async {
-    final r = await _dio.post('/api/aluno/medidas', data: {
-      'data': data ?? DateTime.now().toIso8601String().substring(0, 10),
-      if (peso != null) 'peso': peso,
-      if (cintura != null) 'cintura': cintura,
-      if (quadril != null) 'quadril': quadril,
-      if (braco != null) 'braco': braco,
-      if (fotoUrl != null && fotoUrl.isNotEmpty) 'fotoUrl': fotoUrl,
-    });
+    final r = await _dio.post(
+      '/api/aluno/medidas',
+      data: {
+        'data': data ?? DateTime.now().toIso8601String().substring(0, 10),
+        if (peso != null) 'peso': peso,
+        if (cintura != null) 'cintura': cintura,
+        if (quadril != null) 'quadril': quadril,
+        if (braco != null) 'braco': braco,
+        if (fotoUrl != null && fotoUrl.isNotEmpty) 'fotoUrl': fotoUrl,
+      },
+    );
     return MedidaCorporal.fromJson(r.data);
   }
 
@@ -73,14 +103,24 @@ class EvolucaoRepository {
     return (r.data as List).map((e) => MedidaCorporal.fromJson(e)).toList();
   }
 
-  Future<MedidaCorporal> adicionarMedida(int alunoId, {String? data, double? peso, double? cintura, double? quadril, double? braco}) async {
-    final r = await _dio.post('/api/alunos/$alunoId/medidas', data: {
-      'data': data ?? DateTime.now().toIso8601String().substring(0, 10),
-      if (peso != null) 'peso': peso,
-      if (cintura != null) 'cintura': cintura,
-      if (quadril != null) 'quadril': quadril,
-      if (braco != null) 'braco': braco,
-    });
+  Future<MedidaCorporal> adicionarMedida(
+    int alunoId, {
+    String? data,
+    double? peso,
+    double? cintura,
+    double? quadril,
+    double? braco,
+  }) async {
+    final r = await _dio.post(
+      '/api/alunos/$alunoId/medidas',
+      data: {
+        'data': data ?? DateTime.now().toIso8601String().substring(0, 10),
+        if (peso != null) 'peso': peso,
+        if (cintura != null) 'cintura': cintura,
+        if (quadril != null) 'quadril': quadril,
+        if (braco != null) 'braco': braco,
+      },
+    );
     return MedidaCorporal.fromJson(r.data);
   }
 
@@ -89,26 +129,40 @@ class EvolucaoRepository {
     return (r.data as List).map((e) => RecordePessoal.fromJson(e)).toList();
   }
 
-  Future<RecordePessoal> adicionarRecorde(int alunoId, {
+  Future<RecordePessoal> adicionarRecorde(
+    int alunoId, {
     required String exercicioNome,
     double? carga,
     String? unidade,
     String? observacao,
   }) async {
-    final r = await _dio.post('/api/alunos/$alunoId/recordes', data: {
-      'exercicioNome': exercicioNome,
-      if (carga != null) 'carga': carga,
-      if (unidade != null) 'unidade': unidade,
-      if (observacao != null && observacao.isNotEmpty) 'observacao': observacao,
-    });
+    final r = await _dio.post(
+      '/api/alunos/$alunoId/recordes',
+      data: {
+        'exercicioNome': exercicioNome,
+        if (carga != null) 'carga': carga,
+        if (unidade != null) 'unidade': unidade,
+        if (observacao != null && observacao.isNotEmpty)
+          'observacao': observacao,
+      },
+    );
     return RecordePessoal.fromJson(r.data);
   }
 
-  Future<List<EventoEngajamento>> engajamento(int alunoId, {int dias = 30}) async {
-    final r = await _dio.get('/api/alunos/$alunoId/engajamento', queryParameters: {'dias': dias});
+  Future<List<EventoEngajamento>> engajamento(
+    int alunoId, {
+    int dias = 30,
+  }) async {
+    final r = await _dio.get(
+      '/api/alunos/$alunoId/engajamento',
+      queryParameters: {'dias': dias},
+    );
     final data = r.data;
-    final eventos = data is Map ? (data['eventos'] as List?) ?? [] : data as List;
-    return eventos.map((e) => EventoEngajamento.fromJson(e as Map<String, dynamic>)).toList();
+    final eventos =
+        data is Map ? (data['eventos'] as List?) ?? [] : data as List;
+    return eventos
+        .map((e) => EventoEngajamento.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Map<String, dynamic>> engajamentoResumo(int alunoId) async {

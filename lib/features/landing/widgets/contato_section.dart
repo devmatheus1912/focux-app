@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/public_personal_data.dart';
 import 'landing_design_helpers.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class ContatoSection extends StatelessWidget {
   final PublicPersonalData data;
@@ -72,7 +73,8 @@ class ContatoSection extends StatelessWidget {
                         text: 'https://instagram.com/${data.instagram}',
                       ),
                     );
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    FeedbackHelper.showSnackBar(
+                      context,
                       const SnackBar(
                         content: Text('Link do Instagram copiado!'),
                       ),

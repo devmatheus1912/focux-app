@@ -50,7 +50,7 @@ class _AlunoEquipamentosScreenState
               child: SizedBox(
                 width: 18,
                 height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: FxLoading(strokeWidth: 2),
               ),
             )
           else
@@ -69,10 +69,7 @@ class _AlunoEquipamentosScreenState
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
-              Text(
-                aluno.nome,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text(aluno.nome, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 6),
               const Text(
                 'Use isto para filtrar substituicoes inteligentes e evitar prescrever algo que o aluno nao consegue executar.',

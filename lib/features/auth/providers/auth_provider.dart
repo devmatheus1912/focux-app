@@ -89,15 +89,30 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     state = AuthStatus.authenticated;
   }
 
-  Future<void> registerAluno(String nome, String email, String password, String conviteToken, {String? personalSlug}) async {
-    await _repo.registerAluno(nome, email, password, conviteToken, personalSlug: personalSlug);
+  Future<void> registerAluno(
+    String nome,
+    String email,
+    String password,
+    String conviteToken, {
+    String? personalSlug,
+  }) async {
+    await _repo.registerAluno(
+      nome,
+      email,
+      password,
+      conviteToken,
+      personalSlug: personalSlug,
+    );
     _currentRole = UserRole.aluno;
     _isAdmin = false;
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
   }
 
-  Future<void> definirSenhaDefinitivaAluno(String senhaAtual, String novaSenha) async {
+  Future<void> definirSenhaDefinitivaAluno(
+    String senhaAtual,
+    String novaSenha,
+  ) async {
     await _repo.definirSenhaDefinitivaAluno(senhaAtual, novaSenha);
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;

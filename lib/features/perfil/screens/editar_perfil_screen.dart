@@ -8,6 +8,8 @@ import '../../../core/theme/design_tokens.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../../../core/utils/friendly_error.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 // ─── Cloudinary ──────────────────────────────────────────────────────────────
 class EditarPerfilScreen extends ConsumerStatefulWidget {
@@ -37,13 +39,19 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   @override
   void initState() {
     super.initState();
-    _nomeCtrl         = TextEditingController(text: widget.perfil.nome);
-    _crefCtrl         = TextEditingController(text: widget.perfil.cref ?? '');
-    _especialidadeCtrl= TextEditingController(text: widget.perfil.especialidade ?? '');
-    _especialidadesCtrl = TextEditingController(text: widget.perfil.especialidades ?? '');
-    _instagramCtrl    = TextEditingController(text: widget.perfil.instagram ?? '');
-    _bioCtrl          = TextEditingController(text: widget.perfil.descricaoProfissional ?? '');
-    _logoUrl          = widget.perfil.logoUrl;
+    _nomeCtrl = TextEditingController(text: widget.perfil.nome);
+    _crefCtrl = TextEditingController(text: widget.perfil.cref ?? '');
+    _especialidadeCtrl = TextEditingController(
+      text: widget.perfil.especialidade ?? '',
+    );
+    _especialidadesCtrl = TextEditingController(
+      text: widget.perfil.especialidades ?? '',
+    );
+    _instagramCtrl = TextEditingController(text: widget.perfil.instagram ?? '');
+    _bioCtrl = TextEditingController(
+      text: widget.perfil.descricaoProfissional ?? '',
+    );
+    _logoUrl = widget.perfil.logoUrl;
   }
 
   @override
@@ -68,17 +76,19 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
 
     setState(() => _uploadingPhoto = true);
     try {
-      final url = await MediaUploadService(ref.read(apiClientProvider))
-          .uploadBytes(
-            bytes: await file.readAsBytes(),
-            filename: file.name,
-            folder: 'perfil',
-            resourceType: 'image',
-          );
+      final url = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        folder: 'perfil',
+        resourceType: 'image',
+      );
       if (mounted) setState(() => _logoUrl = url);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(content: Text(friendlyError(e))),
         );
       }
@@ -89,22 +99,43 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
-      await ref.read(perfilRepositoryProvider).atualizar(
-        nome: _nomeCtrl.text.trim(),
-        cref: _crefCtrl.text.trim().isEmpty ? null : _crefCtrl.text.trim(),
-        especialidade: _especialidadeCtrl.text.trim().isEmpty ? null : _especialidadeCtrl.text.trim(),
-        logoUrl: _logoUrl,
-        especialidades: _especialidadesCtrl.text.trim().isEmpty ? null : _especialidadesCtrl.text.trim(),
-        instagram: _instagramCtrl.text.trim().isEmpty ? null : _instagramCtrl.text.trim(),
-        descricaoProfissional: _bioCtrl.text.trim().isEmpty ? null : _bioCtrl.text.trim(),
-      );
+      await ref
+          .read(perfilRepositoryProvider)
+          .atualizar(
+            nome: _nomeCtrl.text.trim(),
+            cref: _crefCtrl.text.trim().isEmpty ? null : _crefCtrl.text.trim(),
+            especialidade:
+                _especialidadeCtrl.text.trim().isEmpty
+                    ? null
+                    : _especialidadeCtrl.text.trim(),
+            logoUrl: _logoUrl,
+            especialidades:
+                _especialidadesCtrl.text.trim().isEmpty
+                    ? null
+                    : _especialidadesCtrl.text.trim(),
+            instagram:
+                _instagramCtrl.text.trim().isEmpty
+                    ? null
+                    : _instagramCtrl.text.trim(),
+            descricaoProfissional:
+                _bioCtrl.text.trim().isEmpty ? null : _bioCtrl.text.trim(),
+          );
       if (mounted) context.pop(true);
     } catch (e) {
-      setState(() { _error = 'Erro ao salvar. Tente novamente.'; });
+      setState(() {
+        _error = 'Erro ao salvar. Tente novamente.';
+      });
     } finally {
-      if (mounted) setState(() { _loading = false; });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -136,20 +167,24 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                     children: [
                       CircleAvatar(
                         radius: 52,
-                        backgroundColor: isDark ? EagleTokens.darkCard : primarySoft,
-                        backgroundImage: _logoUrl != null ? NetworkImage(_logoUrl!) : null,
-                        child: _logoUrl == null
-                            ? Text(
-                                widget.perfil.nome.isNotEmpty
-                                    ? widget.perfil.nome[0].toUpperCase()
-                                    : '?',
-                                style: TextStyle(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.w700,
-                                  color: isDark ? EagleTokens.darkInk : primary,
-                                ),
-                              )
-                            : null,
+                        backgroundColor:
+                            isDark ? EagleTokens.darkCard : primarySoft,
+                        backgroundImage:
+                            _logoUrl != null ? NetworkImage(_logoUrl!) : null,
+                        child:
+                            _logoUrl == null
+                                ? Text(
+                                  widget.perfil.nome.isNotEmpty
+                                      ? widget.perfil.nome[0].toUpperCase()
+                                      : '?',
+                                  style: TextStyle(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.w700,
+                                    color:
+                                        isDark ? EagleTokens.darkInk : primary,
+                                  ),
+                                )
+                                : null,
                       ),
                       GestureDetector(
                         onTap: _uploadingPhoto ? null : _pickAndUploadPhoto,
@@ -160,19 +195,27 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                             color: primary,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkBg
+                                      : EagleTokens.paper,
                               width: 2,
                             ),
                           ),
-                          child: _uploadingPhoto
-                              ? const Padding(
-                                  padding: EdgeInsets.all(6),
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                          child:
+                              _uploadingPhoto
+                                  ? const Padding(
+                                    padding: EdgeInsets.all(6),
+                                    child: FxLoading(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : const Icon(
+                                    Icons.camera_alt,
+                                    size: 16,
                                     color: Colors.white,
                                   ),
-                                )
-                              : const Icon(Icons.camera_alt, size: 16, color: Colors.white),
                         ),
                       ),
                     ],
@@ -193,7 +236,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                 TextFormField(
                   controller: _nomeCtrl,
                   decoration: const InputDecoration(labelText: 'Nome completo'),
-                  validator: (v) => v == null || v.isEmpty ? 'Informe o nome' : null,
+                  validator:
+                      (v) => v == null || v.isEmpty ? 'Informe o nome' : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -243,7 +287,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                   maxLength: 500,
                   decoration: const InputDecoration(
                     labelText: 'Sobre você (opcional)',
-                    hintText: 'Conte sua história, metodologia e diferenciais...',
+                    hintText:
+                        'Conte sua história, metodologia e diferenciais...',
                     alignLabelWithHint: true,
                   ),
                 ),
@@ -255,13 +300,14 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: _loading ? null : _submit,
-                  child: _loading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Salvar alterações'),
+                  child:
+                      _loading
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: FxLoading(strokeWidth: 2),
+                          )
+                          : const Text('Salvar alterações'),
                 ),
                 const SizedBox(height: 16),
               ],

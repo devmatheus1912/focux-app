@@ -6,12 +6,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../data/planos_repository.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class EnterprisePromoScreen extends ConsumerStatefulWidget {
   const EnterprisePromoScreen({super.key});
 
   @override
-  ConsumerState<EnterprisePromoScreen> createState() => _EnterprisePromoScreenState();
+  ConsumerState<EnterprisePromoScreen> createState() =>
+      _EnterprisePromoScreenState();
 }
 
 class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
@@ -23,23 +26,28 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
     setState(() => _starting = true);
     try {
       await PlanosRepository(ref.read(apiClientProvider)).startTrial(
-        payload: buildLocalSubscriptionMetadata(
-          productId: 'focux_enterprise_trial',
-        ).toTrialPayload(),
+        payload:
+            buildLocalSubscriptionMetadata(
+              productId: 'focux_enterprise_trial',
+            ).toTrialPayload(),
       );
       ref.invalidate(perfilProvider);
       await _markPromoAsSeen();
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(
-          content: Text('Trial Enterprise ativado. Aproveite os proximos 5 dias.'),
+          content: Text(
+            'Trial Enterprise ativado. Aproveite os proximos 5 dias.',
+          ),
         ),
       );
       context.go('/dashboard/personal');
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(content: Text('Erro ao ativar trial: $error')),
       );
     } finally {
@@ -123,10 +131,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                         Expanded(
                           child: Text(
                             feature,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                            ),
+                            style: TextStyle(color: Colors.white, fontSize: 15),
                           ),
                         ),
                       ],
@@ -176,10 +181,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                       const Text(
                         'Depois disso: R\$149,90/mes',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white54,
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Colors.white54, fontSize: 12),
                       ),
                     ],
                   ),
@@ -196,22 +198,23 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: _starting
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                    child:
+                        _starting
+                            ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: FxLoading(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : const Text(
+                              'Experimentar 5 dias gratis',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          )
-                        : const Text(
-                            'Experimentar 5 dias gratis',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -219,10 +222,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                   onPressed: _dismiss,
                   child: const Text(
                     'Agora nao',
-                    style: TextStyle(
-                      color: Colors.white54,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.white54, fontSize: 14),
                   ),
                 ),
                 const SizedBox(height: 8),

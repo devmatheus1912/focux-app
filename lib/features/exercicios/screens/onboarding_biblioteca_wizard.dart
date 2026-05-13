@@ -10,6 +10,7 @@ import 'widgets/wizard_step_confirmacao.dart';
 import 'widgets/wizard_step_espacos.dart';
 import 'widgets/wizard_step_loading.dart';
 import 'widgets/wizard_step_modalidades.dart';
+import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class OnboardingBibliotecaWizard extends ConsumerStatefulWidget {
   const OnboardingBibliotecaWizard({super.key});
@@ -67,7 +68,7 @@ class _OnboardingBibliotecaWizardState
       _importing = true;
       _step = 3;
     });
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = FeedbackHelper.messengerOf(context);
     try {
       final result = await ref
           .read(exercicioRepositoryProvider)

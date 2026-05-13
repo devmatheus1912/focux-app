@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AuthShell extends StatelessWidget {
   const AuthShell({super.key, required this.child, this.dark = false});
@@ -97,12 +99,13 @@ class AuthLogoMark extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: ShaderMask(
-        shaderCallback: (Rect bounds) => const RadialGradient(
-          center: Alignment(-0.3, -0.5),
-          radius: 1.0,
-          colors: [Color(0xFF122E65), Color(0xFF050B20)],
-          stops: [0.0, 1.0],
-        ).createShader(bounds),
+        shaderCallback:
+            (Rect bounds) => const RadialGradient(
+              center: Alignment(-0.3, -0.5),
+              radius: 1.0,
+              colors: [Color(0xFF122E65), Color(0xFF050B20)],
+              stops: [0.0, 1.0],
+            ).createShader(bounds),
         blendMode: BlendMode.screen,
         child: OverflowBox(
           maxWidth: size * 1.3,
@@ -286,21 +289,21 @@ class AuthField extends StatelessWidget {
               horizontal: 14,
               vertical: 12,
             ),
-            enabledBorder: OutlineInputBorder(
+            enabledBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
                 color: Colors.white.withValues(alpha: 0.14),
               ),
             ),
-            focusedBorder: OutlineInputBorder(
+            focusedBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(color: primary),
             ),
-            errorBorder: OutlineInputBorder(
+            errorBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(color: Color(0xFFFF8B8B)),
             ),
-            focusedErrorBorder: OutlineInputBorder(
+            focusedErrorBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(color: Color(0xFFFF8B8B)),
             ),
@@ -346,9 +349,10 @@ class _AuthPrimaryButtonState extends State<AuthPrimaryButton>
       duration: const Duration(milliseconds: 120),
       reverseDuration: const Duration(milliseconds: 280),
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.97).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.97,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -362,16 +366,18 @@ class _AuthPrimaryButtonState extends State<AuthPrimaryButton>
     final primary = Theme.of(context).colorScheme.primary;
     return GestureDetector(
       onTapDown: widget.isLoading ? null : (_) => _ctrl.forward(),
-      onTapUp: widget.isLoading
-          ? null
-          : (_) {
-              _ctrl.reverse();
-              widget.onPressed?.call();
-            },
+      onTapUp:
+          widget.isLoading
+              ? null
+              : (_) {
+                _ctrl.reverse();
+                widget.onPressed?.call();
+              },
       onTapCancel: widget.isLoading ? null : () => _ctrl.reverse(),
       child: AnimatedBuilder(
         animation: _scale,
-        builder: (_, child) => Transform.scale(scale: _scale.value, child: child),
+        builder:
+            (_, child) => Transform.scale(scale: _scale.value, child: child),
         child: SizedBox(
           width: double.infinity,
           height: 48,
@@ -398,32 +404,30 @@ class _AuthPrimaryButtonState extends State<AuthPrimaryButton>
               ],
             ),
             child: Center(
-              child: widget.isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (widget.icon != null) ...[
-                          Icon(widget.icon, size: 16, color: Colors.white),
-                          const SizedBox(width: 8),
-                        ],
-                        Text(
-                          widget.label,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
+              child:
+                  widget.isLoading
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: FxLoading(strokeWidth: 2, color: Colors.white),
+                      )
+                      : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (widget.icon != null) ...[
+                            Icon(widget.icon, size: 16, color: Colors.white),
+                            const SizedBox(width: 8),
+                          ],
+                          Text(
+                            widget.label,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
             ),
           ),
         ),
@@ -559,7 +563,10 @@ class AuthPlanCard extends StatelessWidget {
           gradient:
               selected
                   ? LinearGradient(
-                    colors: [Theme.of(context).colorScheme.primary, BrandPalette.deep(Theme.of(context).colorScheme.primary)],
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      BrandPalette.deep(Theme.of(context).colorScheme.primary),
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   )
@@ -573,7 +580,9 @@ class AuthPlanCard extends StatelessWidget {
               selected
                   ? [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.4),
                       blurRadius: 20,
                       offset: const Offset(0, 6),
                     ),

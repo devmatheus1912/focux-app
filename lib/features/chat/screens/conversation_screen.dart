@@ -27,6 +27,8 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 enum ConversationMode { personal, aluno }
 
@@ -287,7 +289,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     if (_isDuplicateOutgoing(text)) {
       HapticFeedback.selectionClick();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(content: Text('Mensagem recente ja enviada.')),
         );
       }
@@ -320,9 +323,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     } finally {
       if (mounted) {
@@ -341,7 +345,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       _ctrl.clear();
       _composerHasText = false;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
+    FeedbackHelper.showSnackBar(
+      context,
       const SnackBar(content: Text('Mensagem recente ja existe no chat.')),
     );
   }
@@ -425,7 +430,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(content: Text('Nao foi possivel selecionar o arquivo: $e')),
         );
       }
@@ -470,9 +476,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     } finally {
       if (mounted) {
@@ -487,7 +494,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       final allowed = await _audioRecorder.hasPermission();
       if (!allowed) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           const SnackBar(
             content: Text('Permita o microfone para gravar audio.'),
           ),
@@ -527,7 +535,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(content: Text('Nao foi possivel iniciar o audio: $e')),
       );
     }
@@ -552,7 +561,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       path = await _audioRecorder.stop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(content: Text('Nao foi possivel finalizar o audio: $e')),
       );
       return;
@@ -564,7 +574,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
     if (path == null || path.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Audio vazio. Grave novamente.')),
       );
       return;
@@ -583,7 +594,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(content: Text('Nao foi possivel enviar o audio: $e')),
       );
     }
@@ -633,9 +645,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        FeedbackHelper.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          SnackBar(content: Text(friendlyError(e))),
+        );
       }
     } finally {
       if (mounted) {
@@ -795,7 +808,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   void _jumpToReplySource(ChatMsg msg) {
     final original = _findMessageById(msg.replyToMessageId);
     if (original == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Mensagem original nao encontrada aqui.')),
       );
       return;
@@ -907,7 +921,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               ),
                             );
                             if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            FeedbackHelper.showSnackBar(
+                              context,
                               const SnackBar(content: Text('Mensagem copiada')),
                             );
                           },
@@ -1148,7 +1163,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                   isDark
                                       ? EagleTokens.darkCardHi
                                       : EagleTokens.card,
-                              border: OutlineInputBorder(
+                              border: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(18),
                                 borderSide: BorderSide.none,
                               ),
@@ -1165,9 +1180,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                           'Encontre mensagens antigas da conversa.',
                                     )
                                     : searching
-                                    ? const Center(
-                                      child: CircularProgressIndicator(),
-                                    )
+                                    ? const Center(child: FxLoading())
                                     : searched && results.isEmpty
                                     ? const _SearchState(
                                       icon: Icons.chat_bubble_outline,
@@ -1500,7 +1513,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
     final opened = await launchUrlString(url);
     if (!opened && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Nao foi possivel abrir o anexo.')),
       );
     }
@@ -1838,10 +1852,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: primary,
-                        ),
+                        child: FxLoading(strokeWidth: 2, color: primary),
                       ),
                       const SizedBox(width: 10),
                       Text(
@@ -1857,9 +1868,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               Expanded(
                 child:
                     _loading
-                        ? Center(
-                          child: CircularProgressIndicator(color: primary),
-                        )
+                        ? Center(child: FxLoading(color: primary))
                         : _loadFailed
                         ? _ConversationErrorState(
                           isDark: isDark,
@@ -2100,11 +2109,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                     ? const SizedBox(
                                                       width: 14,
                                                       height: 14,
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                            strokeWidth: 2,
-                                                            color: Colors.white,
-                                                          ),
+                                                      child: FxLoading(
+                                                        strokeWidth: 2,
+                                                        color: Colors.white,
+                                                      ),
                                                     )
                                                     : const Icon(
                                                       Icons.arrow_upward,
@@ -2407,10 +2415,7 @@ class _OlderMessagesLoader extends StatelessWidget {
                     ? SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: primary,
-                      ),
+                      child: FxLoading(strokeWidth: 2, color: primary),
                     )
                     : Text(
                       'Carregar mensagens antigas',
@@ -3569,7 +3574,7 @@ class _AudioInlinePlayerState extends State<_AudioInlinePlayer> {
                           ? const SizedBox(
                             width: 16,
                             height: 16,
-                            child: CircularProgressIndicator(
+                            child: FxLoading(
                               strokeWidth: 2,
                               color: Colors.white,
                             ),
