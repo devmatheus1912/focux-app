@@ -19,7 +19,8 @@ async function getSharp() {
   }
 }
 
-const BRAND_BG = { r: 8, g: 12, b: 16, alpha: 1 }; // #080C10
+const BRAND_BG = { r: 18, g: 52, b: 60, alpha: 1 }; // #12343C mesh center
+const BRAND_BG_DEEP = { r: 8, g: 12, b: 16, alpha: 1 }; // #080C10 edge
 
 function isCheckerboard(r, g, b) {
   if (Math.abs(r - g) > 10 || Math.abs(g - b) > 10 || Math.abs(r - b) > 10) {
@@ -193,6 +194,39 @@ async function composeGlassAppIcon(markPath, outputPath, size, sharp) {
   console.log(`✓ glass app icon: ${outputPath}`);
 }
 
+async function composePortraitSplash(markPath, outputPath, sharp) {
+  const width = 1080;
+  const height = 1920;
+  const mesh = await sharp(Buffer.from(meshBackgroundSvg(width, height)))
+    .png()
+    .toBuffer();
+  const tileSize = Math.round(width * 0.46);
+  const radius = Math.round(tileSize * 0.26);
+  const tile = await sharp(Buffer.from(glassTileSvg(tileSize, radius)))
+    .png()
+    .toBuffer();
+  const markSize = Math.round(tileSize * 0.72);
+  const mark = await sharp(markPath)
+    .trim({ threshold: 8 })
+    .resize(markSize, markSize, {
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .png()
+    .toBuffer();
+  const tileWithMark = await sharp(tile)
+    .composite([{ input: mark, gravity: 'centre' }])
+    .png()
+    .toBuffer();
+
+  await sharp(mesh)
+    .composite([{ input: tileWithMark, gravity: 'centre' }])
+    .png()
+    .toFile(outputPath);
+
+  console.log(`✓ portrait splash: ${outputPath}`);
+}
+
 async function writeSolidBg(outputPath, sharp) {
   await sharp({
     create: {
@@ -258,22 +292,19 @@ async function main() {
     markPath,
     path.join(assets, 'logo_icon_padded.png'),
     1152,
-    0.58,
+    0.68,
+    sharp,
+  );
+
+  await composePortraitSplash(
+    markPath,
+    path.join(assets, 'splash_portrait.png'),
     sharp,
   );
 
   await composeGlassAppIcon(markPath, path.join(brand, 'app_icon_eagle_1024.png'), 1024, sharp);
 
   await writeSolidBg(path.join(assets, 'splash_background.png'), sharp);
-
-  for (const rel of [
-    'android/app/src/main/res/drawable/background.png',
-    'android/app/src/main/res/drawable-v21/background.png',
-  ]) {
-    await sharp(Buffer.from(meshBackgroundSvg(512, 512)))
-      .png()
-      .toFile(path.join(root, rel));
-  }
 
   console.log('Brand assets ready.');
 }

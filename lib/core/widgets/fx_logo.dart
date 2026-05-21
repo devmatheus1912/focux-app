@@ -32,7 +32,11 @@ class FxLogo extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final logoUrl = ref.watch(logoUrlProvider);
-    final mark = _BrandedMarkTile(size: iconSize, logoUrl: logoUrl);
+    final mark = _BrandedMarkTile(
+      size: iconSize,
+      logoUrl: logoUrl,
+      tone: light ? BrandGlassTone.dark : BrandGlassTone.light,
+    );
 
     if (!showLabel) return mark;
 
@@ -91,10 +95,15 @@ class FxLogo extends ConsumerWidget {
 /// Cinematic glass background: teal gradient + glass border + brand glow shadow.
 /// When personal has a custom logoUrl, it displays their logo instead.
 class _BrandedMarkTile extends StatelessWidget {
-  const _BrandedMarkTile({required this.size, this.logoUrl});
+  const _BrandedMarkTile({
+    required this.size,
+    required this.tone,
+    this.logoUrl,
+  });
 
   final double size;
   final String? logoUrl;
+  final BrandGlassTone tone;
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +111,7 @@ class _BrandedMarkTile extends StatelessWidget {
     return BrandGlassMark(
       size: size,
       logoUrl: hasCustomLogo ? logoUrl : null,
+      tone: tone,
     );
   }
 }

@@ -215,7 +215,7 @@ class _PersonalDashboardScreenState
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   FxLogo(
-                                    iconSize: 28,
+                                    iconSize: 34,
                                     showLabel: true,
                                     horizontal: true,
                                     light: isDark,
