@@ -17,7 +17,7 @@ class ContatoSection extends StatelessWidget {
     final accent = Theme.of(context).colorScheme.primary;
 
     return Container(
-      color: const Color(0xFF070B16),
+      color: const Color(0xFF0A1014),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 34),
       child: Center(
         child: ConstrainedBox(
@@ -25,7 +25,7 @@ class ContatoSection extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: const Color(0xFF101827),
+              color: const Color(0xFF0F1419),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
             ),

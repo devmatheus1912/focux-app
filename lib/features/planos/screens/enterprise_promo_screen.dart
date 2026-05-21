@@ -85,7 +85,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF111821), Color(0xFF0D0F14)],
+            colors: [Color(0xFF0F1419), Color(0xFF080C10)],
           ),
         ),
         child: SafeArea(

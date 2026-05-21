@@ -1281,20 +1281,20 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
     final palette =
         isDark
             ? const [
-              Color(0xFF3454D1),
-              Color(0xFF3D5FBE),
-              Color(0xFF2A44A8),
-              Color(0xFF4A6FD1),
-              Color(0xFF243B7A),
-              Color(0xFF6482D9),
+              Color(0xFF1EC8C8),
+              Color(0xFF26A8A8),
+              Color(0xFF159A9A),
+              Color(0xFF32D4D4),
+              Color(0xFF0F7A7A),
+              Color(0xFF5EEAD4),
             ]
             : const [
-              Color(0xFF3454D1),
-              Color(0xFF3D5FBE),
-              Color(0xFF6482D9),
-              Color(0xFF2A44A8),
-              Color(0xFF4A6FD1),
-              Color(0xFF8DA4E2),
+              Color(0xFF1EC8C8),
+              Color(0xFF26A8A8),
+              Color(0xFF5EEAD4),
+              Color(0xFF159A9A),
+              Color(0xFF32D4D4),
+              Color(0xFF8BF0E0),
             ];
     final hash = displayName.isNotEmpty ? displayName.codeUnitAt(0) : 0;
     final avatarColor = palette[hash % palette.length];

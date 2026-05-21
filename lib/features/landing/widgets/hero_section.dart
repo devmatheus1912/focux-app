@@ -39,7 +39,7 @@ class HeroSection extends StatelessWidget {
 
     return Container(
       constraints: BoxConstraints(minHeight: minHeight),
-      color: const Color(0xFF0D0F14),
+      color: const Color(0xFF080C10),
       child: Stack(
         children: [
           Positioned.fill(
@@ -69,9 +69,9 @@ class HeroSection extends StatelessWidget {
                   begin: compact ? Alignment.topCenter : Alignment.centerLeft,
                   end: compact ? Alignment.bottomCenter : Alignment.centerRight,
                   colors: [
-                    const Color(0xFF050814).withValues(alpha: 0.98),
+                    const Color(0xFF080C10).withValues(alpha: 0.98),
                     const Color(
-                      0xFF050814,
+                      0xFF080C10,
                     ).withValues(alpha: heroImage == null ? 0.74 : 0.62),
                     primaryColor.withValues(
                       alpha: heroImage == null ? 0.44 : 0.26,
@@ -527,9 +527,9 @@ class _LandingBrandPainter extends CustomPainter {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFF050814),
-              Color.lerp(primary, const Color(0xFF050814), 0.74)!,
-              Color.lerp(secondary, const Color(0xFF050814), 0.70)!,
+              const Color(0xFF080C10),
+              Color.lerp(primary, const Color(0xFF080C10), 0.74)!,
+              Color.lerp(secondary, const Color(0xFF080C10), 0.70)!,
             ],
           ).createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, bg);

@@ -29,7 +29,7 @@ class SobreSection extends StatelessWidget {
         final copyWidth = wide ? contentWidth - mediaWidth - 54 : contentWidth;
 
         return Container(
-          color: const Color(0xFF070B16),
+          color: const Color(0xFF0A1014),
           padding: EdgeInsets.fromLTRB(
             horizontalPadding,
             wide ? 56 : 34,
@@ -179,7 +179,7 @@ class _SobreMediaCard extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    const Color(0xFF050814).withValues(alpha: 0.58),
+                    const Color(0xFF080C10).withValues(alpha: 0.58),
                   ],
                 ),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
@@ -245,8 +245,8 @@ class _MediaFallback extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color.lerp(accent, const Color(0xFF050814), 0.62)!,
-            const Color(0xFF111827),
+            Color.lerp(accent, const Color(0xFF080C10), 0.62)!,
+            const Color(0xFF0F1419),
           ],
         ),
       ),
@@ -280,7 +280,7 @@ class _CredentialRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF101827),
+        color: const Color(0xFF0F1419),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),

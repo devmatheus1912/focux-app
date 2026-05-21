@@ -13,7 +13,7 @@ class FaqSection extends StatelessWidget {
     final items = LandingDesign.faq(data);
 
     return Container(
-      color: const Color(0xFF070B16),
+      color: const Color(0xFF0A1014),
       padding: const EdgeInsets.fromLTRB(16, 34, 16, 34),
       child: Center(
         child: ConstrainedBox(
@@ -45,7 +45,7 @@ class FaqSection extends StatelessWidget {
                 Container(
                   margin: const EdgeInsets.only(bottom: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF111827),
+                    color: const Color(0xFF0F1419),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: primaryColor.withValues(alpha: 0.22),

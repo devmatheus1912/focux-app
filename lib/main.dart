@@ -69,7 +69,7 @@ void main() {
       ErrorWidget.builder = (FlutterErrorDetails details) {
         if (kDebugMode) return ErrorWidget(details.exception);
         return Material(
-          color: const Color(0xFF0D0F14),
+          color: const Color(0xFF080C10),
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(32),

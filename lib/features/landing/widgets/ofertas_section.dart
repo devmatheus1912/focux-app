@@ -37,7 +37,7 @@ class OfertasSection extends StatelessWidget {
 
         return Container(
           padding: EdgeInsets.fromLTRB(wide ? 56 : 16, 30, wide ? 56 : 16, 32),
-          color: const Color(0xFF0D0F14),
+          color: const Color(0xFF080C10),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1100),
@@ -169,7 +169,7 @@ class _ServiceTile extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 130),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF101827),
+        color: const Color(0xFF0F1419),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
@@ -234,7 +234,7 @@ class _PackageTile extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 310),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: featured ? const Color(0xFF121D31) : const Color(0xFF101827),
+        color: featured ? const Color(0xFF161D24) : const Color(0xFF0F1419),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color:
@@ -326,7 +326,7 @@ class _PackageTile extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: featured ? primaryColor : Colors.white,
                 foregroundColor:
-                    featured ? Colors.white : const Color(0xFF111827),
+                    featured ? Colors.white : const Color(0xFF0F1419),
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),

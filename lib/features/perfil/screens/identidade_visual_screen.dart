@@ -18,8 +18,8 @@ import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 
 const _coresPredefinidas = [
-  Color(0xFF3454D1),
-  Color(0xFF2A44A8),
+  Color(0xFF1EC8C8), // Focux cyan (default)
+  Color(0xFF159A9A), // Focux teal
   Color(0xFF0097A7),
   Color(0xFF22C55E),
   Color(0xFFF59E0B),
@@ -91,7 +91,7 @@ class _IdentidadeVisualScreenState
   final _packageDescCtrls = List.generate(3, (_) => TextEditingController());
   final _faqQuestionCtrls = List.generate(4, (_) => TextEditingController());
   final _faqAnswerCtrls = List.generate(4, (_) => TextEditingController());
-  Color _corPrimaria = const Color(0xFF3454D1);
+  Color _corPrimaria = const Color(0xFF1EC8C8);
   Color _corSecundaria = const Color(0xFF0097A7);
   bool _salvando = false;
   bool _uploadingLogo = false;
@@ -2198,7 +2198,7 @@ class _BioPhotoFallback extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [primary.withValues(alpha: 0.28), const Color(0xFF111827)],
+          colors: [primary.withValues(alpha: 0.28), const Color(0xFF0F1419)],
         ),
       ),
       child: Icon(
@@ -2249,9 +2249,9 @@ class _PremiumHeroPreviewPainter extends CustomPainter {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFF050814),
-              Color.lerp(primary, const Color(0xFF050814), 0.64)!,
-              Color.lerp(secondary, const Color(0xFF111827), 0.62)!,
+              const Color(0xFF080C10),
+              Color.lerp(primary, const Color(0xFF080C10), 0.64)!,
+              Color.lerp(secondary, const Color(0xFF0F1419), 0.62)!,
             ],
           ).createShader(rect);
     canvas.drawRect(rect, background);
@@ -2573,8 +2573,8 @@ class _PremiumLandingPreviewCard extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0xFF050814).withValues(alpha: 0.20),
-                    const Color(0xFF050814).withValues(alpha: 0.92),
+                    const Color(0xFF080C10).withValues(alpha: 0.20),
+                    const Color(0xFF080C10).withValues(alpha: 0.92),
                   ],
                 ),
               ),

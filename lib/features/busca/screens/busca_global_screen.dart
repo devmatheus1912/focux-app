@@ -463,7 +463,7 @@ class _BuscaItemTile extends StatelessWidget {
     _ => Icons.search,
   };
   Color _colorForTipo(String tipo) => switch (tipo) {
-    'ALUNO' => const Color(0xFF3454D1),
+    'ALUNO' => const Color(0xFF1EC8C8),
     'TREINO' => const Color(0xFF22C55E),
     'COBRANCA' => const Color(0xFFF59E0B),
     _ => EagleTokens.inkMute,

@@ -44,7 +44,7 @@ class MetodoSection extends StatelessWidget {
         final cardWidth = wide ? (contentWidth - 36) / 4 : contentWidth;
         return Container(
           padding: EdgeInsets.fromLTRB(wide ? 56 : 16, 34, wide ? 56 : 16, 22),
-          decoration: const BoxDecoration(color: Color(0xFF070B16)),
+          decoration: const BoxDecoration(color: Color(0xFF0A1014)),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1100),
@@ -125,7 +125,7 @@ class _MetodoCard extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 142),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF101827),
+        color: const Color(0xFF0F1419),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),

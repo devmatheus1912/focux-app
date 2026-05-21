@@ -1,16 +1,39 @@
 import 'package:flutter/material.dart';
 
+/// Derives soft/deep/accent variants from any dynamic primary color.
+/// Used by white-label: personal's corPrimaria is passed here to generate
+/// a harmonious set of tints that work across light and dark modes.
+///
+/// Tested with cyan (default Focux), warm reds, greens, purples.
 class BrandPalette {
   static Color soft(Color primary, {bool dark = false}) {
-    final blend = dark ? Colors.black : Colors.white;
-    final amount = dark ? 0.74 : 0.86;
-    return Color.alphaBlend(blend.withValues(alpha: amount), primary);
+    final hsl = HSLColor.fromColor(primary);
+    if (dark) {
+      // In dark mode, produce a deeply desaturated, low-lightness tint
+      return hsl
+          .withSaturation((hsl.saturation * 0.35).clamp(0.0, 1.0))
+          .withLightness(0.14)
+          .toColor();
+    }
+    // In light mode, produce a very light tint with reduced saturation
+    return hsl
+        .withSaturation((hsl.saturation * 0.30).clamp(0.0, 1.0))
+        .withLightness(0.93)
+        .toColor();
   }
 
   static Color softer(Color primary, {bool dark = false}) {
-    final blend = dark ? Colors.black : Colors.white;
-    final amount = dark ? 0.82 : 0.92;
-    return Color.alphaBlend(blend.withValues(alpha: amount), primary);
+    final hsl = HSLColor.fromColor(primary);
+    if (dark) {
+      return hsl
+          .withSaturation((hsl.saturation * 0.25).clamp(0.0, 1.0))
+          .withLightness(0.10)
+          .toColor();
+    }
+    return hsl
+        .withSaturation((hsl.saturation * 0.20).clamp(0.0, 1.0))
+        .withLightness(0.96)
+        .toColor();
   }
 
   static Color deep(Color primary) {

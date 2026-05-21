@@ -405,8 +405,8 @@ class _PersonalDashboardScreenState
                                     colors:
                                         isDark
                                             ? const [
-                                              Color(0xFF2A44A8),
-                                              Color(0xFF0F1A4A),
+                                              Color(0xFF159A9A),
+                                              Color(0xFF0A2E2E),
                                             ]
                                             : [primary, primaryDeep],
                                     begin: begin,

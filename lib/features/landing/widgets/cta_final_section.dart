@@ -43,7 +43,7 @@ class CtaFinalSection extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [accent, Color.lerp(accent, const Color(0xFF050814), 0.36)!],
+          colors: [accent, Color.lerp(accent, const Color(0xFF080C10), 0.36)!],
         ),
         borderRadius: BorderRadius.circular(8),
         boxShadow: [

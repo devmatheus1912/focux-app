@@ -153,7 +153,7 @@ class _PlanSyncBannerShell extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF111827).withValues(alpha: 0.94),
+                color: const Color(0xFF0F1419).withValues(alpha: 0.94),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: const Color(0xFFFFB020).withValues(alpha: 0.28),
@@ -253,7 +253,7 @@ class _LockedScreen extends ConsumerWidget {
                 ElevatedButton(
                   onPressed: () => context.push('/planos'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF3454D1),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 32,
                       vertical: 12,

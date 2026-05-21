@@ -3,35 +3,38 @@ import 'package:flutter/material.dart';
 /// FX Design System — Focux
 /// Fonte única de verdade para todos os tokens visuais.
 ///
-/// Palette: Warm Zinc neutrals + Deep Cobalt accent.
+/// Palette: Teal-tinted cool neutrals + Cyan accent (cinematic identity).
 /// Typography: Outfit (display/body) + JetBrains Mono (technical/numbers).
+///
+/// Legacy brand (#3454D1 Deep Cobalt) has been replaced with the new
+/// cinematic cyan-teal identity that matches the 4K glass app icon.
 abstract class EagleTokens {
-  // ── Brand (Deep Cobalt — desaturated, ~60% sat) ────────────────────────
-  static const Color brand = Color(0xFF3454D1);
-  static const Color brandInk = Color(0xFF2A44A8);
-  static const Color brandSoft = Color(0xFFE8ECFA);
-  static const Color brandSofter = Color(0xFFF3F5FD);
-  static const Color brandDeep = Color(0xFF0F1A4A);
-  static const Color brandAccent = Color(0xFF7BA3F0);
+  // ── Brand (Cyan Teal — cinematic, ~70% sat) ─────────────────────────
+  static const Color brand = Color(0xFF1EC8C8);
+  static const Color brandInk = Color(0xFF159A9A);
+  static const Color brandSoft = Color(0xFFE0F7F7);
+  static const Color brandSofter = Color(0xFFF0FBFB);
+  static const Color brandDeep = Color(0xFF0A2E2E);
+  static const Color brandAccent = Color(0xFF5EEAD4);
 
-  // ── Neutral Light (Warm Zinc) ──────────────────────────────────────────
-  static const Color ink = Color(0xFF111318);
-  static const Color inkSoft = Color(0xFF3B3F4A);
-  static const Color inkMute = Color(0xFF6E7380);
-  static const Color line = Color(0xFFE4E5E7);
-  static const Color lineSoft = Color(0xFFEEEFF0);
-  static const Color paper = Color(0xFFF8F8F6);
+  // ── Neutral Light (Teal-tinted cool) ────────────────────────────────
+  static const Color ink = Color(0xFF0C1218);
+  static const Color inkSoft = Color(0xFF2E3840);
+  static const Color inkMute = Color(0xFF6B7A84);
+  static const Color line = Color(0xFFDDE3E6);
+  static const Color lineSoft = Color(0xFFECF0F2);
+  static const Color paper = Color(0xFFF4F7F8);
   static const Color card = Color(0xFFFFFFFF);
 
-  // ── Neutral Dark (Charcoal) ────────────────────────────────────────────
-  static const Color darkBg = Color(0xFF0D0F14);
-  static const Color darkCard = Color(0xFF161921);
-  static const Color darkCardHi = Color(0xFF1E2230);
-  static const Color darkLine = Color(0xFF252833);
-  static const Color darkInk = Color(0xFFF1F2F4);
-  static const Color darkInkMute = Color(0xFF8B909E);
+  // ── Neutral Dark (Charcoal — teal-tinted) ───────────────────────────
+  static const Color darkBg = Color(0xFF080C10);
+  static const Color darkCard = Color(0xFF0F1419);
+  static const Color darkCardHi = Color(0xFF161D24);
+  static const Color darkLine = Color(0xFF1E2830);
+  static const Color darkInk = Color(0xFFE8EDF2);
+  static const Color darkInkMute = Color(0xFF7A8A96);
 
-  // ── Semânticos ─────────────────────────────────────────────────────────
+  // ── Semânticos ──────────────────────────────────────────────────────
   static const Color good = Color(0xFF1B8C54);
   static const Color goodSoft = Color(0xFFE2F4EB);
   static const Color warn = Color(0xFFB5760A);
@@ -44,7 +47,24 @@ abstract class EagleTokens {
   static const Color goldSoft = Color(0xFFFFF8E6);
   static const Color purple = Color(0xFF6B46C1);
 
-  // ── Adapters de Compatibilidade ────────────────────────────────────────
+  // ── Glass / Cinematic Surfaces ──────────────────────────────────────
+  static const Color glassFill = Color(0x14FFFFFF);
+  static const Color glassBorder = Color(0x1AFFFFFF);
+  static const Color glassInnerHighlight = Color(0x0DFFFFFF);
+  static const Color metalMid = Color(0xFF8B9AAB);
+
+  /// Circuit glow — use with BoxShadow internal/tinted, never outer neon.
+  /// Apply as: brandAccent.withValues(alpha: 0.35)
+  static Color get circuitGlow => brandAccent.withValues(alpha: 0.35);
+
+  /// Hero mesh dark gradient stops for auth/splash backgrounds.
+  static const List<Color> heroMeshDark = [
+    Color(0xFF080C10),
+    Color(0xFF0A1F24),
+    Color(0xFF0D2830),
+  ];
+
+  // ── Adapters de Compatibilidade ─────────────────────────────────────
   static const Color primary = brand;
   static const Color danger = bad;
   static const Color warning = warn;
@@ -61,7 +81,7 @@ abstract class EagleTokens {
   static const Color outlineLight = line;
   static const Color outlineDark = darkLine;
 
-  // ── Radius ─────────────────────────────────────────────────────────────
+  // ── Radius ──────────────────────────────────────────────────────────
   static const double radiusXs = 8;
   static const double radiusSm = 12;
   static const double radiusMd = 16;
@@ -70,15 +90,15 @@ abstract class EagleTokens {
   static const double radius2xl = 28;
   static const double radiusPill = 999;
 
-  // ── Hero Gradients ─────────────────────────────────────────────────────
+  // ── Hero Gradients ──────────────────────────────────────────────────
   static const List<Color> heroGradientLight = [
-    Color(0xFF3454D1),
-    Color(0xFF2A44A8),
+    Color(0xFF1EC8C8),
+    Color(0xFF159A9A),
   ];
 
   static const List<Color> heroGradientDark = [
-    Color(0xFF0F1A4A),
-    Color(0xFF0A1235),
+    Color(0xFF0A2E2E),
+    Color(0xFF080C10),
   ];
 
   static LinearGradient heroGradient({bool dark = false}) => LinearGradient(
@@ -88,6 +108,7 @@ abstract class EagleTokens {
   );
 
   /// Generates a hero gradient from any dynamic primary color.
+  /// Used by white-label to derive gradients from the personal's custom color.
   static LinearGradient heroGradientFrom(Color primary, {bool dark = false}) {
     final hsl = HSLColor.fromColor(primary);
     if (dark) {
@@ -116,7 +137,7 @@ abstract class EagleTokens {
     );
   }
 
-  // ── Helper de Aderência ────────────────────────────────────────────────
+  // ── Helper de Aderência ─────────────────────────────────────────────
   static Color aderenciaColor(double taxa, {bool isDark = false}) {
     if (taxa >= 75) return isDark ? const Color(0xFF6FE296) : good;
     if (taxa >= 50) return isDark ? const Color(0xFFE2B46F) : warn;

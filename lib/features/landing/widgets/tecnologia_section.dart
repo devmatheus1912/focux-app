@@ -31,7 +31,7 @@ class TecnologiaSection extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFF111827),
+              const Color(0xFF0F1419),
               primaryColor.withValues(alpha: 0.24),
               secondaryColor.withValues(alpha: 0.22),
             ],

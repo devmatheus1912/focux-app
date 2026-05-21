@@ -187,7 +187,7 @@ class _PerfilLoadingScaffold extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(26),
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF3158D5), Color(0xFF101B42)],
+                    colors: [Color(0xFF1AABA4), Color(0xFF0A1F24)],
                   ),
                 ),
               ),
@@ -363,7 +363,7 @@ class _PerfilBody extends StatelessWidget {
                       transform: const GradientRotation(160 * math.pi / 180),
                       colors:
                           isDark
-                              ? const [Color(0xFF2A44A8), Color(0xFF060D28)]
+                              ? const [Color(0xFF159A9A), Color(0xFF0A2E2E)]
                               : [primaryColor, secondaryColor],
                     ),
                   ),

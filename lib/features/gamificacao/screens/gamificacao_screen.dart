@@ -431,7 +431,7 @@ class _StreakHeroStatic extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors:
-              dark ? [brandDeep, const Color(0xFF0D0F14)] : [brand, brandDeep],
+              dark ? [brandDeep, const Color(0xFF080C10)] : [brand, brandDeep],
         ),
         borderRadius: BorderRadius.circular(26),
       ),

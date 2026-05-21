@@ -32,7 +32,7 @@ class FxDockItems {
   ];
 }
 
-/// Floating glass dock with configurable tabs.
+/// Floating glass dock — cinematic redesign with brand dot indicator.
 class FxDock extends StatelessWidget {
   const FxDock({
     super.key,
@@ -52,31 +52,33 @@ class FxDock extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final width = MediaQuery.sizeOf(context).width;
     final compact = width < 390;
+
+    // Glass background — uses EagleTokens for consistency
     final bgColor =
         isDark
-            ? const Color.fromRGBO(20, 26, 48, 0.66)
-            : const Color.fromRGBO(255, 255, 255, 0.70);
+            ? EagleTokens.darkCard.withValues(alpha: 0.72)
+            : Colors.white.withValues(alpha: 0.75);
     final borderColor =
         isDark
-            ? const Color.fromRGBO(255, 255, 255, 0.12)
+            ? EagleTokens.glassBorder
             : const Color.fromRGBO(0, 0, 0, 0.06);
     final inactiveColor = (isDark ? EagleTokens.darkInk : EagleTokens.ink)
-        .withValues(alpha: 0.45);
+        .withValues(alpha: 0.40);
 
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.20),
+            color: Colors.black.withValues(alpha: 0.20),
             blurRadius: 34,
-            offset: Offset(0, 12),
+            offset: const Offset(0, 12),
             spreadRadius: -12,
           ),
           BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.10),
+            color: Colors.black.withValues(alpha: 0.10),
             blurRadius: 12,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
             spreadRadius: -4,
           ),
         ],
@@ -114,7 +116,8 @@ class FxDock extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
                           width: compact ? 38 : 44,
                           height: compact ? 28 : 30,
                           decoration: BoxDecoration(
@@ -147,6 +150,18 @@ class FxDock extends StatelessWidget {
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                        ),
+                        // ── Active dot indicator ──────────────────
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          margin: const EdgeInsets.only(top: 3),
+                          width: active ? 4 : 0,
+                          height: active ? 4 : 0,
+                          decoration: BoxDecoration(
+                            color: primary,
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ],
                     ),

@@ -21,7 +21,7 @@ class SocialProofSection extends StatelessWidget {
         final itemWidth = wide ? (contentWidth - 24) / 3 : contentWidth;
 
         return Container(
-          color: const Color(0xFF070B16),
+          color: const Color(0xFF0A1014),
           padding: EdgeInsets.fromLTRB(
             horizontalPadding,
             wide ? 28 : 18,
@@ -61,7 +61,7 @@ class _BadgeChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF0F1419),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),

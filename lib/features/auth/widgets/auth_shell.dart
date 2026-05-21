@@ -1,8 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/theme_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
@@ -17,28 +20,24 @@ class AuthShell extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
+        // ── Cinematic mesh gradient background ──────────────────────
         Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: RadialGradient(
-              center: const Alignment(-0.35, -0.85),
+              center: Alignment(-0.35, -0.85),
               radius: 1.35,
-              colors:
-                  dark
-                      ? const [
-                        Color(0xFF1A3A7A),
-                        Color(0xFF060C1E),
-                        Color(0xFF020818),
-                      ]
-                      : const [
-                        Color(0xFF0F1A4A),
-                        Color(0xFF0F1A4A),
-                        Color(0xFF070F33),
-                      ],
-              stops: const [0.0, 0.55, 1.0],
+              colors: [
+                Color(0xFF0D2830), // teal deep glow
+                Color(0xFF0A1F24), // mid teal
+                Color(0xFF080C10), // darkBg
+              ],
+              stops: [0.0, 0.55, 1.0],
             ),
           ),
         ),
+        // ── Technical grid (teal-tinted, subtle) ────────────────────
         CustomPaint(painter: const _AuthGridPainter(), size: Size.infinite),
+        // ── Ambient glow — brandAccent radial at top, 8% opacity ────
         Positioned(
           top: -80,
           right: -80,
@@ -46,14 +45,14 @@ class AuthShell extends StatelessWidget {
             child: Container(
               width: 300,
               height: 300,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Color.fromRGBO(124, 192, 255, 0.18),
+                    EagleTokens.brandAccent.withValues(alpha: 0.08),
                     Colors.transparent,
                   ],
-                  stops: [0.0, 0.7],
+                  stops: const [0.0, 0.7],
                 ),
               ),
             ),
@@ -65,60 +64,115 @@ class AuthShell extends StatelessWidget {
   }
 }
 
-class AuthLogoMark extends StatelessWidget {
+class AuthLogoMark extends ConsumerStatefulWidget {
   const AuthLogoMark({super.key, this.size = 96});
 
   final double size;
 
   @override
+  ConsumerState<AuthLogoMark> createState() => _AuthLogoMarkState();
+}
+
+class _AuthLogoMarkState extends ConsumerState<AuthLogoMark>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerCtrl;
+  late Animation<double> _shimmerAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    )..repeat(reverse: true);
+    _shimmerAnim = Tween<double>(begin: 0.3, end: 0.6).animate(
+      CurvedAnimation(parent: _shimmerCtrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _shimmerCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final radius = size * 0.26;
+    final radius = widget.size * 0.26;
     final primary = Theme.of(context).colorScheme.primary;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        gradient: const RadialGradient(
-          center: Alignment(-0.3, -0.5),
-          radius: 1.0,
-          colors: [Color(0xFF122E65), Color(0xFF050B20)],
-          stops: [0.0, 1.0],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: 0.35),
-            blurRadius: 28,
-            offset: const Offset(0, 6),
-          ),
-        ],
-        border: Border.all(
-          color: const Color.fromRGBO(124, 192, 255, 0.10),
-          width: 1,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: ShaderMask(
-        shaderCallback:
-            (Rect bounds) => const RadialGradient(
+    final logoUrl = ref.watch(logoUrlProvider);
+
+    return AnimatedBuilder(
+      animation: _shimmerAnim,
+      builder: (_, child) {
+        return Container(
+          width: widget.size,
+          height: widget.size,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius),
+            gradient: const RadialGradient(
               center: Alignment(-0.3, -0.5),
               radius: 1.0,
-              colors: [Color(0xFF122E65), Color(0xFF050B20)],
+              colors: [Color(0xFF0D2830), Color(0xFF080C10)],
               stops: [0.0, 1.0],
-            ).createShader(bounds),
-        blendMode: BlendMode.screen,
-        child: OverflowBox(
-          maxWidth: size * 1.3,
-          maxHeight: size * 1.3,
-          child: Image.asset(
-            'assets/images/logo_icon.png',
-            width: size * 1.3,
-            height: size * 1.3,
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.high,
-            isAntiAlias: true,
+            ),
+            boxShadow: [
+              // Cinematic brand glow
+              BoxShadow(
+                color: primary.withValues(alpha: 0.30),
+                blurRadius: 28,
+                offset: const Offset(0, 6),
+              ),
+              // Circuit shimmer — internal tinted glow
+              BoxShadow(
+                color: EagleTokens.brandAccent.withValues(
+                  alpha: _shimmerAnim.value * 0.15,
+                ),
+                blurRadius: 40,
+                spreadRadius: -4,
+              ),
+            ],
+            border: Border.all(
+              color: EagleTokens.glassBorder,
+              width: 1,
+            ),
           ),
+          clipBehavior: Clip.antiAlias,
+          child: child,
+        );
+      },
+      child: _buildLogoContent(logoUrl, widget.size),
+    );
+  }
+
+  Widget _buildLogoContent(String? logoUrl, double size) {
+    if (logoUrl != null && logoUrl.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.26),
+        child: Image.network(
+          logoUrl,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.high,
+          errorBuilder: (_, __, ___) => _buildAssetLogo(size),
         ),
+      );
+    }
+    return _buildAssetLogo(size);
+  }
+
+  Widget _buildAssetLogo(double size) {
+    return OverflowBox(
+      maxWidth: size * 1.3,
+      maxHeight: size * 1.3,
+      child: Image.asset(
+        'assets/images/logo_icon.png',
+        width: size * 1.3,
+        height: size * 1.3,
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
+        isAntiAlias: true,
       ),
     );
   }
@@ -200,16 +254,24 @@ class AuthGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
+            color: EagleTokens.glassFill,
             borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            border: Border.all(color: EagleTokens.glassBorder),
+            boxShadow: [
+              BoxShadow(
+                color: primary.withValues(alpha: 0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: child,
         ),
@@ -284,7 +346,7 @@ class AuthField extends StatelessWidget {
                     ),
             suffixIcon: suffix,
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.07),
+            fillColor: EagleTokens.glassFill,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
@@ -292,12 +354,12 @@ class AuthField extends StatelessWidget {
             enabledBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.14),
+                color: EagleTokens.glassBorder,
               ),
             ),
             focusedBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: primary),
+              borderSide: BorderSide(color: primary, width: 1.5),
             ),
             errorBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
@@ -397,7 +459,7 @@ class _AuthPrimaryButtonState extends State<AuthPrimaryButton>
               boxShadow: [
                 if (!widget.isLoading)
                   BoxShadow(
-                    color: primary.withValues(alpha: 0.28),
+                    color: primary.withValues(alpha: 0.25),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -456,11 +518,11 @@ class AuthSecondaryButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.14)),
+          side: BorderSide(color: EagleTokens.glassBorder),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          backgroundColor: Colors.white.withValues(alpha: 0.08),
+          backgroundColor: EagleTokens.glassFill,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -502,8 +564,9 @@ class AuthBackButton extends StatelessWidget {
         width: 38,
         height: 38,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: EagleTokens.glassFill,
           shape: BoxShape.circle,
+          border: Border.all(color: EagleTokens.glassBorder),
         ),
         child: const Icon(
           Icons.chevron_left_rounded,
@@ -557,6 +620,7 @@ class AuthPlanCard extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
@@ -571,18 +635,18 @@ class AuthPlanCard extends StatelessWidget {
                     end: Alignment.bottomRight,
                   )
                   : null,
-          color: selected ? null : Colors.white.withValues(alpha: 0.07),
+          color: selected ? null : EagleTokens.glassFill,
           border:
               selected
                   ? null
-                  : Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                  : Border.all(color: EagleTokens.glassBorder),
           boxShadow:
               selected
                   ? [
                     BoxShadow(
                       color: Theme.of(
                         context,
-                      ).colorScheme.primary.withValues(alpha: 0.4),
+                      ).colorScheme.primary.withValues(alpha: 0.35),
                       blurRadius: 20,
                       offset: const Offset(0, 6),
                     ),
@@ -628,6 +692,8 @@ class AuthPlanCard extends StatelessWidget {
   }
 }
 
+/// Technical grid painter — teal-tinted 1px lines at opacity 0.06.
+/// Matches the cinematic "blueprint" aesthetic of the new identity.
 class _AuthGridPainter extends CustomPainter {
   const _AuthGridPainter();
 
@@ -635,7 +701,7 @@ class _AuthGridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.05)
+          ..color = EagleTokens.brandAccent.withValues(alpha: 0.06)
           ..strokeWidth = 0.5
           ..style = PaintingStyle.stroke;
 

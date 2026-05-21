@@ -24,7 +24,7 @@ class DepoimentosSection extends StatelessWidget {
         ).take(5).toList();
 
     return Container(
-      color: const Color(0xFF070B16),
+      color: const Color(0xFF0A1014),
       padding: const EdgeInsets.fromLTRB(16, 30, 16, 34),
       child: Center(
         child: ConstrainedBox(
@@ -83,7 +83,7 @@ class _TestimonialTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(featured ? 18 : 14),
       decoration: BoxDecoration(
-        color: featured ? const Color(0xFF121D31) : const Color(0xFF111827),
+        color: featured ? const Color(0xFF161D24) : const Color(0xFF0F1419),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color:

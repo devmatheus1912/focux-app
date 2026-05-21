@@ -121,13 +121,13 @@ class _State extends ConsumerState<ModoPresencialScreen> {
   Widget build(BuildContext context) {
     if (_loading) {
       return const Scaffold(
-        backgroundColor: Color(0xFF0D0F14),
+        backgroundColor: Color(0xFF080C10),
         body: Center(child: FxLoading(color: Colors.white)),
       );
     }
     if (_exec == null || _exec!.exercicios.isEmpty) {
       return Scaffold(
-        backgroundColor: const Color(0xFF0D0F14),
+        backgroundColor: const Color(0xFF080C10),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -155,7 +155,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0F14),
+      backgroundColor: const Color(0xFF080C10),
       body: SafeArea(
         child:
             _resting

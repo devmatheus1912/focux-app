@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Focux Personal — Brand Logo Component
+import '../theme/design_tokens.dart';
+import '../theme/theme_provider.dart';
+
+/// Focux Personal — Brand Logo Component (Cinematic Redesign)
 ///
-/// Design System: Dark Premium / Eagle Tokens
-/// FxMark = rounded-square tile, dark blue radial gradient, F-eagle image
+/// Design System: Cyan-Teal Glass / Eagle Tokens
+/// BrandedMark = uses logoUrlProvider when available, falls back to asset.
 /// Consistent across all screens: login, onboarding, dashboard, etc.
 ///
 /// [iconSize] — tile size in pixels (default 40)
 /// [showLabel] — horizontal lockup: tile + wordmark
 /// [light]     — true = white wordmark text (dark bg), false = dark text (light bg)
-class FxLogo extends StatelessWidget {
+class FxLogo extends ConsumerWidget {
   final double iconSize;
   final bool showLabel;
   final bool horizontal;
@@ -25,16 +29,17 @@ class FxLogo extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final mark = _FxMarkTile(size: iconSize);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final logoUrl = ref.watch(logoUrlProvider);
+    final mark = _BrandedMarkTile(size: iconSize, logoUrl: logoUrl);
 
     if (!showLabel) return mark;
 
-    final wordmarkColor = light ? Colors.white : const Color(0xFF0D0F14);
+    final wordmarkColor = light ? Colors.white : EagleTokens.ink;
     final muteColor =
         light
             ? Colors.white.withValues(alpha: 0.60)
-            : const Color(0xFF0D0F14).withValues(alpha: 0.50);
+            : EagleTokens.ink.withValues(alpha: 0.50);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -80,18 +85,21 @@ class FxLogo extends StatelessWidget {
   }
 }
 
-/// Rounded-square brand tile — matches design FxMark "official" variant.
+/// BrandedMark — uses network logo when available, else asset.
 ///
-/// Dark blue radial gradient background + F-eagle image.
-/// Inset border + drop shadow matching design spec.
-class _FxMarkTile extends StatelessWidget {
-  const _FxMarkTile({required this.size});
+/// Cinematic glass background: teal gradient + glass border + brand glow shadow.
+/// When personal has a custom logoUrl, it displays their logo instead.
+class _BrandedMarkTile extends StatelessWidget {
+  const _BrandedMarkTile({required this.size, this.logoUrl});
 
   final double size;
+  final String? logoUrl;
 
   @override
   Widget build(BuildContext context) {
     final radius = size * 0.26;
+    final primary = Theme.of(context).colorScheme.primary;
+
     return Container(
       width: size,
       height: size,
@@ -100,56 +108,67 @@ class _FxMarkTile extends StatelessWidget {
         gradient: const RadialGradient(
           center: Alignment(-0.3, -0.5),
           radius: 1.0,
-          colors: [Color(0xFF122E65), Color(0xFF050B20)],
+          colors: [Color(0xFF0D2830), Color(0xFF080C10)],
           stops: [0.0, 1.0],
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3454D1).withValues(alpha: 0.28),
+            color: primary.withValues(alpha: 0.22),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),
         ],
         border: Border.all(
-          color: const Color.fromRGBO(124, 192, 255, 0.12),
+          color: EagleTokens.glassBorder,
           width: 1,
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      // ShaderMask with BlendMode.screen simulates CSS mix-blend-mode:screen —
-      // mathematically equivalent (screen is commutative). The gradient shader
-      // matches the tile background so eagle pixels are brightened/luminous.
-      child: ShaderMask(
-        shaderCallback:
-            (Rect bounds) => const RadialGradient(
-              center: Alignment(-0.3, -0.5),
-              radius: 1.0,
-              colors: [Color(0xFF122E65), Color(0xFF050B20)],
-              stops: [0.0, 1.0],
-            ).createShader(bounds),
-        blendMode: BlendMode.screen,
-        child: OverflowBox(
-          maxWidth: size * 1.3,
-          maxHeight: size * 1.3,
-          child: Image.asset(
-            'assets/images/logo_icon.png',
-            width: size * 1.3,
-            height: size * 1.3,
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.high,
-            isAntiAlias: true,
-          ),
+      child: _buildContent(size, radius),
+    );
+  }
+
+  Widget _buildContent(double size, double radius) {
+    if (logoUrl != null && logoUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: Image.network(
+          logoUrl!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.high,
+          errorBuilder: (_, __, ___) => _buildAssetLogo(size),
         ),
+      );
+    }
+    return _buildAssetLogo(size);
+  }
+
+  Widget _buildAssetLogo(double size) {
+    return OverflowBox(
+      maxWidth: size * 1.3,
+      maxHeight: size * 1.3,
+      child: Image.asset(
+        'assets/images/logo_icon.png',
+        width: size * 1.3,
+        height: size * 1.3,
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
+        isAntiAlias: true,
       ),
     );
   }
 }
 
 /// Shorthand — tile only, for AppBars, list items, etc.
-class FxLogoIcon extends StatelessWidget {
+class FxLogoIcon extends ConsumerWidget {
   final double size;
   const FxLogoIcon({super.key, this.size = 40});
 
   @override
-  Widget build(BuildContext context) => _FxMarkTile(size: size);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final logoUrl = ref.watch(logoUrlProvider);
+    return _BrandedMarkTile(size: size, logoUrl: logoUrl);
+  }
 }

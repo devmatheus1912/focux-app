@@ -82,13 +82,13 @@ class AppTheme {
     final onSurfMute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final outline = dark ? EagleTokens.darkLine : EagleTokens.line;
 
-    // Tinted shadow — subtle brand-tinted depth instead of flat gray
+    // Tinted shadow — brand-tinted depth with cinematic subtlety
     final shadowColor =
         dark
-            ? Colors.black.withValues(alpha: 0.5)
+            ? Colors.black.withValues(alpha: 0.6)
             : Color.alphaBlend(
-              primary.withValues(alpha: 0.04),
-              Colors.black.withValues(alpha: 0.08),
+              primary.withValues(alpha: 0.05),
+              Colors.black.withValues(alpha: 0.07),
             );
 
     final cs = ColorScheme(
@@ -225,7 +225,7 @@ class AppTheme {
 
       // ── App Bar: clean, no elevation, premium title ─────────────────
       appBarTheme: AppBarTheme(
-        backgroundColor: surface,
+        backgroundColor: dark ? EagleTokens.darkBg : surface,
         foregroundColor: onSurface,
         elevation: 0,
         scrolledUnderElevation: 0.5,
@@ -244,13 +244,17 @@ class AppTheme {
         actionsIconTheme: IconThemeData(color: onSurface),
       ),
 
-      // ── Cards: no border, subtle tinted shadow for depth ────────────
+      // ── Cards: glass-style border, tinted shadow for depth ──────────
       cardTheme: CardTheme(
-        color: surface,
+        color: dark ? EagleTokens.darkCard : surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(EagleTokens.radiusLg),
-          side: BorderSide(color: outline.withValues(alpha: dark ? 0.4 : 0.6)),
+          side: BorderSide(
+            color: dark
+                ? EagleTokens.glassBorder
+                : outline.withValues(alpha: 0.6),
+          ),
         ),
         margin: const EdgeInsets.symmetric(vertical: 6),
         clipBehavior: Clip.antiAlias,
@@ -273,7 +277,9 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
-          borderSide: BorderSide(color: outline.withValues(alpha: 0.6)),
+          borderSide: BorderSide(
+            color: dark ? EagleTokens.darkLine : outline.withValues(alpha: 0.6),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
@@ -289,7 +295,7 @@ class AppTheme {
         ),
       ),
 
-      // ── Filled Button: tactile press feedback ───────────────────────
+      // ── Filled Button: gradient feel via elevation, tactile press ───
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primary,
@@ -322,7 +328,7 @@ class AppTheme {
         ),
       ),
 
-      // ── Chips: pill-shaped, subtle ──────────────────────────────────
+      // ── Chips: pill-shaped, subtle glass tint ───────────────────────
       chipTheme: ChipThemeData(
         backgroundColor: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
         selectedColor: dark ? EagleTokens.darkCardHi : primarySoft,
@@ -331,7 +337,11 @@ class AppTheme {
           color: onSurface,
           fontWeight: FontWeight.w500,
         ),
-        side: BorderSide(color: outline.withValues(alpha: 0.5)),
+        side: BorderSide(
+          color: dark
+              ? EagleTokens.glassBorder
+              : outline.withValues(alpha: 0.5),
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       ),
@@ -351,7 +361,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(EagleTokens.radiusXl),
         ),
-        backgroundColor: surface,
+        backgroundColor: dark ? EagleTokens.darkCard : surface,
         titleTextStyle: _outfit(
           fontSize: 18,
           fontWeight: FontWeight.w600,
@@ -365,16 +375,16 @@ class AppTheme {
             top: Radius.circular(EagleTokens.radius2xl),
           ),
         ),
-        backgroundColor: surface,
+        backgroundColor: dark ? EagleTokens.darkCard : surface,
         elevation: 0,
       ),
 
-      // ── Navigation Bar: glass dock ──────────────────────────────────
+      // ── Navigation Bar: cinematic glass dock ────────────────────────
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor:
             dark
-                ? EagleTokens.darkCard.withValues(alpha: 0.92)
-                : Colors.white.withValues(alpha: 0.88),
+                ? EagleTokens.darkCard.withValues(alpha: 0.88)
+                : Colors.white.withValues(alpha: 0.85),
         indicatorColor: dark ? EagleTokens.darkCardHi : primarySoft,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -438,6 +448,44 @@ class AppTheme {
         checkColor: WidgetStateProperty.all(onPrimary),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         side: BorderSide(color: outline, width: 1.5),
+      ),
+
+      // ── Progress / Slider — uses primary (white-label aware) ────────
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: primary,
+        linearTrackColor: dark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+        circularTrackColor: dark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+      ),
+
+      sliderTheme: SliderThemeData(
+        activeTrackColor: primary,
+        thumbColor: primary,
+        inactiveTrackColor: dark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+        overlayColor: primary.withValues(alpha: 0.12),
+      ),
+
+      // ── TabBar: refined with brand accent ───────────────────────────
+      tabBarTheme: TabBarTheme(
+        labelColor: primary,
+        unselectedLabelColor: onSurfMute,
+        indicatorColor: primary,
+        labelStyle: _outfit(fontSize: 13, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: _outfit(fontSize: 13, fontWeight: FontWeight.w500),
+      ),
+
+      // ── Badge ───────────────────────────────────────────────────────
+      badgeTheme: BadgeThemeData(
+        backgroundColor: primary,
+        textColor: onPrimary,
+      ),
+
+      // ── Tooltip ─────────────────────────────────────────────────────
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: dark ? EagleTokens.darkCardHi : EagleTokens.ink,
+          borderRadius: BorderRadius.circular(EagleTokens.radiusXs),
+        ),
+        textStyle: _outfit(color: Colors.white, fontSize: 12),
       ),
     );
   }

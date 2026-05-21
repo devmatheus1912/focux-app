@@ -296,7 +296,7 @@ class _TrilhaCard extends StatelessWidget {
 
   Color get _progressColor {
     if (trilha.concluida) return const Color(0xFF22C55E);
-    if (trilha.percentualConclusao >= 70) return const Color(0xFF3454D1);
+    if (trilha.percentualConclusao >= 70) return const Color(0xFF1EC8C8);
     if (trilha.percentualConclusao >= 30) return const Color(0xFFF59E0B);
     return const Color(0xFF717171);
   }

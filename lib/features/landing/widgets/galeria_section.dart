@@ -29,7 +29,7 @@ class GaleriaSection extends StatelessWidget {
         final tileWidth = wide ? (contentWidth - 24) / 3 : contentWidth;
 
         return Container(
-          color: const Color(0xFF0D0F14),
+          color: const Color(0xFF080C10),
           padding: EdgeInsets.fromLTRB(
             horizontalPadding,
             wide ? 48 : 32,
@@ -112,7 +112,7 @@ class _GalleryEditorialTile extends StatelessWidget {
               fit: BoxFit.cover,
               errorBuilder:
                   (_, __, ___) => Container(
-                    color: const Color(0xFF111827),
+                    color: const Color(0xFF0F1419),
                     child: Icon(
                       Icons.image_not_supported_outlined,
                       color: accent,
@@ -126,7 +126,7 @@ class _GalleryEditorialTile extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    const Color(0xFF050814).withValues(alpha: 0.54),
+                    const Color(0xFF080C10).withValues(alpha: 0.54),
                   ],
                 ),
               ),

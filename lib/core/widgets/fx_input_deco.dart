@@ -27,7 +27,7 @@ class FxInputDeco {
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
-    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final fillColor = isDark ? EagleTokens.darkCard : EagleTokens.card;
 
     return InputDecoration(
       labelText: label,
@@ -41,7 +41,7 @@ class FxInputDeco {
       prefixIcon: icon != null ? Icon(icon, size: 20, color: mute) : null,
       suffixIcon: suffix,
       filled: true,
-      fillColor: card,
+      fillColor: fillColor,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -53,7 +53,7 @@ class FxInputDeco {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: primary, width: 1.6),
+        borderSide: BorderSide(color: primary, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -61,7 +61,7 @@ class FxInputDeco {
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: EagleTokens.bad, width: 1.6),
+        borderSide: const BorderSide(color: EagleTokens.bad, width: 1.5),
       ),
     );
   }
