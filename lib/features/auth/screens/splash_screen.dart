@@ -96,7 +96,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   Future<void> _handleUnauthenticated() async {
     final prefs = await SharedPreferences.getInstance();
-    final onboardingDone = prefs.getBool('onboarding_done_v2') ?? false;
+    final onboardingDone = prefs.getBool('onboarding_done_v3') ?? false;
 
     if (!mounted) {
       return;

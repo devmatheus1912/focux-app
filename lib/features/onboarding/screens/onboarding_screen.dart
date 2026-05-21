@@ -183,7 +183,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   Future<void> _markDone() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('onboarding_done_v2', true);
+    await prefs.setBool('onboarding_done_v3', true);
+    await prefs.remove('onboarding_done_v2');
     await prefs.remove('onboarding_done');
   }
 
