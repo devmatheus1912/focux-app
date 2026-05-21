@@ -65,3 +65,4 @@ ios/Runner/GoogleService-Info.plist
 # Local design exports and generated archives
 *.zip
 temp_design/
+scripts/node_modules/
