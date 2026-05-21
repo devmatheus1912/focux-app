@@ -69,6 +69,8 @@ class AuthLogoMark extends ConsumerStatefulWidget {
 
   final double size;
 
+  static const _defaultBrandAsset = 'assets/images/logo_icon.png';
+
   @override
   ConsumerState<AuthLogoMark> createState() => _AuthLogoMarkState();
 }
@@ -98,9 +100,45 @@ class _AuthLogoMarkState extends ConsumerState<AuthLogoMark>
 
   @override
   Widget build(BuildContext context) {
-    final radius = widget.size * 0.26;
     final primary = Theme.of(context).colorScheme.primary;
     final logoUrl = ref.watch(logoUrlProvider);
+    final hasCustomLogo = logoUrl != null && logoUrl.isNotEmpty;
+
+    if (!hasCustomLogo) {
+      return AnimatedBuilder(
+        animation: _shimmerAnim,
+        builder: (_, __) {
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: primary.withValues(alpha: 0.28),
+                  blurRadius: widget.size * 0.28,
+                  offset: Offset(0, widget.size * 0.06),
+                ),
+                BoxShadow(
+                  color: EagleTokens.brandAccent.withValues(
+                    alpha: _shimmerAnim.value * 0.12,
+                  ),
+                  blurRadius: widget.size * 0.34,
+                  spreadRadius: -widget.size * 0.04,
+                ),
+              ],
+            ),
+            child: Image.asset(
+              AuthLogoMark._defaultBrandAsset,
+              width: widget.size,
+              height: widget.size,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+              isAntiAlias: true,
+            ),
+          );
+        },
+      );
+    }
+
+    final radius = widget.size * 0.26;
 
     return AnimatedBuilder(
       animation: _shimmerAnim,
@@ -117,13 +155,11 @@ class _AuthLogoMarkState extends ConsumerState<AuthLogoMark>
               stops: [0.0, 1.0],
             ),
             boxShadow: [
-              // Cinematic brand glow
               BoxShadow(
                 color: primary.withValues(alpha: 0.30),
                 blurRadius: 28,
                 offset: const Offset(0, 6),
               ),
-              // Circuit shimmer — internal tinted glow
               BoxShadow(
                 color: EagleTokens.brandAccent.withValues(
                   alpha: _shimmerAnim.value * 0.15,
@@ -141,39 +177,28 @@ class _AuthLogoMarkState extends ConsumerState<AuthLogoMark>
           child: child,
         );
       },
-      child: _buildLogoContent(logoUrl, widget.size),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: Image.network(
+          logoUrl,
+          width: widget.size,
+          height: widget.size,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.high,
+          errorBuilder: (_, __, ___) => _buildDefaultBrandMark(),
+        ),
+      ),
     );
   }
 
-  Widget _buildLogoContent(String? logoUrl, double size) {
-    if (logoUrl != null && logoUrl.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(size * 0.26),
-        child: Image.network(
-          logoUrl,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.high,
-          errorBuilder: (_, __, ___) => _buildAssetLogo(size),
-        ),
-      );
-    }
-    return _buildAssetLogo(size);
-  }
-
-  Widget _buildAssetLogo(double size) {
-    return OverflowBox(
-      maxWidth: size * 1.3,
-      maxHeight: size * 1.3,
-      child: Image.asset(
-        'assets/images/logo_icon_transparent.png',
-        width: size * 1.15,
-        height: size * 1.15,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-        isAntiAlias: true,
-      ),
+  Widget _buildDefaultBrandMark() {
+    return Image.asset(
+      AuthLogoMark._defaultBrandAsset,
+      width: widget.size,
+      height: widget.size,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+      isAntiAlias: true,
     );
   }
 }

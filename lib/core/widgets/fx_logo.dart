@@ -92,11 +92,25 @@ class FxLogo extends ConsumerWidget {
 class _BrandedMarkTile extends StatelessWidget {
   const _BrandedMarkTile({required this.size, this.logoUrl});
 
+  static const _defaultBrandAsset = 'assets/images/logo_icon.png';
+
   final double size;
   final String? logoUrl;
 
   @override
   Widget build(BuildContext context) {
+    final hasCustomLogo = logoUrl != null && logoUrl!.isNotEmpty;
+    if (!hasCustomLogo) {
+      return Image.asset(
+        _defaultBrandAsset,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        isAntiAlias: true,
+      );
+    }
+
     final radius = size * 0.26;
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -124,13 +138,7 @@ class _BrandedMarkTile extends StatelessWidget {
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: _buildContent(size, radius),
-    );
-  }
-
-  Widget _buildContent(double size, double radius) {
-    if (logoUrl != null && logoUrl!.isNotEmpty) {
-      return ClipRRect(
+      child: ClipRRect(
         borderRadius: BorderRadius.circular(radius),
         child: Image.network(
           logoUrl!,
@@ -138,24 +146,15 @@ class _BrandedMarkTile extends StatelessWidget {
           height: size,
           fit: BoxFit.cover,
           filterQuality: FilterQuality.high,
-          errorBuilder: (_, __, ___) => _buildAssetLogo(size),
+          errorBuilder: (_, __, ___) => Image.asset(
+            _defaultBrandAsset,
+            width: size,
+            height: size,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+            isAntiAlias: true,
+          ),
         ),
-      );
-    }
-    return _buildAssetLogo(size);
-  }
-
-  Widget _buildAssetLogo(double size) {
-    return OverflowBox(
-      maxWidth: size * 1.3,
-      maxHeight: size * 1.3,
-      child: Image.asset(
-        'assets/images/logo_icon_transparent.png',
-        width: size * 1.15,
-        height: size * 1.15,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-        isAntiAlias: true,
       ),
     );
   }
