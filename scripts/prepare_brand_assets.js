@@ -1,7 +1,7 @@
 /**
  * Prepare Eagle brand assets:
  * - strip fake checkerboard from transparent F export
- * - build splash / launcher surfaces from mark + #080C10 (not 3D scene PNG)
+ * - build premium mesh splash surfaces + glass mark overlays
  */
 const fs = require('fs');
 const path = require('path');
@@ -53,33 +53,35 @@ async function stripCheckerboard(inputPath, outputPath, sharp) {
   console.log(`✓ transparent mark: ${outputPath}`);
 }
 
-async function composeMarkOnBrandBg(inputPath, outputPath, size, iconScale, sharp) {
-  const trimmed = await sharp(inputPath)
-    .trim({ threshold: 8 })
-    .toBuffer();
+function meshBackgroundSvg(width, height) {
+  const gridStep = 30;
+  let gridLines = '';
+  for (let x = 0; x <= width; x += gridStep) {
+    gridLines += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="rgba(94,234,212,0.05)" stroke-width="0.6"/>`;
+  }
+  for (let y = 0; y <= height; y += gridStep) {
+    gridLines += `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="rgba(94,234,212,0.05)" stroke-width="0.6"/>`;
+  }
 
-  const iconSize = Math.round(size * iconScale);
-  const icon = await sharp(trimmed)
-    .resize(iconSize, iconSize, {
-      fit: 'contain',
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
-    .png()
-    .toBuffer();
-
-  await sharp({
-    create: {
-      width: size,
-      height: size,
-      channels: 4,
-      background: BRAND_BG,
-    },
-  })
-    .composite([{ input: icon, gravity: 'centre' }])
-    .png()
-    .toFile(outputPath);
-
-  console.log(`✓ brand surface: ${outputPath}`);
+  return `
+    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="mesh" cx="50%" cy="36%" r="78%">
+          <stop offset="0%" stop-color="#12343C"/>
+          <stop offset="42%" stop-color="#0A1F24"/>
+          <stop offset="100%" stop-color="#080C10"/>
+        </radialGradient>
+        <radialGradient id="heroGlow" cx="50%" cy="40%" r="34%">
+          <stop offset="0%" stop-color="rgba(30,200,200,0.20)"/>
+          <stop offset="55%" stop-color="rgba(94,234,212,0.08)"/>
+          <stop offset="100%" stop-color="rgba(8,12,16,0)"/>
+        </radialGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#mesh)"/>
+      <rect width="100%" height="100%" fill="url(#heroGlow)"/>
+      ${gridLines}
+    </svg>
+  `;
 }
 
 function glassTileSvg(size, radius) {
@@ -90,11 +92,84 @@ function glassTileSvg(size, radius) {
           <stop offset="0%" stop-color="#0D2830"/>
           <stop offset="100%" stop-color="#080C10"/>
         </radialGradient>
+        <linearGradient id="sheen" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="rgba(94,234,212,0.16)"/>
+          <stop offset="35%" stop-color="rgba(94,234,212,0)"/>
+        </linearGradient>
       </defs>
       <rect width="${size}" height="${size}" rx="${radius}" ry="${radius}" fill="url(#tile)"/>
-      <rect width="${size}" height="${size}" rx="${radius}" ry="${radius}" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="2"/>
+      <rect width="${size}" height="${size}" rx="${radius}" ry="${radius}" fill="url(#sheen)"/>
+      <rect width="${size}" height="${size}" rx="${radius}" ry="${radius}" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
     </svg>
   `;
+}
+
+async function composeGlassMarkOverlay(markPath, outputPath, canvasSize, tileScale, sharp) {
+  const tileSize = Math.round(canvasSize * tileScale);
+  const radius = Math.round(tileSize * 0.26);
+  const tile = await sharp(Buffer.from(glassTileSvg(tileSize, radius)))
+    .png()
+    .toBuffer();
+  const markSize = Math.round(tileSize * 0.72);
+  const mark = await sharp(markPath)
+    .trim({ threshold: 8 })
+    .resize(markSize, markSize, {
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .png()
+    .toBuffer();
+
+  const tileWithMark = await sharp(tile)
+    .composite([{ input: mark, gravity: 'centre' }])
+    .png()
+    .toBuffer();
+
+  await sharp({
+    create: {
+      width: canvasSize,
+      height: canvasSize,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .composite([{ input: tileWithMark, gravity: 'centre' }])
+    .png()
+    .toFile(outputPath);
+
+  console.log(`✓ glass mark overlay: ${outputPath}`);
+}
+
+async function composePremiumSplashCanvas(markPath, outputPath, size, tileScale, sharp) {
+  const mesh = await sharp(Buffer.from(meshBackgroundSvg(size, size)))
+    .png()
+    .toBuffer();
+  const tileSize = Math.round(size * tileScale);
+  const radius = Math.round(tileSize * 0.26);
+  const tile = await sharp(Buffer.from(glassTileSvg(tileSize, radius)))
+    .png()
+    .toBuffer();
+  const markSize = Math.round(tileSize * 0.72);
+  const mark = await sharp(markPath)
+    .trim({ threshold: 8 })
+    .resize(markSize, markSize, {
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .png()
+    .toBuffer();
+
+  const tileWithMark = await sharp(tile)
+    .composite([{ input: mark, gravity: 'centre' }])
+    .png()
+    .toBuffer();
+
+  await sharp(mesh)
+    .composite([{ input: tileWithMark, gravity: 'centre' }])
+    .png()
+    .toFile(outputPath);
+
+  console.log(`✓ premium splash canvas: ${outputPath}`);
 }
 
 async function composeGlassAppIcon(markPath, outputPath, size, sharp) {
@@ -116,6 +191,19 @@ async function composeGlassAppIcon(markPath, outputPath, size, sharp) {
     .toFile(outputPath);
 
   console.log(`✓ glass app icon: ${outputPath}`);
+}
+
+async function writeSolidBg(outputPath, sharp) {
+  await sharp({
+    create: {
+      width: 1,
+      height: 1,
+      channels: 4,
+      background: BRAND_BG,
+    },
+  })
+    .png()
+    .toFile(outputPath);
 }
 
 async function main() {
@@ -144,33 +232,45 @@ async function main() {
   const markPath = path.join(assets, 'logo_mark_transparent.png');
   await stripCheckerboard(markSource, markPath, sharp);
 
-  await composeMarkOnBrandBg(markPath, path.join(assets, 'logo_splash.png'), 1024, 0.42, sharp);
-  await composeMarkOnBrandBg(markPath, path.join(assets, 'logo_icon_padded.png'), 1152, 0.46, sharp);
+  const meshBgPath = path.join(assets, 'splash_mesh_bg.png');
+  await sharp(Buffer.from(meshBackgroundSvg(1080, 1920)))
+    .png()
+    .toFile(meshBgPath);
+  console.log(`✓ mesh background: ${meshBgPath}`);
+
+  await composeGlassMarkOverlay(
+    markPath,
+    path.join(assets, 'logo_splash_mark.png'),
+    640,
+    0.72,
+    sharp,
+  );
+
+  await composePremiumSplashCanvas(
+    markPath,
+    path.join(assets, 'logo_splash.png'),
+    1024,
+    0.54,
+    sharp,
+  );
+
+  await composePremiumSplashCanvas(
+    markPath,
+    path.join(assets, 'logo_icon_padded.png'),
+    1152,
+    0.58,
+    sharp,
+  );
+
   await composeGlassAppIcon(markPath, path.join(brand, 'app_icon_eagle_1024.png'), 1024, sharp);
 
-  await sharp({
-    create: {
-      width: 1,
-      height: 1,
-      channels: 4,
-      background: BRAND_BG,
-    },
-  })
-    .png()
-    .toFile(path.join(assets, 'splash_background.png'));
+  await writeSolidBg(path.join(assets, 'splash_background.png'), sharp);
 
   for (const rel of [
     'android/app/src/main/res/drawable/background.png',
     'android/app/src/main/res/drawable-v21/background.png',
   ]) {
-    await sharp({
-      create: {
-        width: 1,
-        height: 1,
-        channels: 4,
-        background: BRAND_BG,
-      },
-    })
+    await sharp(Buffer.from(meshBackgroundSvg(512, 512)))
       .png()
       .toFile(path.join(root, rel));
   }

@@ -80,7 +80,7 @@ class BrandGlassMark extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(size * 0.11),
+            padding: EdgeInsets.all(size * 0.08),
             child: _buildMarkImage(),
           ),
         ],

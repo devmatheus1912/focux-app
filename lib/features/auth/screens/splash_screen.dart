@@ -131,30 +131,25 @@ class _SplashBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 54, 32, 60),
+      padding: const EdgeInsets.fromLTRB(32, 48, 32, 52),
       child: Column(
         children: [
-          const Spacer(),
-          const AuthLogoMark(size: 110),
-          const SizedBox(height: 28),
-          const AuthWordmark(),
-          const Spacer(),
+          const Spacer(flex: 2),
+          const AuthLogoMark(size: 140),
+          const SizedBox(height: 32),
+          const AuthWordmark(titleSize: 38, subtitleSize: 14, taglineSize: 13),
+          const Spacer(flex: 3),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(3, (index) {
               final isActive = index == 0;
               return Container(
-                width: isActive ? 24 : 7,
+                width: isActive ? 28 : 7,
                 height: 7,
                 margin: const EdgeInsets.symmetric(horizontal: 3),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(
-                    alpha:
-                        isActive
-                            ? 1
-                            : index == 1
-                            ? 0.4
-                            : 0.2,
+                    alpha: isActive ? 1 : index == 1 ? 0.4 : 0.2,
                   ),
                   borderRadius: BorderRadius.circular(7),
                 ),

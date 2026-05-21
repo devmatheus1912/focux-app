@@ -38,7 +38,7 @@ class AuthShell extends StatelessWidget {
         ),
         // ── Technical grid (teal-tinted, subtle) ────────────────────
         CustomPaint(painter: const _AuthGridPainter(), size: Size.infinite),
-        // ── Ambient glow — brandAccent radial at top, 8% opacity ────
+        // ── Ambient glow — top-right ────────────────────────────────
         Positioned(
           top: -80,
           right: -80,
@@ -50,10 +50,31 @@ class AuthShell extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    EagleTokens.brandAccent.withValues(alpha: 0.08),
+                    EagleTokens.brandAccent.withValues(alpha: 0.10),
                     Colors.transparent,
                   ],
                   stops: const [0.0, 0.7],
+                ),
+              ),
+            ),
+          ),
+        ),
+        // ── Hero glow — center (logo anchor) ────────────────────────
+        Align(
+          alignment: const Alignment(0, -0.22),
+          child: IgnorePointer(
+            child: Container(
+              width: 340,
+              height: 340,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFF1EC8C8).withValues(alpha: 0.14),
+                    EagleTokens.brandAccent.withValues(alpha: 0.06),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.45, 1.0],
                 ),
               ),
             ),

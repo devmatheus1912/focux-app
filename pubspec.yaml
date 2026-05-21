@@ -83,7 +83,8 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#080C10"
-  image: "assets/images/logo_splash.png"
+  background_image: "assets/images/splash_mesh_bg.png"
+  image: "assets/images/logo_splash_mark.png"
   android_12:
     color: "#080C10"
     image: "assets/images/logo_icon_padded.png"
@@ -115,6 +116,8 @@ flutter:
     - assets/images/logo_icon.png
     - assets/images/logo_icon_padded.png
     - assets/images/logo_splash.png
+    - assets/images/logo_splash_mark.png
+    - assets/images/splash_mesh_bg.png
     - assets/images/logo_mark_transparent.png
     - assets/images/splash_background.png
     - assets/images/logo_full.png
