@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/design_tokens.dart';
 import '../theme/theme_provider.dart';
+import 'brand_glass_mark.dart';
 
 /// Focux Personal — Brand Logo Component (Cinematic Redesign)
 ///
@@ -92,70 +93,15 @@ class FxLogo extends ConsumerWidget {
 class _BrandedMarkTile extends StatelessWidget {
   const _BrandedMarkTile({required this.size, this.logoUrl});
 
-  static const _defaultBrandAsset = 'assets/images/logo_icon.png';
-
   final double size;
   final String? logoUrl;
 
   @override
   Widget build(BuildContext context) {
     final hasCustomLogo = logoUrl != null && logoUrl!.isNotEmpty;
-    if (!hasCustomLogo) {
-      return Image.asset(
-        _defaultBrandAsset,
-        width: size,
-        height: size,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-        isAntiAlias: true,
-      );
-    }
-
-    final radius = size * 0.26;
-    final primary = Theme.of(context).colorScheme.primary;
-
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        gradient: const RadialGradient(
-          center: Alignment(-0.3, -0.5),
-          radius: 1.0,
-          colors: [Color(0xFF0D2830), Color(0xFF080C10)],
-          stops: [0.0, 1.0],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: 0.22),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: Border.all(
-          color: EagleTokens.glassBorder,
-          width: 1,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: Image.network(
-          logoUrl!,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.high,
-          errorBuilder: (_, __, ___) => Image.asset(
-            _defaultBrandAsset,
-            width: size,
-            height: size,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.high,
-            isAntiAlias: true,
-          ),
-        ),
-      ),
+    return BrandGlassMark(
+      size: size,
+      logoUrl: hasCustomLogo ? logoUrl : null,
     );
   }
 }

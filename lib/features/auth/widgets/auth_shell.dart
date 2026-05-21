@@ -6,8 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../../core/widgets/brand_glass_mark.dart';
 
 class AuthShell extends StatelessWidget {
   const AuthShell({super.key, required this.child, this.dark = false});
@@ -69,8 +70,6 @@ class AuthLogoMark extends ConsumerStatefulWidget {
 
   final double size;
 
-  static const _defaultBrandAsset = 'assets/images/logo_icon.png';
-
   @override
   ConsumerState<AuthLogoMark> createState() => _AuthLogoMarkState();
 }
@@ -102,103 +101,17 @@ class _AuthLogoMarkState extends ConsumerState<AuthLogoMark>
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final logoUrl = ref.watch(logoUrlProvider);
-    final hasCustomLogo = logoUrl != null && logoUrl.isNotEmpty;
-
-    if (!hasCustomLogo) {
-      return AnimatedBuilder(
-        animation: _shimmerAnim,
-        builder: (_, __) {
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: primary.withValues(alpha: 0.28),
-                  blurRadius: widget.size * 0.28,
-                  offset: Offset(0, widget.size * 0.06),
-                ),
-                BoxShadow(
-                  color: EagleTokens.brandAccent.withValues(
-                    alpha: _shimmerAnim.value * 0.12,
-                  ),
-                  blurRadius: widget.size * 0.34,
-                  spreadRadius: -widget.size * 0.04,
-                ),
-              ],
-            ),
-            child: Image.asset(
-              AuthLogoMark._defaultBrandAsset,
-              width: widget.size,
-              height: widget.size,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-              isAntiAlias: true,
-            ),
-          );
-        },
-      );
-    }
-
-    final radius = widget.size * 0.26;
 
     return AnimatedBuilder(
       animation: _shimmerAnim,
-      builder: (_, child) {
-        return Container(
-          width: widget.size,
-          height: widget.size,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(radius),
-            gradient: const RadialGradient(
-              center: Alignment(-0.3, -0.5),
-              radius: 1.0,
-              colors: [Color(0xFF0D2830), Color(0xFF080C10)],
-              stops: [0.0, 1.0],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: primary.withValues(alpha: 0.30),
-                blurRadius: 28,
-                offset: const Offset(0, 6),
-              ),
-              BoxShadow(
-                color: EagleTokens.brandAccent.withValues(
-                  alpha: _shimmerAnim.value * 0.15,
-                ),
-                blurRadius: 40,
-                spreadRadius: -4,
-              ),
-            ],
-            border: Border.all(
-              color: EagleTokens.glassBorder,
-              width: 1,
-            ),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: child,
+      builder: (_, __) {
+        return BrandGlassMark(
+          size: widget.size,
+          logoUrl: logoUrl,
+          glowColor: primary,
+          shimmerAlpha: _shimmerAnim.value,
         );
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: Image.network(
-          logoUrl,
-          width: widget.size,
-          height: widget.size,
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.high,
-          errorBuilder: (_, __, ___) => _buildDefaultBrandMark(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDefaultBrandMark() {
-    return Image.asset(
-      AuthLogoMark._defaultBrandAsset,
-      width: widget.size,
-      height: widget.size,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
-      isAntiAlias: true,
     );
   }
 }
