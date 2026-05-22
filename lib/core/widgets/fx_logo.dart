@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/design_tokens.dart';
-import '../theme/theme_provider.dart';
 import 'brand_glass_mark.dart';
 
 /// Focux Personal — Brand Logo Component (Cinematic Redesign)
 ///
 /// Design System: Cyan-Teal Glass / Eagle Tokens
-/// BrandedMark = uses logoUrlProvider when available, falls back to asset.
-/// Consistent across all screens: login, onboarding, dashboard, etc.
+/// Platform lockup for in-app chrome (dashboard, support, etc.).
+/// White-label logos belong on student surfaces and public landing pages.
 ///
 /// [iconSize] — tile size in pixels (default 40)
 /// [showLabel] — horizontal lockup: tile + wordmark
 /// [light]     — true = white wordmark text (dark bg), false = dark text (light bg)
-class FxLogo extends ConsumerWidget {
+class FxLogo extends StatelessWidget {
   final double iconSize;
   final bool showLabel;
   final bool horizontal;
@@ -30,11 +28,9 @@ class FxLogo extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final logoUrl = ref.watch(logoUrlProvider);
+  Widget build(BuildContext context) {
     final mark = _BrandedMarkTile(
       size: iconSize,
-      logoUrl: logoUrl,
       tone: light ? BrandGlassTone.dark : BrandGlassTone.light,
     );
 
@@ -90,45 +86,36 @@ class FxLogo extends ConsumerWidget {
   }
 }
 
-/// BrandedMark — uses network logo when available, else asset.
-///
-/// Cinematic glass background: teal gradient + glass border + brand glow shadow.
-/// When personal has a custom logoUrl, it displays their logo instead.
+/// BrandedMark — Focux platform glass tile with default F asset.
 class _BrandedMarkTile extends StatelessWidget {
   const _BrandedMarkTile({
     required this.size,
     required this.tone,
-    this.logoUrl,
   });
 
   final double size;
-  final String? logoUrl;
   final BrandGlassTone tone;
 
   @override
   Widget build(BuildContext context) {
-    final hasCustomLogo = logoUrl != null && logoUrl!.isNotEmpty;
     return BrandGlassMark(
       size: size,
-      logoUrl: hasCustomLogo ? logoUrl : null,
       tone: tone,
     );
   }
 }
 
 /// Shorthand — tile only, for AppBars, list items, etc.
-class FxLogoIcon extends ConsumerWidget {
+class FxLogoIcon extends StatelessWidget {
   final double size;
   final bool light;
 
   const FxLogoIcon({super.key, this.size = 40, this.light = true});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final logoUrl = ref.watch(logoUrlProvider);
+  Widget build(BuildContext context) {
     return _BrandedMarkTile(
       size: size,
-      logoUrl: logoUrl,
       tone: light ? BrandGlassTone.dark : BrandGlassTone.light,
     );
   }
