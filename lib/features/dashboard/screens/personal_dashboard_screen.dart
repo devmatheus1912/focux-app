@@ -183,6 +183,11 @@ class _PersonalDashboardScreenState
               final pendente = ((_finData?.previsaoReceita ?? 0) -
                       (_finData?.receitaMes ?? 0))
                   .clamp(0.0, double.infinity);
+              final metaReceita = _finData?.previsaoReceita ?? 0;
+              final receitaAtual = _finData?.receitaMes ?? 0;
+              final progressRaw =
+                  metaReceita > 0 ? receitaAtual / metaReceita : 0.0;
+              final metaSuperada = metaReceita > 0 && receitaAtual >= metaReceita;
 
               final alunosAtivos = alunosAsync.maybeWhen(
                 data:
@@ -391,12 +396,21 @@ class _PersonalDashboardScreenState
                                       boxShadow: [
                                         BoxShadow(
                                           color: heroPrimary.withValues(
-                                            alpha: 0.26,
+                                            alpha: themeDark ? 0.34 : 0.26,
                                           ),
-                                          blurRadius: 40,
+                                          blurRadius: themeDark ? 48 : 40,
                                           offset: const Offset(0, 20),
-                                          spreadRadius: -20,
+                                          spreadRadius: themeDark ? -14 : -20,
                                         ),
+                                        if (themeDark)
+                                          BoxShadow(
+                                            color: heroPrimary.withValues(
+                                              alpha: 0.16,
+                                            ),
+                                            blurRadius: 64,
+                                            offset: const Offset(0, 24),
+                                            spreadRadius: -8,
+                                          ),
                                       ],
                                     ),
                                 padding: const EdgeInsets.fromLTRB(
@@ -422,11 +436,18 @@ class _PersonalDashboardScreenState
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        pendente > 0
+                                        metaSuperada
+                                            ? 'Meta superada · ${(progressRaw * 100).round()}% do objetivo.'
+                                            : pendente > 0
                                             ? 'Recebido agora. Faltam R\$ ${pendente.toInt()} para a meta.'
                                             : 'Recebido agora. Meta do mês sob controle.',
-                                        style: const TextStyle(
-                                          color: Colors.white70,
+                                        style: TextStyle(
+                                          color:
+                                              metaSuperada
+                                                  ? Colors.white.withValues(
+                                                    alpha: 0.88,
+                                                  )
+                                                  : Colors.white70,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -483,26 +504,52 @@ class _PersonalDashboardScreenState
                                         ],
                                       ),
                                       const SizedBox(height: 5),
-                                      Text(
-                                        'Meta R\$ ${_finData?.previsaoReceita.toStringAsFixed(0) ?? '--'}',
-                                        style: const TextStyle(
-                                          color: Colors.white54,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'Meta R\$ ${_finData?.previsaoReceita.toStringAsFixed(0) ?? '--'}',
+                                            style: const TextStyle(
+                                              color: Colors.white54,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          if (metaSuperada) ...[
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 7,
+                                                    vertical: 3,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.16,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(999),
+                                                border: Border.all(
+                                                  color: Colors.white
+                                                      .withValues(alpha: 0.22),
+                                                ),
+                                              ),
+                                              child: const Text(
+                                                'SUPERADA',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.w800,
+                                                  letterSpacing: 0.6,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                       const SizedBox(height: 14),
                                       _HeroProgressRail(
-                                        progress:
-                                            (_finData == null ||
-                                                    (_finData!
-                                                            .previsaoReceita) ==
-                                                        0)
-                                                ? 0.0
-                                                : (_finData!.receitaMes /
-                                                        _finData!
-                                                            .previsaoReceita)
-                                                    .clamp(0.0, 1.0),
+                                        progress: progressRaw.clamp(0.0, 1.0),
+                                        exceeded: metaSuperada,
                                         glow: BrandPalette.accent(heroPrimary),
                                       ),
                                       const SizedBox(height: 16),
@@ -897,22 +944,28 @@ class _PersonalDashboardScreenState
 }
 
 class _HeroProgressRail extends StatelessWidget {
-  const _HeroProgressRail({required this.progress, required this.glow});
+  const _HeroProgressRail({
+    required this.progress,
+    required this.glow,
+    this.exceeded = false,
+  });
 
   final double progress;
   final Color glow;
+  final bool exceeded;
 
   @override
   Widget build(BuildContext context) {
     final clamped = progress.clamp(0.0, 1.0);
+    final displayProgress = exceeded ? 1.0 : clamped;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final fillWidth = width * clamped;
+        final fillWidth = width * displayProgress;
 
         return SizedBox(
-          height: 10,
+          height: exceeded ? 12 : 10,
           child: Stack(
             clipBehavior: Clip.none,
             alignment: Alignment.centerLeft,
@@ -920,9 +973,11 @@ class _HeroProgressRail extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(99),
-                  color: Colors.white.withValues(alpha: 0.12),
+                  color: Colors.white.withValues(alpha: exceeded ? 0.16 : 0.12),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.16),
+                    color: Colors.white.withValues(
+                      alpha: exceeded ? 0.24 : 0.16,
+                    ),
                   ),
                 ),
               ),
@@ -930,22 +985,35 @@ class _HeroProgressRail extends StatelessWidget {
                 Positioned(
                   left: 0,
                   width: fillWidth,
-                  height: 10,
+                  height: exceeded ? 12 : 10,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(99),
                       gradient: LinearGradient(
-                        colors: [
-                          Colors.white.withValues(alpha: 0.72),
-                          Colors.white,
-                          glow.withValues(alpha: 0.92),
-                        ],
+                        colors:
+                            exceeded
+                                ? [
+                                  Colors.white.withValues(alpha: 0.78),
+                                  Colors.white,
+                                  const Color(0xFFFFF3C4),
+                                  glow.withValues(alpha: 0.95),
+                                ]
+                                : [
+                                  Colors.white.withValues(alpha: 0.72),
+                                  Colors.white,
+                                  glow.withValues(alpha: 0.92),
+                                ],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.white.withValues(alpha: 0.35),
-                          blurRadius: 12,
-                          spreadRadius: -2,
+                          color:
+                              exceeded
+                                  ? const Color(
+                                    0xFFFFF3C4,
+                                  ).withValues(alpha: 0.45)
+                                  : Colors.white.withValues(alpha: 0.35),
+                          blurRadius: exceeded ? 18 : 12,
+                          spreadRadius: exceeded ? 0 : -2,
                         ),
                       ],
                     ),
@@ -953,18 +1021,23 @@ class _HeroProgressRail extends StatelessWidget {
                 ),
               if (fillWidth > 12)
                 Positioned(
-                  left: fillWidth - 9,
+                  left: fillWidth - (exceeded ? 10 : 9),
                   child: Container(
-                    width: 16,
-                    height: 16,
+                    width: exceeded ? 18 : 16,
+                    height: exceeded ? 18 : 16,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: glow.withValues(alpha: 0.55),
-                          blurRadius: 14,
-                          spreadRadius: 1,
+                          color:
+                              exceeded
+                                  ? const Color(
+                                    0xFFFFF3C4,
+                                  ).withValues(alpha: 0.70)
+                                  : glow.withValues(alpha: 0.55),
+                          blurRadius: exceeded ? 20 : 14,
+                          spreadRadius: exceeded ? 2 : 1,
                         ),
                       ],
                     ),
@@ -1087,6 +1160,8 @@ class _KpiAsymmetricGrid extends StatelessWidget {
                         label: 'Check-ins',
                         value: checkinsHoje.toString(),
                         accent: EagleTokens.good,
+                        chipLabel: 'hoje',
+                        chipColor: EagleTokens.good,
                         isDark: isDark,
                         compact: true,
                         onTap: onCheckins,
@@ -1099,6 +1174,9 @@ class _KpiAsymmetricGrid extends StatelessWidget {
                         label: 'Risco',
                         value: riscoAlto.toString(),
                         accent: EagleTokens.warn,
+                        chipLabel: riscoAlto > 0 ? 'atenção' : 'ok',
+                        chipColor:
+                            riscoAlto > 0 ? EagleTokens.warn : EagleTokens.good,
                         isDark: isDark,
                         compact: true,
                         onTap: onRisco,
@@ -1122,6 +1200,8 @@ class _QuickTile extends StatelessWidget {
   final bool isDark;
   final bool tall;
   final bool compact;
+  final String? chipLabel;
+  final Color? chipColor;
   final VoidCallback? onTap;
   const _QuickTile({
     required this.icon,
@@ -1131,6 +1211,8 @@ class _QuickTile extends StatelessWidget {
     required this.isDark,
     this.tall = false,
     this.compact = false,
+    this.chipLabel,
+    this.chipColor,
     this.onTap,
   });
 
@@ -1138,10 +1220,10 @@ class _QuickTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forDark(isDark);
     final ink = chrome.ink;
-    final mute = chrome.mute;
-    final numVal = int.tryParse(value) ?? 0;
     final valueSize = tall ? 28.0 : (compact ? 17.0 : 21.0);
     final labelSize = compact ? 10.0 : 11.0;
+    final chip = chipLabel;
+    final chipTint = chipColor ?? accent;
 
     return InkWell(
       onTap: onTap,
@@ -1178,29 +1260,30 @@ class _QuickTile extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Spacer(),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: compact ? 5 : 6,
-                      vertical: compact ? 2 : 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          numVal > 0
-                              ? accent.withValues(alpha: isDark ? 0.12 : 0.07)
-                              : Colors.white.withValues(alpha: 0.04),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      numVal > 0 ? 'ativo' : '—',
-                      style: TextStyle(
-                        fontSize: compact ? 8 : 9,
-                        fontWeight: FontWeight.w800,
-                        color: numVal > 0 ? accent : mute,
-                        letterSpacing: 0.4,
+                  if (chip != null) ...[
+                    const Spacer(),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: compact ? 5 : 6,
+                        vertical: compact ? 2 : 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: chipTint.withValues(
+                          alpha: isDark ? 0.14 : 0.08,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        chip,
+                        style: TextStyle(
+                          fontSize: compact ? 8 : 9,
+                          fontWeight: FontWeight.w800,
+                          color: chipTint,
+                          letterSpacing: 0.4,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
               if (tall) const Spacer(flex: 2) else const Spacer(),
@@ -1699,7 +1782,10 @@ class _CommandCenterSection extends ConsumerWidget {
             borderRadius: BorderRadius.circular(20),
             child: Container(
               padding: const EdgeInsets.all(13),
-              decoration: ShellChrome.forDark(isDark).panel(radius: 20),
+              decoration: ShellChrome.forDark(isDark).panel(
+                radius: 20,
+                accent: primary,
+              ),
               child: Row(
                 children: [
                   Container(
@@ -1819,7 +1905,7 @@ class _CommandCenterSection extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 20),
         _CommandActionPanel(
           isDark: isDark,
           primary: primary,
@@ -2155,13 +2241,10 @@ class _CommandLoadingTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final chrome = ShellChrome.forDark(isDark);
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: primary.withValues(alpha: isDark ? 0.14 : 0.065),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: primary.withValues(alpha: 0.10)),
-      ),
+      decoration: chrome.panel(radius: 18, accent: primary),
       child: Row(
         children: [
           Shimmer.fromColors(
@@ -2171,7 +2254,7 @@ class _CommandLoadingTile extends StatelessWidget {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: primary,
+                color: primary.withValues(alpha: isDark ? 0.24 : 0.14),
                 borderRadius: BorderRadius.circular(15),
               ),
             ),

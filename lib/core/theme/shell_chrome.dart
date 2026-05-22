@@ -33,22 +33,30 @@ class ShellPalette {
     Color? accent,
   }) {
     if (isDark) {
+      final tint = accent ?? EagleTokens.brandAccent;
       return BoxDecoration(
-        color: EagleTokens.darkCard.withValues(alpha: 0.82),
+        color: EagleTokens.darkCard.withValues(alpha: 0.86),
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
           color:
               accent != null
-                  ? accent.withValues(alpha: 0.24)
+                  ? tint.withValues(alpha: 0.30)
                   : EagleTokens.glassBorder,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.22),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-            spreadRadius: -8,
+            color: Colors.black.withValues(alpha: 0.28),
+            blurRadius: 26,
+            offset: const Offset(0, 12),
+            spreadRadius: -10,
           ),
+          if (accent != null)
+            BoxShadow(
+              color: tint.withValues(alpha: 0.14),
+              blurRadius: 32,
+              offset: const Offset(0, 14),
+              spreadRadius: -8,
+            ),
         ],
       );
     }
@@ -108,18 +116,24 @@ class ShellPalette {
     return BoxDecoration(
       color:
           isDark
-              ? EagleTokens.darkCard.withValues(alpha: 0.72)
+              ? EagleTokens.darkCard.withValues(alpha: 0.78)
               : Colors.white.withValues(alpha: 0.78),
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
         color:
             isDark
-                ? EagleTokens.glassBorder
+                ? Colors.white.withValues(alpha: 0.14)
                 : EagleTokens.brandAccent.withValues(alpha: 0.10),
       ),
       boxShadow:
           isDark
-              ? null
+              ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.18),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
+                ),
+              ]
               : [
                 BoxShadow(
                   color: EagleTokens.ink.withValues(alpha: 0.04),
