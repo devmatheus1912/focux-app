@@ -128,19 +128,18 @@ class _PersonalDashboardScreenState
     final primary = Theme.of(context).colorScheme.primary;
     final dashboardAsync = ref.watch(dashboardProvider);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
-    const cockpitDark = true;
     final alunosAsync = ref.watch(alunosProvider);
     final historicoCheckinsAsync = ref.watch(historicoCheckinProvider);
     final notificacoesNaoLidas =
         ref.watch(notificacoesNaoLidasProvider).valueOrNull ?? 0;
-    const chromeOnDark = true;
+    final chromeOnDark = themeDark;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: dashboardAsync.when(
-          loading: () => _buildShimmerLoading(context),
+          loading: () => _buildShimmerLoading(context, themeDark),
           error:
               (e, _) => _DashboardErrorState(
                 chromeOnDark: chromeOnDark,
@@ -240,9 +239,12 @@ class _PersonalDashboardScreenState
                                     'Hoje · Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
-                                      color: EagleTokens.darkInk,
+                                      color:
+                                          themeDark
+                                              ? EagleTokens.darkInk
+                                              : EagleTokens.ink,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -269,14 +271,26 @@ class _PersonalDashboardScreenState
                                     height: 36,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.05,
-                                      ),
+                                      color:
+                                          themeDark
+                                              ? Colors.white.withValues(
+                                                alpha: 0.05,
+                                              )
+                                              : Colors.white,
+                                      border:
+                                          themeDark
+                                              ? null
+                                              : Border.all(
+                                                color: EagleTokens.line,
+                                              ),
                                     ),
                                     child: FxIcon(
                                       name: themeDark ? 'sun' : 'moon',
                                       size: 20,
-                                      color: EagleTokens.darkInk,
+                                      color:
+                                          themeDark
+                                              ? EagleTokens.darkInk
+                                              : EagleTokens.ink,
                                     ),
                                   ),
                                 ),
@@ -292,9 +306,18 @@ class _PersonalDashboardScreenState
                                     height: 36,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.05,
-                                      ),
+                                      color:
+                                          themeDark
+                                              ? Colors.white.withValues(
+                                                alpha: 0.05,
+                                              )
+                                              : Colors.white,
+                                      border:
+                                          themeDark
+                                              ? null
+                                              : Border.all(
+                                                color: EagleTokens.line,
+                                              ),
                                     ),
                                     child: Stack(
                                       alignment: Alignment.center,
@@ -302,7 +325,10 @@ class _PersonalDashboardScreenState
                                         FxIcon(
                                           name: 'bell',
                                           size: 20,
-                                          color: EagleTokens.darkInk,
+                                          color:
+                                              themeDark
+                                                  ? EagleTokens.darkInk
+                                                  : EagleTokens.ink,
                                           strokeWidth: 1.9,
                                         ),
                                         if (notificacoesNaoLidas > 0)
@@ -316,7 +342,10 @@ class _PersonalDashboardScreenState
                                                 color: primary,
                                                 shape: BoxShape.circle,
                                                 border: Border.all(
-                                                  color: EagleTokens.darkCard,
+                                                  color:
+                                                      themeDark
+                                                          ? EagleTokens.darkCard
+                                                          : EagleTokens.card,
                                                   width: 2,
                                                 ),
                                               ),
@@ -391,10 +420,16 @@ class _PersonalDashboardScreenState
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(28),
                                       gradient: LinearGradient(
-                                        colors: const [
-                                          Color(0xFF159A9A),
-                                          Color(0xFF0A2E2E),
-                                        ],
+                                        colors:
+                                            themeDark
+                                                ? const [
+                                                  Color(0xFF159A9A),
+                                                  Color(0xFF0A2E2E),
+                                                ]
+                                                : [
+                                                  primary,
+                                                  BrandPalette.deep(primary),
+                                                ],
                                         begin: begin,
                                         end: end,
                                       ),
@@ -585,6 +620,7 @@ class _PersonalDashboardScreenState
                         padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
                         child: _KpiAsymmetricGrid(
                           fade: _kpiFade,
+                          isDark: themeDark,
                           alunosAtivos: alunosAtivos,
                           checkinsHoje: checkinsHoje,
                           riscoAlto: riscoAlto,
@@ -601,7 +637,7 @@ class _PersonalDashboardScreenState
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                         child: _CommandCenterSection(
-                          isDark: cockpitDark,
+                          isDark: themeDark,
                           primary: primary,
                           finData: _finData,
                         ),
@@ -629,7 +665,7 @@ class _PersonalDashboardScreenState
                                   ? 'Ver tudo · +${riscoAlto - 1}'
                                   : 'Ver tudo',
                           onAction: () => context.go('/alunos?filtro=risco'),
-                          isDark: cockpitDark,
+                          isDark: themeDark,
                         ),
                       ),
                       SliverToBoxAdapter(
@@ -665,7 +701,7 @@ class _PersonalDashboardScreenState
                                           ? 'Financeiro e aderência exigem contato'
                                           : 'Acompanhar antes de perder ritmo',
                                   acao: 'Revisar',
-                                  isDark: cockpitDark,
+                                  isDark: themeDark,
                                   onTap:
                                       () => context.push('/alunos/${aluno.id}'),
                                 );
@@ -679,7 +715,7 @@ class _PersonalDashboardScreenState
                                 subt:
                                     'R\$ ${v.valor.toStringAsFixed(0)} pendente',
                                 acao: 'Cobrar',
-                                isDark: cockpitDark,
+                                isDark: themeDark,
                                 onTap: () => context.go('/financeiro'),
                               );
                             },
@@ -695,13 +731,13 @@ class _PersonalDashboardScreenState
                         title: 'Aderência da semana',
                         action: 'Relatório',
                         onAction: () => context.push('/relatorios/global'),
-                        isDark: cockpitDark,
+                        isDark: themeDark,
                       ),
                     ),
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: _AderenciaSemanaWidget(isDark: cockpitDark),
+                        child: _AderenciaSemanaWidget(isDark: themeDark),
                       ),
                     ),
 
@@ -710,7 +746,7 @@ class _PersonalDashboardScreenState
                     SliverToBoxAdapter(
                       child: _SectionTitle(
                         title: 'Mais ferramentas',
-                        isDark: cockpitDark,
+                        isDark: themeDark,
                       ),
                     ),
                     SliverToBoxAdapter(
@@ -726,7 +762,7 @@ class _PersonalDashboardScreenState
                           children: [
                             _ToolGroupLabel(
                               label: 'Acessos menos frequentes',
-                              isDark: cockpitDark,
+                              isDark: themeDark,
                             ),
                             const SizedBox(height: 8),
                             GridView.count(
@@ -740,25 +776,25 @@ class _PersonalDashboardScreenState
                                 _ShortcutBtn(
                                   icon: 'dumbbell',
                                   label: 'Exercícios',
-                                  isDark: cockpitDark,
+                                  isDark: themeDark,
                                   onTap: () => context.push('/exercicios'),
                                 ),
                                 _ShortcutBtn(
                                   icon: 'article',
                                   label: 'Feed',
-                                  isDark: cockpitDark,
+                                  isDark: themeDark,
                                   onTap: () => context.push('/feed'),
                                 ),
                                 _ShortcutBtn(
                                   icon: 'trend',
                                   label: 'Leads',
-                                  isDark: cockpitDark,
+                                  isDark: themeDark,
                                   onTap: () => context.push('/leads'),
                                 ),
                                 _ShortcutBtn(
                                   icon: 'spark',
                                   label: 'Qualidade',
-                                  isDark: cockpitDark,
+                                  isDark: themeDark,
                                   onTap:
                                       () =>
                                           context.push('/dashboard/qualidade'),
@@ -766,13 +802,13 @@ class _PersonalDashboardScreenState
                                 _ShortcutBtn(
                                   icon: 'bell',
                                   label: 'Broadcasts',
-                                  isDark: cockpitDark,
+                                  isDark: themeDark,
                                   onTap: () => context.push('/broadcasts'),
                                 ),
                                 _ShortcutBtn(
                                   icon: 'chat',
                                   label: 'Suporte',
-                                  isDark: cockpitDark,
+                                  isDark: themeDark,
                                   onTap: () => context.push('/suporte'),
                                 ),
                               ],
@@ -790,9 +826,9 @@ class _PersonalDashboardScreenState
     );
   }
 
-  Widget _buildShimmerLoading(BuildContext context) {
-    const base = EagleTokens.darkCard;
-    const highlight = EagleTokens.darkCardHi;
+  Widget _buildShimmerLoading(BuildContext context, bool themeDark) {
+    final base = themeDark ? EagleTokens.darkCard : EagleTokens.line;
+    final highlight = themeDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft;
 
     Widget bone(double w, double h, {double radius = 12}) => Container(
       width: w,
@@ -962,6 +998,7 @@ class _HeroMiniStat extends StatelessWidget {
 class _KpiAsymmetricGrid extends StatelessWidget {
   const _KpiAsymmetricGrid({
     required this.fade,
+    required this.isDark,
     required this.alunosAtivos,
     required this.checkinsHoje,
     required this.riscoAlto,
@@ -972,6 +1009,7 @@ class _KpiAsymmetricGrid extends StatelessWidget {
   });
 
   final Animation<double> fade;
+  final bool isDark;
   final int alunosAtivos;
   final int checkinsHoje;
   final int riscoAlto;
@@ -1003,7 +1041,7 @@ class _KpiAsymmetricGrid extends StatelessWidget {
                   label: 'Ativos',
                   value: alunosAtivos.toString(),
                   accent: primary,
-                  isDark: true,
+                  isDark: isDark,
                   tall: true,
                   onTap: onAtivos,
                 ),
@@ -1019,7 +1057,7 @@ class _KpiAsymmetricGrid extends StatelessWidget {
                         label: 'Check-ins',
                         value: checkinsHoje.toString(),
                         accent: EagleTokens.good,
-                        isDark: true,
+                        isDark: isDark,
                         compact: true,
                         onTap: onCheckins,
                       ),
@@ -1031,7 +1069,7 @@ class _KpiAsymmetricGrid extends StatelessWidget {
                         label: 'Risco',
                         value: riscoAlto.toString(),
                         accent: EagleTokens.warn,
-                        isDark: true,
+                        isDark: isDark,
                         compact: true,
                         onTap: onRisco,
                       ),
@@ -2049,7 +2087,13 @@ class _CommandActionPanel extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        Divider(color: EagleTokens.glassBorder, height: 1),
+        Divider(
+          color:
+              isDark
+                  ? EagleTokens.glassBorder
+                  : EagleTokens.line.withValues(alpha: 0.85),
+          height: 1,
+        ),
         const SizedBox(height: 12),
         if (loading)
           _CommandLoadingTile(isDark: isDark, primary: primary)
@@ -2069,7 +2113,13 @@ class _CommandActionPanel extends StatelessWidget {
             ),
             if (index < actions.length - 1) ...[
               const SizedBox(height: 10),
-              Divider(color: EagleTokens.glassBorder.withValues(alpha: 0.65), height: 1),
+              Divider(
+                color:
+                    isDark
+                        ? EagleTokens.glassBorder.withValues(alpha: 0.65)
+                        : EagleTokens.line.withValues(alpha: 0.75),
+                height: 1,
+              ),
               const SizedBox(height: 10),
             ],
           ],

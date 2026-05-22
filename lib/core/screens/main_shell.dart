@@ -7,9 +7,6 @@ import '../widgets/cinematic_mesh_background.dart';
 import '../widgets/fx_dock.dart';
 
 /// Shell scaffold wrapping the 5 main personal-trainer tabs.
-///
-/// Renders [navigationShell] (the current branch content) inside a Stack
-/// with [FxDock] floating at bottom: safeArea + 18px.
 class MainShell extends StatelessWidget {
   const MainShell({super.key, required this.navigationShell});
 
@@ -17,17 +14,20 @@ class MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final compact = MediaQuery.sizeOf(context).width < 390;
     final dockClearance = bottomInset + (compact ? 82.0 : 92.0);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: EagleTokens.darkBg,
-        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor:
+            isDark ? EagleTokens.darkBg : EagleTokens.paper,
+        systemNavigationBarIconBrightness:
+            isDark ? Brightness.light : Brightness.dark,
       ),
       child: Scaffold(
         extendBody: true,
@@ -49,8 +49,8 @@ class MainShell extends StatelessWidget {
                 child: FxDock(
                   items: FxDockItems.personal,
                   currentIndex: navigationShell.currentIndex,
-                  cinematicChrome: true,
-                  isDark: true,
+                  cinematicChrome: isDark,
+                  isDark: isDark,
                   onTap:
                       (i) => navigationShell.goBranch(
                         i,
