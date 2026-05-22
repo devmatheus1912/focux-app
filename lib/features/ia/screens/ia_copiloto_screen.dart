@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/analytics/analytics_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -963,15 +964,16 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final dark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: dark);
     final primaryAccent = BrandPalette.accent(primary);
     final primaryDeep = BrandPalette.deep(primary);
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final cardBg = chrome.cardFill;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
+    final line = chrome.line;
     final brand = dark ? primaryAccent : primary;
 
     return Scaffold(
@@ -1035,6 +1037,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                     ),
                   ],
                 ),
+                const ShellThemeToggle(size: 36),
+                const SizedBox(width: 8),
                 _CopilotHeaderStatus(
                   dark: dark,
                   brand: brand,
@@ -1597,20 +1601,10 @@ class _CopilotHeaderStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(dark);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: dark ? const Color(0x0FFFFFFF) : EagleTokens.card,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: line),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? 0.16 : 0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      decoration: chrome.headerAction(radius: 999),
       child: Row(
         children: [
           Container(
@@ -1654,24 +1648,14 @@ class _CopilotStudentSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     final selected = alunoNome != null;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: line),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.035),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
+        decoration: chrome.panel(radius: 18),
         child: Row(
           children: [
             Container(
@@ -1746,13 +1730,10 @@ class _CopilotModeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(dark);
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: dark ? EagleTokens.darkCard : EagleTokens.lineSoft,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
+      decoration: chrome.panel(radius: 16),
       child: Row(
         children:
             modes.asMap().entries.map((e) {
@@ -1816,11 +1797,7 @@ class _CopilotSafetyNote extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
+      decoration: ShellChrome.of(context).panel(radius: 16),
       child: Row(
         children: [
           Icon(Icons.verified_user_outlined, color: brand, size: 16),
@@ -2136,29 +2113,17 @@ class _CopilotReadinessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final dark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final soft = BrandPalette.soft(primary, dark: dark);
     final visibleChecks = checks.take(2).toList();
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: line),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? 0.20 : 0.045),
-            blurRadius: 26,
-            offset: const Offset(0, 14),
-          ),
-        ],
-      ),
+      decoration: chrome.panel(radius: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

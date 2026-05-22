@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'design_tokens.dart';
+import 'shell_chrome.dart';
 
-/// Dark cockpit surfaces for screens rendered over the cinematic mesh.
+/// Dark cockpit surfaces — delegates to [ShellPalette] for consistency.
 abstract class CockpitTheme {
   static const bool enabled = true;
 
@@ -12,19 +13,6 @@ abstract class CockpitTheme {
   static Color get ink => EagleTokens.darkInk;
   static Color get mute => EagleTokens.darkInkMute;
 
-  static BoxDecoration glassPanel({Color? tint, double radius = 20}) {
-    return BoxDecoration(
-      color: EagleTokens.darkCard.withValues(alpha: 0.82),
-      borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: EagleTokens.glassBorder),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.22),
-          blurRadius: 24,
-          offset: const Offset(0, 10),
-          spreadRadius: -8,
-        ),
-      ],
-    );
-  }
+  static BoxDecoration glassPanel({Color? tint, double radius = 20}) =>
+      ShellChrome.forDark(true).panel(radius: radius, accent: tint);
 }

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/cockpit_theme.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_logo.dart';
@@ -255,40 +256,7 @@ class _PersonalDashboardScreenState
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                InkWell(
-                                  onTap:
-                                      () => ref
-                                          .read(themeModeProvider.notifier)
-                                          .toggle(),
-                                  borderRadius: BorderRadius.circular(18),
-                                  child: Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          themeDark
-                                              ? Colors.white.withValues(
-                                                alpha: 0.05,
-                                              )
-                                              : Colors.white,
-                                      border:
-                                          themeDark
-                                              ? null
-                                              : Border.all(
-                                                color: EagleTokens.line,
-                                              ),
-                                    ),
-                                    child: FxIcon(
-                                      name: themeDark ? 'sun' : 'moon',
-                                      size: 20,
-                                      color:
-                                          themeDark
-                                              ? EagleTokens.darkInk
-                                              : EagleTokens.ink,
-                                    ),
-                                  ),
-                                ),
+                                const ShellThemeToggle(size: 36),
                                 const SizedBox(width: 8),
                                 InkWell(
                                   onTap:
@@ -299,21 +267,9 @@ class _PersonalDashboardScreenState
                                   child: Container(
                                     width: 36,
                                     height: 36,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          themeDark
-                                              ? Colors.white.withValues(
-                                                alpha: 0.05,
-                                              )
-                                              : Colors.white,
-                                      border:
-                                          themeDark
-                                              ? null
-                                              : Border.all(
-                                                color: EagleTokens.line,
-                                              ),
-                                    ),
+                                    decoration: ShellChrome.forDark(
+                                      themeDark,
+                                    ).headerAction(radius: 18),
                                     child: Stack(
                                       alignment: Alignment.center,
                                       children: [
@@ -1101,8 +1057,9 @@ class _QuickTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? CockpitTheme.ink : EagleTokens.ink;
-    final mute = isDark ? CockpitTheme.mute : EagleTokens.inkMute;
+    final chrome = ShellChrome.forDark(isDark);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final numVal = int.tryParse(value) ?? 0;
     final valueSize = tall ? 28.0 : (compact ? 17.0 : 21.0);
     final labelSize = compact ? 10.0 : 11.0;
@@ -1121,30 +1078,7 @@ class _QuickTile extends StatelessWidget {
             compact ? 10 : 11,
             compact ? 8 : 10,
           ),
-          decoration:
-              isDark
-                  ? BoxDecoration(
-                    color: CockpitTheme.card.withValues(alpha: 0.82),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: accent.withValues(alpha: 0.24),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.22),
-                        blurRadius: 24,
-                        offset: const Offset(0, 10),
-                        spreadRadius: -8,
-                      ),
-                    ],
-                  )
-                  : BoxDecoration(
-                    color: EagleTokens.card,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: accent.withValues(alpha: 0.13),
-                    ),
-                  ),
+          decoration: chrome.accentPanel(accent: accent),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1297,7 +1231,8 @@ class _AttentionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final cardBg = isDark ? CockpitTheme.card : EagleTokens.card;
+    final chrome = ShellChrome.forDark(isDark);
+    final cardBg = chrome.cardFill;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final accent = EagleTokens.bad; // simplificado para overdue
@@ -1426,7 +1361,8 @@ class _ShortcutBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final primaryAccent = BrandPalette.accent(primary);
-    final cardBg = isDark ? CockpitTheme.card : EagleTokens.card;
+    final chrome = ShellChrome.forDark(isDark);
+    final cardBg = chrome.cardFill;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
@@ -1540,7 +1476,8 @@ class _CommandCenterSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final cardBg = isDark ? CockpitTheme.card : EagleTokens.card;
+    final chrome = ShellChrome.forDark(isDark);
+    final cardBg = chrome.cardFill;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -1686,14 +1623,7 @@ class _CommandCenterSection extends ConsumerWidget {
             borderRadius: BorderRadius.circular(20),
             child: Container(
               padding: const EdgeInsets.all(13),
-              decoration:
-                  isDark
-                      ? CockpitTheme.glassPanel(radius: 20)
-                      : BoxDecoration(
-                        color: cardBg,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: line.withValues(alpha: 0.78)),
-                      ),
+              decoration: ShellChrome.forDark(isDark).panel(radius: 20),
               child: Row(
                 children: [
                   Container(
@@ -1875,7 +1805,8 @@ void _showCommandActionsSheet(
   required Color primary,
   required List<_CommandActionItem> actions,
 }) {
-  final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+  final chrome = ShellChrome.forDark(isDark);
+  final cardBg = chrome.cardFill;
   final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
   final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
   final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -2284,7 +2215,8 @@ class _AderenciaSemanaWidget extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final primaryAccent = BrandPalette.accent(primary);
-    final cardBg = isDark ? CockpitTheme.card : EagleTokens.card;
+    final chrome = ShellChrome.forDark(isDark);
+    final cardBg = chrome.cardFill;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 

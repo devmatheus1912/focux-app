@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -357,7 +358,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final card = ShellChrome.forDark(isDark).cardFill;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final dangerFill =
         isDark ? const Color(0xFFB24646) : const Color(0xFFA83A3A);
@@ -394,19 +395,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
         ),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
-          decoration: BoxDecoration(
-            color: card,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: line),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.12),
-                blurRadius: 32,
-                offset: const Offset(0, 18),
-                spreadRadius: -18,
-              ),
-            ],
-          ),
+          decoration: ShellChrome.forDark(isDark).bottomSheet(radius: 28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,7 +549,8 @@ class _TreinosHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final chrome = ShellChrome.forDark(isDark);
+    final ink = chrome.ink;
     final primary = Theme.of(context).colorScheme.primary;
     final ready = treinos.where((t) => t.exercicios.isNotEmpty).length;
 
@@ -569,13 +559,16 @@ class _TreinosHeader extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          IconButton(
-            onPressed: onBack,
-            icon: Icon(Icons.arrow_back_rounded, color: ink),
-            style: IconButton.styleFrom(
-              backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
-              side: BorderSide(
-                color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onBack,
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: chrome.headerAction(radius: 14),
+                child: Icon(Icons.arrow_back_rounded, color: ink),
               ),
             ),
           ),
@@ -617,6 +610,8 @@ class _TreinosHeader extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 8),
+          const ShellThemeToggle(size: 36),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -1315,7 +1310,7 @@ class _TreinoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final card = ShellChrome.forDark(isDark).cardFill;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
@@ -1336,22 +1331,10 @@ class _TreinoCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(24),
       child: Container(
         padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: card,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: selected ? primary.withValues(alpha: 0.62) : line,
-            width: selected ? 1.4 : 1,
-          ),
-          boxShadow: [
-            if (!isDark)
-              BoxShadow(
-                color: const Color(0xFF16213E).withValues(alpha: 0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 12),
-                spreadRadius: -18,
-              ),
-          ],
+        decoration: ShellChrome.forDark(isDark).listCard(
+          selected: selected,
+          primary: primary,
+          radius: 24,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

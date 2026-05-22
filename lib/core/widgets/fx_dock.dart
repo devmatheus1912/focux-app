@@ -56,35 +56,54 @@ class FxDock extends StatelessWidget {
     final compact = width < 390;
 
     final onCinematic = cinematicChrome || isDark;
+    final lightCinematic = onCinematic && !isDark;
 
-    // Glass background — cinematic mesh uses dark glass always.
     final bgColor =
         onCinematic
-            ? EagleTokens.darkCard.withValues(alpha: 0.78)
+            ? isDark
+                ? EagleTokens.darkCard.withValues(alpha: 0.78)
+                : Colors.white.withValues(alpha: 0.82)
             : Colors.white.withValues(alpha: 0.75);
     final borderColor =
         onCinematic
-            ? EagleTokens.glassBorder
+            ? isDark
+                ? EagleTokens.glassBorder
+                : primary.withValues(alpha: 0.12)
             : const Color.fromRGBO(0, 0, 0, 0.06);
-    final inactiveColor = (onCinematic ? EagleTokens.darkInk : EagleTokens.ink)
+    final inactiveColor = (isDark ? EagleTokens.darkInk : EagleTokens.ink)
         .withValues(alpha: 0.40);
 
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.20),
-            blurRadius: 34,
-            offset: const Offset(0, 12),
-            spreadRadius: -12,
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.10),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-            spreadRadius: -4,
-          ),
+          if (lightCinematic) ...[
+            BoxShadow(
+              color: primary.withValues(alpha: 0.10),
+              blurRadius: 28,
+              offset: const Offset(0, 14),
+              spreadRadius: -10,
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+              spreadRadius: -8,
+            ),
+          ] else ...[
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.20),
+              blurRadius: 34,
+              offset: const Offset(0, 12),
+              spreadRadius: -12,
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.10),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+              spreadRadius: -4,
+            ),
+          ],
         ],
       ),
       child: ClipRRect(

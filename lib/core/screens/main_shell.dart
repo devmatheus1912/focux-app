@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-import '../theme/design_tokens.dart';
 import '../widgets/cinematic_mesh_background.dart';
 import '../widgets/fx_dock.dart';
 
@@ -24,8 +23,7 @@ class MainShell extends StatelessWidget {
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-        systemNavigationBarColor:
-            isDark ? EagleTokens.darkBg : EagleTokens.paper,
+        systemNavigationBarColor: Colors.transparent,
         systemNavigationBarIconBrightness:
             isDark ? Brightness.light : Brightness.dark,
       ),
@@ -34,7 +32,7 @@ class MainShell extends StatelessWidget {
         backgroundColor: Colors.transparent,
         body: CinematicMeshBackground(
           showCenterGlow: false,
-          showCornerGlow: false,
+          showCornerGlow: true,
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -49,7 +47,7 @@ class MainShell extends StatelessWidget {
                 child: FxDock(
                   items: FxDockItems.personal,
                   currentIndex: navigationShell.currentIndex,
-                  cinematicChrome: isDark,
+                  cinematicChrome: true,
                   isDark: isDark,
                   onTap:
                       (i) => navigationShell.goBranch(

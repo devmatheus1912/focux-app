@@ -9,6 +9,7 @@ import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -436,10 +437,11 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   @override
   Widget build(BuildContext context) {
     final alunosAsync = ref.watch(alunosProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     return Scaffold(
       backgroundColor: shellScaffoldColor,
@@ -539,43 +541,24 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                           child: Container(
                             width: 44,
                             height: 44,
-                            decoration: BoxDecoration(
-                              color:
-                                  isDark
-                                      ? Colors.white.withValues(alpha: 0.1)
-                                      : EagleTokens.line,
-                              shape: BoxShape.circle,
-                            ),
+                            decoration: chrome.headerAction(radius: 22),
                             child: Icon(Icons.close, size: 22, color: ink),
                           ),
                         ),
                       ] else ...[
+                        const ShellThemeToggle(size: 40),
+                        const SizedBox(width: 8),
                         InkWell(
                           onTap: _toggleModoSelecao,
                           borderRadius: BorderRadius.circular(44),
                           child: Container(
                             width: 44,
                             height: 44,
-                            decoration: BoxDecoration(
-                              color:
-                                  isDark
-                                      ? Colors.white.withValues(alpha: 0.08)
-                                      : EagleTokens.card,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color:
-                                    isDark
-                                        ? EagleTokens.darkLine
-                                        : EagleTokens.line,
-                              ),
-                            ),
+                            decoration: chrome.headerAction(radius: 22),
                             child: Icon(
                               Icons.checklist_rounded,
                               size: 22,
-                              color:
-                                  isDark
-                                      ? EagleTokens.darkInk
-                                      : EagleTokens.ink,
+                              color: ink,
                             ),
                           ),
                         ),
@@ -1245,10 +1228,11 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final chrome = ShellChrome.forDark(isDark);
+    final cardBg = chrome.cardFill;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
+    final line = chrome.line;
 
     final aluno = widget.aluno;
     final displayName = _titleCaseName(aluno.nome);
@@ -1328,27 +1312,10 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color:
-              isSelected
-                  ? primary.withValues(alpha: isDark ? 0.18 : 0.08)
-                  : cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border:
-              isSelected
-                  ? Border.all(
-                    color: primary.withValues(alpha: 0.5),
-                    width: 1.5,
-                  )
-                  : Border.all(color: line),
-          boxShadow: [
-            if (!isDark && !isSelected)
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-          ],
+        decoration: ShellChrome.forDark(isDark).listCard(
+          selected: isSelected,
+          primary: primary,
+          radius: 20,
         ),
         child: Row(
           children: [

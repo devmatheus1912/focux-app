@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
@@ -111,11 +112,12 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final cardBg = chrome.cardFill;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
+    final line = chrome.line;
     final primary = Theme.of(context).colorScheme.primary;
 
     final diasSemanaStr = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
@@ -192,55 +194,58 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: line),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        InkWell(
-                          onTap: () => _changeWeek(-1),
-                          borderRadius: BorderRadius.circular(999),
-                          child: Padding(
-                            padding: const EdgeInsets.all(2),
-                            child: Icon(
-                              Icons.chevron_left,
-                              size: 16,
-                              color: mute,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const ShellThemeToggle(size: 36),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: chrome.headerAction(radius: 12),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            InkWell(
+                              onTap: () => _changeWeek(-1),
+                              borderRadius: BorderRadius.circular(999),
+                              child: Padding(
+                                padding: const EdgeInsets.all(2),
+                                child: Icon(
+                                  Icons.chevron_left,
+                                  size: 16,
+                                  color: mute,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${_weekStart.day}–${_weekStart.add(const Duration(days: 6)).day} ${monthNames[_weekStart.month]}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: ink,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        InkWell(
-                          onTap: () => _changeWeek(1),
-                          borderRadius: BorderRadius.circular(999),
-                          child: Padding(
-                            padding: const EdgeInsets.all(2),
-                            child: Icon(
-                              Icons.chevron_right,
-                              size: 16,
-                              color: mute,
+                            const SizedBox(width: 6),
+                            Text(
+                              '${_weekStart.day}–${_weekStart.add(const Duration(days: 6)).day} ${monthNames[_weekStart.month]}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: ink,
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 6),
+                            InkWell(
+                              onTap: () => _changeWeek(1),
+                              borderRadius: BorderRadius.circular(999),
+                              child: Padding(
+                                padding: const EdgeInsets.all(2),
+                                child: Icon(
+                                  Icons.chevron_right,
+                                  size: 16,
+                                  color: mute,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -271,9 +276,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                         border:
                             isSelected
                                 ? null
-                                : Border.all(
-                                  color: isDark ? Colors.transparent : line,
-                                ),
+                                : Border.all(color: chrome.lineStrong),
                         boxShadow:
                             isSelected && !isDark
                                 ? [
@@ -458,11 +461,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                 horizontal: 14,
                                 vertical: 14,
                               ),
-                              decoration: BoxDecoration(
-                                color: cardBg,
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(color: line),
-                              ),
+                              decoration: chrome.panel(radius: 18),
                               child: Row(
                                 children: [
                                   SizedBox(
