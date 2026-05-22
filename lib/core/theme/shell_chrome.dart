@@ -57,7 +57,9 @@ class ShellPalette {
     return BoxDecoration(
       color: Colors.white.withValues(alpha: 0.92),
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: tint.withValues(alpha: 0.14)),
+      border: Border.all(
+        color: tint.withValues(alpha: accent != null ? 0.20 : 0.14),
+      ),
       boxShadow: [
         BoxShadow(
           color: EagleTokens.ink.withValues(alpha: 0.06),
@@ -65,12 +67,20 @@ class ShellPalette {
           offset: const Offset(0, 10),
           spreadRadius: -6,
         ),
-        BoxShadow(
-          color: EagleTokens.brandAccent.withValues(alpha: 0.05),
-          blurRadius: 32,
-          offset: const Offset(0, 16),
-          spreadRadius: -12,
-        ),
+        if (accent != null)
+          BoxShadow(
+            color: tint.withValues(alpha: 0.10),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+            spreadRadius: -8,
+          )
+        else
+          BoxShadow(
+            color: EagleTokens.brandAccent.withValues(alpha: 0.05),
+            blurRadius: 32,
+            offset: const Offset(0, 16),
+            spreadRadius: -12,
+          ),
       ],
     );
   }

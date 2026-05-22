@@ -48,6 +48,7 @@ class _PersonalDashboardScreenState
   late Animation<double> _heroFade;
   late Animation<Offset> _heroSlide;
   late Animation<double> _kpiFade;
+  late Animation<double> _commandFade;
 
   @override
   void initState() {
@@ -79,6 +80,10 @@ class _PersonalDashboardScreenState
     _kpiFade = CurvedAnimation(
       parent: _entryCtrl,
       curve: const Interval(0.22, 0.82, curve: Curves.easeOutCubic),
+    );
+    _commandFade = CurvedAnimation(
+      parent: _entryCtrl,
+      curve: const Interval(0.38, 0.96, curve: Curves.easeOutCubic),
     );
     _loadFin();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -127,6 +132,8 @@ class _PersonalDashboardScreenState
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final heroPrimary = BrandPalette.softened(primary, amount: 0.06);
+    final heroDeep = BrandPalette.deep(heroPrimary);
     final dashboardAsync = ref.watch(dashboardProvider);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
     final alunosAsync = ref.watch(alunosProvider);
@@ -374,19 +381,18 @@ class _PersonalDashboardScreenState
                                         colors:
                                             themeDark
                                                 ? const [
-                                                  Color(0xFF159A9A),
+                                                  Color(0xFF128989),
                                                   Color(0xFF0A2E2E),
                                                 ]
-                                                : [
-                                                  primary,
-                                                  BrandPalette.deep(primary),
-                                                ],
+                                                : [heroPrimary, heroDeep],
                                         begin: begin,
                                         end: end,
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: primary.withValues(alpha: 0.32),
+                                          color: heroPrimary.withValues(
+                                            alpha: 0.26,
+                                          ),
                                           blurRadius: 40,
                                           offset: const Offset(0, 20),
                                           spreadRadius: -20,
@@ -486,36 +492,18 @@ class _PersonalDashboardScreenState
                                         ),
                                       ),
                                       const SizedBox(height: 14),
-                                      Container(
-                                        height: 6,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.15,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                        ),
-                                        alignment: Alignment.centerLeft,
-                                        child: FractionallySizedBox(
-                                          widthFactor:
-                                              (_finData == null ||
-                                                      (_finData!
-                                                              .previsaoReceita) ==
-                                                          0)
-                                                  ? 0.0
-                                                  : (_finData!.receitaMes /
-                                                          _finData!
-                                                              .previsaoReceita)
-                                                      .clamp(0.0, 1.0),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                            ),
-                                          ),
-                                        ),
+                                      _HeroProgressRail(
+                                        progress:
+                                            (_finData == null ||
+                                                    (_finData!
+                                                            .previsaoReceita) ==
+                                                        0)
+                                                ? 0.0
+                                                : (_finData!.receitaMes /
+                                                        _finData!
+                                                            .previsaoReceita)
+                                                    .clamp(0.0, 1.0),
+                                        glow: BrandPalette.accent(heroPrimary),
                                       ),
                                       const SizedBox(height: 16),
                                       Row(
@@ -585,12 +573,21 @@ class _PersonalDashboardScreenState
 
                     // CENTRAL DE COMANDO
                     SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                        child: _CommandCenterSection(
-                          isDark: themeDark,
-                          primary: primary,
-                          finData: _finData,
+                      child: FadeTransition(
+                        opacity: _commandFade,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.04),
+                            end: Offset.zero,
+                          ).animate(_commandFade),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                            child: _CommandCenterSection(
+                              isDark: themeDark,
+                              primary: primary,
+                              finData: _finData,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -895,6 +892,88 @@ class _PersonalDashboardScreenState
           ],
         ),
       ),
+    );
+  }
+}
+
+class _HeroProgressRail extends StatelessWidget {
+  const _HeroProgressRail({required this.progress, required this.glow});
+
+  final double progress;
+  final Color glow;
+
+  @override
+  Widget build(BuildContext context) {
+    final clamped = progress.clamp(0.0, 1.0);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final fillWidth = width * clamped;
+
+        return SizedBox(
+          height: 10,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.centerLeft,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(99),
+                  color: Colors.white.withValues(alpha: 0.12),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.16),
+                  ),
+                ),
+              ),
+              if (fillWidth > 2)
+                Positioned(
+                  left: 0,
+                  width: fillWidth,
+                  height: 10,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(99),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.72),
+                          Colors.white,
+                          glow.withValues(alpha: 0.92),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withValues(alpha: 0.35),
+                          blurRadius: 12,
+                          spreadRadius: -2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (fillWidth > 12)
+                Positioned(
+                  left: fillWidth - 9,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: glow.withValues(alpha: 0.55),
+                          blurRadius: 14,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -1476,9 +1555,6 @@ class _CommandCenterSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final chrome = ShellChrome.forDark(isDark);
-    final cardBg = chrome.cardFill;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
@@ -1953,6 +2029,14 @@ class _HeroGridPainter extends CustomPainter {
 
 enum _CommandActionTone { primary, hot, money }
 
+Color _commandToneAccent(_CommandActionTone tone, Color primary) {
+  return switch (tone) {
+    _CommandActionTone.hot => Color.lerp(EagleTokens.warn, primary, 0.34)!,
+    _CommandActionTone.money => const Color(0xFF0E9F6E),
+    _CommandActionTone.primary => primary,
+  };
+}
+
 class _CommandActionItem {
   final String icon;
   final String title;
@@ -2138,11 +2222,8 @@ class _CommandActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final accent = switch (item.tone) {
-      _CommandActionTone.hot => const Color(0xFFE5484D),
-      _CommandActionTone.money => const Color(0xFF0E9F6E),
-      _CommandActionTone.primary => primary,
-    };
+    final chrome = ShellChrome.forDark(isDark);
+    final accent = _commandToneAccent(item.tone, primary);
     return InkWell(
       onTap: onTap ?? () => context.go(item.route),
       borderRadius: BorderRadius.circular(18),
@@ -2151,11 +2232,7 @@ class _CommandActionTile extends StatelessWidget {
         duration: const Duration(milliseconds: 110),
         child: Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: accent.withValues(alpha: isDark ? 0.10 : 0.075),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: accent.withValues(alpha: 0.22)),
-          ),
+          decoration: chrome.panel(radius: 18, accent: accent),
           child: Row(
           children: [
             Container(
