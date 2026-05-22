@@ -68,11 +68,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
               color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
             ),
             onPressed: () {
-              final currentMode = ref.read(themeModeProvider);
-              ref.read(themeModeProvider.notifier).state =
-                  currentMode == ThemeMode.dark
-                      ? ThemeMode.light
-                      : ThemeMode.dark;
+              ref.read(themeModeProvider.notifier).toggle();
             },
           ),
           alunoAsync.when(

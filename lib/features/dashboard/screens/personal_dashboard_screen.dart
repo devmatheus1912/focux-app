@@ -256,15 +256,10 @@ class _PersonalDashboardScreenState
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 InkWell(
-                                  onTap: () {
-                                    final currentMode = ref.read(
-                                      themeModeProvider,
-                                    );
-                                    ref.read(themeModeProvider.notifier).state =
-                                        currentMode == ThemeMode.dark
-                                            ? ThemeMode.light
-                                            : ThemeMode.dark;
-                                  },
+                                  onTap:
+                                      () => ref
+                                          .read(themeModeProvider.notifier)
+                                          .toggle(),
                                   borderRadius: BorderRadius.circular(18),
                                   child: Container(
                                     width: 36,

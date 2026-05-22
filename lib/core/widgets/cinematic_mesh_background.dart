@@ -35,9 +35,9 @@ class CinematicMeshBackground extends StatelessWidget {
               colors:
                   isLight
                       ? const [
-                        Color(0xFFE4F7F7),
-                        Color(0xFFF4F7F8),
-                        Color(0xFFECF2F4),
+                        Color(0xFFC8E8E6),
+                        Color(0xFFE6F2F3),
+                        Color(0xFFDCE9EB),
                       ]
                       : const [
                         Color(0xFF0D2830),

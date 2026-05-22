@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -139,7 +140,6 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
             : ref.watch(treinosDoAlunoProvider(widget.alunoId!));
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
 
     Future<void> refresh() async {
       if (widget.alunoId == null) {
@@ -163,7 +163,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     }
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: shellScaffoldColor,
       body: SafeArea(
         bottom: false,
         child: treinosAsync.when(

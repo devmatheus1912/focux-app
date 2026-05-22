@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -111,7 +112,6 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -154,7 +154,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: shellScaffoldColor,
       body: SafeArea(
         bottom: false,
         child: Column(

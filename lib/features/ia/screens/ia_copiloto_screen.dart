@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/analytics/analytics_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -967,7 +968,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     final primarySoft = BrandPalette.soft(primary, dark: dark);
     final primaryAccent = BrandPalette.accent(primary);
     final primaryDeep = BrandPalette.deep(primary);
-    final bg = dark ? EagleTokens.darkBg : EagleTokens.paper;
     final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -975,13 +975,13 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     final brand = dark ? primaryAccent : primary;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: shellScaffoldColor,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(82),
         child: SafeArea(
           bottom: false,
           child: Container(
-            color: bg,
+            color: shellScaffoldColor,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
