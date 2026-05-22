@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -351,18 +352,13 @@ class _DonutChartCard extends StatelessWidget {
     final double percentRecebido =
         isEmpty ? 0 : (recebido / previsto * 100).clamp(0, 100);
 
-    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: card,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 22),
       child: Column(
         children: [
           SizedBox(
@@ -514,19 +510,13 @@ class _MetricRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
 
     return Container(
       margin: EdgeInsets.only(bottom: isLast ? 0 : 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: card,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: color, radius: 18),
       child: Row(
         children: [
           Container(

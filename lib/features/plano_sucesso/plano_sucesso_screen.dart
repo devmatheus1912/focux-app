@@ -3,9 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/router/safe_navigation.dart';
+import '../../core/theme/brand_palette.dart';
 import '../../core/theme/design_tokens.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/feedback_helper.dart';
+import '../../core/widgets/fx_shell_scaffold.dart';
 import '../../core/widgets/skeleton_loader.dart';
 import 'plano_sucesso_model.dart';
 import 'plano_sucesso_provider.dart';
@@ -32,11 +35,15 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<PlanoSucessoProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
+    final primary = Theme.of(context).colorScheme.primary;
 
     if (provider.isLoading) {
       return Scaffold(
         backgroundColor: Colors.transparent,
+        appBar: FxShellAppBar(
+          title: 'Plano de Sucesso',
+          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+        ),
         body: const SafeArea(child: SkeletonList(count: 5)),
       );
     }
@@ -45,6 +52,10 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     if (plano == null) {
       return Scaffold(
         backgroundColor: Colors.transparent,
+        appBar: FxShellAppBar(
+          title: 'Plano de Sucesso',
+          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+        ),
         body: const SafeArea(
           child: EmptyStateWidget(
             icon: Icons.flag_outlined,
@@ -63,52 +74,36 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Plano de Sucesso',
+        subtitle: 'Aluno #${widget.alunoId}',
+        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+      ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ALUNO #${widget.alunoId}',
-                    style: TextStyle(
-                      color:
-                          isDark
-                              ? EagleTokens.darkInkMute
-                              : EagleTokens.inkMute,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Plano de Sucesso',
-                    style: TextStyle(
-                      color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
             Container(
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
-                gradient: EagleTokens.heroGradient(dark: isDark),
+                gradient: LinearGradient(
+                  colors:
+                      isDark
+                          ? const [Color(0xFF128989), Color(0xFF0A2E2E)]
+                          : [
+                            BrandPalette.softened(primary),
+                            BrandPalette.deep(primary),
+                          ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withValues(alpha: 0.28),
+                    color: primary.withValues(alpha: isDark ? 0.30 : 0.22),
                     blurRadius: 32,
                     offset: const Offset(0, 16),
+                    spreadRadius: -8,
                   ),
                 ],
               ),
@@ -156,7 +151,17 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
+            Text(
+              'Marcos',
+              style: TextStyle(
+                color: fxScreenInk(context),
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+              ),
+            ),
+            const SizedBox(height: 10),
             for (var i = 0; i < plano.marcos.length; i++)
               _MarcoTile(
                 index: i + 1,
@@ -270,90 +275,103 @@ class _MarcoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final brand = Theme.of(context).colorScheme.primary;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
     final doneBg =
         isDark
             ? EagleTokens.good.withValues(alpha: 0.18)
             : EagleTokens.goodSoft;
     final currentBg = brand.withValues(alpha: isDark ? 0.16 : 0.10);
 
-    return InkWell(
-      onTap: onChanged,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: cardBg,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onChanged,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: atual ? brand : line, width: atual ? 2 : 1),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color:
-                    marco.atingido
-                        ? doneBg
-                        : (atual
-                            ? currentBg
-                            : (isDark
-                                ? Colors.white.withValues(alpha: 0.04)
-                                : EagleTokens.lineSoft)),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child:
-                    marco.atingido
-                        ? const Icon(
-                          Icons.check_rounded,
-                          size: 18,
-                          color: EagleTokens.good,
-                        )
-                        : Text(
-                          '$index',
-                          style: TextStyle(
-                            color: atual ? brand : mute,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    marco.titulo,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color:
-                          marco.atingido
-                              ? EagleTokens.good
-                              : (atual ? brand : ink),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
+          child: Ink(
+            padding: const EdgeInsets.all(14),
+            decoration:
+                atual
+                    ? fxListCardDecoration(
+                      context,
+                      accent: brand,
+                      radius: 18,
+                      selected: true,
+                    )
+                    : fxListCardDecoration(
+                      context,
+                      accent: marco.atingido ? EagleTokens.good : null,
+                      radius: 18,
                     ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color:
+                        marco.atingido
+                            ? doneBg
+                            : (atual
+                                ? currentBg
+                                : (isDark
+                                    ? Colors.white.withValues(alpha: 0.04)
+                                    : EagleTokens.lineSoft)),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    marco.atingido
-                        ? 'Etapa concluida.'
-                        : (atual ? 'Etapa atual do onboarding.' : 'Pendente.'),
-                    style: TextStyle(color: mute, fontSize: 11.5),
+                  child: Center(
+                    child:
+                        marco.atingido
+                            ? const Icon(
+                              Icons.check_rounded,
+                              size: 18,
+                              color: EagleTokens.good,
+                            )
+                            : Text(
+                              '$index',
+                              style: TextStyle(
+                                color: atual ? brand : mute,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        marco.titulo,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color:
+                              marco.atingido
+                                  ? EagleTokens.good
+                                  : (atual ? brand : ink),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        marco.atingido
+                            ? 'Etapa concluida.'
+                            : (atual
+                                ? 'Etapa atual do onboarding.'
+                                : 'Pendente.'),
+                        style: TextStyle(color: mute, fontSize: 11.5),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

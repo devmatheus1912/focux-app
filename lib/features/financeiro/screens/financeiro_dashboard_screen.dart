@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
@@ -195,12 +197,10 @@ class _FinanceiroDashboardScreenState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
-                decoration: BoxDecoration(
-                  color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                  ),
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: 20,
                 ),
                 child: Column(
                   children:
@@ -318,10 +318,8 @@ class _HeroRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
 
@@ -329,15 +327,33 @@ class _HeroRing extends StatelessWidget {
         data.previsaoReceita > 0
             ? (data.receitaMes / data.previsaoReceita)
             : 0.0;
+    final metaSuperada = data.previsaoReceita > 0 && data.receitaMes >= data.previsaoReceita;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
         decoration: BoxDecoration(
-          color: cardBg,
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: line),
+          gradient: LinearGradient(
+            colors:
+                isDark
+                    ? const [Color(0xFF128989), Color(0xFF0A2E2E)]
+                    : [
+                      BrandPalette.softened(primary),
+                      BrandPalette.deep(primary),
+                    ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: primary.withValues(alpha: isDark ? 0.32 : 0.24),
+              blurRadius: 40,
+              offset: const Offset(0, 18),
+              spreadRadius: -12,
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -368,16 +384,16 @@ class _HeroRing extends StatelessWidget {
                           fontSize: 9,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1.0,
-                          color: ink,
+                          color: Colors.white.withValues(alpha: 0.82),
                         ),
                       ),
                       Text(
                         '${(perc * 100).round()}%',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.5,
-                          color: ink,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -391,22 +407,22 @@ class _HeroRing extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'RECEBIDO NESTE MÊS',
+                    metaSuperada ? 'META SUPERADA' : 'RECEBIDO NESTE MÊS',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.8,
-                      color: mute,
+                      color: Colors.white.withValues(alpha: 0.72),
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     'R\$ ${data.receitaMes.toStringAsFixed(2).replaceAll('.', ',')}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w600,
                       letterSpacing: -0.5,
-                      color: ink,
+                      color: Colors.white,
                       height: 1.1,
                     ),
                   ),
@@ -416,14 +432,17 @@ class _HeroRing extends StatelessWidget {
                       children: [
                         TextSpan(
                           text: 'Previsto ',
-                          style: TextStyle(fontSize: 12.5, color: mute),
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: Colors.white.withValues(alpha: 0.62),
+                          ),
                         ),
                         TextSpan(
                           text:
                               'R\$ ${data.previsaoReceita.toStringAsFixed(2).replaceAll('.', ',')}',
                           style: TextStyle(
                             fontSize: 12.5,
-                            color: ink,
+                            color: Colors.white.withValues(alpha: 0.88),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -586,17 +605,12 @@ class _MiniMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -634,10 +648,8 @@ class _EvolucaoChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
 
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final primaryDeep = BrandPalette.deep(primary);
@@ -650,11 +662,7 @@ class _EvolucaoChart extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: line),
-        ),
+        decoration: fxListCardDecoration(context, accent: primary, radius: 22),
         child: Column(
           children: [
             Row(
@@ -792,10 +800,8 @@ class _VencimentoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final primaryDeep = BrandPalette.deep(primary);
@@ -809,10 +815,10 @@ class _VencimentoRow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
+      decoration: fxListCardDecoration(
+        context,
+        accent: isAtrasado ? EagleTokens.bad : EagleTokens.warn,
+        radius: 16,
       ),
       child: Row(
         children: [
