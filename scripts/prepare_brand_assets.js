@@ -46,6 +46,10 @@ async function stripCheckerboard(inputPath, outputPath, sharp) {
     }
   }
 
+  cleanAlphaGhosts(data);
+  defringeCircularMark(data, info.width, info.height);
+  cleanAlphaGhosts(data);
+
   await sharp(data, {
     raw: { width: info.width, height: info.height, channels: 4 },
   })
@@ -53,6 +57,123 @@ async function stripCheckerboard(inputPath, outputPath, sharp) {
     .toFile(outputPath);
 
   console.log(`✓ transparent mark: ${outputPath}`);
+}
+
+/// Zero RGB on fully transparent pixels so scaled PNGs don't bleed white halos.
+function cleanAlphaGhosts(data) {
+  let cleaned = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    const a = data[i + 3];
+    if (a === 0) {
+      if (data[i] || data[i + 1] || data[i + 2]) cleaned++;
+      data[i] = 0;
+      data[i + 1] = 0;
+      data[i + 2] = 0;
+    }
+  }
+  if (cleaned > 0) {
+    console.log(`  cleaned ${cleaned} ghost pixels`);
+  }
+}
+
+function measureCircle(data, width, height) {
+  let cx = 0;
+  let cy = 0;
+  let count = 0;
+  let maxR = 0;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      if (data[i + 3] > 8) {
+        cx += x;
+        cy += y;
+        count++;
+      }
+    }
+  }
+
+  cx /= count;
+  cy /= count;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      if (data[i + 3] > 8) {
+        const d = Math.hypot(x - cx, y - cy);
+        if (d > maxR) maxR = d;
+      }
+    }
+  }
+
+  return { cx, cy, maxR };
+}
+
+function defringeCircularMark(data, width, height) {
+  let { cx, cy, maxR } = measureCircle(data, width, height);
+  let removed = 0;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      const alpha = data[i + 3];
+      if (alpha === 0) continue;
+
+      const lum = (data[i] + data[i + 1] + data[i + 2]) / 3;
+      const sat =
+        Math.max(data[i], data[i + 1], data[i + 2]) -
+        Math.min(data[i], data[i + 1], data[i + 2]);
+      const outer = Math.hypot(x - cx, y - cy) / maxR;
+
+      if (outer > 0.84 && lum > 130 && sat < 65) {
+        data[i] = 0;
+        data[i + 1] = 0;
+        data[i + 2] = 0;
+        data[i + 3] = 0;
+        removed++;
+      }
+    }
+  }
+
+  ({ cx, cy, maxR } = measureCircle(data, width, height));
+  const inset = 1.5;
+  const feather = 10;
+  const cutoff = maxR - inset;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      const alpha = data[i + 3];
+      if (alpha === 0) continue;
+
+      const dist = Math.hypot(x - cx, y - cy);
+      if (dist >= cutoff) {
+        data[i] = 0;
+        data[i + 1] = 0;
+        data[i + 2] = 0;
+        data[i + 3] = 0;
+        removed++;
+        continue;
+      }
+
+      const fadeStart = cutoff - feather;
+      if (dist > fadeStart) {
+        const t = (cutoff - dist) / feather;
+        const nextAlpha = Math.round(alpha * t * t);
+        data[i + 3] = nextAlpha;
+        if (nextAlpha === 0) {
+          data[i] = 0;
+          data[i + 1] = 0;
+          data[i + 2] = 0;
+          removed++;
+        }
+      }
+    }
+  }
+
+  if (removed > 0) {
+    console.log(`  defringed ${removed} edge pixels`);
+  }
 }
 
 function meshBackgroundSvg(width, height) {

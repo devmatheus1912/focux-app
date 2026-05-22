@@ -140,52 +140,22 @@ class BrandGlassMark extends StatelessWidget {
         clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
-          if (!_onLightSurface) ...[
-            Container(
-              width: size * 1.42,
-              height: size * 1.42,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    primary.withValues(alpha: 0.20 * shimmer),
-                    EagleTokens.brandAccent.withValues(alpha: 0.10 * shimmer),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.38, 1.0],
+          if (!_onLightSurface)
+            IgnorePointer(
+              child: Container(
+                width: size * 1.28,
+                height: size * 1.28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      primary.withValues(alpha: 0.16 * shimmer),
+                      EagleTokens.brandAccent.withValues(alpha: 0.07 * shimmer),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.52, 1.0],
+                  ),
                 ),
-              ),
-            ),
-            Container(
-              width: size * 1.02,
-              height: size * 1.02,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: primary.withValues(alpha: 0.32 * shimmer),
-                    blurRadius: size * 0.24,
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.35),
-                    blurRadius: size * 0.18,
-                    offset: Offset(0, size * 0.06),
-                  ),
-                ],
-              ),
-            ),
-          ] else
-            Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: EagleTokens.ink.withValues(alpha: 0.10),
-                    blurRadius: size * 0.14,
-                    offset: Offset(0, size * 0.05),
-                  ),
-                ],
               ),
             ),
           SizedBox(
@@ -211,11 +181,17 @@ class BrandGlassMark extends StatelessWidget {
   }
 
   Widget _assetMark() {
-    return Image.asset(
-      markAsset,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
-      isAntiAlias: true,
+    return ClipOval(
+      clipBehavior: Clip.antiAlias,
+      child: Image.asset(
+        markAsset,
+        fit: BoxFit.cover,
+        width: size,
+        height: size,
+        filterQuality: FilterQuality.high,
+        isAntiAlias: true,
+        gaplessPlayback: true,
+      ),
     );
   }
 }
