@@ -23,11 +23,12 @@ const BRAND_BG = { r: 18, g: 52, b: 60, alpha: 1 }; // #12343C mesh center
 const BRAND_BG_DEEP = { r: 8, g: 12, b: 16, alpha: 1 }; // #080C10 edge
 
 function isCheckerboard(r, g, b) {
-  if (Math.abs(r - g) > 10 || Math.abs(g - b) > 10 || Math.abs(r - b) > 10) {
+  if (Math.abs(r - g) > 8 || Math.abs(g - b) > 8 || Math.abs(r - b) > 8) {
     return false;
   }
   const avg = (r + g + b) / 3;
-  return avg >= 168;
+  // Light (~240–255) and dark (~160–200) checkerboard squares from editor exports.
+  return avg >= 155 && avg <= 255;
 }
 
 async function stripCheckerboard(inputPath, outputPath, sharp) {
@@ -272,7 +273,16 @@ async function main() {
   const assets = path.join(root, 'assets', 'images');
   const brand = path.join(root, 'brand');
   const sourceCandidates = [
+    path.join(assets, 'logo_official.png'),
     path.join(assets, 'logo_icon_transparent.png'),
+    path.join(
+      process.env.USERPROFILE || '',
+      '.cursor',
+      'projects',
+      'd-Projetos-Focux-Personal',
+      'assets',
+      'c__Users_mathe_AppData_Roaming_Cursor_User_workspaceStorage_b0ad238a091a6811f671c88c4fcf6b7a_images_Logo_Oficial-9792c166-df7e-4bf3-993e-853cb8c87dcd.png',
+    ),
     path.join(
       process.env.USERPROFILE || '',
       '.cursor',

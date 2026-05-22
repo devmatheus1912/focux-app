@@ -281,9 +281,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    const SizedBox(height: 6),
-                    const AuthLogoMark(size: 100),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 4),
+                    AuthLogoMark(size: 108),
+                    const SizedBox(height: 14),
                     const AuthWordmark(
                       titleSize: 32,
                       subtitleSize: 13,

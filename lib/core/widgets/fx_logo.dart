@@ -4,11 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/design_tokens.dart';
 import 'brand_glass_mark.dart';
 
-/// Focux Personal — Brand Logo Component (Cinematic Redesign)
+/// Focux Personal — Brand Logo Component
 ///
-/// Design System: Cyan-Teal Glass / Eagle Tokens
-/// Platform lockup for in-app chrome (dashboard, support, etc.).
-/// White-label logos belong on student surfaces and public landing pages.
+/// Uses the official transparent logo mark across in-app chrome.
+/// White-label [logoUrl] overrides apply on student/public surfaces only.
 ///
 /// [iconSize] — tile size in pixels (default 40)
 /// [showLabel] — horizontal lockup: tile + wordmark
@@ -29,9 +28,12 @@ class FxLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final mark = _BrandedMarkTile(
       size: iconSize,
       tone: light ? BrandGlassTone.dark : BrandGlassTone.light,
+      glowColor: light ? primary : null,
+      shimmerAlpha: light ? 0.38 : null,
     );
 
     if (!showLabel) return mark;
@@ -91,16 +93,22 @@ class _BrandedMarkTile extends StatelessWidget {
   const _BrandedMarkTile({
     required this.size,
     required this.tone,
+    this.glowColor,
+    this.shimmerAlpha,
   });
 
   final double size;
   final BrandGlassTone tone;
+  final Color? glowColor;
+  final double? shimmerAlpha;
 
   @override
   Widget build(BuildContext context) {
     return BrandGlassMark(
       size: size,
       tone: tone,
+      glowColor: glowColor,
+      shimmerAlpha: shimmerAlpha,
     );
   }
 }
@@ -114,9 +122,12 @@ class FxLogoIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return _BrandedMarkTile(
       size: size,
       tone: light ? BrandGlassTone.dark : BrandGlassTone.light,
+      glowColor: light ? primary : null,
+      shimmerAlpha: light ? 0.34 : null,
     );
   }
 }

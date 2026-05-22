@@ -594,10 +594,10 @@ class _OBPageWidget extends StatelessWidget {
                         children: [
                           ..._buildOrbitIcons(data, primary),
                           BrandGlassMark(
-                            size: 112,
+                            size: 118,
                             tone: BrandGlassTone.dark,
                             glowColor: primary,
-                            shimmerAlpha: 0.12,
+                            shimmerAlpha: 0.38,
                             enableBackdropBlur: false,
                           ),
                         ],

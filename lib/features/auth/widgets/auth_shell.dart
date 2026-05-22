@@ -98,12 +98,14 @@ class AuthWordmark extends StatelessWidget {
     this.titleSize = 36,
     this.subtitleSize = 13,
     this.taglineSize = 12,
+    this.showDivider = true,
   });
 
   final bool center;
   final double titleSize;
   final double subtitleSize;
   final double taglineSize;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
@@ -138,15 +140,57 @@ class AuthWordmark extends StatelessWidget {
             height: 1,
           ),
         ),
-        const SizedBox(height: 14),
+        if (showDivider) ...[
+          const SizedBox(height: 16),
+          SizedBox(
+            width: titleSize * 5.4,
+            height: 16,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        primary.withValues(alpha: 0.18),
+                        primary.withValues(alpha: 0.48),
+                        primary.withValues(alpha: 0.18),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.28, 0.5, 0.72, 1.0],
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.88),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primary.withValues(alpha: 0.55),
+                        blurRadius: 12,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        SizedBox(height: showDivider ? 12 : 14),
         Text(
           'Treine com dados. Evolua com inteligência.',
           textAlign: align,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.42),
+            color: Colors.white.withValues(alpha: 0.46),
             fontSize: taglineSize,
             fontStyle: FontStyle.italic,
-            height: 1.2,
+            height: 1.25,
           ),
         ),
       ],

@@ -52,18 +52,18 @@ class CinematicSplashScene extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
                   child: Column(
                     children: [
-                      SizedBox(height: size.height * 0.07),
+                      SizedBox(height: size.height * 0.06),
                       Opacity(
                         opacity: entryT,
                         child: Transform.translate(
-                          offset: Offset(0, (1 - entryT) * 28),
+                          offset: Offset(0, (1 - entryT) * 24),
                           child: _SplashHeroMark(
                             phase: phase,
                             entry: entry.value,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       Opacity(
                         opacity: Curves.easeOut.transform(
                           (entry.value - 0.12).clamp(0.0, 1.0),
@@ -107,22 +107,23 @@ class _SplashHeroMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const markSize = 184.0;
-    final spin = math.sin(phase * math.pi * 2) * 0.10;
+    const markSize = 200.0;
+    final floatY = math.sin(phase * math.pi * 2) * 5;
     final scale =
-        0.92 + Curves.elasticOut.transform(entry.clamp(0.0, 1.0)) * 0.08;
+        0.90 + Curves.elasticOut.transform(entry.clamp(0.0, 1.0)) * 0.10;
+    final primary = Theme.of(context).colorScheme.primary;
+    final glow = 0.55 + math.sin(phase * math.pi * 2) * 0.18;
 
-    return Transform(
-      alignment: Alignment.center,
-      transform:
-          Matrix4.identity()
-            ..setEntry(3, 2, 0.0012)
-            ..rotateY(spin)
-            ..scale(scale),
-      child: BrandGlassMark(
-        size: markSize,
-        shimmerAlpha: 0.08,
-        enableBackdropBlur: false,
+    return Transform.translate(
+      offset: Offset(0, floatY),
+      child: Transform.scale(
+        scale: scale,
+        child: BrandGlassMark(
+          size: markSize,
+          glowColor: primary,
+          shimmerAlpha: glow,
+          enableBackdropBlur: false,
+        ),
       ),
     );
   }
@@ -149,27 +150,27 @@ class _PremiumSplashWordmark extends StatelessWidget {
           textAlign: TextAlign.center,
           style: GoogleFonts.outfit(
             color: Colors.white,
-            fontSize: 36,
+            fontSize: 38,
             fontWeight: FontWeight.w700,
-            letterSpacing: -0.6,
+            letterSpacing: -0.8,
             height: 1,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 7),
         Text(
           'PERSONAL',
           textAlign: TextAlign.center,
           style: GoogleFonts.outfit(
             color: primary,
-            fontSize: 12.5,
+            fontSize: 12,
             fontWeight: FontWeight.w600,
-            letterSpacing: 5.0,
+            letterSpacing: 4.8,
             height: 1,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
         SizedBox(
-          width: 210,
+          width: 196,
           height: 18,
           child: Stack(
             alignment: Alignment.center,
@@ -212,11 +213,11 @@ class _PremiumSplashWordmark extends StatelessWidget {
           'Treine com dados. Evolua com inteligência.',
           textAlign: TextAlign.center,
           style: GoogleFonts.outfit(
-            color: Colors.white.withValues(alpha: 0.44),
-            fontSize: 13,
+            color: Colors.white.withValues(alpha: 0.48),
+            fontSize: 13.5,
             fontStyle: FontStyle.italic,
             fontWeight: FontWeight.w400,
-            height: 1.25,
+            height: 1.3,
           ),
         ),
       ],
@@ -357,8 +358,8 @@ class _RadialTargetsPainter extends CustomPainter {
     canvas.rotate(rotation * 0.05);
 
     for (var i = 0; i < 5; i++) {
-      final radius = 48.0 + i * 36.0;
-      final alpha = (0.14 - i * 0.022) * (0.65 + pulse * 0.35);
+      final radius = 52.0 + i * 34.0;
+      final alpha = (0.16 - i * 0.024) * (0.62 + pulse * 0.38);
       final paint =
           Paint()
             ..style = PaintingStyle.stroke

@@ -12,7 +12,7 @@ enum BrandGlassTone {
   light,
 }
 
-/// Default Focux mark: transparent F over in-app glass cyan tile.
+/// Default Focux mark — official transparent logo asset.
 class BrandGlassMark extends StatelessWidget {
   const BrandGlassMark({
     super.key,
@@ -22,9 +22,11 @@ class BrandGlassMark extends StatelessWidget {
     this.shimmerAlpha,
     this.tone = BrandGlassTone.dark,
     this.enableBackdropBlur = true,
+    this.bare = true,
   });
 
-  static const markAsset = 'assets/images/logo_mark_transparent.png';
+  /// Official Focux logo (transparent PNG, no extra chrome).
+  static const markAsset = 'assets/images/logo_official.png';
 
   final double size;
   final String? logoUrl;
@@ -33,10 +35,17 @@ class BrandGlassMark extends StatelessWidget {
   final BrandGlassTone tone;
   final bool enableBackdropBlur;
 
+  /// When true, renders only the logo asset — no glass tile behind it.
+  final bool bare;
+
   bool get _onLightSurface => tone == BrandGlassTone.light;
 
   @override
   Widget build(BuildContext context) {
+    if (bare) {
+      return _buildBareMark(context);
+    }
+
     final primary = glowColor ?? Theme.of(context).colorScheme.primary;
     final radius = size * 0.26;
     final shimmer = shimmerAlpha ?? 0.15;
@@ -120,16 +129,82 @@ class BrandGlassMark extends StatelessWidget {
     );
   }
 
+  Widget _buildBareMark(BuildContext context) {
+    final primary = glowColor ?? Theme.of(context).colorScheme.primary;
+    final shimmer = (shimmerAlpha ?? 0.42).clamp(0.0, 1.0);
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          if (!_onLightSurface) ...[
+            Container(
+              width: size * 1.42,
+              height: size * 1.42,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    primary.withValues(alpha: 0.20 * shimmer),
+                    EagleTokens.brandAccent.withValues(alpha: 0.10 * shimmer),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.38, 1.0],
+                ),
+              ),
+            ),
+            Container(
+              width: size * 1.02,
+              height: size * 1.02,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: primary.withValues(alpha: 0.32 * shimmer),
+                    blurRadius: size * 0.24,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    blurRadius: size * 0.18,
+                    offset: Offset(0, size * 0.06),
+                  ),
+                ],
+              ),
+            ),
+          ] else
+            Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: EagleTokens.ink.withValues(alpha: 0.10),
+                    blurRadius: size * 0.14,
+                    offset: Offset(0, size * 0.05),
+                  ),
+                ],
+              ),
+            ),
+          SizedBox(
+            width: size,
+            height: size,
+            child: _buildMarkImage(),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMarkImage() {
     if (logoUrl != null && logoUrl!.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(size * 0.14),
-        child: Image.network(
-          logoUrl!,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.high,
-          errorBuilder: (_, __, ___) => _assetMark(),
-        ),
+      return Image.network(
+        logoUrl!,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        errorBuilder: (_, __, ___) => _assetMark(),
       );
     }
     return _assetMark();
