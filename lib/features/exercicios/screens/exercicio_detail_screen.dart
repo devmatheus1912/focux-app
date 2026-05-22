@@ -10,6 +10,7 @@ import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
@@ -149,142 +150,98 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     final exercicioAsync = ref.watch(exercicioProvider(widget.exercicioId));
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'DETALHES',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: mute,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Exercicio',
-                        style: TextStyle(
-                          fontSize: 32,
-                          color: ink,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      exercicioAsync.when(
-                        data:
-                            (ex) => IconButton(
-                              icon: Icon(
-                                ex.favoritado ? Icons.star : Icons.star_border,
-                                color: ex.favoritado ? EagleTokens.warn : mute,
-                              ),
-                              tooltip:
-                                  ex.favoritado
-                                      ? 'Remover dos favoritos'
-                                      : 'Adicionar aos favoritos',
-                              onPressed:
-                                  () => _toggleFavorito(context, ex.favoritado),
-                            ),
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.arrow_back, color: mute),
-                        onPressed: () => safePopOrGo(context, '/exercicios'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: exercicioAsync.when(
-                loading: () => Center(child: FxLoading(color: primary)),
-                error: (e, _) => Center(child: Text('Erro: $e')),
-                data:
-                    (ex) => SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            ex.nome,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              color: ink,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          _ExerciseEssentials(exercicio: ex),
-                          const SizedBox(height: 14),
-                          _OwnVideoPanel(
-                            hasVideo: ex.videoUrl?.isNotEmpty == true,
-                            uploading: _uploadingVideo,
-                            onUpload: () => _pickAndUploadVideo(context),
-                          ),
-                          if (ex.videoUrl?.isNotEmpty == true) ...[
-                            const SizedBox(height: 12),
-                            _VideoPlayer(url: ex.videoUrl!),
-                          ] else if (ex.gifUrl != null ||
-                              ex.thumbnailUrl != null) ...[
-                            const SizedBox(height: 12),
-                            _ExercisePreviewImage(
-                              url: ex.gifUrl ?? ex.thumbnailUrl!,
-                            ),
-                          ],
-                          if (ex.descricao?.trim().isNotEmpty == true) ...[
-                            const SizedBox(height: 14),
-                            _SimpleInfoCard(
-                              icon: Icons.menu_book_rounded,
-                              title: 'Como orientar',
-                              text: ex.descricao!.trim(),
-                            ),
-                          ],
-                          if (ex.errosComuns?.trim().isNotEmpty == true ||
-                              ex.contraindicacoes?.trim().isNotEmpty == true ||
-                              ex.substitutos?.trim().isNotEmpty == true) ...[
-                            const SizedBox(height: 12),
-                            _GuidanceExpansion(exercicio: ex),
-                          ],
-                          const SizedBox(height: 12),
-                          _TechnicalDataExpansion(
-                            exercicio: ex,
-                            onChangeEditorial:
-                                (status) => _updateEditorialReview(
-                                  context,
-                                  status,
-                                  ex.editorialNotes,
-                                ),
-                          ),
-                        ],
+      appBar: FxShellAppBar(
+        title: 'Exercicio',
+        subtitle: 'DETALHES',
+        onBack: () => safePopOrGo(context, '/exercicios'),
+        actions:
+            exercicioAsync.maybeWhen(
+              data:
+                  (ex) => [
+                    IconButton(
+                      tooltip:
+                          ex.favoritado
+                              ? 'Remover dos favoritos'
+                              : 'Adicionar aos favoritos',
+                      onPressed:
+                          () => _toggleFavorito(context, ex.favoritado),
+                      icon: Icon(
+                        ex.favoritado ? Icons.star_rounded : Icons.star_border_rounded,
+                        color: ex.favoritado ? EagleTokens.warn : mute,
                       ),
                     ),
-              ),
+                  ],
+              orElse: () => const <Widget>[],
             ),
-          ],
+      ),
+      body: SafeArea(
+        bottom: false,
+        child: exercicioAsync.when(
+          loading: () => Center(child: FxLoading(color: primary)),
+          error: (e, _) => Center(child: Text('Erro: $e')),
+          data:
+              (ex) => SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      ex.nome,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: ink,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _ExerciseEssentials(exercicio: ex),
+                    const SizedBox(height: 14),
+                    _OwnVideoPanel(
+                      hasVideo: ex.videoUrl?.isNotEmpty == true,
+                      uploading: _uploadingVideo,
+                      onUpload: () => _pickAndUploadVideo(context),
+                    ),
+                    if (ex.videoUrl?.isNotEmpty == true) ...[
+                      const SizedBox(height: 12),
+                      _VideoPlayer(url: ex.videoUrl!),
+                    ] else if (ex.gifUrl != null || ex.thumbnailUrl != null) ...[
+                      const SizedBox(height: 12),
+                      _ExercisePreviewImage(
+                        url: ex.gifUrl ?? ex.thumbnailUrl!,
+                      ),
+                    ],
+                    if (ex.descricao?.trim().isNotEmpty == true) ...[
+                      const SizedBox(height: 14),
+                      _SimpleInfoCard(
+                        icon: Icons.menu_book_rounded,
+                        title: 'Como orientar',
+                        text: ex.descricao!.trim(),
+                      ),
+                    ],
+                    if (ex.errosComuns?.trim().isNotEmpty == true ||
+                        ex.contraindicacoes?.trim().isNotEmpty == true ||
+                        ex.substitutos?.trim().isNotEmpty == true) ...[
+                      const SizedBox(height: 12),
+                      _GuidanceExpansion(exercicio: ex),
+                    ],
+                    const SizedBox(height: 12),
+                    _TechnicalDataExpansion(
+                      exercicio: ex,
+                      onChangeEditorial:
+                          (status) => _updateEditorialReview(
+                            context,
+                            status,
+                            ex.editorialNotes,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
         ),
       ),
     );
@@ -390,14 +347,9 @@ class _SimpleInfoCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -520,13 +472,8 @@ class _CleanExpansion extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     return Container(
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 16),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
@@ -564,16 +511,11 @@ class _PrescriptionReadinessPanel extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final color = _trustColor(exercicio, primary);
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.15 : 0.09),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: color, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -808,7 +750,6 @@ class _EditorialReviewPanel extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final color = switch (status) {
       'APPROVED' => EagleTokens.good,
       'REJECTED' => EagleTokens.bad,
@@ -823,11 +764,7 @@ class _EditorialReviewPanel extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.14 : 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: color, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -952,14 +889,9 @@ class _GuidanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.12 : 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: color, radius: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1009,23 +941,20 @@ class _MediaMetadataPanel extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final licensed = licenseStatus == 'LICENSED';
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
+      decoration: fxListCardDecoration(
+        context,
+        accent: licensed ? null : primary,
+        radius: 16,
       ),
       child: Row(
         children: [
           Icon(
             licensed ? Icons.verified_rounded : Icons.video_library_rounded,
-            color:
-                licensed
-                    ? EagleTokens.good
-                    : Theme.of(context).colorScheme.primary,
+          color: licensed ? EagleTokens.good : primary,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -1142,15 +1071,7 @@ class _VideoPlayerState extends State<_VideoPlayer> {
       return Container(
         height: 180,
         padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: 0.18),
-          ),
-        ),
+        decoration: fxListCardDecoration(context, accent: Theme.of(context).colorScheme.primary, radius: 16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1245,15 +1166,10 @@ class _OwnVideoPanel extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 16),
       child: Row(
         children: [
           Container(

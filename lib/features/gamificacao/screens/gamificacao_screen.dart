@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -29,8 +31,6 @@ class GamificacaoScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final bg = dark ? EagleTokens.darkBg : EagleTokens.paper;
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
@@ -86,13 +86,15 @@ class GamificacaoScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Minha evolução',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 110),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 54),
-
             // Header
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
@@ -177,10 +179,9 @@ class GamificacaoScreen extends ConsumerWidget {
                         opacity: earned ? 1.0 : 0.45,
                         duration: const Duration(milliseconds: 300),
                         child: Container(
-                          decoration: BoxDecoration(
-                            color: cardBg,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: line),
+                          decoration: fxListCardDecoration(
+                            context,
+                            accent: earned ? cor : null,
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -265,10 +266,10 @@ class GamificacaoScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: line),
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: brand,
+                  radius: 20,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

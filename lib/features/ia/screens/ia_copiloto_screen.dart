@@ -13,6 +13,7 @@ import '../../../core/router/role_home.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../data/ia_repository.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
@@ -163,7 +164,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
         final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
         final line = dark ? EagleTokens.darkLine : EagleTokens.line;
         final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
-        final surface = dark ? EagleTokens.darkBg : EagleTokens.paper;
         var query = '';
 
         return StatefulBuilder(
@@ -181,26 +181,19 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
               maxChildSize: 0.82,
               expand: false,
               builder: (ctx, scrollController) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: surface,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(28),
-                    ),
-                    border: Border(top: BorderSide(color: line)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(
-                          alpha: dark ? 0.38 : 0.16,
-                        ),
-                        blurRadius: 32,
-                        offset: const Offset(0, -12),
-                      ),
-                    ],
+                return ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28),
                   ),
-                  child: SafeArea(
-                    top: false,
-                    child: ListView(
+                  child: DecoratedBox(
+                    decoration: fxListCardDecoration(
+                      ctx,
+                      accent: primary,
+                      radius: 28,
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      child: ListView(
                       controller: scrollController,
                       padding: const EdgeInsets.fromLTRB(18, 10, 18, 20),
                       children: [
@@ -313,11 +306,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         if (filtered.isEmpty)
                           Container(
                             padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: cardBg,
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: line),
-                            ),
+                            decoration: fxListCardDecoration(ctx, radius: 18),
                             child: Text(
                               'Nenhum aluno encontrado para essa busca.',
                               style: TextStyle(
@@ -342,19 +331,18 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 160),
                                   padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        selected
-                                            ? BrandPalette.soft(
-                                              primary,
-                                              dark: dark,
-                                            )
-                                            : cardBg,
-                                    borderRadius: BorderRadius.circular(18),
-                                    border: Border.all(
-                                      color: selected ? primary : line,
-                                    ),
-                                  ),
+                                  decoration:
+                                      selected
+                                          ? fxListCardDecoration(
+                                            ctx,
+                                            selected: true,
+                                            accent: primary,
+                                            radius: 18,
+                                          )
+                                          : fxListCardDecoration(
+                                            ctx,
+                                            radius: 18,
+                                          ),
                                   child: Row(
                                     children: [
                                       Container(
@@ -430,7 +418,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                       ],
                     ),
                   ),
-                );
+                ),
+              );
               },
             );
           },
@@ -609,7 +598,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
     final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
-    final surface = dark ? EagleTokens.darkBg : EagleTokens.paper;
     final controller = TextEditingController(text: acaoInicial);
 
     final result = await showModalBottomSheet<_CopilotTaskDraft>(
@@ -623,19 +611,22 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
           ),
           child: SafeArea(
             top: false,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-              decoration: BoxDecoration(
-                color: surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28),
-                ),
-                border: Border(top: BorderSide(color: line)),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              child: DecoratedBox(
+                decoration: fxListCardDecoration(
+                  ctx,
+                  accent: brand,
+                  radius: 28,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   Center(
                     child: Container(
                       width: 44,
@@ -811,7 +802,9 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
               ),
             ),
           ),
-        );
+        ),
+      ),
+    );
       },
     );
     controller.dispose();
@@ -824,8 +817,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
-    final surface = dark ? EagleTokens.darkBg : EagleTokens.paper;
 
     final action = await showModalBottomSheet<String>(
       context: context,
@@ -833,25 +824,21 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       builder: (ctx) {
         return SafeArea(
           top: false,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(28),
-              ),
-              border: Border(top: BorderSide(color: line)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: dark ? 0.38 : 0.16),
-                  blurRadius: 30,
-                  offset: const Offset(0, -10),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(26),
+              child: DecoratedBox(
+                decoration: fxListCardDecoration(
+                  ctx,
+                  accent: primary,
+                  radius: 26,
                 ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                 Container(
                   width: 34,
                   height: 4,
@@ -909,8 +896,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                   icon: Icons.person_search_outlined,
                   title: 'Trocar aluno',
                   subtitle: 'Gera um novo rascunho para outra pessoa.',
-                  cardBg: cardBg,
-                  line: line,
                   ink: ink,
                   mute: mute,
                   onTap: () => Navigator.of(ctx).pop('trocar'),
@@ -919,8 +904,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                   icon: Icons.refresh_rounded,
                   title: 'Atualizar insights',
                   subtitle: 'Recalcula as recomendações para este aluno.',
-                  cardBg: cardBg,
-                  line: line,
                   ink: ink,
                   mute: mute,
                   onTap: () => Navigator.of(ctx).pop('atualizar'),
@@ -929,13 +912,14 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                   icon: Icons.cleaning_services_outlined,
                   title: 'Limpar resultado',
                   subtitle: 'Volta para o estado inicial do Copiloto.',
-                  cardBg: cardBg,
-                  line: line,
                   ink: ink,
                   mute: mute,
                   onTap: () => Navigator.of(ctx).pop('limpar'),
                 ),
-              ],
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         );
@@ -970,7 +954,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     final primarySoft = BrandPalette.soft(primary, dark: dark);
     final primaryAccent = BrandPalette.accent(primary);
     final primaryDeep = BrandPalette.deep(primary);
-    final cardBg = chrome.cardFill;
     final ink = chrome.ink;
     final mute = chrome.mute;
     final line = chrome.line;
@@ -1063,8 +1046,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
               child: _CopilotStudentSelector(
                 alunoNome: _selectedAlunoNome,
                 brand: brand,
-                cardBg: cardBg,
-                line: line,
                 ink: ink,
                 mute: mute,
                 onTap: _selecionarAluno,
@@ -1101,8 +1082,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: _CopilotSafetyNote(
-                cardBg: cardBg,
-                line: line,
                 ink: ink,
                 mute: mute,
                 brand: brand,
@@ -1126,8 +1105,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         gerado: _gerado,
                         elapsedMs: _geracaoMs,
                         mode: _modeDisplay,
-                        cardBg: cardBg,
-                        line: line,
                         ink: ink,
                         mute: mute,
                         primarySoft: primarySoft,
@@ -1140,8 +1117,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                 child: _CopilotPreviewCard(
                   mode: _mode,
                   brand: brand,
-                  cardBg: cardBg,
-                  line: line,
                   ink: ink,
                   mute: mute,
                   checks: _modeChecks,
@@ -1197,8 +1172,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         () => Padding(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                           child: _CopilotInsightsLoading(
-                            cardBg: cardBg,
-                            line: line,
                             ink: ink,
                             mute: mute,
                             brand: brand,
@@ -1255,10 +1228,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                           child: Container(
                             padding: const EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              color: cardBg,
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: line),
+                            decoration: fxListCardDecoration(
+                              context,
+                              accent: primary,
+                              radius: 18,
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1284,10 +1257,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                       return Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                         child: Container(
-                          decoration: BoxDecoration(
-                            color: cardBg,
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(color: line),
+                          decoration: fxListCardDecoration(
+                            context,
+                            accent: primary,
+                            radius: 22,
                           ),
                           clipBehavior: Clip.antiAlias,
                           child: Column(
@@ -1389,13 +1362,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
               Container(
                 margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color:
-                      dark
-                          ? EagleTokens.darkCardHi
-                          : BrandPalette.softer(brand),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: brand.withValues(alpha: 0.18)),
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: brand,
+                  radius: 14,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1464,10 +1434,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                       child: Container(
                         width: 50,
                         height: 50,
-                        decoration: BoxDecoration(
-                          color: cardBg,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: line),
+                        decoration: fxListCardDecoration(
+                          context,
+                          accent: brand,
+                          radius: 14,
                         ),
                         child: Icon(Icons.more_vert, color: ink),
                       ),
@@ -1480,18 +1450,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: Container(
                     padding: const EdgeInsets.all(13),
-                    decoration: BoxDecoration(
-                      color:
-                          _tarefaPersistida
-                              ? BrandPalette.softer(brand)
-                              : cardBg,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color:
-                            _tarefaPersistida
-                                ? brand.withValues(alpha: 0.22)
-                                : line,
-                      ),
+                    decoration: fxListCardDecoration(
+                      context,
+                      accent: brand,
+                      radius: 14,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1631,8 +1593,6 @@ class _CopilotStudentSelector extends StatelessWidget {
   const _CopilotStudentSelector({
     required this.alunoNome,
     required this.brand,
-    required this.cardBg,
-    required this.line,
     required this.ink,
     required this.mute,
     required this.onTap,
@@ -1640,22 +1600,19 @@ class _CopilotStudentSelector extends StatelessWidget {
 
   final String? alunoNome;
   final Color brand;
-  final Color cardBg;
-  final Color line;
   final Color ink;
   final Color mute;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
     final selected = alunoNome != null;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
-        decoration: chrome.panel(radius: 18),
+        decoration: fxListCardDecoration(context, accent: brand, radius: 18),
         child: Row(
           children: [
             Container(
@@ -1780,15 +1737,11 @@ class _CopilotModeSelector extends StatelessWidget {
 
 class _CopilotSafetyNote extends StatelessWidget {
   const _CopilotSafetyNote({
-    required this.cardBg,
-    required this.line,
     required this.ink,
     required this.mute,
     required this.brand,
   });
 
-  final Color cardBg;
-  final Color line;
   final Color ink;
   final Color mute;
   final Color brand;
@@ -1797,7 +1750,7 @@ class _CopilotSafetyNote extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-      decoration: ShellChrome.of(context).panel(radius: 16),
+      decoration: fxListCardDecoration(context, accent: brand, radius: 16),
       child: Row(
         children: [
           Icon(Icons.verified_user_outlined, color: brand, size: 16),
@@ -2229,8 +2182,6 @@ class _CopilotMenuAction extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
-    required this.cardBg,
-    required this.line,
     required this.ink,
     required this.mute,
     required this.onTap,
@@ -2239,8 +2190,6 @@ class _CopilotMenuAction extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final Color cardBg;
-  final Color line;
   final Color ink;
   final Color mute;
   final VoidCallback onTap;
@@ -2257,11 +2206,7 @@ class _CopilotMenuAction extends StatelessWidget {
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: line),
-          ),
+          decoration: fxListCardDecoration(context, accent: primary, radius: 18),
           child: Row(
             children: [
               Container(
@@ -2309,15 +2254,11 @@ class _CopilotMenuAction extends StatelessWidget {
 
 class _CopilotInsightsLoading extends StatelessWidget {
   const _CopilotInsightsLoading({
-    required this.cardBg,
-    required this.line,
     required this.ink,
     required this.mute,
     required this.brand,
   });
 
-  final Color cardBg;
-  final Color line;
   final Color ink;
   final Color mute;
   final Color brand;
@@ -2325,14 +2266,11 @@ class _CopilotInsightsLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final soft = brand.withValues(alpha: 0.10);
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2502,8 +2440,6 @@ class _CopilotGenerationStatus extends StatelessWidget {
     required this.gerado,
     required this.elapsedMs,
     required this.mode,
-    required this.cardBg,
-    required this.line,
     required this.ink,
     required this.mute,
     required this.primarySoft,
@@ -2513,8 +2449,6 @@ class _CopilotGenerationStatus extends StatelessWidget {
   final bool gerado;
   final int elapsedMs;
   final String mode;
-  final Color cardBg;
-  final Color line;
   final Color ink;
   final Color mute;
   final Color primarySoft;
@@ -2525,14 +2459,11 @@ class _CopilotGenerationStatus extends StatelessWidget {
         elapsedMs >= 1000
             ? '${(elapsedMs / 1000).toStringAsFixed(1)}s'
             : '${elapsedMs}ms';
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2624,8 +2555,6 @@ class _CopilotPreviewCard extends StatelessWidget {
   const _CopilotPreviewCard({
     required this.mode,
     required this.brand,
-    required this.cardBg,
-    required this.line,
     required this.ink,
     required this.mute,
     required this.checks,
@@ -2633,21 +2562,17 @@ class _CopilotPreviewCard extends StatelessWidget {
 
   final String mode;
   final Color brand;
-  final Color cardBg;
-  final Color line;
   final Color ink;
   final Color mute;
   final List<String> checks;
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

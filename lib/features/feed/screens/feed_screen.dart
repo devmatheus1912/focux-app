@@ -10,6 +10,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feed_repository.dart';
 import '../widgets/feed_comments_sheet.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -557,19 +558,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color:
-                              isDark ? EagleTokens.darkCard : EagleTokens.card,
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(
-                            color:
-                                p.fixado
-                                    ? primary
-                                    : (isDark
-                                        ? EagleTokens.darkLine
-                                        : EagleTokens.line),
-                            width: p.fixado ? 2 : 1,
-                          ),
+                        decoration: fxListCardDecoration(
+                          context,
+                          accent: p.fixado ? primary : null,
+                          radius: 22,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),

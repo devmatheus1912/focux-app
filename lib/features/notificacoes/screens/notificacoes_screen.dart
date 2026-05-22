@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
 
@@ -17,8 +20,6 @@ class NotificacoesScreen extends ConsumerWidget {
     final async = ref.watch(notificacoesProvider);
     final repo = ref.read(notificacoesRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
 
     Future<void> reload() async {
       ref.invalidate(notificacoesProvider);
@@ -38,13 +39,9 @@ class NotificacoesScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Notificações',
-          style: TextStyle(color: ink, fontWeight: FontWeight.w900),
-        ),
+      appBar: FxShellAppBar(
+        title: 'Notificações',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
         actions: [
           TextButton(
             onPressed: () async {
@@ -357,7 +354,6 @@ class _RadarNotificationGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -370,20 +366,10 @@ class _RadarNotificationGroup extends StatelessWidget {
       opacity: unread ? 1 : 0.78,
       child: Container(
         padding: const EdgeInsets.all(13),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: unread ? primary.withValues(alpha: 0.22) : line,
-          ),
-          boxShadow: [
-            if (!isDark && unread)
-              BoxShadow(
-                color: const Color(0xFF111318).withValues(alpha: 0.035),
-                blurRadius: 22,
-                offset: const Offset(0, 12),
-              ),
-          ],
+        decoration: fxListCardDecoration(
+          context,
+          accent: unread ? primary : null,
+          radius: 22,
         ),
         child: Column(
           children: [
@@ -565,19 +551,13 @@ class _QuietFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 20),
       child: Row(
         children: [
           Container(
@@ -640,8 +620,6 @@ class _NotificationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final tipoColor = _notifColor(item.tipo, primary);
@@ -657,20 +635,10 @@ class _NotificationTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Container(
           padding: const EdgeInsets.all(13),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: unread ? tipoColor.withValues(alpha: 0.22) : line,
-            ),
-            boxShadow: [
-              if (!isDark && unread)
-                BoxShadow(
-                  color: const Color(0xFF111318).withValues(alpha: 0.035),
-                  blurRadius: 22,
-                  offset: const Offset(0, 12),
-                ),
-            ],
+          decoration: fxListCardDecoration(
+            context,
+            accent: unread ? tipoColor : null,
+            radius: 20,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -701,7 +669,10 @@ class _NotificationTile extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: tipoColor,
                           shape: BoxShape.circle,
-                          border: Border.all(color: cardBg, width: 1.5),
+                          border: Border.all(
+                            color: ShellChrome.of(context).cardFill,
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
@@ -847,8 +818,6 @@ class _NotificationsStateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return ListView(
@@ -856,10 +825,10 @@ class _NotificationsStateCard extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: line),
+          decoration: fxListCardDecoration(
+            context,
+            accent: primary,
+            radius: 22,
           ),
           child: Row(
             children: [

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -49,15 +51,11 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final background = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Relatorio Global'),
+      appBar: FxShellAppBar(
+        title: 'Relatorio global',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
         actions: [
           IconButton(
             tooltip: 'Atualizar',
@@ -149,7 +147,7 @@ class _ReportContent extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (dados.maisComprometidos.isEmpty)
-            const _EmptyList(
+            _EmptyList(
               text: 'Ainda nao ha treinos concluidos no periodo.',
             )
           else
@@ -174,7 +172,7 @@ class _ReportContent extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (dados.menosComprometidos.isEmpty)
-            const _EmptyList(text: 'Nenhum aluno em risco neste recorte.')
+            _EmptyList(text: 'Nenhum aluno em risco neste recorte.')
           else
             ...dados.menosComprometidos
                 .take(5)
@@ -348,13 +346,7 @@ class _MetricTile extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-        ),
-      ),
+      decoration: fxListCardDecoration(context, accent: tone, radius: 18),
       child: Row(
         children: [
           Container(
@@ -489,13 +481,7 @@ class _AlunoRankCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-        ),
-      ),
+      decoration: fxListCardDecoration(context, accent: tone, radius: 18),
       child: Row(
         children: [
           _RankBadge(posicao: posicao, tipo: tipo, tone: tone),
@@ -651,13 +637,7 @@ class _EmptyList extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-        ),
-      ),
+      decoration: fxListCardDecoration(context, radius: 18),
       child: Text(
         text,
         textAlign: TextAlign.center,

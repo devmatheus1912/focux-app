@@ -14,6 +14,7 @@ import 'widgets/exercicios_batch_actions.dart';
 import 'widgets/exercicios_filter_bar.dart';
 import 'widgets/exercicios_list_view.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 // Legacy editorial import contract still lives in repository/tests:
@@ -324,12 +325,51 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   Widget build(BuildContext context) {
     final asyncList = ref.watch(exerciciosProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar:
+          _selected.isEmpty
+              ? FxShellAppBar(
+                title: 'Exercicios',
+                subtitle: 'BIBLIOTECA',
+                onBack:
+                    () => safePopOrGo(context, '/dashboard/personal'),
+                actions: [
+                  IconButton(
+                    tooltip: 'Selecionar exercicios',
+                    icon: const Icon(Icons.checklist_rounded),
+                    onPressed:
+                        () => asyncList.whenData((value) {
+                          final filtered = _applyFilter(value);
+                          if (filtered.isEmpty) return;
+                          setState(() => _selected.add(filtered.first.id));
+                        }),
+                  ),
+                  IconButton(
+                    tooltip: 'Carregar biblioteca completa',
+                    icon: const Icon(Icons.download_rounded),
+                    onPressed: () async {
+                      final imported = await context.push<bool>(
+                        '/exercicios/biblioteca-wizard',
+                      );
+                      if (imported == true) _refresh();
+                    },
+                  ),
+                  IconButton(
+                    tooltip: 'Novo exercicio',
+                    icon: const Icon(Icons.add_rounded),
+                    onPressed: () async {
+                      final created = await context.push<bool>(
+                        '/exercicios/novo',
+                      );
+                      if (created == true) _refresh();
+                    },
+                  ),
+                ],
+              )
+              : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final created = await context.push<bool>('/exercicios/novo');
@@ -357,74 +397,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                     ),
               )
             else
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 12, 14),
-                child: Row(
-                  children: [
-                    IconButton(
-                      tooltip: 'Voltar',
-                      icon: const Icon(Icons.arrow_back_rounded),
-                      onPressed:
-                          () => safePopOrGo(context, '/dashboard/personal'),
-                    ),
-                    const SizedBox(width: 2),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'BIBLIOTECA',
-                            style: TextStyle(
-                              color: mute,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          Text(
-                            'Exercicios',
-                            style: TextStyle(
-                              color: ink,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Selecionar exercicios',
-                      icon: const Icon(Icons.checklist_rounded),
-                      onPressed:
-                          () => asyncList.whenData((value) {
-                            final filtered = _applyFilter(value);
-                            if (filtered.isEmpty) return;
-                            setState(() => _selected.add(filtered.first.id));
-                          }),
-                    ),
-                    IconButton(
-                      tooltip: 'Carregar biblioteca completa',
-                      icon: const Icon(Icons.download_rounded),
-                      onPressed: () async {
-                        final imported = await context.push<bool>(
-                          '/exercicios/biblioteca-wizard',
-                        );
-                        if (imported == true) _refresh();
-                      },
-                    ),
-                    IconButton(
-                      tooltip: 'Novo exercicio',
-                      icon: const Icon(Icons.add_rounded),
-                      onPressed: () async {
-                        final created = await context.push<bool>(
-                          '/exercicios/novo',
-                        );
-                        if (created == true) _refresh();
-                      },
-                    ),
-                  ],
-                ),
-              ),
+              const SizedBox.shrink(),
             ExerciciosFilterBar(
               filter: _filter,
               onChanged: (value) => setState(() => _filter = value),

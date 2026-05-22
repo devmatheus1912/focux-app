@@ -3,6 +3,8 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 
@@ -24,14 +26,10 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
     final sugestoesAsync = ref.watch(sugestoesProgressaoProvider);
 
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Progressão de Carga — Sugestões'),
+      backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Progressão de Carga — Sugestões',
+        onBack: () => safePopOrGo(context, '/ia/copiloto'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

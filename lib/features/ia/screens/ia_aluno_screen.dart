@@ -58,13 +58,11 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor:
-        Theme.of(context).brightness == Brightness.dark
-            ? EagleTokens.darkBg
-            : EagleTokens.paper,
+    backgroundColor: Colors.transparent,
     appBar: AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
+      scrolledUnderElevation: 0,
       title: const Text('Assistente IA'),
       bottom: TabBar(
         controller: _tabs,

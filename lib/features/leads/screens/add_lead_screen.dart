@@ -5,6 +5,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 
 const _origens = ['Instagram', 'Indicação', 'WhatsApp', 'Google', 'Outro'];
@@ -56,12 +57,10 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('Novo Lead'),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => safePopOrGo(context, '/leads'),
-      ),
+    backgroundColor: Colors.transparent,
+    appBar: FxShellAppBar(
+      title: 'Novo Lead',
+      onBack: () => safePopOrGo(context, '/leads'),
     ),
     body: SingleChildScrollView(
       padding: const EdgeInsets.all(16),

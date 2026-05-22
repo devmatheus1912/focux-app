@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,124 +62,69 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
   }
 
   Widget _buildContent(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
-
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: SafeArea(
-        bottom: false,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(112),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // V3 Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onTap:
-                            () => safePopOrGo(context, '/dashboard/personal'),
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 12, bottom: 4),
-                          child: Icon(
-                            Icons.arrow_back_ios_new,
-                            size: 20,
+            FxShellAppBar(
+              title: 'Financeiro',
+              subtitle: 'ESTE MÊS',
+              onBack: () => safePopOrGo(context, '/dashboard/personal'),
+              actions: [
+                PopupMenuButton<String>(
+                  initialValue: _periodFilter,
+                  tooltip: 'Filtrar periodo',
+                  onSelected: (value) {
+                    setState(() => _periodFilter = value);
+                    if (value == 'ano') {
+                      _tabController.animateTo(2);
+                    }
+                  },
+                  itemBuilder:
+                      (context) =>
+                          _periodLabels.entries
+                              .map(
+                                (entry) => PopupMenuItem<String>(
+                                  value: entry.key,
+                                  child: Text(entry.value),
+                                ),
+                              )
+                              .toList(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: chrome.panel(radius: 999),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _periodLabels[_periodFilter] ?? 'agora',
+                          style: TextStyle(
+                            fontSize: 12,
                             color: ink,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'ESTE MÊS',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: mute,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.6,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Financeiro',
-                            style: GoogleFonts.outfit(
-                              fontSize: 30,
-                              color: ink,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.6,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  PopupMenuButton<String>(
-                    initialValue: _periodFilter,
-                    tooltip: 'Filtrar periodo',
-                    onSelected: (value) {
-                      setState(() => _periodFilter = value);
-                      if (value == 'ano') {
-                        _tabController.animateTo(2);
-                      }
-                    },
-                    itemBuilder:
-                        (context) =>
-                            _periodLabels.entries
-                                .map(
-                                  (entry) => PopupMenuItem<String>(
-                                    value: entry.key,
-                                    child: Text(entry.value),
-                                  ),
-                                )
-                                .toList(),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            isDark
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : Colors.white,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: line),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _periodLabels[_periodFilter] ?? 'agora',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: ink,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            size: 16,
-                            color: mute,
-                          ),
-                        ],
-                      ),
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 16,
+                          color: mute,
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
             TabBar(
               controller: _tabController,
@@ -195,18 +142,16 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
                 Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Metricas'),
               ],
             ),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: const [
-                  FinanceiroDashboardScreen(),
-                  _MensalidadesTab(),
-                  FinanceiroResumoScreen(),
-                ],
-              ),
-            ),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: const [
+          FinanceiroDashboardScreen(),
+          _MensalidadesTab(),
+          FinanceiroResumoScreen(),
+        ],
       ),
     );
   }
@@ -300,9 +245,9 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
   }
 
   InputDecoration _fxDeco(String label, {IconData? icon, String? hint}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final chrome = ShellChrome.of(context);
+    final line = chrome.line;
+    final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
     return InputDecoration(
       labelText: label,
@@ -315,7 +260,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
       hintStyle: TextStyle(color: mute.withValues(alpha: 0.5), fontSize: 13.5),
       prefixIcon: icon != null ? Icon(icon, size: 20, color: mute) : null,
       filled: true,
-      fillColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+      fillColor: chrome.cardFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: FxInputDeco.outlineBorder(
         borderRadius: BorderRadius.circular(14),
@@ -350,26 +295,27 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     bool salvando = false;
     final formKey = GlobalKey<FormState>();
 
-    final isDarkSheet = Theme.of(context).brightness == Brightness.dark;
-    final sheetBg = isDarkSheet ? EagleTokens.darkCard : EagleTokens.card;
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: sheetBg,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder:
-          (ctx) => StatefulBuilder(
+          (ctx) => Padding(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              16 + MediaQuery.of(ctx).viewInsets.bottom,
+            ),
+            child: ShellSurface(
+              radius: 28,
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              child: StatefulBuilder(
             builder:
-                (ctx, setModalState) => Padding(
-                  padding: EdgeInsets.only(
-                    left: 24,
-                    right: 24,
-                    top: 24,
-                    bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-                  ),
-                  child: Form(
+                (ctx, setModalState) => Form(
                     key: formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -534,7 +480,8 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                       ],
                     ),
                   ),
-                ),
+            ),
+            ),
           ),
     );
   }
@@ -719,26 +666,27 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     int? alunoSelecionadoId;
     bool salvando = false;
 
-    final isDarkSheet2 = Theme.of(context).brightness == Brightness.dark;
-    final sheetBg2 = isDarkSheet2 ? EagleTokens.darkCard : EagleTokens.card;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: sheetBg2,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder:
-          (ctx) => StatefulBuilder(
+          (ctx) => Padding(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              16 + MediaQuery.of(ctx).viewInsets.bottom,
+            ),
+            child: ShellSurface(
+              radius: 28,
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              child: StatefulBuilder(
             builder:
-                (ctx, setModalState) => Padding(
-                  padding: EdgeInsets.only(
-                    left: 24,
-                    right: 24,
-                    top: 24,
-                    bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-                  ),
-                  child: Form(
+                (ctx, setModalState) => Form(
                     key: formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -930,13 +878,18 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                       ],
                     ),
                   ),
-                ),
+            ),
+            ),
           ),
     );
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final mute = chrome.mute;
+    final primary = Theme.of(context).colorScheme.primary;
+    return Scaffold(
     floatingActionButton: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -970,19 +923,13 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
             decoration: InputDecoration(
               hintText: 'Buscar por nome do aluno...',
               hintStyle: TextStyle(
-                color:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? EagleTokens.darkInkMute
-                        : EagleTokens.inkMute,
+                color: mute,
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
               ),
               prefixIcon: Icon(
                 Icons.search_rounded,
-                color:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? EagleTokens.darkInkMute
-                        : EagleTokens.inkMute,
+                color: mute,
                 size: 20,
               ),
               suffixIcon:
@@ -996,36 +943,23 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                       )
                       : null,
               filled: true,
-              fillColor:
-                  Theme.of(context).brightness == Brightness.dark
-                      ? EagleTokens.darkCard
-                      : EagleTokens.card,
+              fillColor: chrome.cardFill,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,
               ),
               border: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? EagleTokens.darkLine
-                          : EagleTokens.line,
-                ),
+                borderSide: BorderSide(color: chrome.line),
               ),
               enabledBorder: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? EagleTokens.darkLine
-                          : EagleTokens.line,
-                ),
+                borderSide: BorderSide(color: chrome.line),
               ),
               focusedBorder: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: primary,
                   width: 1.6,
                 ),
               ),
@@ -1041,10 +975,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.4,
-              color:
-                  Theme.of(context).brightness == Brightness.dark
-                      ? EagleTokens.darkInkMute
-                      : EagleTokens.inkMute,
+              color: mute,
             ),
           ),
         ),
@@ -1059,30 +990,15 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                     itemCount: _filtered.length,
                     itemBuilder: (_, i) {
                       final m = _filtered[i];
-                      final isDark =
-                          Theme.of(context).brightness == Brightness.dark;
-                      final primary = Theme.of(context).colorScheme.primary;
-                      final card =
-                          isDark ? EagleTokens.darkCard : EagleTokens.card;
-                      final ink =
-                          isDark ? EagleTokens.darkInk : EagleTokens.ink;
-                      final mute =
-                          isDark
-                              ? EagleTokens.darkInkMute
-                              : EagleTokens.inkMute;
-                      final line =
-                          isDark ? EagleTokens.darkLine : EagleTokens.line;
+                      final ink = chrome.ink;
+                      final mute = chrome.mute;
                       final statusColor = _statusColor(m.status);
                       final isPending =
                           m.status == 'PENDENTE' || m.status == 'ATRASADO';
                       return Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: card,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: line),
-                        ),
+                        decoration: fxListCardDecoration(context, radius: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1137,7 +1053,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                   ),
                                   decoration: BoxDecoration(
                                     color: statusColor.withValues(
-                                      alpha: isDark ? 0.18 : 0.10,
+                                      alpha: chrome.isDark ? 0.18 : 0.10,
                                     ),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
@@ -1188,9 +1104,9 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
       ],
     ),
   );
+  }
 
   Widget _buildMensalidadesLoading(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
       itemCount: 5,
@@ -1199,13 +1115,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
             padding: const EdgeInsets.only(bottom: 10),
             child: Container(
               height: 82,
-              decoration: BoxDecoration(
-                color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                ),
-              ),
+              decoration: fxListCardDecoration(context, radius: 20),
               child: const SizedBox.shrink(),
             ),
           ),
@@ -1213,9 +1123,9 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
   }
 
   Widget _buildMensalidadesEmpty(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
     return Center(
       child: Column(
@@ -1225,7 +1135,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: primary.withValues(alpha: isDark ? 0.15 : 0.08),
+              color: primary.withValues(alpha: chrome.isDark ? 0.15 : 0.08),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Icon(Icons.receipt_long_rounded, color: primary, size: 24),
@@ -1262,17 +1172,14 @@ class _MiniAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Container(
         width: 34,
         height: 34,
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: isDark ? 0.14 : 0.07),
-          borderRadius: BorderRadius.circular(10),
-        ),
+        decoration: chrome.headerAction(radius: 10),
         child: Icon(icon, size: 16, color: color),
       ),
     );

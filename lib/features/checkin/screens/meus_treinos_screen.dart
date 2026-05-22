@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -17,60 +18,36 @@ class MeusTreinosScreen extends ConsumerWidget {
     final treinosAsync = ref.watch(meusTreinosProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Sua rotina',
+        subtitle: 'TREINOS',
+        onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+        actions: [
+          IconButton(
+            onPressed: () => ref.invalidate(meusTreinosProvider),
+            icon: Icon(Icons.refresh_rounded, color: fxScreenMute(context)),
+          ),
+        ],
+      ),
       body: SafeArea(
         bottom: false,
         child: treinosAsync.when(
-          loading:
-              () => Column(
-                children: [
-                  _TrainingHeader(
-                    ink: ink,
-                    mute: mute,
-                    primary: primary,
-                    onBack: () => safePopOrGo(context, '/dashboard/aluno'),
-                    onRefresh: () => ref.invalidate(meusTreinosProvider),
-                  ),
-                  Expanded(child: Center(child: FxLoading(color: primary))),
-                ],
-              ),
+          loading: () => Center(child: FxLoading(color: primary)),
           error:
-              (e, _) => Column(
-                children: [
-                  _TrainingHeader(
-                    ink: ink,
-                    mute: mute,
-                    primary: primary,
-                    onBack: () => safePopOrGo(context, '/dashboard/aluno'),
-                    onRefresh: () => ref.invalidate(meusTreinosProvider),
-                  ),
-                  Expanded(
-                    child: _TrainingEmptyState(
-                      title: 'Nao foi possivel carregar',
-                      message: 'Toque para tentar novamente.',
-                      icon: Icons.wifi_off_rounded,
-                      isDark: isDark,
-                      onTap: () => ref.invalidate(meusTreinosProvider),
-                    ),
-                  ),
-                ],
+              (e, _) => _TrainingEmptyState(
+                title: 'Nao foi possivel carregar',
+                message: 'Toque para tentar novamente.',
+                icon: Icons.wifi_off_rounded,
+                isDark: isDark,
+                onTap: () => ref.invalidate(meusTreinosProvider),
               ),
           data: (treinos) {
             if (treinos.isEmpty) {
               return Column(
                 children: [
-                  _TrainingHeader(
-                    ink: ink,
-                    mute: mute,
-                    primary: primary,
-                    onBack: () => safePopOrGo(context, '/dashboard/aluno'),
-                    onRefresh: () => ref.invalidate(meusTreinosProvider),
-                  ),
                   const Spacer(),
                   _TrainingEmptyState(
                     title: 'Nenhum treino atribuido',
@@ -103,15 +80,7 @@ class MeusTreinosScreen extends ConsumerWidget {
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  SliverToBoxAdapter(
-                    child: _TrainingHeader(
-                      ink: ink,
-                      mute: mute,
-                      primary: primary,
-                      onBack: () => safePopOrGo(context, '/dashboard/aluno'),
-                      onRefresh: () => ref.invalidate(meusTreinosProvider),
-                    ),
-                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 8)),
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
@@ -157,68 +126,6 @@ class MeusTreinosScreen extends ConsumerWidget {
             );
           },
         ),
-      ),
-    );
-  }
-}
-
-class _TrainingHeader extends StatelessWidget {
-  final Color ink;
-  final Color mute;
-  final Color primary;
-  final VoidCallback onBack;
-  final VoidCallback onRefresh;
-
-  const _TrainingHeader({
-    required this.ink,
-    required this.mute,
-    required this.primary,
-    required this.onBack,
-    required this.onRefresh,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: onBack,
-            icon: Icon(Icons.arrow_back_rounded, color: ink),
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'TREINOS',
-                  style: TextStyle(
-                    color: primary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Sua rotina',
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    height: 1,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: onRefresh,
-            icon: Icon(Icons.refresh_rounded, color: mute),
-          ),
-        ],
       ),
     );
   }
@@ -374,10 +281,8 @@ class _TrainingPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final done = treino.exercicios.where((e) => e.concluido).length;
     final progress =
         treino.exercicios.isEmpty ? 0.0 : done / treino.exercicios.length;
@@ -404,13 +309,10 @@ class _TrainingPlanCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(22),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: card,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: concluido ? EagleTokens.good : line,
-            width: concluido ? 1.4 : 1,
-          ),
+        decoration: fxListCardDecoration(
+          context,
+          accent: concluido ? EagleTokens.good : primary,
+          radius: 22,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -579,100 +481,111 @@ void _showTrainingPendingSheet({
   final primary = Theme.of(context).colorScheme.primary;
   final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
   final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-  final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
-  final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
 
   showModalBottomSheet<void>(
     context: context,
     useSafeArea: true,
     showDragHandle: true,
-    backgroundColor: card,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-    ),
-    builder:
-        (context) => Padding(
-          padding: const EdgeInsets.fromLTRB(22, 4, 22, 26),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: BrandPalette.soft(primary, dark: isDark),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(Icons.pending_actions_rounded, color: primary),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          treinoNome,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
+    backgroundColor: Colors.transparent,
+    builder: (sheetContext) => Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 18),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(26),
+        child: DecoratedBox(
+          decoration: fxListCardDecoration(
+            sheetContext,
+            accent: primary,
+            radius: 26,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(22, 12, 22, 22),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: BrandPalette.soft(primary, dark: isDark),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child:
+                          Icon(
+                            Icons.pending_actions_rounded,
+                            color: primary,
                           ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Em preparacao',
-                          style: TextStyle(
-                            color: mute,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            treinoNome,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 3),
+                          Text(
+                            'Em preparacao',
+                            style: TextStyle(
+                              color: mute,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: fxListCardDecoration(
+                    sheetContext,
+                    accent: primary,
+                    radius: 22,
+                  ),
+                  child: Text(
+                    'Seu personal ja reservou este treino. Assim que os exercicios forem liberados, o botao Iniciar aparece com registro de series, videos e feedback.',
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 13,
+                      height: 1.42,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: BrandPalette.soft(primary, dark: isDark),
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: line),
                 ),
-                child: Text(
-                  'Seu personal ja reservou este treino. Assim que os exercicios forem liberados, o botao Iniciar aparece com registro de series, videos e feedback.',
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 13,
-                    height: 1.42,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
+                    child: const Text('Entendi'),
                   ),
-                  child: const Text('Entendi'),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
+      ),
+    ),
   );
 }
 
@@ -694,16 +607,14 @@ class _TrainingReadinessSection extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
-    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final hasExercises = totalExercicios > 0;
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: card,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: line),
+      decoration: fxListCardDecoration(
+        context,
+        accent: primary,
+        radius: 24,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -809,14 +720,13 @@ class _ReadinessMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
 
     return Container(
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCardHi : EagleTokens.brandSofter,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: line),
+      decoration: fxListCardDecoration(
+        context,
+        accent: color,
+        radius: 18,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

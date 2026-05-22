@@ -9,6 +9,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/suporte_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 const _severidades = ['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'];
@@ -161,7 +162,6 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
@@ -869,11 +869,19 @@ class _TicketCard extends StatelessWidget {
     final resolvido = ticket.status == 'RESOLVIDO';
     final temResposta = resolvido && ticket.respostaAdmin != null;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child:
-          temResposta
-              ? ExpansionTile(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: fxListCardDecoration(context, accent: statusColor),
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child:
+                temResposta
+                    ? ExpansionTile(
+                      backgroundColor: Colors.transparent,
+                      collapsedBackgroundColor: Colors.transparent,
                 tilePadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 4,
@@ -918,7 +926,7 @@ class _TicketCard extends StatelessWidget {
                   ),
                 ],
               )
-              : ListTile(
+                    : ListTile(
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 4,
@@ -929,6 +937,9 @@ class _TicketCard extends StatelessWidget {
                   sevColor: sevColor,
                 ),
               ),
+          ),
+        ),
+      ),
     );
   }
 }

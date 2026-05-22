@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -110,18 +112,23 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: Colors.transparent,
-    appBar: AppBar(
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return Scaffold(
       backgroundColor: Colors.transparent,
-      title: Text('Progressão de Carga — ${widget.alunoNome}'),
-    ),
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Card(
+      appBar: FxShellAppBar(
+        title: 'Progressão de Carga',
+        subtitle: widget.alunoNome,
+        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+          Container(
+            decoration: fxListCardDecoration(context, accent: primary),
+            clipBehavior: Clip.antiAlias,
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -175,7 +182,9 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
           ),
           if (_erro != null) ...[
             const SizedBox(height: 16),
-            Card(
+            Container(
+              decoration: fxListCardDecoration(context, accent: primary),
+              clipBehavior: Clip.antiAlias,
               child: Padding(
                 padding: const EdgeInsets.all(14),
                 child: Column(
@@ -220,4 +229,5 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       ),
     ),
   );
+  }
 }

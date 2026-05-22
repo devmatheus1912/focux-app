@@ -16,6 +16,8 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../ia/data/ia_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/theme/shell_chrome.dart';
 
 final alunoCopilotoActionProvider =
     FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
@@ -159,8 +161,10 @@ class AlunoDetailScreen extends ConsumerWidget {
   }
 
   void _showNovaSenhaSheet(BuildContext context, Aluno aluno, String senha) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
     final hasWhatsapp = whatsappNumber.isNotEmpty;
     final mensagem = _senhaProvisoriaMessage(aluno, senha);
@@ -175,19 +179,23 @@ class AlunoDetailScreen extends ConsumerWidget {
       builder:
           (ctx) => Padding(
             padding: EdgeInsets.fromLTRB(
-              20,
-              12,
-              20,
-              24 + MediaQuery.of(ctx).padding.bottom,
+              16,
+              8,
+              16,
+              16 + MediaQuery.of(ctx).padding.bottom,
             ),
-            child: Column(
+            child: ShellSurface(
+              accent: primary,
+              radius: 28,
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+              child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 42,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                    color: chrome.line,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -205,7 +213,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                 Text(
                   'Nova senha provisória',
                   style: TextStyle(
-                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    color: ink,
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.5,
@@ -216,8 +224,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                   'A senha anterior não funciona mais. ${aluno.nome} deve trocar no primeiro acesso.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color:
-                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                    color: mute,
                     fontSize: 13.4,
                     height: 1.35,
                   ),
@@ -226,20 +233,17 @@ class AlunoDetailScreen extends ConsumerWidget {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(18, 15, 18, 14),
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: primary.withValues(alpha: 0.2)),
+                  decoration: fxListCardDecoration(
+                    ctx,
+                    radius: 20,
+                    accent: primary,
                   ),
                   child: Column(
                     children: [
                       Text(
                         'Senha provisória',
                         style: TextStyle(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInkMute
-                                  : EagleTokens.inkMute,
+                          color: mute,
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                         ),
@@ -249,7 +253,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                         senha,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: isDark ? Colors.white : EagleTokens.ink,
+                          color: ink,
                           fontSize: 31,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 5.5,
@@ -260,10 +264,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                         'Compartilhe apenas com o aluno.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInkMute
-                                  : EagleTokens.inkMute,
+                          color: mute,
                           fontSize: 11.8,
                           fontWeight: FontWeight.w500,
                         ),
@@ -343,19 +344,14 @@ class AlunoDetailScreen extends ConsumerWidget {
                       icon: Icon(
                         Icons.copy_rounded,
                         size: 18,
-                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                        color: ink,
                       ),
                       label: Text(
                         'Copiar nova senha',
-                        style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                        ),
+                        style: TextStyle(color: ink),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color:
-                              isDark ? EagleTokens.darkLine : EagleTokens.line,
-                        ),
+                        side: BorderSide(color: chrome.line),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -372,16 +368,14 @@ class AlunoDetailScreen extends ConsumerWidget {
                     child: Text(
                       'Fechar',
                       style: TextStyle(
-                        color:
-                            isDark
-                                ? EagleTokens.darkInkMute
-                                : EagleTokens.inkMute,
+                        color: mute,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
                 ),
               ],
+            ),
             ),
           ),
     );
@@ -408,11 +402,11 @@ class AlunoDetailScreen extends ConsumerWidget {
     final scoreSnapshotsAsync = ref.watch(alunoScoreSnapshotsProvider(alunoId));
     final evolucaoAsync = ref.watch(alunoEvolucaoInteligenteProvider(alunoId));
     final timeline360ApiAsync = ref.watch(alunoTimeline360ApiProvider(alunoId));
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -434,125 +428,126 @@ class AlunoDetailScreen extends ConsumerWidget {
 
           return CustomScrollView(
             slivers: [
-              // Hero App Bar that stays when scrolling
               SliverAppBar(
-                expandedHeight: 180,
+                expandedHeight: 196,
                 pinned: true,
-                backgroundColor: primary,
-                foregroundColor: Colors.white,
+                stretch: true,
+                backgroundColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
                 elevation: 0,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [primary, BrandPalette.deep(primary)],
+                scrolledUnderElevation: 0,
+                leading: Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: IconButton(
+                    onPressed: () => safePopOrGo(context, '/alunos'),
+                    icon: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: chrome.headerAction(radius: 12),
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        size: 16,
+                        color: ink,
                       ),
                     ),
-                    child: SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(18, 10, 18, 14),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 56,
-                                  height: 56,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black26,
-                                        blurRadius: 20,
-                                        offset: Offset(0, 8),
-                                      ),
-                                    ],
+                  ),
+                ),
+                flexibleSpace: FlexibleSpaceBar(
+                  collapseMode: CollapseMode.pin,
+                  background: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 72, 16, 10),
+                    child: Container(
+                      decoration: chrome.panel(radius: 24, accent: primary),
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  color: BrandPalette.soft(primary, dark: isDark),
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  fxInitials(aluno.nome),
+                                  style: TextStyle(
+                                    color: primary,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
                                   ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    fxInitials(aluno.nome),
-                                    style: TextStyle(
-                                      color: primary,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      aluno.nome,
+                                      style: TextStyle(
+                                        color: ink,
+                                        fontSize: 21,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.5,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        aluno.nome,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: -0.5,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      aluno.objetivo ?? 'Emagrecimento',
+                                      style: TextStyle(
+                                        color: mute,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        aluno.objetivo ?? 'Emagrecimento',
-                                        style: TextStyle(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.75,
-                                          ),
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 11),
-                            // Stats Strip
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _HeroStat(label: 'Perfil', value: perfil),
-                                Container(
-                                  width: 1,
-                                  height: 24,
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                ),
-                                _HeroStat(
-                                  label: 'Financeiro',
-                                  value: financeiro,
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 24,
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                ),
-                                _HeroStat(label: 'Medida', value: medida),
-                                Container(
-                                  width: 1,
-                                  height: 24,
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                ),
-                                _HeroStat(label: 'Contexto', value: contexto),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _HeroStat(label: 'Perfil', value: perfil),
+                              Container(
+                                width: 1,
+                                height: 24,
+                                color: chrome.line,
+                              ),
+                              _HeroStat(
+                                label: 'Financeiro',
+                                value: financeiro,
+                              ),
+                              Container(
+                                width: 1,
+                                height: 24,
+                                color: chrome.line,
+                              ),
+                              _HeroStat(label: 'Medida', value: medida),
+                              Container(
+                                width: 1,
+                                height: 24,
+                                color: chrome.line,
+                              ),
+                              _HeroStat(label: 'Contexto', value: contexto),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
                 actions: [
                   PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_horiz_rounded),
+                    icon: Icon(Icons.more_horiz_rounded, color: ink),
                     tooltip: 'Mais opções',
                     onSelected: (value) async {
                       if (value == 'excluir') {
@@ -577,6 +572,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           ),
                         ],
                   ),
+                  const ShellThemeToggle(size: 38),
+                  const SizedBox(width: 8),
                 ],
               ),
 
@@ -643,17 +640,7 @@ class AlunoDetailScreen extends ConsumerWidget {
 
                       // Weight evolution card
                       Container(
-                        decoration: BoxDecoration(
-                          color:
-                              isDark ? EagleTokens.darkCard : EagleTokens.card,
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(
-                            color:
-                                isDark
-                                    ? EagleTokens.darkLine
-                                    : EagleTokens.line,
-                          ),
-                        ),
+                        decoration: fxListCardDecoration(context, radius: 22),
                         padding: const EdgeInsets.all(18),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1022,17 +1009,11 @@ class _StudentQuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1309,11 +1290,9 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     List<_ProfileGap> gaps,
   ) async {
     final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final line = ShellChrome.of(context).line;
 
     Future<void> go(_ProfileGap gap, BuildContext sheetContext) async {
       Navigator.of(sheetContext).pop();
@@ -1329,12 +1308,16 @@ class _Aluno360CopilotCard extends ConsumerWidget {
           (sheetContext) => SafeArea(
             child: Padding(
               padding: EdgeInsets.fromLTRB(
-                20,
+                16,
                 4,
-                20,
-                20 + MediaQuery.of(sheetContext).padding.bottom,
+                16,
+                16 + MediaQuery.of(sheetContext).padding.bottom,
               ),
-              child: Column(
+              child: ShellSurface(
+                radius: 28,
+                accent: primary,
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1396,14 +1379,14 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                     ...gaps.map(
                       (gap) => Padding(
                         padding: const EdgeInsets.only(bottom: 10),
-                        child: InkWell(
+                          child: InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () => go(gap, sheetContext),
                           child: Container(
                             padding: const EdgeInsets.all(13),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: line),
+                            decoration: fxListCardDecoration(
+                              sheetContext,
+                              radius: 16,
                             ),
                             child: Row(
                               children: [
@@ -1465,6 +1448,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                     ),
                 ],
               ),
+            ),
             ),
           ),
     );
@@ -1686,10 +1670,9 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final line = ShellChrome.of(context).line;
     final actionAsync = ref.watch(alunoCopilotoActionProvider(aluno.id));
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
     final openTask = _firstOpenCopilotAction(openActionsAsync.valueOrNull);
@@ -1700,10 +1683,10 @@ class _Aluno360CopilotCard extends ConsumerWidget {
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: primary.withValues(alpha: 0.20)),
+      decoration: fxListCardDecoration(
+        context,
+        radius: 22,
+        accent: primary,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2049,18 +2032,12 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 22),
       child: evolucaoAsync.when(
         loading: () => const LinearProgressIndicator(minHeight: 2),
         error:
@@ -2377,10 +2354,9 @@ class _Aluno360TimelineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final line = ShellChrome.of(context).line;
     final loading =
         eventosAsync.isLoading ||
         snapshotsAsync.isLoading ||
@@ -2391,11 +2367,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2465,6 +2437,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
   }
 
   void _showFullTimeline(BuildContext context, List<_Timeline360Item> items) {
+    final chrome = ShellChrome.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -2479,20 +2452,24 @@ class _Aluno360TimelineCard extends StatelessWidget {
             minChildSize: 0.45,
             maxChildSize: 0.92,
             builder:
-                (context, controller) => ListView.separated(
+                (context, controller) => Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: ShellSurface(
+                    radius: 28,
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      18,
+                      16,
+                      24 + MediaQuery.of(ctx).padding.bottom,
+                    ),
+                    child: ListView.separated(
                   controller: controller,
-                  padding: EdgeInsets.fromLTRB(
-                    16,
-                    18,
-                    16,
-                    24 + MediaQuery.of(ctx).padding.bottom,
-                  ),
                   itemCount: items.length + 1,
                   separatorBuilder: (_, index) {
                     if (index == 0) return const SizedBox(height: 12);
                     return Divider(
                       height: 18,
-                      color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                      color: chrome.line,
                     );
                   },
                   itemBuilder: (context, index) {
@@ -2500,7 +2477,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
                       return Text(
                         'Histórico 360',
                         style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                          color: fxScreenInk(context),
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
                         ),
@@ -2511,6 +2488,8 @@ class _Aluno360TimelineCard extends StatelessWidget {
                       isDark: isDark,
                     );
                   },
+                ),
+                  ),
                 ),
           ),
     );
@@ -3007,13 +2986,15 @@ class _HeroStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label.toUpperCase(),
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
+            color: mute,
             fontSize: 10,
             fontWeight: FontWeight.w600,
             letterSpacing: 1.2,
@@ -3022,8 +3003,8 @@ class _HeroStat extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: ink,
             fontSize: 20,
             fontWeight: FontWeight.w700,
             letterSpacing: -0.5,
@@ -3094,18 +3075,12 @@ class _MeasurementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 14),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -3173,29 +3148,23 @@ class _ModuleTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-
-    final bg =
-        highlight
-            ? (isDark ? EagleTokens.darkCardHi : BrandPalette.soft(primary))
-            : cardBg;
-    final border = Border.all(
-      color: highlight ? primary.withValues(alpha: 0.2) : line,
-    );
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(11),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(16),
-          border: border,
-        ),
+        decoration:
+            highlight
+                ? fxListCardDecoration(
+                  context,
+                  radius: 16,
+                  accent: primary,
+                  selected: true,
+                )
+                : fxListCardDecoration(context, radius: 16),
         child: Row(
           children: [
             Container(

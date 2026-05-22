@@ -2,7 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -207,32 +209,22 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Relatório — ${widget.alunoNome}',
-          style: TextStyle(
-            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
-        ),
-        iconTheme: IconThemeData(
-          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-        ),
+      appBar: FxShellAppBar(
+        title: 'Relatório',
+        subtitle: widget.alunoNome,
+        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.picture_as_pdf,
-              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-            ),
             tooltip: 'Exportar PDF',
             onPressed: _dados != null ? _exportarPdf : null,
+            icon: Icon(
+              Icons.picture_as_pdf_rounded,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+              size: 22,
+            ),
           ),
         ],
       ),
@@ -323,7 +315,11 @@ class _SeletorPeriodo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCustom = rangeCustom != null;
-    return Card(
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return Container(
+      width: double.infinity,
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -444,7 +440,9 @@ class _CardAderencia extends StatelessWidget {
             ? EagleTokens.warn
             : theme.colorScheme.error;
 
-    return Card(
+    return Container(
+      width: double.infinity,
+      decoration: fxListCardDecoration(context, accent: cor),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -550,7 +548,9 @@ class _CardInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
+    return Container(
+      width: double.infinity,
+      decoration: fxListCardDecoration(context, accent: cor),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -595,7 +595,11 @@ class _CardComparativo extends StatelessWidget {
             ? '+${delta.toStringAsFixed(1)}%'
             : '${delta.toStringAsFixed(1)}%';
 
-    return Card(
+    final primaryAccent = theme.colorScheme.primary;
+
+    return Container(
+      width: double.infinity,
+      decoration: fxListCardDecoration(context, accent: primaryAccent),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

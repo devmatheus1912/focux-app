@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/broadcast_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -78,11 +79,8 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
   Widget build(BuildContext context) {
     final historicoAsync = ref.watch(_broadcastHistoricoProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final brand = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
@@ -122,10 +120,10 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
               ),
               Container(
                 padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: line),
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: brand,
+                  radius: 22,
                 ),
                 child: Form(
                   key: _formKey,
@@ -389,19 +387,13 @@ class _BroadcastCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final brand = Theme.of(context).colorScheme.primary;
     final publico = broadcast.tipoConsultoriaAlvo ?? 'TODOS';
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: brand, radius: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -481,13 +473,7 @@ class _StateCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-        ),
-      ),
+      decoration: fxListCardDecoration(context, radius: 18),
       child: Text(
         text,
         textAlign: TextAlign.center,

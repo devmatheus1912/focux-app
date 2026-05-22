@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -105,41 +107,32 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Editar Aluno',
-          style: TextStyle(
-            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        iconTheme: IconThemeData(
-          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-        ),
-        actions: [
-          _salvando
-              ? const Padding(
-                padding: EdgeInsets.all(16),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: FxLoading(strokeWidth: 2),
-                ),
-              )
-              : TextButton(
-                onPressed: _salvar,
-                child: Text(
-                  'Salvar',
-                  style: TextStyle(
-                    color: primary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
+      appBar: FxShellAppBar(
+        title: 'Editar Aluno',
+        onBack: () => safePopOrGo(context, '/alunos/${widget.aluno.id}'),
+        actions:
+            [
+              _salvando
+                  ? const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: FxLoading(strokeWidth: 2),
+                    ),
+                  )
+                  : TextButton(
+                    onPressed: _salvar,
+                    child: Text(
+                      'Salvar',
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-        ],
+            ],
       ),
       body: FadeTransition(
         opacity: CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut),

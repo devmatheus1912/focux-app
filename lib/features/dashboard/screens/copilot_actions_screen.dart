@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_dock.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -34,49 +36,16 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final brand = dark ? BrandPalette.accent(primary) : primary;
-    final bg = dark ? EagleTokens.darkBg : EagleTokens.paper;
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
     final actionsAsync = ref.watch(iaActionsProvider(_status));
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        toolbarHeight: 76,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: ink, size: 18),
-          onPressed:
-              () =>
-                  context.canPop()
-                      ? context.pop()
-                      : context.go('/dashboard/personal'),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Tarefas IA',
-              style: TextStyle(
-                color: ink,
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            Text(
-              'Command Center',
-              style: TextStyle(
-                color: mute,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.6,
-              ),
-            ),
-          ],
-        ),
+      appBar: FxShellAppBar(
+        title: 'Tarefas IA',
+        subtitle: 'Command Center',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
@@ -106,8 +75,6 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
             child: _StatusSegmentedControl(
               selected: _status,
               brand: brand,
-              cardBg: cardBg,
-              line: line,
               ink: ink,
               mute: mute,
               onChanged: (value) => setState(() => _status = value),
@@ -123,10 +90,9 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                     itemBuilder:
                         (_, __) => Container(
                           height: 94,
-                          decoration: BoxDecoration(
-                            color: cardBg,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: line),
+                          decoration: fxListCardDecoration(
+                            context,
+                            radius: 16,
                           ),
                         ),
                   ),
@@ -136,8 +102,6 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                     subtitle: 'Puxe para atualizar ou tente novamente.',
                     ink: ink,
                     mute: mute,
-                    cardBg: cardBg,
-                    line: line,
                     brand: brand,
                     onRefresh: _refresh,
                   ),
@@ -162,8 +126,6 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                           subtitle: _emptySubtitle(_status),
                           ink: ink,
                           mute: mute,
-                          cardBg: cardBg,
-                          line: line,
                           brand: brand,
                           onRefresh: _refresh,
                         ),
@@ -190,8 +152,6 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                             action: entry.value,
                             status: _status,
                             highlighted: _status == 'ABERTO' && entry.key == 0,
-                            cardBg: cardBg,
-                            line: line,
                             ink: ink,
                             mute: mute,
                             brand: brand,
@@ -216,8 +176,6 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                           _RadarSignalCard(
                             action: action,
                             status: _status,
-                            cardBg: cardBg,
-                            line: line,
                             ink: ink,
                             mute: mute,
                             brand: brand,
@@ -305,8 +263,6 @@ class _StatusSegmentedControl extends StatelessWidget {
   const _StatusSegmentedControl({
     required this.selected,
     required this.brand,
-    required this.cardBg,
-    required this.line,
     required this.ink,
     required this.mute,
     required this.onChanged,
@@ -314,8 +270,6 @@ class _StatusSegmentedControl extends StatelessWidget {
 
   final String selected;
   final Color brand;
-  final Color cardBg;
-  final Color line;
   final Color ink;
   final Color mute;
   final ValueChanged<String> onChanged;
@@ -330,11 +284,7 @@ class _StatusSegmentedControl extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 16),
       child: Row(
         children:
             _items.map((item) {
@@ -423,8 +373,6 @@ class _CopilotTaskCard extends StatelessWidget {
     required this.action,
     required this.status,
     required this.highlighted,
-    required this.cardBg,
-    required this.line,
     required this.ink,
     required this.mute,
     required this.brand,
@@ -437,8 +385,6 @@ class _CopilotTaskCard extends StatelessWidget {
   final FilaAcaoResumo action;
   final String status;
   final bool highlighted;
-  final Color cardBg;
-  final Color line;
   final Color ink;
   final Color mute;
   final Color brand;
@@ -453,27 +399,15 @@ class _CopilotTaskCard extends StatelessWidget {
     final isDone = status == 'CONCLUIDO';
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-      decoration: BoxDecoration(
-        color:
-            highlighted
-                ? Color.alphaBlend(brand.withValues(alpha: 0.035), cardBg)
-                : cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: highlighted ? brand.withValues(alpha: 0.34) : line,
-        ),
-        boxShadow:
-            highlighted
-                ? [
-                  BoxShadow(
-                    color: brand.withValues(alpha: 0.11),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                    spreadRadius: -14,
-                  ),
-                ]
-                : null,
-      ),
+      decoration:
+          highlighted
+              ? fxListCardDecoration(
+                context,
+                accent: brand,
+                selected: true,
+                radius: 16,
+              )
+              : fxListCardDecoration(context, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -595,8 +529,6 @@ class _RadarSignalCard extends StatelessWidget {
   const _RadarSignalCard({
     required this.action,
     required this.status,
-    required this.cardBg,
-    required this.line,
     required this.ink,
     required this.mute,
     required this.brand,
@@ -608,8 +540,6 @@ class _RadarSignalCard extends StatelessWidget {
 
   final FilaAcaoResumo action;
   final String status;
-  final Color cardBg;
-  final Color line;
   final Color ink;
   final Color mute;
   final Color brand;
@@ -622,11 +552,7 @@ class _RadarSignalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -786,8 +712,6 @@ class _IaActionsEmpty extends StatelessWidget {
     required this.subtitle,
     required this.ink,
     required this.mute,
-    required this.cardBg,
-    required this.line,
     required this.brand,
     required this.onRefresh,
   });
@@ -796,8 +720,6 @@ class _IaActionsEmpty extends StatelessWidget {
   final String subtitle;
   final Color ink;
   final Color mute;
-  final Color cardBg;
-  final Color line;
   final Color brand;
   final Future<void> Function() onRefresh;
 
@@ -813,8 +735,6 @@ class _IaActionsEmpty extends StatelessWidget {
             subtitle: subtitle,
             ink: ink,
             mute: mute,
-            cardBg: cardBg,
-            line: line,
             brand: brand,
             onRefresh: onRefresh,
           ),
@@ -830,8 +750,6 @@ class _IaActionsEmptyCard extends StatelessWidget {
     required this.subtitle,
     required this.ink,
     required this.mute,
-    required this.cardBg,
-    required this.line,
     required this.brand,
     required this.onRefresh,
   });
@@ -840,8 +758,6 @@ class _IaActionsEmptyCard extends StatelessWidget {
   final String subtitle;
   final Color ink;
   final Color mute;
-  final Color cardBg;
-  final Color line;
   final Color brand;
   final Future<void> Function() onRefresh;
 
@@ -849,11 +765,7 @@ class _IaActionsEmptyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: brand, radius: 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

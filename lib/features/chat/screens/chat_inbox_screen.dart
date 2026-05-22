@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
@@ -209,11 +211,11 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -225,75 +227,105 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                 onPressed: _showAlunoPicker,
                 child: const Icon(Icons.edit_outlined),
               ),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: ink,
-        automaticallyImplyLeading: !_selectionActive,
-        leading:
-            _selectionActive
-                ? IconButton(
-                  icon: Icon(Icons.close_rounded, color: ink),
-                  onPressed: _clearSelection,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(
+          _isSearching || _selectionActive ? 56 : 104,
+        ),
+        child:
+            _selectionActive || _isSearching
+                ? AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  foregroundColor: ink,
+                  automaticallyImplyLeading: !_selectionActive,
+                  leading:
+                      _selectionActive
+                          ? IconButton(
+                            icon: Icon(Icons.close_rounded, color: ink),
+                            onPressed: _clearSelection,
+                          )
+                          : IconButton(
+                            onPressed: () => safePopOrGo(context, '/dashboard/personal'),
+                            icon: Container(
+                              width: 38,
+                              height: 38,
+                              decoration: chrome.headerAction(radius: 12),
+                              child: Icon(
+                                Icons.arrow_back_ios_new,
+                                size: 16,
+                                color: ink,
+                              ),
+                            ),
+                          ),
+                  title:
+                      _selectionActive
+                          ? Text(
+                            _selectedAlunoIds.isEmpty
+                                ? 'Selecione mensagens'
+                                : '${_selectedAlunoIds.length} selecionada(s)',
+                            style: TextStyle(
+                              color: ink,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          )
+                          : TextField(
+                            controller: _searchCtrl,
+                            autofocus: true,
+                            style: TextStyle(color: ink, fontSize: 16),
+                            decoration: InputDecoration(
+                              hintText: 'Buscar em todas as conversas...',
+                              hintStyle: TextStyle(color: mute),
+                              border: InputBorder.none,
+                            ),
+                            onChanged: _performSearch,
+                          ),
+                  actions: [
+                    if (_selectionActive)
+                      IconButton(
+                        tooltip: 'Excluir mensagens',
+                        icon: const Icon(Icons.delete_outline_rounded),
+                        color:
+                            _selectedAlunoIds.isEmpty
+                                ? mute.withValues(alpha: 0.45)
+                                : EagleTokens.bad,
+                        onPressed:
+                            _selectedAlunoIds.isEmpty
+                                ? null
+                                : _deleteSelectedConversations,
+                      )
+                    else
+                      IconButton(
+                        icon: Icon(Icons.close, color: ink),
+                        onPressed: _toggleSearch,
+                      ),
+                  ],
                 )
-                : IconButton(
-                  icon: Icon(Icons.arrow_back_rounded, color: ink),
-                  onPressed: () => safePopOrGo(context, '/dashboard/personal'),
-                ),
-        title:
-            _selectionActive
-                ? Text(
-                  _selectedAlunoIds.isEmpty
-                      ? 'Selecione mensagens'
-                      : '${_selectedAlunoIds.length} selecionada(s)',
-                )
-                : _isSearching
-                ? TextField(
-                  controller: _searchCtrl,
-                  autofocus: true,
-                  style: TextStyle(color: ink, fontSize: 16),
-                  decoration: InputDecoration(
-                    hintText: 'Buscar em todas as conversas...',
-                    hintStyle: TextStyle(color: mute),
-                    border: InputBorder.none,
-                  ),
-                  onChanged: _performSearch,
-                )
-                : const Text('Mensagens'),
-        actions: [
-          if (_selectionActive)
-            IconButton(
-              tooltip: 'Excluir mensagens',
-              icon: const Icon(Icons.delete_outline_rounded),
-              color:
-                  _selectedAlunoIds.isEmpty
-                      ? mute.withValues(alpha: 0.45)
-                      : EagleTokens.bad,
-              onPressed:
-                  _selectedAlunoIds.isEmpty
-                      ? null
-                      : _deleteSelectedConversations,
-            )
-          else ...[
-            IconButton(
-              icon: Icon(_isSearching ? Icons.close : Icons.search, color: ink),
-              onPressed: _toggleSearch,
-            ),
-          ],
-        ],
-        bottom:
-            _isSearching || _selectionActive
-                ? null
-                : TabBar(
-                  controller: _tabCtrl,
-                  labelColor: primary,
-                  unselectedLabelColor: mute,
-                  indicatorColor: primary,
-                  indicatorSize: TabBarIndicatorSize.label,
-                  tabs: const [
-                    Tab(text: 'Todas'),
-                    Tab(text: 'Não lidas'),
-                    Tab(text: 'Arquivadas'),
+                : Column(
+                  children: [
+                    FxShellAppBar(
+                      title: 'Mensagens',
+                      onBack: () => safePopOrGo(context, '/dashboard/personal'),
+                      actions: [
+                        IconButton(
+                          icon: Icon(Icons.search_rounded, color: ink),
+                          onPressed: _toggleSearch,
+                        ),
+                      ],
+                    ),
+                    TabBar(
+                      controller: _tabCtrl,
+                      labelColor: primary,
+                      unselectedLabelColor: mute,
+                      indicatorColor: primary,
+                      indicatorSize: TabBarIndicatorSize.label,
+                      dividerColor: Colors.transparent,
+                      tabs: const [
+                        Tab(text: 'Todas'),
+                        Tab(text: 'Não lidas'),
+                        Tab(text: 'Arquivadas'),
+                      ],
+                    ),
                   ],
                 ),
       ),
@@ -388,19 +420,27 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkCard
-              : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder:
-          (ctx) => _AlunoPickerSheet(
-            onSelect: (aluno) {
-              Navigator.pop(ctx);
-              context.push('/alunos/${aluno.id}/chat', extra: aluno.nome);
-            },
+          (ctx) => Padding(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              16 + MediaQuery.of(ctx).padding.bottom,
+            ),
+            child: ShellSurface(
+              radius: 28,
+              child: _AlunoPickerSheet(
+                onSelect: (aluno) {
+                  Navigator.pop(ctx);
+                  context.push('/alunos/${aluno.id}/chat', extra: aluno.nome);
+                },
+              ),
+            ),
           ),
     );
   }
@@ -536,10 +576,11 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     final async = ref.watch(alunosProvider);
 
@@ -559,7 +600,7 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                    color: chrome.line,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -591,13 +632,10 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
                     hintText: 'Buscar aluno',
                     prefixIcon: const Icon(Icons.search_rounded),
                     filled: true,
-                    fillColor:
-                        isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                    fillColor: chrome.cardFill,
                     border: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(
-                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                      ),
+                      borderSide: BorderSide(color: chrome.line),
                     ),
                   ),
                 ),
@@ -674,22 +712,17 @@ class _AlunoContactTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final bg = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final soft = BrandPalette.soft(primary, dark: isDark);
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final soft = BrandPalette.soft(primary, dark: Theme.of(context).brightness == Brightness.dark);
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: line),
-        ),
+        decoration: fxListCardDecoration(context, radius: 16),
         child: Row(
           children: [
             aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty
@@ -765,13 +798,7 @@ class _SearchResultTile extends StatelessWidget {
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-          ),
-        ),
+        decoration: fxListCardDecoration(context, radius: 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -829,29 +856,38 @@ class _InboxState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 44, color: color),
-              const SizedBox(height: 12),
-              Text(title, style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 4),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: color),
-              ),
-            ],
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final card = ShellSurface(
+      radius: 18,
+      padding: const EdgeInsets.all(20),
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 44, color: color),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: TextStyle(color: ink, fontWeight: FontWeight.w700),
           ),
-        ),
+          const SizedBox(height: 4),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: mute),
+          ),
+          if (onTap != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              'Toque para tentar novamente',
+              style: TextStyle(color: mute, fontSize: 12),
+            ),
+          ],
+        ],
       ),
     );
+    return Center(child: card);
   }
 }
 
@@ -875,11 +911,9 @@ class _InboxTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final brandSoft = BrandPalette.soft(primary, dark: isDark);
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final brandSoft = BrandPalette.soft(primary, dark: Theme.of(context).brightness == Brightness.dark);
 
     return InkWell(
       onTap: onTap,
@@ -887,14 +921,15 @@ class _InboxTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        decoration: BoxDecoration(
-          color: selected ? primary.withValues(alpha: 0.10) : cardBg,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: selected ? primary : line,
-            width: selected ? 1.4 : 1,
-          ),
-        ),
+        decoration:
+            selected
+                ? fxListCardDecoration(
+                  context,
+                  radius: 18,
+                  accent: primary,
+                  selected: true,
+                )
+                : fxListCardDecoration(context, radius: 18),
         child: Row(
           children: [
             if (selecting) ...[

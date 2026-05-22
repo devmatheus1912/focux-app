@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -20,10 +22,9 @@ class HistoricoCheckinScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Histórico de Treinos'),
+      appBar: FxShellAppBar(
+        title: 'Histórico de Treinos',
+        onBack: () => safePopOrGo(context, '/checkin/treinos'),
       ),
       body: historicoAsync.when(
         loading: () => const FxLoading(),
@@ -75,6 +76,7 @@ class _HistoricoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final concluido = entry.status == 'CONCLUIDO';
     final iconName = concluido ? 'circle-check' : 'calendar';
     final iconColor = concluido ? EagleTokens.good : EagleTokens.warn;
@@ -82,8 +84,6 @@ class _HistoricoCard extends StatelessWidget {
         concluido
             ? EagleTokens.good.withValues(alpha: 0.12)
             : EagleTokens.warn.withValues(alpha: 0.12);
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
@@ -99,10 +99,10 @@ class _HistoricoCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(EagleTokens.radiusMd),
-        border: Border.all(color: line),
+      decoration: fxListCardDecoration(
+        context,
+        accent: concluido ? primary : null,
+        radius: EagleTokens.radiusMd,
       ),
       child: Row(
         children: [

@@ -4,8 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/treinos_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -140,8 +142,6 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final canSubmit = _nomeCtrl.text.trim().isNotEmpty && !_loading;
     final previewTitle =
@@ -159,62 +159,20 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title:
+            widget.alunoId == null
+                ? 'Novo Treino'
+                : 'Treino vinculado',
+        subtitle:
+            widget.alunoId == null ? 'PLANO BASE' : 'PLANO DO ALUNO',
+        onBack: () => safePopOrGo(context, '/treinos'),
+      ),
       body: SafeArea(
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.alunoId == null
-                            ? 'PLANO BASE'
-                            : 'PLANO DO ALUNO',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: primary,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.alunoId == null
-                            ? 'Novo Treino'
-                            : 'Treino vinculado',
-                        style: TextStyle(
-                          fontSize: 28,
-                          color: ink,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close_rounded, color: mute),
-                    onPressed: () => context.pop(),
-                    style: IconButton.styleFrom(
-                      backgroundColor:
-                          isDark ? EagleTokens.darkCard : EagleTokens.card,
-                      side: BorderSide(
-                        color:
-                            isDark
-                                ? EagleTokens.darkLine
-                                : EagleTokens.lineSoft,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
             Expanded(
               child: FadeTransition(
                 opacity: CurvedAnimation(
@@ -577,20 +535,11 @@ class _PresetRail extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               width: 142,
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color:
-                    active
-                        ? BrandPalette.soft(primary, dark: isDark)
-                        : (isDark ? EagleTokens.darkCard : EagleTokens.card),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color:
-                      active
-                          ? primary.withValues(alpha: 0.38)
-                          : (isDark
-                              ? EagleTokens.darkLine
-                              : EagleTokens.lineSoft),
-                ),
+              decoration: fxListCardDecoration(
+                context,
+                accent: active ? primary : null,
+                selected: active,
+                radius: 18,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -661,20 +610,11 @@ class _LevelSelector extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
               padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 8),
-              decoration: BoxDecoration(
-                color:
-                    sel
-                        ? _niveisCor[i].withValues(alpha: 0.11)
-                        : (isDark ? EagleTokens.darkCard : EagleTokens.card),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color:
-                      sel
-                          ? _niveisCor[i].withValues(alpha: 0.38)
-                          : (isDark
-                              ? EagleTokens.darkLine
-                              : EagleTokens.lineSoft),
-                ),
+              decoration: fxListCardDecoration(
+                context,
+                accent: sel ? _niveisCor[i] : null,
+                selected: sel,
+                radius: 16,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -4,6 +4,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../data/feed_repository.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -87,7 +88,6 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
@@ -95,16 +95,12 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.72,
         child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: bg,
+          decoration: fxListCardDecoration(
+            context,
+            accent: primary,
+            radius: 28,
+          ).copyWith(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.12),
-                blurRadius: 24,
-                offset: const Offset(0, -8),
-              ),
-            ],
           ),
           child: Column(
             children: [

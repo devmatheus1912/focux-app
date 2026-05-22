@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/analytics_repository.dart';
 import '../providers/analytics_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -20,6 +22,10 @@ class AnalyticsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Analytics',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
+      ),
       body: async.when(
         loading: () => Center(child: FxLoading(color: primary)),
         error:
@@ -137,12 +143,10 @@ class _AnalyticsBody extends StatelessWidget {
                       horizontal: 12,
                       vertical: 7,
                     ),
-                    decoration: BoxDecoration(
-                      color: dark ? EagleTokens.darkCard : EagleTokens.card,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: dark ? EagleTokens.darkLine : EagleTokens.line,
-                      ),
+                    decoration: fxListCardDecoration(
+                      context,
+                      accent: brand,
+                      radius: 10,
                     ),
                     child: Row(
                       children: [
@@ -177,35 +181,21 @@ class _AnalyticsBody extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               childAspectRatio: 1.5,
               children: [
-                _KpiCard(
-                  label: 'MRR',
-                  value: 'R\$ ${mrr.toInt()}',
-                  sub: 'ativos esta semana',
-                  icon: Icons.people_outline,
-                  dark: dark,
-                ),
+                _KpiCard(label: 'MRR', value: 'R\$ ${mrr.toInt()}', dark: dark),
                 _KpiCard(
                   label: 'CHURN',
                   value: '${churn.toStringAsFixed(1)}%',
-                  sub: 'ativos este mês',
-                  icon: Icons.calendar_month_outlined,
                   dark: dark,
                 ),
                 _KpiCard(
                   label: 'LTV',
                   value: 'R\$ ${ltv.toInt()}',
-                  sub: 'voltaram em 7 dias',
-                  icon: Icons.loop,
                   dark: dark,
-                  highlight: data.retencaoD7 >= 40,
                 ),
                 _KpiCard(
                   label: 'CAC',
                   value: 'R\$ ${cac.toInt()}',
-                  sub: 'voltaram em 30 dias',
-                  icon: Icons.trending_up,
                   dark: dark,
-                  highlight: data.retencaoD30 >= 20,
                 ),
               ],
             ),
@@ -277,17 +267,14 @@ class _KpiCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.dark,
-    String? sub,
-    IconData? icon,
-    bool highlight = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final primary = Theme.of(context).colorScheme.primary;
     final delta = switch (label) {
       'CHURN' => -2.4,
       'CAC' => -3.2,
@@ -299,11 +286,11 @@ class _KpiCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(
+        context,
+        accent: primary,
+        radius: 18,
+      ).copyWith(border: Border.all(color: line)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -386,10 +373,10 @@ class _FunilCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final primary = Theme.of(context).colorScheme.primary;
 
     final steps = [
       _FunilStep('Cadastrados', funil.cadastrados, 1.0),
@@ -412,11 +399,11 @@ class _FunilCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(
+        context,
+        accent: primary,
+        radius: 22,
+      ).copyWith(border: Border.all(color: line)),
       child: Column(
         children: [
           Row(
@@ -543,7 +530,6 @@ class _WauChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -553,11 +539,11 @@ class _WauChart extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(
+        context,
+        accent: primary,
+        radius: 22,
+      ).copyWith(border: Border.all(color: line)),
       child: Column(
         children: [
           Row(
@@ -672,7 +658,6 @@ class _CohortTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -680,11 +665,11 @@ class _CohortTable extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(
+        context,
+        accent: primary,
+        radius: 22,
+      ).copyWith(border: Border.all(color: line)),
       child: Column(
         children: [
           // Header
@@ -817,20 +802,20 @@ class _InadimplenciaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
     final line = dark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final churn = data.taxaInadimplencia;
     final isGood = churn < 5.0;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(
+        context,
+        accent: primary,
+        radius: 22,
+      ).copyWith(border: Border.all(color: line)),
       child: Column(
         children: [
           Row(

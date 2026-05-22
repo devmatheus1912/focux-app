@@ -6,8 +6,9 @@ import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
@@ -196,8 +197,6 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
@@ -208,133 +207,60 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     final medios = _alertas.where((a) => a.score == 1).length;
     const saudaveis = 0;
 
+    void openFiltros() {
+      showModalBottomSheet(
+        context: context,
+        builder:
+            (sheetContext) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: const Text('Todos'),
+                    onTap: () {
+                      setState(() => _filtroScoreMin = null);
+                      Navigator.pop(sheetContext);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Score ≥ 2 (alto)'),
+                    onTap: () {
+                      setState(() => _filtroScoreMin = 2);
+                      Navigator.pop(sheetContext);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Score = 1 (médio)'),
+                    onTap: () {
+                      setState(() => _filtroScoreMin = 1);
+                      Navigator.pop(sheetContext);
+                    },
+                  ),
+                ],
+              ),
+            ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Alertas de Risco',
+        subtitle: 'MOTOR ANTI-CHURN',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        actions: [
+          IconButton(
+            tooltip: 'Filtrar',
+            onPressed: openFiltros,
+            icon: Icon(Icons.filter_list, color: mute),
+          ),
+        ],
+      ),
       body: SafeArea(
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onTap:
-                            () => safePopOrGo(context, '/dashboard/personal'),
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: Icon(
-                            Icons.arrow_back_ios_new,
-                            size: 24,
-                            color: ink,
-                          ),
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'MOTOR ANTI-CHURN',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color:
-                                  isDark
-                                      ? const Color(0xFFFF8B8B)
-                                      : EagleTokens.bad,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.6,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Alertas de Risco',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w700,
-                              color: ink,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  InkWell(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder:
-                            (sheetContext) => SafeArea(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ListTile(
-                                    title: const Text('Todos'),
-                                    onTap: () {
-                                      setState(() => _filtroScoreMin = null);
-                                      Navigator.pop(sheetContext);
-                                    },
-                                  ),
-                                  ListTile(
-                                    title: const Text('Score ≥ 2 (alto)'),
-                                    onTap: () {
-                                      setState(() => _filtroScoreMin = 2);
-                                      Navigator.pop(sheetContext);
-                                    },
-                                  ),
-                                  ListTile(
-                                    title: const Text('Score = 1 (médio)'),
-                                    onTap: () {
-                                      setState(() => _filtroScoreMin = 1);
-                                      Navigator.pop(sheetContext);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            isDark
-                                ? Colors.white.withValues(alpha: 0.06)
-                                : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: line),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.filter_list, size: 14, color: mute),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Filtrar',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: mute,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
             if (_loading)
               const Expanded(child: FxLoading())
             else ...[
@@ -574,17 +500,11 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
 
                             return Container(
                               margin: const EdgeInsets.only(bottom: 10),
-                              decoration: BoxDecoration(
-                                color: cardBg,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color:
-                                      a.score >= 2
-                                          ? EagleTokens.bad.withValues(
-                                            alpha: 0.4,
-                                          )
-                                          : line,
-                                ),
+                              decoration: fxListCardDecoration(
+                                context,
+                                accent:
+                                    a.score >= 2 ? EagleTokens.bad : null,
+                                radius: 20,
                               ),
                               child: Column(
                                 children: [

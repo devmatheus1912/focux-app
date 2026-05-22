@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
@@ -52,8 +53,7 @@ class ExercicioCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
-    final card = isDark ? EagleTokens.darkCardHi : Colors.white;
+    final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final subtitle = [
@@ -70,8 +70,7 @@ class ExercicioCard extends ConsumerWidget {
     final hasVideo = exercicio.videoUrl?.isNotEmpty == true;
 
     return Material(
-      color: card,
-      borderRadius: BorderRadius.circular(16),
+      color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap:
@@ -79,12 +78,11 @@ class ExercicioCard extends ConsumerWidget {
         onLongPress: onLongPress,
         child: Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: selected ? Theme.of(context).colorScheme.primary : line,
-              width: selected ? 2 : 1,
-            ),
+          decoration: fxListCardDecoration(
+            context,
+            accent: primary,
+            radius: 16,
+            selected: selected,
           ),
           child: Row(
             children: [

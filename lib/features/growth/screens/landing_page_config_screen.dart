@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../perfil/providers/perfil_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -16,13 +18,16 @@ class LandingPageConfigScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final bg = dark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final perfilAsync = ref.watch(perfilProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Landing page',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
+      ),
       body: perfilAsync.when(
         loading: () => const FxLoading(),
         error:
@@ -114,7 +119,6 @@ class LandingPageConfigScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 54),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
                   child: Column(
@@ -212,17 +216,7 @@ class LandingPageConfigScreen extends ConsumerWidget {
                             horizontal: 14,
                             vertical: 12,
                           ),
-                          decoration: BoxDecoration(
-                            color:
-                                dark ? EagleTokens.darkCard : EagleTokens.card,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color:
-                                  dark
-                                      ? EagleTokens.darkLine
-                                      : EagleTokens.line,
-                            ),
-                          ),
+                          decoration: fxListCardDecoration(context, accent: brand),
                           child: Row(
                             children: [
                               Expanded(
@@ -260,6 +254,7 @@ class LandingPageConfigScreen extends ConsumerWidget {
                                 label: 'Servicos',
                                 value: servicesCount.toString(),
                                 dark: dark,
+                                accent: brand,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -268,6 +263,7 @@ class LandingPageConfigScreen extends ConsumerWidget {
                                 label: 'Pacotes',
                                 value: packagesCount.toString(),
                                 dark: dark,
+                                accent: brand,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -276,6 +272,7 @@ class LandingPageConfigScreen extends ConsumerWidget {
                                 label: 'FAQ',
                                 value: faqCount.toString(),
                                 dark: dark,
+                                accent: brand,
                               ),
                             ),
                           ],
@@ -306,16 +303,9 @@ class LandingPageConfigScreen extends ConsumerWidget {
                             horizontal: 14,
                             vertical: 13,
                           ),
-                          decoration: BoxDecoration(
-                            color:
-                                dark ? EagleTokens.darkCard : EagleTokens.card,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color:
-                                  dark
-                                      ? EagleTokens.darkLine
-                                      : EagleTokens.line,
-                            ),
+                          decoration: fxListCardDecoration(
+                            context,
+                            accent: brand,
                           ),
                           child: Row(
                             children: [
@@ -412,24 +402,20 @@ class _MetricCard extends StatelessWidget {
   final String label;
   final String value;
   final bool dark;
+  final Color accent;
 
   const _MetricCard({
     required this.label,
     required this.value,
     required this.dark,
+    required this.accent,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: dark ? EagleTokens.darkCard : EagleTokens.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: dark ? EagleTokens.darkLine : EagleTokens.line,
-        ),
-      ),
+      decoration: fxListCardDecoration(context, accent: accent, radius: 12),
       child: Column(
         children: [
           Text(

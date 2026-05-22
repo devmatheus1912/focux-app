@@ -6,12 +6,14 @@ import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
-// ─── Providers ───────────────────────────────────────────────────────────────
+import '../../../core/router/safe_navigation.dart';
 
+// ─── Providers ───────────────────────────────────────────────────────────────
 final medidasProvider = FutureProvider.family<List<MedidaCorporal>, int>((
   ref,
   alunoId,
@@ -84,35 +86,25 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Evolução — ${widget.alunoNome}',
-          style: TextStyle(
-            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
-        ),
-        iconTheme: IconThemeData(
-          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-        ),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: primary,
-          labelColor: primary,
-          unselectedLabelColor:
-              isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-          indicatorWeight: 2.5,
-          tabs: const [
-            Tab(text: 'Medidas Corporais'),
-            Tab(text: 'Recordes Pessoais'),
-          ],
-        ),
+      appBar: FxShellAppBar(
+        title: 'Evolução — ${widget.alunoNome}',
+        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          TabBar(
+            controller: _tabController,
+            indicatorColor: primary,
+            labelColor: primary,
+            unselectedLabelColor:
+                isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            indicatorWeight: 2.5,
+            tabs: const [
+              Tab(text: 'Medidas Corporais'),
+              Tab(text: 'Recordes Pessoais'),
+            ],
+          ),
           if (variacaoText != null && variacaoText.isNotEmpty)
             _BannerVariacao(texto: variacaoText),
           Expanded(
@@ -390,8 +382,13 @@ class _TabMedidas extends StatelessWidget {
           itemCount: ordenada.length + (weightData.length > 1 ? 1 : 0),
           itemBuilder: (_, i) {
             if (weightData.length > 1 && i == 0) {
-              return Card(
+              return Container(
                 margin: const EdgeInsets.only(bottom: 12),
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: EagleTokens.good,
+                  radius: 16,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: FxSparkline(
@@ -419,8 +416,10 @@ class _CardMedida extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final primary = Theme.of(context).colorScheme.primary;
+    return Container(
       margin: const EdgeInsets.only(bottom: 10),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 16),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -511,44 +510,48 @@ class _CardRecorde extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        leading: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: const Color(0x33FFD37A),
-            borderRadius: BorderRadius.circular(12),
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: fxListCardDecoration(context, accent: primary, radius: 16),
+        child: ListTile(
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0x33FFD37A),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: const Icon(Icons.emoji_events, color: EagleTokens.gold),
           ),
-          alignment: Alignment.center,
-          child: const Icon(Icons.emoji_events, color: EagleTokens.gold),
-        ),
-        title: Text(
-          recorde.exercicioNome,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          [
-            if (recorde.cargaKg != null)
-              '${recorde.cargaKg!.toStringAsFixed(1)}kg',
-            if (recorde.repeticoes != null) '${recorde.repeticoes} reps',
-            fxDateShort(DateTime.parse(recorde.data)),
-          ].join(' × '),
-          style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(
-            color: primary.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(999),
+          title: Text(
+            recorde.exercicioNome,
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          child: Text(
-            'NOVO PR',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: primary,
+          subtitle: Text(
+            [
+              if (recorde.cargaKg != null)
+                '${recorde.cargaKg!.toStringAsFixed(1)}kg',
+              if (recorde.repeticoes != null) '${recorde.repeticoes} reps',
+              fxDateShort(DateTime.parse(recorde.data)),
+            ].join(' × '),
+            style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
+          ),
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              'NOVO PR',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: primary,
+              ),
             ),
           ),
         ),

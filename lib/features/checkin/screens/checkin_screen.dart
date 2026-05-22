@@ -11,6 +11,8 @@ import 'package:video_player/video_player.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -417,16 +419,15 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final dark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
     final brand = dark ? BrandPalette.accent(primary) : primary;
     final brandDeep = BrandPalette.deep(primary);
     final brandSoft = BrandPalette.soft(primary, dark: dark);
-    final bg = dark ? EagleTokens.darkBg : EagleTokens.paper;
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
+    final line = chrome.line;
 
     if (_loading) {
       return Scaffold(
@@ -466,8 +467,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                   brand: brand,
                   brandDeep: brandDeep,
                   brandSoft: brandSoft,
-                  bg: bg,
-                  cardBg: cardBg,
                   ink: ink,
                   mute: mute,
                   line: line,
@@ -491,7 +490,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                       ink: ink,
                       mute: mute,
                       line: line,
-                      cardBg: cardBg,
                       feedback: item.feedback,
                       onFeedback: (value) => _setFeedback(item, value),
                       onMarcar: (s) => _marcar(item, s),
@@ -579,7 +577,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                   totalSeconds: _restTotalSeconds,
                   brand: brand,
                   dark: dark,
-                  cardBg: cardBg,
                   ink: ink,
                   mute: mute,
                   line: line,
@@ -610,8 +607,6 @@ class _WorkoutHeader extends StatelessWidget {
   final Color brand;
   final Color brandDeep;
   final Color brandSoft;
-  final Color bg;
-  final Color cardBg;
   final Color ink;
   final Color mute;
   final Color line;
@@ -630,8 +625,6 @@ class _WorkoutHeader extends StatelessWidget {
     required this.brand,
     required this.brandDeep,
     required this.brandSoft,
-    required this.bg,
-    required this.cardBg,
     required this.ink,
     required this.mute,
     required this.line,
@@ -641,14 +634,8 @@ class _WorkoutHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: dark ? [brandDeep, bg] : [brandSoft, bg],
-        ),
-      ),
       padding: const EdgeInsets.fromLTRB(20, 58, 20, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -657,15 +644,11 @@ class _WorkoutHeader extends StatelessWidget {
             children: [
               InkWell(
                 onTap: onBack,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: line),
-                  ),
+                  width: 38,
+                  height: 38,
+                  decoration: chrome.headerAction(radius: 12),
                   child: Icon(Icons.chevron_left_rounded, color: ink),
                 ),
               ),
@@ -701,103 +684,95 @@ class _WorkoutHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          Text(
-            duration,
-            style: GoogleFonts.outfit(
-              color: ink,
-              fontSize: 56,
-              fontWeight: FontWeight.w600,
-              height: 0.96,
-              letterSpacing: -2,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-          const SizedBox(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              backgroundColor:
-                  dark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-              valueColor: AlwaysStoppedAnimation(brand),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: _HeaderMetric(
-                  label: 'Exercicios',
-                  value: '$concluido/$total',
-                  ink: ink,
-                  mute: mute,
-                  cardBg: cardBg,
-                  line: line,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _HeaderMetric(
-                  label: 'Series',
-                  value:
-                      totalSeries == 0
-                          ? '$doneSeries'
-                          : '$doneSeries/$totalSeries',
-                  ink: ink,
-                  mute: mute,
-                  cardBg: cardBg,
-                  line: line,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: line),
-            ),
-            child: Row(
+          ShellSurface(
+            accent: brand,
+            radius: 24,
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: brandSoft,
-                    borderRadius: BorderRadius.circular(14),
+                Text(
+                  duration,
+                  style: GoogleFonts.outfit(
+                    color: ink,
+                    fontSize: 56,
+                    fontWeight: FontWeight.w600,
+                    height: 0.96,
+                    letterSpacing: -2,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
-                  child: Icon(Icons.near_me_rounded, color: brand, size: 18),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Proximo foco',
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        nextExercise,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 14),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 8,
+                    backgroundColor: line,
+                    valueColor: AlwaysStoppedAnimation(brand),
                   ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _HeaderMetric(
+                        label: 'Exercicios',
+                        value: '$concluido/$total',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _HeaderMetric(
+                        label: 'Series',
+                        value:
+                            totalSeries == 0
+                                ? '$doneSeries'
+                                : '$doneSeries/$totalSeries',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: brandSoft,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(Icons.near_me_rounded, color: brand, size: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Proximo foco',
+                            style: TextStyle(
+                              color: mute,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            nextExercise,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -811,29 +786,19 @@ class _WorkoutHeader extends StatelessWidget {
 class _HeaderMetric extends StatelessWidget {
   final String label;
   final String value;
-  final Color ink;
-  final Color mute;
-  final Color cardBg;
-  final Color line;
 
   const _HeaderMetric({
     required this.label,
     required this.value,
-    required this.ink,
-    required this.mute,
-    required this.cardBg,
-    required this.line,
   });
 
   @override
   Widget build(BuildContext context) {
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 16),
       child: Column(
         children: [
           Text(
@@ -868,7 +833,6 @@ class _SerieCard extends StatelessWidget {
   final Color ink;
   final Color mute;
   final Color line;
-  final Color cardBg;
   final String? feedback;
   final void Function(String) onFeedback;
   final void Function(int) onMarcar;
@@ -883,7 +847,6 @@ class _SerieCard extends StatelessWidget {
     required this.ink,
     required this.mute,
     required this.line,
-    required this.cardBg,
     required this.feedback,
     required this.onFeedback,
     required this.onMarcar,
@@ -910,14 +873,15 @@ class _SerieCard extends StatelessWidget {
         ee.rpeAnterior != null;
 
     return Container(
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: ee.concluido ? EagleTokens.good : line,
-          width: ee.concluido ? 1.5 : 1,
-        ),
-      ),
+      decoration:
+          ee.concluido
+              ? fxListCardDecoration(
+                context,
+                radius: 22,
+                accent: EagleTokens.good,
+                selected: true,
+              )
+              : fxListCardDecoration(context, radius: 22),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
         initiallyExpanded: !ee.concluido,
@@ -1127,10 +1091,7 @@ class _SerieCard extends StatelessWidget {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color:
-                            dark
-                                ? Colors.white.withValues(alpha: 0.06)
-                                : EagleTokens.lineSoft,
+                        color: ShellChrome.of(context).cardFill,
                         borderRadius: BorderRadius.circular(24),
                       ),
                       child: Row(
@@ -1346,12 +1307,7 @@ class _ExerciseNote extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color:
-            dark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.lineSoft,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 14),
       child: Text(
         text,
         style: TextStyle(
@@ -1389,10 +1345,10 @@ class _ExecutionGuidanceCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: dark ? 0.14 : 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: line),
+      decoration: fxListCardDecoration(
+        context,
+        radius: 14,
+        accent: color,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1458,10 +1414,10 @@ class _PreviousPerformance extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: dark ? const Color(0xFF10243C) : const Color(0xFFEAF4FF),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: line),
+      decoration: fxListCardDecoration(
+        context,
+        radius: 14,
+        accent: Theme.of(context).colorScheme.primary,
       ),
       child: Row(
         children: [
@@ -1527,11 +1483,7 @@ class _SeriesHistory extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: dark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1669,26 +1621,24 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dark = theme.brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final dark = chrome.isDark;
     final primary = theme.colorScheme.primary;
     final brand = dark ? BrandPalette.accent(primary) : primary;
-    final bg = dark ? EagleTokens.darkCard : Colors.white;
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
+    final line = chrome.line;
 
     return AnimatedPadding(
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          border: Border(top: BorderSide(color: line)),
-        ),
-        child: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: ShellSurface(
+          radius: 28,
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1698,7 +1648,7 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
                   width: 42,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: mute.withValues(alpha: 0.35),
+                    color: line,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -1803,14 +1753,7 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color:
-                      dark
-                          ? Colors.white.withValues(alpha: 0.05)
-                          : EagleTokens.lineSoft,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: line),
-                ),
+                decoration: fxListCardDecoration(context, radius: 16),
                 child: Column(
                   children: [
                     Row(
@@ -1888,6 +1831,7 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -2014,13 +1958,10 @@ class _TinyMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: dark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 13),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -2540,7 +2481,6 @@ class _RestTimerDock extends StatelessWidget {
   final int totalSeconds;
   final Color brand;
   final bool dark;
-  final Color cardBg;
   final Color ink;
   final Color mute;
   final Color line;
@@ -2551,7 +2491,6 @@ class _RestTimerDock extends StatelessWidget {
     required this.totalSeconds,
     required this.brand,
     required this.dark,
-    required this.cardBg,
     required this.ink,
     required this.mute,
     required this.line,
@@ -2560,6 +2499,7 @@ class _RestTimerDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     final fraction = totalSeconds <= 0 ? 0.0 : seconds / totalSeconds;
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -2568,10 +2508,7 @@ class _RestTimerDock extends StatelessWidget {
         child: Container(
           width: 160,
           height: 160,
-          decoration: BoxDecoration(
-            color: cardBg.withValues(alpha: 0.85),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: line),
+          decoration: chrome.panel(radius: 20).copyWith(
             boxShadow: const [
               BoxShadow(
                 color: Colors.black26,

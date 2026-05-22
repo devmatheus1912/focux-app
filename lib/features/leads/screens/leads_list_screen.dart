@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
@@ -62,19 +64,9 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Funil de Leads',
-          style: TextStyle(
-            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        iconTheme: IconThemeData(
-          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-        ),
+      appBar: FxShellAppBar(
+        title: 'Funil de Leads',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
         actions: [
           IconButton(
             icon: Icon(
@@ -315,27 +307,12 @@ class _KanbanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border(left: BorderSide(color: color, width: 3)),
-        boxShadow:
-            isDark
-                ? null
-                : [
-                  const BoxShadow(
-                    color: Color(0x0A000000),
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-      ),
+      decoration: fxListCardDecoration(context, accent: color, radius: 12),
       child: ListTile(
         onTap: onTap,
         contentPadding: const EdgeInsets.fromLTRB(12, 4, 8, 4),

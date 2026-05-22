@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -57,17 +58,9 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => safePopOrGo(context, '/dashboard/personal'),
-        ),
-        title: Text(
-          'Qualidade Operacional',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 17),
-        ),
+      appBar: FxShellAppBar(
+        title: 'Qualidade Operacional',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
       body: asyncData.when(
         loading: () => const FxLoading(),
@@ -97,7 +90,6 @@ class _QualidadeBody extends StatelessWidget {
     final accent = BrandPalette.accent(primary);
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final lineBg = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
     final scoreColor =
@@ -236,10 +228,10 @@ class _QualidadeBody extends StatelessWidget {
           // ── Score Breakdown ──
           Container(
             padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(EagleTokens.radiusLg),
-              border: Border.all(color: lineBg),
+            decoration: fxListCardDecoration(
+              context,
+              accent: primary,
+              radius: EagleTokens.radiusLg,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,8 +304,7 @@ class _QualidadeBody extends StatelessWidget {
                         (data.ticketPessoal + data.ticketMercado)
                     : 0.5,
             isDark: isDark,
-            cardBg: cardBg,
-            lineBg: lineBg,
+            lineDivider: lineBg,
             ink: ink,
             mute: mute,
             primary: primary,
@@ -333,8 +324,7 @@ class _QualidadeBody extends StatelessWidget {
             isAbove: data.retencaoPessoal >= data.retencaoMercado,
             ratio: data.retencaoPessoal / 100,
             isDark: isDark,
-            cardBg: cardBg,
-            lineBg: lineBg,
+            lineDivider: lineBg,
             ink: ink,
             mute: mute,
             primary: primary,
@@ -474,7 +464,7 @@ class _MetricCompareCard extends StatelessWidget {
   final bool isAbove;
   final double ratio;
   final bool isDark;
-  final Color cardBg, lineBg, ink, mute, primary, accent;
+  final Color lineDivider, ink, mute, primary, accent;
 
   const _MetricCompareCard({
     required this.icon,
@@ -486,8 +476,7 @@ class _MetricCompareCard extends StatelessWidget {
     required this.isAbove,
     required this.ratio,
     required this.isDark,
-    required this.cardBg,
-    required this.lineBg,
+    required this.lineDivider,
     required this.ink,
     required this.mute,
     required this.primary,
@@ -500,18 +489,10 @@ class _MetricCompareCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(EagleTokens.radiusLg),
-        border: Border.all(color: lineBg),
-        boxShadow: [
-          if (!isDark)
-            BoxShadow(
-              color: const Color(0xFF111318).withValues(alpha: 0.03),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-        ],
+      decoration: fxListCardDecoration(
+        context,
+        accent: primary,
+        radius: EagleTokens.radiusLg,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -623,7 +604,7 @@ class _MetricCompareCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(width: 1, height: 36, color: lineBg),
+              Container(width: 1, height: 36, color: lineDivider),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(

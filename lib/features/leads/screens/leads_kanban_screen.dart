@@ -8,6 +8,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 const _kCols = ['LEAD', 'TESTE', 'ATIVO', 'INADIMPLENTE', 'CANCELADO'];
@@ -173,106 +174,29 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final brand = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Funil de Leads',
+        subtitle: 'CRM',
+        onBack: () => safePopOrGo(context, '/leads'),
+        actions: [
+          TextButton.icon(
+            onPressed: _novoLeadRapido,
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Lead'),
+          ),
+        ],
+      ),
       body: SafeArea(
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onTap: () => safePopOrGo(context, '/leads'),
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: Icon(
-                            Icons.arrow_back_ios_new,
-                            size: 24,
-                            color: ink,
-                          ),
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'CRM',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: brand,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.6,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Funil de Leads',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w700,
-                              color: ink,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  InkWell(
-                    onTap: _novoLeadRapido,
-                    borderRadius: BorderRadius.circular(999),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: brand,
-                        borderRadius: BorderRadius.circular(999),
-                        boxShadow: [
-                          if (!isDark)
-                            BoxShadow(
-                              color: brand.withValues(alpha: 0.4),
-                              blurRadius: 16,
-                              offset: const Offset(0, 6),
-                            ),
-                        ],
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.add, color: Colors.white, size: 18),
-                          SizedBox(width: 6),
-                          Text(
-                            'Lead',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
             if (_showIntro)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -327,10 +251,10 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                   horizontal: 8,
                                   vertical: 10,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: cardBg,
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: line),
+                                decoration: fxListCardDecoration(
+                                  context,
+                                  accent: cColor,
+                                  radius: 14,
                                 ),
                                 child: Column(
                                   children: [
@@ -556,7 +480,6 @@ class _LeadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
@@ -573,15 +496,10 @@ class _LeadCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border(
-          left: BorderSide(color: cColor, width: 3),
-          top: BorderSide(color: isDark ? Colors.transparent : line),
-          right: BorderSide(color: isDark ? Colors.transparent : line),
-          bottom: BorderSide(color: isDark ? Colors.transparent : line),
-        ),
+      decoration: fxListCardDecoration(
+        context,
+        accent: cColor,
+        radius: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

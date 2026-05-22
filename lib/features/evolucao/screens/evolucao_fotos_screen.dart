@@ -2,11 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feedback_helper.dart';
 
 class EvolucaoFotosScreen extends ConsumerStatefulWidget {
@@ -107,12 +109,15 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: Text('Evolução · ${widget.alunoNome}'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+      appBar: FxShellAppBar(
+        title: 'Evolução · ${widget.alunoNome}',
+        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}/evolucao'),
         actions: [
-          IconButton(icon: const Icon(Icons.add_a_photo), onPressed: _addFoto),
+          IconButton(
+            tooltip: 'Adicionar foto',
+            icon: const Icon(Icons.add_a_photo),
+            onPressed: _addFoto,
+          ),
         ],
       ),
       body:

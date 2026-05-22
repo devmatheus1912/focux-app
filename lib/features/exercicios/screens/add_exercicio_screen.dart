@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/enums.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
@@ -115,56 +117,21 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
     final bottom = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Novo Exercício',
+        subtitle: 'NOVO ITEM',
+        onBack: () => safePopOrGo(context, '/exercicios'),
+      ),
       body: SafeArea(
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'NOVO ITEM',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: mute,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Novo Exercício',
-                        style: TextStyle(
-                          fontSize: 28,
-                          color: ink,
-                          height: 1.04,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close, color: mute),
-                    onPressed: () => context.pop(),
-                  ),
-                ],
-              ),
-            ),
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 118 + bottom),
@@ -371,7 +338,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       ),
       bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(
-          color: bg,
+          color: isDark ? EagleTokens.darkBg : EagleTokens.paper,
           border: Border(
             top: BorderSide(
               color:
@@ -598,11 +565,7 @@ class _SectionCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final collapsed = onToggle != null && !expanded;
-    final stroke =
-        isDark
-            ? EagleTokens.darkLine
-            : EagleTokens.line.withValues(alpha: collapsed ? 0.7 : 0.92);
-    final surface = isDark ? EagleTokens.darkCardHi : Colors.white;
+    final r = collapsed ? 18.0 : 20.0;
     final header = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -659,23 +622,7 @@ class _SectionCard extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOutCubic,
       padding: EdgeInsets.all(collapsed ? 12 : 14),
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(collapsed ? 18 : 20),
-        border: Border.all(color: stroke),
-        boxShadow:
-            expanded
-                ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(
-                      alpha: isDark ? 0.18 : 0.035,
-                    ),
-                    blurRadius: 18,
-                    offset: const Offset(0, 10),
-                  ),
-                ]
-                : null,
-      ),
+      decoration: fxListCardDecoration(context, radius: r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -929,11 +876,9 @@ class _EnumPickerCompact<T extends Enum> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkCardHi : Colors.white;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
     return SafeArea(
       child: LayoutBuilder(
@@ -945,18 +890,7 @@ class _EnumPickerCompact<T extends Enum> extends StatelessWidget {
               width: width,
               margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-              decoration: BoxDecoration(
-                color: bg,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: line),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.14),
-                    blurRadius: 30,
-                    offset: const Offset(0, 18),
-                  ),
-                ],
-              ),
+              decoration: fxListCardDecoration(context, accent: primary, radius: 24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1101,7 +1035,6 @@ class _EnumPickerFullScreenState<T extends Enum>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkCardHi : Colors.white;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
@@ -1113,7 +1046,7 @@ class _EnumPickerFullScreenState<T extends Enum>
         }).toList();
 
     return ColoredBox(
-      color: bg,
+      color: Colors.transparent,
       child: SafeArea(
         child: Padding(
           padding: EdgeInsets.fromLTRB(20, 14, 20, 12 + bottom),
@@ -1241,7 +1174,6 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkCardHi : Colors.white;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
@@ -1265,19 +1197,8 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
           height: sheetHeight,
           margin: EdgeInsets.zero,
           padding: EdgeInsets.fromLTRB(16, 10, 16, 12 + bottom),
-          decoration: BoxDecoration(
-            color: bg,
+          decoration: fxListCardDecoration(context, accent: primary, radius: 26).copyWith(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
-            border: Border.all(
-              color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.32 : 0.12),
-                blurRadius: 28,
-                offset: const Offset(0, -8),
-              ),
-            ],
           ),
           child: Column(
             children: [
@@ -1572,13 +1493,7 @@ class _SwitchRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
-        decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkCard : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-          ),
-        ),
+        decoration: fxListCardDecoration(context, radius: 16),
         child: Row(
           children: [
             Expanded(

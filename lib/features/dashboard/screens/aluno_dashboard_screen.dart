@@ -19,6 +19,7 @@ import '../../evolucao/data/evolucao_repository.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import 'progresso_semanal_widget.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 final minhasMedidasDashboardProvider = FutureProvider<List<MedidaCorporal>>((
   ref,
@@ -47,30 +48,11 @@ class AlunoDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Meu Treino',
-          style: TextStyle(
-            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        iconTheme: IconThemeData(
-          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-        ),
+      appBar: FxShellAppBar(
+        title: 'Meu Treino',
+        leading: const SizedBox(width: 8),
         actions: [
           NotificacaoBadgeButton(isDark: isDark),
-          IconButton(
-            icon: Icon(
-              isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-            ),
-            onPressed: () {
-              ref.read(themeModeProvider.notifier).toggle();
-            },
-          ),
           alunoAsync.when(
             data:
                 (aluno) => _AlunoAppBarProfileMenu(
@@ -276,18 +258,12 @@ class _AlunoHeroCard extends StatelessWidget {
             ? brand.slogan!
             : 'Seu treino organizado para hoje.';
     final primary = Theme.of(context).colorScheme.primary;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 18),
       child: Row(
         children: [
           CircleAvatar(
@@ -693,10 +669,7 @@ class _MiniMetricCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCardHi : BrandPalette.softer(primary),
-        borderRadius: BorderRadius.circular(16),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -735,18 +708,12 @@ class _PerformanceEvolutionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
       child: historicoAsync.when(
         loading: () => const SizedBox(height: 96, child: FxLoading()),
         error:
@@ -988,8 +955,6 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final cardBg = widget.isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = widget.isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = widget.isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = widget.isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
@@ -1011,11 +976,7 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
 
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1191,7 +1152,6 @@ void _showAlunoPlanSheet(
   required AlunoAutonomyPlan plan,
   required void Function(AlunoAutonomyTask task) onOpenTask,
 }) {
-  final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
   final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
   final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
   final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -1209,17 +1169,10 @@ void _showAlunoPlanSheet(
         child: Container(
           constraints: BoxConstraints(maxHeight: media.size.height * 0.76),
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: line),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.34 : 0.12),
-                blurRadius: 34,
-                offset: const Offset(0, 18),
-              ),
-            ],
+          decoration: fxListCardDecoration(
+            sheetContext,
+            accent: primary,
+            radius: 30,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1550,13 +1503,7 @@ class _AutonomyTaskTile extends StatelessWidget {
         final compact = constraints.maxWidth < 360;
         return Container(
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: isDark ? EagleTokens.darkBg : Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-            ),
-          ),
+          decoration: fxListCardDecoration(context, accent: primary, radius: 16),
           child:
               compact
                   ? Column(
@@ -1661,8 +1608,6 @@ class _StudentToolsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final tools = [
@@ -1707,19 +1652,7 @@ class _StudentToolsSection extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: line),
-        boxShadow: [
-          if (!isDark)
-            BoxShadow(
-              color: const Color(0xFF111318).withValues(alpha: 0.045),
-              blurRadius: 28,
-              offset: const Offset(0, 14),
-            ),
-        ],
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1965,29 +1898,13 @@ class _AlunoProfileCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final muteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final cardColor = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final lineColor = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
 
     final hasFoto = aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty;
     final genderLabel = _genderLabel(aluno.genero);
     final telefone = aluno.telefone ?? aluno.whatsapp;
 
     return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: lineColor),
-        boxShadow: [
-          BoxShadow(
-            color:
-                isDark
-                    ? Colors.black.withValues(alpha: 0.3)
-                    : Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 16),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
@@ -2099,15 +2016,11 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final bg = isDark ? EagleTokens.darkCardHi : BrandPalette.softer(primary);
     final fg = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -2139,16 +2052,11 @@ class _ProfileCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shimmer = isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       height: 88,
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-        ),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 16),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(

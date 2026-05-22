@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../chat/data/chat_repository.dart';
@@ -52,9 +53,9 @@ class AlunoActivationScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text('Boas-vindas'),
-        automaticallyImplyLeading: false,
+      appBar: FxShellAppBar(
+        title: 'Boas-vindas',
+        leading: const SizedBox(width: 8),
         actions: [
           alunoAsync.when(
             data:
@@ -267,13 +268,10 @@ class AlunoActivationScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color:
-                          isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-                    ),
+                  decoration: fxListCardDecoration(
+                    context,
+                    accent: Theme.of(context).colorScheme.primary,
+                    radius: 24,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,13 +403,7 @@ class _ActivationStepCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-        ),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

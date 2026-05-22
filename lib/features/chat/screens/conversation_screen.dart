@@ -27,6 +27,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
@@ -827,17 +828,27 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder:
-          (_) => SafeArea(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.sizeOf(context).height * 0.72,
-              ),
-              child: SingleChildScrollView(
+          (_) => Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: DecoratedBox(
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: 22,
+                ),
+                child: SafeArea(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.sizeOf(context).height * 0.72,
+                    ),
+                    child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
                   child: Column(
@@ -957,6 +968,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               ),
             ),
           ),
+        ),
+      ),
+    ),
     );
   }
 
@@ -965,14 +979,25 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final primarySoft = BrandPalette.soft(primary);
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder:
-          (_) => SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
-              child: Wrap(
+          (_) => Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: DecoratedBox(
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: 22,
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+                    child: Wrap(
                 spacing: 10,
                 runSpacing: 10,
                 children: [
@@ -1004,25 +1029,39 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       ),
                     ),
                 ],
+                  ),
+                ),
               ),
             ),
           ),
+        ),
     );
   }
 
   void _showAttachmentSheet() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder:
-          (_) => SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
-              child: Column(
+          (_) => Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: DecoratedBox(
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: 22,
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+                    child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
@@ -1064,6 +1103,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     },
                   ),
                 ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -1083,7 +1125,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -1096,7 +1138,17 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   media.size.height - keyboardInset - media.padding.top - 32;
               final sheetHeight = availableHeight.clamp(280.0, 440.0);
 
-              return AnimatedPadding(
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: DecoratedBox(
+                    decoration: fxListCardDecoration(
+                      context,
+                      accent: primary,
+                      radius: 22,
+                    ),
+                    child: AnimatedPadding(
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeOutCubic,
                 padding: EdgeInsets.only(bottom: keyboardInset),
@@ -1251,12 +1303,15 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         );
                                       },
                                     ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
               );
             },
           ),
@@ -1297,17 +1352,28 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   void _showChatMenu() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder:
-          (_) => SafeArea(
-            child: Column(
+          (_) => Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: DecoratedBox(
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: 22,
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
+                    child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (_isPersonalMode)
@@ -1352,6 +1418,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   },
                 ),
               ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
     );
@@ -1380,13 +1450,23 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder:
-          (sheetContext) => SafeArea(
-            child: StatefulBuilder(
+          (sheetContext) => Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: DecoratedBox(
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: 22,
+                ),
+                child: SafeArea(
+                  child: StatefulBuilder(
               builder: (context, setSheetState) {
                 final items = filtered(selected);
                 return Padding(
@@ -1498,6 +1578,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   ),
                 );
               },
+                  ),
+                ),
+              ),
             ),
           ),
     );
@@ -1543,13 +1626,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           (_, __, ___) => Container(
                             height: 240,
                             alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color:
-                                  isDark
-                                      ? EagleTokens.darkCard
-                                      : EagleTokens.card,
-                              borderRadius: BorderRadius.circular(24),
-                            ),
+                            decoration: fxListCardDecoration(context, radius: 24),
                             child: const Icon(
                               Icons.broken_image_outlined,
                               size: 32,
@@ -1737,100 +1814,51 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-          ),
-          onPressed:
-              () => safePopOrGo(
-                context,
-                _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal',
-              ),
-        ),
-        titleSpacing: 0,
-        title: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: primary.withValues(alpha: 0.18)),
-              ),
-              child: CircleAvatar(
-                radius: 18,
-                backgroundColor: primarySoft,
-                backgroundImage:
-                    _avatarImage(brand) == null
-                        ? null
-                        : NetworkImage(_avatarImage(brand)!),
-                child:
-                    _avatarImage(brand) == null
-                        ? Text(
-                          fxInitials(title),
-                          style: TextStyle(
-                            color: primary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
-                          ),
-                        )
-                        : null,
-              ),
+      appBar: FxShellAppBar(
+        title: title,
+        subtitle: subtitle,
+        onBack:
+            () => safePopOrGo(
+              context,
+              _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal',
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+        actions:
+            [
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: SizedBox(
+                  height: 40,
+                  width: 40,
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: primarySoft,
+                    backgroundImage:
+                        _avatarImage(brand) == null
+                            ? null
+                            : NetworkImage(_avatarImage(brand)!),
+                    child:
+                        _avatarImage(brand) == null
+                            ? Text(
+                              fxInitials(title),
+                              style: TextStyle(
+                                color: primary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            )
+                            : null,
                   ),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color:
-                          isDark
-                              ? EagleTokens.darkInkMute
-                              : EagleTokens.inkMute,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            onPressed: _showSearchSheet,
-            icon: const Icon(Icons.search_rounded),
-          ),
-          IconButton(
-            onPressed: _showChatMenu,
-            icon: const Icon(Icons.more_horiz),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 1,
-            color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-          ),
-        ),
+              IconButton(
+                onPressed: _showSearchSheet,
+                icon: const Icon(Icons.search_rounded),
+              ),
+              IconButton(
+                onPressed: _showChatMenu,
+                icon: const Icon(Icons.more_horiz),
+              ),
+            ],
       ),
       body: Stack(
         children: [
@@ -2002,21 +2030,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
                           child: Container(
-                            decoration: BoxDecoration(
-                              color: (isDark
-                                      ? EagleTokens.darkCard
-                                      : EagleTokens.card)
-                                  .withValues(alpha: isDark ? 0.86 : 0.94),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                color:
-                                    isDark
-                                        ? EagleTokens.darkLine.withValues(
-                                          alpha: 0.85,
-                                        )
-                                        : primary.withValues(alpha: 0.20),
-                              ),
-                            ),
+                            decoration: fxListCardDecoration(context, radius: 24),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -2210,10 +2224,7 @@ class _AttachOption extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkCardHi : EagleTokens.paper,
-          borderRadius: BorderRadius.circular(14),
-        ),
+        decoration: fxListCardDecoration(context, accent: primary, radius: 14),
         child: Row(
           children: [
             Icon(icon, color: primary),
@@ -2991,10 +3002,7 @@ class _ReplyComposerBar extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCardHi : EagleTokens.paper,
-        borderRadius: BorderRadius.circular(18),
-      ),
+      decoration: fxListCardDecoration(context, accent: accentColor, radius: 18),
       child: Row(
         children: [
           Container(
@@ -3100,10 +3108,7 @@ class _RecordingComposerBar extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCardHi : EagleTokens.paper,
-        borderRadius: BorderRadius.circular(18),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 18),
       child: Row(
         children: [
           Container(
@@ -3385,13 +3390,7 @@ class _MediaGalleryTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-          ),
-        ),
+        decoration: fxListCardDecoration(context, accent: primary, radius: 18),
         child: Row(
           children: [
             ClipRRect(

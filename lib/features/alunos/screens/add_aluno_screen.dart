@@ -6,8 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/alunos_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -420,60 +422,18 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Novo aluno',
+        subtitle: 'Novo item',
+        onBack: () => safePopOrGo(context, '/alunos'),
+      ),
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => context.pop(false),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                    color: ink,
-                    iconSize: 20,
-                    style: IconButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Novo item',
-                          style: TextStyle(
-                            color: mute,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Novo aluno',
-                          style: GoogleFonts.outfit(
-                            color: ink,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.9,
-                            height: 1,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
             Expanded(
               child: FadeTransition(
                 opacity: _entryFade,
@@ -692,21 +652,13 @@ class _SectionCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(EagleTokens.radiusXl),
-        border: Border.all(color: line.withValues(alpha: 0.86)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
+      decoration: fxListCardDecoration(
+        context,
+        accent: primary,
+        radius: EagleTokens.radiusXl,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

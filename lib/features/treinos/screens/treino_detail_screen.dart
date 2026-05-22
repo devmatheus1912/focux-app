@@ -6,6 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -76,11 +77,6 @@ class _TreinoDetailBody extends StatelessWidget {
       builder: (sheetContext) {
         final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
         final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-        final card = isDark ? EagleTokens.darkCard : Colors.white;
-        final border =
-            isDark
-                ? Colors.white.withValues(alpha: 0.08)
-                : EagleTokens.line.withValues(alpha: 0.9);
 
         return SafeArea(
           top: false,
@@ -88,18 +84,7 @@ class _TreinoDetailBody extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
             child: Container(
               padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-              decoration: BoxDecoration(
-                color: card,
-                borderRadius: BorderRadius.circular(34),
-                border: Border.all(color: border),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.14),
-                    blurRadius: 44,
-                    offset: const Offset(0, 24),
-                  ),
-                ],
-              ),
+              decoration: fxListCardDecoration(context, radius: 34),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -707,28 +692,8 @@ class _TreinoDetailBody extends StatelessWidget {
                     ),
                     Container(
                       margin: const EdgeInsets.only(bottom: 14),
-                      decoration: BoxDecoration(
-                        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-                        borderRadius: BorderRadius.circular(28),
-                        border: Border.all(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkLine
-                                  : EagleTokens.line.withValues(alpha: 0.72),
-                        ),
-                        boxShadow:
-                            isDark
-                                ? null
-                                : [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(
-                                      alpha: 0.035,
-                                    ),
-                                    blurRadius: 26,
-                                    offset: const Offset(0, 16),
-                                  ),
-                                ],
-                      ),
+                      decoration:
+                          fxListCardDecoration(context, accent: primary, radius: 28),
                       child: Column(
                         children:
                             entry.value.asMap().entries.map((e) {
@@ -992,7 +957,6 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
         widget.isDark
             ? Colors.white.withValues(alpha: 0.08)
             : EagleTokens.lineSoft.withValues(alpha: 0.95);
-    final sheetFill = widget.isDark ? EagleTokens.darkCard : Colors.white;
 
     return SafeArea(
       top: false,
@@ -1000,20 +964,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
         padding: EdgeInsets.fromLTRB(12, 0, 12, math.max(10, bottom + 8)),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: BoxDecoration(
-            color: sheetFill,
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(
-                  alpha: widget.isDark ? 0.34 : 0.16,
-                ),
-                blurRadius: 30,
-                offset: const Offset(0, 18),
-              ),
-            ],
-          ),
+          decoration: fxListCardDecoration(context, radius: 30),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1602,7 +1553,6 @@ class _ExerciseActionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = isDark ? EagleTokens.darkCard : Colors.white;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final border =
@@ -1616,18 +1566,7 @@ class _ExerciseActionsSheet extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: BoxDecoration(
-            color: card,
-            borderRadius: BorderRadius.circular(34),
-            border: Border.all(color: border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.14),
-                blurRadius: 44,
-                offset: const Offset(0, 24),
-              ),
-            ],
-          ),
+          decoration: fxListCardDecoration(context, radius: 34),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1810,7 +1749,6 @@ class _RemoveExerciseSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = isDark ? EagleTokens.darkCard : Colors.white;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final border =
@@ -1826,18 +1764,7 @@ class _RemoveExerciseSheet extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: BoxDecoration(
-            color: card,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.14),
-                blurRadius: 34,
-                offset: const Offset(0, 18),
-              ),
-            ],
-          ),
+          decoration: fxListCardDecoration(context, radius: 28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1958,7 +1885,6 @@ class _DeleteTrainingSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final card = isDark ? EagleTokens.darkCard : Colors.white;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final border =
@@ -1973,18 +1899,7 @@ class _DeleteTrainingSheet extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: BoxDecoration(
-            color: card,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.14),
-                blurRadius: 34,
-                offset: const Offset(0, 18),
-              ),
-            ],
-          ),
+          decoration: fxListCardDecoration(context, accent: primary, radius: 28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

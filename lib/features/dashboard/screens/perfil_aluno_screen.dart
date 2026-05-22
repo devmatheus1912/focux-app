@@ -14,6 +14,7 @@ import '../../anamnese/data/anamnese_repository.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 final minhasMedidasProvider = FutureProvider<List<MedidaCorporal>>((ref) async {
@@ -611,12 +612,9 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text('Meu perfil'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => safePopOrGo(context, '/dashboard/aluno'),
-        ),
+      appBar: FxShellAppBar(
+        title: 'Meu perfil',
+        onBack: () => safePopOrGo(context, '/dashboard/aluno'),
         actions: [
           TextButton(
             onPressed: _saving ? null : _save,
@@ -1202,15 +1200,10 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-        ),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1415,13 +1408,7 @@ class _ProgressEntryCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkBg : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-        ),
-      ),
+      decoration: fxListCardDecoration(context, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

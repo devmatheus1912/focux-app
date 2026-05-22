@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class AlertaDetalheScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -61,14 +63,10 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text('Análise — ${widget.alunoNome}'),
+      backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Análise — ${widget.alunoNome}',
+        onBack: () => safePopOrGo(context, '/alertas'),
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
         ],

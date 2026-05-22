@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -68,9 +70,9 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: Colors.transparent,
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      title: const Text('Assistente IA'),
+    appBar: FxShellAppBar(
+      title: 'Assistente IA',
+      onBack: () => safePopOrGo(context, '/dashboard/personal'),
     ),
     body: Column(
       children: [

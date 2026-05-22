@@ -4,9 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -338,54 +340,21 @@ class _AddExercicioToTreinoScreenState
     final exerciciosAsync = ref.watch(exerciciosProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Adicionar Exercício',
+        subtitle: 'NOVO ITEM',
+        onBack:
+            () => safePopOrGo(context, '/treinos/${widget.treinoId}'),
+      ),
       body: SafeArea(
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'NOVO ITEM',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: mute,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.6,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Adicionar Exercício',
-                        style: GoogleFonts.outfit(
-                          fontSize: 26,
-                          color: ink,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.6,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close, color: mute),
-                    onPressed: () => context.pop(),
-                  ),
-                ],
-              ),
-            ),
             Expanded(
               child: exerciciosAsync.when(
                 loading:
@@ -817,7 +786,6 @@ class _ExercisePickerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final selected = exercicio != null;
     final hasMediaIssue = selected && exercicio!.mediaTrustLevel != 'READY';
 
@@ -833,30 +801,11 @@ class _ExercisePickerCard extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
                   padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color:
-                        isDark
-                            ? EagleTokens.darkCardHi
-                            : selected
-                            ? EagleTokens.brandSofter
-                            : Colors.white,
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(
-                      color:
-                          selected
-                              ? primary.withValues(alpha: 0.28)
-                              : line.withValues(alpha: 0.95),
-                    ),
-                    boxShadow:
-                        isDark
-                            ? null
-                            : [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.045),
-                                blurRadius: 22,
-                                offset: const Offset(0, 12),
-                              ),
-                            ],
+                  decoration: fxListCardDecoration(
+                    context,
+                    accent: selected ? primary : null,
+                    selected: selected,
+                    radius: 22,
                   ),
                   child: Row(
                     children: [
@@ -952,14 +901,7 @@ class _ExercisePickerCard extends StatelessWidget {
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color:
-                  isDark
-                      ? Colors.white.withValues(alpha: 0.035)
-                      : EagleTokens.card,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: line.withValues(alpha: 0.76)),
-            ),
+            decoration: fxListCardDecoration(context, accent: primary, radius: 16),
             child: Row(
               children: [
                 Icon(
@@ -1027,7 +969,6 @@ class _ExerciseMediaStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final hasVideo = exercicio.videoUrl?.trim().isNotEmpty == true;
@@ -1056,14 +997,12 @@ class _ExerciseMediaStatus extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-      decoration: BoxDecoration(
-        color:
-            isDark
-                ? Colors.white.withValues(alpha: 0.035)
-                : Colors.white.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: line.withValues(alpha: 0.72)),
-      ),
+      decoration:
+          fxListCardDecoration(
+            context,
+            accent: hasVideo ? primary : null,
+            radius: 18,
+          ),
       child: Row(
         children: [
           Container(
@@ -1190,23 +1129,7 @@ class _RemoveExerciseVideoSheet extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(14, 0, 14, bottom + 10),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: BoxDecoration(
-            color: isDark ? EagleTokens.darkCard : Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color:
-                  isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : EagleTokens.lineSoft,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.34 : 0.16),
-                blurRadius: 28,
-                offset: const Offset(0, 18),
-              ),
-            ],
-          ),
+          decoration: fxListCardDecoration(context, radius: 28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1386,18 +1309,7 @@ class _ExerciseVideoPreviewSheetState
         padding: EdgeInsets.fromLTRB(12, 0, 12, bottom + 10),
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-          decoration: BoxDecoration(
-            color: isDark ? EagleTokens.darkCard : Colors.white,
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: line.withValues(alpha: 0.9)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.16),
-                blurRadius: 30,
-                offset: const Offset(0, 18),
-              ),
-            ],
-          ),
+          decoration: fxListCardDecoration(context, accent: primary, radius: 30),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1674,23 +1586,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
             maxHeight: MediaQuery.of(context).size.height * 0.82,
           ),
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-          decoration: BoxDecoration(
-            color: isDark ? EagleTokens.darkCard : Colors.white,
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(
-              color:
-                  isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : EagleTokens.lineSoft,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.16),
-                blurRadius: 30,
-                offset: const Offset(0, 18),
-              ),
-            ],
-          ),
+          decoration: fxListCardDecoration(context, accent: primary, radius: 30),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1970,16 +1866,10 @@ class _PresetSelector extends StatelessWidget {
     final selected = workoutBuilderPresetById(selectedId);
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final card = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: card,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2070,8 +1960,6 @@ class _SerieTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final card = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final options = const [
       ('NORMAL', Icons.fitness_center_rounded, 'Normal'),
@@ -2081,11 +1969,7 @@ class _SerieTypeSelector extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: card,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: line),
-      ),
+      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

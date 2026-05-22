@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
@@ -52,7 +54,6 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     final perfil = ref.watch(perfilProvider).valueOrNull;
@@ -65,10 +66,9 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Planos'),
+      appBar: FxShellAppBar(
+        title: 'Planos',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
@@ -255,16 +255,16 @@ class _PlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(18),
+      decoration: fxListCardDecoration(
+        context,
+        accent: isCurrent ? accentColor : null,
+      ).copyWith(
         border: Border.all(
           color: isCurrent ? accentColor : line,
           width: isCurrent ? 2 : 1,
@@ -347,7 +347,6 @@ class _EnterpriseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
@@ -365,9 +364,10 @@ class _EnterpriseCard extends StatelessWidget {
       ),
       child: Container(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(18),
+        decoration: fxListCardDecoration(
+          context,
+          accent: isCurrent ? _accent : null,
+        ).copyWith(
           border: Border.all(
             color: isCurrent ? _accent : line,
             width: isCurrent ? 2 : 1,

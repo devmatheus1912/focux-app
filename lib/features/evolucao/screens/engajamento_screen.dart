@@ -3,6 +3,8 @@ import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_loading.dart';
 
 class EngajamentoScreen extends ConsumerStatefulWidget {
@@ -82,14 +84,10 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text('Engajamento — ${widget.alunoNome}'),
+      backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Engajamento — ${widget.alunoNome}',
+        onBack: () => safePopOrGo(context, '/evolucao'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),

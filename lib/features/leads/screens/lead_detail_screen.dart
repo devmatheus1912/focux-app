@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
@@ -341,18 +342,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         _lead.status != 'CONVERTIDO' && _lead.status != 'ATIVO';
 
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => safePopOrGo(context, '/leads'),
-        ),
-        title: Text(_lead.nome),
+      backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: _lead.nome,
+        onBack: () => safePopOrGo(context, '/leads'),
         actions: [
           PopupMenuButton<String>(
             onSelected: _mudarStatus,

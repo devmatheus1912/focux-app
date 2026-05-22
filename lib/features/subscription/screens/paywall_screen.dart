@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
 import '../models/subscription_plan.dart';
@@ -218,7 +220,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         Theme.of(context).brightness == Brightness.dark ||
         Theme.of(context).brightness == Brightness.light;
     const bg = Color(0xFF071126);
-    const cardBg = Color(0xFF111A2F);
     const ink = Colors.white;
     const mute = Color(0xFFB9C4D8);
     const line = Color(0x263B82F6);
@@ -249,14 +250,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: ink),
+      appBar: FxShellAppBar(
+        title: 'Premium',
         leading: IconButton(
           tooltip: 'Fechar',
           icon: const Icon(Icons.close_rounded),
-          onPressed: () => context.go('/dashboard/personal'),
+          onPressed: () => safePopOrGo(context, '/dashboard/personal'),
         ),
       ),
       bottomNavigationBar: SafeArea(
@@ -504,18 +503,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
               child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: plCor, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: plCor.withValues(alpha: 0.33),
-                      blurRadius: 40,
-                      spreadRadius: -16,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                  color: cardBg,
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: plCor,
+                  radius: 22,
                 ),
                 child: Column(
                   children: [
@@ -525,12 +516,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(20),
                         ),
-                        color:
-                            pl['id'] == 0
-                                ? (isDark
-                                    ? EagleTokens.darkCard
-                                    : const Color(0xFFF8F8F6))
-                                : null,
                         gradient:
                             pl['id'] > 0
                                 ? LinearGradient(

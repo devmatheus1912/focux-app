@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -151,11 +153,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
 
   Widget _buildContent(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final brand = Theme.of(context).colorScheme.primary;
     final brandDeep = BrandPalette.deep(brand);
     final brandSoft = BrandPalette.soft(brand, dark: isDark);
@@ -163,10 +162,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: ink),
+      appBar: FxShellAppBar(
+        title: 'Migração mágica',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 110),
@@ -305,10 +303,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Container(
                 padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: line),
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: brand,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -452,10 +449,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             horizontal: 14,
                             vertical: 13,
                           ),
-                          decoration: BoxDecoration(
-                            color: cardBg,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: line),
+                          decoration: fxListCardDecoration(
+                            context,
+                            accent: brand,
                           ),
                           child: Row(
                             children: [

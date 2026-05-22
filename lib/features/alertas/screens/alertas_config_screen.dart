@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class AlertasConfigScreen extends ConsumerStatefulWidget {
@@ -86,14 +88,10 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
     final primary = theme.colorScheme.primary;
 
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Configurar Alertas'),
+      backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Configurar Alertas',
+        onBack: () => safePopOrGo(context, '/alertas'),
       ),
       body:
           _loading

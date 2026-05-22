@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/planos/data/planos_repository.dart';
@@ -313,8 +314,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
@@ -329,14 +328,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => safePopOrGo(context, '/planos'),
-        ),
-        title: const Text('Assinatura'),
+      appBar: FxShellAppBar(
+        title: 'Assinatura',
+        onBack: () => safePopOrGo(context, '/planos'),
       ),
       body: planosAsync.when(
         loading: () => const FxLoading(),
@@ -421,7 +415,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   trialStatus: _trialStatus,
                   loading: _loadingTrial,
                   isDark: isDark,
-                  cardBg: cardBg,
                   ink: ink,
                   mute: mute,
                   line: line,
@@ -434,10 +427,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: line),
+                  decoration: fxListCardDecoration(
+                    context,
+                    accent: primary,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -479,10 +471,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
               const SizedBox(height: 18),
               Container(
                 padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: line),
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: primary,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -617,13 +608,12 @@ class _TrialInfoCard extends StatelessWidget {
   final TrialStatus? trialStatus;
   final bool loading;
   final bool isDark;
-  final Color cardBg, ink, mute, line;
+  final Color ink, mute, line;
 
   const _TrialInfoCard({
     required this.trialStatus,
     required this.loading,
     required this.isDark,
-    required this.cardBg,
     required this.ink,
     required this.mute,
     required this.line,
@@ -634,11 +624,7 @@ class _TrialInfoCard extends StatelessWidget {
     if (loading) {
       return Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: line),
-        ),
+        decoration: fxListCardDecoration(context),
         child: const FxLoading(),
       );
     }
@@ -802,7 +788,6 @@ class _PlanoCard extends StatelessWidget {
     final isSelected = plan == selectedPlan;
     final isCurrent = plan == currentPlan;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
@@ -824,9 +809,10 @@ class _PlanoCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(18),
+        decoration: fxListCardDecoration(
+          context,
+          accent: isSelected || isCurrent ? accent : null,
+        ).copyWith(
           border: Border.all(
             color: isSelected || isCurrent ? accent : line,
             width: isSelected || isCurrent ? 2 : 1,
