@@ -40,12 +40,14 @@ class FxDock extends StatelessWidget {
     required this.currentIndex,
     required this.onTap,
     required this.isDark,
+    this.cinematicChrome = false,
   });
 
   final List<FxDockItem> items;
   final int currentIndex;
   final ValueChanged<int> onTap;
   final bool isDark;
+  final bool cinematicChrome;
 
   @override
   Widget build(BuildContext context) {
@@ -53,16 +55,18 @@ class FxDock extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
     final compact = width < 390;
 
-    // Glass background — uses EagleTokens for consistency
+    final onCinematic = cinematicChrome || isDark;
+
+    // Glass background — cinematic mesh uses dark glass always.
     final bgColor =
-        isDark
-            ? EagleTokens.darkCard.withValues(alpha: 0.72)
+        onCinematic
+            ? EagleTokens.darkCard.withValues(alpha: 0.78)
             : Colors.white.withValues(alpha: 0.75);
     final borderColor =
-        isDark
+        onCinematic
             ? EagleTokens.glassBorder
             : const Color.fromRGBO(0, 0, 0, 0.06);
-    final inactiveColor = (isDark ? EagleTokens.darkInk : EagleTokens.ink)
+    final inactiveColor = (onCinematic ? EagleTokens.darkInk : EagleTokens.ink)
         .withValues(alpha: 0.40);
 
     return Container(
@@ -125,8 +129,8 @@ class FxDock extends StatelessWidget {
                                 active
                                     ? BrandPalette.soft(
                                       primary,
-                                      dark: isDark,
-                                    ).withValues(alpha: isDark ? 0.42 : 0.72)
+                                      dark: onCinematic,
+                                    ).withValues(alpha: onCinematic ? 0.42 : 0.72)
                                     : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),

@@ -4,12 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/cockpit_theme.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_logo.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_sparkline.dart';
-import '../../../core/widgets/cinematic_mesh_background.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -42,7 +42,11 @@ class _PersonalDashboardScreenState
 
   late AnimationController _gradientCtrl;
   late AnimationController _counterCtrl;
+  late AnimationController _entryCtrl;
   late Animation<double> _counterAnim;
+  late Animation<double> _heroFade;
+  late Animation<Offset> _heroSlide;
+  late Animation<double> _kpiFade;
 
   @override
   void initState() {
@@ -55,17 +59,37 @@ class _PersonalDashboardScreenState
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
+    _entryCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
     _counterAnim = Tween<double>(
       begin: 0,
       end: 0,
     ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
+    _heroFade = CurvedAnimation(
+      parent: _entryCtrl,
+      curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic),
+    );
+    _heroSlide = Tween<Offset>(
+      begin: const Offset(0, 0.05),
+      end: Offset.zero,
+    ).animate(_heroFade);
+    _kpiFade = CurvedAnimation(
+      parent: _entryCtrl,
+      curve: const Interval(0.22, 0.82, curve: Curves.easeOutCubic),
+    );
     _loadFin();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _entryCtrl.forward(from: 0);
+    });
   }
 
   @override
   void dispose() {
     _gradientCtrl.dispose();
     _counterCtrl.dispose();
+    _entryCtrl.dispose();
     super.dispose();
   }
 
@@ -102,44 +126,33 @@ class _PersonalDashboardScreenState
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final primaryDeep = BrandPalette.deep(primary);
     final dashboardAsync = ref.watch(dashboardProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final themeDark = Theme.of(context).brightness == Brightness.dark;
+    const cockpitDark = true;
     final alunosAsync = ref.watch(alunosProvider);
     final historicoCheckinsAsync = ref.watch(historicoCheckinProvider);
     final notificacoesNaoLidas =
         ref.watch(notificacoesNaoLidasProvider).valueOrNull ?? 0;
     const chromeOnDark = true;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: EagleTokens.darkBg,
-        systemNavigationBarIconBrightness: Brightness.light,
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: CinematicMeshBackground(
-          showCenterGlow: false,
-          showCornerGlow: false,
-          child: SafeArea(
-            bottom: false,
-            child: dashboardAsync.when(
-            loading: () => _buildShimmerLoading(context),
-            error:
-                (e, _) => _DashboardErrorState(
-                  chromeOnDark: chromeOnDark,
-                  primary: primary,
-                  message: friendlyError(e),
-                  onRetry: () {
-                    ref.invalidate(dashboardProvider);
-                    ref.invalidate(commandCenterProvider);
-                    ref.invalidate(alunosProvider);
-                  },
-                ),
-            data: (data) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        bottom: false,
+        child: dashboardAsync.when(
+          loading: () => _buildShimmerLoading(context),
+          error:
+              (e, _) => _DashboardErrorState(
+                chromeOnDark: chromeOnDark,
+                primary: primary,
+                message: friendlyError(e),
+                onRetry: () {
+                  ref.invalidate(dashboardProvider);
+                  ref.invalidate(commandCenterProvider);
+                  ref.invalidate(alunosProvider);
+                },
+              ),
+          data: (data) {
               final screenWidth = MediaQuery.sizeOf(context).width;
               final isCompactPhone = screenWidth < 390;
               final shortcutAspectRatio = isCompactPhone ? 2.75 : 3.05;
@@ -261,7 +274,7 @@ class _PersonalDashboardScreenState
                                       ),
                                     ),
                                     child: FxIcon(
-                                      name: isDark ? 'sun' : 'moon',
+                                      name: themeDark ? 'sun' : 'moon',
                                       size: 20,
                                       color: EagleTokens.darkInk,
                                     ),
@@ -353,46 +366,47 @@ class _PersonalDashboardScreenState
 
                     // HERO CARD
                     SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: AnimatedBuilder(
-                          animation: _gradientCtrl,
-                          builder: (ctx, _) {
-                            final angle = _gradientCtrl.value * 2 * math.pi;
-                            final begin = Alignment(
-                              -math.cos(angle),
-                              -math.sin(angle),
-                            );
-                            final end = Alignment(
-                              math.cos(angle),
-                              math.sin(angle),
-                            );
-                            return InkWell(
-                              onTap: () => context.go('/financeiro'),
-                              borderRadius: BorderRadius.circular(28),
-                              child: Container(
-                                decoration: BoxDecoration(
+                      child: FadeTransition(
+                        opacity: _heroFade,
+                        child: SlideTransition(
+                          position: _heroSlide,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: AnimatedBuilder(
+                              animation: _gradientCtrl,
+                              builder: (ctx, _) {
+                                final angle = _gradientCtrl.value * 2 * math.pi;
+                                final begin = Alignment(
+                                  -math.cos(angle),
+                                  -math.sin(angle),
+                                );
+                                final end = Alignment(
+                                  math.cos(angle),
+                                  math.sin(angle),
+                                );
+                                return InkWell(
+                                  onTap: () => context.go('/financeiro'),
                                   borderRadius: BorderRadius.circular(28),
-                                  gradient: LinearGradient(
-                                    colors:
-                                        isDark
-                                            ? const [
-                                              Color(0xFF159A9A),
-                                              Color(0xFF0A2E2E),
-                                            ]
-                                            : [primary, primaryDeep],
-                                    begin: begin,
-                                    end: end,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: primary.withValues(alpha: 0.4),
-                                      blurRadius: 40,
-                                      offset: const Offset(0, 20),
-                                      spreadRadius: -20,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(28),
+                                      gradient: LinearGradient(
+                                        colors: const [
+                                          Color(0xFF159A9A),
+                                          Color(0xFF0A2E2E),
+                                        ],
+                                        begin: begin,
+                                        end: end,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: primary.withValues(alpha: 0.32),
+                                          blurRadius: 40,
+                                          offset: const Offset(0, 20),
+                                          spreadRadius: -20,
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
                                 padding: const EdgeInsets.fromLTRB(
                                   22,
                                   22,
@@ -560,49 +574,24 @@ class _PersonalDashboardScreenState
                             );
                           },
                         ),
+                          ),
+                        ),
                       ),
                     ),
 
-                    // PULSO DO DIA
+                    // PULSO DO DIA — asymmetric KPI rail
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _QuickTile(
-                                icon: 'users',
-                                label: 'Ativos',
-                                value: alunosAtivos.toString(),
-                                accent: primary,
-                                isDark: isDark,
-                                onTap: () => context.go('/alunos'),
-                              ),
-                            ),
-                            const SizedBox(width: 9),
-                            Expanded(
-                              child: _QuickTile(
-                                icon: 'circle-check',
-                                label: 'Check-ins',
-                                value: checkinsHoje.toString(),
-                                accent: EagleTokens.good,
-                                isDark: isDark,
-                                onTap: () => context.push('/relatorios/global'),
-                              ),
-                            ),
-                            const SizedBox(width: 9),
-                            Expanded(
-                              child: _QuickTile(
-                                icon: 'alert-triangle',
-                                label: 'Risco',
-                                value: riscoAlto.toString(),
-                                accent: EagleTokens.warn,
-                                isDark: isDark,
-                                onTap:
-                                    () => context.push('/dashboard/qualidade'),
-                              ),
-                            ),
-                          ],
+                        child: _KpiAsymmetricGrid(
+                          fade: _kpiFade,
+                          alunosAtivos: alunosAtivos,
+                          checkinsHoje: checkinsHoje,
+                          riscoAlto: riscoAlto,
+                          primary: primary,
+                          onAtivos: () => context.go('/alunos'),
+                          onCheckins: () => context.push('/relatorios/global'),
+                          onRisco: () => context.push('/dashboard/qualidade'),
                         ),
                       ),
                     ),
@@ -612,7 +601,7 @@ class _PersonalDashboardScreenState
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                         child: _CommandCenterSection(
-                          isDark: isDark,
+                          isDark: cockpitDark,
                           primary: primary,
                           finData: _finData,
                         ),
@@ -640,7 +629,7 @@ class _PersonalDashboardScreenState
                                   ? 'Ver tudo · +${riscoAlto - 1}'
                                   : 'Ver tudo',
                           onAction: () => context.go('/alunos?filtro=risco'),
-                          isDark: isDark,
+                          isDark: cockpitDark,
                         ),
                       ),
                       SliverToBoxAdapter(
@@ -676,7 +665,7 @@ class _PersonalDashboardScreenState
                                           ? 'Financeiro e aderência exigem contato'
                                           : 'Acompanhar antes de perder ritmo',
                                   acao: 'Revisar',
-                                  isDark: isDark,
+                                  isDark: cockpitDark,
                                   onTap:
                                       () => context.push('/alunos/${aluno.id}'),
                                 );
@@ -690,7 +679,7 @@ class _PersonalDashboardScreenState
                                 subt:
                                     'R\$ ${v.valor.toStringAsFixed(0)} pendente',
                                 acao: 'Cobrar',
-                                isDark: isDark,
+                                isDark: cockpitDark,
                                 onTap: () => context.go('/financeiro'),
                               );
                             },
@@ -706,13 +695,13 @@ class _PersonalDashboardScreenState
                         title: 'Aderência da semana',
                         action: 'Relatório',
                         onAction: () => context.push('/relatorios/global'),
-                        isDark: isDark,
+                        isDark: cockpitDark,
                       ),
                     ),
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: _AderenciaSemanaWidget(isDark: isDark),
+                        child: _AderenciaSemanaWidget(isDark: cockpitDark),
                       ),
                     ),
 
@@ -721,7 +710,7 @@ class _PersonalDashboardScreenState
                     SliverToBoxAdapter(
                       child: _SectionTitle(
                         title: 'Mais ferramentas',
-                        isDark: isDark,
+                        isDark: cockpitDark,
                       ),
                     ),
                     SliverToBoxAdapter(
@@ -737,7 +726,7 @@ class _PersonalDashboardScreenState
                           children: [
                             _ToolGroupLabel(
                               label: 'Acessos menos frequentes',
-                              isDark: isDark,
+                              isDark: cockpitDark,
                             ),
                             const SizedBox(height: 8),
                             GridView.count(
@@ -751,25 +740,25 @@ class _PersonalDashboardScreenState
                                 _ShortcutBtn(
                                   icon: 'dumbbell',
                                   label: 'Exercícios',
-                                  isDark: isDark,
+                                  isDark: cockpitDark,
                                   onTap: () => context.push('/exercicios'),
                                 ),
                                 _ShortcutBtn(
                                   icon: 'article',
                                   label: 'Feed',
-                                  isDark: isDark,
+                                  isDark: cockpitDark,
                                   onTap: () => context.push('/feed'),
                                 ),
                                 _ShortcutBtn(
                                   icon: 'trend',
                                   label: 'Leads',
-                                  isDark: isDark,
+                                  isDark: cockpitDark,
                                   onTap: () => context.push('/leads'),
                                 ),
                                 _ShortcutBtn(
                                   icon: 'spark',
                                   label: 'Qualidade',
-                                  isDark: isDark,
+                                  isDark: cockpitDark,
                                   onTap:
                                       () =>
                                           context.push('/dashboard/qualidade'),
@@ -777,13 +766,13 @@ class _PersonalDashboardScreenState
                                 _ShortcutBtn(
                                   icon: 'bell',
                                   label: 'Broadcasts',
-                                  isDark: isDark,
+                                  isDark: cockpitDark,
                                   onTap: () => context.push('/broadcasts'),
                                 ),
                                 _ShortcutBtn(
                                   icon: 'chat',
                                   label: 'Suporte',
-                                  isDark: isDark,
+                                  isDark: cockpitDark,
                                   onTap: () => context.push('/suporte'),
                                 ),
                               ],
@@ -798,8 +787,6 @@ class _PersonalDashboardScreenState
             },
           ),
         ),
-      ),
-      ),
     );
   }
 
@@ -972,11 +959,101 @@ class _HeroMiniStat extends StatelessWidget {
   }
 }
 
+class _KpiAsymmetricGrid extends StatelessWidget {
+  const _KpiAsymmetricGrid({
+    required this.fade,
+    required this.alunosAtivos,
+    required this.checkinsHoje,
+    required this.riscoAlto,
+    required this.primary,
+    required this.onAtivos,
+    required this.onCheckins,
+    required this.onRisco,
+  });
+
+  final Animation<double> fade;
+  final int alunosAtivos;
+  final int checkinsHoje;
+  final int riscoAlto;
+  final Color primary;
+  final VoidCallback onAtivos;
+  final VoidCallback onCheckins;
+  final VoidCallback onRisco;
+
+  @override
+  Widget build(BuildContext context) {
+    final slide = Tween<Offset>(
+      begin: const Offset(0, 0.04),
+      end: Offset.zero,
+    ).animate(fade);
+
+    return FadeTransition(
+      opacity: fade,
+      child: SlideTransition(
+        position: slide,
+        child: SizedBox(
+          height: 196,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                flex: 5,
+                child: _QuickTile(
+                  icon: 'users',
+                  label: 'Ativos',
+                  value: alunosAtivos.toString(),
+                  accent: primary,
+                  isDark: true,
+                  tall: true,
+                  onTap: onAtivos,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 4,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: _QuickTile(
+                        icon: 'circle-check',
+                        label: 'Check-ins',
+                        value: checkinsHoje.toString(),
+                        accent: EagleTokens.good,
+                        isDark: true,
+                        compact: true,
+                        onTap: onCheckins,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: _QuickTile(
+                        icon: 'alert-triangle',
+                        label: 'Risco',
+                        value: riscoAlto.toString(),
+                        accent: EagleTokens.warn,
+                        isDark: true,
+                        compact: true,
+                        onTap: onRisco,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _QuickTile extends StatelessWidget {
   final String icon;
   final String label, value;
   final Color accent;
   final bool isDark;
+  final bool tall;
+  final bool compact;
   final VoidCallback? onTap;
   const _QuickTile({
     required this.icon,
@@ -984,108 +1061,130 @@ class _QuickTile extends StatelessWidget {
     required this.value,
     required this.accent,
     required this.isDark,
+    this.tall = false,
+    this.compact = false,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? CockpitTheme.ink : EagleTokens.ink;
+    final mute = isDark ? CockpitTheme.mute : EagleTokens.inkMute;
     final numVal = int.tryParse(value) ?? 0;
+    final valueSize = tall ? 28.0 : (compact ? 17.0 : 21.0);
+    final labelSize = compact ? 10.0 : 11.0;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
-      child: Container(
-        height: 92,
-        padding: const EdgeInsets.fromLTRB(11, 11, 11, 10),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: accent.withValues(alpha: isDark ? 0.22 : 0.13),
-            width: 1,
+      child: AnimatedScale(
+        scale: 1,
+        duration: const Duration(milliseconds: 120),
+        child: Container(
+          height: tall || compact ? null : 92,
+          padding: EdgeInsets.fromLTRB(
+            compact ? 10 : 11,
+            compact ? 9 : 11,
+            compact ? 10 : 11,
+            compact ? 8 : 10,
           ),
-          boxShadow: [
-            if (!isDark)
-              BoxShadow(
-                color: const Color(0xFF111318).withValues(alpha: 0.035),
-                blurRadius: 22,
-                offset: const Offset(0, 12),
-              ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: FxIcon(name: icon, size: 14, color: accent),
-                  ),
-                ),
-                const Spacer(),
-                // Micro-status badge
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color:
-                        numVal > 0
-                            ? accent.withValues(alpha: isDark ? 0.12 : 0.07)
-                            : (isDark
-                                ? Colors.white.withValues(alpha: 0.04)
-                                : const Color(0xFFF5F5F3)),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    numVal > 0 ? 'ativo' : '—',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      color: numVal > 0 ? accent : mute,
-                      letterSpacing: 0.4,
+          decoration:
+              isDark
+                  ? BoxDecoration(
+                    color: CockpitTheme.card.withValues(alpha: 0.82),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: accent.withValues(alpha: 0.24),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.22),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
+                        spreadRadius: -8,
+                      ),
+                    ],
+                  )
+                  : BoxDecoration(
+                    color: EagleTokens.card,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: accent.withValues(alpha: 0.13),
                     ),
                   ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: compact ? 24 : 28,
+                    height: compact ? 24 : 28,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
+                      borderRadius: BorderRadius.circular(compact ? 10 : 12),
+                    ),
+                    child: Center(
+                      child: FxIcon(
+                        name: icon,
+                        size: compact ? 12 : 14,
+                        color: accent,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: compact ? 5 : 6,
+                      vertical: compact ? 2 : 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          numVal > 0
+                              ? accent.withValues(alpha: isDark ? 0.12 : 0.07)
+                              : Colors.white.withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      numVal > 0 ? 'ativo' : '—',
+                      style: TextStyle(
+                        fontSize: compact ? 8 : 9,
+                        fontWeight: FontWeight.w800,
+                        color: numVal > 0 ? accent : mute,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (tall) const Spacer(flex: 2) else const Spacer(),
+              Text(
+                value,
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: valueSize,
+                  fontWeight: FontWeight.w700,
+                  color: ink,
+                  height: 1,
+                  letterSpacing: -0.5,
                 ),
-              ],
-            ),
-            const Spacer(),
-            Text(
-              value,
-              style: GoogleFonts.jetBrainsMono(
-                fontSize: 21,
-                fontWeight: FontWeight.w700,
-                color: ink,
-                height: 1,
-                letterSpacing: -0.5,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: ink,
-                height: 1.1,
+              SizedBox(height: compact ? 2 : 3),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: labelSize,
+                  fontWeight: FontWeight.w800,
+                  color: ink,
+                  height: 1.1,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+              if (tall) const Spacer(),
+            ],
+          ),
         ),
       ),
     );
@@ -1165,7 +1264,7 @@ class _AttentionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final cardBg = isDark ? CockpitTheme.card : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final accent = EagleTokens.bad; // simplificado para overdue
@@ -1294,7 +1393,7 @@ class _ShortcutBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final primaryAccent = BrandPalette.accent(primary);
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final cardBg = isDark ? CockpitTheme.card : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
@@ -1408,7 +1507,7 @@ class _CommandCenterSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final cardBg = isDark ? CockpitTheme.card : EagleTokens.card;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -1554,11 +1653,14 @@ class _CommandCenterSection extends ConsumerWidget {
             borderRadius: BorderRadius.circular(20),
             child: Container(
               padding: const EdgeInsets.all(13),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: line.withValues(alpha: 0.78)),
-              ),
+              decoration:
+                  isDark
+                      ? CockpitTheme.glassPanel(radius: 20)
+                      : BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: line.withValues(alpha: 0.78)),
+                      ),
               child: Row(
                 children: [
                   Container(
@@ -1918,73 +2020,60 @@ class _CommandActionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: line.withValues(alpha: 0.82)),
-        boxShadow: [
-          if (!isDark)
-            BoxShadow(
-              color: const Color(0xFF111318).withValues(alpha: 0.045),
-              blurRadius: 30,
-              offset: const Offset(0, 16),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            FxIcon(name: 'route', size: 17, color: primary),
+            const SizedBox(width: 8),
+            Text(
+              'Próximas ações',
+              style: TextStyle(
+                color: ink,
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+              ),
             ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              FxIcon(name: 'route', size: 17, color: primary),
-              const SizedBox(width: 8),
-              Text(
-                'Próximas ações',
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w900,
-                ),
+            const Spacer(),
+            Text(
+              'impacto hoje',
+              style: TextStyle(
+                color: mute,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
               ),
-              const Spacer(),
-              Text(
-                'impacto hoje',
-                style: TextStyle(
-                  color: mute,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          if (loading)
-            _CommandLoadingTile(isDark: isDark, primary: primary)
-          else if (actions.isEmpty)
-            _CommandLoadingTile(
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Divider(color: EagleTokens.glassBorder, height: 1),
+        const SizedBox(height: 12),
+        if (loading)
+          _CommandLoadingTile(isDark: isDark, primary: primary)
+        else if (actions.isEmpty)
+          _CommandLoadingTile(
+            isDark: isDark,
+            primary: primary,
+            title: 'Operação sob controle',
+            subtitle: 'Nenhuma ação crítica para agora.',
+          )
+        else
+          for (var index = 0; index < actions.length; index++) ...[
+            _CommandActionTile(
+              item: actions[index],
               isDark: isDark,
               primary: primary,
-              title: 'Operação sob controle',
-              subtitle: 'Nenhuma ação crítica para agora.',
-            )
-          else
-            for (var index = 0; index < actions.length; index++) ...[
-              _CommandActionTile(
-                item: actions[index],
-                isDark: isDark,
-                primary: primary,
-              ),
-              if (index < actions.length - 1) const SizedBox(height: 8),
+            ),
+            if (index < actions.length - 1) ...[
+              const SizedBox(height: 10),
+              Divider(color: EagleTokens.glassBorder.withValues(alpha: 0.65), height: 1),
+              const SizedBox(height: 10),
             ],
-        ],
-      ),
+          ],
+      ],
     );
   }
 }
@@ -2081,14 +2170,17 @@ class _CommandActionTile extends StatelessWidget {
     return InkWell(
       onTap: onTap ?? () => context.go(item.route),
       borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: accent.withValues(alpha: isDark ? 0.16 : 0.075),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: accent.withValues(alpha: 0.10)),
-        ),
-        child: Row(
+      child: AnimatedScale(
+        scale: 1,
+        duration: const Duration(milliseconds: 110),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: accent.withValues(alpha: isDark ? 0.10 : 0.075),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: accent.withValues(alpha: 0.22)),
+          ),
+          child: Row(
           children: [
             Container(
               width: 38,
@@ -2131,6 +2223,7 @@ class _CommandActionTile extends StatelessWidget {
           ],
         ),
       ),
+      ),
     );
   }
 }
@@ -2146,7 +2239,7 @@ class _AderenciaSemanaWidget extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final primaryAccent = BrandPalette.accent(primary);
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final cardBg = isDark ? CockpitTheme.card : EagleTokens.card;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
