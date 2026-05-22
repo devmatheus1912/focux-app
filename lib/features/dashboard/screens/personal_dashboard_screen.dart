@@ -9,6 +9,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_logo.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_sparkline.dart';
+import '../../../core/widgets/cinematic_mesh_background.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -108,27 +109,28 @@ class _PersonalDashboardScreenState
     final historicoCheckinsAsync = ref.watch(historicoCheckinProvider);
     final notificacoesNaoLidas =
         ref.watch(notificacoesNaoLidasProvider).valueOrNull ?? 0;
+    const chromeOnDark = true;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
+      value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-        systemNavigationBarColor:
-            isDark ? EagleTokens.backgroundDark : EagleTokens.paper,
-        systemNavigationBarIconBrightness:
-            isDark ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarColor: EagleTokens.darkBg,
+        systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor:
-            isDark ? EagleTokens.backgroundDark : EagleTokens.paper,
-        body: SafeArea(
-          bottom: false,
-          child: dashboardAsync.when(
+        backgroundColor: Colors.transparent,
+        body: CinematicMeshBackground(
+          showCenterGlow: false,
+          showCornerGlow: false,
+          child: SafeArea(
+            bottom: false,
+            child: dashboardAsync.when(
             loading: () => _buildShimmerLoading(context),
             error:
                 (e, _) => _DashboardErrorState(
-                  isDark: isDark,
+                  chromeOnDark: chromeOnDark,
                   primary: primary,
                   message: friendlyError(e),
                   onRetry: () {
@@ -218,19 +220,16 @@ class _PersonalDashboardScreenState
                                     iconSize: 34,
                                     showLabel: true,
                                     horizontal: true,
-                                    light: isDark,
+                                    light: chromeOnDark,
                                   ),
                                   const SizedBox(height: 10),
                                   Text(
                                     'Hoje · Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 12,
-                                      color:
-                                          isDark
-                                              ? EagleTokens.darkInk
-                                              : EagleTokens.ink,
+                                      color: EagleTokens.darkInk,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -257,26 +256,14 @@ class _PersonalDashboardScreenState
                                     height: 36,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color:
-                                          isDark
-                                              ? Colors.white.withValues(
-                                                alpha: 0.05,
-                                              )
-                                              : Colors.white,
-                                      border:
-                                          isDark
-                                              ? null
-                                              : Border.all(
-                                                color: EagleTokens.line,
-                                              ),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.05,
+                                      ),
                                     ),
                                     child: FxIcon(
                                       name: isDark ? 'sun' : 'moon',
                                       size: 20,
-                                      color:
-                                          isDark
-                                              ? EagleTokens.darkInk
-                                              : EagleTokens.ink,
+                                      color: EagleTokens.darkInk,
                                     ),
                                   ),
                                 ),
@@ -292,18 +279,9 @@ class _PersonalDashboardScreenState
                                     height: 36,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color:
-                                          isDark
-                                              ? Colors.white.withValues(
-                                                alpha: 0.05,
-                                              )
-                                              : Colors.white,
-                                      border:
-                                          isDark
-                                              ? null
-                                              : Border.all(
-                                                color: EagleTokens.line,
-                                              ),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.05,
+                                      ),
                                     ),
                                     child: Stack(
                                       alignment: Alignment.center,
@@ -311,10 +289,7 @@ class _PersonalDashboardScreenState
                                         FxIcon(
                                           name: 'bell',
                                           size: 20,
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkInk
-                                                  : EagleTokens.ink,
+                                          color: EagleTokens.darkInk,
                                           strokeWidth: 1.9,
                                         ),
                                         if (notificacoesNaoLidas > 0)
@@ -328,10 +303,7 @@ class _PersonalDashboardScreenState
                                                 color: primary,
                                                 shape: BoxShape.circle,
                                                 border: Border.all(
-                                                  color:
-                                                      isDark
-                                                          ? EagleTokens.darkCard
-                                                          : EagleTokens.card,
+                                                  color: EagleTokens.darkCard,
                                                   width: 2,
                                                 ),
                                               ),
@@ -827,13 +799,13 @@ class _PersonalDashboardScreenState
           ),
         ),
       ),
+      ),
     );
   }
 
   Widget _buildShimmerLoading(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark ? EagleTokens.darkCard : EagleTokens.line;
-    final highlight = isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft;
+    const base = EagleTokens.darkCard;
+    const highlight = EagleTokens.darkCardHi;
 
     Widget bone(double w, double h, {double radius = 12}) => Container(
       width: w,
@@ -2438,13 +2410,13 @@ class _AderenciaSemanaWidget extends StatelessWidget {
 // Premium Error State — replaces raw Text(friendlyError)
 // ─────────────────────────────────────────────────────────────────────────────
 class _DashboardErrorState extends StatelessWidget {
-  final bool isDark;
+  final bool chromeOnDark;
   final Color primary;
   final String message;
   final VoidCallback onRetry;
 
   const _DashboardErrorState({
-    required this.isDark,
+    required this.chromeOnDark,
     required this.primary,
     required this.message,
     required this.onRetry,
@@ -2452,8 +2424,8 @@ class _DashboardErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = chromeOnDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = chromeOnDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -2464,7 +2436,7 @@ class _DashboardErrorState extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
+                color: EagleTokens.bad.withValues(alpha: chromeOnDark ? 0.18 : 0.08),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Icon(

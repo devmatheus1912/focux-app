@@ -9,6 +9,7 @@ import '../../../core/theme/theme_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/widgets/brand_glass_mark.dart';
+import '../../../core/widgets/cinematic_mesh_background.dart';
 
 class AuthShell extends StatelessWidget {
   const AuthShell({
@@ -26,72 +27,10 @@ class AuthShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // ── Cinematic mesh gradient background ──────────────────────
-        Container(
-          decoration: const BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment(-0.35, -0.85),
-              radius: 1.35,
-              colors: [
-                Color(0xFF0D2830), // teal deep glow
-                Color(0xFF0A1F24), // mid teal
-                Color(0xFF080C10), // darkBg
-              ],
-              stops: [0.0, 0.55, 1.0],
-            ),
-          ),
-        ),
-        // ── Technical grid (teal-tinted, subtle) ────────────────────
-        CustomPaint(painter: const _AuthGridPainter(), size: Size.infinite),
-        // ── Ambient glow — top-right ────────────────────────────────
-        if (showCornerGlow)
-          Positioned(
-            top: -80,
-            right: -80,
-            child: IgnorePointer(
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      EagleTokens.brandAccent.withValues(alpha: 0.10),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.7],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        // ── Hero glow — center (logo anchor) ────────────────────────
-        if (showCenterGlow)
-          Align(
-            alignment: const Alignment(0, -0.22),
-            child: IgnorePointer(
-              child: Container(
-                width: 340,
-                height: 340,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFF1EC8C8).withValues(alpha: 0.14),
-                      EagleTokens.brandAccent.withValues(alpha: 0.06),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.45, 1.0],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        SafeArea(child: child),
-      ],
+    return CinematicMeshBackground(
+      showCenterGlow: showCenterGlow,
+      showCornerGlow: showCornerGlow,
+      child: SafeArea(child: child),
     );
   }
 }
@@ -748,28 +687,3 @@ class AuthPlanCard extends StatelessWidget {
   }
 }
 
-/// Technical grid painter — teal-tinted 1px lines at opacity 0.06.
-/// Matches the cinematic "blueprint" aesthetic of the new identity.
-class _AuthGridPainter extends CustomPainter {
-  const _AuthGridPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = EagleTokens.brandAccent.withValues(alpha: 0.06)
-          ..strokeWidth = 0.5
-          ..style = PaintingStyle.stroke;
-
-    for (double x = 0; x <= size.width; x += 30) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-
-    for (double y = 0; y <= size.height; y += 30) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

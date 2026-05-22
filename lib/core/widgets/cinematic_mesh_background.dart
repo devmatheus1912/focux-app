@@ -1,0 +1,108 @@
+import 'package:flutter/material.dart';
+
+import '../theme/design_tokens.dart';
+
+/// Shared cinematic mesh used on login, splash, and premium app chrome.
+class CinematicMeshBackground extends StatelessWidget {
+  const CinematicMeshBackground({
+    super.key,
+    required this.child,
+    this.showCenterGlow = true,
+    this.showCornerGlow = true,
+  });
+
+  final Widget child;
+  final bool showCenterGlow;
+  final bool showCornerGlow;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(-0.35, -0.85),
+              radius: 1.35,
+              colors: [
+                Color(0xFF0D2830),
+                Color(0xFF0A1F24),
+                Color(0xFF080C10),
+              ],
+              stops: [0.0, 0.55, 1.0],
+            ),
+          ),
+        ),
+        CustomPaint(painter: const CinematicGridPainter(), size: Size.infinite),
+        if (showCornerGlow)
+          Positioned(
+            top: -80,
+            right: -80,
+            child: IgnorePointer(
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      EagleTokens.brandAccent.withValues(alpha: 0.10),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.7],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (showCenterGlow)
+          Align(
+            alignment: const Alignment(0, -0.22),
+            child: IgnorePointer(
+              child: Container(
+                width: 340,
+                height: 340,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFF1EC8C8).withValues(alpha: 0.14),
+                      EagleTokens.brandAccent.withValues(alpha: 0.06),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.45, 1.0],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        child,
+      ],
+    );
+  }
+}
+
+class CinematicGridPainter extends CustomPainter {
+  const CinematicGridPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = EagleTokens.brandAccent.withValues(alpha: 0.06)
+          ..strokeWidth = 0.5
+          ..style = PaintingStyle.stroke;
+
+    for (double x = 0; x <= size.width; x += 30) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+
+    for (double y = 0; y <= size.height; y += 30) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
