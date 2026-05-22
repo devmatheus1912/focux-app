@@ -13,7 +13,9 @@ import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/widgets/cinematic_mesh_background.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -391,7 +393,6 @@ class _PerfilBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final themePrimary = theme.colorScheme.primary;
@@ -439,16 +440,22 @@ class _PerfilBody extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: primaryColor,
-      body: SafeArea(
-        child: ColoredBox(
-          color: bg,
+      backgroundColor: Colors.transparent,
+      body: CinematicMeshBackground(
+        showCenterGlow: false,
+        showCornerGlow: false,
+        child: SafeArea(
+          bottom: false,
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
                 child: Container(
-                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 6),
+                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 8),
                   decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(28),
+                      bottomRight: Radius.circular(28),
+                    ),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -458,6 +465,14 @@ class _PerfilBody extends StatelessWidget {
                               ? const [Color(0xFF159A9A), Color(0xFF0A2E2E)]
                               : [primaryColor, secondaryColor],
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withValues(alpha: isDark ? 0.22 : 0.28),
+                        blurRadius: 28,
+                        offset: const Offset(0, 14),
+                        spreadRadius: -8,
+                      ),
+                    ],
                   ),
                   child: Stack(
                     children: [
@@ -489,6 +504,25 @@ class _PerfilBody extends StatelessWidget {
                                     letterSpacing: 0.1,
                                   ),
                                 ),
+                                const SizedBox(width: 6),
+                                Consumer(
+                                  builder: (context, ref, _) {
+                                    final themeDark =
+                                        Theme.of(context).brightness ==
+                                        Brightness.dark;
+                                    return _HeroAction(
+                                      icon:
+                                          themeDark
+                                              ? Icons.wb_sunny_outlined
+                                              : Icons.dark_mode_outlined,
+                                      onTap:
+                                          () => ref
+                                              .read(themeModeProvider.notifier)
+                                              .toggle(),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 6),
                                 _HeroAction(
                                   icon: Icons.edit_outlined,
                                   onTap: onEditPerfil,
@@ -560,7 +594,11 @@ class _PerfilBody extends StatelessWidget {
                           const SizedBox(height: 14),
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.18),
+                              color: Colors.black.withValues(alpha: 0.16),
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(28),
+                                bottomRight: Radius.circular(28),
+                              ),
                               border: Border(
                                 top: BorderSide(
                                   color: Colors.white.withValues(alpha: 0.12),
@@ -633,7 +671,7 @@ class _PerfilBody extends StatelessWidget {
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 96),
+                padding: const EdgeInsets.fromLTRB(18, 16, 18, 96),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     _CardSection(
@@ -641,8 +679,9 @@ class _PerfilBody extends StatelessWidget {
                       subtitle:
                           'Marca aplicada no app, landing page e white-label.',
                       trailingLabel: 'Abrir',
-                      onTap: () => context.push('/identidade-visual'),
+                      onTrailingTap: () => context.push('/identidade-visual'),
                       isDark: isDark,
+                      accent: accent,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -653,24 +692,26 @@ class _PerfilBody extends StatelessWidget {
                             publicUrl: displayPublicUrl,
                             isDark: isDark,
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
+                          _PaletteLegend(mute: mute),
+                          const SizedBox(height: 10),
                           Wrap(
                             spacing: 9,
                             runSpacing: 9,
                             children: [
-                              ...swatches.map(
-                                (color) => _ColorSwatch(
-                                  color: color,
-                                  borderColor: line,
-                                  selected: color == primaryColor,
-                                ),
-                              ),
                               _DefaultBrandSwatch(
                                 borderColor: line,
                                 mute: mute,
                                 selected: usingDefaultBrand,
                                 loading: resettingBrand,
                                 onTap: onResetBrandColors,
+                              ),
+                              ...swatches.map(
+                                (color) => _ColorSwatch(
+                                  color: color,
+                                  borderColor: line,
+                                  selected: color == primaryColor,
+                                ),
                               ),
                               _AddSwatch(
                                 borderColor: line,
@@ -682,7 +723,7 @@ class _PerfilBody extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     _CompletenessCard(
                       score: profileScore,
                       accent: accent,
@@ -697,7 +738,7 @@ class _PerfilBody extends StatelessWidget {
                               ),
                       onLanding: () => context.push('/landing-config'),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     _ProfessionalDataPanel(
                       perfil: perfil,
                       dashboard: dashboard,
@@ -707,11 +748,12 @@ class _PerfilBody extends StatelessWidget {
                       line: line,
                       isDark: isDark,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     _CardSection(
                       title: 'Conta e plano',
                       subtitle: 'Acesso, billing, IA, documentos e seguranca.',
                       isDark: isDark,
+                      accent: accent,
                       child: Column(
                         children: [
                           _ActionTile(
@@ -975,17 +1017,21 @@ class _HeroAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(38),
-      child: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.14),
-          shape: BoxShape.circle,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(38),
+        child: Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.14),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+          ),
+          child: Icon(icon, color: Colors.white, size: 18),
         ),
-        child: Icon(icon, color: Colors.white, size: 18),
       ),
     );
   }
@@ -1078,8 +1124,9 @@ class _CardSection extends StatelessWidget {
   final String title;
   final String? subtitle;
   final String? trailingLabel;
-  final VoidCallback? onTap;
+  final VoidCallback? onTrailingTap;
   final bool isDark;
+  final Color accent;
   final Widget child;
 
   const _CardSection({
@@ -1088,87 +1135,118 @@ class _CardSection extends StatelessWidget {
     required this.child,
     this.subtitle,
     this.trailingLabel,
-    this.onTap,
+    this.onTrailingTap,
+    this.accent = EagleTokens.brand,
   });
 
   @override
   Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final accent = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
-    final content = Container(
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: line),
-        boxShadow: [
-          if (!isDark)
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.025),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-        ],
-      ),
+    return Container(
+      decoration: chrome.panel(radius: 20),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: ink,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: ink,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle!,
+                          style: TextStyle(color: mute, fontSize: 12, height: 1.35),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                if (trailingLabel != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: isDark ? 0.14 : 0.08),
+                if (trailingLabel != null && onTrailingTap != null)
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onTrailingTap,
                       borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      trailingLabel!,
-                      style: TextStyle(
-                        color: accent,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: accent.withValues(alpha: isDark ? 0.16 : 0.10),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: accent.withValues(alpha: 0.22),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              trailingLabel!,
+                              style: TextStyle(
+                                color: accent,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            Icon(Icons.north_east, size: 13, color: accent),
+                          ],
+                        ),
                       ),
                     ),
                   ),
               ],
             ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 3),
-              Text(
-                subtitle!,
-                style: TextStyle(color: mute, fontSize: 12, height: 1.3),
-              ),
-            ],
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             child,
           ],
         ),
       ),
     );
+  }
+}
 
-    if (onTap == null) return content;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: content,
+class _PaletteLegend extends StatelessWidget {
+  const _PaletteLegend({required this.mute});
+
+  final Color mute;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(Icons.palette_outlined, size: 14, color: mute),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            'Paleta da marca · Padrão restaura o cyan oficial do Focux',
+            style: TextStyle(
+              color: mute,
+              fontSize: 11.2,
+              height: 1.25,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1187,26 +1265,37 @@ class _ColorSwatch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 36,
-      height: 36,
+      width: 38,
+      height: 38,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(13),
         border: Border.all(
           color:
               selected
-                  ? Colors.black.withValues(alpha: 0.42)
+                  ? Colors.black.withValues(alpha: 0.38)
                   : (color == Colors.white ? borderColor : Colors.transparent),
-          width: selected ? 2 : 1.5,
+          width: selected ? 2.2 : 1.5,
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 6,
-            offset: Offset(0, 2),
+            color: color.withValues(alpha: selected ? 0.34 : 0.18),
+            blurRadius: selected ? 14 : 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+      child:
+          selected
+              ? Icon(
+                Icons.check_rounded,
+                size: 16,
+                color:
+                    color.computeLuminance() > 0.72
+                        ? Colors.black87
+                        : Colors.white,
+              )
+              : null,
     );
   }
 }
@@ -1228,13 +1317,14 @@ class _AddSwatch extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        width: 36,
-        height: 36,
+        width: 38,
+        height: 38,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(13),
           border: Border.all(color: borderColor, style: BorderStyle.solid),
+          color: ShellChrome.of(context).cardFill,
         ),
-        child: Icon(Icons.add, size: 16, color: mute),
+        child: Icon(Icons.add_rounded, size: 18, color: mute),
       ),
     );
   }
@@ -1264,10 +1354,10 @@ class _DefaultBrandSwatch extends StatelessWidget {
         onTap: loading ? null : onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          width: 36,
-          height: 36,
+          width: 38,
+          height: 38,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(13),
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -1279,15 +1369,17 @@ class _DefaultBrandSwatch extends StatelessWidget {
             border: Border.all(
               color:
                   selected
-                      ? Colors.black.withValues(alpha: 0.42)
+                      ? Colors.black.withValues(alpha: 0.38)
                       : borderColor,
-              width: selected ? 2 : 1.5,
+              width: selected ? 2.2 : 1.5,
             ),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Color(0x14000000),
-                blurRadius: 6,
-                offset: Offset(0, 2),
+                color: BrandPalette.defaultPrimary.withValues(
+                  alpha: selected ? 0.38 : 0.22,
+                ),
+                blurRadius: selected ? 14 : 8,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -1328,17 +1420,23 @@ class _BrandPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [primary, secondary],
         ),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withValues(alpha: 0.28),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+            spreadRadius: -6,
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -1346,8 +1444,15 @@ class _BrandPreview extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.92),
+              color: Colors.white.withValues(alpha: 0.94),
               borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Icon(Icons.fitness_center, color: primary, size: 22),
           ),
@@ -1372,7 +1477,7 @@ class _BrandPreview extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.74),
+                    color: Colors.white.withValues(alpha: 0.78),
                     fontSize: 11.5,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1381,19 +1486,34 @@ class _BrandPreview extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.92),
+              color: Colors.white.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.34)),
             ),
-            child: Text(
-              'LIVE',
-              style: TextStyle(
-                color: ink,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.5,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF6FE296),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                const Text(
+                  'LIVE',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -1421,19 +1541,14 @@ class _CompletenessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final cardBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final chrome = ShellChrome.forDark(isDark);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final complete = score >= 100;
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: line),
-      ),
+      decoration: chrome.panel(radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1449,14 +1564,15 @@ class _CompletenessCard extends StatelessWidget {
                         color: ink,
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
+                        letterSpacing: -0.2,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     Text(
                       complete
                           ? 'Sua vitrine publica esta pronta para operar.'
                           : 'Perfil pronto para vender, atender e parecer premium.',
-                      style: TextStyle(color: mute, fontSize: 12, height: 1.3),
+                      style: TextStyle(color: mute, fontSize: 12, height: 1.35),
                     ),
                   ],
                 ),
@@ -1475,17 +1591,33 @@ class _CompletenessCard extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: score / 100,
-              minHeight: 8,
-              backgroundColor:
-                  isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : EagleTokens.lineSoft,
-              valueColor: AlwaysStoppedAnimation<Color>(accent),
+            child: SizedBox(
+              height: 9,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ColoredBox(
+                    color:
+                        isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : EagleTokens.lineSoft,
+                  ),
+                  FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: score / 100,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [accent.withValues(alpha: 0.72), accent],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -1676,6 +1808,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
       title: 'Dados profissionais',
       subtitle: 'Contrato, canais publicos e prova de autoridade.',
       isDark: isDark,
+      accent: accent,
       child: Column(
         children: [
           _InfoTile(
