@@ -21,6 +21,7 @@ class BrandGlassMark extends StatelessWidget {
     this.glowColor,
     this.shimmerAlpha,
     this.tone = BrandGlassTone.dark,
+    this.enableBackdropBlur = true,
   });
 
   static const markAsset = 'assets/images/logo_mark_transparent.png';
@@ -30,6 +31,7 @@ class BrandGlassMark extends StatelessWidget {
   final Color? glowColor;
   final double? shimmerAlpha;
   final BrandGlassTone tone;
+  final bool enableBackdropBlur;
 
   bool get _onLightSurface => tone == BrandGlassTone.light;
 
@@ -72,7 +74,7 @@ class BrandGlassMark extends StatelessWidget {
             blurRadius: size * 0.26,
             offset: Offset(0, size * 0.05),
           ),
-          if (!_onLightSurface)
+          if (!_onLightSurface && enableBackdropBlur)
             BoxShadow(
               color: EagleTokens.brandAccent.withValues(alpha: shimmer * 0.15),
               blurRadius: size * 0.32,
@@ -101,7 +103,7 @@ class BrandGlassMark extends StatelessWidget {
               ),
             ),
           ),
-          if (!_onLightSurface)
+          if (!_onLightSurface && enableBackdropBlur)
             ClipRRect(
               borderRadius: BorderRadius.circular(radius),
               child: BackdropFilter(

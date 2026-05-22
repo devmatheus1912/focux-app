@@ -119,11 +119,17 @@ class _BrandedMarkTile extends StatelessWidget {
 /// Shorthand — tile only, for AppBars, list items, etc.
 class FxLogoIcon extends ConsumerWidget {
   final double size;
-  const FxLogoIcon({super.key, this.size = 40});
+  final bool light;
+
+  const FxLogoIcon({super.key, this.size = 40, this.light = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final logoUrl = ref.watch(logoUrlProvider);
-    return _BrandedMarkTile(size: size, logoUrl: logoUrl);
+    return _BrandedMarkTile(
+      size: size,
+      logoUrl: logoUrl,
+      tone: light ? BrandGlassTone.dark : BrandGlassTone.light,
+    );
   }
 }

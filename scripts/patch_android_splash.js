@@ -1,6 +1,8 @@
 /**
  * Post flutter_native_splash patch:
- * replace 1x1 solid android background drawables with mesh PNG.
+ * - mesh PNG on android background drawables
+ * - remove centered logo layer from launch_background
+ * - Android 12+: blank animated icon (same color as background)
  */
 const fs = require('fs');
 const path = require('path');
@@ -49,6 +51,82 @@ function meshBackgroundSvg(width, height) {
   `;
 }
 
+const LAUNCH_BACKGROUND = `<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <bitmap android:gravity="fill" android:src="@drawable/background"/>
+    </item>
+</layer-list>
+`;
+
+const SPLASH_COLOR = '#12343C';
+
+function patchLaunchBackground(root) {
+  const targets = [
+    path.join(root, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'),
+    path.join(root, 'android', 'app', 'src', 'main', 'res', 'drawable-v21', 'launch_background.xml'),
+  ];
+
+  for (const target of targets) {
+    if (!fs.existsSync(target)) continue;
+    fs.writeFileSync(target, LAUNCH_BACKGROUND);
+  }
+}
+
+function patchAndroid12Styles(root) {
+  const styleFiles = [
+    path.join(root, 'android', 'app', 'src', 'main', 'res', 'values-v31', 'styles.xml'),
+    path.join(root, 'android', 'app', 'src', 'main', 'res', 'values-night-v31', 'styles.xml'),
+  ];
+
+  for (const styleFile of styleFiles) {
+    if (!fs.existsSync(styleFile)) continue;
+    let content = fs.readFileSync(styleFile, 'utf8');
+    content = content.replace(
+      /(<item name="android:windowSplashScreenBackground">)[^<]+(<\/item>)/,
+      `$1${SPLASH_COLOR}$2`,
+    );
+    content = content.replace(
+      /(<item name="android:windowSplashScreenIconBackgroundColor">)[^<]+(<\/item>)/,
+      `$1${SPLASH_COLOR}$2`,
+    );
+    if (!content.includes('android:windowSplashScreenAnimatedIcon')) {
+      content = content.replace(
+        /(<item name="android:windowSplashScreenBackground">#12343C<\/item>)/,
+        `$1\n        <item name="android:windowSplashScreenAnimatedIcon">@drawable/android12splash</item>`,
+      );
+    }
+    fs.writeFileSync(styleFile, content);
+  }
+}
+
+async function removeSplashDrawables(sharp, resDir) {
+  for (const entry of fs.readdirSync(resDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith('drawable')) continue;
+    const splash = path.join(resDir, entry.name, 'splash.png');
+    if (fs.existsSync(splash)) fs.unlinkSync(splash);
+    const android12 = path.join(resDir, entry.name, 'android12splash.png');
+    if (fs.existsSync(android12)) fs.unlinkSync(android12);
+  }
+
+  const blankIcon = await sharp({
+    create: {
+      width: 1,
+      height: 1,
+      channels: 4,
+      background: { r: 18, g: 52, b: 60, alpha: 1 },
+    },
+  })
+    .png()
+    .toBuffer();
+
+  for (const entry of fs.readdirSync(resDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith('drawable')) continue;
+    const android12 = path.join(resDir, entry.name, 'android12splash.png');
+    await sharp(blankIcon).toFile(android12);
+  }
+}
+
 async function main() {
   const sharp = await getSharp();
   const root = path.join(__dirname, '..');
@@ -68,7 +146,12 @@ async function main() {
     await sharp(meshBuffer).toFile(target);
   }
 
+  patchLaunchBackground(root);
+  patchAndroid12Styles(root);
+  await removeSplashDrawables(sharp, resDir);
+
   console.log(`✓ patched ${targets.length} android background drawables with mesh`);
+  console.log('✓ removed native splash logo layers');
 }
 
 main().catch((err) => {

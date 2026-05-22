@@ -11,10 +11,18 @@ import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/widgets/brand_glass_mark.dart';
 
 class AuthShell extends StatelessWidget {
-  const AuthShell({super.key, required this.child, this.dark = false});
+  const AuthShell({
+    super.key,
+    required this.child,
+    this.dark = false,
+    this.showCenterGlow = true,
+    this.showCornerGlow = true,
+  });
 
   final Widget child;
   final bool dark;
+  final bool showCenterGlow;
+  final bool showCornerGlow;
 
   @override
   Widget build(BuildContext context) {
@@ -39,47 +47,49 @@ class AuthShell extends StatelessWidget {
         // ── Technical grid (teal-tinted, subtle) ────────────────────
         CustomPaint(painter: const _AuthGridPainter(), size: Size.infinite),
         // ── Ambient glow — top-right ────────────────────────────────
-        Positioned(
-          top: -80,
-          right: -80,
-          child: IgnorePointer(
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    EagleTokens.brandAccent.withValues(alpha: 0.10),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.7],
+        if (showCornerGlow)
+          Positioned(
+            top: -80,
+            right: -80,
+            child: IgnorePointer(
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      EagleTokens.brandAccent.withValues(alpha: 0.10),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.7],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
         // ── Hero glow — center (logo anchor) ────────────────────────
-        Align(
-          alignment: const Alignment(0, -0.22),
-          child: IgnorePointer(
-            child: Container(
-              width: 340,
-              height: 340,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFF1EC8C8).withValues(alpha: 0.14),
-                    EagleTokens.brandAccent.withValues(alpha: 0.06),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.45, 1.0],
+        if (showCenterGlow)
+          Align(
+            alignment: const Alignment(0, -0.22),
+            child: IgnorePointer(
+              child: Container(
+                width: 340,
+                height: 340,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFF1EC8C8).withValues(alpha: 0.14),
+                      EagleTokens.brandAccent.withValues(alpha: 0.06),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.45, 1.0],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
         SafeArea(child: child),
       ],
     );
@@ -153,6 +163,7 @@ class AuthWordmark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final align = center ? TextAlign.center : TextAlign.left;
     final crossAxis =
         center ? CrossAxisAlignment.center : CrossAxisAlignment.start;
@@ -176,10 +187,10 @@ class AuthWordmark extends StatelessWidget {
           'PERSONAL',
           textAlign: align,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.55),
+            color: primary,
             fontSize: subtitleSize,
-            fontWeight: FontWeight.w500,
-            letterSpacing: subtitleSize * 0.28,
+            fontWeight: FontWeight.w600,
+            letterSpacing: subtitleSize * 0.32,
             height: 1,
           ),
         ),
@@ -188,13 +199,99 @@ class AuthWordmark extends StatelessWidget {
           'Treine com dados. Evolua com inteligência.',
           textAlign: align,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.4),
+            color: Colors.white.withValues(alpha: 0.42),
             fontSize: taglineSize,
             fontStyle: FontStyle.italic,
             height: 1.2,
           ),
         ),
       ],
+    );
+  }
+}
+
+class AuthRoleToggle extends StatelessWidget {
+  const AuthRoleToggle({
+    super.key,
+    required this.isAluno,
+    required this.onPersonalTap,
+    required this.onAlunoTap,
+  });
+
+  final bool isAluno;
+  final VoidCallback onPersonalTap;
+  final VoidCallback onAlunoTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+
+    Widget tab({
+      required String label,
+      required bool selected,
+      required VoidCallback onTap,
+    }) {
+      return Expanded(
+        child: Semantics(
+          label: label,
+          button: true,
+          selected: selected,
+          child: GestureDetector(
+            onTap: onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(vertical: 11),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient:
+                    selected
+                        ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [primary, BrandPalette.deep(primary)],
+                        )
+                        : null,
+                color: selected ? null : Colors.transparent,
+                boxShadow:
+                    selected
+                        ? [
+                          BoxShadow(
+                            color: primary.withValues(alpha: 0.28),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
+                        : null,
+              ),
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: selected ? 1.0 : 0.48),
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: EagleTokens.glassBorder),
+      ),
+      child: Row(
+        children: [
+          tab(label: 'Personal', selected: !isAluno, onTap: onPersonalTap),
+          tab(label: 'Aluno', selected: isAluno, onTap: onAlunoTap),
+        ],
+      ),
     );
   }
 }
@@ -221,7 +318,7 @@ class AuthGlassCard extends StatelessWidget {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: EagleTokens.glassFill,
+            color: const Color(0x1AFFFFFF),
             borderRadius: BorderRadius.circular(radius),
             border: Border.all(color: EagleTokens.glassBorder),
             boxShadow: [
@@ -313,7 +410,7 @@ class AuthField extends StatelessWidget {
             enabledBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: EagleTokens.glassBorder,
+                color: primary.withValues(alpha: 0.28),
               ),
             ),
             focusedBorder: FxInputDeco.outlineBorder(

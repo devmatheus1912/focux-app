@@ -105,6 +105,32 @@ function glassTileSvg(size, radius) {
   `;
 }
 
+async function composeMarkOnly(markPath, outputPath, canvasSize, markScale, sharp) {
+  const markSize = Math.round(canvasSize * markScale);
+  const mark = await sharp(markPath)
+    .trim({ threshold: 8 })
+    .resize(markSize, markSize, {
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .png()
+    .toBuffer();
+
+  await sharp({
+    create: {
+      width: canvasSize,
+      height: canvasSize,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .composite([{ input: mark, gravity: 'centre' }])
+    .png()
+    .toFile(outputPath);
+
+  console.log(`✓ mark-only overlay: ${outputPath}`);
+}
+
 async function composeGlassMarkOverlay(markPath, outputPath, canvasSize, tileScale, sharp) {
   const tileSize = Math.round(canvasSize * tileScale);
   const radius = Math.round(tileSize * 0.26);
@@ -272,6 +298,22 @@ async function main() {
     .toFile(meshBgPath);
   console.log(`✓ mesh background: ${meshBgPath}`);
 
+  await composeMarkOnly(
+    markPath,
+    path.join(assets, 'logo_splash_f_only.png'),
+    640,
+    0.58,
+    sharp,
+  );
+
+  await composeMarkOnly(
+    markPath,
+    path.join(assets, 'logo_splash_f_padded.png'),
+    1152,
+    0.52,
+    sharp,
+  );
+
   await composeGlassMarkOverlay(
     markPath,
     path.join(assets, 'logo_splash_mark.png'),
@@ -288,11 +330,11 @@ async function main() {
     sharp,
   );
 
-  await composePremiumSplashCanvas(
+  await composeMarkOnly(
     markPath,
     path.join(assets, 'logo_icon_padded.png'),
     1152,
-    0.68,
+    0.52,
     sharp,
   );
 

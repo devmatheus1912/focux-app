@@ -1,10 +1,13 @@
-import 'dart:ui';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/widgets/brand_glass_mark.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOCUX PERSONAL — FxIntroSlides (Onboarding) — Premium V2
@@ -31,14 +34,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   static const _pages = [
     _OBData(
-      icon: Icons.fitness_center_rounded,
-      title: 'Seus alunos,\nsua gestão.',
+      title: 'Seus alunos, sua ',
+      titleHighlight: 'gestão.',
       subtitle:
           'Cadastre alunos, monte treinos e acompanhe a evolução de cada um em tempo real.',
-      accent: Color(0xFF80C8FF),
       orbitIcons: [
         Icons.people_alt_rounded,
-        Icons.timeline_rounded,
+        Icons.show_chart_rounded,
         Icons.calendar_month_rounded,
       ],
       metrics: [
@@ -65,11 +67,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       ],
     ),
     _OBData(
-      icon: Icons.auto_awesome_rounded,
-      title: 'IA que\nentende treino.',
+      title: 'IA que entende ',
+      titleHighlight: 'treino.',
       subtitle:
           'Gere treinos e dietas personalizados em segundos. A IA aprende com o histórico de cada aluno.',
-      accent: Color(0xFFA0CCFF),
       orbitIcons: [
         Icons.psychology_rounded,
         Icons.auto_graph_rounded,
@@ -95,11 +96,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       ],
     ),
     _OBData(
-      icon: Icons.attach_money_rounded,
-      title: 'Financeiro\nsem complicação.',
+      title: 'Financeiro ',
+      titleHighlight: 'sem complicação.',
       subtitle:
           'Cobranças, inadimplências e relatórios automatizados. Você foca no que importa: resultados.',
-      accent: Color(0xFFB8D9FF),
       orbitIcons: [
         Icons.trending_up_rounded,
         Icons.pie_chart_rounded,
@@ -225,56 +225,44 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           children: [
             // ── Background ──
             Container(
-              decoration: BoxDecoration(
-                gradient: EagleTokens.heroGradient(dark: true),
+              decoration: const BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(0, -0.18),
+                  radius: 1.1,
+                  colors: [
+                    Color(0xFF0A1F24),
+                    Color(0xFF050B0D),
+                    Color(0xFF050B0D),
+                  ],
+                  stops: [0.0, 0.55, 1.0],
+                ),
               ),
             ),
 
             // Grid pattern
             CustomPaint(painter: _AuthGridPainter(), size: Size.infinite),
 
-            // Ambient glow — follows accent
-            AnimatedBuilder(
-              animation: _entryCtrl,
-              builder:
-                  (_, __) => Positioned(
-                    top: -60,
-                    right: -60,
-                    child: Opacity(
-                      opacity: _fade.value,
-                      child: Container(
-                        width: 280,
-                        height: 280,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              _pages[_current].accent.withValues(alpha: 0.22),
-                              Colors.transparent,
-                            ],
-                            stops: const [0.0, 0.7],
-                          ),
-                        ),
+            // Soft hero glow — behind logo only
+            Positioned(
+              top: 108,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                child: Center(
+                  child: Container(
+                    width: 220,
+                    height: 220,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          primary.withValues(alpha: 0.14),
+                          primary.withValues(alpha: 0.04),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.45, 1.0],
                       ),
                     ),
-                  ),
-            ),
-
-            // Bottom ambient glow
-            Positioned(
-              bottom: -120,
-              left: -60,
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      primary.withValues(alpha: 0.10),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.7],
                   ),
                 ),
               ),
@@ -288,23 +276,42 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
-                      vertical: 10,
+                      vertical: 8,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        TextButton(
-                          onPressed: _finish,
-                          style: TextButton.styleFrom(
-                            foregroundColor: EagleTokens.darkInk.withValues(
-                              alpha: 0.5,
+                        GestureDetector(
+                          onTap: _finish,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
                             ),
-                          ),
-                          child: const Text(
-                            'Pular',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.04),
+                              borderRadius: BorderRadius.circular(99),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.12),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Pular',
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white.withValues(alpha: 0.62),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 16,
+                                  color: Colors.white.withValues(alpha: 0.45),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -344,7 +351,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 duration: const Duration(milliseconds: 400),
                                 curve: Curves.easeOutCubic,
                               ),
-                          child: _SlideDot(active: _current == i),
+                          child: _SlideDot(
+                            active: _current == i,
+                            primary: primary,
+                          ),
                         ),
                       ),
                     ),
@@ -360,42 +370,58 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           onTap: _next,
                           child: Container(
                             width: double.infinity,
-                            height: 50,
+                            height: 52,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(14),
                               gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
                                 colors: [primary, BrandPalette.deep(primary)],
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: primary.withValues(alpha: 0.4),
-                                  blurRadius: 16,
+                                  color: primary.withValues(alpha: 0.38),
+                                  blurRadius: 18,
                                   offset: const Offset(0, 6),
                                 ),
                               ],
                             ),
-                            alignment: Alignment.center,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            child: Stack(
                               children: [
-                                Text(
-                                  _current < 2 ? 'Próximo →' : 'Começar agora',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
+                                Positioned(
+                                  top: 0,
+                                  left: 18,
+                                  right: 18,
+                                  child: Container(
+                                    height: 1,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.white.withValues(alpha: 0.0),
+                                          Colors.white.withValues(alpha: 0.28),
+                                          Colors.white.withValues(alpha: 0.0),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                if (_current == 2) ...[
-                                  const SizedBox(width: 8),
-                                  const Icon(
-                                    Icons.chevron_right_rounded,
-                                    size: 20,
-                                    color: Colors.white,
+                                Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        _current < 2
+                                            ? 'Próximo →'
+                                            : 'Começar agora',
+                                        style: GoogleFonts.outfit(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ],
                             ),
                           ),
@@ -451,17 +477,16 @@ class _MetricChip {
 }
 
 class _OBData {
-  final IconData icon;
-  final String title, subtitle;
-  final Color accent;
+  final String title;
+  final String titleHighlight;
+  final String subtitle;
   final List<_MetricChip> metrics;
   final List<String> features;
   final List<IconData> orbitIcons;
   const _OBData({
-    required this.icon,
     required this.title,
+    required this.titleHighlight,
     required this.subtitle,
-    required this.accent,
     required this.metrics,
     required this.features,
     required this.orbitIcons,
@@ -470,7 +495,8 @@ class _OBData {
 
 class _SlideDot extends StatelessWidget {
   final bool active;
-  const _SlideDot({required this.active});
+  final Color primary;
+  const _SlideDot({required this.active, required this.primary});
 
   @override
   Widget build(BuildContext context) {
@@ -481,7 +507,8 @@ class _SlideDot extends StatelessWidget {
       height: 7,
       margin: const EdgeInsets.symmetric(horizontal: 3),
       decoration: BoxDecoration(
-        color: active ? Colors.white : Colors.white.withValues(alpha: 0.3),
+        color:
+            active ? primary : Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(7),
       ),
     );
@@ -509,28 +536,34 @@ class _OBPageWidget extends StatelessWidget {
     required this.fade,
   });
 
-  List<Widget> _buildOrbitIcons(_OBData d) {
-    // Position 3 orbiting icons at 120° intervals around center
+  List<Widget> _buildOrbitIcons(_OBData d, Color primary) {
     const positions = [
-      Alignment(-0.95, -0.75), // top-left
-      Alignment(0.95, -0.30), // right
-      Alignment(-0.70, 0.85), // bottom-left
+      Alignment(-0.92, -0.72),
+      Alignment(0.92, -0.28),
+      Alignment(-0.78, 0.88),
     ];
     return List.generate(d.orbitIcons.length, (i) {
       return Align(
         alignment: positions[i],
         child: Container(
-          width: 32,
-          height: 32,
+          width: 42,
+          height: 42,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(13),
+            color: const Color(0xFF0B1518),
             border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+            boxShadow: [
+              BoxShadow(
+                color: primary.withValues(alpha: 0.12),
+                blurRadius: 12,
+                spreadRadius: -4,
+              ),
+            ],
           ),
           child: Icon(
             d.orbitIcons[i],
-            size: 15,
-            color: d.accent.withValues(alpha: 0.5),
+            size: 18,
+            color: primary,
           ),
         ),
       );
@@ -539,132 +572,104 @@ class _OBPageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+
     return AnimatedBuilder(
       animation: fade,
       builder:
           (_, __) => Padding(
-            padding: const EdgeInsets.only(left: 24, right: 24, top: 10),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // ── Composite Illustration ──
                 Transform.scale(
                   scale: iconScale.value,
                   child: SizedBox(
-                    width: 140,
-                    height: 140,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Orbiting satellite icons
-                        ..._buildOrbitIcons(data),
-                        // Main glass icon
-                        Container(
-                          width: 88,
-                          height: 88,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(26),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.12),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: data.accent.withValues(alpha: 0.32),
-                                blurRadius: 32,
-                                spreadRadius: -8,
-                              ),
-                            ],
+                    width: 188,
+                    height: 188,
+                    child: CustomPaint(
+                      painter: _OrbitLinksPainter(),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          ..._buildOrbitIcons(data, primary),
+                          BrandGlassMark(
+                            size: 112,
+                            tone: BrandGlassTone.dark,
+                            glowColor: primary,
+                            shimmerAlpha: 0.12,
+                            enableBackdropBlur: false,
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(26),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      gradient: RadialGradient(
-                                        colors: [
-                                          data.accent.withValues(alpha: 0.14),
-                                          Colors.transparent,
-                                        ],
-                                        stops: const [0.0, 0.7],
-                                      ),
-                                    ),
-                                  ),
-                                  Icon(data.icon, color: data.accent, size: 38),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // ── Title — staggered slide ──
-                Transform.translate(
-                  offset: Offset(0, titleSlide.value),
-                  child: Opacity(
-                    opacity: fade.value.clamp(0.0, 1.0),
-                    child: Text(
-                      data.title,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.85,
-                        height: 1.15,
+                        ],
                       ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 18),
 
-                // ── Subtitle — staggered slide ──
+                Transform.translate(
+                  offset: Offset(0, titleSlide.value),
+                  child: Opacity(
+                    opacity: fade.value.clamp(0.0, 1.0),
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.7,
+                          height: 1.12,
+                        ),
+                        children: [
+                          TextSpan(text: data.title),
+                          TextSpan(
+                            text: data.titleHighlight,
+                            style: TextStyle(color: primary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
                 Transform.translate(
                   offset: Offset(0, subtitleSlide.value),
                   child: Opacity(
                     opacity: fade.value.clamp(0.0, 1.0),
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 320),
+                      constraints: const BoxConstraints(maxWidth: 330),
                       child: Text(
                         data.subtitle,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.65),
+                        style: GoogleFonts.outfit(
+                          color: Colors.white.withValues(alpha: 0.62),
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
-                          height: 1.6,
+                          height: 1.55,
                         ),
                       ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 22),
 
-                // ── Metric Chips — visual anchor filling dead space ──
                 Transform.translate(
                   offset: Offset(0, metricsSlide.value),
                   child: Opacity(
                     opacity: fade.value.clamp(0.0, 1.0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children:
                           data.metrics
                               .map(
                                 (m) => Expanded(
                                   child: _MetricChipWidget(
                                     metric: m,
-                                    accent: data.accent,
+                                    primary: primary,
                                   ),
                                 ),
                               )
@@ -672,20 +677,22 @@ class _OBPageWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
 
-                // ── Feature checklist — fills the dead space ──
                 Transform.translate(
                   offset: Offset(0, metricsSlide.value * 0.7),
                   child: Opacity(
                     opacity: fade.value.clamp(0.0, 1.0),
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.04),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.07),
+                          color: Colors.white.withValues(alpha: 0.08),
                         ),
                       ),
                       child: Column(
@@ -694,7 +701,7 @@ class _OBPageWidget extends StatelessWidget {
                               final isLast = e.key == data.features.length - 1;
                               return Padding(
                                 padding: EdgeInsets.only(
-                                  bottom: isLast ? 0 : 12,
+                                  bottom: isLast ? 0 : 11,
                                 ),
                                 child: Row(
                                   children: [
@@ -702,26 +709,22 @@ class _OBPageWidget extends StatelessWidget {
                                       width: 22,
                                       height: 22,
                                       decoration: BoxDecoration(
-                                        color: data.accent.withValues(
-                                          alpha: 0.12,
-                                        ),
-                                        borderRadius: BorderRadius.circular(7),
+                                        color: primary.withValues(alpha: 0.14),
+                                        shape: BoxShape.circle,
                                       ),
                                       child: Icon(
                                         Icons.check_rounded,
                                         size: 13,
-                                        color: data.accent.withValues(
-                                          alpha: 0.8,
-                                        ),
+                                        color: primary,
                                       ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
                                         e.value,
-                                        style: TextStyle(
+                                        style: GoogleFonts.outfit(
                                           color: Colors.white.withValues(
-                                            alpha: 0.6,
+                                            alpha: 0.72,
                                           ),
                                           fontSize: 13,
                                           fontWeight: FontWeight.w500,
@@ -740,37 +743,37 @@ class _OBPageWidget extends StatelessWidget {
 
                 const Spacer(),
 
-                // ── Feature highlight bar ──
                 Transform.translate(
                   offset: Offset(0, metricsSlide.value * 0.5),
                   child: Opacity(
-                    opacity: (fade.value * 0.8).clamp(0.0, 1.0),
+                    opacity: (fade.value * 0.95).clamp(0.0, 1.0),
                     child: Container(
-                      margin: const EdgeInsets.only(bottom: 8),
+                      margin: const EdgeInsets.only(bottom: 6),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
+                        horizontal: 14,
+                        vertical: 9,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.04),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(99),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.06),
+                          color: Colors.white.withValues(alpha: 0.08),
                         ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.verified_rounded,
                             size: 14,
-                            color: data.accent.withValues(alpha: 0.6),
+                            color: primary,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             'Usado por +200 personal trainers',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.40),
+                            style: GoogleFonts.outfit(
+                              color: Colors.white.withValues(alpha: 0.48),
                               fontSize: 11.5,
                               fontWeight: FontWeight.w500,
                             ),
@@ -793,28 +796,28 @@ class _OBPageWidget extends StatelessWidget {
 
 class _MetricChipWidget extends StatelessWidget {
   final _MetricChip metric;
-  final Color accent;
-  const _MetricChipWidget({required this.metric, required this.accent});
+  final Color primary;
+  const _MetricChipWidget({required this.metric, required this.primary});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Column(
         children: [
-          Icon(metric.icon, color: accent.withValues(alpha: 0.6), size: 20),
+          Icon(metric.icon, color: primary, size: 18),
           const SizedBox(height: 8),
           Text(
             metric.value,
-            style: const TextStyle(
+            style: GoogleFonts.outfit(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.w700,
               height: 1,
             ),
@@ -823,8 +826,9 @@ class _MetricChipWidget extends StatelessWidget {
           Text(
             metric.label,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.45),
+            maxLines: 2,
+            style: GoogleFonts.outfit(
+              color: Colors.white.withValues(alpha: 0.42),
               fontSize: 10,
               fontWeight: FontWeight.w500,
               height: 1.2,
@@ -902,7 +906,7 @@ class _AuthGridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final p =
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.05)
+          ..color = EagleTokens.brandAccent.withValues(alpha: 0.045)
           ..strokeWidth = 0.5
           ..style = PaintingStyle.stroke;
     for (double x = 0; x < size.width; x += 30) {
@@ -915,4 +919,45 @@ class _AuthGridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter old) => false;
+}
+
+class _OrbitLinksPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width * 0.5, size.height * 0.5);
+    final nodes = [
+      Offset(size.width * 0.14, size.height * 0.20),
+      Offset(size.width * 0.86, size.height * 0.34),
+      Offset(size.width * 0.20, size.height * 0.84),
+    ];
+    final paint =
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.14)
+          ..strokeWidth = 1
+          ..style = PaintingStyle.stroke;
+
+    for (final node in nodes) {
+      _drawDotted(canvas, center, node, paint);
+    }
+  }
+
+  void _drawDotted(Canvas canvas, Offset from, Offset to, Paint paint) {
+    const dash = 4.0;
+    const gap = 5.0;
+    final delta = to - from;
+    final distance = delta.distance;
+    if (distance <= 0) return;
+    final direction = Offset(delta.dx / distance, delta.dy / distance);
+    var drawn = 0.0;
+    while (drawn < distance) {
+      final start = from + direction * drawn;
+      final endDist = math.min(drawn + dash, distance);
+      final end = from + direction * endDist;
+      canvas.drawLine(start, end, paint);
+      drawn += dash + gap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -272,7 +272,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Scaffold(
         body: AuthShell(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 60, 24, 40),
+            padding: const EdgeInsets.fromLTRB(24, 52, 24, 36),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight: MediaQuery.of(context).size.height - 100,
@@ -282,14 +282,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 6),
-                    const AuthLogoMark(size: 108),
-                    const SizedBox(height: 18),
+                    const AuthLogoMark(size: 100),
+                    const SizedBox(height: 16),
                     const AuthWordmark(
-                      titleSize: 30,
+                      titleSize: 32,
                       subtitleSize: 13,
                       taglineSize: 13,
                     ),
-                    const SizedBox(height: 36),
+                    const SizedBox(height: 32),
                     AuthGlassCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,111 +298,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             'Entrar',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 26,
+                              fontSize: 22,
                               fontWeight: FontWeight.w700,
-                              letterSpacing: -0.5,
+                              letterSpacing: -0.4,
                             ),
                           ),
                           const SizedBox(height: 18),
-                          // BUG-39: role toggle
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Semantics(
-                                    label: 'Personal',
-                                    button: true,
-                                    selected: !_isAluno,
-                                    child: GestureDetector(
-                                      onTap:
-                                          () =>
-                                              setState(() => _isAluno = false),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 180,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 10,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              !_isAluno
-                                                  ? Colors.white.withValues(
-                                                    alpha: 0.18,
-                                                  )
-                                                  : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          'Personal',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: Colors.white.withValues(
-                                              alpha: !_isAluno ? 1.0 : 0.5,
-                                            ),
-                                            fontWeight:
-                                                !_isAluno
-                                                    ? FontWeight.w700
-                                                    : FontWeight.w500,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Semantics(
-                                    label: 'Aluno',
-                                    button: true,
-                                    selected: _isAluno,
-                                    child: GestureDetector(
-                                      onTap:
-                                          () => setState(() => _isAluno = true),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 180,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 10,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              _isAluno
-                                                  ? Colors.white.withValues(
-                                                    alpha: 0.18,
-                                                  )
-                                                  : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          'Aluno',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: Colors.white.withValues(
-                                              alpha: _isAluno ? 1.0 : 0.5,
-                                            ),
-                                            fontWeight:
-                                                _isAluno
-                                                    ? FontWeight.w700
-                                                    : FontWeight.w500,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                          AuthRoleToggle(
+                            isAluno: _isAluno,
+                            onPersonalTap: () => setState(() => _isAluno = false),
+                            onAlunoTap: () => setState(() => _isAluno = true),
                           ),
                           const SizedBox(height: 18),
                           AuthField(
@@ -509,17 +414,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onTap: () => context.go('/register'),
                       child: RichText(
                         textAlign: TextAlign.center,
-                        text: const TextSpan(
+                        text: TextSpan(
                           style: TextStyle(
-                            color: Color.fromRGBO(255, 255, 255, 0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             fontSize: 14,
                           ),
                           children: [
-                            TextSpan(text: 'Não tem conta? '),
+                            const TextSpan(text: 'Não tem conta? '),
                             TextSpan(
                               text: 'Criar conta grátis',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: primary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
