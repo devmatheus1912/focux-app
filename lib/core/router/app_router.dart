@@ -94,6 +94,7 @@ import '../../features/notificacoes/screens/notificacoes_screen.dart';
 import '../../features/qa/screens/qa_smoke_screen.dart';
 import '../auth/session_invalidator.dart';
 import '../storage/secure_storage.dart';
+import '../widgets/fx_route_chrome.dart';
 import 'role_home.dart';
 
 class AppRouter {
@@ -203,11 +204,15 @@ class AppRouter {
       ),
       GoRoute(
         path: '/aluno/ativacao',
-        builder: (context, state) => const AlunoActivationScreen(),
+        builder:
+            (context, state) =>
+                const FxRouteChrome(child: AlunoActivationScreen()),
       ),
       GoRoute(
         path: '/notificacoes',
-        builder: (context, state) => const NotificacoesScreen(),
+        builder:
+            (context, state) =>
+                const FxRouteChrome(child: NotificacoesScreen()),
       ),
       GoRoute(
         path: '/evolucao',
@@ -274,6 +279,9 @@ class AppRouter {
       ),
 
       // ── Sub-routes (pushed over the shell, dock hidden) ───────────────────────
+      ShellRoute(
+        builder: (context, state, child) => FxRouteChrome(child: child),
+        routes: [
       GoRoute(
         path: '/dashboard/qualidade',
         builder: (context, state) => const QualidadeOperacionalScreen(),
@@ -780,6 +788,8 @@ class AppRouter {
           path: '/qa/smoke',
           builder: (context, state) => const QaSmokeScreen(),
         ),
+        ],
+      ),
     ],
   );
 }

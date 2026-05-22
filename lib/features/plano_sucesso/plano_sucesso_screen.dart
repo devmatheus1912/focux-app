@@ -36,7 +36,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
 
     if (provider.isLoading) {
       return Scaffold(
-        backgroundColor: bg,
+        backgroundColor: Colors.transparent,
         body: const SafeArea(child: SkeletonList(count: 5)),
       );
     }
@@ -44,7 +44,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     final plano = provider.plano;
     if (plano == null) {
       return Scaffold(
-        backgroundColor: bg,
+        backgroundColor: Colors.transparent,
         body: const SafeArea(
           child: EmptyStateWidget(
             icon: Icons.flag_outlined,
@@ -62,7 +62,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     final atual = pendentes.isEmpty ? null : pendentes.first.id;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),

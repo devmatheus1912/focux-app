@@ -86,7 +86,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     final brand = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async => ref.invalidate(_broadcastHistoricoProvider),

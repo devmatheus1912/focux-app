@@ -83,9 +83,9 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
     );
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Evolução — ${widget.alunoNome}',

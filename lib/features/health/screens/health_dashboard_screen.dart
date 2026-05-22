@@ -93,7 +93,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Saúde & Wearables'),
         backgroundColor: Colors.transparent,

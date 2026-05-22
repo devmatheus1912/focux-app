@@ -122,7 +122,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     final bottom = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(

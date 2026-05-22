@@ -114,7 +114,9 @@ class _OnboardingBibliotecaWizardState
         (_step == 1 && _espacos.isNotEmpty);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: const Text('Biblioteca curada'),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),

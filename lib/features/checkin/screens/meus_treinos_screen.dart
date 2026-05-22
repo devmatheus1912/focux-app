@@ -22,7 +22,7 @@ class MeusTreinosScreen extends ConsumerWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: treinosAsync.when(

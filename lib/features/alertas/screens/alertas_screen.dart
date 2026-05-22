@@ -209,7 +209,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     const saudaveis = 0;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(

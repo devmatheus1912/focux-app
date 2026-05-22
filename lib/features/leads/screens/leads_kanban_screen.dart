@@ -181,7 +181,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
     final brand = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(

@@ -19,7 +19,7 @@ class HistoricoCheckinScreen extends ConsumerWidget {
     final historicoAsync = ref.watch(historicoCheckinProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

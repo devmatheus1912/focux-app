@@ -15,7 +15,6 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../../core/widgets/cinematic_mesh_background.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -262,7 +261,7 @@ class _PerfilLoadingScaffold extends StatelessWidget {
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -313,7 +312,7 @@ class _PerfilErrorScaffold extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -443,12 +442,9 @@ class _PerfilBody extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: CinematicMeshBackground(
-        showCenterGlow: false,
-        showCornerGlow: false,
-        child: SafeArea(
-          bottom: false,
-          child: CustomScrollView(
+      body: SafeArea(
+        bottom: false,
+        child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
                 child: Container(
@@ -892,7 +888,6 @@ class _PerfilBody extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }

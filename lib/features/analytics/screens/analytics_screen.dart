@@ -19,7 +19,7 @@ class AnalyticsScreen extends ConsumerWidget {
     final async = ref.watch(analyticsDashboardProvider);
 
     return Scaffold(
-      backgroundColor: dark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       body: async.when(
         loading: () => Center(child: FxLoading(color: primary)),
         error:

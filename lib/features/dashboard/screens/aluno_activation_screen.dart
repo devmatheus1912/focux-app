@@ -51,7 +51,7 @@ class AlunoActivationScreen extends ConsumerWidget {
     final chatAsync = ref.watch(chatAlunoDashboardProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Boas-vindas'),
         automaticallyImplyLeading: false,

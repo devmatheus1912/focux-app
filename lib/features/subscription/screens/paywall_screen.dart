@@ -248,9 +248,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     }
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: bg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: ink),
         leading: IconButton(

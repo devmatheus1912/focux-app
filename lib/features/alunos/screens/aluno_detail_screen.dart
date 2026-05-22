@@ -168,7 +168,7 @@ class AlunoDetailScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark ? EagleTokens.darkCard : Colors.white,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -415,7 +415,7 @@ class AlunoDetailScreen extends ConsumerWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: alunoAsync.when(
         loading: () => const FxLoading(),
         error: (e, _) => Center(child: Text('Erro: $e')),
@@ -1324,7 +1324,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       builder:
           (sheetContext) => SafeArea(
             child: Padding(
@@ -2468,7 +2468,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),

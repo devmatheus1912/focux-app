@@ -111,7 +111,11 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text('Progressão de Carga — ${widget.alunoNome}')),
+    backgroundColor: Colors.transparent,
+    appBar: AppBar(
+      backgroundColor: Colors.transparent,
+      title: Text('Progressão de Carga — ${widget.alunoNome}'),
+    ),
     body: SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(

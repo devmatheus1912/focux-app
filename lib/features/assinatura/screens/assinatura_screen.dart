@@ -328,7 +328,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         widget.initialPlan?.trim().toUpperCase() ?? currentPlan.apiName;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

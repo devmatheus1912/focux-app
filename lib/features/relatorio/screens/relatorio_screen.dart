@@ -210,9 +210,9 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Relatório — ${widget.alunoNome}',

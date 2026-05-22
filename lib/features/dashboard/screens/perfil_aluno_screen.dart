@@ -610,7 +610,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Meu perfil'),
         leading: IconButton(

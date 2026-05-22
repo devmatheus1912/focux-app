@@ -175,7 +175,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       isScrollControlled: true,
       isDismissible: false,
       enableDrag: false,
-      backgroundColor: isDark ? EagleTokens.darkCard : Colors.white,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -425,7 +425,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(

@@ -46,9 +46,9 @@ class AlunoDashboardScreen extends ConsumerWidget {
     final chatAsync = ref.watch(chatAlunoDashboardProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Meu Treino',

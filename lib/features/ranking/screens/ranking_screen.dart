@@ -51,7 +51,11 @@ class RankingScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ranking de Personais')),
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: const Text('Ranking de Personais'),
+      ),
       body: rankingAsync.when(
         loading: () => const SkeletonList(count: 5),
         error: (e, _) => Center(child: Text('Erro: $e')),

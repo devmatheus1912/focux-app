@@ -106,7 +106,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text('Evolução · ${widget.alunoNome}'),
         backgroundColor: Colors.transparent,

@@ -162,9 +162,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     final brandSofter = BrandPalette.softer(brand, dark: isDark);
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: bg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: ink),
       ),

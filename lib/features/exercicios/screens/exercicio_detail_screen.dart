@@ -155,7 +155,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(

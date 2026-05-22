@@ -329,7 +329,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final created = await context.push<bool>('/exercicios/novo');

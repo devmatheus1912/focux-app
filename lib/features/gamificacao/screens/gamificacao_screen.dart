@@ -85,7 +85,7 @@ class GamificacaoScreen extends ConsumerWidget {
     ];
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 110),
         child: Column(

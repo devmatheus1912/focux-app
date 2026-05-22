@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../widgets/cinematic_mesh_background.dart';
 import '../widgets/fx_dock.dart';
+import '../widgets/mesh_scope.dart';
 
 /// Shell scaffold wrapping the 5 main personal-trainer tabs.
 class MainShell extends StatelessWidget {
@@ -30,10 +31,12 @@ class MainShell extends StatelessWidget {
       child: Scaffold(
         extendBody: true,
         backgroundColor: Colors.transparent,
-        body: CinematicMeshBackground(
-          showCenterGlow: false,
-          showCornerGlow: true,
-          child: Stack(
+        body: MeshScope(
+          active: true,
+          child: CinematicMeshBackground(
+            showCenterGlow: false,
+            showCornerGlow: true,
+            child: Stack(
             fit: StackFit.expand,
             children: [
               Padding(
@@ -57,6 +60,7 @@ class MainShell extends StatelessWidget {
                 ),
               ),
             ],
+            ),
           ),
         ),
       ),

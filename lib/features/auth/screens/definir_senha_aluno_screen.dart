@@ -121,7 +121,7 @@ class _DefinirSenhaAlunoScreenState
     final strength = _passwordStrength();
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

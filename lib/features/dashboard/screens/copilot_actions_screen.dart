@@ -42,9 +42,9 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     final actionsAsync = ref.watch(iaActionsProvider(_status));
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: bg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 76,
         leading: IconButton(

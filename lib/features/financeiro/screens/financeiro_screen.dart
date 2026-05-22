@@ -69,7 +69,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
     final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(

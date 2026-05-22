@@ -430,7 +430,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
 
     if (_loading) {
       return Scaffold(
-        backgroundColor: bg,
+        backgroundColor: Colors.transparent,
         body: Center(child: FxLoading(color: brand)),
       );
     }
@@ -448,7 +448,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     final progresso = exercicios.isEmpty ? 0.0 : concluidos / exercicios.length;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           CustomScrollView(

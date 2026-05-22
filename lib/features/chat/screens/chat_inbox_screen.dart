@@ -216,7 +216,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       floatingActionButton:
           _isSearching || _selectionActive
               ? null
@@ -226,7 +226,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                 child: const Icon(Icons.edit_outlined),
               ),
       appBar: AppBar(
-        backgroundColor: bg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: ink,
         automaticallyImplyLeading: !_selectionActive,

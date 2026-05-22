@@ -67,7 +67,11 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Assistente IA')),
+    backgroundColor: Colors.transparent,
+    appBar: AppBar(
+      backgroundColor: Colors.transparent,
+      title: const Text('Assistente IA'),
+    ),
     body: Column(
       children: [
         Expanded(

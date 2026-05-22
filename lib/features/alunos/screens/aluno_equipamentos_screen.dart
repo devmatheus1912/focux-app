@@ -41,7 +41,9 @@ class _AlunoEquipamentosScreenState
     final selected = _selected;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: const Text('Equipamentos do aluno'),
         actions: [
           if (_saving)

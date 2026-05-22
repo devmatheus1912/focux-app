@@ -158,7 +158,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
             : _niveisLabel[_niveis.indexOf(_nivel!)];
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(

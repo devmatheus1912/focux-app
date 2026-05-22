@@ -188,7 +188,9 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
     final alunosAsync = ref.watch(alunosProvider);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: const Text('Ações em Massa'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

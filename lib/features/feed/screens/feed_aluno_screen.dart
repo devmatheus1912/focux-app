@@ -123,7 +123,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child:
             _loading

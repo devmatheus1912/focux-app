@@ -163,7 +163,7 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
           children: [

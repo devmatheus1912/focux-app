@@ -1736,9 +1736,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final subtitle = _subtitle(brand);
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(

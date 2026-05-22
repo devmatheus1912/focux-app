@@ -100,9 +100,9 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(
           color: isDark ? EagleTokens.darkInk : EagleTokens.ink,

@@ -465,7 +465,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       floatingActionButton: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: [primary, primaryDeep]),

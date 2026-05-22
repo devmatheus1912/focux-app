@@ -53,9 +53,9 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
     final background = isDark ? EagleTokens.darkBg : EagleTokens.paper;
 
     return Scaffold(
-      backgroundColor: background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: background,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text('Relatorio Global'),
         actions: [

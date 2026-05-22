@@ -495,7 +495,7 @@ class _IdentidadeVisualScreenState
     );
 
     return Scaffold(
-      backgroundColor: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -1633,7 +1633,7 @@ void _showSectionOrderSheet(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: isDark ? EagleTokens.darkCard : EagleTokens.card,
+    backgroundColor: Colors.transparent,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
     ),

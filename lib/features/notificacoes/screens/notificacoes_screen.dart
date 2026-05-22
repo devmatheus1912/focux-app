@@ -37,9 +37,9 @@ class NotificacoesScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: bg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Notificações',

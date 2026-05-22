@@ -22,7 +22,7 @@ class LandingPageConfigScreen extends ConsumerWidget {
     final perfilAsync = ref.watch(perfilProvider);
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Colors.transparent,
       body: perfilAsync.when(
         loading: () => const FxLoading(),
         error:
