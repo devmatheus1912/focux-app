@@ -9,13 +9,14 @@ import 'package:flutter/material.dart';
 /// Legacy brand (#3454D1 Deep Cobalt) has been replaced with the new
 /// cinematic cyan-teal identity that matches the 4K glass app icon.
 abstract class EagleTokens {
-  // ── Brand (Cyan Teal — cinematic, ~70% sat) ─────────────────────────
-  static const Color brand = Color(0xFF1EC8C8);
-  static const Color brandInk = Color(0xFF159A9A);
-  static const Color brandSoft = Color(0xFFE0F7F7);
-  static const Color brandSofter = Color(0xFFF0FBFB);
+  // ── Brand (Cyan Teal — cinematic, slightly softened for comfort) ───
+  static const Color brand = Color(0xFF18B5B5);
+  static const Color brandInk = Color(0xFF128989);
+  static const Color brandSecondary = Color(0xFF007D8A);
+  static const Color brandSoft = Color(0xFFD9F2F2);
+  static const Color brandSofter = Color(0xFFEDF8F8);
   static const Color brandDeep = Color(0xFF0A2E2E);
-  static const Color brandAccent = Color(0xFF5EEAD4);
+  static const Color brandAccent = Color(0xFF4DCFC0);
 
   // ── Neutral Light (Teal-tinted cool) ────────────────────────────────
   static const Color ink = Color(0xFF0C1218);
@@ -92,8 +93,8 @@ abstract class EagleTokens {
 
   // ── Hero Gradients ──────────────────────────────────────────────────
   static const List<Color> heroGradientLight = [
-    Color(0xFF1EC8C8),
-    Color(0xFF159A9A),
+    Color(0xFF18B5B5),
+    Color(0xFF128989),
   ];
 
   static const List<Color> heroGradientDark = [

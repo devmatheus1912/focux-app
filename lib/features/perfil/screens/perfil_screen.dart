@@ -405,7 +405,9 @@ class _PerfilBody extends StatelessWidget {
       perfil.corSecundaria ?? dashboard.corSecundaria,
       fallback: BrandPalette.deep(themePrimary),
     );
-    final accent = primaryColor;
+    final accent = BrandPalette.softened(primaryColor);
+    final heroPrimary = BrandPalette.softened(primaryColor, amount: 0.10);
+    final heroSecondary = BrandPalette.softened(secondaryColor, amount: 0.14);
     final profileScore = _profileScore(perfil, dashboard);
     final publicUrl = _publicProfileUrl(perfil);
     final displayPublicUrl = _displayPublicProfileUrl(perfil, publicUrl);
@@ -462,12 +464,12 @@ class _PerfilBody extends StatelessWidget {
                       transform: const GradientRotation(160 * math.pi / 180),
                       colors:
                           isDark
-                              ? const [Color(0xFF159A9A), Color(0xFF0A2E2E)]
-                              : [primaryColor, secondaryColor],
+                              ? [EagleTokens.brandInk, EagleTokens.brandDeep]
+                              : [heroPrimary, heroSecondary],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: primaryColor.withValues(alpha: isDark ? 0.22 : 0.28),
+                        color: heroPrimary.withValues(alpha: isDark ? 0.22 : 0.24),
                         blurRadius: 28,
                         offset: const Offset(0, 14),
                         spreadRadius: -8,
@@ -686,8 +688,8 @@ class _PerfilBody extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _BrandPreview(
-                            primary: primaryColor,
-                            secondary: secondaryColor,
+                            primary: heroPrimary,
+                            secondary: heroSecondary,
                             profileName: perfil.nome,
                             publicUrl: displayPublicUrl,
                             isDark: isDark,
@@ -1136,7 +1138,7 @@ class _CardSection extends StatelessWidget {
     this.subtitle,
     this.trailingLabel,
     this.onTrailingTap,
-    this.accent = EagleTokens.brand,
+    required this.accent,
   });
 
   @override
@@ -1387,10 +1389,7 @@ class _DefaultBrandSwatch extends StatelessWidget {
               loading
                   ? const Padding(
                     padding: EdgeInsets.all(8),
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+                    child: FxLoading(strokeWidth: 2, color: Colors.white),
                   )
                   : Icon(
                     selected ? Icons.check_rounded : Icons.restore_rounded,

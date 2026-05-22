@@ -18,9 +18,9 @@ import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 
 const _coresPredefinidas = [
-  Color(0xFF1EC8C8), // Focux cyan (default)
-  Color(0xFF159A9A), // Focux teal
-  Color(0xFF0097A7),
+  BrandPalette.defaultPrimary,
+  BrandPalette.defaultInk,
+  BrandPalette.defaultSecondary,
   Color(0xFF22C55E),
   Color(0xFFF59E0B),
   Color(0xFFEF4444),

@@ -86,7 +86,7 @@ class CinematicMeshBackground extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFF1EC8C8).withValues(
+                      Theme.of(context).colorScheme.primary.withValues(
                         alpha: isLight ? 0.08 : 0.14,
                       ),
                       EagleTokens.brandAccent.withValues(

@@ -8,10 +8,15 @@ import 'design_tokens.dart';
 ///
 /// Tested with cyan (default Focux), warm reds, greens, purples.
 class BrandPalette {
-  static const Color defaultPrimary = EagleTokens.brand;
-  static const Color defaultSecondary = Color(0xFF0097A7);
-  static const String defaultPrimaryHex = '#1EC8C8';
-  static const String defaultSecondaryHex = '#0097A7';
+  static const Color defaultPrimary = Color(0xFF18B5B5);
+  static const Color defaultSecondary = Color(0xFF007D8A);
+  static const Color defaultInk = Color(0xFF128989);
+  static const String defaultPrimaryHex = '#18B5B5';
+  static const String defaultSecondaryHex = '#007D8A';
+
+  /// Previous default cyan kept for reset detection on saved profiles.
+  static const String legacyPrimaryHex = '#1EC8C8';
+  static const String legacySecondaryHex = '#0097A7';
 
   static bool isDefaultBrandColors({
     String? corPrimaria,
@@ -19,12 +24,19 @@ class BrandPalette {
   }) {
     final primary = _normalizeHex(corPrimaria);
     final secondary = _normalizeHex(corSecundaria);
-    return (primary == null || primary == defaultPrimaryHex) &&
-        (secondary == null || secondary == defaultSecondaryHex);
+    const primaryDefaults = {defaultPrimaryHex, legacyPrimaryHex};
+    const secondaryDefaults = {defaultSecondaryHex, legacySecondaryHex};
+    return (primary == null || primaryDefaults.contains(primary)) &&
+        (secondary == null || secondaryDefaults.contains(secondary));
   }
 
   static String toHex(Color color) =>
       '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
+
+  /// Slightly darkens a brand color for large surfaces and CTAs.
+  static Color softened(Color primary, {double amount = 0.08}) {
+    return Color.lerp(primary, EagleTokens.brandDeep, amount)!;
+  }
 
   static String? _normalizeHex(String? raw) {
     if (raw == null || raw.trim().isEmpty) return null;
