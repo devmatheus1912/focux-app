@@ -2118,6 +2118,7 @@ class _CopilotReadinessCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = chrome.ink;
     final mute = chrome.mute;
+    final line = chrome.line;
     final soft = BrandPalette.soft(primary, dark: dark);
     final visibleChecks = checks.take(2).toList();
 

@@ -18,6 +18,7 @@ class AuthShell extends StatelessWidget {
     this.dark = false,
     this.showCenterGlow = true,
     this.showCornerGlow = true,
+    this.forceDark = true,
   });
 
   final Widget child;
@@ -25,9 +26,13 @@ class AuthShell extends StatelessWidget {
   final bool showCenterGlow;
   final bool showCornerGlow;
 
+  /// Auth/splash UI is authored for the dark cinematic mesh (white type).
+  final bool forceDark;
+
   @override
   Widget build(BuildContext context) {
     return CinematicMeshBackground(
+      forceDark: forceDark,
       showCenterGlow: showCenterGlow,
       showCornerGlow: showCornerGlow,
       child: SafeArea(child: child),

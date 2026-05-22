@@ -155,6 +155,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       child: Scaffold(
         backgroundColor: const Color(0xFF080C10),
         body: AuthShell(
+          forceDark: true,
           showCenterGlow: false,
           showCornerGlow: false,
           child: AnimatedBuilder(
