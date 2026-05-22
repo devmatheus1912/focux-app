@@ -1,11 +1,38 @@
 import 'package:flutter/material.dart';
 
+import 'design_tokens.dart';
+
 /// Derives soft/deep/accent variants from any dynamic primary color.
 /// Used by white-label: personal's corPrimaria is passed here to generate
 /// a harmonious set of tints that work across light and dark modes.
 ///
 /// Tested with cyan (default Focux), warm reds, greens, purples.
 class BrandPalette {
+  static const Color defaultPrimary = EagleTokens.brand;
+  static const Color defaultSecondary = Color(0xFF0097A7);
+  static const String defaultPrimaryHex = '#1EC8C8';
+  static const String defaultSecondaryHex = '#0097A7';
+
+  static bool isDefaultBrandColors({
+    String? corPrimaria,
+    String? corSecundaria,
+  }) {
+    final primary = _normalizeHex(corPrimaria);
+    final secondary = _normalizeHex(corSecundaria);
+    return (primary == null || primary == defaultPrimaryHex) &&
+        (secondary == null || secondary == defaultSecondaryHex);
+  }
+
+  static String toHex(Color color) =>
+      '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
+
+  static String? _normalizeHex(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return null;
+    final value = raw.trim().toUpperCase();
+    if (!value.startsWith('#')) return '#$value';
+    return value;
+  }
+
   static Color soft(Color primary, {bool dark = false}) {
     final hsl = HSLColor.fromColor(primary);
     if (dark) {

@@ -32,6 +32,7 @@ void main() {
     expect(find.text('Prontidao comercial'), findsOneWidget);
     expect(find.text('Identidade visual'), findsOneWidget);
     expect(find.text('Marca'), findsWidgets);
+    expect(find.bySemanticsLabel('Restaurar cores padrão do Focux'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Carteira e PIX'),

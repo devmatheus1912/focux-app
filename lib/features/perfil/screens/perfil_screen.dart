@@ -13,6 +13,7 @@ import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -30,6 +31,83 @@ class PerfilScreen extends ConsumerStatefulWidget {
 
 class _PerfilScreenState extends ConsumerState<PerfilScreen> {
   bool _uploadingPhoto = false;
+  bool _resettingBrand = false;
+
+  Future<void> _resetBrandColors(PerfilPersonal perfil) async {
+    if (perfil.plano.toUpperCase() != 'ENTERPRISE') {
+      if (!mounted) return;
+      context.push('/identidade-visual');
+      return;
+    }
+
+    if (BrandPalette.isDefaultBrandColors(
+      corPrimaria: perfil.corPrimaria,
+      corSecundaria: perfil.corSecundaria,
+    )) {
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(content: Text('Suas cores já estão no padrão Focux.')),
+      );
+      return;
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Restaurar cores padrão?'),
+            content: const Text(
+              'O app, a landing page e o white-label voltam para o cyan oficial do Focux.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Restaurar'),
+              ),
+            ],
+          ),
+    );
+    if (confirm != true || !mounted) return;
+
+    setState(() => _resettingBrand = true);
+    try {
+      await ref.read(apiClientProvider).dio.put(
+        '/api/personal/identidade',
+        data: {
+          'corPrimaria': BrandPalette.defaultPrimaryHex,
+          'corSecundaria': BrandPalette.defaultSecondaryHex,
+        },
+      );
+      ref.read(primaryColorProvider.notifier).state = BrandPalette.defaultPrimary;
+      ref.invalidate(perfilProvider);
+      ref.invalidate(dashboardProvider);
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(content: Text('Cores restauradas para o padrão Focux.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        SnackBar(
+          content: Text(
+            friendlyError(
+              error,
+              fallback: 'Não foi possível restaurar as cores agora.',
+            ),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _resettingBrand = false);
+    }
+  }
 
   Future<void> _pickAndUploadPhoto() async {
     final picker = ImagePicker();
@@ -129,6 +207,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
+                  onResetBrandColors: () => _resetBrandColors(perfil),
+                  resettingBrand: _resettingBrand,
                 ),
             error:
                 (_, __) => _PerfilBody(
@@ -149,6 +229,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
+                  onResetBrandColors: () => _resetBrandColors(perfil),
+                  resettingBrand: _resettingBrand,
                 ),
             data:
                 (dashboard) => _PerfilBody(
@@ -158,6 +240,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
+                  onResetBrandColors: () => _resetBrandColors(perfil),
+                  resettingBrand: _resettingBrand,
                 ),
           ),
     );
@@ -288,6 +372,8 @@ class _PerfilBody extends StatelessWidget {
   final VoidCallback onPickPhoto;
   final VoidCallback onEditPerfil;
   final VoidCallback onLogout;
+  final VoidCallback onResetBrandColors;
+  final bool resettingBrand;
 
   const _PerfilBody({
     required this.perfil,
@@ -297,6 +383,8 @@ class _PerfilBody extends StatelessWidget {
     required this.onPickPhoto,
     required this.onEditPerfil,
     required this.onLogout,
+    required this.onResetBrandColors,
+    this.resettingBrand = false,
   });
 
   @override
@@ -345,6 +433,10 @@ class _PerfilBody extends StatelessWidget {
       Colors.white,
       const Color(0xFF111318),
     ];
+    final usingDefaultBrand = BrandPalette.isDefaultBrandColors(
+      corPrimaria: perfil.corPrimaria,
+      corSecundaria: perfil.corSecundaria,
+    );
 
     return Scaffold(
       backgroundColor: primaryColor,
@@ -573,7 +665,18 @@ class _PerfilBody extends StatelessWidget {
                                   selected: color == primaryColor,
                                 ),
                               ),
-                              _AddSwatch(borderColor: line, mute: mute),
+                              _DefaultBrandSwatch(
+                                borderColor: line,
+                                mute: mute,
+                                selected: usingDefaultBrand,
+                                loading: resettingBrand,
+                                onTap: onResetBrandColors,
+                              ),
+                              _AddSwatch(
+                                borderColor: line,
+                                mute: mute,
+                                onTap: () => context.push('/identidade-visual'),
+                              ),
                             ],
                           ),
                         ],
@@ -1111,19 +1214,99 @@ class _ColorSwatch extends StatelessWidget {
 class _AddSwatch extends StatelessWidget {
   final Color borderColor;
   final Color mute;
+  final VoidCallback? onTap;
 
-  const _AddSwatch({required this.borderColor, required this.mute});
+  const _AddSwatch({
+    required this.borderColor,
+    required this.mute,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor, style: BorderStyle.solid),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor, style: BorderStyle.solid),
+        ),
+        child: Icon(Icons.add, size: 16, color: mute),
       ),
-      child: Icon(Icons.add, size: 16, color: mute),
+    );
+  }
+}
+
+class _DefaultBrandSwatch extends StatelessWidget {
+  const _DefaultBrandSwatch({
+    required this.borderColor,
+    required this.mute,
+    required this.selected,
+    required this.onTap,
+    this.loading = false,
+  });
+
+  final Color borderColor;
+  final Color mute;
+  final bool selected;
+  final bool loading;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Restaurar cores padrão do Focux',
+      child: InkWell(
+        onTap: loading ? null : onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                BrandPalette.defaultPrimary,
+                BrandPalette.defaultSecondary,
+              ],
+            ),
+            border: Border.all(
+              color:
+                  selected
+                      ? Colors.black.withValues(alpha: 0.42)
+                      : borderColor,
+              width: selected ? 2 : 1.5,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x14000000),
+                blurRadius: 6,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child:
+              loading
+                  ? const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                  : Icon(
+                    selected ? Icons.check_rounded : Icons.restore_rounded,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+        ),
+      ),
     );
   }
 }

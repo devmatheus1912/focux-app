@@ -91,8 +91,8 @@ class _IdentidadeVisualScreenState
   final _packageDescCtrls = List.generate(3, (_) => TextEditingController());
   final _faqQuestionCtrls = List.generate(4, (_) => TextEditingController());
   final _faqAnswerCtrls = List.generate(4, (_) => TextEditingController());
-  Color _corPrimaria = const Color(0xFF1EC8C8);
-  Color _corSecundaria = const Color(0xFF0097A7);
+  Color _corPrimaria = BrandPalette.defaultPrimary;
+  Color _corSecundaria = BrandPalette.defaultSecondary;
   bool _salvando = false;
   bool _uploadingLogo = false;
   bool _uploadingBioPhoto = false;
@@ -331,6 +331,29 @@ class _IdentidadeVisualScreenState
     } finally {
       if (mounted) setState(() => _uploadingBioPhoto = false);
     }
+  }
+
+  Future<void> _restoreDefaultBrandColors(String plano) async {
+    if (plano.toUpperCase() != 'ENTERPRISE') return;
+
+    if (_corPrimaria.toARGB32() == BrandPalette.defaultPrimary.toARGB32() &&
+        _corSecundaria.toARGB32() == BrandPalette.defaultSecondary.toARGB32()) {
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(content: Text('As cores já estão no padrão Focux.')),
+      );
+      return;
+    }
+
+    setState(() {
+      _corPrimaria = BrandPalette.defaultPrimary;
+      _corSecundaria = BrandPalette.defaultSecondary;
+    });
+    await _salvar(
+      plano,
+      successMessage: 'Cores padrão do Focux restauradas!',
+    );
   }
 
   Future<void> _salvar(
@@ -913,6 +936,16 @@ class _IdentidadeVisualScreenState
                             isEnterprise
                                 ? (c) => setState(() => _corPrimaria = c)
                                 : null,
+                        showDefaultChip: isEnterprise,
+                        usingDefaultBrand:
+                            _corPrimaria.toARGB32() ==
+                                BrandPalette.defaultPrimary.toARGB32() &&
+                            _corSecundaria.toARGB32() ==
+                                BrandPalette.defaultSecondary.toARGB32(),
+                        onRestoreDefault:
+                            isEnterprise
+                                ? () => _restoreDefaultBrandColors(plano)
+                                : null,
                       ),
                       const SizedBox(height: 16),
 
@@ -928,7 +961,19 @@ class _IdentidadeVisualScreenState
                             isEnterprise
                                 ? (c) => setState(() => _corSecundaria = c)
                                 : null,
+                        showDefaultChip: false,
                       ),
+                      if (isEnterprise) ...[
+                        const SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () => _restoreDefaultBrandColors(plano),
+                            icon: const Icon(Icons.restore_rounded, size: 18),
+                            label: const Text('Restaurar cores padrão do Focux'),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _domCtrl,
@@ -2920,15 +2965,68 @@ class _LandingAccordionCard extends StatelessWidget {
 class _ColorPicker extends StatelessWidget {
   final Color selected;
   final ValueChanged<Color>? onSelect;
-  const _ColorPicker({required this.selected, this.onSelect});
+  final bool showDefaultChip;
+  final bool usingDefaultBrand;
+  final VoidCallback? onRestoreDefault;
+
+  const _ColorPicker({
+    required this.selected,
+    required this.onSelect,
+    this.showDefaultChip = false,
+    this.usingDefaultBrand = false,
+    this.onRestoreDefault,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children:
-          _coresPredefinidas.map((c) {
+      children: [
+        if (showDefaultChip && onRestoreDefault != null)
+          GestureDetector(
+            onTap: onRestoreDefault,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    BrandPalette.defaultPrimary,
+                    BrandPalette.defaultSecondary,
+                  ],
+                ),
+                border:
+                    usingDefaultBrand
+                        ? Border.all(color: Colors.white, width: 3)
+                        : null,
+                boxShadow:
+                    usingDefaultBrand
+                        ? [
+                          BoxShadow(
+                            color: BrandPalette.defaultPrimary.withValues(
+                              alpha: 0.6,
+                            ),
+                            blurRadius: 8,
+                          ),
+                        ]
+                        : null,
+              ),
+              child:
+                  usingDefaultBrand
+                      ? const Icon(Icons.check, color: Colors.white, size: 18)
+                      : const Icon(
+                        Icons.restore_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+            ),
+          ),
+        ..._coresPredefinidas.map((c) {
             final isSelected = c.toARGB32() == selected.toARGB32();
             return GestureDetector(
               onTap: onSelect != null ? () => onSelect!(c) : null,
@@ -2959,7 +3057,8 @@ class _ColorPicker extends StatelessWidget {
                         : null,
               ),
             );
-          }).toList(),
+          }),
+      ],
     );
   }
 }
