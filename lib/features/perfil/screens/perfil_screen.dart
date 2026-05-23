@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -778,6 +779,26 @@ class _PerfilBody extends StatelessWidget {
                                   mode: LaunchMode.externalApplication,
                                 ),
                           ),
+                          if (kDebugMode) ...[
+                            _ActionTile(
+                              icon: Icons.palette_outlined,
+                              label: 'TOKENS STRIP (design system)',
+                              value: 'Só em debug',
+                              accent: accent,
+                              mute: mute,
+                              line: line,
+                              onTap: () => context.push('/qa/tokens-strip'),
+                            ),
+                            _ActionTile(
+                              icon: Icons.science_outlined,
+                              label: 'QA Smoke Test',
+                              value: 'Só em debug',
+                              accent: accent,
+                              mute: mute,
+                              line: line,
+                              onTap: () => context.push('/qa/smoke'),
+                            ),
+                          ],
                           _ActionTile(
                             icon: Icons.logout,
                             label: 'Sair da conta',
