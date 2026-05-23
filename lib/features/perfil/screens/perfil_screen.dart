@@ -719,7 +719,7 @@ class _PerfilBody extends StatelessWidget {
                     _CardSection(
                       title: 'Identidade visual',
                       subtitle:
-                          'Logo, paleta e bio aplicados no app e nas areas do aluno.',
+                          'Logo, slogan e paleta aplicados no app e na experiencia do aluno.',
                       trailingLabel: 'Abrir',
                       onTrailingTap: () => context.push('/identidade-visual'),
                       isDark: isDark,
