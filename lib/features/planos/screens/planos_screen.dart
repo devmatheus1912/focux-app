@@ -110,7 +110,6 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
                 _Feature('IA avançada', included: false),
                 _Feature('Financeiro e CRM', included: false),
                 _Feature('White-label', included: false),
-                _Feature('Landing page', included: false),
               ],
               cta:
                   currentPlan == SubscriptionPlan.FREE
@@ -140,7 +139,7 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
                 _Feature('Até 20 alunos', included: true),
                 _Feature('Financeiro e CRM', included: true),
                 _Feature('Migração Mágica IA', included: true),
-                _Feature('Landing page Focux', included: true),
+                _Feature('Identidade visual premium', included: true),
                 _Feature('White-label', included: false),
                 _Feature('IA ilimitada + RAG', included: false),
               ],
@@ -415,7 +414,7 @@ class _EnterpriseCard extends StatelessWidget {
               const _Feature('IA ilimitada + RAG', included: true),
               const _Feature('White-label completo', included: true),
               const _Feature('Domínio customizado', included: true),
-              const _Feature('Landing page + prova social', included: true),
+              const _Feature('Identidade visual + white-label', included: true),
               const _Feature('Suporte prioritário', included: true),
             ].map((f) => _FeatureRow(feature: f, accent: _accent, mute: mute)),
 

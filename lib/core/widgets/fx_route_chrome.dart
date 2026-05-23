@@ -9,7 +9,6 @@ import 'mesh_scope.dart';
 const _immersiveRoutePrefixes = [
   '/treino-presencial/',
   '/promo-enterprise',
-  '/p/',
 ];
 
 bool fxRouteUsesImmersiveChrome(String path) {

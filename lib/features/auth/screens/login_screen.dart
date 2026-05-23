@@ -503,8 +503,7 @@ bool _isPublicAuthPath(String path) {
       path == '/register/aluno' ||
       path == '/onboarding' ||
       path == '/esqueci-senha' ||
-      path == '/resetar-senha' ||
-      path.startsWith('/p/');
+      path == '/resetar-senha';
 }
 
 bool _isAlunoPath(String path) {
@@ -545,7 +544,6 @@ bool _isPersonalPath(String path) {
       path == '/perfil' ||
       path == '/identidade-visual' ||
       path == '/setup/identidade' ||
-      path == '/landing-config' ||
       path == '/planos' ||
       path == '/paywall' ||
       path == '/assinatura') {

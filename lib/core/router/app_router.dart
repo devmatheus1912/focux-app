@@ -75,7 +75,6 @@ import '../../features/analytics/screens/analytics_screen.dart';
 import '../../features/trilhas/screens/trilhas_screen.dart';
 import '../../features/dashboard/screens/qualidade_operacional_screen.dart';
 import '../../features/admin/screens/rbac_screen.dart';
-import '../../features/landing/screens/personal_public_landing_screen.dart';
 import '../../features/depoimentos/screens/depoimento_aluno_screen.dart';
 import '../../features/depoimentos/screens/depoimentos_personal_screen.dart';
 import '../../features/galeria/screens/galeria_screen.dart';
@@ -83,7 +82,6 @@ import '../../features/planos/screens/planos_screen.dart';
 import '../../features/planos/screens/enterprise_promo_screen.dart';
 import '../../features/subscription/screens/paywall_screen.dart';
 import '../../features/growth/screens/migracao_magica_screen.dart';
-import '../../features/growth/screens/landing_page_config_screen.dart';
 import '../../features/gamificacao/screens/gamificacao_screen.dart';
 import '../../features/anamnese/screens/anamnese_screen.dart';
 import '../../features/alimentar/screens/alimentar_screen.dart';
@@ -124,13 +122,6 @@ class AppRouter {
         redirect: (context, state) => '/dashboard/personal',
       ),
       GoRoute(path: '/ia', redirect: (context, state) => '/ia/copiloto'),
-      GoRoute(
-        path: '/p/:slug',
-        builder:
-            (context, state) => PersonalPublicLandingScreen(
-              slug: state.pathParameters['slug']!,
-            ),
-      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
@@ -725,10 +716,6 @@ class AppRouter {
         redirect: (context, state) => '/migracao-magica',
       ),
       GoRoute(
-        path: '/growth/link-bio',
-        redirect: (context, state) => '/landing-config',
-      ),
-      GoRoute(
         path: '/promo-enterprise',
         builder: (context, state) => const EnterprisePromoScreen(),
       ),
@@ -778,10 +765,6 @@ class AppRouter {
         path: '/gamificacao',
         builder: (context, state) => const GamificacaoScreen(),
       ),
-      GoRoute(
-        path: '/landing-config',
-        builder: (context, state) => const LandingPageConfigScreen(),
-      ),
       // QA — Smoke test (debug only)
       if (kDebugMode)
         GoRoute(
@@ -828,7 +811,6 @@ bool _isPublicLocation(String path) {
       path == '/onboarding' ||
       path == '/esqueci-senha' ||
       path == '/resetar-senha' ||
-      path.startsWith('/p/') ||
       // QA routes — only accessible in debug mode (automatically disabled in release builds)
       (kDebugMode && path.startsWith('/qa/'));
 }
@@ -882,13 +864,11 @@ bool _isPersonalOnlyLocation(String path) {
     '/identidade-visual',
     '/white-label',
     '/setup/identidade',
-    '/landing-config',
     '/planos',
     '/paywall',
     '/assinatura',
     '/migracao-magica',
     '/growth/migracao',
-    '/growth/link-bio',
     '/promo-enterprise',
     '/ranking',
     '/galeria',

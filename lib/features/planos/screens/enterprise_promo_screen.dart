@@ -115,7 +115,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                   'Alunos ilimitados',
                   'IA completa + RAG',
                   'White-label com sua marca',
-                  'Landing page profissional',
+                  'Identidade visual premium',
                   'Dominio customizado',
                 ].map(
                   (feature) => Padding(

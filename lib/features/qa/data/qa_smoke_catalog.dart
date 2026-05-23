@@ -70,7 +70,7 @@ const qaSmokeRoutes = <QaSmokeRoute>[
   QaSmokeRoute(
     id: 'public-student-register',
     area: 'auth',
-    label: 'Cadastro aluno por landing/convite',
+    label: 'Cadastro aluno por convite',
     path: '/register/aluno?p=personal-demo',
     authMode: 'PUBLIC',
   ),
@@ -79,13 +79,6 @@ const qaSmokeRoutes = <QaSmokeRoute>[
     area: 'auth',
     label: 'Recuperacao de senha',
     path: '/esqueci-senha',
-    authMode: 'PUBLIC',
-  ),
-  QaSmokeRoute(
-    id: 'public-landing',
-    area: 'landing',
-    label: 'Landing publica white-label',
-    path: '/p/personal-demo',
     authMode: 'PUBLIC',
   ),
   QaSmokeRoute(
@@ -312,16 +305,6 @@ const qaSmokeRoutes = <QaSmokeRoute>[
     expectedAnonymousRedirect: '/login?from=%2Falertas',
   ),
 
-  // ── Link na Bio ────────────────────────────────────────────────────────────
-  QaSmokeRoute(
-    id: 'personal-link-bio',
-    area: 'growth',
-    label: 'Link na bio',
-    path: '/growth/link-bio',
-    authMode: 'PERSONAL',
-    expectedAnonymousRedirect: '/login?from=%2Fgrowth%2Flink-bio',
-  ),
-
   // ── Aluno Side ─────────────────────────────────────────────────────────────
   QaSmokeRoute(
     id: 'student-home',
@@ -396,23 +379,6 @@ const qaSmokeEndpoints = <QaSmokeEndpoint>[
     authMode: 'PUBLIC',
     expectedAnonymousStatus: 200,
   ),
-  QaSmokeEndpoint(
-    id: 'public-landing',
-    area: 'landing',
-    method: 'GET',
-    path: '/api/public/personal/{slug}',
-    authMode: 'PUBLIC',
-    expectedAnonymousStatus: 200,
-  ),
-  QaSmokeEndpoint(
-    id: 'public-landing-event',
-    area: 'landing',
-    method: 'POST',
-    path: '/api/public/personal/{slug}/eventos',
-    authMode: 'PUBLIC',
-    expectedAnonymousStatus: 200,
-  ),
-
   // ── Personal Protected ─────────────────────────────────────────────────────
   QaSmokeEndpoint(
     id: 'profile',

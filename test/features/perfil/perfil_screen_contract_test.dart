@@ -41,7 +41,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Landing page'), findsWidgets);
+    expect(find.text('Identidade visual'), findsWidgets);
     expect(find.text('Carteira e PIX'), findsOneWidget);
   });
 }

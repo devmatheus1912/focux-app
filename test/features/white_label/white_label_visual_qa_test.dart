@@ -141,7 +141,7 @@ Future<ui.Image> _drawQaContactSheet(_BrandScenario scenario) async {
     canvas,
     theme,
     top: top,
-    title: 'Landing premium',
+    title: 'Marca premium',
     icon: Icons.public,
     primary: primary,
     onPrimary: onPrimary,

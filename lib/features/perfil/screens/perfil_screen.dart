@@ -9,7 +9,6 @@ import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/media_upload_service.dart';
-import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -59,7 +58,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
           (ctx) => AlertDialog(
             title: const Text('Restaurar cores padrão?'),
             content: const Text(
-              'O app, a landing page e o white-label voltam para o cyan oficial do Focux.',
+              'O app e o white-label voltam para o cyan oficial do Focux.',
             ),
             actions: [
               TextButton(
@@ -408,8 +407,10 @@ class _PerfilBody extends StatelessWidget {
     final heroPrimary = BrandPalette.softened(primaryColor, amount: 0.10);
     final heroSecondary = BrandPalette.softened(secondaryColor, amount: 0.14);
     final profileScore = _profileScore(perfil, dashboard);
-    final publicUrl = _publicProfileUrl(perfil);
-    final displayPublicUrl = _displayPublicProfileUrl(perfil, publicUrl);
+    final brandSubtitle =
+        (perfil.slogan ?? '').trim().isNotEmpty
+            ? perfil.slogan!.trim()
+            : 'Marca ativa no app';
     final bioText =
         (perfil.descricaoProfissional ?? dashboard.descricaoProfissional ?? '')
             .trim();
@@ -584,7 +585,7 @@ class _PerfilBody extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: _HeroQuickActions(
                               onBrand: () => context.push('/identidade-visual'),
-                              onLanding: () => context.push('/landing-config'),
+                              onEdit: onEditPerfil,
                               onWallet: () => context.push('/perfil/wallet'),
                               onPlans: () => context.push('/planos'),
                             ),
@@ -675,7 +676,7 @@ class _PerfilBody extends StatelessWidget {
                     _CardSection(
                       title: 'Identidade visual',
                       subtitle:
-                          'Marca aplicada no app, landing page e white-label.',
+                          'Marca aplicada no app e white-label premium.',
                       trailingLabel: 'Abrir',
                       onTrailingTap: () => context.push('/identidade-visual'),
                       isDark: isDark,
@@ -687,7 +688,7 @@ class _PerfilBody extends StatelessWidget {
                             primary: heroPrimary,
                             secondary: heroSecondary,
                             profileName: perfil.nome,
-                            publicUrl: displayPublicUrl,
+                            subtitle: brandSubtitle,
                             isDark: isDark,
                           ),
                           const SizedBox(height: 14),
@@ -727,14 +728,7 @@ class _PerfilBody extends StatelessWidget {
                       accent: accent,
                       isDark: isDark,
                       items: _profileChecklist(perfil, dashboard),
-                      onPublicProfile:
-                          publicUrl == null
-                              ? () => context.push('/landing-config')
-                              : () => launchUrl(
-                                Uri.parse(publicUrl),
-                                mode: LaunchMode.externalApplication,
-                              ),
-                      onLanding: () => context.push('/landing-config'),
+                      onAdjustBrand: () => context.push('/identidade-visual'),
                     ),
                     const SizedBox(height: 14),
                     _ProfessionalDataPanel(
@@ -773,13 +767,13 @@ class _PerfilBody extends StatelessWidget {
                             onTap: () => context.push('/planos'),
                           ),
                           _ActionTile(
-                            icon: Icons.public_outlined,
-                            label: 'Landing page',
-                            value: publicUrl == null ? 'Configurar' : 'Editar',
+                            icon: Icons.palette_outlined,
+                            label: 'Identidade visual',
+                            value: 'Paleta premium',
                             accent: accent,
                             mute: mute,
                             line: line,
-                            onTap: () => context.push('/landing-config'),
+                            onTap: () => context.push('/identidade-visual'),
                           ),
                           _ActionTile(
                             icon: Icons.account_balance_wallet_outlined,
@@ -869,15 +863,9 @@ class _PerfilBody extends StatelessWidget {
                         const SizedBox(width: 10),
                         Expanded(
                           child: FilledButton.icon(
-                            onPressed:
-                                publicUrl == null
-                                    ? () => context.push('/landing-config')
-                                    : () => launchUrl(
-                                      Uri.parse(publicUrl),
-                                      mode: LaunchMode.externalApplication,
-                                    ),
-                            icon: const Icon(Icons.north_east),
-                            label: const Text('Ver perfil publico'),
+                            onPressed: () => context.push('/identidade-visual'),
+                            icon: const Icon(Icons.palette_outlined),
+                            label: const Text('Ajustar marca'),
                           ),
                         ),
                       ],
@@ -940,13 +928,13 @@ class _PlanPill extends StatelessWidget {
 
 class _HeroQuickActions extends StatelessWidget {
   final VoidCallback onBrand;
-  final VoidCallback onLanding;
+  final VoidCallback onEdit;
   final VoidCallback onWallet;
   final VoidCallback onPlans;
 
   const _HeroQuickActions({
     required this.onBrand,
-    required this.onLanding,
+    required this.onEdit,
     required this.onWallet,
     required this.onPlans,
   });
@@ -955,7 +943,7 @@ class _HeroQuickActions extends StatelessWidget {
   Widget build(BuildContext context) {
     final actions = [
       (Icons.palette_outlined, 'Marca', onBrand),
-      (Icons.public_outlined, 'Landing', onLanding),
+      (Icons.edit_outlined, 'Perfil', onEdit),
       (Icons.account_balance_wallet_outlined, 'PIX', onWallet),
       (Icons.workspace_premium_outlined, 'Plano', onPlans),
     ];
@@ -1401,14 +1389,14 @@ class _BrandPreview extends StatelessWidget {
   final Color primary;
   final Color secondary;
   final String profileName;
-  final String? publicUrl;
+  final String subtitle;
   final bool isDark;
 
   const _BrandPreview({
     required this.primary,
     required this.secondary,
     required this.profileName,
-    required this.publicUrl,
+    required this.subtitle,
     required this.isDark,
   });
 
@@ -1467,7 +1455,7 @@ class _BrandPreview extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  publicUrl ?? 'Landing ainda sem slug',
+                  subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -1521,16 +1509,14 @@ class _CompletenessCard extends StatelessWidget {
   final Color accent;
   final bool isDark;
   final List<_ProfileChecklistItem> items;
-  final VoidCallback onPublicProfile;
-  final VoidCallback onLanding;
+  final VoidCallback onAdjustBrand;
 
   const _CompletenessCard({
     required this.score,
     required this.accent,
     required this.isDark,
     required this.items,
-    required this.onPublicProfile,
-    required this.onLanding,
+    required this.onAdjustBrand,
   });
 
   @override
@@ -1564,8 +1550,8 @@ class _CompletenessCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       complete
-                          ? 'Sua vitrine publica esta pronta para operar.'
-                          : 'Perfil pronto para vender, atender e parecer premium.',
+                          ? 'Seu perfil comercial esta pronto para operar.'
+                          : 'Complete foto, bio, marca e PIX para parecer premium.',
                       style: TextStyle(color: mute, fontSize: 12, height: 1.35),
                     ),
                   ],
@@ -1627,24 +1613,13 @@ class _CompletenessCard extends StatelessWidget {
                       .toList(),
             ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onPublicProfile,
-                  icon: const Icon(Icons.north_east, size: 18),
-                  label: Text(complete ? 'Ver publico' : 'Ver preview'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: onLanding,
-                  icon: const Icon(Icons.tune_outlined, size: 18),
-                  label: const Text('Otimizar'),
-                ),
-              ),
-            ],
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: onAdjustBrand,
+              icon: const Icon(Icons.palette_outlined, size: 18),
+              label: Text(complete ? 'Refinar marca' : 'Completar perfil'),
+            ),
           ),
         ],
       ),
@@ -1711,7 +1686,7 @@ class _ReadyFocusStrip extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Proximo ganho: ajustar oferta, CTA e prova social.',
+              'Proximo ganho: ajustar bio, especialidade e paleta premium.',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -2171,7 +2146,11 @@ List<_ProfileChecklistItem> _profileChecklist(
       'Cores',
       _hasText(perfil.corPrimaria ?? dashboard.corPrimaria),
     ),
-    _ProfileChecklistItem('Landing', _hasText(perfil.slug)),
+    _ProfileChecklistItem(
+      'Marca',
+      _hasText(perfil.corPrimaria ?? dashboard.corPrimaria) &&
+          _hasText(perfil.corSecundaria ?? dashboard.corSecundaria),
+    ),
     _ProfileChecklistItem('PIX', _hasWallet(perfil)),
   ];
 }
@@ -2189,20 +2168,6 @@ bool _hasWallet(PerfilPersonal perfil) =>
         _hasText(perfil.conta));
 
 bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
-
-String? _publicProfileUrl(PerfilPersonal perfil) {
-  final slug = perfil.slug?.trim();
-  if (slug == null || slug.isEmpty) return null;
-  return '${Env.publicWebUrl}/p/$slug';
-}
-
-String? _displayPublicProfileUrl(PerfilPersonal perfil, String? canonicalUrl) {
-  final domain = perfil.dominioCustomizado?.trim();
-  if (domain != null && domain.isNotEmpty) {
-    return '$domain aguardando CNAME';
-  }
-  return canonicalUrl;
-}
 
 String _buildSubtitle(PerfilPersonal perfil) {
   final specialty = perfil.especialidade ?? 'Personal Trainer';

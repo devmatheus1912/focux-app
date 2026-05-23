@@ -12,7 +12,6 @@ void main() {
       'public-login',
       'public-login-from-financeiro',
       'public-student-register',
-      'public-landing',
       'personal-home',
       'personal-financeiro',
       'personal-chat',
@@ -43,12 +42,9 @@ void main() {
 
     for (final route in qaSmokeRoutes) {
       final cleanPath = route.path.split('?').first;
-      final registeredPath = cleanPath.startsWith('/p/')
-          ? '/p/:slug'
-          : cleanPath;
       expect(
         router,
-        contains("path: '$registeredPath'"),
+        contains("path: '$cleanPath'"),
         reason: '${route.id} precisa continuar registrado no router.',
       );
     }
@@ -65,15 +61,11 @@ void main() {
 
     for (final route in qaPublicRoutes) {
       final cleanPath = route.path.split('?').first;
-      if (cleanPath.startsWith('/p/')) {
-        expect(router, contains("path.startsWith('/p/')"));
-      } else {
-        expect(
-          router,
-          contains("path == '$cleanPath'"),
-          reason: '${route.id} precisa permanecer publico para smoke sem token.',
-        );
-      }
+      expect(
+        router,
+        contains("path == '$cleanPath'"),
+        reason: '${route.id} precisa permanecer publico para smoke sem token.',
+      );
     }
 
     for (final route in qaPrivateRoutes) {
@@ -96,8 +88,6 @@ void main() {
       'health',
       'auth-capabilities',
       'auth-environment',
-      'public-landing',
-      'public-landing-event',
       'profile',
       'command-center',
       'notifications',

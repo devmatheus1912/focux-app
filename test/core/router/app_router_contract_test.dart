@@ -87,7 +87,7 @@ void main() {
       expect(router, contains("path == '$publicPath'"));
     }
 
-    expect(router, contains("path.startsWith('/p/')"));
+    expect(router, isNot(contains("path.startsWith('/p/')")));
     expect(router, isNot(contains("path == '/ia'")));
     expect(router, isNot(contains("path == '/aluno'")));
     expect(router, isNot(contains("path == '/personal'")));

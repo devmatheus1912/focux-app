@@ -35,7 +35,6 @@ const ROTAS = [
   '/analytics',
   '/admin/rbac',
   '/gamificacao',
-  '/landing-config',
   '/identidade-visual',
   '/perfil',
   '/perfil/wallet',
