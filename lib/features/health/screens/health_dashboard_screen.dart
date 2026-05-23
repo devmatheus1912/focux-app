@@ -6,6 +6,7 @@ import '../../../core/health/recovery_score.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../core/health/home_widget_service.dart';
 import '../data/health_repository.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
@@ -82,6 +83,12 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           ApiClient(),
         );
         synced = await repo.syncToday(summary);
+        await HomeWidgetService.updateRecovery(
+          recoveryScore: synced.recoveryScore,
+          recoveryLabel: synced.recoveryLabel,
+          recoveryHint: synced.recoveryHint,
+          steps: synced.steps,
+        );
       } catch (_) {
         synced = RecoverySnapshot.fromSummary(summary);
       }

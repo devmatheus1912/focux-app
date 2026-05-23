@@ -19,6 +19,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_celebration_overlay.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import '../widgets/pose_coach_panel.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
   final int treinoId;
@@ -960,6 +961,16 @@ class _SerieCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                 ],
+                if (!ee.concluido) ...[
+                  PoseCoachPanel(
+                    exerciseName: ee.exercicioNome,
+                    targetReps: _parseTargetReps(ee.repeticoes),
+                    brand: brand,
+                    dark: dark,
+                    onRepCompleted: () {},
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 if (loadText != null || restText != null) ...[
                   _ExerciseMetaRow(
                     loadText: loadText,
@@ -1215,6 +1226,12 @@ class _SerieCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  int? _parseTargetReps(String? reps) {
+    if (reps == null || reps.trim().isEmpty) return null;
+    final match = RegExp(r'\d+').firstMatch(reps);
+    return match == null ? null : int.tryParse(match.group(0)!);
   }
 
   String? _formatKg(double? value) {
@@ -2431,7 +2448,7 @@ class _LiveCoachingCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const Text(
-            'Se a proxima serie ficar facil, registre o feedback. Isso ajuda o personal a ajustar carga, volume e descanso com mais precisao.',
+            'Use o coach de execucao ou a camera MediaPipe para contar reps e manter a tecnica. Registre feedback apos cada serie.',
             style: TextStyle(
               color: Colors.white,
               fontSize: 14,

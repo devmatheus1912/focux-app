@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/health/health_service.dart';
+import '../../../core/health/home_widget_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../health/data/health_repository.dart';
@@ -14,10 +15,22 @@ final alunoRecoveryProvider = FutureProvider<RecoverySnapshot?>((ref) async {
   if (!await HealthService.isAuthorized()) return null;
   final repo = HealthRepository.fromClient(ref.read(apiClientProvider));
   try {
-    return await repo.fetchLatestRecovery();
-  } catch (_) {
     final summary = await HealthService.getTodaySummary();
-    return RecoverySnapshot.fromSummary(summary);
+    final synced = await repo.syncToday(summary);
+    await HomeWidgetService.updateRecovery(
+      recoveryScore: synced.recoveryScore,
+      recoveryLabel: synced.recoveryLabel,
+      recoveryHint: synced.recoveryHint,
+      steps: synced.steps,
+    );
+    return synced;
+  } catch (_) {
+    try {
+      return await repo.fetchLatestRecovery();
+    } catch (_) {
+      final summary = await HealthService.getTodaySummary();
+      return RecoverySnapshot.fromSummary(summary);
+    }
   }
 });
 

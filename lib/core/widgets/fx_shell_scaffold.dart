@@ -37,7 +37,10 @@ class FxShellScaffold extends StatelessWidget {
 
     Widget content = FxPremiumEntrance(child: body);
     if (safeArea) {
-      content = SafeArea(bottom: bottomNavigationBar == null, child: body);
+      content = SafeArea(
+        bottom: bottomNavigationBar == null,
+        child: FxPremiumEntrance(child: body),
+      );
     }
 
     final scaffold = Scaffold(

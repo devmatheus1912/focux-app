@@ -11,6 +11,8 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feed_repository.dart';
 import '../widgets/feed_comments_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import 'package:focux_app/core/widgets/fx_empty_state.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -492,7 +494,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             _loading
                 ? Center(child: FxLoading(color: primary))
                 : _posts.isEmpty
-                ? _EmptyFeed(primary: primary)
+                ? FxEmptyState(
+                  icon: 'rss',
+                  title: 'Nenhuma publicacao ainda',
+                  subtitle: 'Compartilhe novidades, videos e conquistas com seus alunos.',
+                  action: FxEmptyAction(
+                    label: 'Criar publicacao',
+                    onTap: _abrirFormulario,
+                  ),
+                )
                 : RefreshIndicator(
                   color: primary,
                   onRefresh: _load,
@@ -556,7 +566,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       final comentarios =
                           _comentariosLocais[p.id] ?? p.totalComentarios;
 
-                      return Container(
+                      return FxStaggerItem(
+                        index: i,
+                        child: Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         decoration: fxListCardDecoration(
                           context,
@@ -704,6 +716,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                             ],
                           ),
                         ),
+                      ),
                       );
                     },
                   ),

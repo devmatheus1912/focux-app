@@ -12,6 +12,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/router/role_home.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../data/ia_repository.dart';
+import '../../health/data/health_repository.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -52,6 +53,15 @@ final proximaAcaoProvider = FutureProvider.family<Map<String, dynamic>, int>((
   alunoId,
 ) async {
   return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
+});
+
+final copilotRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
+  ref,
+  alunoId,
+) async {
+  return HealthRepository.fromClient(
+    ref.read(apiClientProvider),
+  ).fetchRecoveryForAluno(alunoId);
 });
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
@@ -118,7 +128,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
           'Alertas para revisão',
         ];
       case 'Progressão':
-        return ['Histórico recente', 'Sinais de aderência', 'Próxima ação'];
+        return ['Histórico recente', 'Prontidão wearable', 'Próxima ação'];
       default:
         return [
           'Objetivo e nível',
@@ -1075,6 +1085,9 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                 promise: _modePromise,
                 checks: _modeChecks,
                 alunoNome: _selectedAlunoNome,
+                recoveryAsync: _selectedAlunoId == null
+                    ? null
+                    : ref.watch(copilotRecoveryProvider(_selectedAlunoId!)),
               ),
             ),
 
@@ -2056,6 +2069,7 @@ class _CopilotReadinessCard extends StatelessWidget {
     required this.promise,
     required this.checks,
     required this.alunoNome,
+    this.recoveryAsync,
   });
 
   final String modeDisplay;
@@ -2063,6 +2077,7 @@ class _CopilotReadinessCard extends StatelessWidget {
   final String promise;
   final List<String> checks;
   final String? alunoNome;
+  final AsyncValue<RecoverySnapshot?>? recoveryAsync;
 
   @override
   Widget build(BuildContext context) {
@@ -2159,6 +2174,41 @@ class _CopilotReadinessCard extends StatelessWidget {
                   line: line,
                   soft: soft,
                   brand: primary,
+                ),
+              if (recoveryAsync != null)
+                recoveryAsync!.when(
+                  loading: () => _CopilotPill(
+                    icon: Icons.watch_outlined,
+                    label: 'Sync wearable...',
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    soft: soft,
+                    brand: primary,
+                  ),
+                  error: (_, __) => const SizedBox.shrink(),
+                  data: (snapshot) {
+                    if (snapshot == null) {
+                      return _CopilotPill(
+                        icon: Icons.watch_off_outlined,
+                        label: 'Sem wearable',
+                        ink: ink,
+                        mute: mute,
+                        line: line,
+                        soft: soft,
+                        brand: primary,
+                      );
+                    }
+                    return _CopilotPill(
+                      icon: Icons.favorite_outline,
+                      label: '${snapshot.recoveryScore}% prontidao',
+                      ink: ink,
+                      mute: mute,
+                      line: line,
+                      soft: soft,
+                      brand: primary,
+                    );
+                  },
                 ),
               _CopilotPill(
                 icon: Icons.manage_search_outlined,

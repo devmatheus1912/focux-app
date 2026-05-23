@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
 import 'core/fcm/fcm_service.dart';
+import 'core/health/home_widget_service.dart';
 import 'core/widgets/fx_connectivity_banner.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/secure_storage.dart';
@@ -29,6 +30,7 @@ void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      await HomeWidgetService.init();
 
       SystemChrome.setSystemUIOverlayStyle(
         const SystemUiOverlayStyle(
