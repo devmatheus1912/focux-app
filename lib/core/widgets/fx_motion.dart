@@ -170,7 +170,13 @@ class FxLiquidPrimaryButton extends StatelessWidget {
     );
 
     if (!expand) return button;
-    return SizedBox(width: double.infinity, child: button);
+    return SizedBox(
+      width: double.infinity,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48, maxHeight: 52),
+        child: button,
+      ),
+    );
   }
 }
 

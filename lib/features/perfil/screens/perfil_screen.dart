@@ -1270,31 +1270,34 @@ class _PerfilStickyBar extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(18, 12, 18, 12),
         child: SafeArea(
           top: false,
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    HapticFeedback.selectionClick();
-                    goPersonalShellTab(context, '/alunos');
-                  },
-                  icon: const Icon(Icons.groups_2_outlined, size: 18),
-                  label: const Text('Meus alunos'),
+          child: SizedBox(
+            height: 52,
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      goPersonalShellTab(context, '/alunos');
+                    },
+                    icon: const Icon(Icons.groups_2_outlined, size: 18),
+                    label: const Text('Meus alunos'),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FxLiquidPrimaryButton(
-                  expand: true,
-                  icon: Icons.auto_awesome_outlined,
-                  label: 'Copiloto IA',
-                  onPressed: () {
-                    HapticFeedback.selectionClick();
-                    goPersonalShellTab(context, '/ia/copiloto');
-                  },
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FxLiquidPrimaryButton(
+                    expand: true,
+                    icon: Icons.auto_awesome_outlined,
+                    label: 'Copiloto IA',
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      goPersonalShellTab(context, '/ia/copiloto');
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -1322,34 +1325,37 @@ class _PerfilBottomActions extends StatelessWidget {
     }
 
     if (!walletComplete) {
-      return Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                context.push('/perfil/wallet');
-              },
-              icon: const Icon(Icons.account_balance_wallet_outlined),
-              label: const Text('Configurar PIX'),
+      return SizedBox(
+        height: 52,
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  context.push('/perfil/wallet');
+                },
+                icon: const Icon(Icons.account_balance_wallet_outlined),
+                label: const Text('Configurar PIX'),
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: FxLiquidPrimaryButton(
-              expand: true,
-              icon:
-                  primaryCta.action == PerfilChecklistAction.convites
-                      ? Icons.person_add_outlined
-                      : Icons.arrow_forward_rounded,
-              label: primaryCta.buttonLabel,
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                onChecklistAction(primaryCta.action);
-              },
+            const SizedBox(width: 10),
+            Expanded(
+              child: FxLiquidPrimaryButton(
+                expand: true,
+                icon:
+                    primaryCta.action == PerfilChecklistAction.convites
+                        ? Icons.person_add_outlined
+                        : Icons.arrow_forward_rounded,
+                label: primaryCta.buttonLabel,
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  onChecklistAction(primaryCta.action);
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
