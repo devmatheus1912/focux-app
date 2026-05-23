@@ -14,16 +14,47 @@ final _gamificacaoRepoProvider = Provider<GamificacaoRepository>(
   (ref) => GamificacaoRepository(ref.read(apiClientProvider)),
 );
 
-final gamificacaoProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  final data = await ref.read(_gamificacaoRepoProvider).getGamificacao();
-  return {
-    'streakAtual': data.streak.streakAtual,
-    'streakRecorde': data.streak.streakMaximo,
-    'totalTreinos': data.totalTreinos,
-    'prsEsseMes': 4,
-    'aderencia': 92,
-  };
+final gamificacaoProvider = FutureProvider<GamificacaoData>((ref) async {
+  return ref.read(_gamificacaoRepoProvider).getGamificacao();
 });
+
+const _badgeCatalog = <String, ({String icon, String label})>{
+  'STREAK_10': (icon: '🔥', label: 'Sequencia 10d'),
+  'PR_CARGA': (icon: '💪', label: 'PR de carga'),
+  'FREQUENCIA_100': (icon: '⭐', label: '100% semana'),
+  'FIRST_AI': (icon: '✨', label: 'Usou a IA'),
+  'TREINOS_50': (icon: '🏆', label: '50 treinos'),
+  'META_ATINGIDA': (icon: '🎯', label: 'Meta atingida'),
+};
+
+List<Map<String, dynamic>> _buildBadgeTiles(GamificacaoData data, Color brand) {
+  final earnedTypes = data.badges.map((b) => b.tipo).toSet();
+  final tiles = <Map<String, dynamic>>[];
+
+  for (final badge in data.badges) {
+    final meta = _badgeCatalog[badge.tipo];
+    tiles.add({
+      'tipo': badge.tipo,
+      'icon': meta?.icon ?? '🏅',
+      'label': meta?.label ?? badge.descricao,
+      'cor': brand,
+      'earned': true,
+    });
+  }
+
+  for (final entry in _badgeCatalog.entries) {
+    if (earnedTypes.contains(entry.key)) continue;
+    tiles.add({
+      'tipo': entry.key,
+      'icon': entry.value.icon,
+      'label': entry.value.label,
+      'cor': EagleTokens.inkMute,
+      'earned': false,
+    });
+  }
+
+  return tiles;
+}
 
 class GamificacaoScreen extends ConsumerWidget {
   const GamificacaoScreen({super.key});
@@ -38,51 +69,17 @@ class GamificacaoScreen extends ConsumerWidget {
     final brandSofter = BrandPalette.softer(brand, dark: dark);
 
     final async = ref.watch(gamificacaoProvider);
-
-    final badges = [
-      {
-        'tipo': 'STREAK_10',
-        'icon': '🔥',
-        'label': 'Sequência 10d',
-        'cor': const Color(0xFFE2B46F),
-        'earned': true,
-      },
-      {
-        'tipo': 'PR_CARGA',
-        'icon': '💪',
-        'label': 'PR de carga',
-        'cor': brand,
-        'earned': true,
-      },
-      {
-        'tipo': 'FREQ_100',
-        'icon': '⭐',
-        'label': '100% semana',
-        'cor': const Color(0xFF2BB673),
-        'earned': true,
-      },
-      {
-        'tipo': 'FIRST_AI',
-        'icon': '✨',
-        'label': 'Usou a IA',
-        'cor': const Color(0xFF9B7AFF),
-        'earned': true,
-      },
-      {
-        'tipo': 'LOCK1',
-        'icon': '🏆',
-        'label': '50 treinos',
-        'cor': EagleTokens.inkMute,
-        'earned': false,
-      },
-      {
-        'tipo': 'LOCK2',
-        'icon': '🎯',
-        'label': 'Meta atingida',
-        'cor': EagleTokens.inkMute,
-        'earned': false,
-      },
-    ];
+    final badges = async.maybeWhen(
+      data: (data) => _buildBadgeTiles(data, brand),
+      orElse: () => _buildBadgeTiles(
+        GamificacaoData(
+          streak: Streak(streakAtual: 0, streakMaximo: 0),
+          badges: const [],
+          totalTreinos: 0,
+        ),
+        brand,
+      ),
+    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -113,37 +110,33 @@ class GamificacaoScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: async.when(
-                loading:
-                    () => _StreakHeroStatic(
-                      dark: dark,
-                      brand: brand,
-                      streak: 12,
-                      recorde: 18,
-                      totalTreinos: 58,
-                      prs: 4,
-                      aderencia: 92,
-                    ),
-                error:
-                    (_, __) => _StreakHeroStatic(
-                      dark: dark,
-                      brand: brand,
-                      streak: 12,
-                      recorde: 18,
-                      totalTreinos: 58,
-                      prs: 4,
-                      aderencia: 92,
-                    ),
-                data:
-                    (data) => _StreakHeroStatic(
-                      dark: dark,
-                      brand: brand,
-                      streak: (data['streakAtual'] as num?)?.toInt() ?? 12,
-                      recorde: (data['streakRecorde'] as num?)?.toInt() ?? 18,
-                      totalTreinos:
-                          (data['totalTreinos'] as num?)?.toInt() ?? 58,
-                      prs: (data['prsEsseMes'] as num?)?.toInt() ?? 4,
-                      aderencia: (data['aderencia'] as num?)?.toInt() ?? 92,
-                    ),
+                loading: () => _StreakHeroStatic(
+                  dark: dark,
+                  brand: brand,
+                  streak: 0,
+                  recorde: 0,
+                  totalTreinos: 0,
+                  prs: 0,
+                  aderencia: 0,
+                ),
+                error: (_, __) => _StreakHeroStatic(
+                  dark: dark,
+                  brand: brand,
+                  streak: 0,
+                  recorde: 0,
+                  totalTreinos: 0,
+                  prs: 0,
+                  aderencia: 0,
+                ),
+                data: (data) => _StreakHeroStatic(
+                  dark: dark,
+                  brand: brand,
+                  streak: data.streak.streakAtual,
+                  recorde: data.streak.streakMaximo,
+                  totalTreinos: data.totalTreinos,
+                  prs: data.prsEsseMes,
+                  aderencia: data.aderenciaPercent,
+                ),
               ),
             ),
 

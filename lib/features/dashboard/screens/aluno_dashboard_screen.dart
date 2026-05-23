@@ -17,6 +17,7 @@ import '../../checkin/data/checkin_repository.dart';
 import '../data/aluno_autonomy_plan.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
+import '../../health/widgets/aluno_recovery_card.dart';
 import 'progresso_semanal_widget.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -98,6 +99,8 @@ class AlunoDashboardScreen extends ConsumerWidget {
               loading: () => _FocusCardSkeleton(isDark: isDark),
               error: (_, __) => _FocusCardSkeleton(isDark: isDark),
             ),
+            const SizedBox(height: 12),
+            AlunoRecoveryCard(isDark: isDark),
             const SizedBox(height: 12),
             brandAsync.when(
               data:
@@ -1625,9 +1628,21 @@ class _StudentToolsSection extends StatelessWidget {
         route: '/chat/aluno',
       ),
       _StudentToolAction(
+        icon: Icons.watch_outlined,
+        title: 'Prontidao',
+        subtitle: 'Wearables',
+        route: '/saude',
+      ),
+      _StudentToolAction(
+        icon: Icons.emoji_events_outlined,
+        title: 'Evolucao',
+        subtitle: 'Streak e badges',
+        route: '/gamificacao',
+      ),
+      _StudentToolAction(
         icon: Icons.trending_up_rounded,
-        title: 'Evolução',
-        subtitle: 'Medidas e saúde',
+        title: 'Historico',
+        subtitle: 'Medidas e treinos',
         route: '/checkin/historico',
       ),
       _StudentToolAction(

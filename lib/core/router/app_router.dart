@@ -93,6 +93,7 @@ import '../../features/qa/screens/qa_smoke_screen.dart';
 import '../auth/session_invalidator.dart';
 import '../storage/secure_storage.dart';
 import '../widgets/fx_route_chrome.dart';
+import 'fx_page_transition.dart';
 import 'role_home.dart';
 
 class AppRouter {
@@ -588,9 +589,11 @@ class AppRouter {
         redirect:
             (context, state) =>
                 state.extra is PerfilPersonal ? null : '/perfil',
-        builder:
-            (context, state) =>
-                EditarPerfilScreen(perfil: state.extra as PerfilPersonal),
+        pageBuilder:
+            (context, state) => fxTransitionPage(
+              state: state,
+              child: EditarPerfilScreen(perfil: state.extra as PerfilPersonal),
+            ),
       ),
       GoRoute(
         path: '/perfil/wallet',
@@ -598,7 +601,11 @@ class AppRouter {
       ),
       GoRoute(
         path: '/identidade-visual',
-        builder: (context, state) => const IdentidadeVisualScreen(),
+        pageBuilder:
+            (context, state) => fxTransitionPage(
+              state: state,
+              child: const IdentidadeVisualScreen(),
+            ),
       ),
       GoRoute(
         path: '/white-label',
@@ -763,7 +770,11 @@ class AppRouter {
       ),
       GoRoute(
         path: '/gamificacao',
-        builder: (context, state) => const GamificacaoScreen(),
+        pageBuilder:
+            (context, state) => fxTransitionPage(
+              state: state,
+              child: const GamificacaoScreen(),
+            ),
       ),
       // QA — Smoke test (debug only)
       if (kDebugMode)

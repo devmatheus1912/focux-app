@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'brand_palette.dart';
 import 'design_tokens.dart';
+import 'fx_page_transitions_builder.dart';
 
 class AppTheme {
   static ThemeData buildTheme(Color primary) => _build(primary, false);
@@ -222,6 +223,7 @@ class AppTheme {
       colorScheme: cs,
       scaffoldBackgroundColor: scaffold,
       textTheme: textTheme,
+      pageTransitionsTheme: fxPremiumPageTransitions,
 
       // ── App Bar: clean, no elevation, premium title ─────────────────
       appBarTheme: AppBarTheme(

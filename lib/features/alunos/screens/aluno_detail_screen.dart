@@ -16,8 +16,20 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../ia/data/ia_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../health/data/health_repository.dart';
+import '../../health/widgets/recovery_score_ring.dart';
+import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
+
+final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
+  ref,
+  alunoId,
+) async {
+  return HealthRepository.fromClient(
+    ref.read(apiClientProvider),
+  ).fetchRecoveryForAluno(alunoId);
+});
 
 final alunoCopilotoActionProvider =
     FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
@@ -402,6 +414,7 @@ class AlunoDetailScreen extends ConsumerWidget {
     final scoreSnapshotsAsync = ref.watch(alunoScoreSnapshotsProvider(alunoId));
     final evolucaoAsync = ref.watch(alunoEvolucaoInteligenteProvider(alunoId));
     final timeline360ApiAsync = ref.watch(alunoTimeline360ApiProvider(alunoId));
+    final recoveryAsync = ref.watch(alunoRecoveryProvider(alunoId));
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
@@ -614,6 +627,12 @@ class AlunoDetailScreen extends ConsumerWidget {
                               '/alunos/${aluno.id}/ia/progressao',
                               extra: aluno.nome,
                             ),
+                      ),
+                      const SizedBox(height: 16),
+                      _AlunoRecoveryInsightCard(
+                        recoveryAsync: recoveryAsync,
+                        isDark: isDark,
+                        primary: primary,
                       ),
                       const SizedBox(height: 16),
                       _Aluno360CopilotCard(
@@ -3236,6 +3255,98 @@ class _ModuleTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AlunoRecoveryInsightCard extends StatelessWidget {
+  const _AlunoRecoveryInsightCard({
+    required this.recoveryAsync,
+    required this.isDark,
+    required this.primary,
+  });
+
+  final AsyncValue<RecoverySnapshot?> recoveryAsync;
+  final bool isDark;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    return recoveryAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (snapshot) {
+        if (snapshot == null) {
+          return Container(
+            padding: const EdgeInsets.all(14),
+            decoration: chrome.panel(radius: 18),
+            child: Row(
+              children: [
+                Icon(Icons.watch_outlined, color: primary, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Sem dados de wearable hoje — peça ao aluno conectar Apple Health ou Google Fit.',
+                    style: TextStyle(
+                      color: chrome.mute,
+                      fontSize: 12.5,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        return FxPremiumEntrance(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: chrome.panel(radius: 18, accent: primary),
+            child: Row(
+              children: [
+                RecoveryScoreRing(score: snapshot.recoveryScore, color: primary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Prontidao wearable',
+                        style: TextStyle(
+                          color: chrome.mute,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        snapshot.recoveryLabel,
+                        style: TextStyle(
+                          color: chrome.ink,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        snapshot.recoveryHint,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: chrome.mute,
+                          fontSize: 12,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

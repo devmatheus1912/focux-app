@@ -17,6 +17,7 @@ import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_celebration_overlay.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
@@ -295,11 +296,11 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
         await _showEvolucaoPerformance(evolucoes);
         if (!mounted) return;
       } else {
-        FeedbackHelper.showSnackBar(
+        await FxCelebrationOverlay.show(
           context,
-          const SnackBar(
-            content: Text('Treino concluido. Historico atualizado.'),
-          ),
+          title: 'Treino concluido!',
+          subtitle: 'Historico atualizado. Continue a sequencia.',
+          icon: Icons.check_circle_rounded,
         );
       }
       safePopOrGo(context, '/checkin/treinos');

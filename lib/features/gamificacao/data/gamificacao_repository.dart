@@ -41,20 +41,26 @@ class GamificacaoData {
   final Streak streak;
   final List<BadgeData> badges;
   final int totalTreinos;
+  final int aderenciaPercent;
+  final int prsEsseMes;
 
   GamificacaoData({
     required this.streak,
     required this.badges,
     required this.totalTreinos,
+    this.aderenciaPercent = 0,
+    this.prsEsseMes = 0,
   });
 
   factory GamificacaoData.fromJson(Map<String, dynamic> j) => GamificacaoData(
     streak: Streak.fromJson(j['streak'] as Map<String, dynamic>),
     badges:
-        (j['badges'] as List<dynamic>)
+        (j['badges'] as List<dynamic>? ?? const [])
             .map((e) => BadgeData.fromJson(e as Map<String, dynamic>))
             .toList(),
-    totalTreinos: j['totalTreinos'] as int,
+    totalTreinos: j['totalTreinos'] as int? ?? 0,
+    aderenciaPercent: j['aderenciaPercent'] as int? ?? 0,
+    prsEsseMes: j['prsEsseMes'] as int? ?? 0,
   );
 }
 

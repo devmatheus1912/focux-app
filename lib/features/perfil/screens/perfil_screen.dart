@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
@@ -32,83 +33,6 @@ class PerfilScreen extends ConsumerStatefulWidget {
 
 class _PerfilScreenState extends ConsumerState<PerfilScreen> {
   bool _uploadingPhoto = false;
-  bool _resettingBrand = false;
-
-  Future<void> _resetBrandColors(PerfilPersonal perfil) async {
-    if (perfil.plano.toUpperCase() != 'ENTERPRISE') {
-      if (!mounted) return;
-      context.push('/identidade-visual');
-      return;
-    }
-
-    if (BrandPalette.isDefaultBrandColors(
-      corPrimaria: perfil.corPrimaria,
-      corSecundaria: perfil.corSecundaria,
-    )) {
-      if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Suas cores já estão no padrão Focux.')),
-      );
-      return;
-    }
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Restaurar cores padrão?'),
-            content: const Text(
-              'O app volta para o cyan oficial do Focux.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Restaurar'),
-              ),
-            ],
-          ),
-    );
-    if (confirm != true || !mounted) return;
-
-    setState(() => _resettingBrand = true);
-    try {
-      await ref.read(apiClientProvider).dio.put(
-        '/api/personal/identidade',
-        data: {
-          'corPrimaria': BrandPalette.defaultPrimaryHex,
-          'corSecundaria': BrandPalette.defaultSecondaryHex,
-        },
-      );
-      ref.read(primaryColorProvider.notifier).state = BrandPalette.defaultPrimary;
-      ref.invalidate(perfilProvider);
-      ref.invalidate(dashboardProvider);
-      if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Cores restauradas para o padrão Focux.')),
-      );
-    } catch (error) {
-      if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text(
-            friendlyError(
-              error,
-              fallback: 'Não foi possível restaurar as cores agora.',
-            ),
-          ),
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _resettingBrand = false);
-    }
-  }
 
   Future<void> _pickAndUploadPhoto() async {
     final picker = ImagePicker();
@@ -226,8 +150,6 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
-                  onResetBrandColors: () => _resetBrandColors(perfil),
-                  resettingBrand: _resettingBrand,
                   onChecklistAction:
                       (action) => _handleChecklistAction(action, perfil),
                 ),
@@ -250,8 +172,6 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
-                  onResetBrandColors: () => _resetBrandColors(perfil),
-                  resettingBrand: _resettingBrand,
                   onChecklistAction:
                       (action) => _handleChecklistAction(action, perfil),
                 ),
@@ -263,8 +183,6 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
-                  onResetBrandColors: () => _resetBrandColors(perfil),
-                  resettingBrand: _resettingBrand,
                   onChecklistAction:
                       (action) => _handleChecklistAction(action, perfil),
                 ),
@@ -397,8 +315,6 @@ class _PerfilBody extends StatelessWidget {
   final VoidCallback onPickPhoto;
   final VoidCallback onEditPerfil;
   final VoidCallback onLogout;
-  final VoidCallback onResetBrandColors;
-  final bool resettingBrand;
   final void Function(PerfilChecklistAction action) onChecklistAction;
 
   const _PerfilBody({
@@ -409,8 +325,6 @@ class _PerfilBody extends StatelessWidget {
     required this.onPickPhoto,
     required this.onEditPerfil,
     required this.onLogout,
-    required this.onResetBrandColors,
-    this.resettingBrand = false,
     required this.onChecklistAction,
   });
 
@@ -467,14 +381,7 @@ class _PerfilBody extends StatelessWidget {
           buttonLabel: 'Convidar alunos',
           action: PerfilChecklistAction.convites,
         );
-
-    final swatches = <Color>[
-      primaryColor,
-      secondaryColor,
-      BrandPalette.soft(primaryColor),
-      Colors.white,
-      const Color(0xFF111318),
-    ];
+    final profileComplete = profileScore >= 100;
     final usingDefaultBrand = BrandPalette.isDefaultBrandColors(
       corPrimaria: perfil.corPrimaria,
       corSecundaria: perfil.corSecundaria,
@@ -721,48 +628,40 @@ class _PerfilBody extends StatelessWidget {
                       subtitle:
                           'Logo, slogan e paleta aplicados no app e na experiencia do aluno.',
                       trailingLabel: 'Abrir',
-                      onTrailingTap: () => context.push('/identidade-visual'),
+                      onTrailingTap: () {
+                        HapticFeedback.selectionClick();
+                        context.push('/identidade-visual');
+                      },
                       isDark: isDark,
                       accent: accent,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _BrandPreview(
-                            primary: heroPrimary,
-                            secondary: heroSecondary,
-                            profileName: perfil.nome,
-                            subtitle: brandSubtitle,
-                            isDark: isDark,
-                          ),
-                          const SizedBox(height: 14),
-                          _PaletteLegend(mute: mute),
-                          const SizedBox(height: 10),
-                          Wrap(
-                            spacing: 9,
-                            runSpacing: 9,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            context.push('/identidade-visual');
+                          },
+                          borderRadius: BorderRadius.circular(18),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _DefaultBrandSwatch(
-                                borderColor: line,
-                                mute: mute,
-                                selected: usingDefaultBrand,
-                                loading: resettingBrand,
-                                onTap: onResetBrandColors,
+                              _BrandPreview(
+                                primary: heroPrimary,
+                                secondary: heroSecondary,
+                                profileName: perfil.nome,
+                                subtitle: brandSubtitle,
+                                isDark: isDark,
                               ),
-                              ...swatches.map(
-                                (color) => _ColorSwatch(
-                                  color: color,
-                                  borderColor: line,
-                                  selected: color == primaryColor,
-                                ),
-                              ),
-                              _AddSwatch(
-                                borderColor: line,
+                              const SizedBox(height: 14),
+                              _BrandPaletteStrip(
+                                primary: primaryColor,
+                                secondary: secondaryColor,
                                 mute: mute,
-                                onTap: () => context.push('/identidade-visual'),
+                                usingDefault: usingDefaultBrand,
                               ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -811,15 +710,6 @@ class _PerfilBody extends StatelessWidget {
                             mute: mute,
                             line: line,
                             onTap: () => context.push('/planos'),
-                          ),
-                          _ActionTile(
-                            icon: Icons.person_add_outlined,
-                            label: 'Convidar alunos',
-                            value: 'Link e QR Code',
-                            accent: accent,
-                            mute: mute,
-                            line: line,
-                            onTap: () => context.push('/convites'),
                           ),
                           _ActionTile(
                             icon: Icons.groups_2_outlined,
@@ -907,33 +797,11 @@ class _PerfilBody extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () => context.push('/perfil/wallet'),
-                            icon: const Icon(
-                              Icons.account_balance_wallet_outlined,
-                            ),
-                            label: const Text('PIX'),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: FilledButton.icon(
-                            onPressed:
-                                () => onChecklistAction(primaryCta.action),
-                            icon: Icon(
-                              primaryCta.action ==
-                                      PerfilChecklistAction.convites
-                                  ? Icons.person_add_outlined
-                                  : Icons.arrow_forward_rounded,
-                              size: 18,
-                            ),
-                            label: Text(primaryCta.buttonLabel),
-                          ),
-                        ),
-                      ],
+                    _PerfilBottomActions(
+                      profileComplete: profileComplete,
+                      walletComplete: _hasWallet(perfil),
+                      primaryCta: primaryCta,
+                      onChecklistAction: onChecklistAction,
                     ),
                   ]),
                 ),
@@ -1274,177 +1142,165 @@ class _CardSection extends StatelessWidget {
   }
 }
 
-class _PaletteLegend extends StatelessWidget {
-  const _PaletteLegend({required this.mute});
-
+class _BrandPaletteStrip extends StatelessWidget {
+  final Color primary;
+  final Color secondary;
   final Color mute;
+  final bool usingDefault;
+
+  const _BrandPaletteStrip({
+    required this.primary,
+    required this.secondary,
+    required this.mute,
+    required this.usingDefault,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Icon(Icons.palette_outlined, size: 14, color: mute),
-        const SizedBox(width: 6),
+        const SizedBox(width: 8),
         Expanded(
           child: Text(
-            'Paleta da marca · Padrão restaura o cyan oficial do Focux',
+            usingDefault
+                ? 'Paleta padrao Focux · toque para personalizar'
+                : 'Paleta personalizada ativa · toque para editar',
             style: TextStyle(
               color: mute,
-              fontSize: 11.2,
+              fontSize: 11.5,
               height: 1.25,
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
+        _PaletteDot(color: primary),
+        const SizedBox(width: 6),
+        _PaletteDot(color: secondary),
       ],
     );
   }
 }
 
-class _ColorSwatch extends StatelessWidget {
+class _PaletteDot extends StatelessWidget {
   final Color color;
-  final Color borderColor;
-  final bool selected;
 
-  const _ColorSwatch({
-    required this.color,
-    required this.borderColor,
-    this.selected = false,
-  });
+  const _PaletteDot({required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 38,
-      height: 38,
+      width: 22,
+      height: 22,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(13),
+        shape: BoxShape.circle,
         border: Border.all(
-          color:
-              selected
-                  ? Colors.black.withValues(alpha: 0.38)
-                  : (color == Colors.white ? borderColor : Colors.transparent),
-          width: selected ? 2.2 : 1.5,
+          color: Colors.black.withValues(alpha: 0.08),
+          width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: selected ? 0.34 : 0.18),
-            blurRadius: selected ? 14 : 8,
-            offset: const Offset(0, 4),
+            color: color.withValues(alpha: 0.28),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child:
-          selected
-              ? Icon(
-                Icons.check_rounded,
-                size: 16,
-                color:
-                    color.computeLuminance() > 0.72
-                        ? Colors.black87
-                        : Colors.white,
-              )
-              : null,
     );
   }
 }
 
-class _AddSwatch extends StatelessWidget {
-  final Color borderColor;
-  final Color mute;
-  final VoidCallback? onTap;
+class _PerfilBottomActions extends StatelessWidget {
+  final bool profileComplete;
+  final bool walletComplete;
+  final PerfilNextStep primaryCta;
+  final void Function(PerfilChecklistAction action) onChecklistAction;
 
-  const _AddSwatch({
-    required this.borderColor,
-    required this.mute,
-    this.onTap,
+  const _PerfilBottomActions({
+    required this.profileComplete,
+    required this.walletComplete,
+    required this.primaryCta,
+    required this.onChecklistAction,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(13),
-          border: Border.all(color: borderColor, style: BorderStyle.solid),
-          color: ShellChrome.of(context).cardFill,
-        ),
-        child: Icon(Icons.add_rounded, size: 18, color: mute),
-      ),
-    );
-  }
-}
-
-class _DefaultBrandSwatch extends StatelessWidget {
-  const _DefaultBrandSwatch({
-    required this.borderColor,
-    required this.mute,
-    required this.selected,
-    required this.onTap,
-    this.loading = false,
-  });
-
-  final Color borderColor;
-  final Color mute;
-  final bool selected;
-  final bool loading;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'Restaurar cores padrão do Focux',
-      child: InkWell(
-        onTap: loading ? null : onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(13),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                BrandPalette.defaultPrimary,
-                BrandPalette.defaultSecondary,
-              ],
+    if (profileComplete) {
+      return Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                goPersonalShellTab(context, '/alunos');
+              },
+              icon: const Icon(Icons.groups_2_outlined),
+              label: const Text('Meus alunos'),
             ),
-            border: Border.all(
-              color:
-                  selected
-                      ? Colors.black.withValues(alpha: 0.38)
-                      : borderColor,
-              width: selected ? 2.2 : 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: BrandPalette.defaultPrimary.withValues(
-                  alpha: selected ? 0.38 : 0.22,
-                ),
-                blurRadius: selected ? 14 : 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
-          child:
-              loading
-                  ? const Padding(
-                    padding: EdgeInsets.all(8),
-                    child: FxLoading(strokeWidth: 2, color: Colors.white),
-                  )
-                  : Icon(
-                    selected ? Icons.check_rounded : Icons.restore_rounded,
-                    size: 16,
-                    color: Colors.white,
-                  ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: FilledButton.icon(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                goPersonalShellTab(context, '/ia/copiloto');
+              },
+              icon: const Icon(Icons.auto_awesome_outlined, size: 18),
+              label: const Text('Copiloto IA'),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (!walletComplete) {
+      return Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                context.push('/perfil/wallet');
+              },
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              label: const Text('Configurar PIX'),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: FilledButton.icon(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                onChecklistAction(primaryCta.action);
+              },
+              icon: Icon(
+                primaryCta.action == PerfilChecklistAction.convites
+                    ? Icons.person_add_outlined
+                    : Icons.arrow_forward_rounded,
+                size: 18,
+              ),
+              label: Text(primaryCta.buttonLabel),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: () {
+          HapticFeedback.selectionClick();
+          onChecklistAction(primaryCta.action);
+        },
+        icon: Icon(
+          primaryCta.action == PerfilChecklistAction.convites
+              ? Icons.person_add_outlined
+              : Icons.arrow_forward_rounded,
+          size: 18,
         ),
+        label: Text(primaryCta.buttonLabel),
       ),
     );
   }
@@ -1639,33 +1495,40 @@ class _CompletenessCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: SizedBox(
-              height: 9,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  ColoredBox(
-                    color:
-                        isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : EagleTokens.lineSoft,
-                  ),
-                  FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: score / 100,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [accent.withValues(alpha: 0.72), accent],
+          TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0, end: score / 100),
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, _) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: SizedBox(
+                  height: 9,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ColoredBox(
+                        color:
+                            isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : EagleTokens.lineSoft,
+                      ),
+                      FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: value,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [accent.withValues(alpha: 0.72), accent],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 10),
           if (complete)
@@ -2013,7 +1876,7 @@ class _InfoTile extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final content = Container(
-      padding: const EdgeInsets.symmetric(vertical: 13),
+      padding: const EdgeInsets.symmetric(vertical: 15),
       decoration: BoxDecoration(
         border:
             showDivider
@@ -2103,7 +1966,7 @@ class _ActionTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 13),
+        padding: const EdgeInsets.symmetric(vertical: 15),
         decoration: BoxDecoration(
           border:
               showDivider
@@ -2118,8 +1981,8 @@ class _ActionTile extends StatelessWidget {
                   danger
                       ? (isDark ? const Color(0x24FF8B8B) : EagleTokens.badSoft)
                       : (isDark
-                          ? Colors.white.withValues(alpha: 0.06)
-                          : EagleTokens.lineSoft),
+                          ? accent.withValues(alpha: 0.14)
+                          : BrandPalette.soft(accent)),
               color: danger ? ink : accent,
             ),
             const SizedBox(width: 12),

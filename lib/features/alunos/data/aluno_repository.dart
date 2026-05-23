@@ -16,6 +16,7 @@ class Aluno {
   final String? genero;
   final String? tipoConsultoria;
   final String statusFinanceiro;
+  final int? scoreProntidao;
   final String? senhaProvisoria;
   final double? peso;
   final double? altura;
@@ -36,6 +37,7 @@ class Aluno {
     this.genero,
     this.tipoConsultoria,
     this.statusFinanceiro = 'ATIVO',
+    this.scoreProntidao,
     this.senhaProvisoria,
     this.peso,
     this.altura,
@@ -70,6 +72,7 @@ class Aluno {
     genero: json['genero'] as String?,
     tipoConsultoria: json['tipoConsultoria'] as String?,
     statusFinanceiro: json['statusFinanceiro'] as String? ?? 'ATIVO',
+    scoreProntidao: json['scoreProntidao'] as int?,
     senhaProvisoria: json['senhaProvisoria'] as String?,
     peso: json['peso']?.toDouble(),
     altura: json['altura']?.toDouble(),

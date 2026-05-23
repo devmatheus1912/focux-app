@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
 import 'core/fcm/fcm_service.dart';
+import 'core/widgets/fx_connectivity_banner.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/secure_storage.dart';
 import 'core/theme/app_theme.dart';
@@ -260,7 +261,9 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
         );
         return MediaQuery(
           data: mq.copyWith(textScaler: scaler),
-          child: child ?? const SizedBox.shrink(),
+          child: FxConnectivityBanner(
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
     );

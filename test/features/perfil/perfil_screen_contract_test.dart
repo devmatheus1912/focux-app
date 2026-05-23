@@ -32,7 +32,7 @@ void main() {
     expect(find.text('Prontidao comercial'), findsOneWidget);
     expect(find.text('Identidade visual'), findsOneWidget);
     expect(find.text('Marca'), findsWidgets);
-    expect(find.bySemanticsLabel('Restaurar cores padrão do Focux'), findsOneWidget);
+    expect(find.text('Paleta personalizada ativa · toque para editar'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Carteira e PIX'),
@@ -42,7 +42,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Carteira e PIX'), findsOneWidget);
-    expect(find.text('Convidar alunos'), findsOneWidget);
     expect(find.text('Meus alunos'), findsOneWidget);
   });
 }

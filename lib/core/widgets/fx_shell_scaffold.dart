@@ -6,6 +6,7 @@ import '../theme/shell_chrome.dart';
 import 'cinematic_mesh_background.dart';
 import 'fx_icon.dart';
 import 'mesh_scope.dart';
+import 'fx_premium_entrance.dart';
 
 /// Premium scaffold for shell tabs and standalone screens.
 class FxShellScaffold extends StatelessWidget {
@@ -34,7 +35,7 @@ class FxShellScaffold extends StatelessWidget {
     final meshActive = MeshScope.of(context);
     final needsMesh = useMesh && !meshActive;
 
-    Widget content = body;
+    Widget content = FxPremiumEntrance(child: body);
     if (safeArea) {
       content = SafeArea(bottom: bottomNavigationBar == null, child: body);
     }

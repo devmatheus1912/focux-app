@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/api/api_client.dart';
 import '../../../core/health/health_service.dart';
+import '../../../core/health/recovery_score.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../data/health_repository.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 /// Screen showing synced Apple Health / Google Fit data.
@@ -20,6 +24,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   bool _authorized = false;
   bool _loading = true;
   HealthSummary? _summary;
+  RecoverySnapshot? _recovery;
 
   @override
   void initState() {
@@ -71,10 +76,20 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   Future<void> _loadData() async {
     try {
       final summary = await HealthService.getTodaySummary();
+      RecoverySnapshot? synced;
+      try {
+        final repo = HealthRepository.fromClient(
+          ApiClient(),
+        );
+        synced = await repo.syncToday(summary);
+      } catch (_) {
+        synced = RecoverySnapshot.fromSummary(summary);
+      }
       if (mounted) {
         setState(() {
           _authorized = true;
           _summary = summary;
+          _recovery = synced;
           _loading = false;
         });
       }
@@ -166,11 +181,61 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
 
   Widget _buildDashboard(bool isDark, Color primary) {
     final s = _summary!;
+    final recovery =
+        _recovery ??
+        RecoverySnapshot.fromSummary(s);
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                colors: [primary, primary.withValues(alpha: 0.72)],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: primary.withValues(alpha: 0.24),
+                  blurRadius: 22,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Prontidao ${recovery.recoveryScore}%',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  recovery.recoveryLabel,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  recovery.recoveryHint,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.82),
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           Text(
             'Resumo de Hoje',
             style: TextStyle(
