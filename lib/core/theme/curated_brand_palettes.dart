@@ -124,6 +124,8 @@ class CuratedBrandPalette {
     return best;
   }
 
+  static Color readableOn(Color background) => _readableOn(background);
+
   static bool isReadablePrimary(Color primary) {
     final hsl = HSLColor.fromColor(primary);
     if (hsl.lightness > 0.86) return false;
