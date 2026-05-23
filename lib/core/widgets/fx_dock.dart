@@ -1,11 +1,10 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/brand_palette.dart';
 import '../theme/design_tokens.dart';
+import '../theme/tokens_strip.dart';
 import 'fx_icon.dart';
 
 class FxDockItem {
@@ -56,7 +55,6 @@ class FxDock extends StatelessWidget {
     final compact = width < 390;
 
     final onCinematic = cinematicChrome || isDark;
-    final lightCinematic = onCinematic && !isDark;
 
     final bgColor =
         onCinematic
@@ -64,57 +62,34 @@ class FxDock extends StatelessWidget {
                 ? EagleTokens.darkCard.withValues(alpha: 0.78)
                 : Colors.white.withValues(alpha: 0.82)
             : Colors.white.withValues(alpha: 0.75);
-    final borderColor =
-        onCinematic
-            ? isDark
-                ? EagleTokens.glassBorder
-                : primary.withValues(alpha: 0.12)
-            : const Color.fromRGBO(0, 0, 0, 0.06);
     final inactiveColor = (isDark ? EagleTokens.darkInk : EagleTokens.ink)
         .withValues(alpha: 0.40);
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(TokensStrip.rXl),
         boxShadow: [
-          if (lightCinematic) ...[
-            BoxShadow(
-              color: primary.withValues(alpha: 0.10),
-              blurRadius: 28,
-              offset: const Offset(0, 14),
-              spreadRadius: -10,
+          ...TokensStrip.elevation(16, dark: isDark, accent: primary),
+          if (onCinematic)
+            ...TokensStrip.interactiveGlow(
+              primary,
+              intensity: 0.35,
+              dark: isDark,
             ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-              spreadRadius: -8,
-            ),
-          ] else ...[
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.20),
-              blurRadius: 34,
-              offset: const Offset(0, 12),
-              spreadRadius: -12,
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.10),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-              spreadRadius: -4,
-            ),
-          ],
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(TokensStrip.rXl),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          filter: TokensStrip.blurFilter(TokensStrip.blurHeavy),
           child: Container(
             decoration: BoxDecoration(
               color: bgColor,
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: borderColor, width: 0.5),
+              borderRadius: BorderRadius.circular(TokensStrip.rXl),
+              border: Border.all(
+                color: TokensStrip.glassBorder(dark: isDark, accent: primary),
+                width: 0.8,
+              ),
             ),
             padding: EdgeInsets.fromLTRB(
               6,
@@ -149,9 +124,17 @@ class FxDock extends StatelessWidget {
                                     ? BrandPalette.soft(
                                       primary,
                                       dark: onCinematic,
-                                    ).withValues(alpha: onCinematic ? 0.42 : 0.72)
+                                    ).withValues(alpha: onCinematic ? 0.48 : 0.78)
                                     : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(TokensStrip.rPill),
+                            boxShadow:
+                                active
+                                    ? TokensStrip.interactiveGlow(
+                                      primary,
+                                      intensity: 0.45,
+                                      dark: isDark,
+                                    )
+                                    : null,
                           ),
                           child: Center(
                             child: FxIcon(

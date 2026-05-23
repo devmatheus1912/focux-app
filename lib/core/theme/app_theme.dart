@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'brand_palette.dart';
 import 'design_tokens.dart';
 import 'fx_page_transitions_builder.dart';
+import 'tokens_strip.dart';
 
 class AppTheme {
   static ThemeData buildTheme(Color primary) => _build(primary, false);
@@ -246,45 +247,51 @@ class AppTheme {
         actionsIconTheme: IconThemeData(color: onSurface),
       ),
 
-      // ── Cards: glass-style border, tinted shadow for depth ──────────
+      // ── Cards: Liquid Glass border, multi-layer depth ───────────────
       cardTheme: CardTheme(
         color: dark ? EagleTokens.darkCard : surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(EagleTokens.radiusLg),
+          borderRadius: BorderRadius.circular(TokensStrip.rLg),
           side: BorderSide(
-            color: dark
-                ? EagleTokens.glassBorder
-                : outline.withValues(alpha: 0.6),
+            color: TokensStrip.glassBorder(
+              dark: dark,
+              accent: primaryAccent,
+            ),
           ),
         ),
-        margin: const EdgeInsets.symmetric(vertical: 6),
+        margin: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
         clipBehavior: Clip.antiAlias,
         shadowColor: shadowColor,
       ),
 
-      // ── Inputs: clean with refined focus ring ───────────────────────
+      // ── Inputs: glass fill + neon focus ring ────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+        fillColor:
+            dark
+                ? EagleTokens.darkCardHi.withValues(alpha: 0.88)
+                : Colors.white.withValues(alpha: 0.92),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
+          horizontal: TokensStrip.s4,
+          vertical: TokensStrip.s3,
         ),
         hintStyle: _outfit(color: onSurfMute, fontSize: 14),
         labelStyle: _outfit(color: onSurfMute, fontSize: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
-          borderSide: BorderSide(color: outline),
+          borderRadius: BorderRadius.circular(TokensStrip.rSm),
+          borderSide: BorderSide(
+            color: TokensStrip.glassBorder(dark: dark),
+          ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
+          borderRadius: BorderRadius.circular(TokensStrip.rSm),
           borderSide: BorderSide(
-            color: dark ? EagleTokens.darkLine : outline.withValues(alpha: 0.6),
+            color: TokensStrip.glassBorder(dark: dark),
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
+          borderRadius: BorderRadius.circular(TokensStrip.rSm),
           borderSide: BorderSide(color: primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
@@ -297,17 +304,18 @@ class AppTheme {
         ),
       ),
 
-      // ── Filled Button: gradient feel via elevation, tactile press ───
+      // ── Filled Button: neon gradient feel, visionOS radius ──────────
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primary,
           foregroundColor: onPrimary,
           minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
+            borderRadius: BorderRadius.circular(TokensStrip.rMd),
           ),
           textStyle: _outfit(fontSize: 15, fontWeight: FontWeight.w700),
           elevation: 0,
+          shadowColor: primary.withValues(alpha: 0.35),
         ),
       ),
 
@@ -316,9 +324,12 @@ class AppTheme {
           foregroundColor: primary,
           minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
+            borderRadius: BorderRadius.circular(TokensStrip.rMd),
           ),
-          side: BorderSide(color: primary, width: 1.5),
+          side: BorderSide(
+            color: TokensStrip.glassBorder(dark: dark, accent: primary),
+            width: 1.2,
+          ),
           textStyle: _outfit(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
@@ -374,19 +385,16 @@ class AppTheme {
       bottomSheetTheme: BottomSheetThemeData(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(EagleTokens.radius2xl),
+            top: Radius.circular(TokensStrip.rXl),
           ),
         ),
         backgroundColor: dark ? EagleTokens.darkCard : surface,
         elevation: 0,
       ),
 
-      // ── Navigation Bar: cinematic glass dock ────────────────────────
+      // ── Navigation Bar: Liquid Glass dock ───────────────────────────
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor:
-            dark
-                ? EagleTokens.darkCard.withValues(alpha: 0.88)
-                : Colors.white.withValues(alpha: 0.85),
+        backgroundColor: TokensStrip.glassFill(dark: dark, opacity: 0.88),
         indicatorColor: dark ? EagleTokens.darkCardHi : primarySoft,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {

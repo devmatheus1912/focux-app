@@ -4,8 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/fx_icon.dart';
 import 'design_tokens.dart';
 import 'theme_provider.dart';
+import 'tokens_strip.dart';
 
-/// Dual-theme surface system for shell tabs over the cinematic mesh.
+/// Dual-theme Liquid Glass surface system for shell tabs over cinematic mesh.
 class ShellPalette {
   const ShellPalette(this.isDark);
 
@@ -16,176 +17,87 @@ class ShellPalette {
   Color get line => isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
   Color get lineStrong => isDark ? EagleTokens.glassBorder : EagleTokens.line;
 
-  /// Solid fill for inputs and flat surfaces.
-  Color get cardFill =>
-      isDark
-          ? EagleTokens.darkCard.withValues(alpha: 0.88)
-          : Colors.white.withValues(alpha: 0.94);
+  Color get cardFill => TokensStrip.glassFill(dark: isDark, opacity: 0.94);
 
-  /// Bottom sheet / modal surface.
   Color get sheetFill =>
       isDark
           ? EagleTokens.darkBg.withValues(alpha: 0.96)
           : Colors.white.withValues(alpha: 0.98);
 
   BoxDecoration panel({
-    double radius = 20,
+    double radius = TokensStrip.rLg,
     Color? accent,
+    int elevationLevel = 8,
   }) {
-    if (isDark) {
-      final tint = accent ?? EagleTokens.brandAccent;
-      return BoxDecoration(
-        color: EagleTokens.darkCard.withValues(alpha: 0.86),
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(
-          color:
-              accent != null
-                  ? tint.withValues(alpha: 0.30)
-                  : EagleTokens.glassBorder,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.28),
-            blurRadius: 26,
-            offset: const Offset(0, 12),
-            spreadRadius: -10,
-          ),
-          if (accent != null)
-            BoxShadow(
-              color: tint.withValues(alpha: 0.14),
-              blurRadius: 32,
-              offset: const Offset(0, 14),
-              spreadRadius: -8,
-            ),
-        ],
-      );
-    }
-
-    final tint = accent ?? EagleTokens.brandAccent;
-    return BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.92),
-      borderRadius: BorderRadius.circular(radius),
-      border: Border.all(
-        color: tint.withValues(alpha: accent != null ? 0.20 : 0.14),
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: EagleTokens.ink.withValues(alpha: 0.06),
-          blurRadius: 22,
-          offset: const Offset(0, 10),
-          spreadRadius: -6,
-        ),
-        if (accent != null)
-          BoxShadow(
-            color: tint.withValues(alpha: 0.10),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-            spreadRadius: -8,
-          )
-        else
-          BoxShadow(
-            color: EagleTokens.brandAccent.withValues(alpha: 0.05),
-            blurRadius: 32,
-            offset: const Offset(0, 16),
-            spreadRadius: -12,
-          ),
-      ],
+    return TokensStrip.glassPanel(
+      dark: isDark,
+      radius: radius,
+      accent: accent,
+      elevationLevel: elevationLevel,
     );
   }
 
   BoxDecoration listCard({
     bool selected = false,
     Color? primary,
-    double radius = 20,
+    double radius = TokensStrip.rLg,
   }) {
     final accent = primary ?? EagleTokens.brandAccent;
     if (selected) {
       return BoxDecoration(
-        color: accent.withValues(alpha: isDark ? 0.18 : 0.08),
+        color: accent.withValues(alpha: isDark ? 0.20 : 0.10),
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: accent.withValues(alpha: 0.5),
+          color: accent.withValues(alpha: 0.55),
           width: 1.5,
+        ),
+        boxShadow: TokensStrip.interactiveGlow(
+          accent,
+          intensity: 0.55,
+          dark: isDark,
         ),
       );
     }
-    return panel(radius: radius);
+    return panel(radius: radius, accent: primary);
   }
 
-  BoxDecoration headerAction({double radius = 14}) {
-    return BoxDecoration(
-      color:
-          isDark
-              ? EagleTokens.darkCard.withValues(alpha: 0.78)
-              : Colors.white.withValues(alpha: 0.78),
-      borderRadius: BorderRadius.circular(radius),
-      border: Border.all(
-        color:
-            isDark
-                ? Colors.white.withValues(alpha: 0.14)
-                : EagleTokens.brandAccent.withValues(alpha: 0.10),
-      ),
-      boxShadow:
-          isDark
-              ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.18),
-                  blurRadius: 14,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-              : [
-                BoxShadow(
-                  color: EagleTokens.ink.withValues(alpha: 0.04),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+  BoxDecoration headerAction({double radius = TokensStrip.rSm}) {
+    return TokensStrip.glassPanel(
+      dark: isDark,
+      radius: radius,
+      elevationLevel: 4,
     );
   }
 
-  BoxDecoration bottomSheet({double radius = 28}) {
+  BoxDecoration bottomSheet({double radius = TokensStrip.rXl}) {
     return BoxDecoration(
       color: sheetFill,
       borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
       border: Border(
-        top: BorderSide(color: line),
-        left: BorderSide(color: line.withValues(alpha: 0.5)),
-        right: BorderSide(color: line.withValues(alpha: 0.5)),
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: isDark ? 0.38 : 0.14),
-          blurRadius: 32,
-          offset: const Offset(0, -12),
+        top: BorderSide(color: TokensStrip.glassBorder(dark: isDark)),
+        left: BorderSide(
+          color: TokensStrip.glassBorder(dark: isDark).withValues(alpha: 0.5),
         ),
-      ],
+        right: BorderSide(
+          color: TokensStrip.glassBorder(dark: isDark).withValues(alpha: 0.5),
+        ),
+      ),
+      boxShadow: TokensStrip.elevation(24, dark: isDark),
     );
   }
 
   BoxDecoration accentPanel({
     required Color accent,
-    double radius = 20,
-  }) => panel(radius: radius, accent: accent);
+    double radius = TokensStrip.rLg,
+  }) => panel(radius: radius, accent: accent, elevationLevel: 12);
 
-  BoxDecoration searchField({Color? primary, double radius = 16}) {
+  BoxDecoration searchField({Color? primary, double radius = TokensStrip.rMd}) {
     final accent = primary ?? EagleTokens.brandAccent;
-    return BoxDecoration(
-      color: cardFill,
-      borderRadius: BorderRadius.circular(radius),
-      border: Border.all(
-        color: isDark ? line : accent.withValues(alpha: 0.12),
-      ),
-      boxShadow:
-          isDark
-              ? null
-              : [
-                BoxShadow(
-                  color: EagleTokens.ink.withValues(alpha: 0.03),
-                  blurRadius: 14,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+    return TokensStrip.glassPanel(
+      dark: isDark,
+      radius: radius,
+      accent: accent,
+      elevationLevel: 4,
     );
   }
 }
@@ -213,7 +125,7 @@ class ShellThemeToggle extends ConsumerWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => ref.read(themeModeProvider.notifier).toggle(),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(TokensStrip.rSm),
         child: Container(
           width: size,
           height: size,

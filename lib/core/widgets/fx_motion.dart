@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
-/// Soft pulsing glow for premium CTAs and highlight cards.
-class FxGlowSurface extends StatefulWidget {
-  const FxGlowSurface({
+import '../theme/tokens_strip.dart';
+import 'fx_loading.dart';
+
+/// 3D interactive neon glow — TOKENS STRIP premium CTA halo.
+class FxInteractiveGlow extends StatefulWidget {
+  const FxInteractiveGlow({
     super.key,
     required this.child,
     required this.color,
     this.enabled = true,
     this.intensity = 1,
-    this.borderRadius = 18,
+    this.borderRadius = TokensStrip.rMd,
+    this.pulse = true,
   });
 
   final Widget child;
@@ -17,12 +21,13 @@ class FxGlowSurface extends StatefulWidget {
   final bool enabled;
   final double intensity;
   final double borderRadius;
+  final bool pulse;
 
   @override
-  State<FxGlowSurface> createState() => _FxGlowSurfaceState();
+  State<FxInteractiveGlow> createState() => _FxInteractiveGlowState();
 }
 
-class _FxGlowSurfaceState extends State<FxGlowSurface>
+class _FxInteractiveGlowState extends State<FxInteractiveGlow>
     with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
   late Animation<double> _pulse;
@@ -32,18 +37,19 @@ class _FxGlowSurfaceState extends State<FxGlowSurface>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
+      duration: const Duration(milliseconds: 2400),
     );
     _pulse = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
-    if (widget.enabled) _ctrl.repeat(reverse: true);
+    if (widget.enabled && widget.pulse) _ctrl.repeat(reverse: true);
   }
 
   @override
-  void didUpdateWidget(covariant FxGlowSurface oldWidget) {
+  void didUpdateWidget(covariant FxInteractiveGlow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.enabled && !_ctrl.isAnimating) {
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
+    if (widget.enabled && widget.pulse && !reduceMotion && !_ctrl.isAnimating) {
       _ctrl.repeat(reverse: true);
-    } else if (!widget.enabled) {
+    } else if (!widget.enabled || !widget.pulse || reduceMotion) {
       _ctrl.stop();
       _ctrl.value = 0;
     }
@@ -57,30 +63,114 @@ class _FxGlowSurfaceState extends State<FxGlowSurface>
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.enabled) return widget.child;
+    if (!widget.enabled || TokensStrip.prefersReducedMotion(context)) {
+      return widget.child;
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnimatedBuilder(
       animation: _pulse,
       builder: (context, child) {
-        final glow = 0.14 + (_pulse.value * 0.18 * widget.intensity);
-        final spread = 1 + (_pulse.value * 3 * widget.intensity);
+        final pulse = widget.pulse ? _pulse.value : 0.0;
+        final shadows = TokensStrip.interactiveGlow(
+          widget.color,
+          intensity: widget.intensity * (0.85 + pulse * 0.15),
+          dark: isDark,
+        );
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(widget.borderRadius),
-            boxShadow: [
-              BoxShadow(
-                color: widget.color.withValues(alpha: glow),
-                blurRadius: 22 + (_pulse.value * 10),
-                spreadRadius: spread,
-                offset: const Offset(0, 8),
-              ),
-            ],
+            boxShadow: shadows,
           ),
           child: child,
         );
       },
       child: widget.child,
     );
+  }
+}
+
+/// Back-compat alias for premium glow wrappers.
+typedef FxGlowSurface = FxInteractiveGlow;
+
+/// Liquid Glass primary button with gradient + glow.
+class FxLiquidPrimaryButton extends StatelessWidget {
+  const FxLiquidPrimaryButton({
+    super.key,
+    required this.label,
+    this.onPressed,
+    this.icon,
+    this.loading = false,
+    this.expand = true,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final IconData? icon;
+  final bool loading;
+  final bool expand;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final enabled = onPressed != null && !loading;
+
+    final button = FxInteractiveGlow(
+      color: primary,
+      enabled: enabled,
+      borderRadius: TokensStrip.rMd,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: enabled ? onPressed : null,
+          borderRadius: BorderRadius.circular(TokensStrip.rMd),
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: TokensStrip.primaryButtonGradient(primary),
+              borderRadius: BorderRadius.circular(TokensStrip.rMd),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.22),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: TokensStrip.s5,
+              vertical: TokensStrip.s4,
+            ),
+            child: Center(
+              child:
+                  loading
+                      ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: FxLoading(strokeWidth: 2, color: Colors.white),
+                      )
+                      : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (icon != null) ...[
+                            Icon(icon, size: 18, color: onPrimary),
+                            const SizedBox(width: TokensStrip.s2),
+                          ],
+                          Text(
+                            label,
+                            style: TextStyle(
+                              color: onPrimary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (!expand) return button;
+    return SizedBox(width: double.infinity, child: button);
   }
 }
 

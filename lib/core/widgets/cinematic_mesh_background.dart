@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../theme/design_tokens.dart';
+import '../theme/tokens_strip.dart';
 
-/// Shared cinematic mesh used on login, splash, and premium app chrome.
+/// Shared cinematic mesh — TOKENS STRIP Liquid Glass backdrop.
 class CinematicMeshBackground extends StatelessWidget {
   const CinematicMeshBackground({
     super.key,
@@ -15,14 +16,13 @@ class CinematicMeshBackground extends StatelessWidget {
   final Widget child;
   final bool showCenterGlow;
   final bool showCornerGlow;
-
-  /// When true, always render the dark login mesh regardless of theme.
   final bool forceDark;
 
   @override
   Widget build(BuildContext context) {
     final isLight =
         !forceDark && Theme.of(context).brightness == Brightness.light;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Stack(
       fit: StackFit.expand,
@@ -31,20 +31,20 @@ class CinematicMeshBackground extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: RadialGradient(
               center: const Alignment(-0.35, -0.85),
-              radius: 1.35,
+              radius: 1.45,
               colors:
                   isLight
                       ? const [
-                        Color(0xFFC8E8E6),
-                        Color(0xFFE6F2F3),
-                        Color(0xFFDCE9EB),
+                        TokensStrip.lightMeshA,
+                        TokensStrip.lightMeshB,
+                        TokensStrip.lightMeshC,
                       ]
                       : const [
                         Color(0xFF0D2830),
-                        Color(0xFF0A1F24),
-                        Color(0xFF080C10),
+                        Color(0xFF0B0E14),
+                        TokensStrip.cinematicBg,
                       ],
-              stops: const [0.0, 0.55, 1.0],
+              stops: const [0.0, 0.52, 1.0],
             ),
           ),
         ),
@@ -52,32 +52,10 @@ class CinematicMeshBackground extends StatelessWidget {
           painter: CinematicGridPainter(light: isLight),
           size: Size.infinite,
         ),
-        if (showCornerGlow)
+        if (showCornerGlow) ...[
           Positioned(
-            top: -80,
-            right: -80,
-            child: IgnorePointer(
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      EagleTokens.brandAccent.withValues(
-                        alpha: isLight ? 0.07 : 0.10,
-                      ),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.7],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        if (showCenterGlow)
-          Align(
-            alignment: const Alignment(0, -0.22),
+            top: -100,
+            right: -100,
             child: IgnorePointer(
               child: Container(
                 width: 340,
@@ -86,15 +64,54 @@ class CinematicMeshBackground extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      Theme.of(context).colorScheme.primary.withValues(
-                        alpha: isLight ? 0.08 : 0.14,
-                      ),
-                      EagleTokens.brandAccent.withValues(
-                        alpha: isLight ? 0.03 : 0.06,
+                      (isLight ? EagleTokens.brandAccent : TokensStrip.neonGlow)
+                          .withValues(alpha: isLight ? 0.10 : 0.16),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.72],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -120,
+            left: -80,
+            child: IgnorePointer(
+              child: Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      primary.withValues(alpha: isLight ? 0.05 : 0.10),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+        if (showCenterGlow)
+          Align(
+            alignment: const Alignment(0, -0.20),
+            child: IgnorePointer(
+              child: Container(
+                width: 380,
+                height: 380,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      primary.withValues(alpha: isLight ? 0.10 : 0.18),
+                      TokensStrip.neonGlow.withValues(
+                        alpha: isLight ? 0.04 : 0.08,
                       ),
                       Colors.transparent,
                     ],
-                    stops: const [0.0, 0.45, 1.0],
+                    stops: const [0.0, 0.42, 1.0],
                   ),
                 ),
               ),
@@ -117,8 +134,8 @@ class CinematicGridPainter extends CustomPainter {
         Paint()
           ..color =
               light
-                  ? EagleTokens.brandAccent.withValues(alpha: 0.045)
-                  : EagleTokens.brandAccent.withValues(alpha: 0.06)
+                  ? TokensStrip.neonGlow.withValues(alpha: 0.05)
+                  : TokensStrip.neonGlow.withValues(alpha: 0.07)
           ..strokeWidth = 0.5
           ..style = PaintingStyle.stroke;
 

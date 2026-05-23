@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import '../theme/design_tokens.dart';
 
-/// Premium input decoration factory — Eagle Design System.
-///
-/// Drop-in replacement for the banned `InputDecoration(border: OutlineInputBorder())`.
-/// Usage: `decoration: FxInputDeco.build(context, 'Label', icon: Icons.person)`
+import '../theme/design_tokens.dart';
+import '../theme/tokens_strip.dart';
+
+/// Premium input decoration factory — TOKENS STRIP Liquid Glass.
 class FxInputDeco {
   static OutlineInputBorder outlineBorder({
     BorderRadius? borderRadius,
     BorderSide? borderSide,
   }) {
     return OutlineInputBorder(
-      borderRadius: borderRadius ?? BorderRadius.circular(14),
+      borderRadius: borderRadius ?? BorderRadius.circular(TokensStrip.rSm),
       borderSide: borderSide ?? BorderSide.none,
     );
   }
@@ -24,10 +23,13 @@ class FxInputDeco {
     Widget? suffix,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final primary = Theme.of(context).colorScheme.primary;
-    final fillColor = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final fillColor =
+        isDark
+            ? EagleTokens.darkCardHi.withValues(alpha: 0.88)
+            : Colors.white.withValues(alpha: 0.92);
+    final borderColor = TokensStrip.glassBorder(dark: isDark, accent: primary);
 
     return InputDecoration(
       labelText: label,
@@ -42,25 +44,28 @@ class FxInputDeco {
       suffixIcon: suffix,
       filled: true,
       fillColor: fillColor,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: TokensStrip.s4,
+        vertical: 14,
+      ),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: line),
+        borderRadius: BorderRadius.circular(TokensStrip.rSm),
+        borderSide: BorderSide(color: borderColor),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: line),
+        borderRadius: BorderRadius.circular(TokensStrip.rSm),
+        borderSide: BorderSide(color: borderColor),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(TokensStrip.rSm),
         borderSide: BorderSide(color: primary, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(TokensStrip.rSm),
         borderSide: const BorderSide(color: EagleTokens.bad),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(TokensStrip.rSm),
         borderSide: const BorderSide(color: EagleTokens.bad, width: 1.5),
       ),
     );

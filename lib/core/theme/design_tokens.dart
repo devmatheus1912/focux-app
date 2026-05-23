@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
 
-/// FX Design System — Focux
+/// FX Design System — Focux · TOKENS STRIP v1.0.0
 /// Fonte única de verdade para todos os tokens visuais.
 ///
-/// Palette: Teal-tinted cool neutrals + Cyan accent (cinematic identity).
+/// Palette: Neon cyan-teal + cinematic dark · Liquid Glass surfaces.
 /// Typography: Outfit (display/body) + JetBrains Mono (technical/numbers).
-///
-/// Legacy brand (#3454D1 Deep Cobalt) has been replaced with the new
-/// cinematic cyan-teal identity that matches the 4K glass app icon.
 abstract class EagleTokens {
-  // ── Brand (Cyan Teal — cinematic, slightly softened for comfort) ───
-  static const Color brand = Color(0xFF18B5B5);
+  // ── Brand (Neon Cyan Teal — TOKENS STRIP premium) ───────────────────
+  static const Color brand = Color(0xFF26C6DA);
   static const Color brandInk = Color(0xFF128989);
   static const Color brandSecondary = Color(0xFF007D8A);
   static const Color brandSoft = Color(0xFFD9F2F2);
   static const Color brandSofter = Color(0xFFEDF8F8);
   static const Color brandDeep = Color(0xFF0A2E2E);
-  static const Color brandAccent = Color(0xFF4DCFC0);
+  static const Color brandAccent = Color(0xFF4DD0E1);
 
   // ── Neutral Light (Teal-tinted cool) ────────────────────────────────
   static const Color ink = Color(0xFF0C1218);
@@ -27,10 +24,10 @@ abstract class EagleTokens {
   static const Color paper = Color(0xFFF4F7F8);
   static const Color card = Color(0xFFFFFFFF);
 
-  // ── Neutral Dark (Charcoal — teal-tinted) ───────────────────────────
-  static const Color darkBg = Color(0xFF080C10);
-  static const Color darkCard = Color(0xFF0F1419);
-  static const Color darkCardHi = Color(0xFF161D24);
+  // ── Neutral Dark (Cinematic charcoal) ───────────────────────────────
+  static const Color darkBg = Color(0xFF0B0E14);
+  static const Color darkCard = Color(0xFF121820);
+  static const Color darkCardHi = Color(0xFF1A2330);
   static const Color darkLine = Color(0xFF1E2830);
   static const Color darkInk = Color(0xFFE8EDF2);
   static const Color darkInkMute = Color(0xFF7A8A96);
@@ -48,10 +45,10 @@ abstract class EagleTokens {
   static const Color goldSoft = Color(0xFFFFF8E6);
   static const Color purple = Color(0xFF6B46C1);
 
-  // ── Glass / Cinematic Surfaces ──────────────────────────────────────
-  static const Color glassFill = Color(0x14FFFFFF);
-  static const Color glassBorder = Color(0x1AFFFFFF);
-  static const Color glassInnerHighlight = Color(0x0DFFFFFF);
+  // ── Glass / Liquid Glass Surfaces ───────────────────────────────────
+  static const Color glassFill = Color(0x18FFFFFF);
+  static const Color glassBorder = Color(0x24FFFFFF);
+  static const Color glassInnerHighlight = Color(0x12FFFFFF);
   static const Color metalMid = Color(0xFF8B9AAB);
 
   /// Circuit glow — use with BoxShadow internal/tinted, never outer neon.
@@ -60,9 +57,9 @@ abstract class EagleTokens {
 
   /// Hero mesh dark gradient stops for auth/splash backgrounds.
   static const List<Color> heroMeshDark = [
-    Color(0xFF080C10),
-    Color(0xFF0A1F24),
+    Color(0xFF0B0E14),
     Color(0xFF0D2830),
+    Color(0xFF121820),
   ];
 
   // ── Adapters de Compatibilidade ─────────────────────────────────────
@@ -88,13 +85,14 @@ abstract class EagleTokens {
   static const double radiusMd = 16;
   static const double radiusLg = 20;
   static const double radiusXl = 24;
-  static const double radius2xl = 28;
+  static const double radius2xl = 32;
+  static const double radius3xl = 40;
   static const double radiusPill = 999;
 
   // ── Hero Gradients ──────────────────────────────────────────────────
   static const List<Color> heroGradientLight = [
+    Color(0xFF26C6DA),
     Color(0xFF18B5B5),
-    Color(0xFF128989),
   ];
 
   static const List<Color> heroGradientDark = [

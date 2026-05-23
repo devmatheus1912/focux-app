@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/shell_chrome.dart';
+import '../theme/tokens_strip.dart';
 import 'cinematic_mesh_background.dart';
+import 'fx_glass_surface.dart';
 import 'fx_icon.dart';
 import 'mesh_scope.dart';
 import 'fx_premium_entrance.dart';
@@ -153,15 +155,17 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// Drop-in glass card surface for lists and panels.
+/// Drop-in Liquid Glass card surface for lists and panels.
 class ShellSurface extends StatelessWidget {
   const ShellSurface({
     super.key,
     required this.child,
     this.accent,
-    this.radius = 20,
+    this.radius = TokensStrip.rLg,
     this.padding,
     this.onTap,
+    this.blur = false,
+    this.glow = false,
   });
 
   final Widget child;
@@ -169,30 +173,20 @@ class ShellSurface extends StatelessWidget {
   final double radius;
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
+  final bool blur;
+  final bool glow;
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final decoration = chrome.panel(radius: radius, accent: accent);
-
-    Widget card = Container(
+    return FxGlassSurface(
+      radius: radius,
       padding: padding,
-      decoration: decoration,
+      accent: accent,
+      blur: blur,
+      glow: glow,
+      onTap: onTap,
       child: child,
     );
-
-    if (onTap != null) {
-      card = Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(radius),
-          child: card,
-        ),
-      );
-    }
-
-    return card;
   }
 }
 
@@ -200,7 +194,7 @@ class ShellSurface extends StatelessWidget {
 BoxDecoration fxListCardDecoration(
   BuildContext context, {
   Color? accent,
-  double radius = 20,
+  double radius = TokensStrip.rLg,
   bool selected = false,
 }) {
   final chrome = ShellChrome.of(context);
