@@ -626,7 +626,11 @@ class _PerfilBody extends StatelessWidget {
                               onBrand: () => context.push('/identidade-visual'),
                               onEdit: onEditPerfil,
                               onWallet: () => context.push('/perfil/wallet'),
-                              onCopilot: () => context.go('/ia/copiloto'),
+                              onCopilot:
+                                  () => goPersonalShellTab(
+                                    context,
+                                    '/ia/copiloto',
+                                  ),
                             ),
                           ),
                           const SizedBox(height: 14),
@@ -797,7 +801,8 @@ class _PerfilBody extends StatelessWidget {
                             accent: accent,
                             mute: mute,
                             line: line,
-                            onTap: () => context.go('/ia/copiloto'),
+                            onTap:
+                                () => goPersonalShellTab(context, '/ia/copiloto'),
                           ),
                           _ActionTile(
                             icon: Icons.workspace_premium_outlined,
@@ -827,7 +832,7 @@ class _PerfilBody extends StatelessWidget {
                             accent: accent,
                             mute: mute,
                             line: line,
-                            onTap: () => context.push('/alunos'),
+                            onTap: () => goPersonalShellTab(context, '/alunos'),
                           ),
                           _ActionTile(
                             icon: Icons.account_balance_wallet_outlined,

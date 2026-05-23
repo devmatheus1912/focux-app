@@ -33,3 +33,10 @@ bool _sameLocation(String currentLocation, String targetLocation) {
       current.query == target.query &&
       current.fragment == target.fragment;
 }
+
+/// Switches a MainShell tab. Never `push` these paths from overlay routes
+/// (/perfil, /convites, etc.) — that duplicates Navigator page keys.
+void goPersonalShellTab(BuildContext context, String location) {
+  if (!context.mounted) return;
+  context.go(location);
+}
