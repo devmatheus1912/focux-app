@@ -41,8 +41,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Identidade visual'), findsWidgets);
     expect(find.text('Carteira e PIX'), findsOneWidget);
+    expect(find.text('Convidar alunos'), findsOneWidget);
+    expect(find.text('Meus alunos'), findsOneWidget);
   });
 }
 

@@ -107,6 +107,8 @@ class PerfilPersonal {
   final List<LandingServiceItem> servicos;
   final List<LandingPackageItem> pacotes;
   final List<LandingFaqItem> faq;
+  final int? readinessPercent;
+  final List<String>? readinessMissing;
 
   PerfilPersonal({
     required this.id,
@@ -154,6 +156,8 @@ class PerfilPersonal {
     this.servicos = const [],
     this.pacotes = const [],
     this.faq = const [],
+    this.readinessPercent,
+    this.readinessMissing,
   });
 
   factory PerfilPersonal.fromJson(Map<String, dynamic> json) => PerfilPersonal(
@@ -214,6 +218,11 @@ class PerfilPersonal {
     faq:
         (json['faq'] as List<dynamic>? ?? [])
             .map((e) => LandingFaqItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+    readinessPercent: json['readinessPercent'] as int?,
+    readinessMissing:
+        (json['readinessMissing'] as List<dynamic>?)
+            ?.map((e) => e.toString())
             .toList(),
   );
 }

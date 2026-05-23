@@ -12,7 +12,6 @@ import '../../../core/theme/curated_brand_palettes.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/perfil_repository.dart';
@@ -34,7 +33,6 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
   final _espCtrl = TextEditingController();
   final _instaCtrl = TextEditingController();
   final _sloganCtrl = TextEditingController();
-  final _domCtrl = TextEditingController();
 
   late CuratedBrandPalette _palette = CuratedBrandPalette.focuxDefault;
   bool _salvando = false;
@@ -60,7 +58,6 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
     _espCtrl.dispose();
     _instaCtrl.dispose();
     _sloganCtrl.dispose();
-    _domCtrl.dispose();
     super.dispose();
   }
 
@@ -69,7 +66,6 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
     _espCtrl.text = perfil.especialidades ?? '';
     _instaCtrl.text = perfil.instagram ?? '';
     _sloganCtrl.text = perfil.slogan ?? '';
-    _domCtrl.text = perfil.dominioCustomizado ?? '';
     _logoUrl = perfil.logoUrl;
 
     var primary = BrandPalette.defaultPrimary;
@@ -143,9 +139,6 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
         body['corSecundaria'] = BrandPalette.toHex(_corSecundaria);
         body['slogan'] = _sloganCtrl.text.trim();
         if (_logoUrl != null) body['logoUrl'] = _logoUrl;
-        if (_domCtrl.text.trim().isNotEmpty) {
-          body['dominioCustomizado'] = _domCtrl.text.trim();
-        }
       }
       await dio.put('/api/personal/identidade', data: body);
       if (plano.toUpperCase() == 'ENTERPRISE') {
@@ -190,7 +183,7 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
       useMesh: true,
       appBar: FxShellAppBar(
         title: widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
-        subtitle: isEnterprise ? 'White-label premium' : 'Marca no app',
+        subtitle: isEnterprise ? 'Sua marca no app' : 'Marca no app',
         onBack:
             widget.isSetup
                 ? null
@@ -269,20 +262,14 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
                                 ),
                               ),
                               const SizedBox(height: 18),
-                              TextFormField(
+                              _BrandField(
+                                label: 'Slogan',
                                 controller: _sloganCtrl,
                                 enabled: isEnterprise,
+                                accent: _corPrimaria,
+                                icon: Icons.format_quote_outlined,
+                                hint: 'Transformando vidas através do movimento',
                                 maxLength: 200,
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Slogan',
-                                  icon: Icons.format_quote_outlined,
-                                  hint: 'Transformando vidas através do movimento',
-                                ),
                               ),
                             ],
                           ),
@@ -314,22 +301,53 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
                                         : null,
                               ),
                               if (isEnterprise) ...[
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 10),
                                 Align(
                                   alignment: Alignment.centerLeft,
-                                  child: TextButton.icon(
-                                    onPressed:
-                                        () => _restoreDefaultBrandColors(plano),
-                                    icon: Icon(
-                                      Icons.restore_rounded,
-                                      size: 18,
-                                      color: _corPrimaria,
-                                    ),
-                                    label: Text(
-                                      'Restaurar cores padrão do Focux',
-                                      style: TextStyle(
-                                        color: _corPrimaria,
-                                        fontWeight: FontWeight.w700,
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap:
+                                          () =>
+                                              _restoreDefaultBrandColors(plano),
+                                      borderRadius: BorderRadius.circular(999),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: _corPrimaria.withValues(
+                                            alpha: 0.08,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            999,
+                                          ),
+                                          border: Border.all(
+                                            color: _corPrimaria.withValues(
+                                              alpha: 0.18,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.restore_rounded,
+                                              size: 16,
+                                              color: _corPrimaria,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              'Restaurar cores padrão',
+                                              style: GoogleFonts.outfit(
+                                                color: _corPrimaria,
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -338,30 +356,9 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
                             ],
                           ),
                         ),
-                        if (isEnterprise) ...[
-                          const SizedBox(height: 14),
-                          ShellSurface(
-                            padding: const EdgeInsets.all(18),
-                            child: TextFormField(
-                              controller: _domCtrl,
-                              style: GoogleFonts.outfit(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                              decoration: FxInputDeco.build(
-                                context,
-                                'Domínio customizado',
-                                icon: Icons.language_outlined,
-                                hint: 'app.seudominio.com.br',
-                              ).copyWith(
-                                helperText: 'Opcional — white-label avançado',
-                                helperMaxLines: 2,
-                              ),
-                            ),
-                          ),
-                        ],
                         const SizedBox(height: 14),
                         ShellSurface(
+                          accent: _corPrimaria,
                           padding: const EdgeInsets.all(18),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,42 +371,34 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
                                 accent: _corPrimaria,
                                 mute: chrome.mute,
                               ),
-                              const SizedBox(height: 16),
-                              TextFormField(
+                              const SizedBox(height: 18),
+                              _BrandField(
+                                label: 'Descrição profissional',
                                 controller: _descCtrl,
                                 enabled: isPremiumOrAbove,
-                                maxLines: 3,
+                                accent: _corPrimaria,
+                                hint:
+                                    'Trajetória, metodologia, diferencial...',
+                                maxLines: 4,
                                 maxLength: 500,
-                                style: GoogleFonts.outfit(fontSize: 14),
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Descrição profissional',
-                                  hint: 'Trajetória, metodologia, diferencial...',
-                                ).copyWith(alignLabelWithHint: true),
                               ),
-                              const SizedBox(height: 12),
-                              TextFormField(
+                              const SizedBox(height: 14),
+                              _BrandField(
+                                label: 'Especialidades',
                                 controller: _espCtrl,
                                 enabled: isPremiumOrAbove,
-                                style: GoogleFonts.outfit(fontSize: 14),
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Especialidades',
-                                  icon: Icons.fitness_center_outlined,
-                                  hint: 'Musculação, Funcional...',
-                                ),
+                                accent: _corPrimaria,
+                                icon: Icons.fitness_center_outlined,
+                                hint: 'Musculação, Funcional, Emagrecimento...',
                               ),
-                              const SizedBox(height: 12),
-                              TextFormField(
+                              const SizedBox(height: 14),
+                              _BrandField(
+                                label: 'Instagram',
                                 controller: _instaCtrl,
                                 enabled: isPremiumOrAbove,
-                                style: GoogleFonts.outfit(fontSize: 14),
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Instagram',
-                                  icon: Icons.alternate_email,
-                                  hint: 'seuperfil',
-                                ),
+                                accent: _corPrimaria,
+                                icon: Icons.alternate_email,
+                                hint: '@seuperfil',
                               ),
                             ],
                           ),
@@ -860,6 +849,120 @@ class _CuratedPaletteGrid extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _BrandField extends StatelessWidget {
+  const _BrandField({
+    required this.label,
+    required this.controller,
+    required this.accent,
+    this.hint,
+    this.icon,
+    this.maxLength,
+    this.maxLines = 1,
+    this.enabled = true,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final Color accent;
+  final String? hint;
+  final IconData? icon;
+  final int? maxLength;
+  final int maxLines;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: GoogleFonts.outfit(
+            fontSize: 10.5,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.8,
+            color: chrome.mute,
+          ),
+        ),
+        const SizedBox(height: 8),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            color: chrome.cardFill,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: accent.withValues(alpha: enabled ? 0.16 : 0.08),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: accent.withValues(alpha: 0.06),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+                spreadRadius: -4,
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            enabled: enabled,
+            maxLines: maxLines,
+            maxLength: maxLength,
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: chrome.ink,
+              height: maxLines > 1 ? 1.45 : 1.2,
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: chrome.mute.withValues(alpha: 0.55),
+                fontWeight: FontWeight.w500,
+              ),
+              prefixIcon:
+                  icon != null
+                      ? Icon(icon, size: 18, color: chrome.mute)
+                      : null,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              contentPadding: EdgeInsets.fromLTRB(
+                icon != null ? 0 : 16,
+                maxLines > 1 ? 14 : 15,
+                16,
+                maxLines > 1 ? 14 : 15,
+              ),
+              counterText: '',
+            ),
+          ),
+        ),
+        if (maxLength != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, right: 2),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: ListenableBuilder(
+                listenable: controller,
+                builder: (context, _) {
+                  return Text(
+                    '${controller.text.length}/$maxLength',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: chrome.mute.withValues(alpha: 0.75),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
