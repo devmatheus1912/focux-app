@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'fx_confetti_burst.dart';
+import 'fx_rive_player.dart';
+import '../animations/fx_rive_assets.dart';
 
 class FxCelebrationOverlay {
   static Future<void> show(
@@ -23,7 +25,23 @@ class FxCelebrationOverlay {
       pageBuilder: (ctx, _, __) {
         return Stack(
           children: [
-            Positioned.fill(child: FxConfettiBurst(color: color)),
+            Positioned.fill(
+              child: FxRiveCelebration(
+                fallback: FxConfettiBurst(color: color),
+              ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: 0.35,
+                  child: FxRivePlayer(
+                    asset: 'assets/animations/confetti_burst.riv',
+                    networkUrl: FxRiveAssets.confettiBurstUrl,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
             Center(
               child: Material(
                 color: Colors.transparent,

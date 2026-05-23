@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/gamificacao_repository.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_rive_player.dart';
 
 final _gamificacaoRepoProvider = Provider<GamificacaoRepository>(
   (ref) => GamificacaoRepository(ref.read(apiClientProvider)),
@@ -180,7 +181,17 @@ class GamificacaoScreen extends ConsumerWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Container(
+                              SizedBox(
+                                width: 48,
+                                height: 48,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    if (earned)
+                                      Positioned.fill(
+                                        child: FxRiveBadgeGlow(size: 48),
+                                      ),
+                                    Container(
                                 width: 48,
                                 height: 48,
                                 decoration: BoxDecoration(
@@ -228,6 +239,7 @@ class GamificacaoScreen extends ConsumerWidget {
                                     ),
                                   ),
                                 ),
+                              ),
                               ),
                               const SizedBox(height: 8),
                               Padding(

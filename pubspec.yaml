@@ -127,3 +127,7 @@ flutter:
     - assets/images/logo_official.png
     - assets/images/splash_background.png
     - assets/images/logo_full.png
+    - assets/animations/confetti_success.riv
+    - assets/animations/confetti_burst.riv
+    - assets/animations/cdn_heart.riv
+    - assets/animations/star_sparkle.riv

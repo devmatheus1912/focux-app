@@ -7,13 +7,14 @@ import 'package:home_widget/home_widget.dart';
 class HomeWidgetService {
   HomeWidgetService._();
 
-  static const _androidName = 'FocuxRecoveryWidget';
+  static const _androidName = 'FocuxRecoveryWidgetProvider';
   static const _iosName = 'FocuxRecoveryWidget';
+  static const _appGroupId = 'group.com.focux.focuxApp';
 
   static Future<void> init() async {
     if (kIsWeb || !(Platform.isAndroid || Platform.isIOS)) return;
     try {
-      await HomeWidget.setAppGroupId('group.com.focux.app');
+      await HomeWidget.setAppGroupId(_appGroupId);
     } catch (_) {
       // Native widget extensions may not be configured yet.
     }

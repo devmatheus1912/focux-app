@@ -9,6 +9,7 @@ import '../../../core/health/home_widget_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../health/data/health_repository.dart';
+import '../../../core/widgets/fx_rive_player.dart';
 import 'recovery_score_ring.dart';
 
 final alunoRecoveryProvider = FutureProvider<RecoverySnapshot?>((ref) async {
@@ -67,10 +68,20 @@ class AlunoRecoveryCard extends ConsumerWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  RecoveryScoreRing(
-                    score: snapshot.recoveryScore,
-                    color: primary,
-                    size: 54,
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      RecoveryScoreRing(
+                        score: snapshot.recoveryScore,
+                        color: primary,
+                        size: 54,
+                      ),
+                      Positioned(
+                        right: -2,
+                        bottom: -2,
+                        child: FxRiveHeartPulse(size: 22),
+                      ),
+                    ],
                   ),
                   const SizedBox(width: 14),
                   Expanded(

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/recovery_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/recovery_widget_background"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/recovery_widget_brand"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:letterSpacing="0.08"
+        android:text="FOCUX"
+        android:textAllCaps="true"
+        android:textColor="#99FFFFFF"
+        android:textSize="10sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/recovery_widget_score"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="#FFFFFF"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        tools:text="82%" />
+
+    <TextView
+        android:id="@+id/recovery_widget_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="#E6FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        tools:text="Prontidao alta" />
+
+    <TextView
+        android:id="@+id/recovery_widget_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="#B3FFFFFF"
+        android:textSize="11sp"
+        tools:text="Sono e recuperacao favoraveis para treinar." />
+
+    <TextView
+        android:id="@+id/recovery_widget_steps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColor="#80FFFFFF"
+        android:textSize="11sp"
+        tools:text="6.420 passos hoje" />
+</LinearLayout>

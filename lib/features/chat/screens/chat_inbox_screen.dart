@@ -7,6 +7,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
@@ -488,7 +489,9 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
             itemBuilder: (context, index) {
               final item = items[index];
               final selected = _selectedAlunoIds.contains(item.alunoId);
-              return Dismissible(
+              return FxStaggerItem(
+                index: index,
+                child: Dismissible(
                 key: Key('inbox-${item.alunoId}'),
                 direction:
                     _selectionActive
@@ -546,6 +549,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                   },
                   onLongPress: () => _toggleSelection(item.alunoId),
                 ),
+              ),
               );
             },
           ),
