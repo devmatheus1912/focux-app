@@ -12,6 +12,7 @@ import '../../../core/theme/curated_brand_palettes.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/perfil_repository.dart';
@@ -197,8 +198,6 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
           isPremiumOrAbove
               ? _SaveBar(
                 salvando: _salvando,
-                primary: isEnterprise ? _corPrimaria : null,
-                secondary: isEnterprise ? _corSecundaria : null,
                 label:
                     widget.isSetup ? 'Finalizar configuração' : 'Salvar marca',
                 onPressed: () => _salvar(plano),
@@ -1032,23 +1031,15 @@ class _SaveBar extends StatelessWidget {
     required this.salvando,
     required this.label,
     required this.onPressed,
-    this.primary,
-    this.secondary,
   });
 
   final bool salvando;
   final String label;
   final VoidCallback onPressed;
-  final Color? primary;
-  final Color? secondary;
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final accent = primary ?? Theme.of(context).colorScheme.primary;
-    final accentDeep = BrandPalette.deep(accent);
-    final accentEnd = secondary ?? BrandPalette.softened(accent, amount: 0.06);
-    final onAccent = CuratedBrandPalette.readableOn(accent);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 10, 18, 12),
@@ -1057,7 +1048,7 @@ class _SaveBar extends StatelessWidget {
         border: Border(top: BorderSide(color: chrome.line)),
         boxShadow: [
           BoxShadow(
-            color: accent.withValues(alpha: 0.08),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
             blurRadius: 22,
             offset: const Offset(0, -8),
           ),
@@ -1065,55 +1056,10 @@ class _SaveBar extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [accentDeep, accent, accentEnd],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: accent.withValues(alpha: 0.35),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                  spreadRadius: -4,
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: salvando ? null : onPressed,
-                borderRadius: BorderRadius.circular(16),
-                child: Center(
-                  child:
-                      salvando
-                          ? SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: FxLoading(
-                              strokeWidth: 2,
-                              color: onAccent,
-                            ),
-                          )
-                          : Text(
-                            label,
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 15,
-                              letterSpacing: -0.2,
-                              color: onAccent,
-                            ),
-                          ),
-                ),
-              ),
-            ),
-          ),
+        child: FxLiquidPrimaryButton(
+          label: label,
+          loading: salvando,
+          onPressed: salvando ? null : onPressed,
         ),
       ),
     );
@@ -1162,7 +1108,10 @@ class _PaywallCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          FilledButton(onPressed: onTap, child: const Text('Assinar Premium')),
+          FxLiquidPrimaryButton(
+            label: 'Assinar Premium',
+            onPressed: onTap,
+          ),
         ],
       ),
     );

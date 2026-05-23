@@ -161,6 +161,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     final brandSofter = BrandPalette.softer(brand, dark: isDark);
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: FxShellAppBar(
         title: 'Migração mágica',

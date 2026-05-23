@@ -6,8 +6,11 @@ import 'package:video_player/video_player.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +23,6 @@ import '../../exercicios/screens/widgets/padrao_movimento_grid.dart';
 import '../../exercicios/screens/widgets/template_split_picker.dart';
 import '../data/workout_builder_preset.dart';
 import '../providers/treinos_provider.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
@@ -574,49 +576,11 @@ class _AddExercicioToTreinoScreenState
                               ),
                             ],
                             const SizedBox(height: 32),
-                            SizedBox(
-                              height: 56,
-                              child: ElevatedButton.icon(
-                                onPressed: _loading ? null : _submit,
-                                icon:
-                                    _loading
-                                        ? const SizedBox.shrink()
-                                        : const Icon(
-                                          Icons.add_rounded,
-                                          size: 20,
-                                        ),
-                                label:
-                                    _loading
-                                        ? SizedBox(
-                                          height: 22,
-                                          width: 22,
-                                          child: FxLoading(
-                                            strokeWidth: 2.5,
-                                            color: Colors.white.withValues(
-                                              alpha: 0.8,
-                                            ),
-                                          ),
-                                        )
-                                        : const Text(
-                                          'Adicionar ao Treino',
-                                          style: TextStyle(
-                                            fontSize: 15.5,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: -0.2,
-                                          ),
-                                        ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: primary,
-                                  foregroundColor: Colors.white,
-                                  disabledBackgroundColor: primary.withValues(
-                                    alpha: 0.5,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  elevation: 0,
-                                ),
-                              ),
+                            FxLiquidPrimaryButton(
+                              label: 'Adicionar ao Treino',
+                              icon: Icons.add_rounded,
+                              onPressed: _loading ? null : _submit,
+                              loading: _loading,
                             ),
                           ],
                         ],
@@ -797,7 +761,7 @@ class _ExercisePickerCard extends StatelessWidget {
             Expanded(
               child: InkWell(
                 onTap: onTap,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
                   padding: const EdgeInsets.all(14),
@@ -805,7 +769,6 @@ class _ExercisePickerCard extends StatelessWidget {
                     context,
                     accent: selected ? primary : null,
                     selected: selected,
-                    radius: 22,
                   ),
                   child: Row(
                     children: [
@@ -901,7 +864,7 @@ class _ExercisePickerCard extends StatelessWidget {
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: fxListCardDecoration(context, accent: primary, radius: 16),
+            decoration: fxListCardDecoration(context, accent: primary),
             child: Row(
               children: [
                 Icon(
@@ -1001,7 +964,6 @@ class _ExerciseMediaStatus extends StatelessWidget {
           fxListCardDecoration(
             context,
             accent: hasVideo ? primary : null,
-            radius: 18,
           ),
       child: Row(
         children: [
@@ -1086,23 +1048,11 @@ class _ExerciseMediaStatus extends StatelessWidget {
           else
             Padding(
               padding: const EdgeInsets.only(left: 8),
-              child: FilledButton(
+              child: FxLiquidPrimaryButton(
+                label: 'Adicionar',
                 onPressed: mediaLoading ? null : onUploadVideo,
-                style: FilledButton.styleFrom(
-                  backgroundColor: primary,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(86, 36),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  visualDensity: VisualDensity.compact,
-                  textStyle: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                ),
-                child: const Text('Adicionar'),
+                loading: mediaLoading,
+                expand: false,
               ),
             ),
         ],
@@ -1129,7 +1079,7 @@ class _RemoveExerciseVideoSheet extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(14, 0, 14, bottom + 10),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxListCardDecoration(context, radius: 28),
+          decoration: fxListCardDecoration(context),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1300,7 +1250,6 @@ class _ExerciseVideoPreviewSheetState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
     final bottom = MediaQuery.of(context).padding.bottom;
 
     return SafeArea(
@@ -1309,7 +1258,7 @@ class _ExerciseVideoPreviewSheetState
         padding: EdgeInsets.fromLTRB(12, 0, 12, bottom + 10),
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-          decoration: fxListCardDecoration(context, accent: primary, radius: 30),
+          decoration: fxListCardDecoration(context, accent: primary),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1586,7 +1535,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
             maxHeight: MediaQuery.of(context).size.height * 0.82,
           ),
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-          decoration: fxListCardDecoration(context, accent: primary, radius: 30),
+          decoration: fxListCardDecoration(context, accent: primary),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1869,7 +1818,7 @@ class _PresetSelector extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1969,7 +1918,7 @@ class _SerieTypeSelector extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -7,6 +7,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -84,7 +85,7 @@ class _TreinoDetailBody extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
             child: Container(
               padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-              decoration: fxListCardDecoration(context, radius: 34),
+              decoration: fxListCardDecoration(context),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -693,7 +694,7 @@ class _TreinoDetailBody extends StatelessWidget {
                     Container(
                       margin: const EdgeInsets.only(bottom: 14),
                       decoration:
-                          fxListCardDecoration(context, accent: primary, radius: 28),
+                          fxListCardDecoration(context, accent: primary),
                       child: Column(
                         children:
                             entry.value.asMap().entries.map((e) {
@@ -964,7 +965,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
         padding: EdgeInsets.fromLTRB(12, 0, 12, math.max(10, bottom + 8)),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxListCardDecoration(context, radius: 30),
+          decoration: fxListCardDecoration(context),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1566,7 +1567,7 @@ class _ExerciseActionsSheet extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxListCardDecoration(context, radius: 34),
+          decoration: fxListCardDecoration(context),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1764,7 +1765,7 @@ class _RemoveExerciseSheet extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxListCardDecoration(context, radius: 28),
+          decoration: fxListCardDecoration(context),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1899,7 +1900,7 @@ class _DeleteTrainingSheet extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxListCardDecoration(context, accent: primary, radius: 28),
+          decoration: fxListCardDecoration(context, accent: primary),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2148,15 +2149,11 @@ class _DetailErrorState extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  FilledButton.icon(
-                    onPressed: onRetry,
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: const Text('Tentar novamente'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(0, 44),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
+                  Expanded(
+                    child: FxLiquidPrimaryButton(
+                      label: 'Tentar novamente',
+                      icon: Icons.refresh_rounded,
+                      onPressed: onRetry,
                     ),
                   ),
                 ],
@@ -2225,18 +2222,13 @@ class _EmptyExercisesState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          FilledButton.icon(
-            onPressed: onAdd,
-            icon: const Icon(Icons.add_rounded),
-            label: const Text(
-              'Adicionar exercício',
-              style: TextStyle(fontWeight: FontWeight.w900),
-            ),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(200, 48),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
+          SizedBox(
+            width: 260,
+            child: FxLiquidPrimaryButton(
+              label: 'Adicionar exercício',
+              icon: Icons.add_rounded,
+              onPressed: onAdd,
+              expand: true,
             ),
           ),
         ],

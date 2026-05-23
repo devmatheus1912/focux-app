@@ -13,6 +13,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -367,9 +368,10 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
               ),
             ),
             actions: [
-              FilledButton(
+              FxLiquidPrimaryButton(
+                label: 'Continuar',
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Continuar'),
+                expand: false,
               ),
             ],
           ),
@@ -536,33 +538,11 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
-                  child: FilledButton.icon(
+                  child: FxLiquidPrimaryButton(
+                    label: 'Finalizar treino',
+                    icon: Icons.flag_rounded,
                     onPressed: _concluindo ? null : _concluir,
-                    icon:
-                        _concluindo
-                            ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: FxLoading(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                            : const Icon(Icons.flag_rounded),
-                    label: const Text('Finalizar treino'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(54),
-                      backgroundColor: brand,
-                      foregroundColor: Colors.white,
-                      textStyle: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
+                    loading: _concluindo,
                   ),
                 ),
               ),
@@ -800,7 +780,7 @@ class _HeaderMetric extends StatelessWidget {
     final mute = fxScreenMute(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: fxListCardDecoration(context, radius: 16),
+      decoration: fxListCardDecoration(context),
       child: Column(
         children: [
           Text(
@@ -879,11 +859,10 @@ class _SerieCard extends StatelessWidget {
           ee.concluido
               ? fxListCardDecoration(
                 context,
-                radius: 22,
                 accent: EagleTokens.good,
                 selected: true,
               )
-              : fxListCardDecoration(context, radius: 22),
+              : fxListCardDecoration(context),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
         initiallyExpanded: !ee.concluido,
@@ -1325,7 +1304,7 @@ class _ExerciseNote extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
-      decoration: fxListCardDecoration(context, radius: 14),
+      decoration: fxListCardDecoration(context),
       child: Text(
         text,
         style: TextStyle(
@@ -1365,7 +1344,6 @@ class _ExecutionGuidanceCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: fxListCardDecoration(
         context,
-        radius: 14,
         accent: color,
       ),
       child: Row(
@@ -1434,7 +1412,6 @@ class _PreviousPerformance extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: fxListCardDecoration(
         context,
-        radius: 14,
         accent: Theme.of(context).colorScheme.primary,
       ),
       child: Row(
@@ -1501,7 +1478,7 @@ class _SeriesHistory extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
-      decoration: fxListCardDecoration(context, radius: 14),
+      decoration: fxListCardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1771,7 +1748,7 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: fxListCardDecoration(context, radius: 16),
+                decoration: fxListCardDecoration(context),
                 child: Column(
                   children: [
                     Row(
@@ -1833,18 +1810,10 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
               const SizedBox(height: 14),
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
+                child: FxLiquidPrimaryButton(
+                  label: 'Salvar serie',
+                  icon: Icons.check_rounded,
                   onPressed: _submit,
-                  icon: const Icon(Icons.check_rounded),
-                  label: const Text('Salvar serie'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: brand,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
                 ),
               ),
             ],
@@ -1976,10 +1945,9 @@ class _TinyMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: fxListCardDecoration(context, radius: 13),
+      decoration: fxListCardDecoration(context),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -2466,9 +2434,6 @@ class _LiveCoachingCard extends StatelessWidget {
                     backgroundColor: Colors.white,
                     foregroundColor: brand,
                     minimumSize: const Size.fromHeight(44),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
                   child: const Text('Registrar ajuste'),
                 ),

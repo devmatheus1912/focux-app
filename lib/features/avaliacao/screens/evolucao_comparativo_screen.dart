@@ -7,6 +7,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/avaliacao_repository.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 String _fmtData(String? iso) {
@@ -279,27 +280,30 @@ class _EvolucaoComparativoScreenState
             ],
           ),
           const SizedBox(height: 32),
-          FilledButton.icon(
-            onPressed: () async {
-              final messenger = FeedbackHelper.messengerOf(context);
-              try {
-                final repo = EvolucaoRepository(ref.read(apiClientProvider));
-                await repo.compartilharEvolucao(widget.alunoId);
-                if (mounted) {
-                  messenger.showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Evolução compartilhada via chat com sucesso!',
+          SizedBox(
+            width: double.infinity,
+            child: FxLiquidPrimaryButton(
+              label: 'Compartilhar com o aluno via Chat',
+              icon: Icons.share_rounded,
+              onPressed: () async {
+                final messenger = FeedbackHelper.messengerOf(context);
+                try {
+                  final repo = EvolucaoRepository(ref.read(apiClientProvider));
+                  await repo.compartilharEvolucao(widget.alunoId);
+                  if (mounted) {
+                    messenger.showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Evolução compartilhada via chat com sucesso!',
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
+                } catch (e) {
+                  messenger.showSnackBar(SnackBar(content: Text('Erro: $e')));
                 }
-              } catch (e) {
-                messenger.showSnackBar(SnackBar(content: Text('Erro: $e')));
-              }
-            },
-            icon: const Icon(Icons.share),
-            label: const Text('Compartilhar com o aluno via Chat'),
+              },
+            ),
           ),
         ],
       ),

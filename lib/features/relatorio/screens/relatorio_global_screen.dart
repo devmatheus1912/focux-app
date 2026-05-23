@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -52,6 +53,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: FxShellAppBar(
         title: 'Relatorio global',
@@ -690,10 +692,11 @@ class _ErrorState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-            FilledButton.icon(
+            FxLiquidPrimaryButton(
+              label: 'Tentar novamente',
+              icon: Icons.refresh_rounded,
+              expand: false,
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Tentar novamente'),
             ),
           ],
         ),

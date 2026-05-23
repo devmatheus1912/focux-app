@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,6 +10,7 @@ import '../data/lead_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 const _statusOpcoes = ['LEAD', 'TESTE', 'ATIVO', 'INADIMPLENTE', 'CANCELADO'];
@@ -125,9 +127,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                 onPressed: () => Navigator.pop(ctx, false),
                 child: const Text('Cancelar'),
               ),
-              FilledButton(
+              FxLiquidPrimaryButton(
+                expand: false,
+                label: 'Converter',
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Converter'),
               ),
             ],
           ),
@@ -158,9 +161,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                 onPressed: () => Navigator.pop(ctx, false),
                 child: const Text('Cancelar'),
               ),
-              FilledButton(
+              FxLiquidPrimaryButton(
+                expand: false,
+                label: 'Arquivar',
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Arquivar'),
               ),
             ],
           ),
@@ -285,9 +289,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
-                        child: FilledButton.icon(
-                          icon: const Icon(Icons.save),
-                          label: const Text('Salvar'),
+                        child: FxLiquidPrimaryButton(
+                          icon: Icons.save,
+                          label: 'Salvar',
                           onPressed: () async {
                             final desc = descCtrl.text.trim();
                             if (desc.isEmpty) {
@@ -385,7 +389,12 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         label: const Text('Nova Interação'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+        padding: const EdgeInsets.fromLTRB(
+          TokensStrip.s4,
+          TokensStrip.s4,
+          TokensStrip.s4,
+          96,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -403,9 +412,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             const SizedBox(height: 16),
 
             // Info card
-            Card(
+            Container(
+              decoration: fxListCardDecoration(context),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(TokensStrip.s4),
                 child: Column(
                   children: [
                     _InfoRow(label: 'Nome', value: _lead.nome),
@@ -428,10 +438,11 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
 
             // Próximo Contato / Follow-up
             const SizedBox(height: 12),
-            Card(
+            Container(
+              decoration: fxListCardDecoration(context),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: TokensStrip.s4,
                   vertical: 10,
                 ),
                 child: Row(
@@ -473,9 +484,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
 
             if (_lead.observacoes != null) ...[
               const SizedBox(height: 12),
-              Card(
+              Container(
+                decoration: fxListCardDecoration(context),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(TokensStrip.s4),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -484,7 +496,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                         style: Theme.of(context).textTheme.labelMedium
                             ?.copyWith(color: EagleTokens.inkMute),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: TokensStrip.s2),
                       Text(_lead.observacoes!),
                     ],
                   ),
@@ -492,7 +504,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
               ),
             ],
 
-            const SizedBox(height: 20),
+            const SizedBox(height: TokensStrip.s5),
             const Divider(),
             const SizedBox(height: 8),
 
@@ -570,13 +582,17 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             const SizedBox(height: 8),
 
             if (_loadingInteracoes)
-              const Center(
-                child: Padding(padding: EdgeInsets.all(16), child: FxLoading()),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(TokensStrip.s4),
+                  child: FxLoading(color: Theme.of(context).colorScheme.primary),
+                ),
               )
             else if (_interacoes.isEmpty)
-              const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
+              Container(
+                decoration: fxListCardDecoration(context),
+                child: const Padding(
+                  padding: EdgeInsets.all(TokensStrip.s4),
                   child: Text(
                     'Nenhuma interação registrada.',
                     style: TextStyle(color: EagleTokens.inkMute),

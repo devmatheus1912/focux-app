@@ -9,8 +9,10 @@ import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -366,7 +368,7 @@ class _SectionCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

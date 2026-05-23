@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
@@ -554,33 +555,16 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
               // ── CTA ────────────────────────────────────────────────────
               const SizedBox(height: 18),
-              SizedBox(
-                height: 52,
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    disabledBackgroundColor:
-                        isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
-                    disabledForegroundColor: mute,
-                  ),
-                  onPressed:
-                      ctaEnabled
-                          ? () => _startCheckout(
-                            selectedPlan,
-                            selectedBackendPlan.id,
-                          )
-                          : null,
-                  child:
-                      _loadingCheckout || _syncingPurchase
-                          ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: FxLoading(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                          : Text(ctaLabel),
-                ),
+              FxLiquidPrimaryButton(
+                label: ctaLabel,
+                loading: _loadingCheckout || _syncingPurchase,
+                onPressed:
+                    ctaEnabled
+                        ? () => _startCheckout(
+                          selectedPlan,
+                          selectedBackendPlan.id,
+                        )
+                        : null,
               ),
               const SizedBox(height: 8),
               Text(

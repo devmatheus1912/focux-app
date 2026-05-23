@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/loading_shimmer.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -192,7 +194,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                   color: Theme.of(
                     context,
                   ).colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
                 ),
                 child: Text(
                   '${items.length}',
@@ -309,10 +311,8 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
     final filter = ref.watch(buscaFilterProvider);
 
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -472,25 +472,50 @@ class _BuscaItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cor = _colorForTipo(item.tipo);
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: cor.withValues(alpha: 0.1),
-        child: Icon(_iconForTipo(item.tipo), color: cor, size: 20),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          onTap: onTap,
+          child: Ink(
+            decoration: fxListCardDecoration(context),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: cor.withValues(alpha: 0.1),
+                    child: Icon(_iconForTipo(item.tipo), color: cor, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          item.titulo,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        if (item.subtitulo != null)
+                          Text(
+                            item.subtitulo!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, size: 20),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
-      title: Text(
-        item.titulo,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
-      subtitle:
-          item.subtitulo != null
-              ? Text(
-                item.subtitulo!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              )
-              : null,
-      trailing: const Icon(Icons.chevron_right, size: 20),
-      onTap: onTap,
     );
   }
 }

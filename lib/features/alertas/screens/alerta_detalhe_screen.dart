@@ -7,6 +7,7 @@ import '../data/alertas_repository.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
 
 class AlertaDetalheScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -63,6 +64,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: FxShellAppBar(
         title: 'Análise — ${widget.alunoNome}',
@@ -92,9 +94,10 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
-                      FilledButton(
+                      FxLiquidPrimaryButton(
+                        label: 'Tentar novamente',
+                        expand: false,
                         onPressed: _load,
-                        child: const Text('Tentar novamente'),
                       ),
                     ],
                   ),
@@ -140,9 +143,9 @@ class _Body extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.message_outlined),
-                  label: const Text('Enviar mensagem'),
+                child: FxLiquidPrimaryButton(
+                  label: 'Enviar mensagem',
+                  icon: Icons.message_outlined,
                   onPressed: () => context.push('/alunos/$alunoId'),
                 ),
               ),
@@ -173,7 +176,8 @@ class _CardUltimoTreino extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return Card(
+    return DecoratedBox(
+      decoration: fxListCardDecoration(context),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -221,7 +225,8 @@ class _CardCheckIns extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final progress = (checkIns / 20).clamp(0.0, 1.0);
-    return Card(
+    return DecoratedBox(
+      decoration: fxListCardDecoration(context),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -284,7 +289,8 @@ class _CardFinanceiro extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cor = _cor(status);
-    return Card(
+    return DecoratedBox(
+      decoration: fxListCardDecoration(context),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -331,8 +337,11 @@ class _CardSugestaoIa extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      color: theme.colorScheme.secondaryContainer,
+    return DecoratedBox(
+      decoration: fxListCardDecoration(
+        context,
+        accent: theme.colorScheme.secondary,
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

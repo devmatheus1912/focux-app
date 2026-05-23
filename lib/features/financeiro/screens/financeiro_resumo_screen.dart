@@ -106,6 +106,8 @@ class _FinanceiroResumoScreenState
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
           // Month/year picker

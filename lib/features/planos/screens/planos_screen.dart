@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -109,7 +110,9 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
               name: 'FREE',
               price: 'Grátis',
               accentColor:
-                  isDark ? EagleTokens.darkInkMute : const Color(0xFF6B7280),
+                  isDark
+                      ? EagleTokens.darkInkMute
+                      : TokensStrip.textSecondary,
               isCurrent: currentPlan == SubscriptionPlan.FREE,
               glow: false,
               features: const [

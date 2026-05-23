@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../widgets/auth_shell.dart';
 
 class ResetarSenhaScreen extends StatefulWidget {
@@ -180,11 +181,11 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
                     ),
                     const SizedBox(height: 12),
                   ],
-                  AuthPrimaryButton(
+                  FxLiquidPrimaryButton(
                     label: 'Alterar senha',
                     icon: Icons.check_rounded,
-                    isLoading: _loading,
-                    onPressed: _submit,
+                    loading: _loading,
+                    onPressed: _loading ? null : _submit,
                   ),
                 ],
               ),

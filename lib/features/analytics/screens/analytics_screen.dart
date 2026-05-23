@@ -7,6 +7,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../data/analytics_repository.dart';
 import '../providers/analytics_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -21,6 +22,7 @@ class AnalyticsScreen extends ConsumerWidget {
     final async = ref.watch(analyticsDashboardProvider);
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: FxShellAppBar(
         title: 'Analytics',
@@ -57,17 +59,12 @@ class AnalyticsScreen extends ConsumerWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    onPressed: () => ref.invalidate(analyticsDashboardProvider),
-                    icon: const Icon(Icons.refresh, size: 16),
-                    label: const Text('Tentar novamente'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                  FxLiquidPrimaryButton(
+                    label: 'Tentar novamente',
+                    icon: Icons.refresh,
+                    expand: false,
+                    onPressed:
+                        () => ref.invalidate(analyticsDashboardProvider),
                   ),
                 ],
               ),

@@ -8,6 +8,7 @@ import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feedback_helper.dart';
 
@@ -155,23 +156,11 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
             style: TextStyle(color: EagleTokens.inkMute),
           ),
           const SizedBox(height: 24),
-          ElevatedButton.icon(
+          FxLiquidPrimaryButton(
+            label: 'Tirar Foto',
+            icon: Icons.camera_alt_rounded,
             onPressed: _addFoto,
-            icon: const Icon(Icons.camera_alt, color: Colors.white),
-            label: const Text(
-              'Tirar Foto',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: p,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            ),
+            expand: false,
           ),
         ],
       ),

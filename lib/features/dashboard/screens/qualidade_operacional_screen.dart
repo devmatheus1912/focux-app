@@ -7,6 +7,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 // ─── Model ───────────────────────────────────────────────────────────────────
 
@@ -107,7 +108,12 @@ class _QualidadeBody extends StatelessWidget {
             : 'Atenção';
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s4,
+        TokensStrip.s2,
+        TokensStrip.s4,
+        40,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -231,7 +237,6 @@ class _QualidadeBody extends StatelessWidget {
             decoration: fxListCardDecoration(
               context,
               accent: primary,
-              radius: EagleTokens.radiusLg,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -492,7 +497,6 @@ class _MetricCompareCard extends StatelessWidget {
       decoration: fxListCardDecoration(
         context,
         accent: primary,
-        radius: EagleTokens.radiusLg,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

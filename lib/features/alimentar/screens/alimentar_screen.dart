@@ -7,6 +7,8 @@ import '../data/alimentar_repository.dart';
 import 'plano_alimentar_detail_screen.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 
 class AlimentarScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -44,10 +46,8 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -80,85 +80,88 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
                 itemCount: _planos.length,
                 itemBuilder: (_, i) {
                   final p = _planos[i];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (_) => PlanoAlimentarDetailScreen(
-                                    alunoId: widget.alunoId,
-                                    plano: p,
-                                  ),
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: DecoratedBox(
+                      decoration: fxListCardDecoration(context),
+                      child: InkWell(
+                        onTap:
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => PlanoAlimentarDetailScreen(
+                                      alunoId: widget.alunoId,
+                                      plano: p,
+                                    ),
+                              ),
                             ),
-                          ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    p.nome,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 16,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      p.nome,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 16,
+                                      ),
                                     ),
                                   ),
+                                  const Icon(
+                                    Icons.chevron_right,
+                                    color: EagleTokens.inkMute,
+                                  ),
+                                ],
+                              ),
+                              if (p.caloriasDia != null)
+                                Text(
+                                  '${p.caloriasDia} kcal/dia',
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
                                 ),
-                                const Icon(
-                                  Icons.chevron_right,
-                                  color: EagleTokens.inkMute,
+                              if (p.proteinaG != null ||
+                                  p.carboidratoG != null ||
+                                  p.gorduraG != null) ...[
+                                const SizedBox(height: 10),
+                                _MacroBar(
+                                  proteinaG: p.proteinaG,
+                                  carboidratoG: p.carboidratoG,
+                                  gorduraG: p.gorduraG,
                                 ),
                               ],
-                            ),
-                            if (p.caloriasDia != null)
-                              Text(
-                                '${p.caloriasDia} kcal/dia',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                            if (p.proteinaG != null ||
-                                p.carboidratoG != null ||
-                                p.gorduraG != null) ...[
-                              const SizedBox(height: 10),
-                              _MacroBar(
-                                proteinaG: p.proteinaG,
-                                carboidratoG: p.carboidratoG,
-                                gorduraG: p.gorduraG,
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 16,
+                                children: [
+                                  if (p.proteinaG != null)
+                                    _macro(
+                                      'Proteína',
+                                      '${p.proteinaG}g',
+                                      EagleTokens.bad,
+                                    ),
+                                  if (p.carboidratoG != null)
+                                    _macro(
+                                      'Carbo',
+                                      '${p.carboidratoG}g',
+                                      EagleTokens.warn,
+                                    ),
+                                  if (p.gorduraG != null)
+                                    _macro(
+                                      'Gordura',
+                                      '${p.gorduraG}g',
+                                      Colors.yellow.shade700,
+                                    ),
+                                ],
                               ),
                             ],
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 16,
-                              children: [
-                                if (p.proteinaG != null)
-                                  _macro(
-                                    'Proteína',
-                                    '${p.proteinaG}g',
-                                    EagleTokens.bad,
-                                  ),
-                                if (p.carboidratoG != null)
-                                  _macro(
-                                    'Carbo',
-                                    '${p.carboidratoG}g',
-                                    EagleTokens.warn,
-                                  ),
-                                if (p.gorduraG != null)
-                                  _macro(
-                                    'Gordura',
-                                    '${p.gorduraG}g',
-                                    Colors.yellow.shade700,
-                                  ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
@@ -264,10 +267,8 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -289,9 +290,10 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
             _num(_gord, 'Gordura (g)'),
             _field(_obs, 'Observações', maxLines: 3),
             const SizedBox(height: 16),
-            FilledButton(
+            FxLiquidPrimaryButton(
+              label: 'Criar Plano',
+              loading: _saving,
               onPressed: _saving ? null : _salvar,
-              child: const Text('Criar Plano'),
             ),
           ],
         ),

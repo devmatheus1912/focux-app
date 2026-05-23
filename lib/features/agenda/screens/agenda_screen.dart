@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/theme_provider.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +12,8 @@ import '../data/agenda_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
+import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 
 class AgendaScreen extends ConsumerStatefulWidget {
   const AgendaScreen({super.key});
@@ -117,7 +119,6 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     final cardBg = chrome.cardFill;
     final ink = chrome.ink;
     final mute = chrome.mute;
-    final line = chrome.line;
     final primary = Theme.of(context).colorScheme.primary;
 
     final diasSemanaStr = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
@@ -156,7 +157,8 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: shellScaffoldColor,
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -272,7 +274,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                       constraints: const BoxConstraints(minWidth: 46),
                       decoration: BoxDecoration(
                         color: isSelected ? primary : cardBg,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(TokensStrip.rCard),
                         border:
                             isSelected
                                 ? null
@@ -409,7 +411,8 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                 height: 56,
                                 margin: const EdgeInsets.only(top: 10),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius:
+                                      BorderRadius.circular(TokensStrip.rCard),
                                   color: primary,
                                   boxShadow: [
                                     if (!isDark)
@@ -454,14 +457,16 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
                           return InkWell(
                             onTap: () => _openAgendamentoDetails(e),
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius:
+                                BorderRadius.circular(TokensStrip.rCard),
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 8),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 14,
                                 vertical: 14,
                               ),
-                              decoration: chrome.panel(radius: 18),
+                              decoration:
+                                  fxListCardDecoration(context, accent: sColor),
                               child: Row(
                                 children: [
                                   SizedBox(
@@ -945,6 +950,7 @@ class _NovoAgendamentoScreenState
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    backgroundColor: Colors.transparent,
     appBar: AppBar(
       title: const Text('Novo agendamento'),
       leading: IconButton(
@@ -992,9 +998,10 @@ class _NovoAgendamentoScreenState
             onTap: () => _pickDateTime(false),
           ),
           const SizedBox(height: 16),
-          FilledButton(
+          FxLiquidPrimaryButton(
+            label: 'Agendar',
+            loading: _saving,
             onPressed: _saving || !_canSave ? null : _salvar,
-            child: const Text('Agendar'),
           ),
         ],
       ),
@@ -1013,13 +1020,12 @@ class _AgendaAlunoButton extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: aluno == null ? Colors.white : EagleTokens.brandSofter,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: aluno == null ? EagleTokens.line : primary),
+        decoration: fxListCardDecoration(
+          context,
+          accent: aluno != null ? primary : null,
         ),
         child: Row(
           children: [
@@ -1459,29 +1465,20 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
               ),
             ),
             const SizedBox(height: 14),
-            SizedBox(
-              height: 52,
-              child: FilledButton(
-                onPressed: () {
-                  Navigator.pop(
-                    context,
-                    DateTime(
-                      _selectedDay.year,
-                      _selectedDay.month,
-                      _selectedDay.day,
-                      _selectedTime.hour,
-                      _selectedTime.minute,
-                    ),
-                  );
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: EagleTokens.brandInk,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+            FxLiquidPrimaryButton(
+              label: 'Confirmar horário',
+              onPressed: () {
+                Navigator.pop(
+                  context,
+                  DateTime(
+                    _selectedDay.year,
+                    _selectedDay.month,
+                    _selectedDay.day,
+                    _selectedTime.hour,
+                    _selectedTime.minute,
                   ),
-                ),
-                child: const Text('Confirmar horário'),
-              ),
+                );
+              },
             ),
           ],
         ),

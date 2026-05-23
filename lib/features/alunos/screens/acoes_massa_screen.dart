@@ -6,6 +6,7 @@ import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class AcoesMassaScreen extends ConsumerStatefulWidget {
@@ -294,10 +295,10 @@ class _BottomSheetAcoesState extends State<_BottomSheetAcoes> {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 20),
-          FilledButton.icon(
+          FxLiquidPrimaryButton(
+            icon: Icons.attach_money,
+            label: 'Marcar mensalidade como paga',
             onPressed: widget.onMarcarPagos,
-            icon: const Icon(Icons.attach_money),
-            label: const Text('Marcar mensalidade como paga'),
           ),
           const SizedBox(height: 16),
           const Divider(),

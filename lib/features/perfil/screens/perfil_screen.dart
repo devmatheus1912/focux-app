@@ -23,6 +23,7 @@ import '../providers/perfil_provider.dart';
 import '../utils/perfil_readiness.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_motion.dart';
 
 class PerfilScreen extends ConsumerStatefulWidget {
   const PerfilScreen({super.key});
@@ -293,10 +294,10 @@ class _PerfilErrorScaffold extends StatelessWidget {
                   style: TextStyle(color: mute, height: 1.35),
                 ),
                 const SizedBox(height: 18),
-                FilledButton.icon(
+                FxLiquidPrimaryButton(
+                  icon: Icons.refresh_rounded,
+                  label: 'Tentar novamente',
                   onPressed: onRetry,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Tentar novamente'),
                 ),
               ],
             ),
@@ -1262,13 +1263,14 @@ class _PerfilStickyBar extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: FilledButton.icon(
+                child: FxLiquidPrimaryButton(
+                  expand: true,
+                  icon: Icons.auto_awesome_outlined,
+                  label: 'Copiloto IA',
                   onPressed: () {
                     HapticFeedback.selectionClick();
                     goPersonalShellTab(context, '/ia/copiloto');
                   },
-                  icon: const Icon(Icons.auto_awesome_outlined, size: 18),
-                  label: const Text('Copiloto IA'),
                 ),
               ),
             ],
@@ -1313,39 +1315,33 @@ class _PerfilBottomActions extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: FilledButton.icon(
+            child: FxLiquidPrimaryButton(
+              expand: true,
+              icon:
+                  primaryCta.action == PerfilChecklistAction.convites
+                      ? Icons.person_add_outlined
+                      : Icons.arrow_forward_rounded,
+              label: primaryCta.buttonLabel,
               onPressed: () {
                 HapticFeedback.selectionClick();
                 onChecklistAction(primaryCta.action);
               },
-              icon: Icon(
-                primaryCta.action == PerfilChecklistAction.convites
-                    ? Icons.person_add_outlined
-                    : Icons.arrow_forward_rounded,
-                size: 18,
-              ),
-              label: Text(primaryCta.buttonLabel),
             ),
           ),
         ],
       );
     }
 
-    return SizedBox(
-      width: double.infinity,
-      child: FilledButton.icon(
-        onPressed: () {
-          HapticFeedback.selectionClick();
-          onChecklistAction(primaryCta.action);
-        },
-        icon: Icon(
+    return FxLiquidPrimaryButton(
+      icon:
           primaryCta.action == PerfilChecklistAction.convites
               ? Icons.person_add_outlined
               : Icons.arrow_forward_rounded,
-          size: 18,
-        ),
-        label: Text(primaryCta.buttonLabel),
-      ),
+      label: primaryCta.buttonLabel,
+      onPressed: () {
+        HapticFeedback.selectionClick();
+        onChecklistAction(primaryCta.action);
+      },
     );
   }
 }
@@ -1612,20 +1608,17 @@ class _CompletenessCard extends StatelessWidget {
             ),
           if (!complete) ...[
             const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  if (nextStep != null) {
-                    onChecklistAction(nextStep!.action);
-                    return;
-                  }
-                  onChecklistAction(PerfilChecklistAction.convites);
-                },
-                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                label: Text(nextStep?.buttonLabel ?? 'Completar perfil'),
-              ),
+            FxLiquidPrimaryButton(
+              icon: Icons.arrow_forward_rounded,
+              label: nextStep?.buttonLabel ?? 'Completar perfil',
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                if (nextStep != null) {
+                  onChecklistAction(nextStep!.action);
+                  return;
+                }
+                onChecklistAction(PerfilChecklistAction.convites);
+              },
             ),
           ],
         ],

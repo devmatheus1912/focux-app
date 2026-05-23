@@ -21,6 +21,8 @@ import '../../health/widgets/recovery_score_ring.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_motion.dart';
 
 final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
   ref,
@@ -144,10 +146,11 @@ class AlunoDetailScreen extends ConsumerWidget {
                 onPressed: () => Navigator.pop(ctx, false),
                 child: const Text('Cancelar'),
               ),
-              FilledButton.icon(
+              FxLiquidPrimaryButton(
+                expand: false,
+                icon: Icons.key_rounded,
+                label: 'Gerar senha',
                 onPressed: () => Navigator.pop(ctx, true),
-                icon: const Icon(Icons.key_rounded, size: 18),
-                label: const Text('Gerar senha'),
               ),
             ],
           ),
@@ -198,7 +201,7 @@ class AlunoDetailScreen extends ConsumerWidget {
             ),
             child: ShellSurface(
               accent: primary,
-              radius: 28,
+              radius: TokensStrip.rCard,
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
               child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -247,7 +250,6 @@ class AlunoDetailScreen extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(18, 15, 18, 14),
                   decoration: fxListCardDecoration(
                     ctx,
-                    radius: 20,
                     accent: primary,
                   ),
                   child: Column(
@@ -470,7 +472,10 @@ class AlunoDetailScreen extends ConsumerWidget {
                   background: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 72, 16, 10),
                     child: Container(
-                      decoration: chrome.panel(radius: 24, accent: primary),
+                      decoration: chrome.panel(
+                        radius: TokensStrip.rCard,
+                        accent: primary,
+                      ),
                       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -659,7 +664,7 @@ class AlunoDetailScreen extends ConsumerWidget {
 
                       // Weight evolution card
                       Container(
-                        decoration: fxListCardDecoration(context, radius: 22),
+                        decoration: fxListCardDecoration(context),
                         padding: const EdgeInsets.all(18),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1032,7 +1037,7 @@ class _StudentQuickActions extends StatelessWidget {
     final mute = fxScreenMute(context);
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: fxListCardDecoration(context, radius: 20),
+      decoration: fxListCardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1311,7 +1316,6 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
-    final line = ShellChrome.of(context).line;
 
     Future<void> go(_ProfileGap gap, BuildContext sheetContext) async {
       Navigator.of(sheetContext).pop();
@@ -1333,7 +1337,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                 16 + MediaQuery.of(sheetContext).padding.bottom,
               ),
               child: ShellSurface(
-                radius: 28,
+                radius: TokensStrip.rCard,
                 accent: primary,
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                 child: Column(
@@ -1405,7 +1409,6 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                             padding: const EdgeInsets.all(13),
                             decoration: fxListCardDecoration(
                               sheetContext,
-                              radius: 16,
                             ),
                             child: Row(
                               children: [
@@ -1521,7 +1524,9 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: FilledButton.icon(
+                        child: FxLiquidPrimaryButton(
+                          icon: Icons.chat_bubble_outline_rounded,
+                          label: 'Abrir chat',
                           onPressed: () {
                             Navigator.pop(sheetContext);
                             context.push(
@@ -1529,11 +1534,6 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                               extra: {'nome': aluno.nome},
                             );
                           },
-                          icon: const Icon(
-                            Icons.chat_bubble_outline_rounded,
-                            size: 16,
-                          ),
-                          label: const Text('Abrir chat'),
                         ),
                       ),
                     ],
@@ -1704,7 +1704,6 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       padding: const EdgeInsets.all(14),
       decoration: fxListCardDecoration(
         context,
-        radius: 22,
         accent: primary,
       ),
       child: Column(
@@ -2027,7 +2026,9 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: FilledButton.icon(
+                        child: FxLiquidPrimaryButton(
+                          icon: Icons.chat_bubble_outline,
+                          label: 'Abrir chat',
                           onPressed: () {
                             Navigator.of(sheetContext).pop();
                             context.push(
@@ -2035,8 +2036,6 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
                               extra: alunoNome,
                             );
                           },
-                          icon: const Icon(Icons.chat_bubble_outline, size: 16),
-                          label: const Text('Abrir chat'),
                         ),
                       ),
                     ],
@@ -2056,7 +2055,7 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: fxListCardDecoration(context, radius: 22),
+      decoration: fxListCardDecoration(context),
       child: evolucaoAsync.when(
         loading: () => const LinearProgressIndicator(minHeight: 2),
         error:
@@ -2386,7 +2385,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: fxListCardDecoration(context, radius: 22),
+      decoration: fxListCardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2910,28 +2909,14 @@ class _Aluno360ActionRowState extends State<_Aluno360ActionRow> {
     return Row(
       children: [
         Expanded(
-          child: FilledButton.icon(
-            onPressed: _creating ? null : _handlePrimary,
+          child: FxLiquidPrimaryButton(
+            loading: _creating,
             icon:
-                _creating
-                    ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: FxLoading(strokeWidth: 2),
-                    )
-                    : Icon(
-                      hasTask
-                          ? Icons.open_in_new_rounded
-                          : Icons.task_alt_rounded,
-                      size: 17,
-                    ),
-            label: Text(primaryLabel),
-            style: FilledButton.styleFrom(
-              backgroundColor: widget.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
+                hasTask
+                    ? Icons.open_in_new_rounded
+                    : Icons.task_alt_rounded,
+            label: primaryLabel,
+            onPressed: _creating ? null : _handlePrimary,
           ),
         ),
         const SizedBox(width: 8),
@@ -3099,7 +3084,7 @@ class _MeasurementCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-      decoration: fxListCardDecoration(context, radius: 14),
+      decoration: fxListCardDecoration(context),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -3179,11 +3164,10 @@ class _ModuleTile extends StatelessWidget {
             highlight
                 ? fxListCardDecoration(
                   context,
-                  radius: 16,
                   accent: primary,
                   selected: true,
                 )
-                : fxListCardDecoration(context, radius: 16),
+                : fxListCardDecoration(context),
         child: Row(
           children: [
             Container(
@@ -3280,7 +3264,7 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
         if (snapshot == null) {
           return Container(
             padding: const EdgeInsets.all(14),
-            decoration: chrome.panel(radius: 18),
+            decoration: chrome.panel(radius: TokensStrip.rCard),
             child: Row(
               children: [
                 Icon(Icons.watch_outlined, color: primary, size: 18),
@@ -3302,7 +3286,10 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
         return FxPremiumEntrance(
           child: Container(
             padding: const EdgeInsets.all(16),
-            decoration: chrome.panel(radius: 18, accent: primary),
+            decoration: chrome.panel(
+              radius: TokensStrip.rCard,
+              accent: primary,
+            ),
             child: Row(
               children: [
                 RecoveryScoreRing(score: snapshot.recoveryScore, color: primary),

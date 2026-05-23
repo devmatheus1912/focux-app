@@ -247,17 +247,16 @@ class AppTheme {
         actionsIconTheme: IconThemeData(color: onSurface),
       ),
 
-      // ── Cards: Liquid Glass border, multi-layer depth ───────────────
+      // ── Cards: TOKENS STRIP 12px + soft shadow ───────────────────────
       cardTheme: CardTheme(
         color: dark ? EagleTokens.darkCard : surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(TokensStrip.rLg),
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
           side: BorderSide(
-            color: TokensStrip.glassBorder(
-              dark: dark,
-              accent: primaryAccent,
-            ),
+            color: dark
+                ? TokensStrip.glassBorder(dark: dark, accent: primaryAccent)
+                : TokensStrip.borderDefault,
           ),
         ),
         margin: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
@@ -279,39 +278,41 @@ class AppTheme {
         hintStyle: _outfit(color: onSurfMute, fontSize: 14),
         labelStyle: _outfit(color: onSurfMute, fontSize: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(TokensStrip.rSm),
+          borderRadius: BorderRadius.circular(TokensStrip.rInput),
           borderSide: BorderSide(
-            color: TokensStrip.glassBorder(dark: dark),
+            color: dark ? TokensStrip.glassBorder(dark: dark) : TokensStrip.borderDefault,
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(TokensStrip.rSm),
+          borderRadius: BorderRadius.circular(TokensStrip.rInput),
           borderSide: BorderSide(
-            color: TokensStrip.glassBorder(dark: dark),
+            color: dark ? TokensStrip.glassBorder(dark: dark) : TokensStrip.borderDefault,
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(TokensStrip.rSm),
+          borderRadius: BorderRadius.circular(TokensStrip.rInput),
           borderSide: BorderSide(color: primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
+          borderRadius: BorderRadius.circular(TokensStrip.rInput),
           borderSide: const BorderSide(color: EagleTokens.bad),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
+          borderRadius: BorderRadius.circular(TokensStrip.rInput),
           borderSide: const BorderSide(color: EagleTokens.bad, width: 1.5),
         ),
       ),
 
-      // ── Filled Button: neon gradient feel, visionOS radius ──────────
+      // ── Filled Button: TOKENS STRIP pill 50px ───────────────────────
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primary,
           foregroundColor: onPrimary,
+          disabledBackgroundColor: TokensStrip.disabled.withValues(alpha: 0.35),
+          disabledForegroundColor: TokensStrip.disabled,
           minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(TokensStrip.rMd),
+            borderRadius: BorderRadius.circular(TokensStrip.rButton),
           ),
           textStyle: _outfit(fontSize: 15, fontWeight: FontWeight.w700),
           elevation: 0,
@@ -322,12 +323,15 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: primary,
+          disabledForegroundColor: TokensStrip.disabled,
           minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(TokensStrip.rMd),
+            borderRadius: BorderRadius.circular(TokensStrip.rButton),
           ),
           side: BorderSide(
-            color: TokensStrip.glassBorder(dark: dark, accent: primary),
+            color: dark
+                ? TokensStrip.glassBorder(dark: dark, accent: primary)
+                : primary,
             width: 1.2,
           ),
           textStyle: _outfit(fontSize: 15, fontWeight: FontWeight.w600),

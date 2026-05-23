@@ -22,11 +22,14 @@ void main() {
           perfilProvider.overrideWith((ref) async => _perfilFixture),
           dashboardProvider.overrideWith((ref) async => _dashboardFixture),
         ],
-        child: const MaterialApp(home: PerfilScreen()),
+        child: MaterialApp(
+          home: const PerfilScreen(),
+        ),
       ),
     );
 
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
 
     expect(find.text('Matheus Focux'), findsWidgets);
     expect(find.text('Prontidão comercial'), findsOneWidget);
@@ -39,7 +42,8 @@ void main() {
       420,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Carteira e PIX'), findsOneWidget);
     expect(find.text('Meus alunos'), findsOneWidget);

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 
 class RankingItem {
@@ -66,7 +67,7 @@ class RankingScreen extends ConsumerWidget {
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(rankingProvider),
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(TokensStrip.s4),
               children: [
                 // Pódio
                 if (top3.isNotEmpty) ...[
@@ -98,11 +99,11 @@ class RankingScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    margin: const EdgeInsets.all(16),
-                    padding: const EdgeInsets.all(16),
+                    margin: EdgeInsets.all(TokensStrip.s4),
+                    padding: const EdgeInsets.all(TokensStrip.s4),
                     decoration: BoxDecoration(
                       color: EagleTokens.goldSoft,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(TokensStrip.rCard),
                       border: Border.all(color: const Color(0xFFFFE58A)),
                     ),
                     child: Row(

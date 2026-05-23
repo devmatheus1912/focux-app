@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../providers/alunos_provider.dart';
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class AlunoEquipamentosScreen extends ConsumerStatefulWidget {
   const AlunoEquipamentosScreen({super.key, required this.alunoId});
@@ -42,26 +45,28 @@ class _AlunoEquipamentosScreenState
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('Equipamentos do aluno'),
-        actions: [
-          if (_saving)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: SizedBox(
-                width: 18,
-                height: 18,
-                child: FxLoading(strokeWidth: 2),
-              ),
-            )
-          else
-            IconButton(
-              tooltip: 'Salvar',
-              icon: const Icon(Icons.check_rounded),
-              onPressed: _save,
-            ),
-        ],
+      appBar: FxShellAppBar(
+        title: 'Equipamentos do aluno',
+        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+        actions:
+            _saving
+                ? [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8),
+                    child: SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: FxLoading(strokeWidth: 2),
+                    ),
+                  ),
+                ]
+                : [
+                  IconButton(
+                    tooltip: 'Salvar',
+                    icon: const Icon(Icons.check_rounded),
+                    onPressed: _save,
+                  ),
+                ],
       ),
       body: alunoAsync.when(
         loading: () => const FxLoading(),
@@ -69,7 +74,12 @@ class _AlunoEquipamentosScreenState
         data: (aluno) {
           _selected ??= {...aluno.equipamentosDisponiveis};
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              TokensStrip.s3,
+              TokensStrip.s4,
+              TokensStrip.s6,
+            ),
             children: [
               Text(aluno.nome, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 6),

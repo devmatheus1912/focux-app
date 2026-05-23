@@ -7,11 +7,12 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
 import '../models/subscription_plan.dart';
 import '../services/iap_service.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
@@ -216,14 +217,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         perfil?.trialEndsAt != null &&
         perfil!.trialEndsAt!.isAfter(DateTime.now());
 
-    final isDark =
-        Theme.of(context).brightness == Brightness.dark ||
-        Theme.of(context).brightness == Brightness.light;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const bg = Color(0xFF071126);
     const ink = Colors.white;
     const mute = Color(0xFFB9C4D8);
     const line = Color(0x263B82F6);
-    const brand = Color(0xFF4D78FF);
+    final brand = Theme.of(context).colorScheme.primary;
     final brandDeep = BrandPalette.deep(brand);
 
     final pl = _planos[_selected];
@@ -309,64 +308,18 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   ),
                 )
               else
-                InkWell(
-                  onTap: _submitting ? null : _handlePrimaryAction,
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      gradient:
-                          selectedPlan == SubscriptionPlan.ENTERPRISE
-                              ? const LinearGradient(
-                                colors: [Color(0xFFC49A2A), Color(0xFF7A5C0A)],
-                              )
-                              : LinearGradient(colors: [brand, brandDeep]),
-                      boxShadow: [
-                        BoxShadow(
-                          color: plCor.withValues(alpha: 0.35),
-                          blurRadius: 18,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    alignment: Alignment.center,
-                    child:
-                        _submitting
-                            ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: FxLoading(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                            : Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  selectedPlan == SubscriptionPlan.ENTERPRISE &&
-                                          !trialUsed
-                                      ? Icons.card_giftcard_rounded
-                                      : Icons.star_border,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  selectedPlan == SubscriptionPlan.ENTERPRISE &&
-                                          !trialUsed
-                                      ? 'Testar 7 dias grátis'
-                                      : ctaLabel,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                  ),
+                FxLiquidPrimaryButton(
+                  label:
+                      selectedPlan == SubscriptionPlan.ENTERPRISE && !trialUsed
+                          ? 'Testar 7 dias grátis'
+                          : ctaLabel,
+                  icon:
+                      selectedPlan == SubscriptionPlan.ENTERPRISE && !trialUsed
+                          ? Icons.card_giftcard_rounded
+                          : Icons.star_border,
+                  loading: _submitting,
+                  onPressed:
+                      _submitting ? null : () => _handlePrimaryAction(),
                 ),
             ],
           ),
@@ -506,7 +459,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 decoration: fxListCardDecoration(
                   context,
                   accent: plCor,
-                  radius: 22,
+                  radius: TokensStrip.rCard,
                 ),
                 child: Column(
                   children: [
@@ -745,16 +698,17 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         color:
                             selectedPlan == SubscriptionPlan.ENTERPRISE &&
                                     !trialUsed
-                                ? const Color(0xFF112D23)
+                                ? EagleTokens.goodSoft.withValues(alpha: 0.35)
                                 : EagleTokens.darkCardHi,
                         border: Border.all(
                           color:
                               selectedPlan == SubscriptionPlan.ENTERPRISE &&
                                       !trialUsed
-                                  ? const Color(0xFF2E8B57)
+                                  ? EagleTokens.good.withValues(alpha: 0.5)
                                   : line,
                         ),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius:
+                            BorderRadius.circular(TokensStrip.rCard),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -775,9 +729,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                       !trialUsed
                                   ? 'Teste por 7 dias. A loja pede cartão para ativar, mas você pode cancelar antes do fim do período e não terá cobrança.'
                                   : 'Compra gerenciada pela loja do dispositivo.',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11.5,
-                                color: Color(0xFFE8FFF0),
+                                color:
+                                    selectedPlan ==
+                                                SubscriptionPlan.ENTERPRISE &&
+                                            !trialUsed
+                                        ? EagleTokens.good
+                                        : ink,
                                 height: 1.35,
                               ),
                             ),

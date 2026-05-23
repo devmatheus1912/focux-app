@@ -2,12 +2,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_logo.dart';
+import '../../../core/widgets/fx_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/password_strength_meter.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class RegisterAlunoScreen extends ConsumerStatefulWidget {
@@ -356,26 +357,30 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                                   vertical: 18,
                                 ),
                                 border: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                                   borderSide: BorderSide(
                                     color: primary.withValues(alpha: 0.25),
                                   ),
                                 ),
                                 enabledBorder: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                                   borderSide: BorderSide(
                                     color: primary.withValues(alpha: 0.25),
                                   ),
                                 ),
                                 focusedBorder: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                                   borderSide: BorderSide(
                                     color: primary,
                                     width: 1.5,
                                   ),
                                 ),
                                 errorBorder: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                                   borderSide: BorderSide(
                                     color: EagleTokens.bad,
                                   ),
@@ -465,7 +470,8 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                               color: EagleTokens.badSoft.withValues(
                                 alpha: 0.15,
                               ),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius:
+                                  BorderRadius.circular(TokensStrip.rCard),
                               border: Border.all(
                                 color: EagleTokens.bad.withValues(alpha: 0.3),
                               ),
@@ -492,46 +498,16 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                           ),
                         ],
 
-                        const SizedBox(height: 32),
+                        const SizedBox(height: TokensStrip.s8),
 
                         // Submit
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: ElevatedButton(
-                            onPressed: _loading ? null : _submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primary,
-                              foregroundColor: EagleTokens.card,
-                              disabledBackgroundColor: primary.withValues(
-                                alpha: 0.5,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 0,
-                            ),
-                            child:
-                                _loading
-                                    ? SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: FxLoading(
-                                        strokeWidth: 2.5,
-                                        color: EagleTokens.card,
-                                      ),
-                                    )
-                                    : const Text(
-                                      'Criar conta',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                          ),
+                        FxLiquidPrimaryButton(
+                          label: 'Criar conta',
+                          loading: _loading,
+                          onPressed: _loading ? null : _submit,
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: TokensStrip.s5),
 
                         Center(
                           child: Row(
@@ -638,19 +614,19 @@ class _FxTextField extends StatelessWidget {
               vertical: 16,
             ),
             border: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
               borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08)),
             ),
             enabledBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
               borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08)),
             ),
             focusedBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
               borderSide: BorderSide(color: primary, width: 1.5),
             ),
             errorBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
               borderSide: BorderSide(color: EagleTokens.bad),
             ),
             errorStyle: TextStyle(color: EagleTokens.bad, fontSize: 11),

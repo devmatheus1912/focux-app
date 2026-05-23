@@ -8,6 +8,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
@@ -202,7 +203,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                 onPressed: () => Navigator.pop(ctx),
                 child: const Text('Cancelar'),
               ),
-              FilledButton(
+              FxLiquidPrimaryButton(
+                label: 'Salvar',
                 onPressed: () async {
                   Navigator.pop(ctx);
                   try {
@@ -227,7 +229,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     }
                   }
                 },
-                child: const Text('Salvar'),
+                expand: false,
               ),
             ],
           ),
@@ -289,7 +291,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                 onPressed: () => Navigator.pop(ctx),
                 child: const Text('Cancelar'),
               ),
-              FilledButton(
+              FxLiquidPrimaryButton(
+                label: 'Salvar',
                 onPressed: () async {
                   Navigator.pop(ctx);
                   try {
@@ -316,7 +319,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     }
                   }
                 },
-                child: const Text('Salvar'),
+                expand: false,
               ),
             ],
           ),
@@ -387,7 +390,6 @@ class _TabMedidas extends StatelessWidget {
                 decoration: fxListCardDecoration(
                   context,
                   accent: EagleTokens.good,
-                  radius: 16,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -419,7 +421,7 @@ class _CardMedida extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 16),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -514,13 +516,13 @@ class _CardRecorde extends StatelessWidget {
       color: Colors.transparent,
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
-        decoration: fxListCardDecoration(context, accent: primary, radius: 16),
+        decoration: fxListCardDecoration(context, accent: primary),
         child: ListTile(
           leading: Container(
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: const Color(0x33FFD37A),
+              color: EagleTokens.goldSoft.withValues(alpha: 0.55),
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,

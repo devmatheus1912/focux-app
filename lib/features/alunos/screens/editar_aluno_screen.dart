@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -137,7 +138,12 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
       body: FadeTransition(
         opacity: CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s5,
+            TokensStrip.s2,
+            TokensStrip.s5,
+            TokensStrip.s8,
+          ),
           child: Form(
             key: _formKey,
             child: Column(

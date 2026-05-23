@@ -11,6 +11,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -458,7 +459,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         loading:
             () => const SafeArea(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 86, 16, 0),
+                padding: EdgeInsets.fromLTRB(TokensStrip.s4, 86, TokensStrip.s4, 0),
                 child: SkeletonList(count: 6),
               ),
             ),
@@ -1246,7 +1247,6 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forDark(isDark);
-    final cardBg = chrome.cardFill;
     final ink = chrome.ink;
     final mute = chrome.mute;
     final line = chrome.line;
@@ -1326,14 +1326,14 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
               ? widget.onToggle
               : () => context.push('/alunos/${aluno.id}'),
       onLongPress: widget.onLongPress,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.all(14),
         decoration: ShellChrome.forDark(isDark).listCard(
           selected: isSelected,
           primary: primary,
-          radius: 20,
+          radius: TokensStrip.rCard,
         ),
         child: Row(
           children: [

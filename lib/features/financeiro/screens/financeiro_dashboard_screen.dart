@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -318,8 +317,6 @@ class _HeroRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
 
@@ -610,7 +607,7 @@ class _MiniMetric extends StatelessWidget {
     final mute = fxScreenMute(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 14),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -662,7 +659,7 @@ class _EvolucaoChart extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
-        decoration: fxListCardDecoration(context, accent: primary, radius: 22),
+        decoration: fxListCardDecoration(context, accent: primary),
         child: Column(
           children: [
             Row(

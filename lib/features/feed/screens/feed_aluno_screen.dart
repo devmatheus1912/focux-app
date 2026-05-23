@@ -124,6 +124,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       body: SafeArea(
         child:
@@ -195,7 +196,6 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                         decoration: fxListCardDecoration(
                           context,
                           accent: p.fixado ? primary : null,
-                          radius: 22,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(16),

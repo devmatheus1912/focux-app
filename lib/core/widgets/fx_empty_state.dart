@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../theme/design_tokens.dart';
+import '../theme/tokens_strip.dart';
 import 'fx_icon.dart';
+import 'fx_motion.dart';
 
 class FxEmptyAction {
   final String label;
@@ -39,7 +40,7 @@ class FxEmptyState extends StatelessWidget {
               height: 64,
               decoration: BoxDecoration(
                 color: colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(EagleTokens.radiusLg),
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
               ),
               child: Center(
                 child: FxIcon(name: icon, size: 28, color: colorScheme.primary),
@@ -66,7 +67,10 @@ class FxEmptyState extends StatelessWidget {
             ],
             if (action != null) ...[
               const SizedBox(height: 20),
-              TextButton(onPressed: action!.onTap, child: Text(action!.label)),
+              FxLiquidPrimaryButton(
+                label: action!.label,
+                onPressed: action!.onTap,
+              ),
             ],
           ],
         ),

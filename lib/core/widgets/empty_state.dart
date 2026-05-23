@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/design_tokens.dart';
+import '../theme/tokens_strip.dart';
+import 'fx_motion.dart';
 
 /// Premium empty state with animated icon, structured hierarchy, and optional CTA.
 /// Replaces bare "Nenhum X" Center(Text) patterns across the app.
@@ -71,7 +73,7 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
                       height: 80,
                       decoration: BoxDecoration(
                         color: primary.withValues(alpha: isDark ? 0.12 : 0.07),
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(TokensStrip.rCard),
                         border: Border.all(
                           color: primary.withValues(
                             alpha: isDark ? 0.18 : 0.10,
@@ -130,28 +132,9 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
             // ── CTA Button ──
             if (widget.actionLabel != null && widget.onAction != null) ...[
               const SizedBox(height: 28),
-              SizedBox(
-                height: 44,
-                child: FilledButton.tonal(
-                  onPressed: widget.onAction,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: primary.withValues(
-                      alpha: isDark ? 0.15 : 0.08,
-                    ),
-                    foregroundColor: primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 28),
-                  ),
-                  child: Text(
-                    widget.actionLabel!,
-                    style: const TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+              FxLiquidPrimaryButton(
+                label: widget.actionLabel!,
+                onPressed: widget.onAction,
               ),
             ],
           ],

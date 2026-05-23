@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../core/router/safe_navigation.dart';
 import '../../core/theme/brand_palette.dart';
 import '../../core/theme/design_tokens.dart';
+import '../../core/theme/tokens_strip.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/feedback_helper.dart';
 import '../../core/widgets/fx_shell_scaffold.dart';
@@ -81,16 +82,19 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, TokensStrip.s1, TokensStrip.s4, TokensStrip.s7),
           children: [
             Container(
-              padding: const EdgeInsets.all(22),
+              padding: const EdgeInsets.all(TokensStrip.s5),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(TokensStrip.r2xl),
                 gradient: LinearGradient(
                   colors:
                       isDark
-                          ? const [Color(0xFF128989), Color(0xFF0A2E2E)]
+                          ? [
+                            BrandPalette.deep(primary),
+                            BrandPalette.deep(primary).withValues(alpha: 0.55),
+                          ]
                           : [
                             BrandPalette.softened(primary),
                             BrandPalette.deep(primary),
@@ -289,21 +293,21 @@ class _MarcoTile extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onChanged,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
           child: Ink(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(TokensStrip.s3),
             decoration:
                 atual
                     ? fxListCardDecoration(
                       context,
                       accent: brand,
-                      radius: 18,
+                      radius: TokensStrip.rCard,
                       selected: true,
                     )
                     : fxListCardDecoration(
                       context,
                       accent: marco.atingido ? EagleTokens.good : null,
-                      radius: 18,
+                      radius: TokensStrip.rCard,
                     ),
             child: Row(
               children: [

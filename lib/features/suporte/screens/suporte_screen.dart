@@ -10,6 +10,7 @@ import '../data/suporte_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 const _severidades = ['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'];
@@ -163,6 +164,7 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
@@ -729,17 +731,11 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
               ),
             ),
             const SizedBox(height: 18),
-            FilledButton.icon(
+            FxLiquidPrimaryButton(
+              label: 'Enviar ticket',
+              icon: Icons.send_rounded,
+              loading: _enviando,
               onPressed: _enviando ? null : _enviarTicket,
-              icon:
-                  _enviando
-                      ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: FxLoading(strokeWidth: 2, color: Colors.white),
-                      )
-                      : const Icon(Icons.send_rounded),
-              label: const Text('Enviar ticket'),
             ),
           ],
         ),

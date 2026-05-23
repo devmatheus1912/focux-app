@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/auth_provider.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class DefinirSenhaAlunoScreen extends ConsumerStatefulWidget {
@@ -116,7 +118,6 @@ class _DefinirSenhaAlunoScreenState
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final surface = isDark ? EagleTokens.darkCard : Colors.white;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
     final strength = _passwordStrength();
 
@@ -146,7 +147,7 @@ class _DefinirSenhaAlunoScreenState
                               end: Alignment.bottomRight,
                               colors: [primary, primary.withValues(alpha: 0.7)],
                             ),
-                            borderRadius: BorderRadius.circular(28),
+                            borderRadius: BorderRadius.circular(TokensStrip.r2xl),
                             boxShadow: [
                               BoxShadow(
                                 color: primary.withValues(alpha: 0.3),
@@ -186,22 +187,8 @@ class _DefinirSenhaAlunoScreenState
 
                     // ── Card ──
                     Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: surface,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: line),
-                        boxShadow:
-                            isDark
-                                ? null
-                                : [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.04),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                      ),
+                      padding: const EdgeInsets.all(TokensStrip.s4),
+                      decoration: fxListCardDecoration(context),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -230,14 +217,17 @@ class _DefinirSenhaAlunoScreenState
                                     ),
                               ),
                               border: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                               ),
                               enabledBorder: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                                 borderSide: BorderSide(color: line),
                               ),
                               focusedBorder: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                                 borderSide: BorderSide(
                                   color: primary,
                                   width: 1.5,
@@ -282,14 +272,17 @@ class _DefinirSenhaAlunoScreenState
                                     ),
                               ),
                               border: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                               ),
                               enabledBorder: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                                 borderSide: BorderSide(color: line),
                               ),
                               focusedBorder: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                                 borderSide: BorderSide(
                                   color: primary,
                                   width: 1.5,
@@ -368,14 +361,17 @@ class _DefinirSenhaAlunoScreenState
                                     ),
                               ),
                               border: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                               ),
                               enabledBorder: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                                 borderSide: BorderSide(color: line),
                               ),
                               focusedBorder: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                                 borderSide: BorderSide(
                                   color: primary,
                                   width: 1.5,
@@ -408,7 +404,8 @@ class _DefinirSenhaAlunoScreenState
                               ),
                               decoration: BoxDecoration(
                                 color: EagleTokens.bad.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rCard),
                                 border: Border.all(
                                   color: EagleTokens.bad.withValues(alpha: 0.3),
                                 ),
@@ -440,44 +437,11 @@ class _DefinirSenhaAlunoScreenState
                     ),
                     const SizedBox(height: 24),
 
-                    // ── Submit button ──
-                    SizedBox(
-                      height: 52,
-                      child: FilledButton(
-                        onPressed: _loading ? null : _submit,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 0,
-                        ),
-                        child:
-                            _loading
-                                ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: FxLoading(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                                : const Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.shield_outlined, size: 20),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Salvar nova senha',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                      ),
+                    FxLiquidPrimaryButton(
+                      label: 'Salvar nova senha',
+                      icon: Icons.shield_outlined,
+                      loading: _loading,
+                      onPressed: _loading ? null : _submit,
                     ),
                     const SizedBox(height: 20),
 
@@ -486,7 +450,8 @@ class _DefinirSenhaAlunoScreenState
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: primary.withValues(alpha: isDark ? 0.1 : 0.05),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius:
+                            BorderRadius.circular(TokensStrip.rInput),
                         border: Border.all(
                           color: primary.withValues(alpha: 0.15),
                         ),

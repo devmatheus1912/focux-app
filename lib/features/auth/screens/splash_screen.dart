@@ -9,6 +9,7 @@ import '../../perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/cinematic_splash_scene.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -153,7 +154,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         statusBarBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: const Color(0xFF080C10),
+        backgroundColor: TokensStrip.cinematicBg,
         body: AuthShell(
           forceDark: true,
           showCenterGlow: false,

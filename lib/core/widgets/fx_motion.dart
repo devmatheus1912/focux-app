@@ -120,16 +120,16 @@ class FxLiquidPrimaryButton extends StatelessWidget {
     final button = FxInteractiveGlow(
       color: primary,
       enabled: enabled,
-      borderRadius: TokensStrip.rMd,
+      borderRadius: TokensStrip.rButton,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: enabled ? onPressed : null,
-          borderRadius: BorderRadius.circular(TokensStrip.rMd),
+          borderRadius: BorderRadius.circular(TokensStrip.rButton),
           child: Ink(
             decoration: BoxDecoration(
               gradient: TokensStrip.primaryButtonGradient(primary),
-              borderRadius: BorderRadius.circular(TokensStrip.rMd),
+              borderRadius: BorderRadius.circular(TokensStrip.rButton),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.22),
               ),

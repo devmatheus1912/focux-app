@@ -3,13 +3,14 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class IaProgressaoScreen extends ConsumerStatefulWidget {
@@ -144,7 +145,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                     decoration: InputDecoration(
                       labelText: 'Objetivo (ex: hipertrofia, força)',
                       border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(TokensStrip.rCard),
                       ),
                     ),
                   ),
@@ -155,7 +156,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                       labelText:
                           'Histórico de treinos (cargas e repetições recentes)',
                       border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(TokensStrip.rCard),
                       ),
                       hintText: 'Ex: Supino 80kg 3x8, Agachamento 100kg 4x6...',
                     ),
@@ -168,17 +169,11 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
           const SizedBox(height: 12),
           const IaSafetyDisclaimer(compact: true),
           const SizedBox(height: 12),
-          FilledButton.icon(
+          FxLiquidPrimaryButton(
+            label: _loading ? 'Analisando...' : 'Gerar Progressão com IA',
+            icon: Icons.trending_up,
+            loading: _loading,
             onPressed: _loading ? null : _gerar,
-            icon:
-                _loading
-                    ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: FxLoading(strokeWidth: 2, color: Colors.white),
-                    )
-                    : const Icon(Icons.trending_up),
-            label: Text(_loading ? 'Analisando...' : 'Gerar Progressão com IA'),
           ),
           if (_erro != null) ...[
             const SizedBox(height: 16),

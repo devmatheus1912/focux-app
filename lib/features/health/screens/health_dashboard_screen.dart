@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/health/health_service.dart';
-import '../../../core/health/recovery_score.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../auth/providers/auth_provider.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../data/health_repository.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -158,27 +159,11 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               style: TextStyle(fontSize: 15, color: EagleTokens.inkMute),
             ),
             const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton.icon(
-                onPressed: _requestAccess,
-                icon: const Icon(Icons.sync, color: Colors.white),
-                label: const Text(
-                  'Conectar',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-              ),
+            FxLiquidPrimaryButton(
+              label: 'Conectar',
+              icon: Icons.sync_rounded,
+              onPressed: _requestAccess,
+              expand: false,
             ),
           ],
         ),
@@ -199,7 +184,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
               gradient: LinearGradient(
                 colors: [primary, primary.withValues(alpha: 0.72)],
               ),
@@ -243,14 +228,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            'Resumo de Hoje',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: isDark ? Colors.white : EagleTokens.ink,
+            Text(
+              'Resumo de Hoje',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              ),
             ),
-          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -259,7 +244,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                   icon: Icons.directions_walk,
                   label: 'Passos',
                   value: '${s.steps}',
-                  color: const Color(0xFF22C55E),
+                  color: EagleTokens.good,
                   isDark: isDark,
                 ),
               ),
@@ -269,7 +254,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                   icon: Icons.local_fire_department,
                   label: 'Calorias',
                   value: '${s.caloriesBurned.toInt()} kcal',
-                  color: const Color(0xFFF59E0B),
+                  color: EagleTokens.warn,
                   isDark: isDark,
                 ),
               ),
@@ -286,7 +271,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                       s.avgHeartRate > 0
                           ? '${s.avgHeartRate.toInt()} bpm'
                           : '--',
-                  color: const Color(0xFFEF4444),
+                  color: EagleTokens.bad,
                   isDark: isDark,
                 ),
               ),
@@ -299,7 +284,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                       s.sleepHours > 0
                           ? '${s.sleepHours.toStringAsFixed(1)}h'
                           : '--',
-                  color: const Color(0xFF8B5CF6),
+                  color: EagleTokens.purple,
                   isDark: isDark,
                 ),
               ),
@@ -346,20 +331,7 @@ class _MetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow:
-            isDark
-                ? null
-                : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-      ),
+      decoration: fxListCardDecoration(context, accent: color),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -377,7 +349,7 @@ class _MetricCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: isDark ? Colors.white : EagleTokens.ink,
+              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
             ),
           ),
           const SizedBox(height: 4),

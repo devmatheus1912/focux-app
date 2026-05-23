@@ -11,6 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/config/env.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
@@ -328,10 +329,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     const SizedBox(height: 14),
                   ],
-                  AuthPrimaryButton(
+                  FxLiquidPrimaryButton(
                     label: 'Criar minha conta',
-                    isLoading: _loading,
-                    onPressed: _submit,
+                    loading: _loading,
+                    onPressed: _loading ? null : _submit,
                   ),
                   const SizedBox(height: 12),
                   const _AuthDivider(label: 'ou cadastre com'),

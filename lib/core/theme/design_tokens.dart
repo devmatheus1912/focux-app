@@ -6,22 +6,22 @@ import 'package:flutter/material.dart';
 /// Palette: Neon cyan-teal + cinematic dark · Liquid Glass surfaces.
 /// Typography: Outfit (display/body) + JetBrains Mono (technical/numbers).
 abstract class EagleTokens {
-  // ── Brand (Neon Cyan Teal — TOKENS STRIP premium) ───────────────────
-  static const Color brand = Color(0xFF26C6DA);
-  static const Color brandInk = Color(0xFF128989);
-  static const Color brandSecondary = Color(0xFF007D8A);
+  // ── Brand (TOKENS STRIP #13C2C2) ───────────────────────────────────
+  static const Color brand = Color(0xFF13C2C2);
+  static const Color brandInk = Color(0xFF0D9494);
+  static const Color brandSecondary = Color(0xFF0D9494);
   static const Color brandSoft = Color(0xFFD9F2F2);
   static const Color brandSofter = Color(0xFFEDF8F8);
   static const Color brandDeep = Color(0xFF0A2E2E);
   static const Color brandAccent = Color(0xFF4DD0E1);
 
-  // ── Neutral Light (Teal-tinted cool) ────────────────────────────────
-  static const Color ink = Color(0xFF0C1218);
+  // ── Neutral Light ───────────────────────────────────────────────────
+  static const Color ink = Color(0xFF1A1A2E);
   static const Color inkSoft = Color(0xFF2E3840);
-  static const Color inkMute = Color(0xFF6B7A84);
-  static const Color line = Color(0xFFDDE3E6);
+  static const Color inkMute = Color(0xFF6B7280);
+  static const Color line = Color(0xFFE5E7EB);
   static const Color lineSoft = Color(0xFFECF0F2);
-  static const Color paper = Color(0xFFF4F7F8);
+  static const Color paper = Color(0xFFF4F6F8);
   static const Color card = Color(0xFFFFFFFF);
 
   // ── Neutral Dark (Cinematic charcoal) ───────────────────────────────
@@ -91,7 +91,7 @@ abstract class EagleTokens {
 
   // ── Hero Gradients ──────────────────────────────────────────────────
   static const List<Color> heroGradientLight = [
-    Color(0xFF26C6DA),
+    Color(0xFF13C2C2),
     Color(0xFF18B5B5),
   ];
 

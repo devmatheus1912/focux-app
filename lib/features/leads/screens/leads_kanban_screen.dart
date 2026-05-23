@@ -8,6 +8,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
@@ -142,7 +143,9 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                 onPressed: () => Navigator.pop(ctx, false),
                 child: const Text('Cancelar'),
               ),
-              FilledButton(
+              FxLiquidPrimaryButton(
+                expand: false,
+                label: 'Criar',
                 onPressed: () async {
                   if (nomeCtrl.text.trim().isEmpty) return;
                   try {
@@ -161,7 +164,6 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                     }
                   }
                 },
-                child: const Text('Criar'),
               ),
             ],
           ),
@@ -254,7 +256,6 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                 decoration: fxListCardDecoration(
                                   context,
                                   accent: cColor,
-                                  radius: 14,
                                 ),
                                 child: Column(
                                   children: [
@@ -499,7 +500,6 @@ class _LeadCard extends StatelessWidget {
       decoration: fxListCardDecoration(
         context,
         accent: cColor,
-        radius: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

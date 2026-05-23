@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -120,7 +121,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                                     : Theme.of(
                                       context,
                                     ).colorScheme.surfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(TokensStrip.rCard),
                           ),
                           child: Text(
                             m.texto,
@@ -150,7 +151,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                   decoration: InputDecoration(
                     hintText: 'Pergunte sobre treino, dieta...',
                     border: FxInputDeco.outlineBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(TokensStrip.rCard),
                     ),
                   ),
                   maxLines: null,

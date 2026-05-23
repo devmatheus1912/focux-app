@@ -658,7 +658,6 @@ class _SectionCard extends StatelessWidget {
       decoration: fxListCardDecoration(
         context,
         accent: primary,
-        radius: EagleTokens.radiusXl,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

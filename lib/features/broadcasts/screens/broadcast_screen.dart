@@ -4,6 +4,7 @@ import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/broadcast_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -179,28 +180,14 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                         ],
                       ),
                       const SizedBox(height: 18),
-                      SizedBox(
-                        height: 48,
-                        child: FilledButton.icon(
-                          onPressed: _enviando ? null : _enviar,
-                          icon:
-                              _enviando
-                                  ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: FxLoading(strokeWidth: 2),
-                                  )
-                                  : const Icon(Icons.send_rounded, size: 16),
-                          label: Text(
-                            _enviando ? 'Enviando...' : 'Enviar notificacao',
-                          ),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: brand,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
+                      FxLiquidPrimaryButton(
+                        label:
+                            _enviando
+                                ? 'Enviando...'
+                                : 'Enviar notificacao',
+                        icon: Icons.send_rounded,
+                        loading: _enviando,
+                        onPressed: _enviando ? null : _enviar,
                       ),
                     ],
                   ),
@@ -393,7 +380,7 @@ class _BroadcastCard extends StatelessWidget {
     final publico = broadcast.tipoConsultoriaAlvo ?? 'TODOS';
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, accent: brand, radius: 18),
+      decoration: fxListCardDecoration(context, accent: brand),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

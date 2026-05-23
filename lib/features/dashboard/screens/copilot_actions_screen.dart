@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_dock.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
@@ -48,7 +50,12 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        padding: const EdgeInsets.fromLTRB(
+          TokensStrip.s4,
+          0,
+          TokensStrip.s4,
+          14,
+        ),
         child: SafeArea(
           top: false,
           child: FxDock(
@@ -71,7 +78,12 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              2,
+              TokensStrip.s4,
+              TokensStrip.s2,
+            ),
             child: _StatusSegmentedControl(
               selected: _status,
               brand: brand,
@@ -84,16 +96,18 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
             child: actionsAsync.when(
               loading:
                   () => ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 120),
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      10,
+                      TokensStrip.s4,
+                      120,
+                    ),
                     itemCount: 5,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder:
                         (_, __) => Container(
                           height: 94,
-                          decoration: fxListCardDecoration(
-                            context,
-                            radius: 16,
-                          ),
+                          decoration: fxListCardDecoration(context),
                         ),
                   ),
               error:
@@ -119,7 +133,12 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                   return RefreshIndicator(
                     onRefresh: _refresh,
                     child: ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+                      padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      TokensStrip.s4,
+                      TokensStrip.s4,
+                      120,
+                    ),
                       children: [
                         _IaActionsEmptyCard(
                           title: _emptyTitle(_status),
@@ -137,7 +156,12 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                 return RefreshIndicator(
                   onRefresh: _refresh,
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 120),
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      10,
+                      TokensStrip.s4,
+                      120,
+                    ),
                     children: [
                       if (copilot.isNotEmpty) ...[
                         _SectionHeader(
@@ -284,7 +308,7 @@ class _StatusSegmentedControl extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: fxListCardDecoration(context, radius: 16),
+      decoration: fxListCardDecoration(context),
       child: Row(
         children:
             _items.map((item) {
@@ -398,16 +422,20 @@ class _CopilotTaskCard extends StatelessWidget {
     final mode = _modeLabel(action);
     final isDone = status == 'CONCLUIDO';
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s3,
+        TokensStrip.s3,
+        TokensStrip.s3,
+        10,
+      ),
       decoration:
           highlighted
               ? fxListCardDecoration(
                 context,
                 accent: brand,
                 selected: true,
-                radius: 16,
               )
-              : fxListCardDecoration(context, radius: 16),
+              : fxListCardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -490,23 +518,11 @@ class _CopilotTaskCard extends StatelessWidget {
                             ),
                           ),
                         )
-                        : FilledButton.icon(
+                        : FxLiquidPrimaryButton(
+                          label: 'Revisar aluno',
+                          icon: Icons.person_outline,
                           onPressed:
                               action.acaoUrl.startsWith('/') ? onOpen : null,
-                          icon: const Icon(Icons.person_outline, size: 15),
-                          label: const Text('Revisar aluno'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: brand,
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size.fromHeight(38),
-                            textStyle: const TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w900,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
                         ),
               ),
               const SizedBox(width: 8),
@@ -552,7 +568,7 @@ class _RadarSignalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: fxListCardDecoration(context, radius: 16),
+      decoration: fxListCardDecoration(context),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -728,7 +744,12 @@ class _IaActionsEmpty extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+        padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      TokensStrip.s4,
+                      TokensStrip.s4,
+                      120,
+                    ),
         children: [
           _IaActionsEmptyCard(
             title: title,
@@ -765,7 +786,7 @@ class _IaActionsEmptyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: fxListCardDecoration(context, accent: brand, radius: 20),
+      decoration: fxListCardDecoration(context, accent: brand),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -120,28 +122,32 @@ class _State extends ConsumerState<ModoPresencialScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF080C10),
-        body: Center(child: FxLoading(color: Colors.white)),
+      return Scaffold(
+        backgroundColor: EagleTokens.darkBg,
+        body: Center(child: FxLoading(color: Theme.of(context).colorScheme.primary)),
       );
     }
     if (_exec == null || _exec!.exercicios.isEmpty) {
       return Scaffold(
-        backgroundColor: const Color(0xFF080C10),
+        backgroundColor: EagleTokens.darkBg,
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, color: Colors.white54, size: 48),
+              Icon(Icons.error_outline, color: EagleTokens.darkInkMute, size: 48),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Treino não encontrado',
-                style: TextStyle(color: Colors.white70, fontSize: 18),
+                style: TextStyle(
+                  color: EagleTokens.darkInkMute,
+                  fontSize: 18,
+                ),
               ),
               const SizedBox(height: 24),
-              ElevatedButton(
+              FxLiquidPrimaryButton(
+                label: 'Voltar',
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Voltar'),
+                expand: false,
               ),
             ],
           ),
@@ -155,7 +161,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080C10),
+      backgroundColor: EagleTokens.darkBg,
       body: SafeArea(
         child:
             _resting
@@ -390,29 +396,10 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                 SizedBox(
                   width: double.infinity,
                   height: 72,
-                  child: ElevatedButton(
+                  child: FxLiquidPrimaryButton(
+                    label: 'SÉRIE',
+                    icon: Icons.check_rounded,
                     onPressed: () => _completeSerie(ex),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.check, color: Colors.white, size: 28),
-                        SizedBox(height: 4),
-                        Text(
-                          'SÉRIE',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 const SizedBox(height: 12),

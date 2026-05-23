@@ -331,7 +331,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
             trackHeight: 5,
             activeTrackColor: Theme.of(context).colorScheme.primary,
             inactiveTrackColor: EagleTokens.lineSoft,
-            thumbColor: Colors.white,
+            thumbColor: Theme.of(context).colorScheme.surface,
             overlayColor: Theme.of(
               context,
             ).colorScheme.primary.withValues(alpha: 0.12),

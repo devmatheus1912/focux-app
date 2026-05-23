@@ -10,6 +10,7 @@ import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -104,9 +105,10 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                 onPressed: () => Navigator.pop(ctx),
                 child: const Text('Cancelar'),
               ),
-              FilledButton(
+              FxLiquidPrimaryButton(
+                label: 'Salvar',
                 onPressed: () => Navigator.pop(ctx, notesCtrl.text.trim()),
-                child: const Text('Salvar'),
+                expand: false,
               ),
             ],
           ),
@@ -349,7 +351,7 @@ class _SimpleInfoCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, radius: 16),
+      decoration: fxListCardDecoration(context),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -473,7 +475,7 @@ class _CleanExpansion extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     return Container(
-      decoration: fxListCardDecoration(context, radius: 16),
+      decoration: fxListCardDecoration(context),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
@@ -515,7 +517,7 @@ class _PrescriptionReadinessPanel extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, accent: color, radius: 16),
+      decoration: fxListCardDecoration(context, accent: color),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -764,7 +766,7 @@ class _EditorialReviewPanel extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, accent: color, radius: 16),
+      decoration: fxListCardDecoration(context, accent: color),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -891,7 +893,7 @@ class _GuidanceCard extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, accent: color, radius: 16),
+      decoration: fxListCardDecoration(context, accent: color),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -948,7 +950,6 @@ class _MediaMetadataPanel extends StatelessWidget {
       decoration: fxListCardDecoration(
         context,
         accent: licensed ? null : primary,
-        radius: 16,
       ),
       child: Row(
         children: [
@@ -1071,7 +1072,7 @@ class _VideoPlayerState extends State<_VideoPlayer> {
       return Container(
         height: 180,
         padding: const EdgeInsets.all(18),
-        decoration: fxListCardDecoration(context, accent: Theme.of(context).colorScheme.primary, radius: 16),
+        decoration: fxListCardDecoration(context, accent: Theme.of(context).colorScheme.primary),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1169,7 +1170,7 @@ class _OwnVideoPanel extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 16),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Row(
         children: [
           Container(
@@ -1213,28 +1214,13 @@ class _OwnVideoPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          FilledButton.icon(
-            onPressed: uploading ? null : onUpload,
+          FxLiquidPrimaryButton(
+            label: hasVideo ? 'Trocar' : 'Enviar',
             icon:
-                uploading
-                    ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: FxLoading(strokeWidth: 2, color: Colors.white),
-                    )
-                    : Icon(
-                      hasVideo ? Icons.sync_rounded : Icons.upload_rounded,
-                      size: 17,
-                    ),
-            label: Text(hasVideo ? 'Trocar' : 'Enviar'),
-            style: FilledButton.styleFrom(
-              backgroundColor: primary,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(92, 42),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+                hasVideo ? Icons.sync_rounded : Icons.upload_rounded,
+            onPressed: uploading ? null : onUpload,
+            loading: uploading,
+            expand: false,
           ),
         ],
       ),

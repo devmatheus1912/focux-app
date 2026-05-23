@@ -7,6 +7,7 @@ import '../../../core/utils/fx_utils.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feed_repository.dart';
 import '../widgets/feed_comments_sheet.dart';
@@ -310,7 +311,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                   decoration: BoxDecoration(
                                     color: Theme.of(ctx).colorScheme.primary
                                         .withValues(alpha: 0.08),
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(TokensStrip.rCard),
                                   ),
                                   child: Row(
                                     children: [
@@ -345,7 +346,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               ],
                             ],
                             const SizedBox(height: 24),
-                            FilledButton.icon(
+                            FxLiquidPrimaryButton(
+                              label: salvando ? 'Publicando...' : 'Publicar',
+                              icon: Icons.send,
+                              loading: salvando,
                               onPressed:
                                   salvando
                                       ? null
@@ -401,20 +405,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                           }
                                         }
                                       },
-                              icon:
-                                  salvando
-                                      ? const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: FxLoading(
-                                          strokeWidth: 2,
-                                          color: EagleTokens.darkInk,
-                                        ),
-                                      )
-                                      : const Icon(Icons.send),
-                              label: Text(
-                                salvando ? 'Publicando...' : 'Publicar',
-                              ),
                             ),
                           ],
                         ),
@@ -573,7 +563,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                         decoration: fxListCardDecoration(
                           context,
                           accent: p.fixado ? primary : null,
-                          radius: 22,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),

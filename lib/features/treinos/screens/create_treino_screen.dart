@@ -7,9 +7,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/treinos_provider.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 const _niveis = ['INICIANTE', 'INTERMEDIARIO', 'AVANCADO'];
@@ -142,7 +142,6 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final canSubmit = _nomeCtrl.text.trim().isNotEmpty && !_loading;
     final previewTitle =
         _nomeCtrl.text.trim().isEmpty
@@ -254,45 +253,14 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                           _ErrorNotice(message: _error!),
                         ],
                         const SizedBox(height: 26),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 54,
-                          child: ElevatedButton.icon(
-                            onPressed: canSubmit ? _submit : null,
-                            icon:
-                                _loading
-                                    ? const SizedBox.shrink()
-                                    : const Icon(Icons.add_rounded, size: 20),
-                            label:
-                                _loading
-                                    ? const SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: FxLoading(
-                                        strokeWidth: 2.5,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                    : const Text(
-                                      'Criar treino',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primary,
-                              foregroundColor: Colors.white,
-                              disabledBackgroundColor:
-                                  isDark
-                                      ? EagleTokens.darkCardHi
-                                      : EagleTokens.lineSoft,
-                              disabledForegroundColor: mute,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 0,
-                            ),
+                        Opacity(
+                          opacity: canSubmit ? 1 : 0.45,
+                          child: FxLiquidPrimaryButton(
+                            label: 'Criar treino',
+                            icon: Icons.add_rounded,
+                            onPressed:
+                                canSubmit && !_loading ? _submit : null,
+                            loading: _loading,
                           ),
                         ),
                       ],
@@ -539,7 +507,6 @@ class _PresetRail extends StatelessWidget {
                 context,
                 accent: active ? primary : null,
                 selected: active,
-                radius: 18,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -614,7 +581,6 @@ class _LevelSelector extends StatelessWidget {
                 context,
                 accent: sel ? _niveisCor[i] : null,
                 selected: sel,
-                radius: 16,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

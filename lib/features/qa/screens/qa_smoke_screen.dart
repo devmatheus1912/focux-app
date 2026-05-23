@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/qa_smoke_catalog.dart';
 
 /// Tela QA — navega por todas as rotas de smoke test catalogadas.
@@ -24,6 +25,7 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -54,31 +56,33 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
             ),
 
           // Stats bar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-            child: Row(
-              children: [
-                _statChip('Total', qaSmokeRoutes.length, Colors.blue),
-                const SizedBox(width: 8),
-                _statChip(
-                  '✅',
-                  _results.values.where((r) => r.ok).length,
-                  Colors.green,
-                ),
-                const SizedBox(width: 8),
-                _statChip(
-                  '❌',
-                  _results.values.where((r) => !r.ok).length,
-                  Colors.red,
-                ),
-                const SizedBox(width: 8),
-                _statChip(
-                  '⏳',
-                  qaSmokeRoutes.length - _results.length,
-                  Colors.orange,
-                ),
-              ],
+          DecoratedBox(
+            decoration: fxListCardDecoration(context),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  _statChip('Total', qaSmokeRoutes.length, Colors.blue),
+                  const SizedBox(width: 8),
+                  _statChip(
+                    '✅',
+                    _results.values.where((r) => r.ok).length,
+                    Colors.green,
+                  ),
+                  const SizedBox(width: 8),
+                  _statChip(
+                    '❌',
+                    _results.values.where((r) => !r.ok).length,
+                    Colors.red,
+                  ),
+                  const SizedBox(width: 8),
+                  _statChip(
+                    '⏳',
+                    qaSmokeRoutes.length - _results.length,
+                    Colors.orange,
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -91,35 +95,37 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                 final route = qaSmokeRoutes[index];
                 final result = _results[route.id];
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  color: isDark ? EagleTokens.darkCard : Colors.white,
-                  child: ListTile(
-                    leading: _statusIcon(result),
-                    title: Text(
-                      route.label,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Text(
-                      '${route.authMode} • ${route.path}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color:
-                            isDark
-                                ? EagleTokens.darkInkMute
-                                : EagleTokens.inkMute,
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: DecoratedBox(
+                    decoration: fxListCardDecoration(context),
+                    child: ListTile(
+                      leading: _statusIcon(result),
+                      title: Text(
+                        route.label,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _areaChip(route.area, isDark),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.open_in_new, size: 18),
-                          onPressed: () => _navigateAndRecord(route),
+                      subtitle: Text(
+                        '${route.authMode} • ${route.path}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color:
+                              isDark
+                                  ? EagleTokens.darkInkMute
+                                  : EagleTokens.inkMute,
                         ),
-                      ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _areaChip(route.area, isDark),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.open_in_new, size: 18),
+                            onPressed: () => _navigateAndRecord(route),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

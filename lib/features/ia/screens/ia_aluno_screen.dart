@@ -11,6 +11,7 @@ import '../data/ia_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 
 class IaAlunoScreen extends ConsumerStatefulWidget {
   const IaAlunoScreen({super.key});
@@ -302,17 +303,11 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
         const SizedBox(height: 8),
         const IaSafetyDisclaimer(compact: true),
         const SizedBox(height: 20),
-        FilledButton.icon(
+        FxLiquidPrimaryButton(
+          label: _loading ? 'Analisando...' : 'Gerar Recomendações',
+          icon: Icons.auto_awesome,
+          loading: _loading,
           onPressed: _loading ? null : _gerarProgressao,
-          icon:
-              _loading
-                  ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: FxLoading(strokeWidth: 2, color: Colors.white),
-                  )
-                  : const Icon(Icons.auto_awesome),
-          label: Text(_loading ? 'Analisando...' : 'Gerar Recomendações'),
         ),
         if (_resultado != null) ...[
           const SizedBox(height: 20),

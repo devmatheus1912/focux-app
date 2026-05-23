@@ -13,6 +13,7 @@ import '../providers/exercicios_provider.dart';
 import 'widgets/exercicios_batch_actions.dart';
 import 'widgets/exercicios_filter_bar.dart';
 import 'widgets/exercicios_list_view.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -129,8 +130,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
               ),
               FilledButton(
                 style: FilledButton.styleFrom(
-                  backgroundColor: EagleTokens.bad,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Theme.of(ctx).colorScheme.error,
+                  foregroundColor: Theme.of(ctx).colorScheme.onError,
                 ),
                 onPressed: () => Navigator.pop(ctx, true),
                 child: const Text('Excluir'),
@@ -222,8 +223,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
               ),
               FilledButton(
                 style: FilledButton.styleFrom(
-                  backgroundColor: EagleTokens.bad,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Theme.of(ctx).colorScheme.error,
+                  foregroundColor: Theme.of(ctx).colorScheme.onError,
                 ),
                 onPressed: () => Navigator.pop(ctx, true),
                 child: const Text('Excluir'),
@@ -312,9 +313,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
               ),
             ),
             actions: [
-              FilledButton(
+              FxLiquidPrimaryButton(
+                label: 'Entendi',
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Entendi'),
+                expand: false,
               ),
             ],
           ),

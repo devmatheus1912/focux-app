@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/theme_provider.dart';
 import '../../../core/analytics/analytics_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -13,7 +12,9 @@ import '../../../core/router/role_home.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../data/ia_repository.dart';
 import '../../health/data/health_repository.dart';
+import 'package:focux_app/core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
@@ -783,7 +784,9 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                       const SizedBox(width: 10),
                       Expanded(
                         flex: 2,
-                        child: FilledButton.icon(
+                        child: FxLiquidPrimaryButton(
+                          label: 'Criar tarefa',
+                          icon: Icons.add_task_outlined,
                           onPressed: () {
                             final text = controller.text.trim();
                             if (text.isEmpty) return;
@@ -794,16 +797,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                               ),
                             );
                           },
-                          icon: const Icon(Icons.add_task_outlined, size: 17),
-                          label: const Text('Criar tarefa'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: brand,
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size.fromHeight(48),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
                         ),
                       ),
                     ],
@@ -837,12 +830,12 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(26),
+              borderRadius: BorderRadius.circular(TokensStrip.rXl),
               child: DecoratedBox(
                 decoration: fxListCardDecoration(
                   ctx,
                   accent: primary,
-                  radius: 26,
+                  radius: TokensStrip.rXl,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
@@ -970,13 +963,14 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     final brand = dark ? primaryAccent : primary;
 
     return Scaffold(
-      backgroundColor: shellScaffoldColor,
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(82),
         child: SafeArea(
           bottom: false,
           child: Container(
-            color: shellScaffoldColor,
+            color: Colors.transparent,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1533,18 +1527,16 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                             ),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: FilledButton.icon(
+                              child: FxLiquidPrimaryButton(
+                                label: 'Abrir aluno',
+                                icon: Icons.person_outline,
+                                expand: true,
                                 onPressed:
                                     _selectedAlunoId == null
                                         ? null
                                         : () => context.push(
                                           '/alunos/$_selectedAlunoId',
                                         ),
-                                icon: const Icon(
-                                  Icons.person_outline,
-                                  size: 16,
-                                ),
-                                label: const Text('Abrir aluno'),
                               ),
                             ),
                           ],

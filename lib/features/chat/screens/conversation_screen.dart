@@ -22,11 +22,13 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -701,9 +703,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 onPressed: () => Navigator.pop(dialogContext),
                 child: const Text('Cancelar'),
               ),
-              FilledButton(
+              FxLiquidPrimaryButton(
+                label: 'Salvar',
+                expand: false,
                 onPressed: () => Navigator.pop(dialogContext, ctrl.text),
-                child: const Text('Salvar'),
               ),
             ],
           ),
@@ -836,12 +839,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           (_) => Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(TokensStrip.rXl),
               child: DecoratedBox(
                 decoration: fxListCardDecoration(
                   context,
                   accent: primary,
-                  radius: 22,
+                  radius: TokensStrip.rXl,
                 ),
                 child: SafeArea(
                   child: ConstrainedBox(
@@ -987,12 +990,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           (_) => Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(TokensStrip.rXl),
               child: DecoratedBox(
                 decoration: fxListCardDecoration(
                   context,
                   accent: primary,
-                  radius: 22,
+                  radius: TokensStrip.rXl,
                 ),
                 child: SafeArea(
                   child: Padding(
@@ -1051,12 +1054,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           (_) => Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(TokensStrip.rXl),
               child: DecoratedBox(
                 decoration: fxListCardDecoration(
                   context,
                   accent: primary,
-                  radius: 22,
+                  radius: TokensStrip.rXl,
                 ),
                 child: SafeArea(
                   child: Padding(
@@ -1141,12 +1144,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               return Padding(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(TokensStrip.rXl),
                   child: DecoratedBox(
                     decoration: fxListCardDecoration(
                       context,
                       accent: primary,
-                      radius: 22,
+                      radius: TokensStrip.rXl,
                     ),
                     child: AnimatedPadding(
                 duration: const Duration(milliseconds: 180),
@@ -1363,12 +1366,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           (_) => Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(TokensStrip.rXl),
               child: DecoratedBox(
                 decoration: fxListCardDecoration(
                   context,
                   accent: primary,
-                  radius: 22,
+                  radius: TokensStrip.rXl,
                 ),
                 child: SafeArea(
                   child: Padding(
@@ -1458,12 +1461,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           (sheetContext) => Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(TokensStrip.rXl),
               child: DecoratedBox(
                 decoration: fxListCardDecoration(
                   context,
                   accent: primary,
-                  radius: 22,
+                  radius: TokensStrip.rXl,
                 ),
                 child: SafeArea(
                   child: StatefulBuilder(
@@ -1626,7 +1629,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           (_, __, ___) => Container(
                             height: 240,
                             alignment: Alignment.center,
-                            decoration: fxListCardDecoration(context, radius: 24),
+                            decoration: fxListCardDecoration(context),
                             child: const Icon(
                               Icons.broken_image_outlined,
                               size: 32,
@@ -2030,7 +2033,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
                           child: Container(
-                            decoration: fxListCardDecoration(context, radius: 24),
+                            decoration: fxListCardDecoration(context),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -2224,7 +2227,7 @@ class _AttachOption extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: fxListCardDecoration(context, accent: primary, radius: 14),
+        decoration: fxListCardDecoration(context, accent: primary),
         child: Row(
           children: [
             Icon(icon, color: primary),
@@ -2337,11 +2340,11 @@ class _ConversationErrorState extends StatelessWidget {
               style: TextStyle(color: muted),
             ),
             const SizedBox(height: 14),
-            FilledButton.icon(
+            FxLiquidPrimaryButton(
+              label: 'Tentar novamente',
+              icon: Icons.refresh_rounded,
+              expand: false,
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Tentar novamente'),
-              style: FilledButton.styleFrom(backgroundColor: accentColor),
             ),
           ],
         ),
@@ -3002,7 +3005,7 @@ class _ReplyComposerBar extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-      decoration: fxListCardDecoration(context, accent: accentColor, radius: 18),
+      decoration: fxListCardDecoration(context, accent: accentColor),
       child: Row(
         children: [
           Container(
@@ -3108,7 +3111,7 @@ class _RecordingComposerBar extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 18),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Row(
         children: [
           Container(
@@ -3390,7 +3393,7 @@ class _MediaGalleryTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.all(10),
-        decoration: fxListCardDecoration(context, accent: primary, radius: 18),
+        decoration: fxListCardDecoration(context, accent: primary),
         child: Row(
           children: [
             ClipRRect(

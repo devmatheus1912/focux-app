@@ -161,7 +161,7 @@ class ShellSurface extends StatelessWidget {
     super.key,
     required this.child,
     this.accent,
-    this.radius = TokensStrip.rLg,
+    this.radius = TokensStrip.rCard,
     this.padding,
     this.onTap,
     this.blur = false,
@@ -194,7 +194,7 @@ class ShellSurface extends StatelessWidget {
 BoxDecoration fxListCardDecoration(
   BuildContext context, {
   Color? accent,
-  double radius = TokensStrip.rLg,
+  double radius = TokensStrip.rCard,
   bool selected = false,
 }) {
   final chrome = ShellChrome.of(context);

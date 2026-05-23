@@ -6,7 +6,8 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/theme_provider.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -164,7 +165,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     }
 
     return Scaffold(
-      backgroundColor: shellScaffoldColor,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: treinosAsync.when(
@@ -358,10 +359,8 @@ class _DeleteWorkoutSheet extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final card = ShellChrome.forDark(isDark).cardFill;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
-    final dangerFill =
-        isDark ? const Color(0xFFB24646) : const Color(0xFFA83A3A);
+    final dangerFill = EagleTokens.bad;
     final dangerSoft =
         isDark
             ? EagleTokens.bad.withValues(alpha: 0.16)
@@ -460,7 +459,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isDark ? EagleTokens.darkBg : const Color(0xFFF7F7F4),
+                  color: isDark ? EagleTokens.darkBg : EagleTokens.lineSoft,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: line),
                 ),
@@ -1179,15 +1178,13 @@ class _EmptyState extends StatelessWidget {
             style: TextStyle(color: mute, fontSize: 13, height: 1.35),
           ),
           const SizedBox(height: 18),
-          FilledButton.icon(
-            onPressed: onCreate,
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('Criar treino'),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(180, 48),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
+          SizedBox(
+            width: 220,
+            child: FxLiquidPrimaryButton(
+              label: 'Criar treino',
+              icon: Icons.add_rounded,
+              onPressed: onCreate,
+              expand: true,
             ),
           ),
         ],
@@ -1310,7 +1307,6 @@ class _TreinoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = ShellChrome.forDark(isDark).cardFill;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
@@ -1328,13 +1324,13 @@ class _TreinoCard extends StatelessWidget {
               ? onToggleSelection
               : () => context.push('/treinos/${treino.id}'),
       onLongPress: onStartSelection,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
         padding: const EdgeInsets.all(15),
-        decoration: ShellChrome.forDark(isDark).listCard(
+        decoration: fxListCardDecoration(
+          context,
+          accent: primary,
           selected: selected,
-          primary: primary,
-          radius: 24,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1460,7 +1456,7 @@ class _TreinoCard extends StatelessWidget {
                         color:
                             isDark
                                 ? EagleTokens.darkBg
-                                : const Color(0xFFF5F6FA),
+                                : EagleTokens.lineSoft,
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(color: line),
                       ),

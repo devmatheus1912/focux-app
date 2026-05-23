@@ -9,6 +9,7 @@ import '../data/alertas_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
@@ -92,9 +93,10 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                       onPressed: () => Navigator.pop(ctx, false),
                       child: const Text('Cancelar'),
                     ),
-                    FilledButton(
+                    FxLiquidPrimaryButton(
+                      label: 'Salvar',
+                      expand: false,
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Salvar'),
                     ),
                   ],
                 ),
@@ -154,10 +156,11 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                 onPressed: () => Navigator.pop(ctx, false),
                 child: const Text('Cancelar'),
               ),
-              FilledButton.icon(
+              FxLiquidPrimaryButton(
+                label: 'Enviar',
+                icon: Icons.send,
+                expand: false,
                 onPressed: () => Navigator.pop(ctx, true),
-                icon: const Icon(Icons.send),
-                label: const Text('Enviar'),
               ),
             ],
           ),
@@ -243,6 +246,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     }
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: FxShellAppBar(
         title: 'Alertas de Risco',

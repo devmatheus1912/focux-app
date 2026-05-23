@@ -8,6 +8,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/galeria_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 
 class GaleriaScreen extends ConsumerStatefulWidget {
   const GaleriaScreen({super.key});
@@ -109,6 +110,7 @@ class _State extends ConsumerState<GaleriaScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -158,9 +160,10 @@ class _State extends ConsumerState<GaleriaScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    FilledButton.icon(
-                      icon: const Icon(Icons.add_photo_alternate_outlined),
-                      label: const Text('Adicionar foto'),
+                    FxLiquidPrimaryButton(
+                      icon: Icons.add_photo_alternate_outlined,
+                      label: 'Adicionar foto',
+                      expand: false,
                       onPressed: _add,
                     ),
                   ],

@@ -4,11 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../data/enums.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AddExercicioScreen extends ConsumerStatefulWidget {
@@ -117,7 +118,6 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
     final bottom = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
@@ -359,31 +359,10 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
           top: false,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
-            child: SizedBox(
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _loading ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primary,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: primary.withValues(alpha: 0.42),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  elevation: 0,
-                ),
-                child:
-                    _loading
-                        ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: FxLoading(strokeWidth: 2, color: Colors.white),
-                        )
-                        : const Text(
-                          'Cadastrar exercício',
-                          style: TextStyle(fontWeight: FontWeight.w900),
-                        ),
-              ),
+            child: FxLiquidPrimaryButton(
+              label: 'Cadastrar exercício',
+              onPressed: _loading ? null : _submit,
+              loading: _loading,
             ),
           ),
         ),
@@ -565,7 +544,6 @@ class _SectionCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final collapsed = onToggle != null && !expanded;
-    final r = collapsed ? 18.0 : 20.0;
     final header = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -622,7 +600,7 @@ class _SectionCard extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOutCubic,
       padding: EdgeInsets.all(collapsed ? 12 : 14),
-      decoration: fxListCardDecoration(context, radius: r),
+      decoration: fxListCardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -890,7 +868,7 @@ class _EnumPickerCompact<T extends Enum> extends StatelessWidget {
               width: width,
               margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-              decoration: fxListCardDecoration(context, accent: primary, radius: 24),
+              decoration: fxListCardDecoration(context, accent: primary),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1197,8 +1175,8 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
           height: sheetHeight,
           margin: EdgeInsets.zero,
           padding: EdgeInsets.fromLTRB(16, 10, 16, 12 + bottom),
-          decoration: fxListCardDecoration(context, accent: primary, radius: 26).copyWith(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+          decoration: fxListCardDecoration(context, accent: primary).copyWith(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(TokensStrip.rXl)),
           ),
           child: Column(
             children: [
@@ -1493,7 +1471,7 @@ class _SwitchRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
-        decoration: fxListCardDecoration(context, radius: 16),
+        decoration: fxListCardDecoration(context),
         child: Row(
           children: [
             Expanded(

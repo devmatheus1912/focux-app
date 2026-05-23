@@ -6,6 +6,8 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
+import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 
 class AgendaAlunoScreen extends ConsumerStatefulWidget {
   const AgendaAlunoScreen({super.key});
@@ -63,10 +65,8 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor:
-        Theme.of(context).brightness == Brightness.dark
-            ? EagleTokens.darkBg
-            : EagleTokens.paper,
+    extendBody: true,
+    backgroundColor: Colors.transparent,
     appBar: AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -108,70 +108,70 @@ class _AgCard extends StatelessWidget {
     final inicio = ag.inicio;
     final fim = ag.fim;
     final cor = _statusColor(context, ag.status);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    ag.titulo ?? 'Sessão de treino',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: DecoratedBox(
+        decoration: fxListCardDecoration(context, accent: cor),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      ag.titulo ?? 'Sessão de treino',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
-                ),
-                _StatusChip(status: ag.status, cor: cor),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today,
-                  size: 14,
-                  color: EagleTokens.inkMute,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${inicio.day.toString().padLeft(2, '0')}/${inicio.month.toString().padLeft(2, '0')}/${inicio.year}',
-                  style: const TextStyle(
-                    color: EagleTokens.inkMute,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Icon(
-                  Icons.access_time,
-                  size: 14,
-                  color: EagleTokens.inkMute,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${_hm(inicio)} – ${_hm(fim)}',
-                  style: const TextStyle(
-                    color: EagleTokens.inkMute,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            if (ag.status == 'AGENDADO') ...[
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.tonal(
-                  onPressed: () => onConfirmar(ag),
-                  child: const Text('Confirmar presença'),
-                ),
+                  _StatusChip(status: ag.status, cor: cor),
+                ],
               ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 14,
+                    color: EagleTokens.inkMute,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${inicio.day.toString().padLeft(2, '0')}/${inicio.month.toString().padLeft(2, '0')}/${inicio.year}',
+                    style: const TextStyle(
+                      color: EagleTokens.inkMute,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Icon(
+                    Icons.access_time,
+                    size: 14,
+                    color: EagleTokens.inkMute,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${_hm(inicio)} – ${_hm(fim)}',
+                    style: const TextStyle(
+                      color: EagleTokens.inkMute,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+              if (ag.status == 'AGENDADO') ...[
+                const SizedBox(height: 12),
+                FxLiquidPrimaryButton(
+                  label: 'Confirmar presença',
+                  onPressed: () => onConfirmar(ag),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

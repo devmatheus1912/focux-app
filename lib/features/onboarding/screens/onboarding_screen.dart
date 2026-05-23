@@ -6,8 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/brand_glass_mark.dart';
+import '../../../core/widgets/fx_motion.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOCUX PERSONAL — FxIntroSlides (Onboarding) — Premium V2
@@ -362,71 +363,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
                   // CTA
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s5),
                     child: Column(
                       children: [
-                        // ── Tactile button with spring press ──
-                        _SpringButton(
-                          onTap: _next,
-                          child: Container(
-                            width: double.infinity,
-                            height: 52,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              gradient: LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                colors: [primary, BrandPalette.deep(primary)],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: primary.withValues(alpha: 0.38),
-                                  blurRadius: 18,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  top: 0,
-                                  left: 18,
-                                  right: 18,
-                                  child: Container(
-                                    height: 1,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Colors.white.withValues(alpha: 0.0),
-                                          Colors.white.withValues(alpha: 0.28),
-                                          Colors.white.withValues(alpha: 0.0),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        _current < 2
-                                            ? 'Próximo →'
-                                            : 'Começar agora',
-                                        style: GoogleFonts.outfit(
-                                          color: Colors.white,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        FxLiquidPrimaryButton(
+                          label:
+                              _current < 2
+                                  ? 'Próximo →'
+                                  : 'Começar agora',
+                          onPressed: _next,
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: TokensStrip.s3),
                         GestureDetector(
                           onTap: () => context.go('/login'),
                           child: RichText(
@@ -448,7 +395,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             ),
                           ),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: TokensStrip.s3),
                       ],
                     ),
                   ),
@@ -835,63 +782,6 @@ class _MetricChipWidget extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// SPRING BUTTON — tactile press feedback
-// ═══════════════════════════════════════════════════════════════════════════
-
-class _SpringButton extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onTap;
-  const _SpringButton({required this.child, required this.onTap});
-
-  @override
-  State<_SpringButton> createState() => _SpringButtonState();
-}
-
-class _SpringButtonState extends State<_SpringButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 150),
-      reverseDuration: const Duration(milliseconds: 300),
-    );
-    _scale = Tween<double>(
-      begin: 1.0,
-      end: 0.96,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _ctrl.forward(),
-      onTapUp: (_) {
-        _ctrl.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _ctrl.reverse(),
-      child: AnimatedBuilder(
-        animation: _scale,
-        builder:
-            (_, child) => Transform.scale(scale: _scale.value, child: child),
-        child: widget.child,
       ),
     );
   }

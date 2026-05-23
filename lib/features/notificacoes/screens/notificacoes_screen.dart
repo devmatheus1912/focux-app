@@ -38,6 +38,7 @@ class NotificacoesScreen extends ConsumerWidget {
     }
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: FxShellAppBar(
         title: 'Notificações',

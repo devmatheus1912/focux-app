@@ -14,6 +14,7 @@ import '../../anamnese/data/anamnese_repository.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
@@ -576,17 +577,11 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                       const SizedBox(height: 18),
                       SizedBox(
                         width: double.infinity,
-                        child: FilledButton.icon(
+                        child: FxLiquidPrimaryButton(
+                          loading: saving,
+                          icon: Icons.check_circle_outline,
+                          label: 'Salvar medida',
                           onPressed: saving ? null : salvar,
-                          icon:
-                              saving
-                                  ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: FxLoading(strokeWidth: 2),
-                                  )
-                                  : const Icon(Icons.check_circle_outline),
-                          label: const Text('Salvar medida'),
                         ),
                       ),
                     ],
@@ -1140,15 +1135,11 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  FilledButton.icon(
+                  FxLiquidPrimaryButton(
+                    loading: _saving,
+                    icon: Icons.check,
+                    label: 'Salvar meu perfil',
                     onPressed: _saving ? null : _save,
-                    icon: const Icon(Icons.check),
-                    label: Text(
-                      'Salvar meu perfil',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 10),
                   OutlinedButton.icon(
@@ -1203,7 +1194,7 @@ class _SectionCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 24),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1408,7 +1399,7 @@ class _ProgressEntryCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, radius: 20),
+      decoration: fxListCardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

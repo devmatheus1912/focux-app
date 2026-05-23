@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -96,7 +96,12 @@ class GamificacaoScreen extends ConsumerWidget {
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s5,
+                10,
+                TokensStrip.s5,
+                TokensStrip.s5,
+              ),
               child: Text(
                 'Minha Evolução',
                 style: TextStyle(
@@ -110,7 +115,12 @@ class GamificacaoScreen extends ConsumerWidget {
 
             // Streak hero card
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                0,
+                TokensStrip.s4,
+                TokensStrip.s4,
+              ),
               child: async.when(
                 loading: () => _StreakHeroStatic(
                   dark: dark,
@@ -144,7 +154,12 @@ class GamificacaoScreen extends ConsumerWidget {
 
             // Conquistas title
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s5,
+                0,
+                TokensStrip.s5,
+                TokensStrip.s3,
+              ),
               child: Text(
                 'Conquistas',
                 style: TextStyle(
@@ -158,7 +173,7 @@ class GamificacaoScreen extends ConsumerWidget {
 
             // Badges grid
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
               child: GridView.count(
                 crossAxisCount: 3,
                 crossAxisSpacing: 10,
@@ -271,13 +286,12 @@ class GamificacaoScreen extends ConsumerWidget {
 
             // Referral card
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
               child: Container(
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(TokensStrip.s4),
                 decoration: fxListCardDecoration(
                   context,
                   accent: brand,
-                  radius: 20,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,7 +324,7 @@ class GamificacaoScreen extends ConsumerWidget {
                       decoration: BoxDecoration(
                         color:
                             dark ? brand.withValues(alpha: 0.14) : brandSofter,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(TokensStrip.rCard),
                         border: Border.all(
                           color: brand.withValues(alpha: dark ? 0.26 : 0.12),
                         ),
@@ -346,7 +360,8 @@ class GamificacaoScreen extends ConsumerWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: brand,
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                               ),
                               child: const Text(
                                 'Copiar',
@@ -386,7 +401,7 @@ class GamificacaoScreen extends ConsumerWidget {
                               dark
                                   ? const Color(0x0FFFFFFF)
                                   : EagleTokens.lineSoft,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(TokensStrip.rCard),
                           border: Border.all(color: line),
                         ),
                         child: Row(

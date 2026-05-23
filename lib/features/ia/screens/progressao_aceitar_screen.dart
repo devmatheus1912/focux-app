@@ -6,6 +6,7 @@ import '../data/ia_repository.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/feedback_helper.dart';
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
@@ -55,11 +56,12 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  FilledButton.icon(
+                  FxLiquidPrimaryButton(
+                    label: 'Tentar novamente',
+                    icon: Icons.refresh,
+                    expand: false,
                     onPressed:
                         () => ref.invalidate(sugestoesProgressaoProvider),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Tentar novamente'),
                   ),
                 ],
               ),
@@ -166,17 +168,15 @@ class _CardSugestao extends StatelessWidget {
         sugestao['novaCarga'];
     final motivo = sugestao['motivo'] as String? ?? '';
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 14),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: primary.withValues(alpha: 0.3)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: DecoratedBox(
+        decoration: fxListCardDecoration(context, accent: primary),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Cabeçalho: nome do aluno
             Row(
               children: [
@@ -292,6 +292,7 @@ class _CardSugestao extends StatelessWidget {
               ],
             ),
           ],
+        ),
         ),
       ),
     );

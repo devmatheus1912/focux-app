@@ -6,8 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../data/planos_repository.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/design_tokens.dart';
 
 class EnterprisePromoScreen extends ConsumerStatefulWidget {
   const EnterprisePromoScreen({super.key});
@@ -124,7 +126,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                       children: [
                         Icon(
                           Icons.check_circle,
-                          color: Color(0xFF22C55E),
+                          color: EagleTokens.good,
                           size: 20,
                         ),
                         SizedBox(width: 12),
@@ -143,7 +145,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(TokensStrip.rCard),
                     border: Border.all(
                       color: Colors.white.withValues(alpha: 0.1),
                     ),
@@ -187,35 +189,10 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _starting ? null : _startTrial,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: primary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child:
-                        _starting
-                            ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: FxLoading(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                            : const Text(
-                              'Experimentar 5 dias gratis',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                  ),
+                FxLiquidPrimaryButton(
+                  label: 'Experimentar 5 dias gratis',
+                  loading: _starting,
+                  onPressed: _starting ? null : _startTrial,
                 ),
                 const SizedBox(height: 12),
                 TextButton(

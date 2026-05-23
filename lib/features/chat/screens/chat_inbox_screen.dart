@@ -6,6 +6,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -723,10 +724,10 @@ class _AlunoContactTile extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: fxListCardDecoration(context, radius: 16),
+        decoration: fxListCardDecoration(context),
         child: Row(
           children: [
             aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty
@@ -794,7 +795,7 @@ class _SearchResultTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       onTap: () {
         if (msg.alunoId != null) {
           context.push('/alunos/${msg.alunoId}/chat');
@@ -802,7 +803,7 @@ class _SearchResultTile extends StatelessWidget {
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: fxListCardDecoration(context, radius: 14),
+        decoration: fxListCardDecoration(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -922,18 +923,17 @@ class _InboxTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       onLongPress: onLongPress,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration:
             selected
                 ? fxListCardDecoration(
                   context,
-                  radius: 18,
                   accent: primary,
                   selected: true,
                 )
-                : fxListCardDecoration(context, radius: 18),
+                : fxListCardDecoration(context),
         child: Row(
           children: [
             if (selecting) ...[

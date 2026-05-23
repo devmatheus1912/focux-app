@@ -7,6 +7,7 @@ import '../data/alertas_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class AlertasConfigScreen extends ConsumerStatefulWidget {
@@ -88,6 +89,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
     final primary = theme.colorScheme.primary;
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: FxShellAppBar(
         title: 'Configurar Alertas',
@@ -114,9 +116,10 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
-                      FilledButton(
+                      FxLiquidPrimaryButton(
+                        label: 'Tentar novamente',
+                        expand: false,
                         onPressed: _load,
-                        child: const Text('Tentar novamente'),
                       ),
                     ],
                   ),
@@ -127,7 +130,11 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Card(
+                    DecoratedBox(
+                      decoration: fxListCardDecoration(
+                        context,
+                        accent: primary,
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
@@ -206,7 +213,11 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Card(
+                    DecoratedBox(
+                      decoration: fxListCardDecoration(
+                        context,
+                        accent: EagleTokens.warn,
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
@@ -288,19 +299,10 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                       ),
                     ),
                     const Spacer(),
-                    FilledButton(
+                    FxLiquidPrimaryButton(
+                      label: 'Salvar',
+                      loading: _salvando,
                       onPressed: _salvando ? null : _salvar,
-                      child:
-                          _salvando
-                              ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: FxLoading(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                              : const Text('Salvar'),
                     ),
                   ],
                 ),

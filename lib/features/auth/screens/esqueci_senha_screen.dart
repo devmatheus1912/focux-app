@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../data/auth_repository.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
@@ -332,11 +333,11 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                       ),
                       const SizedBox(height: 14),
                     ],
-                    AuthPrimaryButton(
+                    FxLiquidPrimaryButton(
                       label: 'Enviar link de recuperação',
                       icon: Icons.send_rounded,
-                      isLoading: _loading,
-                      onPressed: _submit,
+                      loading: _loading,
+                      onPressed: _loading ? null : _submit,
                     ),
                     const SizedBox(height: 20),
                     Center(

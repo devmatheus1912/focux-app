@@ -6,6 +6,8 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -306,13 +308,12 @@ class _TrainingPlanCard extends StatelessWidget {
 
     return InkWell(
       onTap: handleAction,
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: fxListCardDecoration(
           context,
           accent: concluido ? EagleTokens.good : primary,
-          radius: 22,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,17 +421,10 @@ class _TrainingPlanCard extends StatelessWidget {
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
+                child: FxLiquidPrimaryButton(
+                  label: 'Ver status do treino',
+                  icon: Icons.info_outline_rounded,
                   onPressed: handleAction,
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(46),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  icon: const Icon(Icons.info_outline_rounded, size: 18),
-                  label: const Text('Ver status do treino'),
                 ),
               ),
             ] else
@@ -450,19 +444,14 @@ class _TrainingPlanCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  FilledButton.icon(
+                  FxLiquidPrimaryButton(
+                    label: concluido ? 'Rever' : 'Iniciar',
+                    icon:
+                        concluido
+                            ? Icons.replay_rounded
+                            : Icons.play_arrow_rounded,
                     onPressed: handleAction,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(0, 44),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    icon: Icon(
-                      concluido
-                          ? Icons.replay_rounded
-                          : Icons.play_arrow_rounded,
-                      size: 18,
-                    ),
-                    label: Text(concluido ? 'Rever' : 'Iniciar'),
+                    expand: false,
                   ),
                 ],
               ),
@@ -490,12 +479,11 @@ void _showTrainingPendingSheet({
     builder: (sheetContext) => Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 18),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(TokensStrip.rXl),
         child: DecoratedBox(
           decoration: fxListCardDecoration(
             sheetContext,
             accent: primary,
-            radius: 26,
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(22, 12, 22, 22),
@@ -554,7 +542,6 @@ void _showTrainingPendingSheet({
                   decoration: fxListCardDecoration(
                     sheetContext,
                     accent: primary,
-                    radius: 22,
                   ),
                   child: Text(
                     'Seu personal ja reservou este treino. Assim que os exercicios forem liberados, o botao Iniciar aparece com registro de series, videos e feedback.',
@@ -569,15 +556,9 @@ void _showTrainingPendingSheet({
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: FilledButton(
+                  child: FxLiquidPrimaryButton(
+                    label: 'Entendi',
                     onPressed: () => Navigator.of(sheetContext).pop(),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text('Entendi'),
                   ),
                 ),
               ],
@@ -614,7 +595,6 @@ class _TrainingReadinessSection extends StatelessWidget {
       decoration: fxListCardDecoration(
         context,
         accent: primary,
-        radius: 24,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -726,7 +706,6 @@ class _ReadinessMarker extends StatelessWidget {
       decoration: fxListCardDecoration(
         context,
         accent: color,
-        radius: 18,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

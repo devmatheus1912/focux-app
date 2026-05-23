@@ -6,6 +6,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,6 +69,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(112),
@@ -421,7 +423,10 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                               ),
                         ),
                         const SizedBox(height: 24),
-                        FilledButton.icon(
+                        FxLiquidPrimaryButton(
+                          label: salvando ? 'Salvando...' : 'Salvar',
+                          icon: Icons.save,
+                          loading: salvando,
                           onPressed:
                               salvando
                                   ? null
@@ -464,18 +469,6 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                       }
                                     }
                                   },
-                          icon:
-                              salvando
-                                  ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: FxLoading(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                  : const Icon(Icons.save),
-                          label: Text(salvando ? 'Salvando...' : 'Salvar'),
                         ),
                       ],
                     ),
@@ -554,9 +547,10 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                       onPressed: () => Navigator.pop(ctx, false),
                       child: const Text('Cancelar'),
                     ),
-                    FilledButton(
+                    FxLiquidPrimaryButton(
+                      label: 'Registrar',
+                      expand: false,
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Registrar'),
                     ),
                   ],
                 ),
@@ -820,7 +814,13 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                           },
                         ),
                         const SizedBox(height: 24),
-                        FilledButton.icon(
+                        FxLiquidPrimaryButton(
+                          label:
+                              salvando
+                                  ? 'Salvando...'
+                                  : 'Lancar Mensalidade',
+                          icon: Icons.check,
+                          loading: salvando,
                           onPressed:
                               salvando
                                   ? null
@@ -860,20 +860,6 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                       }
                                     }
                                   },
-                          icon:
-                              salvando
-                                  ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: FxLoading(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                  : const Icon(Icons.check),
-                          label: Text(
-                            salvando ? 'Salvando...' : 'Lancar Mensalidade',
-                          ),
                         ),
                       ],
                     ),
@@ -890,7 +876,9 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
     return Scaffold(
-    floatingActionButton: Column(
+      extendBody: true,
+      backgroundColor: Colors.transparent,
+      floatingActionButton: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         FloatingActionButton.small(

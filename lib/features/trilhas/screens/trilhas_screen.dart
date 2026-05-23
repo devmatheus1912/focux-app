@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -104,10 +105,8 @@ class TrilhasScreen extends ConsumerWidget {
     final trilhasAsync = ref.watch(trilhasAlunoProvider(alunoId));
 
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -153,10 +152,11 @@ class TrilhasScreen extends ConsumerWidget {
                     style: TextStyle(color: EagleTokens.inkMute),
                   ),
                   const SizedBox(height: 12),
-                  ElevatedButton.icon(
+                  FxLiquidPrimaryButton(
+                    label: 'Criar primeira trilha',
+                    icon: Icons.add,
+                    expand: false,
                     onPressed: () => _showCriarTrilha(context, ref),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Criar primeira trilha'),
                   ),
                 ],
               ),
@@ -248,29 +248,26 @@ class TrilhasScreen extends ConsumerWidget {
                       onChanged: (v) => setState(() => metaTipo = v!),
                     ),
                     const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          if (tituloCtrl.text.trim().isEmpty) return;
-                          final api = ref.read(apiClientProvider);
-                          await api.dio.post(
-                            '/api/trilhas',
-                            data: {
-                              'alunoId': alunoId,
-                              'titulo': tituloCtrl.text.trim(),
-                              'descricao':
-                                  descCtrl.text.trim().isEmpty
-                                      ? null
-                                      : descCtrl.text.trim(),
-                              'metaTipo': metaTipo,
-                            },
-                          );
-                          ref.invalidate(trilhasAlunoProvider(alunoId));
-                          if (ctx.mounted) Navigator.pop(ctx);
-                        },
-                        child: const Text('Criar Trilha'),
-                      ),
+                    FxLiquidPrimaryButton(
+                      label: 'Criar Trilha',
+                      onPressed: () async {
+                        if (tituloCtrl.text.trim().isEmpty) return;
+                        final api = ref.read(apiClientProvider);
+                        await api.dio.post(
+                          '/api/trilhas',
+                          data: {
+                            'alunoId': alunoId,
+                            'titulo': tituloCtrl.text.trim(),
+                            'descricao':
+                                descCtrl.text.trim().isEmpty
+                                    ? null
+                                    : descCtrl.text.trim(),
+                            'metaTipo': metaTipo,
+                          },
+                        );
+                        ref.invalidate(trilhasAlunoProvider(alunoId));
+                        if (ctx.mounted) Navigator.pop(ctx);
+                      },
                     ),
                   ],
                 ),

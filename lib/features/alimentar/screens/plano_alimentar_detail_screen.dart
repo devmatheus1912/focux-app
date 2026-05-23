@@ -8,6 +8,7 @@ import '../data/alimentar_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 
 class PlanoAlimentarDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -145,10 +146,11 @@ class _PlanoAlimentarDetailScreenState
                       onPressed: () => Navigator.pop(ctx, false),
                       child: const Text('Cancelar'),
                     ),
-                    FilledButton.icon(
+                    FxLiquidPrimaryButton(
+                      label: 'Gerar',
+                      icon: Icons.auto_awesome,
+                      expand: false,
                       onPressed: () => Navigator.pop(ctx, true),
-                      icon: const Icon(Icons.auto_awesome),
-                      label: const Text('Gerar'),
                     ),
                   ],
                 ),
@@ -186,10 +188,8 @@ class _PlanoAlimentarDetailScreenState
   Widget build(BuildContext context) {
     final p = widget.plano;
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -543,16 +543,10 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
             _num(_gord, 'Gordura (g)'),
             _field(_alimentos, 'Alimentos', maxLines: 4),
             const SizedBox(height: 16),
-            FilledButton(
+            FxLiquidPrimaryButton(
+              label: 'Adicionar Refeição',
+              loading: _saving,
               onPressed: _saving ? null : _salvar,
-              child:
-                  _saving
-                      ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: FxLoading(strokeWidth: 2, color: Colors.white),
-                      )
-                      : const Text('Adicionar Refeição'),
             ),
           ],
         ),

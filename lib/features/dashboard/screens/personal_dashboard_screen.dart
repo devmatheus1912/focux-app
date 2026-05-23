@@ -1,10 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter/services.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/cockpit_theme.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -143,7 +141,7 @@ class _PersonalDashboardScreenState
     final chromeOnDark = themeDark;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: shellScaffoldColor,
       body: SafeArea(
         bottom: false,
         child: dashboardAsync.when(

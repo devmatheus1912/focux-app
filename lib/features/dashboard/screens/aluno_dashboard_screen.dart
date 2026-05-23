@@ -7,6 +7,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/providers/personal_brand_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
@@ -48,7 +49,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
     final chatAsync = ref.watch(chatAlunoDashboardProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: shellScaffoldColor,
       appBar: FxShellAppBar(
         title: 'Meu Treino',
         leading: const SizedBox(width: 8),
@@ -75,7 +76,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -266,7 +267,7 @@ class _AlunoHeroCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 18),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Row(
         children: [
           CircleAvatar(
@@ -672,7 +673,7 @@ class _MiniMetricCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 16),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -716,7 +717,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: historicoAsync.when(
         loading: () => const SizedBox(height: 96, child: FxLoading()),
         error:
@@ -979,7 +980,7 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
 
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1175,7 +1176,6 @@ void _showAlunoPlanSheet(
           decoration: fxListCardDecoration(
             sheetContext,
             accent: primary,
-            radius: 30,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1506,7 +1506,7 @@ class _AutonomyTaskTile extends StatelessWidget {
         final compact = constraints.maxWidth < 360;
         return Container(
           padding: const EdgeInsets.all(14),
-          decoration: fxListCardDecoration(context, accent: primary, radius: 16),
+          decoration: fxListCardDecoration(context, accent: primary),
           child:
               compact
                   ? Column(
@@ -1667,7 +1667,7 @@ class _StudentToolsSection extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 24),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1919,7 +1919,7 @@ class _AlunoProfileCard extends StatelessWidget {
     final telefone = aluno.telefone ?? aluno.whatsapp;
 
     return Container(
-      decoration: fxListCardDecoration(context, accent: primary, radius: 16),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
@@ -2035,7 +2035,7 @@ class _Chip extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -2071,7 +2071,7 @@ class _ProfileCardSkeleton extends StatelessWidget {
 
     return Container(
       height: 88,
-      decoration: fxListCardDecoration(context, accent: primary, radius: 16),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(

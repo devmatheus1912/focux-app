@@ -14,7 +14,9 @@ import '../../checkin/data/checkin_repository.dart';
 import '../../checkin/providers/checkin_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import 'aluno_dashboard_screen.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 
 class AlunoActivationScreen extends ConsumerWidget {
   const AlunoActivationScreen({super.key});
@@ -106,10 +108,11 @@ class AlunoActivationScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    FilledButton.icon(
+                    FxLiquidPrimaryButton(
+                      expand: false,
+                      icon: Icons.refresh_rounded,
+                      label: 'Tentar novamente',
                       onPressed: () => ref.invalidate(alunoMeProvider),
-                      icon: const Icon(Icons.refresh_rounded, size: 18),
-                      label: const Text('Tentar novamente'),
                     ),
                     const SizedBox(height: 8),
                     TextButton(
@@ -176,7 +179,12 @@ class AlunoActivationScreen extends ConsumerWidget {
           );
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              TokensStrip.s4,
+              TokensStrip.s4,
+              28,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -271,7 +279,6 @@ class AlunoActivationScreen extends ConsumerWidget {
                   decoration: fxListCardDecoration(
                     context,
                     accent: Theme.of(context).colorScheme.primary,
-                    radius: 24,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,7 +324,12 @@ class AlunoActivationScreen extends ConsumerWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: FilledButton.icon(
+                            child: FxLiquidPrimaryButton(
+                              icon: Icons.arrow_forward,
+                              label:
+                                  doneCount == steps.length
+                                      ? 'Entrar no app'
+                                      : nextStep.cta,
                               onPressed: () async {
                                 await _markSeen(aluno.id);
                                 if (context.mounted) {
@@ -328,12 +340,6 @@ class AlunoActivationScreen extends ConsumerWidget {
                                   );
                                 }
                               },
-                              icon: const Icon(Icons.arrow_forward),
-                              label: Text(
-                                doneCount == steps.length
-                                    ? 'Entrar no app'
-                                    : nextStep.cta,
-                              ),
                             ),
                           ),
                         ],
@@ -403,7 +409,7 @@ class _ActivationStepCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

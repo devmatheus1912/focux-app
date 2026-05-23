@@ -7,11 +7,21 @@ import 'package:flutter/material.dart';
 abstract class TokensStrip {
   static const String version = '1.0.0';
 
-  // ── Neon cyan / teal premium ─────────────────────────────────────────
-  static const Color neonCyan = Color(0xFF26C6DA);
+  // ── TOKENS STRIP v1.0.0 canonical palette ────────────────────────────
+  static const Color primary = Color(0xFF13C2C2);
+  static const Color primaryHover = Color(0xFF0D9494);
+  static const Color disabled = Color(0xFFC8C8C8);
+  static const Color pageBg = Color(0xFFF4F6F8);
+  static const Color cardBg = Color(0xFFFFFFFF);
+  static const Color textPrimary = Color(0xFF1A1A2E);
+  static const Color textSecondary = Color(0xFF6B7280);
+  static const Color borderDefault = Color(0xFFE5E7EB);
+
+  // ── Neon cyan / teal premium (aliases) ───────────────────────────────
+  static const Color neonCyan = primary;
   static const Color neonTeal = Color(0xFF18B5B5);
   static const Color neonGlow = Color(0xFF4DD0E1);
-  static const Color neonDeep = Color(0xFF007D8A);
+  static const Color neonDeep = primaryHover;
 
   // ── Cinematic dark ───────────────────────────────────────────────────
   static const Color cinematicBg = Color(0xFF0B0E14);
@@ -19,9 +29,9 @@ abstract class TokensStrip {
   static const Color cinematicElevated = Color(0xFF1A2330);
 
   // ── Light mesh ───────────────────────────────────────────────────────
-  static const Color lightMeshA = Color(0xFFC8E8E6);
-  static const Color lightMeshB = Color(0xFFE6F2F3);
-  static const Color lightMeshC = Color(0xFFDCE9EB);
+  static const Color lightMeshA = Color(0xFFE8F4F4);
+  static const Color lightMeshB = Color(0xFFF4F6F8);
+  static const Color lightMeshC = Color(0xFFEDF2F4);
 
   // ── Spacing (8pt grid) ───────────────────────────────────────────────
   static const double s1 = 4;
@@ -34,20 +44,37 @@ abstract class TokensStrip {
   static const double s8 = 64;
   static const double s9 = 80;
 
-  // ── visionOS fluid radius ────────────────────────────────────────────
-  static const double rSm = 14;
-  static const double rMd = 20;
-  static const double rLg = 26;
-  static const double rXl = 32;
-  static const double r2xl = 40;
-  static const double rPill = 999;
+  // ── Spec radii: 8px inputs · 12px cards · 50px pill buttons ─────────
+  static const double rInput = 8;
+  static const double rCard = 12;
+  static const double rButton = 50;
+
+  // ── visionOS fluid radius (legacy aliases → spec) ────────────────────
+  static const double rSm = rInput;
+  static const double rMd = rCard;
+  static const double rLg = rCard;
+  static const double rXl = 16;
+  static const double r2xl = 24;
+  static const double rPill = rButton;
 
   // ── Blur ─────────────────────────────────────────────────────────────
   static const double blurLight = 16;
   static const double blurMedium = 22;
   static const double blurHeavy = 28;
 
-  /// Multi-layer elevation shadows (0–96dp scale).
+  /// Default card shadow — 0 2px 8px rgba(0,0,0,0.07)
+  static List<BoxShadow> cardShadow({bool dark = false}) {
+    if (dark) {
+      return elevation(4, dark: true);
+    }
+    return const [
+      BoxShadow(
+        color: Color(0x12000000),
+        blurRadius: 8,
+        offset: Offset(0, 2),
+      ),
+    ];
+  }
   static List<BoxShadow> elevation(
     int level, {
     required bool dark,

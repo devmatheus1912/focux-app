@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../../financeiro/data/financeiro_repository.dart';
@@ -100,14 +104,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final perfilAsync = ref.watch(perfilProvider);
 
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Wallet / Pagamentos'),
+      backgroundColor: Colors.transparent,
+      appBar: FxShellAppBar(
+        title: 'Wallet / Pagamentos',
+        onBack: () => context.pop(),
       ),
       body: perfilAsync.when(
         loading: () => const FxLoading(),
@@ -122,33 +122,25 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Cabeçalho informativo
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.account_balance_wallet,
-                            color:
-                                Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Configure suas chaves PIX e dados bancários para receber pagamentos dos alunos.',
-                              style: TextStyle(
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.onPrimaryContainer,
-                              ),
+                  Container(
+                    padding: const EdgeInsets.all(TokensStrip.s3),
+                    decoration: fxListCardDecoration(context),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.account_balance_wallet,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: TokensStrip.s2),
+                        Expanded(
+                          child: Text(
+                            'Configure suas chaves PIX e dados bancários para receber pagamentos dos alunos.',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -168,7 +160,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                     decoration: InputDecoration(
                       labelText: 'Tipo de chave PIX',
                       border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(TokensStrip.rInput),
                       ),
                     ),
                     items:
@@ -189,7 +181,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       labelText: 'Chave PIX',
                       hintText: 'CPF, e-mail, telefone ou chave aleatória',
                       border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(TokensStrip.rInput),
                       ),
                     ),
                   ),
@@ -207,7 +199,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       labelText: 'Banco',
                       hintText: 'Ex.: Nubank, Itaú, Bradesco',
                       border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(TokensStrip.rInput),
                       ),
                     ),
                   ),
@@ -221,7 +213,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                           decoration: InputDecoration(
                             labelText: 'Agência',
                             border: FxInputDeco.outlineBorder(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(TokensStrip.rInput),
                             ),
                           ),
                           keyboardType: TextInputType.number,
@@ -235,7 +227,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                           decoration: InputDecoration(
                             labelText: 'Conta',
                             border: FxInputDeco.outlineBorder(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(TokensStrip.rInput),
                             ),
                           ),
                           keyboardType: TextInputType.number,
@@ -246,17 +238,11 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   const SizedBox(height: 32),
 
                   // Botão salvar
-                  FilledButton.icon(
+                  FxLiquidPrimaryButton(
+                    label: 'Salvar dados',
+                    icon: Icons.save_rounded,
+                    loading: _carregando,
                     onPressed: _carregando ? null : _salvar,
-                    icon:
-                        _carregando
-                            ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: FxLoading(strokeWidth: 2),
-                            )
-                            : const Icon(Icons.save),
-                    label: const Text('Salvar dados'),
                   ),
                 ],
               ),
@@ -319,10 +305,11 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
     if (_resumo == null) return const SizedBox.shrink();
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+    return Container(
+      margin: const EdgeInsets.only(bottom: TokensStrip.s2),
+      padding: const EdgeInsets.all(TokensStrip.s4),
+      decoration: fxListCardDecoration(context),
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
@@ -352,7 +339,6 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
             ),
           ],
         ),
-      ),
     );
   }
 }

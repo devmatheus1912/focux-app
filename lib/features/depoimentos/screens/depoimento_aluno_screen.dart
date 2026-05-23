@@ -4,7 +4,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 
 class DepoimentoAlunoScreen extends ConsumerStatefulWidget {
   const DepoimentoAlunoScreen({super.key});
@@ -44,6 +44,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -158,22 +159,10 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                                     : null,
                       ),
                       const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: _enviando ? null : _enviar,
-                          child:
-                              _enviando
-                                  ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: FxLoading(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                  : const Text('Enviar depoimento'),
-                        ),
+                      FxLiquidPrimaryButton(
+                        label: 'Enviar depoimento',
+                        loading: _enviando,
+                        onPressed: _enviando ? null : _enviar,
                       ),
                     ],
                   ),

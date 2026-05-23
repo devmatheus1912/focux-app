@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -55,10 +56,8 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : EagleTokens.paper,
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -225,7 +224,8 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                       onChanged: (v) => setState(() => nivelSelecionado = v!),
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
+                    FxLiquidPrimaryButton(
+                      label: 'Salvar',
                       onPressed: () async {
                         if (usuarioIdCtrl.text.isEmpty) return;
                         final api = ref.read(apiClientProvider);
@@ -240,7 +240,6 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                         ref.invalidate(permissoesProvider);
                         if (ctx.mounted) Navigator.pop(ctx);
                       },
-                      child: const Text('Salvar'),
                     ),
                   ],
                 ),

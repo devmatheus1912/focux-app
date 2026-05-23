@@ -9,6 +9,7 @@ import '../data/feedback_video_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 
 class FeedbackVideoScreen extends ConsumerStatefulWidget {
   final int? alunoId;
@@ -100,6 +101,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -301,16 +303,11 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancelar'),
         ),
-        FilledButton(
+        FxLiquidPrimaryButton(
+          label: 'Salvar',
+          expand: false,
+          loading: _salvando,
           onPressed: _salvando ? null : _salvar,
-          child:
-              _salvando
-                  ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: FxLoading(strokeWidth: 2),
-                  )
-                  : const Text('Salvar'),
         ),
       ],
     );

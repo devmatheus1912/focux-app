@@ -10,7 +10,8 @@ import 'widgets/wizard_step_confirmacao.dart';
 import 'widgets/wizard_step_espacos.dart';
 import 'widgets/wizard_step_loading.dart';
 import 'widgets/wizard_step_modalidades.dart';
-import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_motion.dart';
 
 class OnboardingBibliotecaWizard extends ConsumerStatefulWidget {
   const OnboardingBibliotecaWizard({super.key});
@@ -148,21 +149,18 @@ class _OnboardingBibliotecaWizardState
                     ),
                   const Spacer(),
                   if (_step < 2)
-                    FilledButton(
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(0, 40),
-                      ),
+                    FxLiquidPrimaryButton(
+                      label: 'Continuar',
                       onPressed: canGoNext ? _next : null,
-                      child: const Text('Continuar'),
+                      expand: false,
                     ),
                   if (_step == 2)
-                    FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(0, 40),
-                      ),
+                    FxLiquidPrimaryButton(
+                      label: 'Carregar biblioteca',
+                      icon: Icons.download_rounded,
                       onPressed: _importing ? null : _importar,
-                      icon: const Icon(Icons.download_rounded),
-                      label: const Text('Carregar biblioteca'),
+                      loading: _importing,
+                      expand: false,
                     ),
                 ],
               ),

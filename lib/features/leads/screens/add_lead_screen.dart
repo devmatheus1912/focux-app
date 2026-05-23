@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 
 const _origens = ['Instagram', 'Indicação', 'WhatsApp', 'Google', 'Outro'];
 
@@ -63,7 +64,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
       onBack: () => safePopOrGo(context, '/leads'),
     ),
     body: SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       child: Form(
         key: _formKey,
         child: Column(
@@ -123,18 +124,12 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
               ),
               maxLines: 3,
             ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
+            const SizedBox(height: TokensStrip.s5),
+            FxLiquidPrimaryButton(
+              loading: _saving,
+              icon: Icons.save_rounded,
+              label: _saving ? 'Salvando...' : 'Salvar Lead',
               onPressed: _saving ? null : _salvar,
-              icon:
-                  _saving
-                      ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: FxLoading(strokeWidth: 2, color: Colors.white),
-                      )
-                      : const Icon(Icons.save_rounded),
-              label: Text(_saving ? 'Salvando...' : 'Salvar Lead'),
             ),
           ],
         ),

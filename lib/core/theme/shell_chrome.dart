@@ -25,22 +25,36 @@ class ShellPalette {
           : Colors.white.withValues(alpha: 0.98);
 
   BoxDecoration panel({
-    double radius = TokensStrip.rLg,
+    double radius = TokensStrip.rCard,
     Color? accent,
-    int elevationLevel = 8,
+    int elevationLevel = 3,
   }) {
-    return TokensStrip.glassPanel(
-      dark: isDark,
-      radius: radius,
-      accent: accent,
-      elevationLevel: elevationLevel,
+    if (isDark) {
+      return TokensStrip.glassPanel(
+        dark: true,
+        radius: radius,
+        accent: accent,
+        elevationLevel: elevationLevel,
+      );
+    }
+    return BoxDecoration(
+      color: EagleTokens.card,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(
+        color:
+            accent != null
+                ? accent.withValues(alpha: 0.22)
+                : TokensStrip.borderDefault,
+        width: accent != null ? 1.2 : 1,
+      ),
+      boxShadow: TokensStrip.cardShadow(),
     );
   }
 
   BoxDecoration listCard({
     bool selected = false,
     Color? primary,
-    double radius = TokensStrip.rLg,
+    double radius = TokensStrip.rCard,
   }) {
     final accent = primary ?? EagleTokens.brandAccent;
     if (selected) {

@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/config/env.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../providers/auth_provider.dart';
@@ -379,10 +380,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             const SizedBox(height: 14),
                           ],
-                          AuthPrimaryButton(
+                          FxLiquidPrimaryButton(
                             label: 'Entrar',
-                            onPressed: _submit,
-                            isLoading: _loading,
+                            onPressed: _loading ? null : _submit,
+                            loading: _loading,
                           ),
                           if (_googleEnabled || _googleStatusNote != null) ...[
                             const SizedBox(height: 12),

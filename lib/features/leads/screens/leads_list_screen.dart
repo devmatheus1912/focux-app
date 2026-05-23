@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -94,7 +95,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       floatingActionButton: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: [primary, primaryDeep]),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(TokensStrip.rXl),
           boxShadow: [
             BoxShadow(
               color: primary.withValues(alpha: 0.4),
@@ -312,7 +313,7 @@ class _KanbanCard extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      decoration: fxListCardDecoration(context, accent: color, radius: 12),
+      decoration: fxListCardDecoration(context, accent: color),
       child: ListTile(
         onTap: onTap,
         contentPadding: const EdgeInsets.fromLTRB(12, 4, 8, 4),

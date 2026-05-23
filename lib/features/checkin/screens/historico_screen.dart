@@ -102,7 +102,6 @@ class _HistoricoCard extends StatelessWidget {
       decoration: fxListCardDecoration(
         context,
         accent: concluido ? primary : null,
-        radius: EagleTokens.radiusMd,
       ),
       child: Row(
         children: [

@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_glass_surface.dart';
@@ -145,8 +146,8 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                 const SizedBox(height: 20),
                 FxGlassSurface(
                   glow: true,
-                  radius: 22,
-                  padding: const EdgeInsets.all(18),
+                  radius: TokensStrip.rCard,
+                  padding: const EdgeInsets.all(TokensStrip.s4),
                   accent: primary,
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +159,8 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                               height: 40,
                               decoration: BoxDecoration(
                                 color: primary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius:
+                                    BorderRadius.circular(TokensStrip.rInput),
                               ),
                               child: Icon(
                                 Icons.verified_outlined,
@@ -197,7 +199,8 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: chrome.cardFill,
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius:
+                                BorderRadius.circular(TokensStrip.rInput),
                             border: Border.all(color: chrome.line),
                           ),
                           child: SelectableText(
@@ -270,7 +273,7 @@ class _HeroCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -289,7 +292,7 @@ class _HeroCard extends StatelessWidget {
             height: 48,
             decoration: BoxDecoration(
               color: primary.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
             ),
             child: Icon(Icons.person_add_alt_1_rounded, color: primary),
           ),
