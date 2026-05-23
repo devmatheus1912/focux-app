@@ -71,6 +71,14 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     });
   }
 
+  Future<void> _adicionarAluno() async {
+    HapticFeedback.selectionClick();
+    final criado = await context.push<bool>('/alunos/novo');
+    if (criado == true) {
+      ref.invalidate(alunosProvider);
+    }
+  }
+
   void _toggleSelecionado(int id) {
     HapticFeedback.selectionClick();
     setState(() {
@@ -574,15 +582,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                           intensity: 0.9,
                           borderRadius: 44,
                           child: FxSpringButton(
-                            onTap: () async {
-                              HapticFeedback.selectionClick();
-                              final criado = await context.push<bool>(
-                                '/alunos/novo',
-                              );
-                              if (criado == true) {
-                                ref.invalidate(alunosProvider);
-                              }
-                            },
+                            onTap: _adicionarAluno,
                             child: Container(
                               width: 44,
                               height: 44,
@@ -819,6 +819,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                           ? _EmptyAlunosState(
                             hasQuery: _query.trim().isNotEmpty,
                             isDark: isDark,
+                            onAdd: _adicionarAluno,
                             onClear:
                                 _query.trim().isEmpty
                                     ? null
@@ -1117,11 +1118,13 @@ class _EmptyAlunosState extends StatelessWidget {
   final bool hasQuery;
   final bool isDark;
   final VoidCallback? onClear;
+  final VoidCallback? onAdd;
 
   const _EmptyAlunosState({
     required this.hasQuery,
     required this.isDark,
     this.onClear,
+    this.onAdd,
   });
 
   @override
@@ -1180,6 +1183,13 @@ class _EmptyAlunosState extends StatelessWidget {
                   ),
                 ),
                 child: const Text('Limpar busca'),
+              ),
+            ] else if (onAdd != null) ...[
+              const SizedBox(height: 20),
+              FxLiquidPrimaryButton(
+                label: 'Adicionar aluno',
+                icon: Icons.person_add_rounded,
+                onPressed: onAdd,
               ),
             ],
           ],

@@ -11,7 +11,6 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -165,36 +164,10 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
           child: SafeArea(
             top: false,
-            child: FxGlowSurface(
-              color: primary,
-              enabled: !_loading,
-              borderRadius: 16,
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _loading ? null : _submit,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child:
-                      _loading
-                          ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: FxLoading(strokeWidth: 2, color: Colors.white),
-                          )
-                          : Text(
-                            'Salvar alterações',
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 15,
-                            ),
-                          ),
-                ),
-              ),
+            child: FxLiquidPrimaryButton(
+              label: 'Salvar alterações',
+              loading: _loading,
+              onPressed: _loading ? null : _submit,
             ),
           ),
         ),

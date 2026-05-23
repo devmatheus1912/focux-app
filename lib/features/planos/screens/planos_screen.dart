@@ -14,7 +14,6 @@ import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/planos_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class PlanosScreen extends ConsumerStatefulWidget {
   const PlanosScreen({super.key});
@@ -698,29 +697,10 @@ class _PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: FilledButton(
-        onPressed: onTap,
-        style: FilledButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          disabledBackgroundColor: EagleTokens.darkCardHi,
-          disabledForegroundColor: EagleTokens.darkInkMute,
-        ),
-        child:
-            loading
-                ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: FxLoading(strokeWidth: 2, color: Colors.white),
-                )
-                : Text(
-                  label,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-      ),
+    return FxLiquidPrimaryButton(
+      label: label,
+      loading: loading,
+      onPressed: onTap,
     );
   }
 }

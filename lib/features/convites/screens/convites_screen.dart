@@ -11,7 +11,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_glass_surface.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -131,34 +131,11 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
             children: [
               _HeroCard(isDark: isDark, primary: primary, ink: ink, mute: mute),
               const SizedBox(height: 20),
-              FxGlowSurface(
-                color: primary,
-                enabled: !_loading && _convite == null,
-                borderRadius: 16,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    icon:
-                        _loading
-                            ? const SizedBox.shrink()
-                            : const Icon(Icons.link_rounded),
-                    label:
-                        _loading
-                            ? const SizedBox(
-                              height: 22,
-                              width: 22,
-                              child: FxLoading(strokeWidth: 2, color: Colors.white),
-                            )
-                            : const Text('Gerar novo link'),
-                    onPressed: _loading ? null : _gerar,
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                ),
+              FxLiquidPrimaryButton(
+                label: 'Gerar novo link',
+                icon: Icons.link_rounded,
+                loading: _loading,
+                onPressed: _loading ? null : _gerar,
               ),
               if (_error != null) ...[
                 const SizedBox(height: 14),
@@ -166,21 +143,12 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
               ],
               if (_convite != null) ...[
                 const SizedBox(height: 20),
-                FxGlowSurface(
-                  color: primary,
-                  enabled: true,
-                  intensity: 0.85,
-                  borderRadius: 22,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(18),
-                    decoration: fxListCardDecoration(
-                      context,
-                      accent: primary,
-                    ).copyWith(
-                      borderRadius: BorderRadius.circular(22),
-                    ),
-                    child: Column(
+                FxGlassSurface(
+                  glow: true,
+                  radius: 22,
+                  padding: const EdgeInsets.all(18),
+                  accent: primary,
+                  child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
@@ -253,17 +221,16 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                             ),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: FilledButton.icon(
+                              child: FxLiquidPrimaryButton(
+                                label: 'WhatsApp',
+                                icon: Icons.chat_rounded,
                                 onPressed: _compartilharWhatsApp,
-                                icon: const Icon(Icons.chat_rounded, size: 18),
-                                label: const Text('WhatsApp'),
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                  ),
                 )
                     .animate()
                     .fadeIn(duration: 320.ms, curve: Curves.easeOutCubic)
