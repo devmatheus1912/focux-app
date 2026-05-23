@@ -382,13 +382,17 @@ class _PerfilBody extends StatelessWidget {
           action: PerfilChecklistAction.convites,
         );
     final profileComplete = profileScore >= 100;
-    final usingDefaultBrand = BrandPalette.isDefaultBrandColors(
-      corPrimaria: perfil.corPrimaria,
-      corSecundaria: perfil.corSecundaria,
-    );
+    final usingDefaultBrand = _usesDefaultPalette(primaryColor, secondaryColor);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      bottomNavigationBar:
+          profileComplete
+              ? _PerfilStickyBar(
+                accent: accent,
+                isDark: isDark,
+              )
+              : null,
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
@@ -620,13 +624,13 @@ class _PerfilBody extends StatelessWidget {
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(18, 16, 18, 96),
+                padding: EdgeInsets.fromLTRB(18, 16, 18, profileComplete ? 28 : 96),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     _CardSection(
                       title: 'Identidade visual',
                       subtitle:
-                          'Logo, slogan e paleta aplicados no app e na experiencia do aluno.',
+                          'Logo, slogan e paleta aplicados no app e na experiência do aluno.',
                       trailingLabel: 'Abrir',
                       onTrailingTap: () {
                         HapticFeedback.selectionClick();
@@ -650,6 +654,7 @@ class _PerfilBody extends StatelessWidget {
                                 secondary: heroSecondary,
                                 profileName: perfil.nome,
                                 subtitle: brandSubtitle,
+                                logoUrl: perfil.logoUrl ?? dashboard.logoUrl,
                                 isDark: isDark,
                               ),
                               const SizedBox(height: 14),
@@ -796,13 +801,15 @@ class _PerfilBody extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    _PerfilBottomActions(
-                      profileComplete: profileComplete,
-                      walletComplete: _hasWallet(perfil),
-                      primaryCta: primaryCta,
-                      onChecklistAction: onChecklistAction,
-                    ),
+                    if (!profileComplete) ...[
+                      const SizedBox(height: 16),
+                      _PerfilBottomActions(
+                        profileComplete: profileComplete,
+                        walletComplete: _hasWallet(perfil),
+                        primaryCta: primaryCta,
+                        onChecklistAction: onChecklistAction,
+                      ),
+                    ],
                   ]),
                 ),
               ),
@@ -889,7 +896,10 @@ class _HeroQuickActions extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 3),
                     child: InkWell(
-                      onTap: item.$3,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        item.$3();
+                      },
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
                         height: 52,
@@ -1164,8 +1174,8 @@ class _BrandPaletteStrip extends StatelessWidget {
         Expanded(
           child: Text(
             usingDefault
-                ? 'Paleta padrao Focux · toque para personalizar'
-                : 'Paleta personalizada ativa · toque para editar',
+                ? 'Paleta padrão Focux · toque para personalizar'
+                : 'Sua paleta está ativa · toque para editar',
             style: TextStyle(
               color: mute,
               fontSize: 11.5,
@@ -1211,6 +1221,64 @@ class _PaletteDot extends StatelessWidget {
   }
 }
 
+class _PerfilStickyBar extends StatelessWidget {
+  const _PerfilStickyBar({required this.accent, required this.isDark});
+
+  final Color accent;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          color: (isDark ? EagleTokens.darkCard : EagleTokens.card)
+              .withValues(alpha: 0.96),
+          border: Border(top: BorderSide(color: chrome.line.withValues(alpha: 0.7))),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.08),
+              blurRadius: 18,
+              offset: const Offset(0, -6),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(18, 12, 18, 12),
+        child: SafeArea(
+          top: false,
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    goPersonalShellTab(context, '/alunos');
+                  },
+                  icon: const Icon(Icons.groups_2_outlined, size: 18),
+                  label: const Text('Meus alunos'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    goPersonalShellTab(context, '/ia/copiloto');
+                  },
+                  icon: const Icon(Icons.auto_awesome_outlined, size: 18),
+                  label: const Text('Copiloto IA'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _PerfilBottomActions extends StatelessWidget {
   final bool profileComplete;
   final bool walletComplete;
@@ -1227,31 +1295,7 @@ class _PerfilBottomActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (profileComplete) {
-      return Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                goPersonalShellTab(context, '/alunos');
-              },
-              icon: const Icon(Icons.groups_2_outlined),
-              label: const Text('Meus alunos'),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: FilledButton.icon(
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                goPersonalShellTab(context, '/ia/copiloto');
-              },
-              icon: const Icon(Icons.auto_awesome_outlined, size: 18),
-              label: const Text('Copiloto IA'),
-            ),
-          ),
-        ],
-      );
+      return const SizedBox.shrink();
     }
 
     if (!walletComplete) {
@@ -1311,6 +1355,7 @@ class _BrandPreview extends StatelessWidget {
   final Color secondary;
   final String profileName;
   final String subtitle;
+  final String? logoUrl;
   final bool isDark;
 
   const _BrandPreview({
@@ -1318,6 +1363,7 @@ class _BrandPreview extends StatelessWidget {
     required this.secondary,
     required this.profileName,
     required this.subtitle,
+    this.logoUrl,
     required this.isDark,
   });
 
@@ -1357,7 +1403,20 @@ class _BrandPreview extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(Icons.fitness_center, color: primary, size: 22),
+            clipBehavior: Clip.antiAlias,
+            child:
+                logoUrl != null && logoUrl!.isNotEmpty
+                    ? Image.network(
+                      logoUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (_, __, ___) => Icon(
+                            Icons.fitness_center,
+                            color: primary,
+                            size: 22,
+                          ),
+                    )
+                    : Icon(Icons.fitness_center, color: primary, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1462,7 +1521,7 @@ class _CompletenessCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      complete ? 'Perfil pronto' : 'Prontidao comercial',
+                      complete ? 'Perfil pronto' : 'Prontidão comercial',
                       style: TextStyle(
                         color: ink,
                         fontSize: 16,
@@ -1473,7 +1532,7 @@ class _CompletenessCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       complete
-                          ? 'Seu perfil comercial esta pronto para operar.'
+                          ? 'Seu perfil comercial está pronto para operar.'
                           : 'Faltam ${items.where((item) => !item.done).length} passos para parecer premium.',
                       style: TextStyle(color: mute, fontSize: 12, height: 1.35),
                     ),
@@ -1551,30 +1610,24 @@ class _CompletenessCard extends StatelessWidget {
                       )
                       .toList(),
             ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () {
-                if (nextStep != null) {
-                  onChecklistAction(nextStep!.action);
-                  return;
-                }
-                onChecklistAction(PerfilChecklistAction.convites);
-              },
-              icon: Icon(
-                complete
-                    ? Icons.person_add_outlined
-                    : Icons.arrow_forward_rounded,
-                size: 18,
-              ),
-              label: Text(
-                complete
-                    ? 'Convidar alunos'
-                    : (nextStep?.buttonLabel ?? 'Completar perfil'),
+          if (!complete) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  if (nextStep != null) {
+                    onChecklistAction(nextStep!.action);
+                    return;
+                  }
+                  onChecklistAction(PerfilChecklistAction.convites);
+                },
+                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                label: Text(nextStep?.buttonLabel ?? 'Completar perfil'),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -1640,7 +1693,7 @@ class _ReadyFocusStrip extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Operacao pronta — convide alunos, use o Copiloto IA e acompanhe pelo dashboard.',
+              'Operação pronta — use o Copiloto IA, convide alunos e acompanhe pelo dashboard.',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -2178,4 +2231,14 @@ Color _parseColor(String? value, {required Color fallback}) {
   }
 
   return Color(parsed);
+}
+
+bool _usesDefaultPalette(Color primary, Color secondary) {
+  bool close(Color a, Color b) =>
+      (a.red - b.red).abs() <= 8 &&
+      (a.green - b.green).abs() <= 8 &&
+      (a.blue - b.blue).abs() <= 8;
+
+  return close(primary, BrandPalette.defaultPrimary) &&
+      close(secondary, BrandPalette.defaultSecondary);
 }

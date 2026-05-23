@@ -29,10 +29,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Matheus Focux'), findsWidgets);
-    expect(find.text('Prontidao comercial'), findsOneWidget);
+    expect(find.text('Prontidão comercial'), findsOneWidget);
     expect(find.text('Identidade visual'), findsOneWidget);
     expect(find.text('Marca'), findsWidgets);
-    expect(find.text('Paleta personalizada ativa · toque para editar'), findsOneWidget);
+    expect(find.text('Sua paleta está ativa · toque para editar'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Carteira e PIX'),
