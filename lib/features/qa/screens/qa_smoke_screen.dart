@@ -33,6 +33,11 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
         title: const Text('🧪 QA Smoke Test'),
         actions: [
           TextButton.icon(
+            onPressed: () => context.push('/qa/tokens-strip'),
+            icon: const Icon(Icons.palette_outlined),
+            label: const Text('TOKENS STRIP'),
+          ),
+          TextButton.icon(
             onPressed: _running ? null : _runPublicRoutes,
             icon: const Icon(Icons.play_arrow),
             label: const Text('Testar Públicas'),

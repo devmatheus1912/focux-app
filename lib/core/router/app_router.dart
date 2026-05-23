@@ -90,6 +90,7 @@ import '../../features/chat/screens/chat_screen.dart';
 import '../../features/perfil/screens/wallet_screen.dart';
 import '../../features/notificacoes/screens/notificacoes_screen.dart';
 import '../../features/qa/screens/qa_smoke_screen.dart';
+import '../../features/qa/screens/tokens_strip_showcase_screen.dart';
 import '../auth/session_invalidator.dart';
 import '../storage/secure_storage.dart';
 import '../widgets/fx_route_chrome.dart';
@@ -777,11 +778,16 @@ class AppRouter {
             ),
       ),
       // QA — Smoke test (debug only)
-      if (kDebugMode)
+      if (kDebugMode) ...[
         GoRoute(
           path: '/qa/smoke',
           builder: (context, state) => const QaSmokeScreen(),
         ),
+        GoRoute(
+          path: '/qa/tokens-strip',
+          builder: (context, state) => const TokensStripShowcaseScreen(),
+        ),
+      ],
         ],
       ),
     ],
