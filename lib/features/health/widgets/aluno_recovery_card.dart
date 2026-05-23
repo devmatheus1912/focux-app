@@ -3,12 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/api/api_client.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../health/data/health_repository.dart';
 import '../../../core/health/health_service.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../health/data/health_repository.dart';
 import '../../../core/widgets/fx_rive_player.dart';
 import 'recovery_score_ring.dart';
 

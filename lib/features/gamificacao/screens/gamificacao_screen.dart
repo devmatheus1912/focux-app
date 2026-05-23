@@ -192,54 +192,56 @@ class GamificacaoScreen extends ConsumerWidget {
                                         child: FxRiveBadgeGlow(size: 48),
                                       ),
                                     Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color:
-                                      earned
-                                          ? cor.withValues(alpha: 0.13)
-                                          : (dark
-                                              ? const Color(0x0AFFFFFF)
-                                              : EagleTokens.lineSoft),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Center(
-                                  child: ColorFiltered(
-                                    colorFilter:
-                                        earned
-                                            ? const ColorFilter.mode(
-                                              Colors.transparent,
-                                              BlendMode.saturation,
-                                            )
-                                            : const ColorFilter.matrix([
-                                              0.2126,
-                                              0.7152,
-                                              0.0722,
-                                              0,
-                                              0,
-                                              0.2126,
-                                              0.7152,
-                                              0.0722,
-                                              0,
-                                              0,
-                                              0.2126,
-                                              0.7152,
-                                              0.0722,
-                                              0,
-                                              0,
-                                              0,
-                                              0,
-                                              0,
-                                              1,
-                                              0,
-                                            ]),
-                                    child: Text(
-                                      b['icon'] as String,
-                                      style: const TextStyle(fontSize: 24),
+                                      width: 48,
+                                      height: 48,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            earned
+                                                ? cor.withValues(alpha: 0.13)
+                                                : (dark
+                                                    ? const Color(0x0AFFFFFF)
+                                                    : EagleTokens.lineSoft),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: ColorFiltered(
+                                          colorFilter:
+                                              earned
+                                                  ? const ColorFilter.mode(
+                                                    Colors.transparent,
+                                                    BlendMode.saturation,
+                                                  )
+                                                  : const ColorFilter.matrix([
+                                                    0.2126,
+                                                    0.7152,
+                                                    0.0722,
+                                                    0,
+                                                    0,
+                                                    0.2126,
+                                                    0.7152,
+                                                    0.0722,
+                                                    0,
+                                                    0,
+                                                    0.2126,
+                                                    0.7152,
+                                                    0.0722,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    1,
+                                                    0,
+                                                  ]),
+                                          child: Text(
+                                            b['icon'] as String,
+                                            style: const TextStyle(fontSize: 24),
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ),
                               ),
                               const SizedBox(height: 8),
                               Padding(

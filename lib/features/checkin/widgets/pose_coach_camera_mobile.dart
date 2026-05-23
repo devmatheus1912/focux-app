@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -159,7 +160,7 @@ class _CameraCoachSheetState extends State<_CameraCoachSheet> {
     final dot = ab.dx * cb.dx + ab.dy * cb.dy;
     final mag = ab.distance * cb.distance;
     if (mag == 0) return 180;
-    return (dot / mag).clamp(-1.0, 1.0).acos() * 180 / 3.1415926535;
+    return math.acos((dot / mag).clamp(-1.0, 1.0)) * 180 / math.pi;
   }
 
   @override

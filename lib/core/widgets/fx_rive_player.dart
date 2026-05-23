@@ -53,7 +53,7 @@ class FxRivePlayer extends StatelessWidget {
         asset,
         fit: fit,
         artboard: artboard,
-        animations: animation == null ? null : [animation!],
+        animations: animation == null ? const [] : [animation!],
         onInit: _bindControllers,
         placeHolder: fallback ?? const SizedBox.shrink(),
       ),
