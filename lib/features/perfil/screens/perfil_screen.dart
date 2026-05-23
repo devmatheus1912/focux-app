@@ -784,7 +784,6 @@ class _PerfilBody extends StatelessWidget {
                       line: line,
                       isDark: isDark,
                       onEdit: onEditPerfil,
-                      onBrand: () => context.push('/identidade-visual'),
                     ),
                     const SizedBox(height: 14),
                     _CardSection(
@@ -1867,7 +1866,6 @@ class _ProfessionalDataPanel extends StatelessWidget {
   final Color line;
   final bool isDark;
   final VoidCallback onEdit;
-  final VoidCallback onBrand;
 
   const _ProfessionalDataPanel({
     required this.perfil,
@@ -1878,7 +1876,6 @@ class _ProfessionalDataPanel extends StatelessWidget {
     required this.line,
     required this.isDark,
     required this.onEdit,
-    required this.onBrand,
   });
 
   @override
@@ -1921,7 +1918,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
             accent: accent,
             mute: mute,
             line: line,
-            onTap: onBrand,
+            onTap: onEdit,
           ),
           _InfoTile(
             icon: Icons.alternate_email,
@@ -1930,7 +1927,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
             accent: accent,
             mute: mute,
             line: line,
-            onTap: onBrand,
+            onTap: onEdit,
             showDivider: bioText.isNotEmpty,
           ),
           if (bioText.isNotEmpty)
@@ -1939,7 +1936,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: onBrand,
+                  onTap: onEdit,
                   borderRadius: BorderRadius.circular(14),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,

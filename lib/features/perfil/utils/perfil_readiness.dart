@@ -128,9 +128,9 @@ class PerfilReadinessView {
     return switch (label) {
       'Foto' => PerfilChecklistAction.photo,
       'CREF' => PerfilChecklistAction.editProfile,
-      'Especialidade' => PerfilChecklistAction.brand,
-      'Bio' => PerfilChecklistAction.brand,
-      'Instagram' => PerfilChecklistAction.brand,
+      'Especialidade' => PerfilChecklistAction.editProfile,
+      'Bio' => PerfilChecklistAction.editProfile,
+      'Instagram' => PerfilChecklistAction.editProfile,
       'Paleta' => PerfilChecklistAction.brand,
       'PIX' => PerfilChecklistAction.wallet,
       _ => PerfilChecklistAction.editProfile,
