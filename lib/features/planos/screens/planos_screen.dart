@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
@@ -24,6 +28,7 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
 
   Future<void> _startTrial() async {
     if (_startingTrial) return;
+    HapticFeedback.mediumImpact();
     setState(() => _startingTrial = true);
     try {
       await PlanosRepository(ref.read(apiClientProvider)).startTrial(
@@ -70,17 +75,19 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
         title: 'Planos',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
-      body: SingleChildScrollView(
+      body: FxPremiumEntrance(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header ──────────────────────────────────────────────────
             Text(
               'Escolha o plano ideal',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+              style: GoogleFonts.outfit(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -96,14 +103,16 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
 
             const SizedBox(height: 24),
 
-            // ── FREE ────────────────────────────────────────────────────
-            _PlanCard(
+            FxStaggerItem(
+              index: 0,
+              child: _PlanCard(
               isDark: isDark,
               name: 'FREE',
               price: 'Grátis',
               accentColor:
                   isDark ? EagleTokens.darkInkMute : const Color(0xFF6B7280),
               isCurrent: currentPlan == SubscriptionPlan.FREE,
+              glow: false,
               features: const [
                 _Feature('Até 5 alunos', included: true),
                 _Feature('Treinos e agenda básicos', included: true),
@@ -118,16 +127,19 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
               ctaLabel:
                   currentPlan == SubscriptionPlan.FREE ? 'Plano atual' : null,
             ),
+            ),
 
             const SizedBox(height: 16),
 
-            // ── PREMIUM ─────────────────────────────────────────────────
-            _PlanCard(
+            FxStaggerItem(
+              index: 1,
+              child: _PlanCard(
               isDark: isDark,
               name: 'PREMIUM',
               price: 'R\$ 79,00/mês',
               accentColor: primary,
               isCurrent: currentPlan == SubscriptionPlan.PREMIUM,
+              glow: currentPlan != SubscriptionPlan.PREMIUM,
               badge:
                   !trialUsed && currentPlan == SubscriptionPlan.FREE
                       ? _PlanBadge(
@@ -149,10 +161,13 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
                       ? _PrimaryButton(
                         label: 'Assinar Premium',
                         onTap:
-                            () => context.push(
+                            () {
+                              HapticFeedback.selectionClick();
+                              context.push(
                               '/assinatura',
                               extra: SubscriptionPlan.PREMIUM.apiName,
-                            ),
+                            );
+                            },
                       )
                       : null,
               ctaLabel:
@@ -160,11 +175,13 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
                       ? 'Plano atual'
                       : null,
             ),
+            ),
 
             const SizedBox(height: 16),
 
-            // ── ENTERPRISE ──────────────────────────────────────────────
-            _EnterpriseCard(
+            FxStaggerItem(
+              index: 2,
+              child: _EnterpriseCard(
               isDark: isDark,
               isCurrent: currentPlan == SubscriptionPlan.ENTERPRISE,
               trialUsed: trialUsed,
@@ -172,13 +189,18 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
               startingTrial: _startingTrial,
               onTrial: _startTrial,
               onAssinar:
-                  () => context.push(
+                  () {
+                    HapticFeedback.selectionClick();
+                    context.push(
                     '/assinatura',
                     extra: SubscriptionPlan.ENTERPRISE.apiName,
-                  ),
+                  );
+                  },
+            ),
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -239,6 +261,7 @@ class _PlanCard extends StatelessWidget {
   final Widget? cta;
   final String? ctaLabel;
   final _PlanBadge? badge;
+  final bool glow;
 
   const _PlanCard({
     required this.isDark,
@@ -250,6 +273,7 @@ class _PlanCard extends StatelessWidget {
     this.cta,
     this.ctaLabel,
     this.badge,
+    this.glow = false,
   });
 
   @override
@@ -258,7 +282,7 @@ class _PlanCard extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
 
-    return Container(
+    final card = Container(
       padding: const EdgeInsets.all(20),
       decoration: fxListCardDecoration(
         context,
@@ -323,6 +347,9 @@ class _PlanCard extends StatelessWidget {
         ],
       ),
     );
+
+    if (!glow) return card;
+    return FxGlowSurface(color: accentColor, enabled: glow, child: card);
   }
 }
 

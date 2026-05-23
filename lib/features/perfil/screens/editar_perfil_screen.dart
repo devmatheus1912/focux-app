@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../../core/api/media_upload_service.dart';
-import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_premium_entrance.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../../../core/utils/friendly_error.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
-import 'package:focux_app/core/widgets/feedback_helper.dart';
 
-// ─── Cloudinary ──────────────────────────────────────────────────────────────
 class EditarPerfilScreen extends ConsumerStatefulWidget {
   final PerfilPersonal perfil;
 
@@ -66,6 +74,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   }
 
   Future<void> _pickAndUploadPhoto() async {
+    HapticFeedback.selectionClick();
     final picker = ImagePicker();
     final file = await picker.pickImage(
       source: ImageSource.gallery,
@@ -99,43 +108,36 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    HapticFeedback.mediumImpact();
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      await ref
-          .read(perfilRepositoryProvider)
-          .atualizar(
-            nome: _nomeCtrl.text.trim(),
-            cref: _crefCtrl.text.trim().isEmpty ? null : _crefCtrl.text.trim(),
-            especialidade:
-                _especialidadeCtrl.text.trim().isEmpty
-                    ? null
-                    : _especialidadeCtrl.text.trim(),
-            logoUrl: _logoUrl,
-            especialidades:
-                _especialidadesCtrl.text.trim().isEmpty
-                    ? null
-                    : _especialidadesCtrl.text.trim(),
-            instagram:
-                _instagramCtrl.text.trim().isEmpty
-                    ? null
-                    : _instagramCtrl.text.trim(),
-            descricaoProfissional:
-                _bioCtrl.text.trim().isEmpty ? null : _bioCtrl.text.trim(),
-          );
+      await ref.read(perfilRepositoryProvider).atualizar(
+        nome: _nomeCtrl.text.trim(),
+        cref: _crefCtrl.text.trim().isEmpty ? null : _crefCtrl.text.trim(),
+        especialidade:
+            _especialidadeCtrl.text.trim().isEmpty
+                ? null
+                : _especialidadeCtrl.text.trim(),
+        logoUrl: _logoUrl,
+        especialidades:
+            _especialidadesCtrl.text.trim().isEmpty
+                ? null
+                : _especialidadesCtrl.text.trim(),
+        instagram:
+            _instagramCtrl.text.trim().isEmpty
+                ? null
+                : _instagramCtrl.text.trim(),
+        descricaoProfissional:
+            _bioCtrl.text.trim().isEmpty ? null : _bioCtrl.text.trim(),
+      );
       if (mounted) context.pop(true);
     } catch (e) {
-      setState(() {
-        _error = 'Erro ao salvar. Tente novamente.';
-      });
+      setState(() => _error = 'Erro ao salvar. Tente novamente.');
     } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -143,174 +145,233 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final primarySoft = primary.withValues(alpha: 0.12);
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final chrome = ShellChrome.forDark(isDark);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Editar Perfil'),
+      appBar: FxShellAppBar(
+        title: 'Editar Perfil',
+        onBack: () => safePopOrGo(context, '/perfil'),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ── Avatar com botão de troca ─────────────────────────
-                Center(
-                  child: Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      CircleAvatar(
-                        radius: 52,
-                        backgroundColor:
-                            isDark ? EagleTokens.darkCard : primarySoft,
-                        backgroundImage:
-                            _logoUrl != null ? NetworkImage(_logoUrl!) : null,
-                        child:
-                            _logoUrl == null
-                                ? Text(
-                                  widget.perfil.nome.isNotEmpty
-                                      ? widget.perfil.nome[0].toUpperCase()
-                                      : '?',
-                                  style: TextStyle(
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.w700,
-                                    color:
-                                        isDark ? EagleTokens.darkInk : primary,
-                                  ),
-                                )
-                                : null,
-                      ),
-                      GestureDetector(
-                        onTap: _uploadingPhoto ? null : _pickAndUploadPhoto,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: primary,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color:
-                                  isDark
-                                      ? EagleTokens.darkBg
-                                      : EagleTokens.paper,
-                              width: 2,
-                            ),
-                          ),
-                          child:
-                              _uploadingPhoto
-                                  ? const Padding(
-                                    padding: EdgeInsets.all(6),
-                                    child: FxLoading(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                  : const Icon(
-                                    Icons.camera_alt,
-                                    size: 16,
-                                    color: Colors.white,
-                                  ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Center(
-                  child: Text(
-                    'Toque no ícone para trocar a foto',
-                    style: TextStyle(fontSize: 12, color: EagleTokens.inkMute),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // ── Dados básicos ─────────────────────────────────────
-                _SectionLabel(text: 'Dados pessoais', isDark: isDark),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _nomeCtrl,
-                  decoration: const InputDecoration(labelText: 'Nome completo'),
-                  validator:
-                      (v) => v == null || v.isEmpty ? 'Informe o nome' : null,
-                ),
-                const SizedBox(height: 16),
-
-                // ── Dados profissionais ───────────────────────────────
-                _SectionLabel(text: 'Dados profissionais', isDark: isDark),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _crefCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'CREF (opcional)',
-                    hintText: 'Ex: 012345-G/SP',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _especialidadeCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Especialidade principal',
-                    hintText: 'Ex: Musculação',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _especialidadesCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Áreas de atuação (opcional)',
-                    hintText: 'Ex: Funcional, Hipertrofia, Emagrecimento',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _instagramCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Instagram (opcional)',
-                    hintText: 'Ex: seuusuario (sem o @)',
-                    prefixText: '@',
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // ── Bio ───────────────────────────────────────────────
-                _SectionLabel(text: 'Bio / Apresentação', isDark: isDark),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _bioCtrl,
-                  maxLines: 4,
-                  maxLength: 500,
-                  decoration: const InputDecoration(
-                    labelText: 'Sobre você (opcional)',
-                    hintText:
-                        'Conte sua história, metodologia e diferenciais...',
-                    alignLabelWithHint: true,
-                  ),
-                ),
-
-                if (_error != null) ...[
-                  const SizedBox(height: 12),
-                  Text(_error!, style: const TextStyle(color: EagleTokens.bad)),
-                ],
-                const SizedBox(height: 24),
-                FilledButton(
+      bottomNavigationBar: Material(
+        color: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: (isDark ? EagleTokens.darkCard : EagleTokens.card)
+                .withValues(alpha: 0.96),
+            border: Border(top: BorderSide(color: chrome.line)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+          child: SafeArea(
+            top: false,
+            child: FxGlowSurface(
+              color: primary,
+              enabled: !_loading,
+              borderRadius: 16,
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
                   onPressed: _loading ? null : _submit,
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
                   child:
                       _loading
                           ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: FxLoading(strokeWidth: 2),
+                            height: 22,
+                            width: 22,
+                            child: FxLoading(strokeWidth: 2, color: Colors.white),
                           )
-                          : const Text('Salvar alterações'),
+                          : Text(
+                            'Salvar alterações',
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
                 ),
-                const SizedBox(height: 16),
-              ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      body: FxPremiumEntrance(
+        child: SafeArea(
+          bottom: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: FxGlowSurface(
+                      color: primary,
+                      enabled: true,
+                      intensity: 0.7,
+                      borderRadius: 999,
+                      child: Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          CircleAvatar(
+                            radius: 54,
+                            backgroundColor: primary.withValues(alpha: 0.12),
+                            backgroundImage:
+                                _logoUrl != null ? NetworkImage(_logoUrl!) : null,
+                            child:
+                                _logoUrl == null
+                                    ? Text(
+                                      widget.perfil.nome.isNotEmpty
+                                          ? widget.perfil.nome[0].toUpperCase()
+                                          : '?',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 36,
+                                        fontWeight: FontWeight.w800,
+                                        color: primary,
+                                      ),
+                                    )
+                                    : null,
+                          ),
+                          GestureDetector(
+                            onTap: _uploadingPhoto ? null : _pickAndUploadPhoto,
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color:
+                                      isDark
+                                          ? EagleTokens.darkBg
+                                          : EagleTokens.paper,
+                                  width: 2,
+                                ),
+                              ),
+                              child:
+                                  _uploadingPhoto
+                                      ? const Padding(
+                                        padding: EdgeInsets.all(7),
+                                        child: FxLoading(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                      : const Icon(
+                                        Icons.camera_alt_rounded,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      'Toque no ícone para trocar a foto',
+                      style: TextStyle(fontSize: 12, color: mute),
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  FxStaggerItem(
+                    index: 0,
+                    child: _SectionCard(
+                      title: 'Dados pessoais',
+                      child: TextFormField(
+                        controller: _nomeCtrl,
+                        decoration: FxInputDeco.build(
+                          context,
+                          'Nome completo',
+                          icon: Icons.person_outline_rounded,
+                        ),
+                        validator:
+                            (v) =>
+                                v == null || v.isEmpty ? 'Informe o nome' : null,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  FxStaggerItem(
+                    index: 1,
+                    child: _SectionCard(
+                      title: 'Dados profissionais',
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _crefCtrl,
+                            decoration: FxInputDeco.build(
+                              context,
+                              'CREF (opcional)',
+                              icon: Icons.badge_outlined,
+                              hint: 'Ex: 012345-G/SP',
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _especialidadeCtrl,
+                            decoration: FxInputDeco.build(
+                              context,
+                              'Especialidade principal',
+                              icon: Icons.fitness_center_outlined,
+                              hint: 'Ex: Musculação',
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _especialidadesCtrl,
+                            decoration: FxInputDeco.build(
+                              context,
+                              'Áreas de atuação (opcional)',
+                              icon: Icons.category_outlined,
+                              hint: 'Ex: Funcional, Hipertrofia',
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _instagramCtrl,
+                            decoration: FxInputDeco.build(
+                              context,
+                              'Instagram (opcional)',
+                              icon: Icons.alternate_email_rounded,
+                              hint: 'seuusuario',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  FxStaggerItem(
+                    index: 2,
+                    child: _SectionCard(
+                      title: 'Bio / Apresentação',
+                      child: TextFormField(
+                        controller: _bioCtrl,
+                        maxLines: 4,
+                        maxLength: 500,
+                        decoration: FxInputDeco.build(
+                          context,
+                          'Sobre você (opcional)',
+                          icon: Icons.notes_rounded,
+                          hint: 'Conte sua história, metodologia e diferenciais...',
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 12),
+                    Text(_error!, style: const TextStyle(color: EagleTokens.bad)),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
@@ -319,21 +380,40 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  final String text;
-  final bool isDark;
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({required this.title, required this.child});
 
-  const _SectionLabel({required this.text, required this.isDark});
+  final String title;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
-        letterSpacing: 0.5,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: fxListCardDecoration(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.outfit(
+              color: ink,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Campos usados no perfil comercial e na experiência do aluno.',
+            style: TextStyle(color: mute, fontSize: 11.5, height: 1.3),
+          ),
+          const SizedBox(height: 14),
+          child,
+        ],
       ),
     );
   }

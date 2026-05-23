@@ -22,6 +22,9 @@ class Aluno {
   final double? altura;
   final String? dataNascimento;
   final Set<Equipamento> equipamentosDisponiveis;
+  final int? aderenciaPercent;
+  final int? diasSemTreino;
+  final String? riscoNivel;
 
   Aluno({
     required this.id,
@@ -43,6 +46,9 @@ class Aluno {
     this.altura,
     this.dataNascimento,
     this.equipamentosDisponiveis = const {},
+    this.aderenciaPercent,
+    this.diasSemTreino,
+    this.riscoNivel,
   });
 
   int? get idade {
@@ -77,6 +83,9 @@ class Aluno {
     peso: json['peso']?.toDouble(),
     altura: json['altura']?.toDouble(),
     dataNascimento: json['dataNascimento'] as String?,
+    aderenciaPercent: (json['aderenciaPercent'] as num?)?.toInt(),
+    diasSemTreino: (json['diasSemTreino'] as num?)?.toInt(),
+    riscoNivel: json['riscoNivel'] as String?,
     equipamentosDisponiveis:
         parseEnumCsv(
           Equipamento.values,

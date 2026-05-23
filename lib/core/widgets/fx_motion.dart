@@ -1,6 +1,89 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
+/// Soft pulsing glow for premium CTAs and highlight cards.
+class FxGlowSurface extends StatefulWidget {
+  const FxGlowSurface({
+    super.key,
+    required this.child,
+    required this.color,
+    this.enabled = true,
+    this.intensity = 1,
+    this.borderRadius = 18,
+  });
+
+  final Widget child;
+  final Color color;
+  final bool enabled;
+  final double intensity;
+  final double borderRadius;
+
+  @override
+  State<FxGlowSurface> createState() => _FxGlowSurfaceState();
+}
+
+class _FxGlowSurfaceState extends State<FxGlowSurface>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    );
+    _pulse = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+    if (widget.enabled) _ctrl.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(covariant FxGlowSurface oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.enabled && !_ctrl.isAnimating) {
+      _ctrl.repeat(reverse: true);
+    } else if (!widget.enabled) {
+      _ctrl.stop();
+      _ctrl.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.enabled) return widget.child;
+
+    return AnimatedBuilder(
+      animation: _pulse,
+      builder: (context, child) {
+        final glow = 0.14 + (_pulse.value * 0.18 * widget.intensity);
+        final spread = 1 + (_pulse.value * 3 * widget.intensity);
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            boxShadow: [
+              BoxShadow(
+                color: widget.color.withValues(alpha: glow),
+                blurRadius: 22 + (_pulse.value * 10),
+                spreadRadius: spread,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: child,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
 /// Tactile spring button — scales down on press, bounces back on release.
 /// Uses real spring physics for premium, weighty feel instead of linear curves.
 /// Use this wrapper around any CTA, card, or interactive element for

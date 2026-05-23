@@ -15,6 +15,7 @@ import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_premium_entrance.dart';
 
 enum AlunoFiltro { todos, ativos, inadimplentes, risco, novos }
 
@@ -478,6 +479,10 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                FxPremiumEntrance(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                 // Header (Alunos + Botão Adicionar)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
@@ -563,34 +568,33 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        InkWell(
-                          onTap: () async {
-                            final criado = await context.push<bool>(
-                              '/alunos/novo',
-                            );
-                            if (criado == true) ref.invalidate(alunosProvider);
-                          },
-                          borderRadius: BorderRadius.circular(44),
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: isDark ? Colors.white : primary,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                if (!isDark)
-                                  BoxShadow(
-                                    color: primary.withValues(alpha: 0.5),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 6),
-                                    spreadRadius: -6,
-                                  ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.add,
-                              size: 24,
-                              color: isDark ? EagleTokens.ink : Colors.white,
+                        FxGlowSurface(
+                          color: primary,
+                          enabled: true,
+                          intensity: 0.9,
+                          borderRadius: 44,
+                          child: FxSpringButton(
+                            onTap: () async {
+                              HapticFeedback.selectionClick();
+                              final criado = await context.push<bool>(
+                                '/alunos/novo',
+                              );
+                              if (criado == true) {
+                                ref.invalidate(alunosProvider);
+                              }
+                            },
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: isDark ? Colors.white : primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.add,
+                                size: 24,
+                                color: isDark ? EagleTokens.ink : Colors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -801,6 +805,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                         onTap:
                             () => setState(() => _filtro = AlunoFiltro.novos),
                       ),
+                    ],
+                  ),
+                ),
                     ],
                   ),
                 ),
@@ -1287,9 +1294,10 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
         .toList(growable: false);
     final weeklyCheckins = sparkValues.fold<double>(0, (p, v) => p + v).round();
     final aderenciaPercent =
-        sparkValues.isEmpty
+        widget.aluno.aderenciaPercent ??
+        (sparkValues.isEmpty
             ? null
-            : ((weeklyCheckins / 7.0) * 100).round().clamp(0, 100);
+            : ((weeklyCheckins / 7.0) * 100).round().clamp(0, 100));
     final aderColor = EagleTokens.aderenciaColor(
       (aderenciaPercent ?? 0).toDouble(),
       isDark: isDark,
