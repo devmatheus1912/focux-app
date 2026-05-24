@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,7 +21,6 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
@@ -27,6 +28,65 @@ import '../../../core/widgets/fx_premium_entrance.dart';
 enum AlunoFiltro { todos, contatoHoje, ativos, inadimplentes, risco, novos }
 
 enum AlunoOrdenacao { prioridade, nome, semFoto }
+
+String _alunosSelectionTitle(int count) =>
+    count == 1 ? '1 aluno selecionado' : '$count alunos selecionados';
+
+String _mensalidadesPagasMessage(int count) =>
+    count == 1
+        ? '1 mensalidade marcada como paga'
+        : '$count mensalidades marcadas como pagas';
+
+String _alunosAtualizadosMessage(int count) =>
+    count == 1 ? '1 aluno atualizado' : '$count alunos atualizados';
+
+/// Fade na borda direita para indicar scroll horizontal nos filtros.
+class _HorizontalScrollPeek extends StatelessWidget {
+  const _HorizontalScrollPeek({
+    required this.child,
+    required this.showPeek,
+  });
+
+  final Widget child;
+  final bool showPeek;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!showPeek) return child;
+
+    final base = Theme.of(context).scaffoldBackgroundColor;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Semantics(
+          label: 'Deslize horizontalmente para ver mais filtros',
+          child: child,
+        ),
+        Positioned(
+          right: 0,
+          top: 0,
+          bottom: 0,
+          child: IgnorePointer(
+            child: Container(
+              width: 32,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    base.withValues(alpha: 0),
+                    base.withValues(alpha: 0.92),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 class AlunosListScreen extends ConsumerStatefulWidget {
   final AlunoFiltro initialFiltro;
@@ -163,7 +223,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         ref.invalidate(alunosProvider);
         FeedbackHelper.showSuccess(
           context,
-          '${_selecionados.length} mensalidade(s) marcada(s) como paga(s)',
+          _mensalidadesPagasMessage(_selecionados.length),
         );
         setState(() {
           _modoSelecao = false;
@@ -187,7 +247,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         ref.invalidate(alunosStatsProvider);
         FeedbackHelper.showSuccess(
           context,
-          '${_selecionados.length} aluno(s) atualizado(s)',
+          _alunosAtualizadosMessage(_selecionados.length),
         );
         setState(() {
           _modoSelecao = false;
@@ -209,6 +269,8 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.34),
+      isScrollControlled: true,
+      useSafeArea: true,
       builder:
           (sheetContext) => _AlunosBulkActionsSheet(
             count: qtd,
@@ -1006,7 +1068,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                 // Filter Chips
                 Padding(
                   padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 4, 16, 10),
-                  child: SingleChildScrollView(
+                  child: _HorizontalScrollPeek(
+                    showPeek: true,
+                    child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
@@ -1071,6 +1135,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                     ),
                   ),
                 ),
+              ),
                     ],
                   ),
                 ),
@@ -1617,19 +1682,19 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
     if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
       statusBg = isDark ? const Color(0x24FF8B8B) : EagleTokens.badSoft;
       statusColor = isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad;
-      statusText = 'INADIMPLENTE';
+      statusText = 'Inadimplente';
     } else if (aluno.status == 'INATIVO') {
       statusBg = isDark ? const Color(0x24E2B46F) : EagleTokens.warnSoft;
       statusColor = isDark ? const Color(0xFFE2B46F) : EagleTokens.warn;
-      statusText = 'INATIVO';
+      statusText = 'Inativo';
     } else if (aluno.emRisco) {
       statusBg = isDark ? const Color(0x24FFB77A) : EagleTokens.warnSoft;
       statusColor = isDark ? const Color(0xFFFFB77A) : EagleTokens.warn;
-      statusText = 'RISCO ALTO';
+      statusText = 'Risco alto';
     } else {
       statusBg = isDark ? const Color(0x1F6FE296) : EagleTokens.goodSoft;
       statusColor = isDark ? const Color(0xFF6FE296) : EagleTokens.good;
-      statusText = 'ATIVO';
+      statusText = 'Ativo';
     }
 
     // Avatar color hashing (deterministic)
@@ -1786,7 +1851,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                                   color: statusColor,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.5,
+                                  letterSpacing: 0.15,
                                   height: 1.1,
                                 ),
                               ),
@@ -2096,19 +2161,19 @@ bool _shouldShowBadge(
   AlunoFiltro activeFiltro, {
   bool triageContextActive = false,
 }) {
-  if (statusText == 'ATIVO') return false;
-  if (statusText == 'RISCO ALTO') {
+  if (statusText == 'Ativo') return false;
+  if (statusText == 'Risco alto') {
     if (activeFiltro == AlunoFiltro.risco) return false;
     if (activeFiltro == AlunoFiltro.contatoHoje) return false;
     if (activeFiltro == AlunoFiltro.todos && triageContextActive) {
       return false;
     }
   }
-  if (statusText == 'INADIMPLENTE') {
+  if (statusText == 'Inadimplente') {
     if (activeFiltro == AlunoFiltro.inadimplentes) return false;
     if (activeFiltro == AlunoFiltro.contatoHoje) return false;
   }
-  if (statusText == 'INATIVO' && activeFiltro == AlunoFiltro.ativos) {
+  if (statusText == 'Inativo' && activeFiltro == AlunoFiltro.ativos) {
     return false;
   }
   return true;
@@ -2394,96 +2459,129 @@ class _AlunosBulkActionsSheet extends StatefulWidget {
 class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
   String _statusSelecionado = 'ATIVO';
 
+  static const _statusOptions = <({String value, String label})>[
+    (value: 'ATIVO', label: 'Ativo'),
+    (value: 'INATIVO', label: 'Inativo'),
+    (value: 'BLOQUEADO', label: 'Bloqueado'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final line = widget.isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final primary = Theme.of(context).colorScheme.primary;
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.72;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: widget.isDark ? EagleTokens.darkCard : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+    return Padding(
       padding: EdgeInsets.fromLTRB(
-        20,
-        12,
-        20,
-        24 + MediaQuery.of(context).padding.bottom,
+        14,
+        0,
+        14,
+        math.max(12, MediaQuery.paddingOf(context).bottom + 8),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 42,
-              height: 4,
-              decoration: BoxDecoration(
-                color: line,
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-          ),
-          const SizedBox(height: 18),
-          Text(
-            '${widget.count} aluno(s) selecionado(s)',
-            style: AppTypography.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: ink,
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 48,
-            child: FilledButton.icon(
-              onPressed: widget.onMarcarPagos,
-              icon: const Icon(Icons.attach_money_rounded, size: 18),
-              label: const Text('Marcar mensalidade como paga'),
-              style: FilledButton.styleFrom(
-                backgroundColor: primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+      child: Container(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        decoration: BoxDecoration(
+          color: widget.isDark ? EagleTokens.darkCard : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: line,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text('Atualizar status', style: TextStyle(color: ink, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            value: _statusSelecionado,
-            decoration: InputDecoration(
-              isDense: true,
-              border: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 18),
+              Semantics(
+                header: true,
+                child: Text(
+                  _alunosSelectionTitle(widget.count),
+                  style: AppTypography.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: ink,
+                  ),
+                ),
               ),
-            ),
-            items:
-                ['ATIVO', 'INATIVO', 'BLOQUEADO']
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                    .toList(),
-            onChanged: (v) => setState(() => _statusSelecionado = v!),
+              const SizedBox(height: 16),
+              Semantics(
+                button: true,
+                label: 'Marcar mensalidade como paga',
+                child: SizedBox(
+                  height: 48,
+                  child: FilledButton.icon(
+                    onPressed: widget.onMarcarPagos,
+                    icon: const Icon(Icons.attach_money_rounded, size: 18),
+                    label: const Text('Marcar mensalidade como paga'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Atualizar status',
+                style: TextStyle(color: ink, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final option in _statusOptions)
+                    Semantics(
+                      button: true,
+                      selected: _statusSelecionado == option.value,
+                      label: 'Status ${option.label}',
+                      child: _SheetShortcutChip(
+                        label: option.label,
+                        selected: _statusSelecionado == option.value,
+                        onTap:
+                            () => setState(
+                              () => _statusSelecionado = option.value,
+                            ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => widget.onAtualizarStatus(_statusSelecionado),
+                icon: const Icon(Icons.update_rounded, size: 18),
+                label: const Text('Aplicar status'),
+              ),
+              const SizedBox(height: 12),
+              Semantics(
+                button: true,
+                label: 'Excluir alunos selecionados',
+                child: OutlinedButton.icon(
+                  onPressed: widget.onExcluir,
+                  icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                  label: const Text('Excluir selecionados'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: EagleTokens.bad,
+                    side: const BorderSide(color: EagleTokens.bad),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
-          OutlinedButton.icon(
-            onPressed: () => widget.onAtualizarStatus(_statusSelecionado),
-            icon: const Icon(Icons.update_rounded, size: 18),
-            label: const Text('Aplicar status'),
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: widget.onExcluir,
-            icon: const Icon(Icons.delete_outline_rounded, size: 18),
-            label: const Text('Excluir selecionados'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: EagleTokens.bad,
-              side: const BorderSide(color: EagleTokens.bad),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
