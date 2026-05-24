@@ -899,7 +899,7 @@ class _TreinoDetailBody extends StatelessWidget {
                                         ),
                                         builder:
                                             (ctx) => _RemoveExerciseSheet(
-                                              title: te.exercicio.nome,
+                                              title: te.exercicio.nomeDisplay,
                                               isDark: isDark,
                                             ),
                                       );
@@ -1527,7 +1527,7 @@ class _ExercicioRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  te.exercicio.nome,
+                  te.exercicio.nomeDisplay,
                   style: AppTypography.inter(
                     color: ink,
                     fontSize: 14.5,

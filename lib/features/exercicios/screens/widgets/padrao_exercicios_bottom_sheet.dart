@@ -9,8 +9,9 @@ import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../providers/exercicios_provider.dart';
 import '../../../treinos/utils/exercise_picker_filter.dart';
+import '../../../../core/widgets/skeleton_loader.dart';
 import 'exercise_media_thumb.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'exercise_video_preview_sheet.dart';
 
 class PadraoExerciciosBottomSheet extends ConsumerWidget {
   const PadraoExerciciosBottomSheet({
@@ -57,12 +58,44 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
           ),
           child: asyncList.when(
             loading:
-                () => const Center(
-                  child: SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: FxLoading(strokeWidth: 2.6),
+                () => ListView.separated(
+                  controller: scrollController,
+                  padding: EdgeInsets.fromLTRB(
+                    18,
+                    10,
+                    18,
+                    MediaQuery.paddingOf(context).bottom + 18,
                   ),
+                  itemCount: 7,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (_, index) {
+                    if (index == 0) {
+                      return _SheetHeader(title: title, count: 0);
+                    }
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        children: [
+                          SkeletonLoader(width: 44, height: 44, borderRadius: 14),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SkeletonLoader(height: 14, borderRadius: 8),
+                                SizedBox(height: 8),
+                                SkeletonLoader(
+                                  height: 11,
+                                  width: 120,
+                                  borderRadius: 8,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
             error:
                 (e, _) => Center(
@@ -131,6 +164,13 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
                     exercicio: ex,
                     subtitle: subtitle,
                     alreadyInTreino: alreadyInTreinoIds.contains(ex.id),
+                    onPreview:
+                        ex.hasPlayableMedia
+                            ? () => showExerciseVideoPreview(
+                              context,
+                              exercicio: ex,
+                            )
+                            : null,
                     onTap: () {
                       HapticFeedback.selectionClick();
                       Navigator.pop(context);
@@ -218,12 +258,14 @@ class _ExerciseChoiceTile extends StatelessWidget {
   final Exercicio exercicio;
   final String subtitle;
   final VoidCallback onTap;
+  final VoidCallback? onPreview;
   final bool alreadyInTreino;
 
   const _ExerciseChoiceTile({
     required this.exercicio,
     required this.subtitle,
     required this.onTap,
+    this.onPreview,
     this.alreadyInTreino = false,
   });
 
@@ -245,34 +287,43 @@ class _ExerciseChoiceTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 11),
         child: Row(
           children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                ExerciseMediaThumb(
-                  mediaUrl: mediaUrl,
-                  size: 44,
-                  radius: 14,
-                ),
-                if (exercicio.hasPlayableMedia)
-                  Positioned(
-                    right: -2,
-                    bottom: -2,
-                    child: Container(
-                      width: 18,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: scheme.primary,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: scheme.surface, width: 1.5),
-                      ),
-                      child: const Icon(
-                        Icons.play_arrow_rounded,
-                        color: Colors.white,
-                        size: 12,
+            GestureDetector(
+              onTap:
+                  onPreview == null
+                      ? null
+                      : () {
+                        HapticFeedback.selectionClick();
+                        onPreview!();
+                      },
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  ExerciseMediaThumb(
+                    mediaUrl: mediaUrl,
+                    size: 44,
+                    radius: 14,
+                  ),
+                  if (exercicio.hasPlayableMedia)
+                    Positioned(
+                      right: -2,
+                      bottom: -2,
+                      child: Container(
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: scheme.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: scheme.surface, width: 1.5),
+                        ),
+                        child: const Icon(
+                          Icons.play_arrow_rounded,
+                          color: Colors.white,
+                          size: 12,
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(

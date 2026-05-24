@@ -49,5 +49,18 @@ void main() {
       );
       expect(filtered.map((e) => e.id), [2]);
     });
+
+    test('filtra somente com video', () {
+      final comVideo = Exercicio(
+        id: 3,
+        nome: 'Supino com demo',
+        gifUrl: 'https://res.cloudinary.com/demo/video/upload/v1/x.mp4',
+      );
+      final filtered = applyExercisePickerFilter(
+        [base, comVideo],
+        const ExercisePickerFilter(somenteComVideo: true),
+      );
+      expect(filtered.map((e) => e.id), [3]);
+    });
   });
 }

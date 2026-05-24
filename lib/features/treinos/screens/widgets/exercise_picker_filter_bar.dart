@@ -56,6 +56,7 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
   int get _activeCount {
     var n = 0;
     if (widget.filter.somenteFavoritos) n++;
+    if (widget.filter.somenteComVideo) n++;
     if (widget.filter.espaco != null) n++;
     if (widget.filter.equipamento != null) n++;
     if (widget.filter.filtrarPorAluno) n++;
@@ -100,6 +101,22 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
                 widget.onChanged(
                   widget.filter.copyWith(
                     somenteFavoritos: !widget.filter.somenteFavoritos,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(width: 8),
+            _FilterChip(
+              label: 'Com vídeo',
+              icon: Icons.play_circle_outline_rounded,
+              selected: widget.filter.somenteComVideo,
+              primary: widget.primary,
+              isDark: widget.isDark,
+              onTap: () {
+                HapticFeedback.selectionClick();
+                widget.onChanged(
+                  widget.filter.copyWith(
+                    somenteComVideo: !widget.filter.somenteComVideo,
                   ),
                 );
               },
@@ -197,6 +214,22 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
                   widget.onChanged(
                     widget.filter.copyWith(
                       somenteFavoritos: !widget.filter.somenteFavoritos,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: 'Com vídeo',
+                icon: Icons.play_circle_outline_rounded,
+                selected: widget.filter.somenteComVideo,
+                primary: widget.primary,
+                isDark: widget.isDark,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  widget.onChanged(
+                    widget.filter.copyWith(
+                      somenteComVideo: !widget.filter.somenteComVideo,
                     ),
                   );
                 },

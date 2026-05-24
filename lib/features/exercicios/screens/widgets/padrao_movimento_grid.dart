@@ -18,11 +18,13 @@ class PadraoMovimentoGrid extends ConsumerStatefulWidget {
     required this.onAdicionar,
     this.alreadyInTreinoIds = const {},
     this.pickerFilter = const ExercisePickerFilter(),
+    this.onClearFilters,
   });
 
   final ValueChanged<Exercicio> onAdicionar;
   final Set<int> alreadyInTreinoIds;
   final ExercisePickerFilter pickerFilter;
+  final VoidCallback? onClearFilters;
 
   @override
   ConsumerState<PadraoMovimentoGrid> createState() =>
@@ -108,15 +110,36 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
                   ? Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 28),
-                      child: Text(
-                        'Nenhuma categoria com exercícios disponíveis nesta visão.',
-                        textAlign: TextAlign.center,
-                        style: AppTypography.inter(
-                          color: mute,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          height: 1.35,
-                        ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.filter_alt_off_rounded,
+                            color: mute.withValues(alpha: 0.7),
+                            size: 36,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            widget.pickerFilter.isActive
+                                ? 'Nenhuma categoria combina com os filtros ativos.'
+                                : 'Nenhuma categoria com exercícios disponíveis nesta visão.',
+                            textAlign: TextAlign.center,
+                            style: AppTypography.inter(
+                              color: mute,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              height: 1.35,
+                            ),
+                          ),
+                          if (widget.pickerFilter.isActive &&
+                              widget.onClearFilters != null) ...[
+                            const SizedBox(height: 14),
+                            FilledButton.tonal(
+                              onPressed: widget.onClearFilters,
+                              child: const Text('Limpar filtros'),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   )

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -29,10 +31,16 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../exercicios/screens/widgets/substituir_exercicio_bottom_sheet.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/services/biblioteca_bootstrap.dart';
+import '../../exercicios/services/biblioteca_sync_status.dart';
+import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
+import '../data/exercise_prescription_memory.dart';
+import '../data/exercise_prescription_memory_store.dart';
 import '../screens/widgets/exercise_picker_filter_bar.dart';
+import '../services/recent_exercise_usage_store.dart';
 import '../utils/exercise_picker_filter.dart';
 import '../utils/exercise_picker_sort.dart';
 import '../utils/exercise_picker_suggestions.dart';
+import '../utils/exercise_search_highlight.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
@@ -75,19 +83,27 @@ class _AddExercicioToTreinoScreenState
   final _prescriptionAnchor = GlobalKey();
   final _scrollCtrl = ScrollController();
   bool _prescriptionInView = false;
+  Timer? _searchDebounce;
+  List<int> _recentIds = const [];
+  ExercisePrescriptionMemory? _lastPrescription;
 
   @override
   void initState() {
     super.initState();
     _applyPreset('hypertrophy', notify: false);
     _buscaCtrl.addListener(() {
-      final next = _buscaCtrl.text.trim();
-      if (next != _buscaQuery) setState(() => _buscaQuery = next);
+      _searchDebounce?.cancel();
+      _searchDebounce = Timer(const Duration(milliseconds: 220), () {
+        if (!mounted) return;
+        final next = _buscaCtrl.text.trim();
+        if (next != _buscaQuery) setState(() => _buscaQuery = next);
+      });
     });
     _scrollCtrl.addListener(_syncPrescriptionVisibility);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureBiblioteca();
       _applyAlunoEquipmentFilter();
+      _loadPickerMemory();
     });
   }
 
@@ -137,10 +153,70 @@ class _AddExercicioToTreinoScreenState
     _observacoesCtrl.dispose();
     _grupoSupersetCtrl.dispose();
     _buscaCtrl.dispose();
+    _searchDebounce?.cancel();
     _scrollCtrl
       ..removeListener(_syncPrescriptionVisibility)
       ..dispose();
     super.dispose();
+  }
+
+  Future<void> _loadPickerMemory() async {
+    final recent = await RecentExerciseUsageStore.recentIds();
+    final last = await ExercisePrescriptionMemoryStore.load();
+    if (!mounted) return;
+    setState(() {
+      _recentIds = recent;
+      _lastPrescription = last;
+    });
+  }
+
+  Future<void> _persistAfterAdd(int exercicioId) async {
+    await RecentExerciseUsageStore.recordUsage(exercicioId);
+    final memory = _currentPrescriptionMemory();
+    await ExercisePrescriptionMemoryStore.save(memory);
+    if (!mounted) return;
+    setState(() => _lastPrescription = memory);
+    final recent = await RecentExerciseUsageStore.recentIds();
+    if (!mounted) return;
+    setState(() => _recentIds = recent);
+  }
+
+  ExercisePrescriptionMemory _currentPrescriptionMemory() {
+    return ExercisePrescriptionMemory(
+      presetId: _presetId,
+      series: int.tryParse(_seriesCtrl.text) ?? 3,
+      repeticoes: _repCtrl.text,
+      descansoSegundos: int.tryParse(_descansoCtrl.text) ?? 60,
+      tipoSerie: _tipoSerie,
+      cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
+      observacoes: _observacoesCtrl.text,
+      grupoSuperset:
+          _tipoSerie == 'SUPERSET'
+              ? int.tryParse(_grupoSupersetCtrl.text)
+              : null,
+    );
+  }
+
+  void _applyLastPrescription() {
+    final memory = _lastPrescription;
+    if (memory == null) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _applyPreset(memory.presetId, notify: false);
+      _seriesCtrl.text = memory.series.toString();
+      _repCtrl.text = memory.repeticoes;
+      _descansoCtrl.text = memory.descansoSegundos.toString();
+      _tipoSerie = memory.tipoSerie;
+      _observacoesCtrl.text = memory.observacoes;
+      if (memory.cargaKg != null) {
+        _cargaCtrl.text = memory.cargaKg!.toString();
+      } else {
+        _cargaCtrl.clear();
+      }
+      if (memory.grupoSuperset != null) {
+        _grupoSupersetCtrl.text = memory.grupoSuperset.toString();
+      }
+    });
   }
 
   Future<void> _ensureBiblioteca() async {
@@ -241,11 +317,12 @@ class _AddExercicioToTreinoScreenState
       _error = null;
     });
     try {
+      final exercicioId = _selecionado!.id;
       await ref
           .read(treinoRepositoryProvider)
           .adicionarExercicio(
             widget.treinoId,
-            _selecionado!.id,
+            exercicioId,
             series: int.tryParse(_seriesCtrl.text) ?? 3,
             repeticoes: _repCtrl.text,
             descanso: int.tryParse(_descansoCtrl.text) ?? 60,
@@ -257,6 +334,7 @@ class _AddExercicioToTreinoScreenState
                     ? int.tryParse(_grupoSupersetCtrl.text)
                     : null,
           );
+      await _persistAfterAdd(exercicioId);
       if (mounted) {
         HapticFeedback.mediumImpact();
         FeedbackHelper.showSuccess(
@@ -292,11 +370,12 @@ class _AddExercicioToTreinoScreenState
     });
     try {
       final nome = _selecionado!.nomeDisplay;
+      final exercicioId = _selecionado!.id;
       await ref
           .read(treinoRepositoryProvider)
           .adicionarExercicio(
             widget.treinoId,
-            _selecionado!.id,
+            exercicioId,
             series: int.tryParse(_seriesCtrl.text) ?? 3,
             repeticoes: _repCtrl.text,
             descanso: int.tryParse(_descansoCtrl.text) ?? 60,
@@ -308,6 +387,7 @@ class _AddExercicioToTreinoScreenState
                     ? int.tryParse(_grupoSupersetCtrl.text)
                     : null,
           );
+      await _persistAfterAdd(exercicioId);
       if (!mounted) return;
       HapticFeedback.mediumImpact();
       ref.invalidate(treinoProvider(widget.treinoId));
@@ -333,11 +413,12 @@ class _AddExercicioToTreinoScreenState
       _error = null;
     });
     try {
+      final exercicioId = exercicio.id;
       await ref
           .read(treinoRepositoryProvider)
           .adicionarExercicio(
             widget.treinoId,
-            exercicio.id,
+            exercicioId,
             series: int.tryParse(_seriesCtrl.text) ?? 3,
             repeticoes: _repCtrl.text,
             descanso: int.tryParse(_descansoCtrl.text) ?? 60,
@@ -349,6 +430,7 @@ class _AddExercicioToTreinoScreenState
                     ? int.tryParse(_grupoSupersetCtrl.text)
                     : null,
           );
+      await _persistAfterAdd(exercicioId);
       AnalyticsService.instance.track(
         'quick_add_padrao',
         props: {'exId': exercicio.id, 'treinoId': widget.treinoId},
@@ -512,18 +594,9 @@ class _AddExercicioToTreinoScreenState
 
   Future<void> _previewSelectedExerciseVideo() async {
     final exercicio = _selecionado;
-    final videoUrl = exercicio?.videoUrl?.trim();
-    if (exercicio == null || videoUrl == null || videoUrl.isEmpty) return;
+    if (exercicio == null || !exercicio.hasPlayableMedia) return;
     HapticFeedback.selectionClick();
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
-      isScrollControlled: true,
-      builder:
-          (_) =>
-              _ExerciseVideoPreviewSheet(exercicio: exercicio, url: videoUrl),
-    );
+    await showExerciseVideoPreview(context, exercicio: exercicio);
   }
 
   Widget _buildTabContent({
@@ -575,12 +648,15 @@ class _AddExercicioToTreinoScreenState
                   alreadyInTreinoIds: alreadyInTreinoIds,
                   pickerFilter: _pickerFilter,
                   onAdicionar: _selectExercise,
+                  onClearFilters:
+                      () => setState(() => _pickerFilter = const ExercisePickerFilter()),
                 ),
               ),
             ],
           ),
         );
       default:
+        final compact = _selecionado != null;
         final query = _buscaQuery.trim().toLowerCase();
         final favoriteShortcuts =
             query.length >= 2 || _pickerFilter.somenteFavoritos
@@ -603,18 +679,20 @@ class _AddExercicioToTreinoScreenState
                   alreadyInTreinoIds: alreadyInTreinoIds,
                 ).take(6).toList();
         final curatedSuggestions =
-            _selecionado == null &&
+            !compact &&
                     query.isEmpty &&
                     favoriteShortcuts.isEmpty
                 ? curatedPickerSuggestions(
                   exercicios,
                   alreadyInTreinoIds: alreadyInTreinoIds,
+                  recentIds: _recentIds,
                 )
                 : const <Exercicio>[];
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (!compact) ...[
             if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno)
               _AlunoEquipmentFilterBanner(
                 alunoNome: _alunoFilterNome!,
@@ -654,10 +732,13 @@ class _AddExercicioToTreinoScreenState
                 ),
               ),
             ),
+            ],
             if (curatedSuggestions.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                'Mais usados pelos personais',
+                _recentIds.isNotEmpty
+                    ? 'Seus recentes e mais usados'
+                    : 'Mais usados pelos personais',
                 style: AppTypography.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
@@ -671,6 +752,7 @@ class _AddExercicioToTreinoScreenState
               ...curatedSuggestions.map(
                 (exercicio) => _QuickSearchResultTile(
                   exercicio: exercicio,
+                  highlightQuery: query,
                   alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
                   primary: primary,
                   isDark: isDark,
@@ -678,7 +760,7 @@ class _AddExercicioToTreinoScreenState
                 ),
               ),
             ],
-            if (favoriteShortcuts.isNotEmpty) ...[
+            if (!compact && favoriteShortcuts.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
                 'Seus favoritos',
@@ -692,6 +774,7 @@ class _AddExercicioToTreinoScreenState
               ...favoriteShortcuts.map(
                 (exercicio) => _QuickSearchResultTile(
                   exercicio: exercicio,
+                  highlightQuery: query,
                   alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
                   primary: primary,
                   isDark: isDark,
@@ -699,11 +782,12 @@ class _AddExercicioToTreinoScreenState
                 ),
               ),
             ],
-            if (quickMatches.isNotEmpty) ...[
+            if (!compact && quickMatches.isNotEmpty) ...[
               const SizedBox(height: 10),
               ...quickMatches.map(
                 (exercicio) => _QuickSearchResultTile(
                   exercicio: exercicio,
+                  highlightQuery: query,
                   alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
                   primary: primary,
                   isDark: isDark,
@@ -717,6 +801,7 @@ class _AddExercicioToTreinoScreenState
               isDark: isDark,
               primary: primary,
               total: exercicios.length,
+              compactMode: compact,
               showPrescriptionHint: !_prescriptionInView,
               onTap:
                   () => _openExercisePicker(
@@ -787,9 +872,32 @@ class _AddExercicioToTreinoScreenState
       ),
       body: SafeArea(
         bottom: false,
-        child: Column(
+        child: CallbackShortcuts(
+          bindings: {
+            const SingleActivator(LogicalKeyboardKey.enter): () {
+              if (_selecionado != null && !_loading) _submitAndContinue();
+            },
+            const SingleActivator(LogicalKeyboardKey.escape): () {
+              safePopOrGo(context, '/treinos/${widget.treinoId}');
+            },
+          },
+          child: Focus(
+            autofocus: true,
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            ListenableBuilder(
+              listenable: BibliotecaSyncStatus.instance,
+              builder: (context, _) {
+                final sync = BibliotecaSyncStatus.instance;
+                if (!sync.syncing) return const SizedBox.shrink();
+                return _BibliotecaSyncBanner(
+                  message: sync.message ?? 'Sincronizando biblioteca...',
+                  isDark: isDark,
+                  primary: primary,
+                );
+              },
+            ),
             Expanded(
               child: exerciciosAsync.when(
                 loading:
@@ -884,6 +992,15 @@ class _AddExercicioToTreinoScreenState
                                     isDark: isDark,
                                     primary: primary,
                                   ),
+                                  if (_lastPrescription != null) ...[
+                                    const SizedBox(height: 10),
+                                    _RepeatPrescriptionBanner(
+                                      memory: _lastPrescription!,
+                                      isDark: isDark,
+                                      primary: primary,
+                                      onApply: _applyLastPrescription,
+                                    ),
+                                  ],
                                   const SizedBox(height: 12),
                                   _PresetSelector(
                                     selectedId: _presetId,
@@ -892,79 +1009,91 @@ class _AddExercicioToTreinoScreenState
                                     onSelected: _applyPreset,
                                   ),
                                   const SizedBox(height: 20),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: _seriesCtrl,
-                                          decoration: _fxInputDecoration(
-                                            label: 'Séries',
-                                            isDark: isDark,
-                                            primary: primary,
-                                          ),
-                                          keyboardType: TextInputType.number,
-                                          style: AppTypography.inter(
-                                            color: ink,
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                  LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      final wide = constraints.maxWidth > 600;
+                                      final fieldStyle = AppTypography.inter(
+                                        color: ink,
+                                        fontWeight: FontWeight.w700,
+                                      );
+                                      final seriesField = TextFormField(
+                                        controller: _seriesCtrl,
+                                        decoration: _fxInputDecoration(
+                                          label: 'Séries',
+                                          isDark: isDark,
+                                          primary: primary,
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: _repCtrl,
-                                          decoration: _fxInputDecoration(
-                                            label: 'Repetições',
-                                            isDark: isDark,
-                                            primary: primary,
-                                          ),
-                                          style: AppTypography.inter(
-                                            color: ink,
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                        keyboardType: TextInputType.number,
+                                        style: fieldStyle,
+                                      );
+                                      final repField = TextFormField(
+                                        controller: _repCtrl,
+                                        decoration: _fxInputDecoration(
+                                          label: 'Repetições',
+                                          isDark: isDark,
+                                          primary: primary,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: TokensStrip.s4),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: _descansoCtrl,
-                                          decoration: _fxInputDecoration(
-                                            label: 'Descanso (segundos)',
-                                            isDark: isDark,
-                                            primary: primary,
-                                          ),
-                                          keyboardType: TextInputType.number,
-                                          style: AppTypography.inter(
-                                            color: ink,
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                        style: fieldStyle,
+                                      );
+                                      final descansoField = TextFormField(
+                                        controller: _descansoCtrl,
+                                        decoration: _fxInputDecoration(
+                                          label: 'Descanso (segundos)',
+                                          isDark: isDark,
+                                          primary: primary,
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: _cargaCtrl,
-                                          decoration: _fxInputDecoration(
-                                            label: 'Carga alvo (kg)',
-                                            helper: 'Opcional',
-                                            isDark: isDark,
-                                            primary: primary,
-                                          ),
-                                          keyboardType:
-                                              const TextInputType.numberWithOptions(
-                                                decimal: true,
-                                              ),
-                                          style: AppTypography.inter(
-                                            color: ink,
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                        keyboardType: TextInputType.number,
+                                        style: fieldStyle,
+                                      );
+                                      final cargaField = TextFormField(
+                                        controller: _cargaCtrl,
+                                        decoration: _fxInputDecoration(
+                                          label: 'Carga alvo (kg)',
+                                          helper: 'Opcional',
+                                          isDark: isDark,
+                                          primary: primary,
                                         ),
-                                      ),
-                                    ],
+                                        keyboardType:
+                                            const TextInputType.numberWithOptions(
+                                              decimal: true,
+                                            ),
+                                        style: fieldStyle,
+                                      );
+                                      if (!wide) {
+                                        return Column(
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Expanded(child: seriesField),
+                                                const SizedBox(width: 12),
+                                                Expanded(child: repField),
+                                              ],
+                                            ),
+                                            const SizedBox(height: TokensStrip.s4),
+                                            Row(
+                                              children: [
+                                                Expanded(child: descansoField),
+                                                const SizedBox(width: 12),
+                                                Expanded(child: cargaField),
+                                              ],
+                                            ),
+                                          ],
+                                        );
+                                      }
+                                      return Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(child: seriesField),
+                                          const SizedBox(width: 12),
+                                          Expanded(child: repField),
+                                          const SizedBox(width: 12),
+                                          Expanded(child: descansoField),
+                                          const SizedBox(width: 12),
+                                          Expanded(child: cargaField),
+                                        ],
+                                      );
+                                    },
                                   ),
                                   const SizedBox(height: TokensStrip.s4),
                                   _SerieTypeSelector(
@@ -1053,6 +1182,107 @@ class _AddExercicioToTreinoScreenState
           ],
         ),
       ),
+        ),
+      ),
+      ),
+    );
+  }
+}
+
+class _BibliotecaSyncBanner extends StatelessWidget {
+  const _BibliotecaSyncBanner({
+    required this.message,
+    required this.isDark,
+    required this.primary,
+  });
+
+  final String message;
+  final bool isDark;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: primary.withValues(alpha: isDark ? 0.14 : 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: primary.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: primary,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: AppTypography.inter(
+                  color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RepeatPrescriptionBanner extends StatelessWidget {
+  const _RepeatPrescriptionBanner({
+    required this.memory,
+    required this.isDark,
+    required this.primary,
+    required this.onApply,
+  });
+
+  final ExercisePrescriptionMemory memory;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onApply;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: fxListCardDecoration(context, accent: primary),
+      child: Row(
+        children: [
+          Icon(Icons.history_rounded, color: primary, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Repetir última prescrição (${memory.summary})',
+              style: AppTypography.inter(
+                color: mute,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: onApply,
+            child: Text(
+              'Aplicar',
+              style: AppTypography.inter(
+                color: primary,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1184,6 +1414,7 @@ class _QuickSearchResultTile extends StatelessWidget {
     required this.primary,
     required this.isDark,
     required this.onTap,
+    this.highlightQuery = '',
   });
 
   final Exercicio exercicio;
@@ -1191,6 +1422,7 @@ class _QuickSearchResultTile extends StatelessWidget {
   final Color primary;
   final bool isDark;
   final VoidCallback onTap;
+  final String highlightQuery;
 
   @override
   Widget build(BuildContext context) {
@@ -1218,14 +1450,14 @@ class _QuickSearchResultTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      exercicio.nomeDisplay,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
+                    highlightedExerciseName(
+                      name: exercicio.nomeDisplay,
+                      query: highlightQuery,
+                      baseStyle: AppTypography.inter(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w800,
                       ),
+                      highlightColor: primary,
                     ),
                     if (alreadyInTreino)
                       Text(
@@ -1661,6 +1893,7 @@ class _ExercisePickerCard extends StatelessWidget {
   final Color primary;
   final int total;
   final bool showPrescriptionHint;
+  final bool compactMode;
   final VoidCallback onTap;
   final bool mediaLoading;
   final bool videoExpanded;
@@ -1676,6 +1909,7 @@ class _ExercisePickerCard extends StatelessWidget {
     required this.primary,
     required this.total,
     this.showPrescriptionHint = true,
+    this.compactMode = false,
     required this.onTap,
     required this.mediaLoading,
     required this.videoExpanded,
@@ -1809,7 +2043,8 @@ class _ExercisePickerCard extends StatelessWidget {
             ),
           ],
         ),
-        if ((!selected || (showPrescriptionHint && !hasMediaIssue))) ...[
+        if (!compactMode &&
+            (!selected || (showPrescriptionHint && !hasMediaIssue))) ...[
           const SizedBox(height: 12),
           AnimatedSize(
             duration: const Duration(milliseconds: 200),
@@ -1845,7 +2080,7 @@ class _ExercisePickerCard extends StatelessWidget {
           ),
           ),
         ],
-        if (selected) ...[
+        if (selected && !compactMode) ...[
           const SizedBox(height: 8),
           InkWell(
             onTap: onToggleVideo,

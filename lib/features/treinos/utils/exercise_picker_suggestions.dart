@@ -16,14 +16,23 @@ const curatedExerciseSearchTerms = [
 List<Exercicio> curatedPickerSuggestions(
   Iterable<Exercicio> items, {
   required Set<int> alreadyInTreinoIds,
+  List<int> recentIds = const [],
   int limit = 6,
 }) {
   final pool = sortExerciciosForPicker(
     items,
     alreadyInTreinoIds: alreadyInTreinoIds,
   );
+  final byId = {for (final ex in pool) ex.id: ex};
   final picked = <Exercicio>[];
   final seen = <int>{};
+
+  for (final id in recentIds) {
+    if (picked.length >= limit) break;
+    if (alreadyInTreinoIds.contains(id)) continue;
+    final exercicio = byId[id];
+    if (exercicio != null && seen.add(id)) picked.add(exercicio);
+  }
 
   for (final term in curatedExerciseSearchTerms) {
     if (picked.length >= limit) break;

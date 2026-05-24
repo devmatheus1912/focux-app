@@ -8,6 +8,7 @@ class ExercisePickerFilter {
     this.equipamentosAluno = const {},
     this.filtrarPorAluno = false,
     this.somenteFavoritos = false,
+    this.somenteComVideo = false,
   });
 
   final Espaco? espaco;
@@ -15,12 +16,14 @@ class ExercisePickerFilter {
   final Set<Equipamento> equipamentosAluno;
   final bool filtrarPorAluno;
   final bool somenteFavoritos;
+  final bool somenteComVideo;
 
   bool get isActive =>
       espaco != null ||
       equipamento != null ||
       filtrarPorAluno ||
-      somenteFavoritos;
+      somenteFavoritos ||
+      somenteComVideo;
 
   ExercisePickerFilter copyWith({
     Espaco? espaco,
@@ -28,6 +31,7 @@ class ExercisePickerFilter {
     Set<Equipamento>? equipamentosAluno,
     bool? filtrarPorAluno,
     bool? somenteFavoritos,
+    bool? somenteComVideo,
     bool clearEspaco = false,
     bool clearEquipamento = false,
     bool clearAluno = false,
@@ -41,6 +45,7 @@ class ExercisePickerFilter {
       filtrarPorAluno:
           clearAluno ? false : (filtrarPorAluno ?? this.filtrarPorAluno),
       somenteFavoritos: somenteFavoritos ?? this.somenteFavoritos,
+      somenteComVideo: somenteComVideo ?? this.somenteComVideo,
     );
   }
 
@@ -59,6 +64,7 @@ List<Exercicio> applyExercisePickerFilter(
 ) {
   return items.where((exercicio) {
     if (filter.somenteFavoritos && !exercicio.favoritado) return false;
+    if (filter.somenteComVideo && !exercicio.hasPlayableMedia) return false;
     if (filter.espaco != null &&
         !exercicio.espacosCompativeis.contains(filter.espaco)) {
       return false;

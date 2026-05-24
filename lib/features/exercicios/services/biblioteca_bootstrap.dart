@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../exercicios/providers/exercicios_provider.dart';
+import '../providers/exercicios_provider.dart';
+import 'biblioteca_sync_status.dart';
 
 const _bootstrapKey = 'biblioteca_bootstrap_v1_done';
 const _mediaPublishKey = 'biblioteca_media_publish_v1_done';
@@ -15,12 +16,14 @@ class BibliotecaBootstrap {
   static Future<void> ensureReady(WidgetRef ref) async {
     if (_running) return;
     _running = true;
+    BibliotecaSyncStatus.instance.start('Preparando biblioteca de exercícios...');
     try {
       final prefs = await SharedPreferences.getInstance();
       final repo = ref.read(exercicioRepositoryProvider);
       var list = await ref.read(exerciciosProvider.future);
 
       if (list.isEmpty) {
+        BibliotecaSyncStatus.instance.start('Importando exercícios padrão...');
         await repo.importarSeedPremiumV1();
         ref.invalidate(exerciciosProvider);
         list = await ref.read(exerciciosProvider.future);
@@ -35,6 +38,7 @@ class BibliotecaBootstrap {
           );
 
       if (needsEnrich || !(prefs.getBool(_bootstrapKey) ?? false)) {
+        BibliotecaSyncStatus.instance.start('Enriquecendo demonstrações...');
         await repo.enriquecerBibliotecaCurada();
         ref.invalidate(exerciciosProvider);
         await prefs.setBool(_bootstrapKey, true);
@@ -47,6 +51,7 @@ class BibliotecaBootstrap {
             !(exercicio.gifUrl?.contains('/upload/v') ?? false),
       );
       if (needsMediaPublish && !(prefs.getBool(_mediaPublishKey) ?? false)) {
+        BibliotecaSyncStatus.instance.start('Publicando vídeos da biblioteca...');
         await repo.publicarMidiasCuradas();
         ref.invalidate(exerciciosProvider);
         await prefs.setBool(_mediaPublishKey, true);
@@ -54,6 +59,7 @@ class BibliotecaBootstrap {
     } catch (_) {
       // Falha silenciosa — telas individuais ainda têm fallback manual.
     } finally {
+      BibliotecaSyncStatus.instance.stop();
       _running = false;
     }
   }

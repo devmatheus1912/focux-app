@@ -22,6 +22,23 @@ void main() {
       expect(suggestions.first.nome, contains('Supino'));
     });
 
+    test('prioriza exercícios recentes do personal', () {
+      final items = [
+        Exercicio(id: 1, nome: 'Supino reto barra'),
+        Exercicio(id: 2, nome: 'Agachamento livre'),
+        Exercicio(id: 99, nome: 'Abducao maquina'),
+      ];
+
+      final suggestions = curatedPickerSuggestions(
+        items,
+        alreadyInTreinoIds: const {},
+        recentIds: const [99],
+        limit: 2,
+      );
+
+      expect(suggestions.first.id, 99);
+    });
+
     test('ignora exercícios já no treino', () {
       final items = [
         Exercicio(id: 1, nome: 'Supino reto barra'),
