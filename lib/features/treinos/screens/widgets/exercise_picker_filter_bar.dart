@@ -348,9 +348,7 @@ class _FilterChip extends StatelessWidget {
                 color:
                     selected
                         ? primary
-                        : (isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : TokensStrip.borderDefault),
+                        : primary.withValues(alpha: isDark ? 0.22 : 0.18),
               ),
             ),
             child: Row(

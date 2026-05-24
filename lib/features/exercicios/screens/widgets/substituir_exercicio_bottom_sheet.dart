@@ -12,6 +12,7 @@ import '../../data/exercicio_taxonomy_labels.dart';
 import '../../data/substituicao_engine.dart';
 import '../../providers/exercicios_provider.dart';
 import 'exercise_media_thumb.dart';
+import 'exercise_video_preview_sheet.dart';
 
 class SubstituirExercicioBottomSheet extends ConsumerWidget {
   const SubstituirExercicioBottomSheet({
@@ -228,14 +229,27 @@ class _AlternativaTile extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ExerciseMediaThumb(
-                mediaUrl: exercisePreviewMediaUrl(
-                  thumbnailUrl: exercicio.thumbnailUrl,
-                  gifUrl: exercicio.gifUrl,
-                  videoUrl: exercicio.videoUrl,
+              GestureDetector(
+                onTap:
+                    exercicio.hasPlayableMedia
+                        ? () {
+                          HapticFeedback.selectionClick();
+                          showExerciseVideoPreview(
+                            context,
+                            exercicio: exercicio,
+                          );
+                        }
+                        : null,
+                child: ExerciseMediaThumb(
+                  mediaUrl: exercisePreviewMediaUrl(
+                    thumbnailUrl: exercicio.thumbnailUrl,
+                    gifUrl: exercicio.gifUrl,
+                    videoUrl: exercicio.videoUrl,
+                  ),
+                  size: 44,
+                  radius: 14,
+                  showPlayBadge: exercicio.hasPlayableMedia,
                 ),
-                size: 44,
-                radius: 14,
               ),
               const SizedBox(width: 12),
               Expanded(
