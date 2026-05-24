@@ -1430,7 +1430,7 @@ class _StickyAddExerciseBar extends StatelessWidget {
             const SizedBox(height: 10),
           ],
           OutlinedButton.icon(
-            onPressed: loading ? null : onContinue,
+            onPressed: loading ? null : onSubmit,
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(46),
               padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -1440,9 +1440,9 @@ class _StickyAddExerciseBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            icon: Icon(Icons.playlist_add_rounded, color: primary, size: 20),
+            icon: Icon(Icons.check_rounded, color: primary, size: 20),
             label: Text(
-              'Adicionar e continuar',
+              'Concluir e voltar ao treino',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.inter(
@@ -1459,9 +1459,9 @@ class _StickyAddExerciseBar extends StatelessWidget {
               ),
             ),
             child: FxLiquidPrimaryButton(
-              label: 'Adicionar ao treino',
-              icon: Icons.add_rounded,
-              onPressed: loading ? null : onSubmit,
+              label: 'Adicionar e continuar',
+              icon: Icons.playlist_add_rounded,
+              onPressed: loading ? null : onContinue,
               loading: loading,
             ),
           ),
