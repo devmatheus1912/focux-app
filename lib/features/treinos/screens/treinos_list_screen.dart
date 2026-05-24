@@ -1175,7 +1175,7 @@ class _TreinosHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
-              '${treinos.length} ${treinos.length == 1 ? 'ativo' : 'ativos'}',
+              '${treinos.length} ${treinos.length == 1 ? 'plano' : 'planos'}',
               style: AppTypography.inter(
                 color: primary,
                 fontSize: 11.5,
@@ -1216,10 +1216,17 @@ class _TreinosCommandCard extends StatelessWidget {
     final ready = treinos.where((t) => t.exercicios.isNotEmpty).length;
     final templates = treinos.where((t) => t.isTemplate).length;
     final assembling = treinos.length - ready;
+    final ultraCompact = treinos.length <= 1;
     final metricGap = compact ? 8.0 : 10.0;
 
     return Container(
-      padding: EdgeInsets.all(compact ? 14 : 18),
+      padding: EdgeInsets.all(
+        ultraCompact
+            ? 13
+            : compact
+            ? 14
+            : 18,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -1229,10 +1236,10 @@ class _TreinosCommandCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: primary.withValues(alpha: isDark ? 0.14 : 0.24),
-            blurRadius: 30,
-            offset: const Offset(0, 16),
-            spreadRadius: -18,
+            color: primary.withValues(alpha: isDark ? 0.08 : 0.14),
+            blurRadius: 22,
+            offset: const Offset(0, 12),
+            spreadRadius: -16,
           ),
         ],
       ),
@@ -1241,39 +1248,43 @@ class _TreinosCommandCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(16),
+              if (!ultraCompact) ...[
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome_motion_rounded,
+                    color: Colors.white,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.auto_awesome_motion_rounded,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 12),
+                const SizedBox(width: 12),
+              ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Biblioteca sob controle',
-                      style: TextStyle(
+                      style: AppTypography.inter(
                         color: Colors.white,
-                        fontSize: 17,
+                        fontSize: ultraCompact ? 15.5 : 17,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: ultraCompact ? 2 : 3),
                     Text(
                       assembling == 0
-                          ? 'Todos os planos têm exercícios.'
+                          ? ultraCompact
+                              ? '1 plano pronto para uso.'
+                              : 'Todos os planos têm exercícios.'
                           : '$assembling plano${assembling == 1 ? '' : 's'} ainda em montagem.',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.72),
-                        fontSize: 12.2,
+                      style: AppTypography.inter(
+                        color: Colors.white.withValues(alpha: 0.74),
+                        fontSize: ultraCompact ? 11.5 : 12.2,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1295,45 +1306,97 @@ class _TreinosCommandCard extends StatelessWidget {
                   ),
                 ),
                 icon: const Icon(Icons.add_rounded, size: 17),
-                label: const Text(
+                label: Text(
                   'Novo',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+                  style: AppTypography.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: compact ? 12 : TokensStrip.s4),
-          Row(
-            children: [
-              Expanded(
-                child: _CommandMetric(
-                  label: 'prontos',
-                  value: '$ready',
-                  textColor: ink,
-                  muteColor: mute,
-                ),
-              ),
-              SizedBox(width: metricGap),
-              Expanded(
-                child: _CommandMetric(
-                  label: 'exercícios',
-                  value: '$totalExercises',
-                  textColor: ink,
-                  muteColor: mute,
-                ),
-              ),
-              SizedBox(width: metricGap),
-              Expanded(
-                child: _CommandMetric(
-                  label: 'templates',
-                  value: '$templates',
-                  textColor: ink,
-                  muteColor: mute,
-                ),
-              ),
-            ],
+          SizedBox(
+            height:
+                ultraCompact
+                    ? 10
+                    : compact
+                    ? 12
+                    : TokensStrip.s4,
           ),
+          if (ultraCompact)
+            _CommandInlineMetrics(
+              ready: ready,
+              totalExercises: totalExercises,
+              templates: templates,
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: _CommandMetric(
+                    label: 'prontos',
+                    value: '$ready',
+                    textColor: ink,
+                    muteColor: mute,
+                  ),
+                ),
+                SizedBox(width: metricGap),
+                Expanded(
+                  child: _CommandMetric(
+                    label: 'exercícios',
+                    value: '$totalExercises',
+                    textColor: ink,
+                    muteColor: mute,
+                  ),
+                ),
+                SizedBox(width: metricGap),
+                Expanded(
+                  child: _CommandMetric(
+                    label: 'templates',
+                    value: '$templates',
+                    textColor: ink,
+                    muteColor: mute,
+                  ),
+                ),
+              ],
+            ),
         ],
+      ),
+    );
+  }
+}
+
+class _CommandInlineMetrics extends StatelessWidget {
+  final int ready;
+  final int totalExercises;
+  final int templates;
+
+  const _CommandInlineMetrics({
+    required this.ready,
+    required this.totalExercises,
+    required this.templates,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.11),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+      ),
+      child: Text(
+        '$ready pronto · $totalExercises exercícios · $templates templates',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppTypography.inter(
+          color: Colors.white.withValues(alpha: 0.86),
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -1368,7 +1431,7 @@ class _CommandMetric extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTypography.mono(
+            style: AppTypography.inter(
               color: Colors.white,
               fontSize: 19,
               fontWeight: FontWeight.w800,
