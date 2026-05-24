@@ -1193,7 +1193,7 @@ class _OwnVideoPanel extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  hasVideo ? 'Video proprio ativo' : 'Adicionar video proprio',
+                  hasVideo ? 'Vídeo próprio ativo' : 'Adicionar vídeo próprio',
                   style: TextStyle(
                     color: ink,
                     fontSize: 14,
@@ -1216,7 +1216,7 @@ class _OwnVideoPanel extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           FxLiquidPrimaryButton(
-            label: hasVideo ? 'Trocar' : 'Enviar',
+            label: hasVideo ? 'Trocar vídeo' : 'Enviar vídeo',
             icon:
                 hasVideo ? Icons.sync_rounded : Icons.upload_rounded,
             onPressed: uploading ? null : onUpload,

@@ -597,7 +597,7 @@ class _AddExercicioToTreinoScreenState
     final exercicio = _selecionado;
     if (exercicio == null || !exercicio.hasPlayableMedia) return;
     HapticFeedback.selectionClick();
-    await showExerciseVideoPreview(context, exercicio: exercicio);
+    await showExerciseMediaPreview(context, exercicio: exercicio);
   }
 
   Widget _buildTabContent({
@@ -813,7 +813,7 @@ class _AddExercicioToTreinoScreenState
                 onSelect: _selectExercise,
                 onPreview: (ex) {
                   if (!ex.hasPlayableMedia) return;
-                  showExerciseVideoPreview(context, exercicio: ex);
+                  showExerciseMediaPreview(context, exercicio: ex);
                 },
               ),
             ],
@@ -837,7 +837,7 @@ class _AddExercicioToTreinoScreenState
                 onSelect: _selectExercise,
                 onPreview: (ex) {
                   if (!ex.hasPlayableMedia) return;
-                  showExerciseVideoPreview(context, exercicio: ex);
+                  showExerciseMediaPreview(context, exercicio: ex);
                 },
               ),
             ],
@@ -852,7 +852,7 @@ class _AddExercicioToTreinoScreenState
                 onSelect: _selectExercise,
                 onPreview: (ex) {
                   if (!ex.hasPlayableMedia) return;
-                  showExerciseVideoPreview(context, exercicio: ex);
+                  showExerciseMediaPreview(context, exercicio: ex);
                 },
               ),
               const SizedBox(height: 8),
@@ -1634,12 +1634,6 @@ class _CompactSelectedExerciseBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaUrl = exercisePreviewMediaUrl(
-      thumbnailUrl: exercicio.thumbnailUrl,
-      gifUrl: exercicio.gifUrl,
-      videoUrl: exercicio.videoUrl,
-    );
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: fxListCardDecoration(context, accent: primary, selected: true),
@@ -1648,18 +1642,10 @@ class _CompactSelectedExerciseBar extends StatelessWidget {
           if (onPreview != null)
             GestureDetector(
               onTap: onPreview,
-              child: ExerciseMediaThumb(
-                mediaUrl: mediaUrl,
-                size: 44,
-                showPlayBadge: exercicio.hasPlayableMedia,
-              ),
+              child: ExerciseMediaThumb.fromExercicio(exercicio, size: 44),
             )
           else
-            ExerciseMediaThumb(
-              mediaUrl: mediaUrl,
-              size: 44,
-              showPlayBadge: exercicio.hasPlayableMedia,
-            ),
+            ExerciseMediaThumb.fromExercicio(exercicio, size: 44),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -1741,26 +1727,10 @@ class _QuickSearchResultTile extends StatelessWidget {
                 if (onPreviewThumb != null)
                   GestureDetector(
                     onTap: onPreviewThumb,
-                    child: ExerciseMediaThumb(
-                      mediaUrl: exercisePreviewMediaUrl(
-                        thumbnailUrl: exercicio.thumbnailUrl,
-                        gifUrl: exercicio.gifUrl,
-                        videoUrl: exercicio.videoUrl,
-                      ),
-                      size: 40,
-                      showPlayBadge: exercicio.hasPlayableMedia,
-                    ),
+                    child: ExerciseMediaThumb.fromExercicio(exercicio, size: 40),
                   )
                 else
-                  ExerciseMediaThumb(
-                    mediaUrl: exercisePreviewMediaUrl(
-                      thumbnailUrl: exercicio.thumbnailUrl,
-                      gifUrl: exercicio.gifUrl,
-                      videoUrl: exercicio.videoUrl,
-                    ),
-                    size: 40,
-                    showPlayBadge: exercicio.hasPlayableMedia,
-                  ),
+                  ExerciseMediaThumb.fromExercicio(exercicio, size: 40),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -2564,9 +2534,12 @@ class _ExerciseMediaStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final hasVideo = exercicio.videoUrl?.trim().isNotEmpty == true;
+    final hasPersonalVideo = exercicioHasPersonalVideo(exercicio);
+    final hasLibraryDemo =
+        exercicio.hasPlayableMedia && !hasPersonalVideo;
+    final hasAnyMedia = hasPersonalVideo || hasLibraryDemo;
     final statusColor =
-        hasVideo
+        hasAnyMedia
             ? primary
             : isDark
             ? Colors.white.withValues(alpha: 0.68)
@@ -2574,18 +2547,24 @@ class _ExerciseMediaStatus extends StatelessWidget {
     final statusIcon =
         mediaLoading
             ? Icons.hourglass_empty_rounded
-            : hasVideo
+            : hasPersonalVideo
             ? Icons.play_circle_fill_rounded
+            : hasLibraryDemo
+            ? Icons.video_library_rounded
             : Icons.video_call_outlined;
     final statusTitle =
         mediaLoading
             ? 'Processando vídeo'
-            : hasVideo
+            : hasPersonalVideo
             ? 'Vídeo próprio disponível'
-            : 'Sem vídeo próprio';
+            : hasLibraryDemo
+            ? 'Demonstração da biblioteca'
+            : 'Sem demonstração';
     final statusSubtitle =
-        hasVideo
-            ? 'Confira a prévia ou troque a mídia deste exercício.'
+        hasPersonalVideo
+            ? 'Confira a prévia ou troque seu vídeo.'
+            : hasLibraryDemo
+            ? 'Você pode assistir a demo ou enviar seu próprio vídeo.'
             : 'Adicione sua demonstração para revisar antes de prescrever.';
 
     return Container(
@@ -2593,7 +2572,7 @@ class _ExerciseMediaStatus extends StatelessWidget {
       decoration:
           fxListCardDecoration(
             context,
-            accent: hasVideo ? primary : null,
+            accent: hasAnyMedia ? primary : null,
           ),
       child: Row(
         children: [
@@ -2635,7 +2614,7 @@ class _ExerciseMediaStatus extends StatelessWidget {
               ],
             ),
           ),
-          if (hasVideo)
+          if (hasAnyMedia)
             TextButton(
               onPressed: mediaLoading ? null : onPreviewVideo,
               style: TextButton.styleFrom(
@@ -2649,7 +2628,7 @@ class _ExerciseMediaStatus extends StatelessWidget {
               ),
               child: const Text('Prévia'),
             ),
-          if (hasVideo)
+          if (hasPersonalVideo)
             PopupMenuButton<_ExerciseMediaAction>(
               enabled: !mediaLoading,
               tooltip: 'Ações de vídeo',
@@ -2675,16 +2654,31 @@ class _ExerciseMediaStatus extends StatelessWidget {
                     ),
                   ],
             )
-          else
+          else ...[
+            if (hasLibraryDemo)
+              TextButton(
+                onPressed: mediaLoading ? null : onPreviewVideo,
+                style: TextButton.styleFrom(
+                  foregroundColor: primary,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  textStyle: AppTypography.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                child: const Text('Ver demo'),
+              ),
             Padding(
               padding: const EdgeInsets.only(left: 8),
               child: FxLiquidPrimaryButton(
-                label: 'Adicionar',
+                label: hasLibraryDemo ? 'Enviar meu vídeo' : 'Adicionar',
                 onPressed: mediaLoading ? null : onUploadVideo,
                 loading: mediaLoading,
                 expand: false,
               ),
             ),
+          ],
         ],
       ),
     );
@@ -3341,7 +3335,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                                   },
                                   onPreviewThumb:
                                       exercicio.hasPlayableMedia
-                                          ? () => showExerciseVideoPreview(
+                                          ? () => showExerciseMediaPreview(
                                             context,
                                             exercicio: exercicio,
                                           )
@@ -3451,11 +3445,6 @@ class _ExercisePickerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final mediaUrl = exercisePreviewMediaUrl(
-      thumbnailUrl: exercicio.thumbnailUrl,
-      gifUrl: exercicio.gifUrl,
-      videoUrl: exercicio.videoUrl,
-    );
 
     return Semantics(
       button: true,
@@ -3490,19 +3479,17 @@ class _ExercisePickerTile extends StatelessWidget {
                     HapticFeedback.selectionClick();
                     onPreviewThumb!();
                   },
-                  child: ExerciseMediaThumb(
-                    mediaUrl: mediaUrl,
+                  child: ExerciseMediaThumb.fromExercicio(
+                    exercicio,
                     size: 44,
                     radius: 14,
-                    showPlayBadge: exercicio.hasPlayableMedia,
                   ),
                 )
               else
-                ExerciseMediaThumb(
-                  mediaUrl: mediaUrl,
+                ExerciseMediaThumb.fromExercicio(
+                  exercicio,
                   size: 44,
                   radius: 14,
-                  showPlayBadge: exercicio.hasPlayableMedia,
                 ),
               const SizedBox(width: 12),
               Expanded(

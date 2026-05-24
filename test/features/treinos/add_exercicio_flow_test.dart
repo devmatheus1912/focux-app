@@ -92,6 +92,34 @@ void main() {
       );
       expect(exercicioMissingPreviewPoster(missing), isTrue);
     });
+
+    test('preview usa GIF Cloudinary da biblioteca', () {
+      const gif =
+          'https://res.cloudinary.com/demo/image/upload/v123/demo.gif';
+      final preview = exercisePreviewMediaUrl(gifUrl: gif);
+      expect(preview, contains('w_160'));
+      expect(preview, contains('.jpg'));
+    });
+
+    test('exercicioHasPersonalVideo só com upload do personal', () {
+      final library = Exercicio(
+        id: 1,
+        nome: 'Supino',
+        gifUrl: 'https://res.cloudinary.com/demo/image/upload/v1/a.gif',
+        videoSource: 'FOCUX_LIBRARY',
+      );
+      expect(exercicioHasPersonalVideo(library), isFalse);
+
+      final personal = Exercicio(
+        id: 2,
+        nome: 'Custom',
+        videoUrl:
+            'https://res.cloudinary.com/demo/video/upload/v123/sample.mp4',
+        videoSource: 'PERSONAL_UPLOAD',
+        licenseStatus: 'PERSONAL_OWNED',
+      );
+      expect(exercicioHasPersonalVideo(personal), isTrue);
+    });
   });
 
   group('workoutBuilderPresets', () {

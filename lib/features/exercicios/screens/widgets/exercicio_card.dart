@@ -8,6 +8,7 @@ import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../providers/exercicios_provider.dart';
+import 'exercise_media_thumb.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class ExercicioCard extends ConsumerWidget {
@@ -61,13 +62,8 @@ class ExercicioCard extends ConsumerWidget {
       _equipamentoLabel(exercicio),
       _dificuldadeLabel(exercicio),
     ].where((s) => s != null && s.isNotEmpty).join(' | ');
-    final mediaThumb =
-        exercicio.thumbnailUrl?.isNotEmpty == true
-            ? exercicio.thumbnailUrl
-            : exercicio.gifUrl?.isNotEmpty == true
-            ? exercicio.gifUrl
-            : null;
-    final hasVideo = exercicio.videoUrl?.isNotEmpty == true;
+    final hasPersonalVideo = exercicioHasPersonalVideo(exercicio);
+    final hasDemo = exercicio.hasPlayableMedia;
 
     return Material(
       color: Colors.transparent,
@@ -86,7 +82,12 @@ class ExercicioCard extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              _ExerciseThumb(mediaThumb: mediaThumb),
+              ExerciseMediaThumb.fromExercicio(
+                exercicio,
+                size: 54,
+                radius: 14,
+                iconSize: 22,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -116,11 +117,21 @@ class ExercicioCard extends ConsumerWidget {
                       children: [
                         _MiniMediaBadge(
                           icon:
-                              hasVideo
+                              hasPersonalVideo
                                   ? Icons.play_circle_fill_rounded
+                                  : hasDemo
+                                  ? Icons.video_library_rounded
                                   : Icons.videocam_off_rounded,
-                          label: hasVideo ? 'Video' : 'Sem video',
-                          color: hasVideo ? EagleTokens.good : EagleTokens.warn,
+                          label:
+                              hasPersonalVideo
+                                  ? 'Vídeo próprio'
+                                  : hasDemo
+                                  ? 'Biblioteca'
+                                  : 'Sem demo',
+                          color:
+                              hasDemo
+                                  ? EagleTokens.good
+                                  : EagleTokens.warn,
                         ),
                         const SizedBox(width: 6),
                         if (_modalidadeLabel(exercicio)?.isNotEmpty == true)
@@ -177,13 +188,19 @@ class ExercicioCard extends ConsumerWidget {
                           child: Row(
                             children: [
                               Icon(
-                                hasVideo
+                                hasPersonalVideo
                                     ? Icons.swap_horiz_rounded
                                     : Icons.upload_rounded,
                                 size: 20,
                               ),
                               const SizedBox(width: 10),
-                              Text(hasVideo ? 'Trocar video' : 'Subir video'),
+                              Text(
+                                hasPersonalVideo
+                                    ? 'Trocar vídeo'
+                                    : hasDemo
+                                    ? 'Enviar meu vídeo'
+                                    : 'Subir vídeo',
+                              ),
                             ],
                           ),
                         ),
@@ -206,42 +223,6 @@ class ExercicioCard extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ExerciseThumb extends StatelessWidget {
-  final String? mediaThumb;
-
-  const _ExerciseThumb({required this.mediaThumb});
-
-  @override
-  Widget build(BuildContext context) {
-    if (mediaThumb != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: SizedBox(
-          width: 54,
-          height: 54,
-          child: Image.network(
-            mediaThumb!,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => const Icon(Icons.fitness_center),
-          ),
-        ),
-      );
-    }
-    return Container(
-      width: 54,
-      height: 54,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Icon(
-        Icons.fitness_center_rounded,
-        color: Theme.of(context).colorScheme.primary,
       ),
     );
   }

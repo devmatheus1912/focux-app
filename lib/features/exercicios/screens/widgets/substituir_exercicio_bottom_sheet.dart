@@ -234,21 +234,16 @@ class _AlternativaTile extends StatelessWidget {
                     exercicio.hasPlayableMedia
                         ? () {
                           HapticFeedback.selectionClick();
-                          showExerciseVideoPreview(
+                          showExerciseMediaPreview(
                             context,
                             exercicio: exercicio,
                           );
                         }
                         : null,
-                child: ExerciseMediaThumb(
-                  mediaUrl: exercisePreviewMediaUrl(
-                    thumbnailUrl: exercicio.thumbnailUrl,
-                    gifUrl: exercicio.gifUrl,
-                    videoUrl: exercicio.videoUrl,
-                  ),
+                child: ExerciseMediaThumb.fromExercicio(
+                  exercicio,
                   size: 44,
                   radius: 14,
-                  showPlayBadge: exercicio.hasPlayableMedia,
                 ),
               ),
               const SizedBox(width: 12),

@@ -166,7 +166,7 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
                     alreadyInTreino: alreadyInTreinoIds.contains(ex.id),
                     onPreview:
                         ex.hasPlayableMedia
-                            ? () => showExerciseVideoPreview(
+                            ? () => showExerciseMediaPreview(
                               context,
                               exercicio: ex,
                             )
@@ -274,12 +274,6 @@ class _ExerciseChoiceTile extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final nome = exercicio.nomeDisplay;
     final muted = alreadyInTreino;
-    final mediaUrl = exercisePreviewMediaUrl(
-      thumbnailUrl: exercicio.thumbnailUrl,
-      gifUrl: exercicio.gifUrl,
-      videoUrl: exercicio.videoUrl,
-    );
-
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -295,34 +289,10 @@ class _ExerciseChoiceTile extends StatelessWidget {
                         HapticFeedback.selectionClick();
                         onPreview!();
                       },
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  ExerciseMediaThumb(
-                    mediaUrl: mediaUrl,
-                    size: 44,
-                    radius: 14,
-                  ),
-                  if (exercicio.hasPlayableMedia)
-                    Positioned(
-                      right: -2,
-                      bottom: -2,
-                      child: Container(
-                        width: 18,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          color: scheme.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: scheme.surface, width: 1.5),
-                        ),
-                        child: const Icon(
-                          Icons.play_arrow_rounded,
-                          color: Colors.white,
-                          size: 12,
-                        ),
-                      ),
-                    ),
-                ],
+              child: ExerciseMediaThumb.fromExercicio(
+                exercicio,
+                size: 44,
+                radius: 14,
               ),
             ),
             const SizedBox(width: 12),

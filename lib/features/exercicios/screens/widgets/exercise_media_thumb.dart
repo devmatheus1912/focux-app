@@ -7,46 +7,81 @@ class ExerciseMediaThumb extends StatelessWidget {
   const ExerciseMediaThumb({
     super.key,
     this.mediaUrl,
+    this.exercicio,
     this.size = 44,
     this.radius = 14,
     this.iconSize = 20,
     this.showPlayBadge = false,
+    this.expectMedia = false,
   });
 
   final String? mediaUrl;
+  final Exercicio? exercicio;
   final double size;
   final double radius;
   final double iconSize;
   final bool showPlayBadge;
+  /// Quando true e sem URL, mostra estado "sem demonstração" em vez de haltere genérico.
+  final bool expectMedia;
+
+  factory ExerciseMediaThumb.fromExercicio(
+    Exercicio exercicio, {
+    double size = 44,
+    double radius = 14,
+    double iconSize = 20,
+    bool? showPlayBadge,
+    Key? key,
+  }) {
+    return ExerciseMediaThumb(
+      key: key,
+      exercicio: exercicio,
+      mediaUrl: exercisePreviewMediaUrlFor(exercicio),
+      size: size,
+      radius: radius,
+      iconSize: iconSize,
+      showPlayBadge: showPlayBadge ?? exercicio.hasPlayableMedia,
+      expectMedia: exercicio.hasPlayableMedia,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final url = mediaUrl?.trim();
-    final thumb =
-        url != null && url.isNotEmpty
-            ? ClipRRect(
-              borderRadius: BorderRadius.circular(radius),
-              child: Image.network(
-                url,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-                cacheWidth: (size * 2).round(),
-                cacheHeight: (size * 2).round(),
-                errorBuilder: (_, __, ___) => _fallback(primary),
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return SkeletonLoader(
-                    width: size,
-                    height: size,
-                    borderRadius: radius,
-                  );
-                },
-              ),
-            )
-            : _fallback(primary);
+    final label = exercicio?.nomeDisplay ?? 'Exercício';
+
+    Widget thumb;
+    if (url != null && url.isNotEmpty) {
+      thumb = ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: Image.network(
+          url,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+          cacheWidth: (size * 2).round(),
+          cacheHeight: (size * 2).round(),
+          errorBuilder: (_, __, ___) => _fallback(primary, missing: expectMedia),
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return SkeletonLoader(
+              width: size,
+              height: size,
+              borderRadius: radius,
+            );
+          },
+        ),
+      );
+    } else {
+      thumb = _fallback(primary, missing: expectMedia);
+    }
+
+    thumb = Semantics(
+      label: expectMedia ? 'Demonstração de $label' : label,
+      image: url != null && url.isNotEmpty,
+      child: thumb,
+    );
 
     if (!showPlayBadge) return thumb;
 
@@ -76,17 +111,41 @@ class ExerciseMediaThumb extends StatelessWidget {
     );
   }
 
-  Widget _fallback(Color primary) {
+  Widget _fallback(Color primary, {required bool missing}) {
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: primary.withValues(alpha: 0.10),
+        color: primary.withValues(alpha: missing ? 0.06 : 0.10),
         borderRadius: BorderRadius.circular(radius),
+        border:
+            missing
+                ? Border.all(color: primary.withValues(alpha: 0.2))
+                : null,
       ),
-      child: Icon(Icons.fitness_center_rounded, color: primary, size: iconSize),
+      child: Icon(
+        missing ? Icons.perm_media_outlined : Icons.fitness_center_rounded,
+        color: primary.withValues(alpha: missing ? 0.55 : 1),
+        size: iconSize,
+      ),
     );
   }
+}
+
+/// URL estática para thumb na lista (prioriza vídeo do personal, depois biblioteca).
+String? exercisePreviewMediaUrlFor(Exercicio exercicio) {
+  if (exercicio.isPersonalUpload) {
+    final video = exercicio.videoUrl?.trim();
+    if (video != null && video.isNotEmpty) {
+      final poster = cloudinaryVideoPosterUrl(video);
+      if (poster != null) return poster;
+    }
+  }
+  return exercisePreviewMediaUrl(
+    thumbnailUrl: exercicio.thumbnailUrl,
+    gifUrl: exercicio.gifUrl,
+    videoUrl: exercicio.videoUrl,
+  );
 }
 
 String? exercisePreviewMediaUrl({
@@ -95,39 +154,69 @@ String? exercisePreviewMediaUrl({
   String? videoUrl,
 }) {
   final thumb = thumbnailUrl?.trim();
-  if (thumb != null && thumb.isNotEmpty && _isRasterImageUrl(thumb)) {
-    return thumb;
+  if (thumb != null && thumb.isNotEmpty) {
+    final resolved = _resolveCloudinaryOrRaster(thumb);
+    if (resolved != null) return resolved;
   }
 
   for (final raw in [gifUrl, videoUrl, thumbnailUrl]) {
     final value = raw?.trim();
     if (value == null || value.isEmpty) continue;
-    if (_isRasterImageUrl(value)) return value;
-    final poster = cloudinaryVideoPosterUrl(value);
-    if (poster != null && !poster.contains('.mp4')) return poster;
+    final resolved = _resolveCloudinaryOrRaster(value);
+    if (resolved != null && !resolved.contains('.mp4')) return resolved;
   }
   return null;
 }
 
+String? _resolveCloudinaryOrRaster(String url) {
+  if (url.contains('.gif') && url.contains('res.cloudinary.com')) {
+    return cloudinaryImageThumbUrl(url) ?? url;
+  }
+  if (_isRasterImageUrl(url)) return url;
+  final imageThumb = cloudinaryImageThumbUrl(url);
+  if (imageThumb != null) return imageThumb;
+  return cloudinaryVideoPosterUrl(url);
+}
+
 bool exercicioMissingPreviewPoster(Exercicio exercicio) {
   if (!exercicio.hasPlayableMedia) return false;
-  final poster = exercisePreviewMediaUrl(
-    thumbnailUrl: exercicio.thumbnailUrl,
-    gifUrl: exercicio.gifUrl,
-    videoUrl: exercicio.videoUrl,
-  );
+  final poster = exercisePreviewMediaUrlFor(exercicio);
   return poster == null || poster.contains('.mp4');
 }
 
 bool _isRasterImageUrl(String url) {
   if (url.contains('.mp4') || url.contains('.mov')) return false;
   return RegExp(
-    r'\.(jpg|jpeg|png|webp)(\?|$)',
+    r'\.(jpg|jpeg|png|webp|gif)(\?|$)',
     caseSensitive: false,
   ).hasMatch(url);
 }
 
-/// Gera URL de poster JPG a partir de vídeo Cloudinary (evita usar MP4 no Image).
+/// Thumb JPG a partir de imagem/GIF Cloudinary.
+String? cloudinaryImageThumbUrl(String imageUrl) {
+  if (!imageUrl.contains('res.cloudinary.com')) return null;
+  const marker = '/image/upload/';
+  final idx = imageUrl.indexOf(marker);
+  if (idx < 0) return null;
+  if (imageUrl.contains('w_160') && imageUrl.contains('c_fill')) {
+    return imageUrl;
+  }
+
+  final prefix = imageUrl.substring(0, idx + marker.length);
+  final after = imageUrl.substring(idx + marker.length);
+  if (after.isEmpty) return null;
+
+  var thumb = '${prefix}w_160,h_160,c_fill,q_auto/$after';
+  if (thumb.contains('.gif')) {
+    thumb = thumb.replaceAll(
+      RegExp(r'\.gif(\?.*)?$', caseSensitive: false),
+      '.jpg',
+    );
+  }
+  return thumb;
+}
+
+/// Poster JPG a partir de vídeo Cloudinary.
 String? cloudinaryVideoPosterUrl(String videoUrl) {
   const marker = '/video/upload/';
   final idx = videoUrl.indexOf(marker);
@@ -142,11 +231,18 @@ String? cloudinaryVideoPosterUrl(String videoUrl) {
   final versionMatch = RegExp(r'(v\d+/).+').firstMatch(afterMarker);
   if (versionMatch == null) return null;
 
-  final pathFromVersion = afterMarker.substring(afterMarker.indexOf(versionMatch.group(1)!));
+  final pathFromVersion = afterMarker.substring(
+    afterMarker.indexOf(versionMatch.group(1)!),
+  );
   final poster =
       '${prefix}so_0,f_jpg,w_160,h_160,c_fill,q_auto/$pathFromVersion';
   return poster.replaceAll(
     RegExp(r'\.(mp4|mov|webm|m4v)(\?.*)?$', caseSensitive: false),
     '.jpg',
   );
+}
+
+bool exercicioHasPersonalVideo(Exercicio exercicio) {
+  return exercicio.isPersonalUpload &&
+      exercicio.videoUrl?.trim().isNotEmpty == true;
 }
