@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/treinos_provider.dart';
@@ -47,6 +48,8 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
   final _nomeCtrl = TextEditingController();
   final _descricaoCtrl = TextEditingController();
   final _objetivoCtrl = TextEditingController();
+  final _nomeFocusNode = FocusNode();
+  final _nomeFieldKey = GlobalKey();
   String? _nivel;
   bool _loading = false;
   String? _error;
@@ -74,12 +77,25 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
     _nomeCtrl.dispose();
     _descricaoCtrl.dispose();
     _objetivoCtrl.dispose();
+    _nomeFocusNode.dispose();
     _entryCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      _nomeFocusNode.requestFocus();
+      final fieldContext = _nomeFieldKey.currentContext;
+      if (fieldContext != null) {
+        await Scrollable.ensureVisible(
+          fieldContext,
+          alignment: 0.2,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOutCubic,
+        );
+      }
+      return;
+    }
     setState(() {
       _loading = true;
       _error = null;
@@ -105,6 +121,13 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
       if (mounted) {
         HapticFeedback.heavyImpact();
         context.pop(true);
+        context.push(
+          '/treinos/${treino.id}/exercicios/add',
+          extra:
+              widget.alunoId == null
+                  ? null
+                  : {'alunoId': widget.alunoId, 'alunoNome': widget.alunoNome},
+        );
       }
     } catch (e) {
       String msg = 'Erro ao criar treino.';
@@ -135,7 +158,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
     setState(() {
       _objetivoCtrl.text = preset.title;
       if (_nomeCtrl.text.trim().isEmpty) {
-        _nomeCtrl.text = 'Treino ${preset.title}';
+        _nomeCtrl.text = displayWorkoutName('Treino ${preset.title}');
       }
       _nivel ??= 'INTERMEDIARIO';
     });
@@ -149,11 +172,11 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
     final previewTitle =
         _nomeCtrl.text.trim().isEmpty
             ? 'Plano sem nome'
-            : _nomeCtrl.text.trim();
+            : displayWorkoutName(_nomeCtrl.text.trim());
     final previewGoal =
         _objetivoCtrl.text.trim().isEmpty
             ? 'Escolha um objetivo'
-            : _objetivoCtrl.text.trim();
+            : displayPtBr(_objetivoCtrl.text.trim());
     final previewLevel =
         _nivel == null
             ? 'Nível em aberto'
@@ -210,6 +233,18 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                                   : null,
                         ),
                         const SizedBox(height: 10),
+                        Text(
+                          'Deslize para ver mais modelos',
+                          style: AppTypography.inter(
+                            color:
+                                isDark
+                                    ? EagleTokens.darkInkMute
+                                    : TokensStrip.textSecondary,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
                         _PresetRail(
                           presets: _objetivoPresets,
                           selected: _objetivoCtrl.text.trim(),
@@ -225,7 +260,9 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                         ),
                         const SizedBox(height: 10),
                         _FxField(
+                          key: _nomeFieldKey,
                           controller: _nomeCtrl,
+                          focusNode: _nomeFocusNode,
                           label: 'Nome do treino',
                           icon: Icons.edit_outlined,
                           isDark: isDark,
@@ -295,7 +332,11 @@ class _StickyCreateBar extends StatelessWidget {
 
     return SafeArea(
       top: false,
-      child: ClipRect(
+      child: Semantics(
+        button: true,
+        enabled: enabled,
+        label: loading ? 'Criando treino' : 'Criar treino',
+        child: ClipRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
           child: Container(
@@ -330,6 +371,7 @@ class _StickyCreateBar extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -562,62 +604,70 @@ class _PresetRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 96,
+      height: 108,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.only(right: 22),
         itemCount: presets.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final preset = presets[index];
           final active = selected == preset.title;
-          return GestureDetector(
-            onTap: () => onTap(preset),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              width: 124,
-              padding: const EdgeInsets.all(12),
-              decoration: fxListCardDecoration(
-                context,
-                accent: active ? primary : null,
-                selected: active,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    preset.icon,
-                    color: active ? primary : TokensStrip.textSecondary,
-                    size: 20,
-                  ),
-                  const Spacer(),
-                  Text(
-                    preset.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.inter(
-                      color:
-                          isDark
-                              ? EagleTokens.darkInk
-                              : TokensStrip.textPrimary,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
+          return Semantics(
+            button: true,
+            selected: active,
+            label: 'Modelo ${preset.title}, ${preset.subtitle}',
+            child: GestureDetector(
+              onTap: () => onTap(preset),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 132,
+                padding: const EdgeInsets.all(12),
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: active ? primary : null,
+                  selected: active,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      preset.icon,
+                      color: active ? primary : TokensStrip.textSecondary,
+                      size: 20,
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    preset.subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.inter(
-                      color:
-                          isDark
-                              ? EagleTokens.darkInkMute
-                              : TokensStrip.textSecondary,
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
+                    const Spacer(),
+                    Text(
+                      preset.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.inter(
+                        color:
+                            isDark
+                                ? EagleTokens.darkInk
+                                : TokensStrip.textPrimary,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      preset.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.inter(
+                        color:
+                            isDark
+                                ? EagleTokens.darkInkMute
+                                : TokensStrip.textSecondary,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        height: 1.15,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -654,12 +704,16 @@ class _LevelSelector extends StatelessWidget {
                 ? EagleTokens.darkCardHi.withValues(alpha: 0.7)
                 : Colors.white.withValues(alpha: 0.9);
         return Expanded(
-          child: GestureDetector(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              onChanged(_niveis[i]);
-            },
-            child: AnimatedContainer(
+          child: Semantics(
+            button: true,
+            selected: sel,
+            label: 'Nível ${_niveisLabel[i]}',
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onChanged(_niveis[i]);
+              },
+              child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
               padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 8),
@@ -709,6 +763,7 @@ class _LevelSelector extends StatelessWidget {
               ),
             ),
           ),
+          ),
         );
       }),
     );
@@ -751,6 +806,7 @@ class _ErrorNotice extends StatelessWidget {
 
 class _FxField extends StatelessWidget {
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String label;
   final IconData icon;
   final bool isDark;
@@ -758,7 +814,9 @@ class _FxField extends StatelessWidget {
   final String? Function(String?)? validator;
 
   const _FxField({
+    super.key,
     required this.controller,
+    this.focusNode,
     required this.label,
     required this.icon,
     required this.isDark,
@@ -771,6 +829,7 @@ class _FxField extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     return TextFormField(
       controller: controller,
+      focusNode: focusNode,
       maxLines: maxLines,
       validator: validator,
       style: AppTypography.inter(
