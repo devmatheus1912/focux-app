@@ -101,18 +101,11 @@ class ShellPalette {
   }
 
   BoxDecoration bottomSheet({double radius = TokensStrip.rXl}) {
+    final edge = TokensStrip.glassBorder(dark: isDark);
     return BoxDecoration(
       color: sheetFill,
       borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
-      border: Border(
-        top: BorderSide(color: TokensStrip.glassBorder(dark: isDark)),
-        left: BorderSide(
-          color: TokensStrip.glassBorder(dark: isDark).withValues(alpha: 0.5),
-        ),
-        right: BorderSide(
-          color: TokensStrip.glassBorder(dark: isDark).withValues(alpha: 0.5),
-        ),
-      ),
+      border: Border.all(color: edge.withValues(alpha: isDark ? 0.55 : 0.45)),
       boxShadow: TokensStrip.elevation(24, dark: isDark),
     );
   }
