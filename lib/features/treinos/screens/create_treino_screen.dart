@@ -1,4 +1,4 @@
-﻿import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -160,13 +160,14 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
     return FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
-        title:
-            widget.alunoId == null
-                ? 'Novo Treino'
-                : 'Treino vinculado',
-        subtitle:
-            widget.alunoId == null ? 'PLANO BASE' : 'PLANO DO ALUNO',
+        title: widget.alunoId == null ? 'Novo Treino' : 'Treino vinculado',
+        subtitle: widget.alunoId == null ? 'PLANO BASE' : 'PLANO DO ALUNO',
         onBack: () => safePopOrGo(context, '/treinos'),
+      ),
+      bottomNavigationBar: _StickyCreateBar(
+        canSubmit: canSubmit,
+        loading: _loading,
+        onSubmit: _submit,
       ),
       body: SafeArea(
         bottom: false,
@@ -180,7 +181,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                   curve: Curves.easeOut,
                 ),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(22, 8, 22, 32),
+                  padding: const EdgeInsets.fromLTRB(22, 8, 22, 116),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -201,6 +202,10 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                                   ? 'Biblioteca'
                                   : widget.alunoNome ?? 'Aluno',
                           isDark: isDark,
+                          onAction:
+                              widget.alunoId == null
+                                  ? () => safePopOrGo(context, '/treinos')
+                                  : null,
                         ),
                         const SizedBox(height: 10),
                         _PresetRail(
@@ -253,17 +258,6 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                           const SizedBox(height: TokensStrip.s4),
                           _ErrorNotice(message: _error!),
                         ],
-                        const SizedBox(height: 26),
-                        Opacity(
-                          opacity: canSubmit ? 1 : 0.45,
-                          child: FxLiquidPrimaryButton(
-                            label: 'Criar treino',
-                            icon: Icons.add_rounded,
-                            onPressed:
-                                canSubmit && !_loading ? _submit : null,
-                            loading: _loading,
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -271,6 +265,63 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StickyCreateBar extends StatelessWidget {
+  final bool canSubmit;
+  final bool loading;
+  final VoidCallback onSubmit;
+
+  const _StickyCreateBar({
+    required this.canSubmit,
+    required this.loading,
+    required this.onSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg =
+        isDark
+            ? EagleTokens.darkBg.withValues(alpha: 0.82)
+            : TokensStrip.pageBg.withValues(alpha: 0.82);
+    final enabled = canSubmit && !loading;
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(22, 10, 22, 12),
+        decoration: BoxDecoration(
+          color: bg,
+          border: Border(
+            top: BorderSide(
+              color:
+                  isDark
+                      ? EagleTokens.darkLine.withValues(alpha: 0.62)
+                      : TokensStrip.borderDefault,
+            ),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.06),
+              blurRadius: 18,
+              offset: const Offset(0, -10),
+              spreadRadius: -16,
+            ),
+          ],
+        ),
+        child: Opacity(
+          opacity: enabled ? 1 : 0.48,
+          child: FxLiquidPrimaryButton(
+            label: 'Criar treino',
+            icon: Icons.add_rounded,
+            onPressed: enabled ? onSubmit : null,
+            loading: loading,
+          ),
         ),
       ),
     );
@@ -297,7 +348,7 @@ class _CreationHero extends StatelessWidget {
     final primaryDeep = BrandPalette.deep(primary);
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -307,10 +358,10 @@ class _CreationHero extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: primary.withValues(alpha: isDark ? 0.12 : 0.22),
-            blurRadius: 28,
-            offset: const Offset(0, 16),
-            spreadRadius: -18,
+            color: primary.withValues(alpha: isDark ? 0.08 : 0.14),
+            blurRadius: 22,
+            offset: const Offset(0, 12),
+            spreadRadius: -20,
           ),
         ],
       ),
@@ -320,16 +371,16 @@ class _CreationHero extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(
                   Icons.fitness_center_rounded,
                   color: Colors.white,
-                  size: 22,
+                  size: 20,
                 ),
               ),
               const Spacer(),
@@ -342,40 +393,39 @@ class _CreationHero extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: const Text(
+                child: Text(
                   'Criação guiada',
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     color: Colors.white,
                     fontSize: 11,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: TokensStrip.s4),
+          const SizedBox(height: 14),
           Text(
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: AppTypography.inter(
               color: Colors.white,
-              fontSize: 23,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.25,
+              fontSize: 21,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 5),
           Text(
             'Monte a base agora. Os exercícios entram no próximo passo.',
-            style: TextStyle(
+            style: AppTypography.inter(
               color: Colors.white.withValues(alpha: 0.72),
               fontSize: 12.2,
               height: 1.25,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: TokensStrip.s4),
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(child: _HeroPill(label: goal, icon: Icons.flag_rounded)),
@@ -400,7 +450,7 @@ class _HeroPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.13),
         borderRadius: BorderRadius.circular(14),
@@ -415,10 +465,10 @@ class _HeroPill extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: AppTypography.inter(
                 color: Colors.white.withValues(alpha: 0.88),
                 fontSize: 11.5,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -432,11 +482,13 @@ class _SectionKicker extends StatelessWidget {
   final String title;
   final String action;
   final bool isDark;
+  final VoidCallback? onAction;
 
   const _SectionKicker({
     required this.title,
     required this.action,
     required this.isDark,
+    this.onAction,
   });
 
   @override
@@ -449,22 +501,35 @@ class _SectionKicker extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: TextStyle(
+            style: AppTypography.inter(
               color: ink,
               fontSize: 15,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.15,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
-        Text(
-          action,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: mute,
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
+        InkWell(
+          onTap: onAction,
+          borderRadius: BorderRadius.circular(999),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            child: Text(
+              action,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style:
+                  onAction == null
+                      ? AppTypography.mono(
+                        color: mute,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                      )
+                      : AppTypography.inter(
+                        color: mute,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+            ),
           ),
         ),
       ],
@@ -494,7 +559,7 @@ class _PresetRail extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: presets.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final preset = presets[index];
           final active = selected == preset.title;
@@ -502,7 +567,7 @@ class _PresetRail extends StatelessWidget {
             onTap: () => onTap(preset),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
-              width: 142,
+              width: 124,
               padding: const EdgeInsets.all(12),
               decoration: fxListCardDecoration(
                 context,
@@ -522,10 +587,13 @@ class _PresetRail extends StatelessWidget {
                     preset.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                    style: AppTypography.inter(
+                      color:
+                          isDark
+                              ? EagleTokens.darkInk
+                              : TokensStrip.textPrimary,
                       fontSize: 12.5,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -533,7 +601,7 @@ class _PresetRail extends StatelessWidget {
                     preset.subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: AppTypography.inter(
                       color:
                           isDark
                               ? EagleTokens.darkInkMute
@@ -568,6 +636,16 @@ class _LevelSelector extends StatelessWidget {
     return Row(
       children: List.generate(3, (i) {
         final sel = selected == _niveis[i];
+        final idleInk =
+            isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+        final idleBorder =
+            isDark
+                ? EagleTokens.darkLine
+                : TokensStrip.textSecondary.withValues(alpha: 0.22);
+        final idleFill =
+            isDark
+                ? EagleTokens.darkCardHi.withValues(alpha: 0.7)
+                : Colors.white.withValues(alpha: 0.9);
         return Expanded(
           child: GestureDetector(
             onTap: () {
@@ -578,22 +656,33 @@ class _LevelSelector extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
               padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 8),
-              decoration: fxListCardDecoration(
-                context,
-                accent: sel ? _niveisCor[i] : null,
-                selected: sel,
+              decoration: BoxDecoration(
+                color:
+                    sel
+                        ? _niveisCor[i].withValues(alpha: isDark ? 0.15 : 0.10)
+                        : idleFill,
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                border: Border.all(
+                  color:
+                      sel ? _niveisCor[i].withValues(alpha: 0.42) : idleBorder,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: isDark ? 0.10 : 0.035,
+                    ),
+                    blurRadius: 14,
+                    offset: const Offset(0, 8),
+                    spreadRadius: -14,
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     _niveisIcon[i],
-                    color:
-                        sel
-                            ? _niveisCor[i]
-                            : (isDark
-                                ? EagleTokens.darkInkMute
-                                : TokensStrip.textSecondary),
+                    color: sel ? _niveisCor[i] : idleInk,
                     size: 16,
                   ),
                   const SizedBox(width: 5),
@@ -602,15 +691,10 @@ class _LevelSelector extends StatelessWidget {
                       _niveisLabel[i],
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color:
-                            sel
-                                ? _niveisCor[i]
-                                : (isDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary),
+                      style: AppTypography.inter(
+                        color: sel ? _niveisCor[i] : idleInk,
                         fontSize: 11,
-                        fontWeight: sel ? FontWeight.w900 : FontWeight.w700,
+                        fontWeight: sel ? FontWeight.w800 : FontWeight.w700,
                       ),
                     ),
                   ),
@@ -645,7 +729,7 @@ class _ErrorNotice extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: AppTypography.inter(
                 color: EagleTokens.bad,
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -682,7 +766,7 @@ class _FxField extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       validator: validator,
-      style: TextStyle(
+      style: AppTypography.inter(
         color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
         fontSize: 15,
         fontWeight: FontWeight.w700,
@@ -697,7 +781,7 @@ class _FxField extends StatelessWidget {
         ),
         filled: true,
         fillColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-        labelStyle: TextStyle(
+        labelStyle: AppTypography.inter(
           color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
           fontWeight: FontWeight.w600,
         ),
@@ -725,7 +809,7 @@ class _FxField extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: EagleTokens.bad),
         ),
-        errorStyle: const TextStyle(
+        errorStyle: AppTypography.inter(
           color: EagleTokens.bad,
           fontSize: 11,
           fontWeight: FontWeight.w700,
