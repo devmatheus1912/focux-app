@@ -12,7 +12,7 @@ class TaxonomyLabels {
     PadraoMovimento.pushVertical: 'Empurrar vertical',
     PadraoMovimento.pullHorizontal: 'Puxar horizontal',
     PadraoMovimento.pullVertical: 'Puxar vertical',
-    PadraoMovimento.hinge: 'Quadril / hinge',
+    PadraoMovimento.hinge: 'Posterior de quadril',
     PadraoMovimento.squat: 'Agachamento',
     PadraoMovimento.lunge: 'Avanço',
     PadraoMovimento.carry: 'Carregamento',

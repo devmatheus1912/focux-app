@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import '../../../core/analytics/analytics_service.dart';
@@ -8,6 +7,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -21,13 +21,26 @@ import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
 import '../../exercicios/screens/widgets/padrao_movimento_grid.dart';
 import '../../exercicios/screens/widgets/template_split_picker.dart';
+import '../data/treino_repository.dart';
 import '../data/workout_builder_preset.dart';
 import '../providers/treinos_provider.dart';
+import '../../alunos/providers/alunos_provider.dart';
+import '../../exercicios/screens/widgets/substituir_exercicio_bottom_sheet.dart';
+import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
+import '../../exercicios/services/biblioteca_bootstrap.dart';
+import '../screens/widgets/exercise_picker_filter_bar.dart';
+import '../utils/exercise_picker_filter.dart';
+import '../utils/exercise_picker_sort.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
   final int treinoId;
-  const AddExercicioToTreinoScreen({super.key, required this.treinoId});
+  final int? alunoId;
+  const AddExercicioToTreinoScreen({
+    super.key,
+    required this.treinoId,
+    this.alunoId,
+  });
 
   @override
   ConsumerState<AddExercicioToTreinoScreen> createState() =>
@@ -50,6 +63,44 @@ class _AddExercicioToTreinoScreenState
   bool _loading = false;
   bool _mediaLoading = false;
   String? _error;
+  final _buscaCtrl = TextEditingController();
+  String _buscaQuery = '';
+  bool _videoExpanded = false;
+  bool _seedingBiblioteca = false;
+  ExercisePickerFilter _pickerFilter = const ExercisePickerFilter();
+  String? _alunoFilterNome;
+  final _prescriptionAnchor = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _applyPreset('hypertrophy', notify: false);
+    _buscaCtrl.addListener(() {
+      final next = _buscaCtrl.text.trim();
+      if (next != _buscaQuery) setState(() => _buscaQuery = next);
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureBiblioteca();
+      _applyAlunoEquipmentFilter();
+    });
+  }
+
+  Future<void> _applyAlunoEquipmentFilter() async {
+    final alunoId = widget.alunoId;
+    if (alunoId == null) return;
+    try {
+      final aluno = await ref.read(alunoProvider(alunoId).future);
+      if (!mounted || aluno.equipamentosDisponiveis.isEmpty) return;
+      setState(() {
+        _alunoFilterNome = aluno.nome;
+        _pickerFilter = ExercisePickerFilter.fromAlunoEquipamentos(
+          aluno.equipamentosDisponiveis,
+        );
+      });
+    } catch (_) {
+      // Mantém filtros manuais se o perfil do aluno não carregar.
+    }
+  }
 
   @override
   void dispose() {
@@ -59,12 +110,77 @@ class _AddExercicioToTreinoScreenState
     _cargaCtrl.dispose();
     _observacoesCtrl.dispose();
     _grupoSupersetCtrl.dispose();
+    _buscaCtrl.dispose();
     super.dispose();
   }
 
-  void _applyPreset(String id) {
-    final preset = workoutBuilderPresetById(id);
+  Future<void> _ensureBiblioteca() async {
+    await BibliotecaBootstrap.ensureReady(ref);
+  }
+
+  Set<int> _treinoExercicioIds(AsyncValue<Treino> treinoAsync) {
+    return treinoAsync.maybeWhen(
+      data:
+          (treino) =>
+              treino.exercicios.map((item) => item.exercicio.id).toSet(),
+      orElse: () => const <int>{},
+    );
+  }
+
+  void _selectExercise(Exercicio exercicio) {
     setState(() {
+      _selecionado = exercicio;
+      _tabIndex = 0;
+      _error = null;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _prescriptionAnchor.currentContext;
+      if (ctx != null) {
+        Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
+  }
+
+  Future<void> _openTemplateBuilder() async {
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) => FxShellScaffold(
+              useMesh: true,
+              appBar: FxShellAppBar(
+                title: 'Montar com modelo',
+                subtitle: 'Preencha os slots do treino',
+                onBack: () => Navigator.pop(context),
+              ),
+              body: TemplateSplitPicker(
+                alreadyInTreinoIds: _treinoExercicioIds(
+                  ref.read(treinoProvider(widget.treinoId)),
+                ),
+                onAdicionar: (exercicio) async {
+                  await _adicionarRapido(exercicio);
+                  AnalyticsService.instance.track(
+                    'template_uso',
+                    props: {
+                      'treinoId': widget.treinoId,
+                      'exId': exercicio.id,
+                    },
+                  );
+                },
+              ),
+            ),
+      ),
+    );
+    if (mounted) ref.invalidate(treinoProvider(widget.treinoId));
+  }
+
+  void _applyPreset(String id, {bool notify = true}) {
+    final preset = workoutBuilderPresetById(id);
+    void apply() {
       _presetId = id;
       _seriesCtrl.text = preset.series.toString();
       _repCtrl.text = preset.repeticoes;
@@ -74,7 +190,13 @@ class _AddExercicioToTreinoScreenState
       if (preset.grupoSuperset != null) {
         _grupoSupersetCtrl.text = preset.grupoSuperset.toString();
       }
-    });
+    }
+
+    if (notify) {
+      setState(apply);
+    } else {
+      apply();
+    }
   }
 
   Future<void> _submit() async {
@@ -123,6 +245,51 @@ class _AddExercicioToTreinoScreenState
     }
   }
 
+  Future<void> _submitAndContinue() async {
+    if (_selecionado == null) {
+      setState(() => _error = 'Selecione um exercício.');
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final nome = _selecionado!.nomeDisplay;
+      await ref
+          .read(treinoRepositoryProvider)
+          .adicionarExercicio(
+            widget.treinoId,
+            _selecionado!.id,
+            series: int.tryParse(_seriesCtrl.text) ?? 3,
+            repeticoes: _repCtrl.text,
+            descanso: int.tryParse(_descansoCtrl.text) ?? 60,
+            cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
+            observacoes: _observacoesCtrl.text,
+            tipoSerie: _tipoSerie,
+            grupoSuperset:
+                _tipoSerie == 'SUPERSET'
+                    ? int.tryParse(_grupoSupersetCtrl.text)
+                    : null,
+          );
+      if (!mounted) return;
+      ref.invalidate(treinoProvider(widget.treinoId));
+      setState(() {
+        _selecionado = null;
+        _buscaCtrl.clear();
+        _loading = false;
+      });
+      FeedbackHelper.showSuccess(context, '$nome adicionado. Escolha o próximo.');
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _error = 'Erro ao adicionar exercício.';
+          _loading = false;
+        });
+      }
+    }
+  }
+
   Future<void> _adicionarRapido(Exercicio exercicio) async {
     setState(() {
       _loading = true;
@@ -150,12 +317,16 @@ class _AddExercicioToTreinoScreenState
         props: {'exId': exercicio.id, 'treinoId': widget.treinoId},
       );
       if (mounted) {
-        FeedbackHelper.showSuccess(context, '${exercicio.nome} adicionado.');
+        ref.invalidate(treinoProvider(widget.treinoId));
+        FeedbackHelper.showSuccess(
+          context,
+          '${exercicio.nomeDisplay} adicionado.',
+        );
       }
     } catch (_) {
       if (mounted) {
         setState(() {
-          _error = 'Erro ao adicionar exercicio.';
+          _error = 'Erro ao adicionar exercício.';
         });
       }
     } finally {
@@ -167,7 +338,38 @@ class _AddExercicioToTreinoScreenState
     }
   }
 
-  Future<void> _openExercisePicker(List<Exercicio> exercicios) async {
+  Future<void> _openSimilarPicker(List<Exercicio> exercicios) async {
+    final alvo = _selecionado;
+    if (alvo == null) return;
+    Exercicio? replacement;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.34),
+      builder:
+          (_) => SubstituirExercicioBottomSheet(
+            alvo: alvo,
+            equipamentosAluno:
+                _pickerFilter.equipamento == null
+                    ? null
+                    : {_pickerFilter.equipamento!},
+            onEscolher: (exercicio) => replacement = exercicio,
+          ),
+    );
+    if (replacement != null && mounted) {
+      _selectExercise(replacement!);
+    }
+  }
+
+  List<Exercicio> _visibleExercicios(List<Exercicio> exercicios) {
+    return applyExercisePickerFilter(exercicios, _pickerFilter);
+  }
+
+  Future<void> _openExercisePicker(
+    List<Exercicio> exercicios, {
+    required Set<int> alreadyInTreinoIds,
+  }) async {
     HapticFeedback.selectionClick();
     final selected = await showModalBottomSheet<Exercicio>(
       context: context,
@@ -178,13 +380,12 @@ class _AddExercicioToTreinoScreenState
           (sheetContext) => _ExercisePickerSheet(
             exercicios: exercicios,
             selected: _selecionado,
+            alreadyInTreinoIds: alreadyInTreinoIds,
+            initialQuery: _buscaQuery,
           ),
     );
     if (selected != null && mounted) {
-      setState(() {
-        _selecionado = selected;
-        _error = null;
-      });
+      _selectExercise(selected);
     }
   }
 
@@ -285,6 +486,7 @@ class _AddExercicioToTreinoScreenState
     required List<Exercicio> exercicios,
     required bool isDark,
     required Color primary,
+    required Set<int> alreadyInTreinoIds,
   }) {
     final browseHeight =
         (MediaQuery.sizeOf(context).height - 280)
@@ -294,45 +496,186 @@ class _AddExercicioToTreinoScreenState
       case 1:
         return SizedBox(
           height: browseHeight,
-          child: PadraoMovimentoGrid(
-            onAdicionar:
-                (exercicio) => setState(() {
-                  _selecionado = exercicio;
-                  _tabIndex = 0;
-                  _error = null;
-                }),
-          ),
-        );
-      case 2:
-        return SizedBox(
-          height: browseHeight,
-          child: TemplateSplitPicker(
-            onAdicionar: (exercicio) async {
-              await _adicionarRapido(exercicio);
-              AnalyticsService.instance.track(
-                'template_uso',
-                props: {'treinoId': widget.treinoId, 'exId': exercicio.id},
-              );
-            },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno)
+                _AlunoEquipmentFilterBanner(
+                  alunoNome: _alunoFilterNome!,
+                  equipamentos: _pickerFilter.equipamentosAluno,
+                  isDark: isDark,
+                  primary: primary,
+                  onClear:
+                      () => setState(
+                        () =>
+                            _pickerFilter = _pickerFilter.copyWith(clearAluno: true),
+                      ),
+                ),
+              ExercisePickerFilterBar(
+                filter: _pickerFilter,
+                isDark: isDark,
+                primary: primary,
+                onChanged:
+                    (ExercisePickerFilter next) =>
+                        setState(() => _pickerFilter = next),
+              ),
+              const SizedBox(height: 10),
+              Expanded(
+                child: PadraoMovimentoGrid(
+                  alreadyInTreinoIds: alreadyInTreinoIds,
+                  pickerFilter: _pickerFilter,
+                  onAdicionar: _selectExercise,
+                ),
+              ),
+              _MontarComModeloCard(
+                onTap: _openTemplateBuilder,
+                isDark: isDark,
+                primary: primary,
+              ),
+            ],
           ),
         );
       default:
-        return _ExercisePickerCard(
-          exercicio: _selecionado,
-          isDark: isDark,
-          primary: primary,
-          total: exercicios.length,
-          onTap: () => _openExercisePicker(exercicios),
-          mediaLoading: _mediaLoading,
-          onPreviewVideo: _previewSelectedExerciseVideo,
-          onUploadVideo: _uploadSelectedExerciseVideo,
-          onRemoveVideo: _removeSelectedExerciseVideo,
-          onCreate: () async {
-            final criado = await context.push<bool>('/exercicios/novo');
-            if (criado == true) {
-              ref.invalidate(exerciciosProvider);
-            }
-          },
+        final query = _buscaQuery.trim().toLowerCase();
+        final favoriteShortcuts =
+            query.length >= 2 || _pickerFilter.somenteFavoritos
+                ? const <Exercicio>[]
+                : sortExerciciosForPicker(
+                  favoriteExercises(exercicios),
+                  alreadyInTreinoIds: alreadyInTreinoIds,
+                ).take(4).toList();
+        final quickMatches =
+            query.length < 2
+                ? const <Exercicio>[]
+                : sortExerciciosForPicker(
+                  exercicios.where((exercicio) {
+                    final haystack =
+                        '${exercicio.nome} ${exercicio.musculoAlvo ?? ''} '
+                                '${exercicio.equipamento ?? ''}'
+                            .toLowerCase();
+                    return haystack.contains(query);
+                  }),
+                  alreadyInTreinoIds: alreadyInTreinoIds,
+                ).take(6).toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno)
+              _AlunoEquipmentFilterBanner(
+                alunoNome: _alunoFilterNome!,
+                equipamentos: _pickerFilter.equipamentosAluno,
+                isDark: isDark,
+                primary: primary,
+                onClear:
+                    () => setState(
+                      () => _pickerFilter = _pickerFilter.copyWith(clearAluno: true),
+                    ),
+              ),
+            ExercisePickerFilterBar(
+              filter: _pickerFilter,
+              isDark: isDark,
+              primary: primary,
+              onChanged: (ExercisePickerFilter next) => setState(() => _pickerFilter = next),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _buscaCtrl,
+              decoration: InputDecoration(
+                hintText: 'Buscar supino, agachamento, remada...',
+                prefixIcon: Icon(Icons.search_rounded, color: primary),
+                suffixIcon:
+                    _buscaQuery.isEmpty
+                        ? null
+                        : IconButton(
+                          onPressed: () => _buscaCtrl.clear(),
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                filled: true,
+                fillColor:
+                    isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            if (favoriteShortcuts.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                'Seus favoritos',
+                style: AppTypography.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...favoriteShortcuts.map(
+                (exercicio) => _QuickSearchResultTile(
+                  exercicio: exercicio,
+                  alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
+                  primary: primary,
+                  isDark: isDark,
+                  onTap: () => _selectExercise(exercicio),
+                ),
+              ),
+            ],
+            if (quickMatches.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              ...quickMatches.map(
+                (exercicio) => _QuickSearchResultTile(
+                  exercicio: exercicio,
+                  alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
+                  primary: primary,
+                  isDark: isDark,
+                  onTap: () => _selectExercise(exercicio),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            _ExercisePickerCard(
+              exercicio: _selecionado,
+              isDark: isDark,
+              primary: primary,
+              total: exercicios.length,
+              onTap:
+                  () => _openExercisePicker(
+                    exercicios,
+                    alreadyInTreinoIds: alreadyInTreinoIds,
+                  ),
+              mediaLoading: _mediaLoading,
+              videoExpanded: _videoExpanded,
+              onToggleVideo: () => setState(() => _videoExpanded = !_videoExpanded),
+              onPreviewVideo: _previewSelectedExerciseVideo,
+              onUploadVideo: _uploadSelectedExerciseVideo,
+              onRemoveVideo: _removeSelectedExerciseVideo,
+              onCreate: () async {
+                final criado = await context.push<bool>('/exercicios/novo');
+                if (criado == true) {
+                  ref.invalidate(exerciciosProvider);
+                }
+              },
+            ),
+            if (_selecionado != null) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => _openSimilarPicker(exercicios),
+                  icon: Icon(Icons.swap_horiz_rounded, color: primary, size: 18),
+                  label: Text(
+                    'Trocar por similar',
+                    style: AppTypography.inter(
+                      color: primary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
         );
     }
   }
@@ -340,15 +683,23 @@ class _AddExercicioToTreinoScreenState
   @override
   Widget build(BuildContext context) {
     final exerciciosAsync = ref.watch(exerciciosProvider);
+    final treinoAsync = ref.watch(treinoProvider(widget.treinoId));
+    final alreadyInTreinoIds = _treinoExercicioIds(treinoAsync);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
 
-    return FxShellScaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        safePopOrGo(context, '/treinos/${widget.treinoId}');
+      },
+      child: FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Adicionar Exercício',
-        subtitle: 'NOVO ITEM',
+        subtitle: 'Novo item',
         onBack:
             () => safePopOrGo(context, '/treinos/${widget.treinoId}'),
       ),
@@ -371,225 +722,701 @@ class _AddExercicioToTreinoScreenState
                       onRetry: () => ref.invalidate(exerciciosProvider),
                     ),
                 data:
-                    (exercicios) => SingleChildScrollView(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _AddExerciseTabStrip(
-                            selectedIndex: _tabIndex,
-                            primary: primary,
-                            isDark: isDark,
-                            onChanged: (index) {
-                              HapticFeedback.selectionClick();
-                              setState(() => _tabIndex = index);
-                            },
+                    (exercicios) {
+                      if (exercicios.isEmpty) {
+                        return _EmptyBibliotecaState(
+                          loading: _seedingBiblioteca,
+                          isDark: isDark,
+                          primary: primary,
+                          onImport: () async {
+                            setState(() => _seedingBiblioteca = true);
+                            try {
+                              await ref
+                                  .read(exercicioRepositoryProvider)
+                                  .importarSeedPremiumV1();
+                              ref.invalidate(exerciciosProvider);
+                            } finally {
+                              if (mounted) {
+                                setState(() => _seedingBiblioteca = false);
+                              }
+                            }
+                          },
+                        );
+                      }
+
+                      return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (_error != null && (_tabIndex != 0 || _selecionado == null))
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                            child: _AddExerciseErrorBanner(message: _error!),
                           ),
-                          const SizedBox(height: TokensStrip.s4),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 180),
-                            switchInCurve: Curves.easeOutCubic,
-                            switchOutCurve: Curves.easeOutCubic,
-                            child: KeyedSubtree(
-                              key: ValueKey(_tabIndex),
-                              child: _buildTabContent(
-                                context: context,
-                                exercicios: exercicios,
-                                isDark: isDark,
-                                primary: primary,
-                              ),
-                            ),
-                          ),
-                          if (_tabIndex == 0 && _selecionado != null) ...[
-                            const SizedBox(height: 18),
-                            _PrescriptionSectionHeader(
-                              isDark: isDark,
-                              primary: primary,
-                            ),
-                            const SizedBox(height: 12),
-                            _PresetSelector(
-                              selectedId: _presetId,
-                              primary: primary,
-                              isDark: isDark,
-                              onSelected: _applyPreset,
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
+                        Expanded(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _seriesCtrl,
-                                    decoration: _fxInputDecoration(
-                                      label: 'Séries',
-                                      isDark: isDark,
-                                      primary: primary,
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    style: TextStyle(
-                                      color: ink,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _repCtrl,
-                                    decoration: _fxInputDecoration(
-                                      label: 'Repetições',
-                                      isDark: isDark,
-                                      primary: primary,
-                                    ),
-                                    style: TextStyle(
-                                      color: ink,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: TokensStrip.s4),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _descansoCtrl,
-                                    decoration: _fxInputDecoration(
-                                      label: 'Descanso (segundos)',
-                                      isDark: isDark,
-                                      primary: primary,
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    style: TextStyle(
-                                      color: ink,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _cargaCtrl,
-                                    decoration: _fxInputDecoration(
-                                      label: 'Carga alvo (kg)',
-                                      isDark: isDark,
-                                      primary: primary,
-                                    ),
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                    style: TextStyle(
-                                      color: ink,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: TokensStrip.s4),
-                            _SerieTypeSelector(
-                              value: _tipoSerie,
-                              primary: primary,
-                              isDark: isDark,
-                              onChanged:
-                                  (value) => setState(() => _tipoSerie = value),
-                            ),
-                            if (_tipoSerie == 'SUPERSET') ...[
-                              const SizedBox(height: TokensStrip.s4),
-                              TextFormField(
-                                controller: _grupoSupersetCtrl,
-                                decoration: _fxInputDecoration(
-                                  label: 'Grupo do superset',
-                                  helper:
-                                      'Use o mesmo numero em exercicios que devem ficar juntos.',
-                                  isDark: isDark,
+                                _AddExerciseTabStrip(
+                                  selectedIndex: _tabIndex,
                                   primary: primary,
+                                  isDark: isDark,
+                                  onChanged: (index) {
+                                    HapticFeedback.selectionClick();
+                                    setState(() => _tabIndex = index);
+                                  },
                                 ),
-                                keyboardType: TextInputType.number,
-                                style: TextStyle(
-                                  color: ink,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                            if (_tipoSerie == 'DROPSET') ...[
-                              const SizedBox(height: 12),
-                              _ModeHint(
-                                icon: Icons.trending_down_rounded,
-                                text:
-                                    'Drop set: registre reducoes de carga nas observacoes ou no acompanhamento por serie.',
-                                color: EagleTokens.warn,
-                                isDark: isDark,
-                              ),
-                            ],
-                            const SizedBox(height: TokensStrip.s4),
-                            TextFormField(
-                              controller: _observacoesCtrl,
-                              decoration: _fxInputDecoration(
-                                label: 'Observações de execução',
-                                isDark: isDark,
-                                primary: primary,
-                              ),
-                              minLines: 2,
-                              maxLines: 4,
-                              style: TextStyle(
-                                color: ink,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            if (_error != null) ...[
-                              const SizedBox(height: TokensStrip.s4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: EagleTokens.bad.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: EagleTokens.bad.withValues(
-                                      alpha: 0.25,
+                                const SizedBox(height: TokensStrip.s4),
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 180),
+                                  switchInCurve: Curves.easeOutCubic,
+                                  switchOutCurve: Curves.easeOutCubic,
+                                  child: KeyedSubtree(
+                                    key: ValueKey(_tabIndex),
+                                    child: _buildTabContent(
+                                      context: context,
+                                      exercicios: _visibleExercicios(exercicios),
+                                      isDark: isDark,
+                                      primary: primary,
+                                      alreadyInTreinoIds: alreadyInTreinoIds,
                                     ),
                                   ),
                                 ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.error_outline,
-                                      color: EagleTokens.bad,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        _error!,
-                                        style: const TextStyle(
-                                          color: EagleTokens.bad,
-                                          fontSize: 13,
+                                if (_tabIndex == 0 && _selecionado != null) ...[
+                                  KeyedSubtree(
+                                    key: _prescriptionAnchor,
+                                    child: const SizedBox(height: 0),
+                                  ),
+                                  const SizedBox(height: 18),
+                                  _PrescriptionSectionHeader(
+                                    isDark: isDark,
+                                    primary: primary,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _PresetSelector(
+                                    selectedId: _presetId,
+                                    primary: primary,
+                                    isDark: isDark,
+                                    onSelected: _applyPreset,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: _seriesCtrl,
+                                          decoration: _fxInputDecoration(
+                                            label: 'Séries',
+                                            isDark: isDark,
+                                            primary: primary,
+                                          ),
+                                          keyboardType: TextInputType.number,
+                                          style: AppTypography.inter(
+                                            color: ink,
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: _repCtrl,
+                                          decoration: _fxInputDecoration(
+                                            label: 'Repetições',
+                                            isDark: isDark,
+                                            primary: primary,
+                                          ),
+                                          style: AppTypography.inter(
+                                            color: ink,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: TokensStrip.s4),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: _descansoCtrl,
+                                          decoration: _fxInputDecoration(
+                                            label: 'Descanso (segundos)',
+                                            isDark: isDark,
+                                            primary: primary,
+                                          ),
+                                          keyboardType: TextInputType.number,
+                                          style: AppTypography.inter(
+                                            color: ink,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: _cargaCtrl,
+                                          decoration: _fxInputDecoration(
+                                            label: 'Carga alvo (kg)',
+                                            helper: 'Opcional',
+                                            isDark: isDark,
+                                            primary: primary,
+                                          ),
+                                          keyboardType:
+                                              const TextInputType.numberWithOptions(
+                                                decimal: true,
+                                              ),
+                                          style: AppTypography.inter(
+                                            color: ink,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: TokensStrip.s4),
+                                  _SerieTypeSelector(
+                                    value: _tipoSerie,
+                                    primary: primary,
+                                    isDark: isDark,
+                                    onChanged:
+                                        (value) =>
+                                            setState(() => _tipoSerie = value),
+                                  ),
+                                  if (_tipoSerie == 'SUPERSET') ...[
+                                    const SizedBox(height: TokensStrip.s4),
+                                    TextFormField(
+                                      controller: _grupoSupersetCtrl,
+                                      decoration: _fxInputDecoration(
+                                        label: 'Grupo do superset',
+                                        helper:
+                                            'Use o mesmo número em exercícios que devem ficar juntos.',
+                                        isDark: isDark,
+                                        primary: primary,
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      style: AppTypography.inter(
+                                        color: ink,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ],
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 32),
-                            FxLiquidPrimaryButton(
-                              label: 'Adicionar ao Treino',
-                              icon: Icons.add_rounded,
-                              onPressed: _loading ? null : _submit,
-                              loading: _loading,
+                                  if (_tipoSerie == 'DROPSET') ...[
+                                    const SizedBox(height: 12),
+                                    _ModeHint(
+                                      icon: Icons.trending_down_rounded,
+                                      text:
+                                          'Drop set: registre reduções de carga nas observações ou no acompanhamento por série.',
+                                      color: EagleTokens.warn,
+                                      isDark: isDark,
+                                    ),
+                                  ],
+                                  const SizedBox(height: TokensStrip.s4),
+                                  TextFormField(
+                                    controller: _observacoesCtrl,
+                                    decoration: _fxInputDecoration(
+                                      label: 'Observações de execução',
+                                      isDark: isDark,
+                                      primary: primary,
+                                    ),
+                                    minLines: 2,
+                                    maxLines: 4,
+                                    style: AppTypography.inter(
+                                      color: ink,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 96),
+                                ],
+                              ],
                             ),
-                          ],
-                        ],
-                      ),
-                    ),
+                          ),
+                        ),
+                        if (_tabIndex != 0)
+                          _ActivePrescriptionStrip(
+                            presetId: _presetId,
+                            series: _seriesCtrl.text,
+                            repeticoes: _repCtrl.text,
+                            descanso: _descansoCtrl.text,
+                            tipoSerie: _tipoSerie,
+                            isDark: isDark,
+                            primary: primary,
+                            onEdit: () => setState(() => _tabIndex = 0),
+                          ),
+                        if (_tabIndex == 0 && _selecionado != null)
+                          _StickyAddExerciseBar(
+                            error: _error,
+                            loading: _loading,
+                            isDark: isDark,
+                            onSubmit: _submit,
+                            onContinue: _submitAndContinue,
+                          ),
+                      ],
+                    );
+                    },
               ),
             ),
           ],
         ),
+      ),
+      ),
+    );
+  }
+}
+
+class _AlunoEquipmentFilterBanner extends StatelessWidget {
+  const _AlunoEquipmentFilterBanner({
+    required this.alunoNome,
+    required this.equipamentos,
+    required this.isDark,
+    required this.primary,
+    required this.onClear,
+  });
+
+  final String alunoNome;
+  final Set<Equipamento> equipamentos;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final labels =
+        equipamentos
+            .map((e) => TaxonomyLabels.equipamento[e] ?? e.name)
+            .take(3)
+            .join(', ');
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: fxListCardDecoration(context, accent: primary),
+        child: Row(
+          children: [
+            Icon(Icons.person_outline_rounded, color: primary, size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Equipamento de $alunoNome: $labels',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: mute,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: onClear,
+              child: Text(
+                'Limpar',
+                style: AppTypography.inter(
+                  color: primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyBibliotecaState extends StatelessWidget {
+  const _EmptyBibliotecaState({
+    required this.loading,
+    required this.isDark,
+    required this.primary,
+    required this.onImport,
+  });
+
+  final bool loading;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onImport;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.library_books_outlined, color: primary, size: 42),
+            const SizedBox(height: 14),
+            Text(
+              'Biblioteca padrão pronta para usar',
+              textAlign: TextAlign.center,
+              style: AppTypography.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Importe ~190 exercícios curados (supino, agachamento, remada...) com vídeos padrão. Depois você personaliza com os seus.',
+              textAlign: TextAlign.center,
+              style: AppTypography.inter(
+                color: mute,
+                fontSize: 13,
+                height: 1.35,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 18),
+            FxLiquidPrimaryButton(
+              label: loading ? 'Importando...' : 'Importar biblioteca',
+              icon: Icons.download_rounded,
+              onPressed: loading ? null : onImport,
+              loading: loading,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickSearchResultTile extends StatelessWidget {
+  const _QuickSearchResultTile({
+    required this.exercicio,
+    required this.alreadyInTreino,
+    required this.primary,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  final Exercicio exercicio;
+  final bool alreadyInTreino;
+  final Color primary;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: fxListCardDecoration(context, accent: primary),
+          child: Row(
+            children: [
+              ExerciseMediaThumb(
+                mediaUrl: exercisePreviewMediaUrl(
+                  thumbnailUrl: exercicio.thumbnailUrl,
+                  gifUrl: exercicio.gifUrl,
+                  videoUrl: exercicio.videoUrl,
+                ),
+                size: 40,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      exercicio.nomeDisplay,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.inter(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    if (alreadyInTreino)
+                      Text(
+                        'Já está neste treino',
+                        style: AppTypography.inter(
+                          color: mute,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: mute, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MontarComModeloCard extends StatelessWidget {
+  const _MontarComModeloCard({
+    required this.onTap,
+    required this.isDark,
+    required this.primary,
+  });
+
+  final VoidCallback onTap;
+  final bool isDark;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: fxListCardDecoration(context, accent: primary),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(Icons.view_agenda_rounded, color: primary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Montar com modelo',
+                      style: AppTypography.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Full body, upper/lower, PPL ou casa — preencha os slots.',
+                      style: AppTypography.inter(
+                        color: mute,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_rounded, color: mute, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddExerciseErrorBanner extends StatelessWidget {
+  const _AddExerciseErrorBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: EagleTokens.bad.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: EagleTokens.bad, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTypography.inter(
+                color: EagleTokens.bad,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActivePrescriptionStrip extends StatelessWidget {
+  const _ActivePrescriptionStrip({
+    required this.presetId,
+    required this.series,
+    required this.repeticoes,
+    required this.descanso,
+    required this.tipoSerie,
+    required this.isDark,
+    required this.primary,
+    required this.onEdit,
+  });
+
+  final String presetId;
+  final String series;
+  final String repeticoes;
+  final String descanso;
+  final String tipoSerie;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final preset = workoutBuilderPresetById(presetId);
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final tipoLabel = switch (tipoSerie) {
+      'SUPERSET' => ' · Superset',
+      'DROPSET' => ' · Drop set',
+      _ => '',
+    };
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onEdit,
+        child: Container(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            12,
+            20,
+            MediaQuery.paddingOf(context).bottom > 0 ? 8 : 14,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.94),
+            border: Border(top: BorderSide(color: line.withValues(alpha: 0.8))),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.tune_rounded, color: primary, size: 18),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Prescrição ativa: ${preset.label}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.inter(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$series×$repeticoes · ${descanso}s descanso$tipoLabel',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.inter(
+                        color: mute,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                'Editar',
+                style: AppTypography.inter(
+                  color: primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StickyAddExerciseBar extends StatelessWidget {
+  const _StickyAddExerciseBar({
+    required this.error,
+    required this.loading,
+    required this.isDark,
+    required this.onSubmit,
+    required this.onContinue,
+  });
+
+  final String? error;
+  final bool loading;
+  final bool isDark;
+  final VoidCallback onSubmit;
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final bottom = MediaQuery.paddingOf(context).bottom;
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(20, 12, 20, bottom + 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.96),
+        border: Border(top: BorderSide(color: line.withValues(alpha: 0.8))),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, -6),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (error != null) ...[
+            _AddExerciseErrorBanner(message: error!),
+            const SizedBox(height: 10),
+          ],
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: loading ? null : onContinue,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text('Adicionar e continuar'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 2,
+                child: FxLiquidPrimaryButton(
+                  label: 'Adicionar ao Treino',
+                  icon: Icons.add_rounded,
+                  onPressed: loading ? null : onSubmit,
+                  loading: loading,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -626,7 +1453,7 @@ class _PrescriptionSectionHeader extends StatelessWidget {
             children: [
               Text(
                 'Prescrição do exercício',
-                style: TextStyle(
+                style: AppTypography.inter(
                   color: ink,
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -638,7 +1465,7 @@ class _PrescriptionSectionHeader extends StatelessWidget {
                 'Ajuste séries, carga, descanso e observações antes de salvar.',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: AppTypography.inter(
                   color: mute,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -665,7 +1492,7 @@ class _AddExerciseTabStrip extends StatelessWidget {
     required this.onChanged,
   });
 
-  static const _labels = ['Buscar', 'Categorias', 'Modelos'];
+  static const _labels = ['Buscar', 'Explorar'];
 
   @override
   Widget build(BuildContext context) {
@@ -690,7 +1517,7 @@ class _AddExerciseTabStrip extends StatelessWidget {
                     children: [
                       Text(
                         _labels[i],
-                        style: TextStyle(
+                        style: AppTypography.inter(
                           color: selectedIndex == i ? primary : mute,
                           fontSize: 13,
                           fontWeight:
@@ -728,6 +1555,8 @@ class _ExercisePickerCard extends StatelessWidget {
   final int total;
   final VoidCallback onTap;
   final bool mediaLoading;
+  final bool videoExpanded;
+  final VoidCallback onToggleVideo;
   final VoidCallback onPreviewVideo;
   final VoidCallback onUploadVideo;
   final VoidCallback onRemoveVideo;
@@ -740,6 +1569,8 @@ class _ExercisePickerCard extends StatelessWidget {
     required this.total,
     required this.onTap,
     required this.mediaLoading,
+    required this.videoExpanded,
+    required this.onToggleVideo,
     required this.onPreviewVideo,
     required this.onUploadVideo,
     required this.onRemoveVideo,
@@ -798,11 +1629,11 @@ class _ExercisePickerCard extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     selected
-                                        ? exercicio!.nome
+                                        ? exercicio!.nomeDisplay
                                         : 'Escolher exercício',
                                     maxLines: selected ? 2 : 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
+                                    style: AppTypography.inter(
                                       color: ink,
                                       fontSize: 15,
                                       height: 1.12,
@@ -819,7 +1650,7 @@ class _ExercisePickerCard extends StatelessWidget {
                                   : '$total exercícios na biblioteca',
                               maxLines: selected ? 2 : 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
+                              style: AppTypography.inter(
                                 color: mute,
                                 fontSize: 12,
                                 height: 1.18,
@@ -879,8 +1710,8 @@ class _ExercisePickerCard extends StatelessWidget {
                   child: Text(
                     selected
                         ? 'Revise a prescrição abaixo antes de adicionar.'
-                        : 'Busque pelo nome ou use Categorias e Modelos para montar rápido.',
-                    style: TextStyle(
+                        : 'Busque acima ou explore por movimento/grupo.',
+                    style: AppTypography.inter(
                       color: mute,
                       fontSize: 12,
                       height: 1.25,
@@ -893,16 +1724,46 @@ class _ExercisePickerCard extends StatelessWidget {
           ),
         ],
         if (selected) ...[
-          const SizedBox(height: 10),
-          _ExerciseMediaStatus(
-            exercicio: exercicio!,
-            isDark: isDark,
-            primary: primary,
-            mediaLoading: mediaLoading,
-            onPreviewVideo: onPreviewVideo,
-            onUploadVideo: onUploadVideo,
-            onRemoveVideo: onRemoveVideo,
+          const SizedBox(height: 8),
+          InkWell(
+            onTap: onToggleVideo,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    videoExpanded ? Icons.expand_less : Icons.videocam_outlined,
+                    color: mute,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Vídeo do exercício (opcional)',
+                      style: AppTypography.inter(
+                        color: mute,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
+          if (videoExpanded) ...[
+            const SizedBox(height: 6),
+            _ExerciseMediaStatus(
+              exercicio: exercicio!,
+              isDark: isDark,
+              primary: primary,
+              mediaLoading: mediaLoading,
+              onPreviewVideo: onPreviewVideo,
+              onUploadVideo: onUploadVideo,
+              onRemoveVideo: onRemoveVideo,
+            ),
+          ],
         ],
       ],
     );
@@ -985,7 +1846,7 @@ class _ExerciseMediaStatus extends StatelessWidget {
                   statusTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     color: ink,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w900,
@@ -996,7 +1857,7 @@ class _ExerciseMediaStatus extends StatelessWidget {
                   statusSubtitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     color: mute,
                     fontSize: 11.2,
                     fontWeight: FontWeight.w700,
@@ -1012,7 +1873,7 @@ class _ExerciseMediaStatus extends StatelessWidget {
                 foregroundColor: primary,
                 visualDensity: VisualDensity.compact,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                textStyle: const TextStyle(
+                textStyle: AppTypography.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w900,
                 ),
@@ -1118,7 +1979,7 @@ class _RemoveExerciseVideoSheet extends StatelessWidget {
                       children: [
                         Text(
                           'Remover vídeo?',
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: ink,
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
@@ -1126,8 +1987,8 @@ class _RemoveExerciseVideoSheet extends StatelessWidget {
                         ),
                         const SizedBox(height: 5),
                         Text(
-                          '"${exercicio.nome}" continua na biblioteca. Só a mídia de demonstração será removida.',
-                          style: TextStyle(
+                          '"${exercicio.nomeDisplay}" continua na biblioteca. Só a mídia de demonstração será removida.',
+                          style: AppTypography.inter(
                             color: mute,
                             fontSize: 12.5,
                             height: 1.35,
@@ -1298,10 +2159,10 @@ class _ExerciseVideoPreviewSheetState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.exercicio.nome,
+                          widget.exercicio.nomeDisplay,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: ink,
                             fontSize: 17,
                             fontWeight: FontWeight.w900,
@@ -1310,7 +2171,7 @@ class _ExerciseVideoPreviewSheetState
                         const SizedBox(height: 3),
                         Text(
                           'Confira se a demonstração está correta.',
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: mute,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -1405,27 +2266,30 @@ class _VideoPreparingPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(18),
+    return Padding(
+      padding: const EdgeInsets.all(18),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
+          const SizedBox(
             width: 26,
             height: 26,
             child: FxLoading(color: Colors.white, strokeWidth: 2.8),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             'Preparando prévia do vídeo...',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+            style: AppTypography.inter(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-          SizedBox(height: 5),
+          const SizedBox(height: 5),
           Text(
             'Na primeira abertura, o Cloudinary pode levar até um minuto.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white70, fontSize: 12.5),
+            style: AppTypography.inter(color: Colors.white70, fontSize: 12.5),
           ),
         ],
       ),
@@ -1438,28 +2302,28 @@ class _VideoPreviewFallback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 210,
       child: Padding(
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.video_file_rounded, color: Colors.white, size: 34),
-            SizedBox(height: 10),
+            const Icon(Icons.video_file_rounded, color: Colors.white, size: 34),
+            const SizedBox(height: 10),
             Text(
               'Vídeo enviado, mas a prévia ainda não ficou disponível.',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTypography.inter(
                 color: Colors.white,
                 fontWeight: FontWeight.w800,
               ),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Text(
               'Tente abrir novamente em instantes. Se persistir, envie um MP4 H.264.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70, fontSize: 12.5),
+              style: AppTypography.inter(color: Colors.white70, fontSize: 12.5),
             ),
           ],
         ),
@@ -1486,10 +2350,14 @@ String _cloudinaryH264VideoUrl(String rawUrl) {
 class _ExercisePickerSheet extends StatefulWidget {
   final List<Exercicio> exercicios;
   final Exercicio? selected;
+  final Set<int> alreadyInTreinoIds;
+  final String initialQuery;
 
   const _ExercisePickerSheet({
     required this.exercicios,
     required this.selected,
+    this.alreadyInTreinoIds = const {},
+    this.initialQuery = '',
   });
 
   @override
@@ -1497,8 +2365,15 @@ class _ExercisePickerSheet extends StatefulWidget {
 }
 
 class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
-  final _searchCtrl = TextEditingController();
-  String _query = '';
+  late final TextEditingController _searchCtrl;
+  late String _query;
+
+  @override
+  void initState() {
+    super.initState();
+    _query = widget.initialQuery;
+    _searchCtrl = TextEditingController(text: widget.initialQuery);
+  }
 
   @override
   void dispose() {
@@ -1515,16 +2390,18 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final bottom = MediaQuery.of(context).padding.bottom;
     final normalized = _query.trim().toLowerCase();
-    final filtered =
-        normalized.isEmpty
-            ? widget.exercicios
-            : widget.exercicios.where((exercicio) {
-              final haystack =
-                  '${exercicio.nome} ${exercicio.musculoAlvo ?? ''} '
-                          '${exercicio.equipamento ?? ''} ${exercicio.nivel ?? ''}'
-                      .toLowerCase();
-              return haystack.contains(normalized);
-            }).toList();
+    final filtered = sortExerciciosForPicker(
+      normalized.isEmpty
+          ? widget.exercicios
+          : widget.exercicios.where((exercicio) {
+            final haystack =
+                '${exercicio.nome} ${exercicio.musculoAlvo ?? ''} '
+                        '${exercicio.equipamento ?? ''} ${exercicio.nivel ?? ''}'
+                    .toLowerCase();
+            return haystack.contains(normalized);
+          }),
+      alreadyInTreinoIds: widget.alreadyInTreinoIds,
+    );
 
     return SafeArea(
       top: false,
@@ -1569,7 +2446,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                       children: [
                         Text(
                           'Biblioteca de exercícios',
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: ink,
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
@@ -1578,7 +2455,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                         const SizedBox(height: 3),
                         Text(
                           '${filtered.length} de ${widget.exercicios.length} disponíveis',
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: mute,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -1626,7 +2503,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                             padding: const EdgeInsets.all(28),
                             child: Text(
                               'Nenhum exercício encontrado.',
-                              style: TextStyle(
+                              style: AppTypography.inter(
                                 color: mute,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
@@ -1646,6 +2523,9 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                             return _ExercisePickerTile(
                               exercicio: exercicio,
                               selected: selected,
+                              alreadyInTreino: widget.alreadyInTreinoIds.contains(
+                                exercicio.id,
+                              ),
                               primary: primary,
                               isDark: isDark,
                               onTap: () {
@@ -1667,6 +2547,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
 class _ExercisePickerTile extends StatelessWidget {
   final Exercicio exercicio;
   final bool selected;
+  final bool alreadyInTreino;
   final Color primary;
   final bool isDark;
   final VoidCallback onTap;
@@ -1674,6 +2555,7 @@ class _ExercisePickerTile extends StatelessWidget {
   const _ExercisePickerTile({
     required this.exercicio,
     required this.selected,
+    this.alreadyInTreino = false,
     required this.primary,
     required this.isDark,
     required this.onTap,
@@ -1708,19 +2590,14 @@ class _ExercisePickerTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: selected ? primary : primary.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(14),
+            ExerciseMediaThumb(
+              mediaUrl: exercisePreviewMediaUrl(
+                thumbnailUrl: exercicio.thumbnailUrl,
+                gifUrl: exercicio.gifUrl,
+                videoUrl: exercicio.videoUrl,
               ),
-              child: Icon(
-                selected ? Icons.check_rounded : _trustIcon(exercicio),
-                color:
-                    selected ? Colors.white : _trustColor(exercicio, primary),
-                size: 20,
-              ),
+              size: 40,
+              radius: 14,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1728,10 +2605,10 @@ class _ExercisePickerTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    exercicio.nome,
+                    exercicio.nomeDisplay,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: AppTypography.inter(
                       color: ink,
                       fontSize: 14,
                       fontWeight: FontWeight.w900,
@@ -1739,10 +2616,12 @@ class _ExercisePickerTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _exerciseMeta(exercicio),
+                    alreadyInTreino
+                        ? 'Já está neste treino · ${_exerciseMeta(exercicio)}'
+                        : _exerciseMeta(exercicio),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: AppTypography.inter(
                       color: mute,
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
@@ -1787,15 +2666,7 @@ String _exerciseMeta(Exercicio exercicio) {
   return clean.isEmpty ? exercicio.mediaTrustLabel : clean.take(3).join(' · ');
 }
 
-String _humanizeMetaToken(String value) {
-  final normalized = value.trim().replaceAll('_', ' ').toLowerCase();
-  if (normalized.isEmpty) return normalized;
-  return normalized
-      .split(RegExp(r'\s+'))
-      .where((part) => part.isNotEmpty)
-      .map((part) => part[0].toUpperCase() + part.substring(1))
-      .join(' ');
-}
+String _humanizeMetaToken(String value) => displayMetaToken(value);
 
 class _PresetSelector extends StatelessWidget {
   final String selectedId;
@@ -1828,7 +2699,7 @@ class _PresetSelector extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Presets de prescrição',
-                style: TextStyle(
+                style: AppTypography.inter(
                   color: ink,
                   fontSize: 13,
                   fontWeight: FontWeight.w900,
@@ -1846,7 +2717,7 @@ class _PresetSelector extends StatelessWidget {
                   return ChoiceChip(
                     selected: isSelected,
                     label: Text(preset.label),
-                    labelStyle: TextStyle(
+                    labelStyle: AppTypography.inter(
                       color: isSelected ? Colors.white : primary,
                       fontWeight: FontWeight.w800,
                     ),
@@ -1862,7 +2733,7 @@ class _PresetSelector extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             selected.summary,
-            style: TextStyle(
+            style: AppTypography.inter(
               color: mute,
               fontSize: 12.5,
               height: 1.35,
@@ -1873,25 +2744,6 @@ class _PresetSelector extends StatelessWidget {
       ),
     );
   }
-}
-
-Color _trustColor(Exercicio exercicio, Color primary) {
-  return switch (exercicio.mediaTrustLevel) {
-    'READY' => exercicio.isPersonalUpload ? primary : EagleTokens.good,
-    'NO_VIDEO' => EagleTokens.bad,
-    _ => EagleTokens.warn,
-  };
-}
-
-IconData _trustIcon(Exercicio exercicio) {
-  return switch (exercicio.mediaTrustLevel) {
-    'READY' =>
-      exercicio.isPersonalUpload
-          ? Icons.workspace_premium_rounded
-          : Icons.verified_rounded,
-    'NO_VIDEO' => Icons.videocam_off_outlined,
-    _ => Icons.rate_review_outlined,
-  };
 }
 
 class _SerieTypeSelector extends StatelessWidget {
@@ -1923,8 +2775,8 @@ class _SerieTypeSelector extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Tipo de serie',
-            style: TextStyle(
+            'Tipo de série',
+            style: AppTypography.inter(
               color: mute,
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -1945,7 +2797,7 @@ class _SerieTypeSelector extends StatelessWidget {
                       color: selected ? Colors.white : primary,
                     ),
                     label: Text(option.$3),
-                    labelStyle: TextStyle(
+                    labelStyle: AppTypography.inter(
                       color: selected ? Colors.white : primary,
                       fontWeight: FontWeight.w800,
                     ),
@@ -1994,7 +2846,7 @@ class _ModeHint extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
+              style: AppTypography.inter(
                 color: color,
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
@@ -2060,7 +2912,7 @@ class _ExercicioErrorState extends StatelessWidget {
             Text(
               'Verifique sua conexão e tente novamente.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+              style: AppTypography.inter(color: mute, fontSize: 13, height: 1.35),
             ),
             const SizedBox(height: 18),
             OutlinedButton.icon(

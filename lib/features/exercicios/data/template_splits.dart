@@ -30,19 +30,20 @@ class TemplateSplit {
   });
 }
 
+/// Modelos de estrutura — apenas splits mais usados por personais (90% dos casos).
 const templateSplits = <TemplateSplit>[
   TemplateSplit(
     id: 'fullbody-iniciante',
     nome: 'Full body iniciante',
-    descricao: '3x semana, base simples e rapida de montar',
+    descricao: '3x semana, base simples e rápida de montar',
     dias: [
       TemplateDia(
         nome: 'A',
         slots: [
           TemplateSlot.padrao(PadraoMovimento.squat, 'Agachamento'),
-          TemplateSlot.padrao(PadraoMovimento.pushHorizontal, 'Empurrar'),
-          TemplateSlot.padrao(PadraoMovimento.pullHorizontal, 'Puxar'),
-          TemplateSlot.padrao(PadraoMovimento.hinge, 'Posterior'),
+          TemplateSlot.padrao(PadraoMovimento.pushHorizontal, 'Supino / empurrar'),
+          TemplateSlot.padrao(PadraoMovimento.pullHorizontal, 'Remada / puxar'),
+          TemplateSlot.padrao(PadraoMovimento.hinge, 'Posterior de quadril'),
           TemplateSlot.padrao(PadraoMovimento.coreAntiExtensao, 'Core'),
         ],
       ),
@@ -51,26 +52,26 @@ const templateSplits = <TemplateSplit>[
   TemplateSplit(
     id: 'upper-lower',
     nome: 'Upper / Lower',
-    descricao: '4x semana, organizacao classica por membros',
+    descricao: '4x semana, organização clássica por membros',
     dias: [
       TemplateDia(
         nome: 'Upper',
         slots: [
-          TemplateSlot.padrao(PadraoMovimento.pushHorizontal, 'Peito'),
+          TemplateSlot.padrao(PadraoMovimento.pushHorizontal, 'Peito / supino'),
           TemplateSlot.padrao(PadraoMovimento.pullHorizontal, 'Remada'),
           TemplateSlot.padrao(PadraoMovimento.pushVertical, 'Ombro'),
           TemplateSlot.padrao(PadraoMovimento.pullVertical, 'Dorsal'),
-          TemplateSlot.grupo(GrupoMuscular.biceps, 'Biceps'),
-          TemplateSlot.grupo(GrupoMuscular.triceps, 'Triceps'),
+          TemplateSlot.grupo(GrupoMuscular.biceps, 'Bíceps'),
+          TemplateSlot.grupo(GrupoMuscular.triceps, 'Tríceps'),
         ],
       ),
       TemplateDia(
         nome: 'Lower',
         slots: [
           TemplateSlot.padrao(PadraoMovimento.squat, 'Agachamento'),
-          TemplateSlot.padrao(PadraoMovimento.hinge, 'Hinge'),
+          TemplateSlot.padrao(PadraoMovimento.hinge, 'Posterior de quadril'),
           TemplateSlot.padrao(PadraoMovimento.lunge, 'Unilateral'),
-          TemplateSlot.grupo(GrupoMuscular.gluteo, 'Gluteo'),
+          TemplateSlot.grupo(GrupoMuscular.gluteo, 'Glúteo'),
           TemplateSlot.grupo(GrupoMuscular.panturrilha, 'Panturrilha'),
           TemplateSlot.padrao(PadraoMovimento.coreAntiRotacao, 'Core'),
         ],
@@ -80,19 +81,19 @@ const templateSplits = <TemplateSplit>[
   TemplateSplit(
     id: 'ppl',
     nome: 'Push / Pull / Legs',
-    descricao: '6x semana, alto volume com divisao clara',
+    descricao: '6x semana, alto volume com divisão clara',
     dias: [
       TemplateDia(
         nome: 'Push',
         slots: [
-          TemplateSlot.padrao(PadraoMovimento.pushHorizontal, 'Supino'),
+          TemplateSlot.padrao(PadraoMovimento.pushHorizontal, 'Supino principal'),
           TemplateSlot.padrao(
             PadraoMovimento.pushHorizontal,
-            'Supino variacao',
+            'Supino variação',
           ),
           TemplateSlot.padrao(PadraoMovimento.pushVertical, 'Desenvolvimento'),
           TemplateSlot.grupo(GrupoMuscular.ombroLateral, 'Lateral'),
-          TemplateSlot.grupo(GrupoMuscular.triceps, 'Triceps'),
+          TemplateSlot.grupo(GrupoMuscular.triceps, 'Tríceps'),
         ],
       ),
       TemplateDia(
@@ -101,7 +102,7 @@ const templateSplits = <TemplateSplit>[
           TemplateSlot.padrao(PadraoMovimento.pullVertical, 'Puxada'),
           TemplateSlot.padrao(PadraoMovimento.pullHorizontal, 'Remada'),
           TemplateSlot.grupo(GrupoMuscular.ombroPosterior, 'Posterior'),
-          TemplateSlot.grupo(GrupoMuscular.biceps, 'Biceps'),
+          TemplateSlot.grupo(GrupoMuscular.biceps, 'Bíceps'),
         ],
       ),
       TemplateDia(
@@ -109,40 +110,8 @@ const templateSplits = <TemplateSplit>[
         slots: [
           TemplateSlot.padrao(PadraoMovimento.squat, 'Agachamento'),
           TemplateSlot.padrao(PadraoMovimento.hinge, 'Posterior'),
-          TemplateSlot.padrao(PadraoMovimento.lunge, 'Avanco'),
-          TemplateSlot.grupo(GrupoMuscular.gluteo, 'Gluteo'),
-          TemplateSlot.grupo(GrupoMuscular.panturrilha, 'Panturrilha'),
-        ],
-      ),
-    ],
-  ),
-  TemplateSplit(
-    id: 'bro-split',
-    nome: 'Bro split',
-    descricao: '5 dias, foco por grupo muscular',
-    dias: [
-      TemplateDia(
-        nome: 'Peito',
-        slots: [
-          TemplateSlot.grupo(GrupoMuscular.peito, 'Peito 1'),
-          TemplateSlot.grupo(GrupoMuscular.peito, 'Peito 2'),
-          TemplateSlot.grupo(GrupoMuscular.peito, 'Peito 3'),
-        ],
-      ),
-      TemplateDia(
-        nome: 'Costas',
-        slots: [
-          TemplateSlot.grupo(GrupoMuscular.costasLatissimo, 'Dorsal'),
-          TemplateSlot.grupo(GrupoMuscular.costasRetangulares, 'Remada'),
-          TemplateSlot.grupo(GrupoMuscular.trapezio, 'Trapezio'),
-        ],
-      ),
-      TemplateDia(
-        nome: 'Pernas',
-        slots: [
-          TemplateSlot.padrao(PadraoMovimento.squat, 'Quadriceps'),
-          TemplateSlot.padrao(PadraoMovimento.hinge, 'Posterior'),
-          TemplateSlot.grupo(GrupoMuscular.gluteo, 'Gluteo'),
+          TemplateSlot.padrao(PadraoMovimento.lunge, 'Avanço'),
+          TemplateSlot.grupo(GrupoMuscular.gluteo, 'Glúteo'),
           TemplateSlot.grupo(GrupoMuscular.panturrilha, 'Panturrilha'),
         ],
       ),

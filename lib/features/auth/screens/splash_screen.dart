@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../alunos/providers/alunos_provider.dart';
 import '../../perfil/providers/perfil_provider.dart';
+import '../../exercicios/services/biblioteca_bootstrap.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/cinematic_splash_scene.dart';
@@ -125,6 +126,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     try {
       final perfil = await ref.read(perfilProvider.future);
+      BibliotecaBootstrap.ensureReady(ref);
       final prefs = await SharedPreferences.getInstance();
       final promoShown = prefs.getBool('promo_shown_${perfil.id}') ?? false;
       final trialUsed = perfil.trialUsed ?? false;

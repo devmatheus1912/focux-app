@@ -9,23 +9,14 @@ void main() {
 
     expect(
       ids,
-      containsAll([
-        'hypertrophy',
-        'strength',
-        'endurance',
-        'superset',
-        'dropset',
-      ]),
+      containsAll(['hypertrophy', 'strength', 'endurance']),
     );
+    expect(ids.length, 3);
     expect(
       workoutBuilderPresetById('strength').descansoSegundos,
       greaterThan(90),
     );
-    expect(workoutBuilderPresetById('superset').tipoSerie, 'SUPERSET');
-    expect(
-      workoutBuilderPresetById('dropset').observacoes,
-      contains('reduzir'),
-    );
+    expect(workoutBuilderPresetById('hypertrophy').tipoSerie, 'NORMAL');
   });
 
   test('workout builder sends premium prescription fields to backend', () {

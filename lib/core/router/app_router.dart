@@ -539,10 +539,19 @@ class AppRouter {
             redirect:
                 (context, state) =>
                     _intPathParam(state, 'id') == null ? '/treinos' : null,
-            builder:
-                (context, state) => AddExercicioToTreinoScreen(
-                  treinoId: _intPathParam(state, 'id')!,
-                ),
+            builder: (context, state) {
+              int? alunoId;
+              if (state.extra is Map) {
+                final extra = state.extra as Map;
+                final raw = extra['alunoId'];
+                alunoId =
+                    raw is int ? raw : int.tryParse(raw?.toString() ?? '');
+              }
+              return AddExercicioToTreinoScreen(
+                treinoId: _intPathParam(state, 'id')!,
+                alunoId: alunoId,
+              );
+            },
           ),
 
           // Exercícios

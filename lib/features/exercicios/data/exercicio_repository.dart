@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/utils/pt_br_display.dart';
 import 'enums.dart';
 
 class Exercicio {
@@ -138,6 +139,8 @@ class Exercicio {
 
   String? get primaryGroupLabel =>
       grupoMuscularPrimario?.backendName ?? musculoAlvo;
+
+  String get nomeDisplay => displayExerciseName(nome);
 
   String? get modalityLabel => modalidade?.backendName ?? categoria;
 
@@ -431,20 +434,38 @@ class ExercicioRepository {
       queryParams['favoritos'] = 'true';
     }
     queryParams['page'] = 0;
-    queryParams['size'] = 80;
+    queryParams['size'] = 200;
     queryParams['sort'] = 'nome,asc';
-    final response = await _dio.get(
-      '/api/exercicios/v2',
-      queryParameters: queryParams,
-    );
-    final data = response.data;
-    final list =
-        data is Map<String, dynamic>
-            ? data['content'] as List<dynamic>
-            : data as List<dynamic>;
-    return list
-        .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final all = <Exercicio>[];
+    var page = 0;
+    const pageSize = 200;
+
+    while (page < 20) {
+      queryParams['page'] = page;
+      queryParams['size'] = pageSize;
+      final response = await _dio.get(
+        '/api/exercicios/v2',
+        queryParameters: queryParams,
+      );
+      final data = response.data;
+      final list =
+          data is Map<String, dynamic>
+              ? data['content'] as List<dynamic>
+              : data as List<dynamic>;
+      if (list.isEmpty) break;
+      all.addAll(
+        list.map((e) => Exercicio.fromJson(e as Map<String, dynamic>)),
+      );
+      final totalPages =
+          data is Map<String, dynamic>
+              ? (data['totalPages'] as num?)?.toInt()
+              : null;
+      page += 1;
+      if (list.length < pageSize) break;
+      if (totalPages != null && page >= totalPages) break;
+    }
+
+    return all;
   }
 
   Future<Exercicio> buscar(int id) async {
@@ -674,6 +695,25 @@ class ExercicioRepository {
       },
     );
     return (data['importados'] as num?)?.toInt() ?? 0;
+  }
+
+  Future<int> enriquecerBibliotecaCurada() async {
+    final response = await _dio.post('/api/exercicios/seed/curated/v2/enriquecer');
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return (data['atualizados'] as num?)?.toInt() ?? 0;
+    }
+    return 0;
+  }
+
+  Future<int> publicarMidiasCuradas() async {
+    final response =
+        await _dio.post('/api/exercicios/seed/curated/v2/publicar-midias');
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return (data['publicados'] as num?)?.toInt() ?? 0;
+    }
+    return 0;
   }
 
   Future<ExercicioCuradoriaResumo> buscarCuradoria() async {

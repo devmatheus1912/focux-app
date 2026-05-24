@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/template_splits.dart';
 import 'padrao_exercicios_bottom_sheet.dart';
 
 class TemplateSplitPicker extends StatelessWidget {
-  const TemplateSplitPicker({super.key, required this.onAdicionar});
+  const TemplateSplitPicker({
+    super.key,
+    required this.onAdicionar,
+    this.alreadyInTreinoIds = const {},
+  });
 
   final Future<void> Function(Exercicio exercicio) onAdicionar;
+  final Set<int> alreadyInTreinoIds;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +35,7 @@ class TemplateSplitPicker extends StatelessWidget {
                     builder:
                         (_) => _TemplateSlotEditor(
                           template: templateSplits[index],
+                          alreadyInTreinoIds: alreadyInTreinoIds,
                           onAdicionar: onAdicionar,
                         ),
                   ),
@@ -69,16 +78,19 @@ class _TemplateIntro extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Comece por uma estrutura',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
+                  style: AppTypography.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Escolha um modelo e preencha cada slot com exercícios da biblioteca.',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     color: scheme.onSurfaceVariant,
                     fontSize: 11.5,
                     height: 1.25,
@@ -142,7 +154,7 @@ class _TemplateCard extends StatelessWidget {
                       template.nome,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: AppTypography.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w900,
                       ),
@@ -152,7 +164,7 @@ class _TemplateCard extends StatelessWidget {
                       template.descricao,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTypography.inter(
                         color: scheme.onSurfaceVariant,
                         fontSize: 12,
                         height: 1.25,
@@ -161,7 +173,7 @@ class _TemplateCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       '$dias ${dias == 1 ? 'dia' : 'dias'} · $slots slots',
-                      style: TextStyle(
+                      style: AppTypography.inter(
                         color: primary,
                         fontSize: 11.5,
                         fontWeight: FontWeight.w800,
@@ -183,10 +195,12 @@ class _TemplateSlotEditor extends ConsumerStatefulWidget {
   const _TemplateSlotEditor({
     required this.template,
     required this.onAdicionar,
+    this.alreadyInTreinoIds = const {},
   });
 
   final TemplateSplit template;
   final Future<void> Function(Exercicio exercicio) onAdicionar;
+  final Set<int> alreadyInTreinoIds;
 
   @override
   ConsumerState<_TemplateSlotEditor> createState() =>
@@ -203,17 +217,16 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
       0,
       (sum, day) => sum + day.slots.length,
     );
+    final done = _done.length;
+    final scheme = Theme.of(context).colorScheme;
+    final mute = scheme.onSurfaceVariant;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-      appBar: AppBar(
-        title: Text(widget.template.nome),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Center(child: Text('${_done.length}/$slotsTotal')),
-          ),
-        ],
+    return FxShellScaffold(
+      useMesh: true,
+      appBar: FxShellAppBar(
+        title: widget.template.nome,
+        subtitle: '$done de $slotsTotal slots',
+        onBack: () => Navigator.pop(context),
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(
@@ -223,22 +236,24 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
           MediaQuery.paddingOf(context).bottom + 18,
         ),
         children: [
-          _TemplateProgressCard(done: _done.length, total: slotsTotal),
+          _TemplateProgressCard(done: done, total: slotsTotal),
           const SizedBox(height: 18),
           for (final (dayIndex, day) in widget.template.dias.indexed) ...[
             Text(
               _templateDayTitle(day.nome, dayIndex),
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
+              style: AppTypography.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+                color: scheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(20),
+                color: scheme.surface,
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
                 border: Border.all(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.outlineVariant.withValues(alpha: 0.7),
+                  color: scheme.outlineVariant.withValues(alpha: 0.7),
                 ),
               ),
               child: Column(
@@ -248,11 +263,14 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
                       done: _done.contains('${day.nome}-$i'),
                       slot: day.slots[i],
                       saving: _saving,
+                      alreadyInTreinoIds: widget.alreadyInTreinoIds,
                       onChoose: (ex) async {
                         setState(() => _saving = true);
                         try {
                           await widget.onAdicionar(ex);
-                          setState(() => _done.add('${day.nome}-$i'));
+                          if (mounted) {
+                            setState(() => _done.add('${day.nome}-$i'));
+                          }
                         } finally {
                           if (mounted) setState(() => _saving = false);
                         }
@@ -262,9 +280,7 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
                       Divider(
                         height: 1,
                         indent: 56,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outlineVariant.withValues(alpha: 0.52),
+                        color: scheme.outlineVariant.withValues(alpha: 0.52),
                       ),
                   ],
                 ],
@@ -272,6 +288,19 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
             ),
             const SizedBox(height: 18),
           ],
+          if (_saving)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'Salvando exercício...',
+                textAlign: TextAlign.center,
+                style: AppTypography.inter(
+                  color: mute,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -302,15 +331,18 @@ class _TemplateProgressCard extends StatelessWidget {
             children: [
               Icon(Icons.playlist_add_check_rounded, color: scheme.primary),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Preencha os slots do modelo',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
+                  style: AppTypography.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
               Text(
                 '$done/$total',
-                style: TextStyle(
+                style: AppTypography.inter(
                   color: scheme.primary,
                   fontSize: 12.5,
                   fontWeight: FontWeight.w900,
@@ -348,12 +380,14 @@ class _SlotTile extends StatelessWidget {
     required this.slot,
     required this.saving,
     required this.onChoose,
+    this.alreadyInTreinoIds = const {},
   });
 
   final bool done;
   final TemplateSlot slot;
   final bool saving;
   final ValueChanged<Exercicio> onChoose;
+  final Set<int> alreadyInTreinoIds;
 
   @override
   Widget build(BuildContext context) {
@@ -371,6 +405,7 @@ class _SlotTile extends StatelessWidget {
                     (_) => PadraoExerciciosBottomSheet(
                       padrao: slot.padrao,
                       grupo: slot.grupo,
+                      alreadyInTreinoIds: alreadyInTreinoIds,
                       onAdicionar: onChoose,
                     ),
               ),
@@ -392,7 +427,7 @@ class _SlotTile extends StatelessWidget {
                 children: [
                   Text(
                     slot.label,
-                    style: const TextStyle(
+                    style: AppTypography.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                     ),
@@ -400,7 +435,7 @@ class _SlotTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     done ? 'Adicionado ao treino' : 'Escolher exercício',
-                    style: TextStyle(
+                    style: AppTypography.inter(
                       color: scheme.onSurfaceVariant,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

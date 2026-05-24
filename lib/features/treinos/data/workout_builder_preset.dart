@@ -22,6 +22,7 @@ class WorkoutBuilderPreset {
   });
 }
 
+/// Presets de volume — tipo de série (normal/superset/drop) fica no seletor dedicado.
 const workoutBuilderPresets = [
   WorkoutBuilderPreset(
     id: 'hypertrophy',
@@ -31,49 +32,27 @@ const workoutBuilderPresets = [
     repeticoes: '8-12',
     descansoSegundos: 75,
     tipoSerie: 'NORMAL',
-    observacoes: 'Priorizar amplitude, controle e falha tecnica proxima.',
+    observacoes: 'Priorizar amplitude, controle e falha técnica próxima.',
   ),
   WorkoutBuilderPreset(
     id: 'strength',
-    label: 'Forca',
+    label: 'Força',
     summary: 'Carga alta com descanso maior.',
     series: 5,
     repeticoes: '3-6',
     descansoSegundos: 150,
     tipoSerie: 'NORMAL',
-    observacoes: 'Usar carga alta, tecnica limpa e descanso completo.',
+    observacoes: 'Usar carga alta, técnica limpa e descanso completo.',
   ),
   WorkoutBuilderPreset(
     id: 'endurance',
-    label: 'Resistencia',
-    summary: 'Mais repeticoes e pausa curta.',
+    label: 'Resistência',
+    summary: 'Mais repetições e pausa curta.',
     series: 3,
     repeticoes: '15-20',
     descansoSegundos: 45,
     tipoSerie: 'NORMAL',
-    observacoes: 'Manter ritmo constante e respiracao controlada.',
-  ),
-  WorkoutBuilderPreset(
-    id: 'superset',
-    label: 'Superset',
-    summary: 'Agrupa exercicios sem pausa entre eles.',
-    series: 3,
-    repeticoes: '10-12',
-    descansoSegundos: 90,
-    tipoSerie: 'SUPERSET',
-    grupoSuperset: 1,
-    observacoes: 'Executar em sequencia com o outro exercicio do grupo.',
-  ),
-  WorkoutBuilderPreset(
-    id: 'dropset',
-    label: 'Drop set',
-    summary: 'Intensificador com reducao de carga.',
-    series: 3,
-    repeticoes: '8-10 + drop',
-    descansoSegundos: 90,
-    tipoSerie: 'DROPSET',
-    observacoes:
-        'Apos a serie principal, reduzir a carga e continuar com boa tecnica.',
+    observacoes: 'Manter ritmo constante e respiração controlada.',
   ),
 ];
 

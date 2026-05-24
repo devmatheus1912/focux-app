@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/design_tokens.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
+import '../../../treinos/utils/exercise_picker_filter.dart';
 import '../../providers/exercicios_provider.dart';
 import 'padrao_exercicios_bottom_sheet.dart';
 
 enum PadraoGridMode { padrao, grupo }
 
 class PadraoMovimentoGrid extends ConsumerStatefulWidget {
-  const PadraoMovimentoGrid({super.key, required this.onAdicionar});
+  const PadraoMovimentoGrid({
+    super.key,
+    required this.onAdicionar,
+    this.alreadyInTreinoIds = const {},
+    this.pickerFilter = const ExercisePickerFilter(),
+  });
 
   final ValueChanged<Exercicio> onAdicionar;
+  final Set<int> alreadyInTreinoIds;
+  final ExercisePickerFilter pickerFilter;
 
   @override
   ConsumerState<PadraoMovimentoGrid> createState() =>
@@ -35,25 +44,22 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
     PadraoMovimento.cardioHiit,
   ];
 
-  @override
-  Widget build(BuildContext context) {
-    final all = ref
-        .watch(exerciciosProvider)
-        .maybeWhen(data: (value) => value, orElse: () => const <Exercicio>[]);
-    final items =
+  List<_GridItemData> _itemsForMode(List<Exercicio> all) {
+    final candidates =
         _mode == PadraoGridMode.padrao
             ? [
               for (final padrao in _padroes)
-                _GridItem(
+                _GridItemData(
                   label: TaxonomyLabels.padrao[padrao] ?? padrao.name,
-                  count: all.where((ex) => ex.padraoMovimento == padrao).length,
+                  count:
+                      all.where((ex) => ex.padraoMovimento == padrao).length,
                   icon: Icons.account_tree_rounded,
                   onTap: () => _open(padrao: padrao),
                 ),
             ]
             : [
               for (final grupo in GrupoMuscular.values)
-                _GridItem(
+                _GridItemData(
                   label: TaxonomyLabels.grupo[grupo] ?? grupo.name,
                   count:
                       all
@@ -63,6 +69,19 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
                   onTap: () => _open(grupo: grupo),
                 ),
             ];
+
+    return candidates.where((item) => item.count > 0).toList()
+      ..sort((a, b) => b.count.compareTo(a.count));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final all = ref
+        .watch(exerciciosProvider)
+        .maybeWhen(data: (value) => value, orElse: () => const <Exercicio>[]);
+    final filtered = applyExercisePickerFilter(all, widget.pickerFilter);
+    final items = _itemsForMode(filtered);
+    final mute = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -83,17 +102,41 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
           ),
         ),
         Expanded(
-          child: GridView.builder(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1.7,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: items.length,
-            itemBuilder: (_, index) => items[index],
-          ),
+          child:
+              items.isEmpty
+                  ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      child: Text(
+                        'Nenhuma categoria com exercícios disponíveis nesta visão.',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.inter(
+                          color: mute,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  )
+                  : GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 1.7,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                    itemCount: items.length,
+                    itemBuilder:
+                        (_, index) => _GridItem(
+                          label: items[index].label,
+                          count: items[index].count,
+                          icon: items[index].icon,
+                          onTap: items[index].onTap,
+                        ),
+                  ),
         ),
       ],
     );
@@ -109,10 +152,26 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
           (_) => PadraoExerciciosBottomSheet(
             padrao: padrao,
             grupo: grupo,
+            alreadyInTreinoIds: widget.alreadyInTreinoIds,
+            pickerFilter: widget.pickerFilter,
             onAdicionar: widget.onAdicionar,
           ),
     );
   }
+}
+
+class _GridItemData {
+  const _GridItemData({
+    required this.label,
+    required this.count,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String label;
+  final int count;
+  final IconData icon;
+  final VoidCallback onTap;
 }
 
 class _CategoryIntro extends StatelessWidget {
@@ -146,16 +205,19 @@ class _CategoryIntro extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Escolha por intenção',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
+                  style: AppTypography.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Abra uma categoria e selecione o exercício certo para prescrever.',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     color: scheme.onSurfaceVariant,
                     fontSize: 11.5,
                     height: 1.25,
@@ -214,12 +276,12 @@ class _GridItem extends StatelessWidget {
                 label,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w900),
+                style: AppTypography.inter(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 3),
               Text(
                 '$count exercícios',
-                style: TextStyle(
+                style: AppTypography.inter(
                   color: scheme.onSurfaceVariant,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,

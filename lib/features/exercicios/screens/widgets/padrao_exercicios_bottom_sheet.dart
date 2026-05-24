@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/design_tokens.dart';
+import '../../../treinos/utils/exercise_picker_sort.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../providers/exercicios_provider.dart';
+import '../../../treinos/utils/exercise_picker_filter.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class PadraoExerciciosBottomSheet extends ConsumerWidget {
@@ -13,11 +16,15 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
     this.padrao,
     this.grupo,
     required this.onAdicionar,
+    this.alreadyInTreinoIds = const {},
+    this.pickerFilter = const ExercisePickerFilter(),
   });
 
   final PadraoMovimento? padrao;
   final GrupoMuscular? grupo;
   final ValueChanged<Exercicio> onAdicionar;
+  final Set<int> alreadyInTreinoIds;
+  final ExercisePickerFilter pickerFilter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,15 +63,23 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
                   ),
                 ),
             error:
-                (e, _) => const Center(
+                (e, _) => Center(
                   child: Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Text('Não foi possível carregar os exercícios.'),
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      'Não foi possível carregar os exercícios.',
+                      textAlign: TextAlign.center,
+                      style: AppTypography.inter(
+                        color: scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
             data: (all) {
-              final items =
-                  all.where((ex) {
+              final filtered = applyExercisePickerFilter(all, pickerFilter);
+              final items = sortExerciciosForPicker(
+                filtered.where((ex) {
                       if (padrao != null) {
                         return ex.padraoMovimento == padrao;
                       }
@@ -72,14 +87,9 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
                         return ex.grupoMuscularPrimario == grupo;
                       }
                       return false;
-                    }).toList()
-                    ..sort((a, b) {
-                      final video = (b.hasPlayableMedia ? 1 : 0).compareTo(
-                        a.hasPlayableMedia ? 1 : 0,
-                      );
-                      if (video != 0) return video;
-                      return a.nome.compareTo(b.nome);
-                    });
+                    }),
+                alreadyInTreinoIds: alreadyInTreinoIds,
+              );
 
               return ListView.separated(
                 controller: scrollController,
@@ -118,6 +128,7 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
                   return _ExerciseChoiceTile(
                     exercicio: ex,
                     subtitle: subtitle,
+                    alreadyInTreino: alreadyInTreinoIds.contains(ex.id),
                     onTap: () {
                       Navigator.pop(context);
                       onAdicionar(ex);
@@ -163,7 +174,7 @@ class _SheetHeader extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: AppTypography.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                 ),
@@ -177,7 +188,7 @@ class _SheetHeader extends StatelessWidget {
               ),
               child: Text(
                 '$count exercícios',
-                style: TextStyle(
+                style: AppTypography.inter(
                   color: scheme.primary,
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
@@ -188,8 +199,8 @@ class _SheetHeader extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Toque em um item para usar nesta prescrição.',
-          style: TextStyle(
+          'Toque para revisar a prescrição e adicionar ao treino.',
+          style: AppTypography.inter(
             color: scheme.onSurfaceVariant,
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
@@ -204,16 +215,20 @@ class _ExerciseChoiceTile extends StatelessWidget {
   final Exercicio exercicio;
   final String subtitle;
   final VoidCallback onTap;
+  final bool alreadyInTreino;
 
   const _ExerciseChoiceTile({
     required this.exercicio,
     required this.subtitle,
     required this.onTap,
+    this.alreadyInTreino = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final nome = exercicio.nomeDisplay;
+    final muted = alreadyInTreino;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -248,21 +263,32 @@ class _ExerciseChoiceTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    exercicio.nome,
+                    nome,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: AppTypography.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
+                      color: muted ? scheme.onSurfaceVariant : null,
                     ),
                   ),
-                  if (subtitle.isNotEmpty) ...[
+                  if (alreadyInTreino) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      'Já está neste treino',
+                      style: AppTypography.inter(
+                        color: scheme.onSurfaceVariant,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ] else if (subtitle.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTypography.inter(
                         color: scheme.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,

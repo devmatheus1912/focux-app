@@ -18,7 +18,9 @@ import '../../exercicios/screens/widgets/substituir_exercicio_bottom_sheet.dart'
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/shell_chrome.dart';
 
 String _workoutContextLabel(Treino treino, String? alunoNome) {
   final name = alunoNome?.trim();
@@ -31,6 +33,22 @@ String _formatLoadKg(double? value) {
   if (value == null || value <= 0) return '—';
   if (value == value.roundToDouble()) return '${value.toStringAsFixed(0)}kg';
   return '${value.toStringAsFixed(1)}kg';
+}
+
+String _displayWorkoutName(String raw) {
+  var name = raw.trim();
+  if (name.isEmpty) return name;
+  const fixes = {
+    ' Forca': ' Força',
+    ' forca': ' Força',
+    ' FORCA': ' Força',
+    'Forca ': 'Força ',
+    'Forca': 'Força',
+  };
+  for (final entry in fixes.entries) {
+    name = name.replaceAll(entry.key, entry.value);
+  }
+  return name;
 }
 
 class TreinoDetailScreen extends ConsumerWidget {
@@ -51,22 +69,40 @@ class TreinoDetailScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: treinoAsync.when(
-        loading:
-            () => const SafeArea(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(TokensStrip.s5, 86, 20, 0),
-                child: SkeletonList(count: 6),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _popTreinoDetail(context, alunoId: alunoId);
+      },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: treinoAsync.when(
+          loading:
+              () => SafeArea(
+                child: Stack(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(TokensStrip.s5, 86, 20, 0),
+                      child: SkeletonList(count: 6),
+                    ),
+                    Positioned(
+                      top: 8,
+                      left: TokensStrip.s5 - 4,
+                      child: _TreinoDetailBackButton(
+                        alunoId: alunoId,
+                        onHero: true,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
         error:
             (e, _) => _DetailErrorState(
               isDark: isDark,
               primary: primary,
               onRetry: () => ref.invalidate(treinoProvider(treinoId)),
-              onBack: () => context.pop(),
+              onBack: () => _popTreinoDetail(context, alunoId: alunoId),
             ),
         data:
             (treino) => _TreinoDetailBody(
@@ -77,6 +113,58 @@ class TreinoDetailScreen extends ConsumerWidget {
               isDark: isDark,
               ref: ref,
             ),
+        ),
+      ),
+    );
+  }
+}
+
+void _popTreinoDetail(BuildContext context, {int? alunoId}) {
+  if (alunoId != null) {
+    safePopOrGo(context, '/alunos/$alunoId/treinos-list');
+    return;
+  }
+  safePopOrGo(context, '/treinos');
+}
+
+class _TreinoDetailBackButton extends StatelessWidget {
+  final int? alunoId;
+  final bool onHero;
+
+  const _TreinoDetailBackButton({
+    required this.alunoId,
+    this.onHero = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _popTreinoDetail(context, alunoId: alunoId),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 38,
+          height: 38,
+          decoration:
+              onHero
+                  ? BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.14),
+                    ),
+                  )
+                  : ShellChrome.of(context).headerAction(radius: 12),
+          child: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 16,
+            color: onHero ? Colors.white : ink,
+          ),
+        ),
       ),
     );
   }
@@ -185,6 +273,11 @@ class _TreinoDetailBody extends StatelessWidget {
                     onTap: () => Navigator.pop(sheetContext, 'assign'),
                   ),
                   _MenuActionTile(
+                    icon: Icons.content_copy_rounded,
+                    label: 'Copiar para aluno',
+                    onTap: () => Navigator.pop(sheetContext, 'clone'),
+                  ),
+                  _MenuActionTile(
                     icon: Icons.copy_outlined,
                     label: 'Duplicar treino',
                     onTap: () => Navigator.pop(sheetContext, 'duplicate'),
@@ -218,6 +311,7 @@ class _TreinoDetailBody extends StatelessWidget {
       case 'add':
         final added = await context.push<bool>(
           '/treinos/$treinoId/exercicios/add',
+          extra: alunoId == null ? null : {'alunoId': alunoId},
         );
         if (added == true) {
           ref.invalidate(treinoProvider(treinoId));
@@ -243,6 +337,35 @@ class _TreinoDetailBody extends StatelessWidget {
           ref.invalidate(treinosDoAlunoProvider(selected));
           if (context.mounted) {
             FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
+          }
+        } catch (e) {
+          if (context.mounted) {
+            FeedbackHelper.showError(context, friendlyError(e));
+          }
+        }
+        break;
+      case 'clone':
+        try {
+          final alunos = await ref.read(alunosProvider.future);
+          if (!context.mounted) return;
+          final selected = await showModalBottomSheet<int>(
+            context: context,
+            backgroundColor: Colors.transparent,
+            barrierColor: Colors.black.withValues(alpha: 0.34),
+            isScrollControlled: true,
+            builder:
+                (dialogContext) =>
+                    _AssignWorkoutSheet(alunos: alunos, isDark: isDark),
+          );
+          if (selected == null) return;
+          await repo.clonarParaAluno(treinoId, selected);
+          ref.invalidate(treinosProvider);
+          ref.invalidate(treinosDoAlunoProvider(selected));
+          if (context.mounted) {
+            FeedbackHelper.showSuccess(
+              context,
+              'Cópia dedicada criada para o aluno.',
+            );
           }
         } catch (e) {
           if (context.mounted) {
@@ -309,8 +432,10 @@ class _TreinoDetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final repo = ref.read(treinoRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
-    final primaryDeep = BrandPalette.deep(primary);
+    final heroPrimary = BrandPalette.softened(primary, amount: 0.06);
+    final heroDeep = BrandPalette.deep(heroPrimary);
     final contextLabel = _workoutContextLabel(treino, alunoNome);
+    final displayName = _displayWorkoutName(treino.nome);
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final orderedExercises = [...treino.exercicios]
       ..sort((a, b) => a.ordem.compareTo(b.ordem));
@@ -337,55 +462,54 @@ class _TreinoDetailBody extends StatelessWidget {
         volumeKg > 0
             ? '${(volumeKg / 1000).toStringAsFixed(1)}t'
             : '${grouped.keys.length} ${grouped.keys.length == 1 ? 'grupo' : 'grupos'}';
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight + 6;
+    final expandedHeight = topInset + 132;
 
     return CustomScrollView(
       slivers: [
         // Hero AppBar
         SliverAppBar(
-          expandedHeight: 236,
+          expandedHeight: expandedHeight,
           pinned: true,
-          backgroundColor: isDark ? const Color(0xFF0A0C12) : primaryDeep,
+          automaticallyImplyLeading: false,
+          backgroundColor: isDark ? EagleTokens.darkBg : heroDeep,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          leadingWidth: 48,
           iconTheme: const IconThemeData(color: Colors.white),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: _TreinoDetailBackButton(alunoId: alunoId, onHero: true),
+          ),
           flexibleSpace: FlexibleSpaceBar(
+            collapseMode: CollapseMode.pin,
             background: Stack(
               fit: StackFit.expand,
               children: [
-                // Gradient base
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       transform: const GradientRotation(160 * math.pi / 180),
-                      colors:
-                          isDark
-                              ? [
-                                const Color(0xFF121A32),
-                                const Color(0xFF080A12),
-                              ]
-                              : [
-                                const Color(0xFF263B96),
-                                const Color(0xFF14205A),
-                              ],
+                      colors: [heroPrimary, heroDeep],
                       stops: const [0.0, 1.0],
                     ),
                   ),
                 ),
-                // Grid texture — white 6% opacity, 26×26px cells
                 CustomPaint(painter: const _GridTexturePainter()),
-                // Content
-                Container(
-                  padding: const EdgeInsets.fromLTRB(
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
                     TokensStrip.s5,
-                    66,
+                    topInset,
                     20,
-                    16,
+                    20,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // Cover tile & Info
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -401,9 +525,9 @@ class _TreinoDetailBody extends StatelessWidget {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.18),
-                                  blurRadius: 34,
-                                  offset: const Offset(0, 16),
+                                  color: Colors.black.withValues(alpha: 0.14),
+                                  blurRadius: 24,
+                                  offset: const Offset(0, 12),
                                 ),
                               ],
                             ),
@@ -448,7 +572,7 @@ class _TreinoDetailBody extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    treino.nome,
+                                    displayName,
                                     style: AppTypography.inter(
                                       color: Colors.white,
                                       fontSize: 22,
@@ -458,46 +582,15 @@ class _TreinoDetailBody extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.timer_outlined,
-                                        size: 13,
-                                        color: Colors.white70,
+                                  Text(
+                                    '${treino.exercicios.length} exercício${treino.exercicios.length == 1 ? '' : 's'}',
+                                    style: AppTypography.mono(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.72,
                                       ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '~${durationMin}min',
-                                        style: AppTypography.mono(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.7,
-                                          ),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        '·',
-                                        style: AppTypography.inter(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.7,
-                                          ),
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        '${treino.exercicios.length} ex.',
-                                        style: AppTypography.mono(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.7,
-                                          ),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -521,91 +614,6 @@ class _TreinoDetailBody extends StatelessWidget {
                           _HeroMetricChip(label: 'Volume', value: volumeLabel),
                         ],
                       ),
-                      const SizedBox(height: 14),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {
-                                HapticFeedback.mediumImpact();
-                                context
-                                    .push<bool>(
-                                      '/treinos/$treinoId/exercicios/add',
-                                    )
-                                    .then((added) {
-                                      if (added == true) {
-                                        ref.invalidate(
-                                          treinoProvider(treinoId),
-                                        );
-                                      }
-                                    });
-                              },
-                              borderRadius: BorderRadius.circular(18),
-                              child: Container(
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF8FAFF),
-                                  borderRadius: BorderRadius.circular(18),
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.65),
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.16,
-                                      ),
-                                      blurRadius: 26,
-                                      offset: const Offset(0, 14),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.add_circle_outline_rounded,
-                                      color: primary,
-                                      size: 19,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'Adicionar exercício',
-                                      style: AppTypography.inter(
-                                        color: primary,
-                                        fontSize: 13.5,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          InkWell(
-                            onTap: () => _openMenu(context),
-                            borderRadius: BorderRadius.circular(18),
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.12),
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.more_horiz,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
                     ],
                   ),
                 ),
@@ -616,7 +624,30 @@ class _TreinoDetailBody extends StatelessWidget {
 
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 22, 20, 12),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 14, 20, 6),
+            child: _TreinoHeroActions(
+              primary: primary,
+              onAdd: () {
+                HapticFeedback.mediumImpact();
+                context
+                    .push<bool>(
+                      '/treinos/$treinoId/exercicios/add',
+                      extra: alunoId == null ? null : {'alunoId': alunoId},
+                    )
+                    .then((added) {
+                      if (added == true) {
+                        ref.invalidate(treinoProvider(treinoId));
+                      }
+                    });
+              },
+              onMenu: () => _openMenu(context),
+            ),
+          ),
+        ),
+
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 14, 20, 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -671,7 +702,12 @@ class _TreinoDetailBody extends StatelessWidget {
               primary: primary,
               onAdd: () {
                 HapticFeedback.mediumImpact();
-                context.push<bool>('/treinos/$treinoId/exercicios/add').then((
+                context
+                    .push<bool>(
+                      '/treinos/$treinoId/exercicios/add',
+                      extra: alunoId == null ? null : {'alunoId': alunoId},
+                    )
+                    .then((
                   added,
                 ) {
                   if (added == true) {
@@ -1047,10 +1083,10 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                       children: [
                         Text(
                           'Atribuir treino',
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: ink,
                             fontSize: 18,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                         const SizedBox(height: 3),
@@ -1058,7 +1094,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                           widget.alunos.isEmpty
                               ? 'Nenhum aluno cadastrado.'
                               : 'Escolha quem recebe este plano.',
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: mute,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -1084,7 +1120,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                   ),
                   child: Text(
                     'Cadastre um aluno antes de atribuir este treino.',
-                    style: TextStyle(
+                    style: AppTypography.inter(
                       color: mute,
                       fontSize: 13,
                       height: 1.35,
@@ -1152,10 +1188,10 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                   alignment: Alignment.center,
                                   child: Text(
                                     initials,
-                                    style: TextStyle(
+                                    style: AppTypography.inter(
                                       color: selected ? Colors.white : primary,
                                       fontSize: 12,
-                                      fontWeight: FontWeight.w900,
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                 ),
@@ -1169,10 +1205,10 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                         aluno.nome,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
+                                        style: AppTypography.inter(
                                           color: ink,
                                           fontSize: 14,
-                                          fontWeight: FontWeight.w900,
+                                          fontWeight: FontWeight.w800,
                                         ),
                                       ),
                                       const SizedBox(height: 3),
@@ -1183,7 +1219,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                             : 'Objetivo não definido',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
+                                        style: AppTypography.inter(
                                           color: mute,
                                           fontSize: 11.5,
                                           fontWeight: FontWeight.w600,
@@ -1261,6 +1297,100 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TreinoHeroActions extends StatelessWidget {
+  final Color primary;
+  final VoidCallback onAdd;
+  final VoidCallback onMenu;
+
+  const _TreinoHeroActions({
+    required this.primary,
+    required this.onAdd,
+    required this.onMenu,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onAdd,
+              borderRadius: BorderRadius.circular(18),
+              child: Ink(
+                height: 48,
+                decoration: BoxDecoration(
+                  color: isDark ? EagleTokens.darkCard : TokensStrip.cardBg,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: primary.withValues(alpha: isDark ? 0.22 : 0.14),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primary.withValues(alpha: isDark ? 0.10 : 0.12),
+                      blurRadius: 22,
+                      offset: const Offset(0, 10),
+                      spreadRadius: -8,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_rounded,
+                      color: primary,
+                      size: 19,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Adicionar exercício',
+                      style: AppTypography.inter(
+                        color: primary,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onMenu,
+            borderRadius: BorderRadius.circular(18),
+            child: Ink(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : TokensStrip.cardBg,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: primary.withValues(alpha: isDark ? 0.18 : 0.12),
+                ),
+              ),
+              child: Icon(
+                Icons.more_horiz_rounded,
+                color: isDark ? Colors.white : primary,
+                size: 20,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1575,7 +1705,7 @@ class _ExerciseMeta extends StatelessWidget {
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: AppTypography.inter(
               color: color,
               fontSize: 11.5,
               fontWeight: FontWeight.w700,
@@ -1855,7 +1985,7 @@ class _RemoveExerciseSheet extends StatelessWidget {
                       children: [
                         Text(
                           'Remover exercício?',
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: ink,
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
@@ -1865,7 +1995,7 @@ class _RemoveExerciseSheet extends StatelessWidget {
                         const SizedBox(height: 5),
                         Text(
                           '$title sai apenas deste treino. O exercício continua disponível na biblioteca.',
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: mute,
                             fontSize: 13,
                             height: 1.38,
@@ -1891,9 +2021,11 @@ class _RemoveExerciseSheet extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Cancelar',
-                        style: TextStyle(fontWeight: FontWeight.w800),
+                        style: AppTypography.inter(
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),
@@ -1910,9 +2042,12 @@ class _RemoveExerciseSheet extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Remover',
-                        style: TextStyle(fontWeight: FontWeight.w800),
+                        style: AppTypography.inter(
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -1988,7 +2123,7 @@ class _DeleteTrainingSheet extends StatelessWidget {
                       children: [
                         Text(
                           'Remover treino?',
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: ink,
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
@@ -1997,8 +2132,8 @@ class _DeleteTrainingSheet extends StatelessWidget {
                         ),
                         const SizedBox(height: 5),
                         Text(
-                          '$title sai da biblioteca. Historicos ja concluidos continuam preservados.',
-                          style: TextStyle(
+                          '$title sai da biblioteca. Históricos já concluídos continuam preservados.',
+                          style: AppTypography.inter(
                             color: mute,
                             fontSize: 13,
                             height: 1.38,
@@ -2032,8 +2167,8 @@ class _DeleteTrainingSheet extends StatelessWidget {
                     const SizedBox(width: 9),
                     Expanded(
                       child: Text(
-                        'Execucoes antigas e dados de alunos nao serao apagados.',
-                        style: TextStyle(
+                        'Execuções antigas e dados de alunos não serão apagados.',
+                        style: AppTypography.inter(
                           color: mute,
                           fontSize: 12.5,
                           height: 1.25,
@@ -2162,10 +2297,10 @@ class _DetailErrorState extends StatelessWidget {
               Text(
                 'Falha ao carregar treino',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTypography.inter(
                   color: ink,
                   fontSize: 19,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w800,
                   letterSpacing: -0.25,
                 ),
               ),
@@ -2173,7 +2308,7 @@ class _DetailErrorState extends StatelessWidget {
               Text(
                 'Verifique a conexão e tente novamente. Se o problema persistir, volte e reabra.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTypography.inter(
                   color: mute,
                   fontSize: 13,
                   height: 1.4,
@@ -2252,10 +2387,10 @@ class _EmptyExercisesState extends StatelessWidget {
           Text(
             'Nenhum exercício ainda',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: AppTypography.inter(
               color: ink,
               fontSize: 19,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w800,
               letterSpacing: -0.25,
             ),
           ),
@@ -2263,7 +2398,7 @@ class _EmptyExercisesState extends StatelessWidget {
           Text(
             'Adicione exercícios da biblioteca curada para montar este treino.',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: AppTypography.inter(
               color: mute,
               fontSize: 13,
               height: 1.4,

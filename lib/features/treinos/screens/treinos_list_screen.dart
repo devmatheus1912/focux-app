@@ -133,6 +133,32 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     }
   }
 
+  Future<void> _cloneTreinoParaAluno(Treino treino) async {
+    try {
+      final alunos = await ref.read(alunosProvider.future);
+      if (!mounted) return;
+      final selected = await showModalBottomSheet<int>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        barrierColor: Colors.black.withValues(alpha: 0.34),
+        isScrollControlled: true,
+        builder: (_) => _AssignWorkoutSheet(alunos: alunos),
+      );
+      if (selected == null) return;
+
+      await ref
+          .read(treinoRepositoryProvider)
+          .clonarParaAluno(treino.id, selected);
+      ref.invalidate(treinosProvider);
+      ref.invalidate(treinosDoAlunoProvider(selected));
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Cópia dedicada criada para o aluno.');
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, 'Não foi possível copiar: $e');
+    }
+  }
+
   Future<void> _openTreinoActions(Treino treino) async {
     final action = await showModalBottomSheet<_TreinoAction>(
       context: context,
@@ -158,6 +184,9 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
         break;
       case _TreinoAction.assign:
         await _assignTreino(treino);
+        break;
+      case _TreinoAction.clone:
+        await _cloneTreinoParaAluno(treino);
         break;
       case _TreinoAction.duplicate:
         await _duplicateTreino(treino);
@@ -295,24 +324,23 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                       ),
                     )
                   else ...[
-                    if (!singlePlan)
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s5,
-                            0,
-                            20,
-                            16,
-                          ),
-                          child: _TreinosCommandCard(
-                            treinos: treinos,
-                            isDark: isDark,
-                            primary: primary,
-                            compact: treinos.length <= 2,
-                            onCreate: createWorkout,
-                          ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          TokensStrip.s5,
+                          0,
+                          20,
+                          singlePlan ? 12 : 16,
+                        ),
+                        child: _TreinosCommandCard(
+                          treinos: treinos,
+                          isDark: isDark,
+                          primary: primary,
+                          compact: treinos.length <= 2,
+                          onCreate: createWorkout,
                         ),
                       ),
+                    ),
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
@@ -637,7 +665,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
   }
 }
 
-enum _TreinoAction { open, assign, duplicate, delete }
+enum _TreinoAction { open, assign, clone, duplicate, delete }
 
 class _TreinoActionsSheet extends StatelessWidget {
   final Treino treino;
@@ -721,12 +749,18 @@ class _TreinoActionsSheet extends StatelessWidget {
                 label: 'Abrir treino',
                 onTap: () => Navigator.pop(context, _TreinoAction.open),
               ),
-              if (canAssign)
+              if (canAssign) ...[
                 _TreinoActionTile(
                   icon: Icons.person_add_alt_1_rounded,
                   label: 'Atribuir a aluno',
                   onTap: () => Navigator.pop(context, _TreinoAction.assign),
                 ),
+                _TreinoActionTile(
+                  icon: Icons.content_copy_rounded,
+                  label: 'Copiar para aluno',
+                  onTap: () => Navigator.pop(context, _TreinoAction.clone),
+                ),
+              ],
               _TreinoActionTile(
                 icon: Icons.copy_rounded,
                 label: 'Duplicar treino',
@@ -1113,6 +1147,7 @@ class _TreinosHeader extends StatelessWidget {
     final chrome = ShellChrome.forDark(isDark);
     final ink = chrome.ink;
     final primary = Theme.of(context).colorScheme.primary;
+    final kickerColor = BrandPalette.sectionLink(primary, dark: isDark);
     final ready = treinos.where((t) => t.exercicios.isNotEmpty).length;
     final showBack = onBack != null;
     final planLabel = treinos.length == 1 ? 'plano' : 'planos';
@@ -1150,7 +1185,7 @@ class _TreinosHeader extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.inter(
                     fontSize: 11,
-                    color: primary,
+                    color: kickerColor,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0,
                   ),
@@ -1218,7 +1253,10 @@ class _TreinosCommandCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final primaryDeep = BrandPalette.deep(primary);
+    final primaryDeep = BrandPalette.deep(
+      BrandPalette.softened(primary, amount: 0.06),
+    );
+    final heroPrimary = BrandPalette.softened(primary, amount: 0.06);
     final totalExercises = treinos.fold<int>(
       0,
       (sum, treino) => sum + treino.exercicios.length,
@@ -1235,12 +1273,12 @@ class _TreinosCommandCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [primary, primaryDeep],
+          colors: [heroPrimary, primaryDeep],
         ),
         borderRadius: BorderRadius.circular(ultraCompact ? 22 : 26),
         boxShadow: [
           BoxShadow(
-            color: primary.withValues(alpha: isDark ? 0.08 : 0.14),
+            color: heroPrimary.withValues(alpha: isDark ? 0.08 : 0.14),
             blurRadius: 22,
             offset: const Offset(0, 12),
             spreadRadius: -16,
@@ -1533,10 +1571,7 @@ class _LibraryControls extends StatelessWidget {
         color:
             isDark
                 ? EagleTokens.darkCard
-                : BrandPalette.soft(
-                  primary,
-                  dark: false,
-                ).withValues(alpha: 0.58),
+                : Colors.white.withValues(alpha: 0.86),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color:

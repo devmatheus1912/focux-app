@@ -354,6 +354,22 @@ class _FxIconPainter extends CustomPainter {
         );
         break;
 
+      case 'arrow-left':
+        canvas.drawPath(
+          Path()
+            ..moveTo(15, 5)
+            ..lineTo(8, 12)
+            ..lineTo(15, 19),
+          paint,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(8, 12)
+            ..lineTo(21, 12),
+          paint,
+        );
+        break;
+
       case 'sun':
         canvas.drawCircle(const Offset(12, 12), 4, paint);
         for (final p in const [
