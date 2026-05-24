@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -11,6 +12,8 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../alunos/data/aluno_repository.dart';
+import '../../alunos/providers/alunos_provider.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -90,6 +93,73 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       _selectionMode = false;
       _selectedIds.clear();
     });
+  }
+
+  Future<void> _assignTreino(Treino treino) async {
+    try {
+      final alunos = await ref.read(alunosProvider.future);
+      if (!mounted) return;
+      final selected = await showModalBottomSheet<int>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        barrierColor: Colors.black.withValues(alpha: 0.34),
+        isScrollControlled: true,
+        builder: (_) => _AssignWorkoutSheet(alunos: alunos),
+      );
+      if (selected == null) return;
+
+      await ref
+          .read(treinoRepositoryProvider)
+          .atribuirAluno(treino.id, selected);
+      ref.invalidate(treinosProvider);
+      ref.invalidate(treinosDoAlunoProvider(selected));
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, 'Não foi possível atribuir: $e');
+    }
+  }
+
+  Future<void> _duplicateTreino(Treino treino) async {
+    try {
+      await ref.read(treinoRepositoryProvider).duplicar(treino.id);
+      ref.invalidate(treinosProvider);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Treino duplicado.');
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, 'Não foi possível duplicar: $e');
+    }
+  }
+
+  Future<void> _openTreinoActions(Treino treino) async {
+    final action = await showModalBottomSheet<_TreinoAction>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.34),
+      builder:
+          (_) => _TreinoActionsSheet(
+            treino: treino,
+            canAssign: widget.alunoId == null,
+          ),
+    );
+    if (!mounted || action == null) return;
+
+    switch (action) {
+      case _TreinoAction.open:
+        context.push('/treinos/${treino.id}');
+        break;
+      case _TreinoAction.assign:
+        await _assignTreino(treino);
+        break;
+      case _TreinoAction.duplicate:
+        await _duplicateTreino(treino);
+        break;
+      case _TreinoAction.delete:
+        await _deleteTreinos([treino]);
+        break;
+    }
   }
 
   Future<void> _deleteTreinos(List<Treino> treinos) async {
@@ -200,12 +270,12 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                       alunoNome: widget.alunoNome,
                       isDark: isDark,
                       onBack:
-                          () => safePopOrGo(
-                            context,
-                            widget.alunoId == null
-                                ? '/dashboard/personal'
-                                : '/alunos/${widget.alunoId}',
-                          ),
+                          widget.alunoId == null
+                              ? null
+                              : () => safePopOrGo(
+                                context,
+                                '/alunos/${widget.alunoId}',
+                              ),
                     ),
                   ),
                   if (treinos.isEmpty)
@@ -220,18 +290,29 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                   else ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 16),
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s5,
+                          0,
+                          20,
+                          16,
+                        ),
                         child: _TreinosCommandCard(
                           treinos: treinos,
                           isDark: isDark,
                           primary: primary,
+                          compact: treinos.length <= 2,
                           onCreate: createWorkout,
                         ),
                       ),
                     ),
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 14),
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s5,
+                          0,
+                          20,
+                          14,
+                        ),
                         child: _LibraryControls(
                           controller: _searchController,
                           query: _query,
@@ -271,7 +352,12 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                     ),
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 12),
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s5,
+                          0,
+                          20,
+                          12,
+                        ),
                         child: _SectionHeader(
                           title:
                               widget.alunoId == null
@@ -300,7 +386,12 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                       )
                     else
                       SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 104),
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s5,
+                          0,
+                          20,
+                          104,
+                        ),
                         sliver: SliverList.separated(
                           itemCount: filteredTreinos.length,
                           separatorBuilder:
@@ -325,9 +416,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                       () => _startSelection(
                                         filteredTreinos[i].id,
                                       ),
-                                  onDelete:
-                                      () =>
-                                          _deleteTreinos([filteredTreinos[i]]),
+                                  onActions:
+                                      () => _openTreinoActions(
+                                        filteredTreinos[i],
+                                      ),
                                 ),
                               ),
                         ),
@@ -404,7 +496,10 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                   width: 42,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+                    color:
+                        isDark
+                            ? EagleTokens.darkLine
+                            : TokensStrip.borderDefault,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -433,17 +528,17 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: ink,
                             fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.2,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0,
                           ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           body,
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: mute,
                             fontSize: 13,
                             height: 1.35,
@@ -459,7 +554,8 @@ class _DeleteWorkoutSheet extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isDark ? EagleTokens.darkBg : TokensStrip.borderDefault,
+                  color:
+                      isDark ? EagleTokens.darkBg : TokensStrip.borderDefault,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: line),
                 ),
@@ -472,7 +568,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                         unlinkOnly
                             ? 'O aluno perde o acesso a este plano.'
                             : 'Histórico e execuções antigas não são apagados.',
-                        style: TextStyle(
+                        style: AppTypography.inter(
                           color: mute,
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
@@ -498,7 +594,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                       ),
                       child: const Text(
                         'Cancelar',
-                        style: TextStyle(fontWeight: FontWeight.w900),
+                        style: TextStyle(fontWeight: FontWeight.w800),
                       ),
                     ),
                   ),
@@ -517,7 +613,463 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                       ),
                       child: Text(
                         actionLabel,
-                        style: const TextStyle(fontWeight: FontWeight.w900),
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum _TreinoAction { open, assign, duplicate, delete }
+
+class _TreinoActionsSheet extends StatelessWidget {
+  final Treino treino;
+  final bool canAssign;
+
+  const _TreinoActionsSheet({required this.treino, required this.canAssign});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
+    final bottom = MediaQuery.of(context).padding.bottom;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          decoration: chrome.bottomSheet(radius: 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: chrome.mute.withValues(alpha: 0.26),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: BrandPalette.soft(primary, dark: isDark),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      Icons.fitness_center_rounded,
+                      color: primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          treino.nome,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.inter(
+                            color: chrome.ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Abra, atribua ou replique este plano.',
+                          style: AppTypography.inter(
+                            color: chrome.mute,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: TokensStrip.s4),
+              _TreinoActionTile(
+                icon: Icons.open_in_new_rounded,
+                label: 'Abrir treino',
+                onTap: () => Navigator.pop(context, _TreinoAction.open),
+              ),
+              if (canAssign)
+                _TreinoActionTile(
+                  icon: Icons.person_add_alt_1_rounded,
+                  label: 'Atribuir a aluno',
+                  onTap: () => Navigator.pop(context, _TreinoAction.assign),
+                ),
+              _TreinoActionTile(
+                icon: Icons.copy_rounded,
+                label: 'Duplicar treino',
+                onTap: () => Navigator.pop(context, _TreinoAction.duplicate),
+              ),
+              _TreinoActionTile(
+                icon: Icons.delete_outline_rounded,
+                label: 'Excluir treino',
+                color: EagleTokens.bad,
+                onTap: () => Navigator.pop(context, _TreinoAction.delete),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TreinoActionTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? color;
+  final VoidCallback onTap;
+
+  const _TreinoActionTile({
+    required this.icon,
+    required this.label,
+    this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final tint = color ?? primary;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+          decoration: BoxDecoration(
+            color:
+                isDark
+                    ? Colors.white.withValues(alpha: 0.035)
+                    : Colors.white.withValues(alpha: 0.88),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: chrome.line),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: BrandPalette.soft(tint, dark: isDark),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(icon, color: tint, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTypography.inter(
+                    color: color ?? chrome.ink,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: chrome.mute, size: 18),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AssignWorkoutSheet extends StatefulWidget {
+  final List<Aluno> alunos;
+
+  const _AssignWorkoutSheet({required this.alunos});
+
+  @override
+  State<_AssignWorkoutSheet> createState() => _AssignWorkoutSheetState();
+}
+
+class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
+  int? selectedAlunoId;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedAlunoId = widget.alunos.isEmpty ? null : widget.alunos.first.id;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
+    final bottom = MediaQuery.of(context).padding.bottom;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          decoration: chrome.bottomSheet(radius: 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: chrome.mute.withValues(alpha: 0.26),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: BrandPalette.soft(primary, dark: isDark),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      Icons.person_add_alt_1_rounded,
+                      color: primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Atribuir treino',
+                          style: AppTypography.inter(
+                            color: chrome.ink,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          widget.alunos.isEmpty
+                              ? 'Cadastre um aluno antes.'
+                              : 'Escolha quem recebe este plano.',
+                          style: AppTypography.inter(
+                            color: chrome.mute,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: TokensStrip.s4),
+              if (widget.alunos.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color:
+                        isDark
+                            ? Colors.white.withValues(alpha: 0.04)
+                            : TokensStrip.cardBg,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: chrome.line),
+                  ),
+                  child: Text(
+                    'Adicione um aluno para atribuir treinos direto da biblioteca.',
+                    style: AppTypography.inter(
+                      color: chrome.mute,
+                      fontSize: 13,
+                      height: 1.35,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+              else
+                Flexible(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 300),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: widget.alunos.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final aluno = widget.alunos[index];
+                        final selected = selectedAlunoId == aluno.id;
+                        final initials =
+                            aluno.nome.trim().isEmpty
+                                ? '?'
+                                : aluno.nome
+                                    .trim()
+                                    .split(RegExp(r'\s+'))
+                                    .take(2)
+                                    .map((part) => part[0].toUpperCase())
+                                    .join();
+
+                        return InkWell(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => selectedAlunoId = aluno.id);
+                          },
+                          borderRadius: BorderRadius.circular(18),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 160),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color:
+                                  selected
+                                      ? BrandPalette.soft(primary, dark: isDark)
+                                      : isDark
+                                      ? Colors.white.withValues(alpha: 0.03)
+                                      : Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color:
+                                    selected
+                                        ? primary.withValues(alpha: 0.30)
+                                        : chrome.line,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: selected ? primary : chrome.line,
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: Text(
+                                    initials,
+                                    style: AppTypography.inter(
+                                      color:
+                                          selected ? Colors.white : chrome.ink,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        aluno.nome,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppTypography.inter(
+                                          color: chrome.ink,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        aluno.objetivo?.trim().isNotEmpty ==
+                                                true
+                                            ? _ptLabel(aluno.objetivo!.trim())
+                                            : 'Objetivo não definido',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppTypography.inter(
+                                          color: chrome.mute,
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  selected
+                                      ? Icons.check_circle_rounded
+                                      : Icons.radio_button_unchecked_rounded,
+                                  color:
+                                      selected
+                                          ? primary
+                                          : chrome.mute.withValues(alpha: 0.7),
+                                  size: 20,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              const SizedBox(height: TokensStrip.s4),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: chrome.ink,
+                        side: BorderSide(color: chrome.line),
+                        minimumSize: const Size(0, 46),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancelar',
+                        style: AppTypography.inter(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed:
+                          selectedAlunoId == null
+                              ? null
+                              : () => Navigator.pop(context, selectedAlunoId),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: primary,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(0, 46),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        'Atribuir',
+                        style: AppTypography.inter(fontWeight: FontWeight.w800),
                       ),
                     ),
                   ),
@@ -536,7 +1088,7 @@ class _TreinosHeader extends StatelessWidget {
   final int? alunoId;
   final String? alunoNome;
   final bool isDark;
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
 
   const _TreinosHeader({
     required this.treinos,
@@ -552,41 +1104,45 @@ class _TreinosHeader extends StatelessWidget {
     final ink = chrome.ink;
     final primary = Theme.of(context).colorScheme.primary;
     final ready = treinos.where((t) => t.exercicios.isNotEmpty).length;
+    final showBack = onBack != null;
+    final planLabel = treinos.length == 1 ? 'plano' : 'planos';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 16, 20, 18),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onBack,
-              borderRadius: BorderRadius.circular(14),
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: chrome.headerAction(radius: 14),
-                child: Icon(Icons.arrow_back_rounded, color: ink),
+          if (showBack) ...[
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onBack,
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: chrome.headerAction(radius: 14),
+                  child: Icon(Icons.arrow_back_rounded, color: ink),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   alunoId == null
-                      ? '$ready PRONTOS  /  ${treinos.length} PLANOS'
-                      : 'TREINOS DO ALUNO',
+                      ? '$ready pronto${ready == 1 ? '' : 's'} / ${treinos.length} $planLabel'
+                      : 'Treinos do aluno',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     fontSize: 11,
                     color: primary,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.25,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -598,12 +1154,12 @@ class _TreinosHeader extends StatelessWidget {
                       : 'Treinos de ${alunoNome!.trim()}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     fontSize: 28,
                     height: 1,
                     color: ink,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.4,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0,
                   ),
                 ),
               ],
@@ -619,11 +1175,11 @@ class _TreinosHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
-              '${treinos.length} ativos',
-              style: TextStyle(
+              '${treinos.length} ${treinos.length == 1 ? 'ativo' : 'ativos'}',
+              style: AppTypography.inter(
                 color: primary,
                 fontSize: 11.5,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
@@ -637,12 +1193,14 @@ class _TreinosCommandCard extends StatelessWidget {
   final List<Treino> treinos;
   final bool isDark;
   final Color primary;
+  final bool compact;
   final VoidCallback onCreate;
 
   const _TreinosCommandCard({
     required this.treinos,
     required this.isDark,
     required this.primary,
+    required this.compact,
     required this.onCreate,
   });
 
@@ -658,9 +1216,10 @@ class _TreinosCommandCard extends StatelessWidget {
     final ready = treinos.where((t) => t.exercicios.isNotEmpty).length;
     final templates = treinos.where((t) => t.isTemplate).length;
     final assembling = treinos.length - ready;
+    final metricGap = compact ? 8.0 : 10.0;
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(compact ? 14 : 18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -704,7 +1263,7 @@ class _TreinosCommandCard extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 17,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -738,12 +1297,12 @@ class _TreinosCommandCard extends StatelessWidget {
                 icon: const Icon(Icons.add_rounded, size: 17),
                 label: const Text(
                   'Novo',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: TokensStrip.s4),
+          SizedBox(height: compact ? 12 : TokensStrip.s4),
           Row(
             children: [
               Expanded(
@@ -754,7 +1313,7 @@ class _TreinosCommandCard extends StatelessWidget {
                   muteColor: mute,
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: metricGap),
               Expanded(
                 child: _CommandMetric(
                   label: 'exercícios',
@@ -763,7 +1322,7 @@ class _TreinosCommandCard extends StatelessWidget {
                   muteColor: mute,
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: metricGap),
               Expanded(
                 child: _CommandMetric(
                   label: 'templates',
@@ -809,10 +1368,10 @@ class _CommandMetric extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: AppTypography.mono(
               color: Colors.white,
               fontSize: 19,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w800,
               height: 1,
             ),
           ),
@@ -821,7 +1380,7 @@ class _CommandMetric extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: AppTypography.inter(
               color: Colors.white.withValues(alpha: 0.68),
               fontSize: 10.5,
               fontWeight: FontWeight.w700,
@@ -854,17 +1413,17 @@ class _SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: TextStyle(
+            style: AppTypography.inter(
               color: ink,
               fontSize: 18,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.25,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
             ),
           ),
         ),
         Text(
           action,
-          style: TextStyle(
+          style: AppTypography.inter(
             color: mute,
             fontSize: 12,
             fontWeight: FontWeight.w800,
@@ -956,16 +1515,16 @@ class _LibraryControls extends StatelessWidget {
                             children: [
                               Text(
                                 '$selectedCount selecionado${selectedCount == 1 ? '' : 's'}',
-                                style: TextStyle(
+                                style: AppTypography.inter(
                                   color: ink,
                                   fontSize: 13,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.1,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0,
                                 ),
                               ),
                               Text(
                                 'Ações em lote',
-                                style: TextStyle(
+                                style: AppTypography.inter(
                                   color: mute,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
@@ -1034,11 +1593,11 @@ class _LibraryControls extends StatelessWidget {
                                 'Operações da biblioteca',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: AppTypography.inter(
                                   color: ink,
                                   fontSize: 13,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.1,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0,
                                 ),
                               ),
                               Text(
@@ -1047,7 +1606,7 @@ class _LibraryControls extends StatelessWidget {
                                     : 'Filtro aplicado',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: AppTypography.inter(
                                   color: mute,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
@@ -1082,15 +1641,18 @@ class _LibraryControls extends StatelessWidget {
             onChanged: onQueryChanged,
             controller: controller,
             textInputAction: TextInputAction.search,
-            style: TextStyle(
+            style: AppTypography.inter(
               color: ink,
               fontSize: 13,
               fontWeight: FontWeight.w800,
             ),
             decoration: InputDecoration(
               isDense: true,
-              hintText: 'Buscar treino, objetivo ou nivel',
-              hintStyle: TextStyle(color: mute, fontWeight: FontWeight.w600),
+              hintText: 'Buscar treino, objetivo ou nível',
+              hintStyle: AppTypography.inter(
+                color: mute,
+                fontWeight: FontWeight.w600,
+              ),
               prefixIcon: Icon(Icons.search_rounded, color: primary, size: 20),
               suffixIcon:
                   query.trim().isEmpty
@@ -1164,18 +1726,18 @@ class _EmptyState extends StatelessWidget {
           Text(
             'Sua biblioteca começa aqui',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: AppTypography.inter(
               color: ink,
               fontSize: 19,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.25,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Crie um plano base, adicione exercícios e use como ponto de partida para seus alunos.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+            style: AppTypography.inter(color: mute, fontSize: 13, height: 1.35),
           ),
           const SizedBox(height: 18),
           SizedBox(
@@ -1227,18 +1789,18 @@ class _NoResultsState extends StatelessWidget {
           Text(
             'Nada encontrado',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: AppTypography.inter(
               color: ink,
               fontSize: 18,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.2,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
             ),
           ),
           const SizedBox(height: 7),
           Text(
             'Ajuste a busca para encontrar outro treino da biblioteca.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+            style: AppTypography.inter(color: mute, fontSize: 13, height: 1.35),
           ),
           const SizedBox(height: TokensStrip.s4),
           OutlinedButton.icon(
@@ -1252,6 +1814,34 @@ class _NoResultsState extends StatelessWidget {
   }
 }
 
+String _ptLabel(String raw) {
+  final value = raw.trim();
+  if (value.isEmpty) return value;
+  final normalized = value
+      .toUpperCase()
+      .replaceAll('Á', 'A')
+      .replaceAll('Ã', 'A')
+      .replaceAll('Â', 'A')
+      .replaceAll('É', 'E')
+      .replaceAll('Í', 'I')
+      .replaceAll('Ó', 'O')
+      .replaceAll('Õ', 'O')
+      .replaceAll('Ú', 'U')
+      .replaceAll('Ç', 'C');
+  const labels = {
+    'FORCA': 'Força',
+    'HIPERTROFIA': 'Hipertrofia',
+    'EMAGRECIMENTO': 'Emagrecimento',
+    'CONDICIONAMENTO': 'Condicionamento',
+    'MOBILIDADE': 'Mobilidade',
+    'INICIANTE': 'Iniciante',
+    'INTERMEDIARIO': 'Intermediário',
+    'AVANCADO': 'Avançado',
+  };
+  return labels[normalized] ??
+      value[0].toUpperCase() + value.substring(1).toLowerCase();
+}
+
 class _TreinoCard extends StatelessWidget {
   final Treino treino;
   final int index;
@@ -1261,7 +1851,7 @@ class _TreinoCard extends StatelessWidget {
   final bool selected;
   final VoidCallback onToggleSelection;
   final VoidCallback onStartSelection;
-  final VoidCallback onDelete;
+  final VoidCallback onActions;
 
   const _TreinoCard({
     required this.treino,
@@ -1272,7 +1862,7 @@ class _TreinoCard extends StatelessWidget {
     required this.selected,
     required this.onToggleSelection,
     required this.onStartSelection,
-    required this.onDelete,
+    required this.onActions,
   });
 
   IconData get _nivelIcon {
@@ -1302,7 +1892,7 @@ class _TreinoCard extends StatelessWidget {
     if (nivel == null || nivel.isEmpty) {
       return 'Iniciante';
     }
-    return nivel[0].toUpperCase() + nivel.substring(1).toLowerCase();
+    return _ptLabel(nivel);
   }
 
   @override
@@ -1364,11 +1954,11 @@ class _TreinoCard extends StatelessWidget {
                               treino.nome,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
+                              style: AppTypography.inter(
+                                fontWeight: FontWeight.w800,
                                 fontSize: 15.5,
                                 color: ink,
-                                letterSpacing: -0.1,
+                                letterSpacing: 0,
                               ),
                             ),
                           ),
@@ -1385,13 +1975,13 @@ class _TreinoCard extends StatelessWidget {
                       const SizedBox(height: 5),
                       Text(
                         treino.objetivo?.trim().isNotEmpty == true
-                            ? treino.objetivo!.trim()
+                            ? _ptLabel(treino.objetivo!.trim())
                             : hasExercises
                             ? 'Plano pronto para atribuir'
                             : 'Estrutura aguardando exercícios',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: AppTypography.inter(
                           color: mute,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -1400,8 +1990,7 @@ class _TreinoCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                const SizedBox(width: 2),
+                const SizedBox(width: 10),
                 if (selectionMode)
                   Checkbox(
                     value: selected,
@@ -1413,71 +2002,42 @@ class _TreinoCard extends StatelessWidget {
                     visualDensity: VisualDensity.compact,
                   )
                 else
-                  PopupMenuButton<String>(
-                    tooltip: 'Ações do treino',
-                    padding: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    onSelected: (value) {
-                      if (value == 'select') {
-                        onStartSelection();
-                      } else if (value == 'delete') {
-                        onDelete();
-                      }
-                    },
-                    itemBuilder:
-                        (context) => [
-                          const PopupMenuItem(
-                            value: 'select',
-                            child: Row(
-                              children: [
-                                Icon(Icons.checklist_rounded, size: 18),
-                                SizedBox(width: 10),
-                                Text('Selecionar'),
-                              ],
+                  Semantics(
+                    button: true,
+                    label: 'Ações do treino',
+                    child: InkWell(
+                      onTap: onActions,
+                      borderRadius: BorderRadius.circular(999),
+                      child: Container(
+                        height: 34,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color:
+                              isDark
+                                  ? EagleTokens.darkBg
+                                  : TokensStrip.borderDefault,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: line),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Ações',
+                              style: AppTypography.inter(
+                                color: mute,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
-                          ),
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                Icon(Icons.delete_outline_rounded, size: 18),
-                                SizedBox(width: 10),
-                                Text('Excluir'),
-                              ],
-                            ),
-                          ),
-                        ],
-                    child: Container(
-                      height: 34,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        color:
-                            isDark
-                                ? EagleTokens.darkBg
-                                : TokensStrip.borderDefault,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: line),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Ações',
-                            style: TextStyle(
+                            const SizedBox(width: 3),
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
                               color: mute,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
+                              size: 16,
                             ),
-                          ),
-                          const SizedBox(width: 3),
-                          Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: mute,
-                            size: 16,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -1525,7 +2085,9 @@ class _TreinoCard extends StatelessWidget {
                       minHeight: hasExercises ? 4 : 6,
                       value: hasExercises ? 1 : 0.28,
                       backgroundColor:
-                          isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+                          isDark
+                              ? EagleTokens.darkLine
+                              : TokensStrip.borderDefault,
                       valueColor: AlwaysStoppedAnimation(
                         hasExercises
                             ? EagleTokens.good.withValues(
@@ -1551,7 +2113,7 @@ class _TreinoCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         '~${estimatedMinutes}min',
-                        style: TextStyle(
+                        style: AppTypography.mono(
                           color: mute,
                           fontSize: 11.5,
                           fontWeight: FontWeight.w800,
@@ -1562,10 +2124,10 @@ class _TreinoCard extends StatelessWidget {
                 else
                   Text(
                     'finalizar',
-                    style: TextStyle(
+                    style: AppTypography.inter(
                       color: EagleTokens.warn,
                       fontSize: 11.5,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
               ],
@@ -1593,6 +2155,7 @@ class _PlanPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final isMetric = RegExp(r'^\d').hasMatch(value) || value.startsWith('~');
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
@@ -1609,11 +2172,18 @@ class _PlanPill extends StatelessWidget {
               value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: ink,
-                fontSize: 10.2,
-                fontWeight: FontWeight.w800,
-              ),
+              style:
+                  isMetric
+                      ? AppTypography.mono(
+                        color: ink,
+                        fontSize: 10.2,
+                        fontWeight: FontWeight.w800,
+                      )
+                      : AppTypography.inter(
+                        color: ink,
+                        fontSize: 10.2,
+                        fontWeight: FontWeight.w800,
+                      ),
             ),
           ),
         ],
@@ -1643,10 +2213,10 @@ class _TinyBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: AppTypography.inter(
           color: color,
           fontSize: 10,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );
@@ -1679,17 +2249,17 @@ class _TreinosErrorState extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               'Não foi possível carregar',
-              style: TextStyle(
+              style: AppTypography.inter(
                 color: ink,
                 fontSize: 17,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(height: 6),
             Text(
               'Verifique a conexão e tente novamente.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 13),
+              style: AppTypography.inter(color: mute, fontSize: 13),
             ),
             const SizedBox(height: TokensStrip.s4),
             OutlinedButton.icon(

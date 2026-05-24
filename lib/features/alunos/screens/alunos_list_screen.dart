@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/env.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
 import '../data/aluno_repository.dart';
@@ -18,6 +19,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
@@ -82,11 +84,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
     if (!fromDashboard) return;
 
-    final router = GoRouter.of(context);
-    router.go('/alunos');
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) router.go('/dashboard/personal');
-    });
+    safePopOrGo(context, '/dashboard/personal');
   }
 
   @override
@@ -2459,7 +2457,9 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
             value: _statusSelecionado,
             decoration: InputDecoration(
               isDense: true,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             items:
                 ['ATIVO', 'INATIVO', 'BLOQUEADO']

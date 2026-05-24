@@ -27,7 +27,8 @@ void main() {
     expect(widget, contains('Pulso operacional'));
     expect(widget, contains('BoxConstraints(minHeight: 48)'));
     expect(widget, contains('hideRiscoChip'));
-    expect(widget, contains('_RiskWaveBanner'));
+    expect(widget, contains('retomada urgente'));
+    expect(widget, isNot(contains('_RiskWaveBanner')));
     expect(widget, contains('_AderenciaSemanaEmptyCard'));
     expect(widget, contains('_isRiskEchoCopy'));
     expect(widget, contains('BrandPalette.sectionHeading'));
