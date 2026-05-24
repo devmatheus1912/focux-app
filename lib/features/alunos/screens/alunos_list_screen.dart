@@ -43,6 +43,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   String _query = '';
+  bool _ignoredDeepLinkFiltro = false;
 
   @override
   void initState() {
@@ -57,8 +58,35 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   void didUpdateWidget(covariant AlunosListScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialFiltro != widget.initialFiltro) {
-      setState(() => _filtro = widget.initialFiltro);
+      setState(() {
+        _filtro = widget.initialFiltro;
+        _ignoredDeepLinkFiltro = false;
+      });
     }
+  }
+
+  bool _hasDeepLinkFiltro(BuildContext context) {
+    if (_ignoredDeepLinkFiltro) return false;
+    return GoRouterState.of(context).uri.queryParameters.containsKey('filtro') ||
+        widget.initialFiltro != AlunoFiltro.todos;
+  }
+
+  void _handleHeaderBack() {
+    HapticFeedback.selectionClick();
+    final fromDashboard = _hasDeepLinkFiltro(context);
+
+    setState(() {
+      _filtro = AlunoFiltro.todos;
+      _ignoredDeepLinkFiltro = true;
+    });
+
+    if (!fromDashboard) return;
+
+    final router = GoRouter.of(context);
+    router.go('/alunos');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) router.go('/dashboard/personal');
+    });
   }
 
   @override
@@ -622,7 +650,13 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         configAsync.valueOrNull?.diasSemTreino ??
         AlunoFollowUpStore.diasSemTreinoLimite;
 
-    return Scaffold(
+    return PopScope(
+      canPop: !_hasActiveFilter,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_hasActiveFilter) _handleHeaderBack();
+      },
+      child: Scaffold(
       backgroundColor: shellScaffoldColor,
       body: alunosAsync.when(
         loading:
@@ -676,7 +710,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
           final headerOps =
               _modoSelecao
                   ? _selectionSummary()
-                  : '$contatoCount contato hoje · $riscoCount risco · $novosCount convites';
+                  : '$contatoCount contato · $riscoCount risco · $novosCount convites';
+          final showHeaderBack = !_modoSelecao && _hasActiveFilter;
+          final headerBackFromDashboard = _hasDeepLinkFiltro(context);
           final triageContextActive =
               !_modoSelecao &&
               _filtro == AlunoFiltro.todos &&
@@ -698,6 +734,30 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      if (showHeaderBack) ...[
+                        Semantics(
+                          button: true,
+                          label:
+                              headerBackFromDashboard
+                                  ? 'Voltar para Hoje'
+                                  : 'Limpar filtro',
+                          child: InkWell(
+                            onTap: _handleHeaderBack,
+                            borderRadius: BorderRadius.circular(22),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: chrome.headerAction(radius: 20),
+                              child: Icon(
+                                Icons.arrow_back_ios_new_rounded,
+                                size: 18,
+                                color: ink,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -719,6 +779,8 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                                 letterSpacing: _modoSelecao ? 1.2 : 0,
                                 height: 1.2,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -1202,6 +1264,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
           );
         },
       ),
+    ),
     );
   }
 }
