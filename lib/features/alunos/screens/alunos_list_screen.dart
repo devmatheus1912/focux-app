@@ -923,70 +923,71 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                 ),
 
                 // Filter Chips
-                SizedBox(
-                  height: 40,
-                  child: ListView(
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 4, 16, 10),
+                  child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 6, 16, 10),
-                    children: [
-                      _FxChip(
-                        label: 'Todos',
-                        count: alunos.length,
-                        isSelected: _filtro == AlunoFiltro.todos,
-                        isDark: isDark,
-                        onTap:
-                            () => setState(() => _filtro = AlunoFiltro.todos),
-                      ),
-                      const SizedBox(width: 8),
-                      _FxChip(
-                        label: 'Contato hoje',
-                        count: contatoCount,
-                        isSelected: _filtro == AlunoFiltro.contatoHoje,
-                        isDark: isDark,
-                        onTap:
-                            () => setState(
-                              () => _filtro = AlunoFiltro.contatoHoje,
-                            ),
-                      ),
-                      const SizedBox(width: 8),
-                      _FxChip(
-                        label: 'Ativos',
-                        count: ativosCount,
-                        isSelected: _filtro == AlunoFiltro.ativos,
-                        isDark: isDark,
-                        onTap:
-                            () => setState(() => _filtro = AlunoFiltro.ativos),
-                      ),
-                      const SizedBox(width: 8),
-                      _FxChip(
-                        label: 'Inadimplentes',
-                        count: inadCount,
-                        isSelected: _filtro == AlunoFiltro.inadimplentes,
-                        isDark: isDark,
-                        onTap:
-                            () => setState(
-                              () => _filtro = AlunoFiltro.inadimplentes,
-                            ),
-                      ),
-                      const SizedBox(width: 8),
-                      _FxChip(
-                        label: 'Risco alto',
-                        count: riscoCount,
-                        isSelected: _filtro == AlunoFiltro.risco,
-                        isDark: isDark,
-                        onTap:
-                            () => setState(() => _filtro = AlunoFiltro.risco),
-                      ),
-                      const SizedBox(width: 8),
-                      _FxChip(
-                        label: 'Convites',
-                        count: novosCount,
-                        isSelected: _filtro == AlunoFiltro.novos,
-                        isDark: isDark,
-                        onTap:
-                            () => setState(() => _filtro = AlunoFiltro.novos),
-                      ),
-                    ],
+                    child: Row(
+                      children: [
+                        _FxChip(
+                          label: 'Todos',
+                          count: alunos.length,
+                          isSelected: _filtro == AlunoFiltro.todos,
+                          isDark: isDark,
+                          onTap:
+                              () => setState(() => _filtro = AlunoFiltro.todos),
+                        ),
+                        const SizedBox(width: 8),
+                        _FxChip(
+                          label: 'Contato hoje',
+                          count: contatoCount,
+                          isSelected: _filtro == AlunoFiltro.contatoHoje,
+                          isDark: isDark,
+                          onTap:
+                              () => setState(
+                                () => _filtro = AlunoFiltro.contatoHoje,
+                              ),
+                        ),
+                        const SizedBox(width: 8),
+                        _FxChip(
+                          label: 'Ativos',
+                          count: ativosCount,
+                          isSelected: _filtro == AlunoFiltro.ativos,
+                          isDark: isDark,
+                          onTap:
+                              () => setState(() => _filtro = AlunoFiltro.ativos),
+                        ),
+                        const SizedBox(width: 8),
+                        _FxChip(
+                          label: 'Inadimplentes',
+                          count: inadCount,
+                          isSelected: _filtro == AlunoFiltro.inadimplentes,
+                          isDark: isDark,
+                          onTap:
+                              () => setState(
+                                () => _filtro = AlunoFiltro.inadimplentes,
+                              ),
+                        ),
+                        const SizedBox(width: 8),
+                        _FxChip(
+                          label: 'Risco alto',
+                          count: riscoCount,
+                          isSelected: _filtro == AlunoFiltro.risco,
+                          isDark: isDark,
+                          onTap:
+                              () => setState(() => _filtro = AlunoFiltro.risco),
+                        ),
+                        const SizedBox(width: 8),
+                        _FxChip(
+                          label: 'Convites',
+                          count: novosCount,
+                          isSelected: _filtro == AlunoFiltro.novos,
+                          isDark: isDark,
+                          onTap:
+                              () => setState(() => _filtro = AlunoFiltro.novos),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                     ],
@@ -1225,7 +1226,7 @@ class _FxChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.fromLTRB(12, 7, 8, 7),
+        padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(999),
@@ -1233,21 +1234,22 @@ class _FxChip extends StatelessWidget {
           boxShadow: [
             if (isSelected && !isDark)
               BoxShadow(
-                color: primary.withValues(alpha: 0.22),
-                blurRadius: 14,
-                offset: const Offset(0, 8),
-                spreadRadius: -12,
+                color: primary.withValues(alpha: 0.18),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+                spreadRadius: -6,
               ),
             if (isSelected && isDark)
               BoxShadow(
-                color: action.withValues(alpha: 0.32),
-                blurRadius: 16,
-                spreadRadius: -4,
+                color: action.withValues(alpha: 0.28),
+                blurRadius: 12,
+                spreadRadius: -2,
               ),
           ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               label,
@@ -1256,19 +1258,19 @@ class _FxChip extends StatelessWidget {
                 fontSize: 12.5,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0,
-                height: 1,
+                height: 1.15,
               ),
             ),
-            const SizedBox(width: 7),
+            const SizedBox(width: 6),
             Container(
-              constraints: const BoxConstraints(minWidth: 19),
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              constraints: const BoxConstraints(minWidth: 20, minHeight: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color:
                     isSelected
-                        ? Colors.white.withValues(alpha: isDark ? 0.94 : 0.96)
+                        ? Colors.white
                         : (isDark
-                            ? Colors.white.withValues(alpha: 0.07)
+                            ? Colors.white.withValues(alpha: 0.08)
                             : TokensStrip.pageBg),
                 borderRadius: BorderRadius.circular(999),
               ),
@@ -1284,7 +1286,7 @@ class _FxChip extends StatelessWidget {
                               : TokensStrip.textSecondary),
                   fontSize: 10.5,
                   fontWeight: FontWeight.w900,
-                  height: 1.1,
+                  height: 1.15,
                 ),
               ),
             ),
