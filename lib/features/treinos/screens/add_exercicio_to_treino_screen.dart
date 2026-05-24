@@ -223,6 +223,21 @@ class _AddExercicioToTreinoScreenState
 
   Future<void> _ensureBiblioteca() async {
     await BibliotecaBootstrap.ensureReady(ref);
+    if (!mounted) return;
+    final selectedId = _selecionado?.id;
+    if (selectedId == null) return;
+    ref.invalidate(exerciciosProvider);
+    final list = await ref.read(exerciciosProvider.future);
+    Exercicio? fresh;
+    for (final exercicio in list) {
+      if (exercicio.id == selectedId) {
+        fresh = exercicio;
+        break;
+      }
+    }
+    if (fresh != null && mounted) {
+      setState(() => _selecionado = fresh);
+    }
   }
 
   Set<int> _treinoExercicioIds(AsyncValue<Treino> treinoAsync) {
@@ -574,7 +589,14 @@ class _AddExercicioToTreinoScreenState
     } catch (e) {
       if (!mounted) return null;
       messenger.clearSnackBars();
-      FeedbackHelper.showError(context, friendlyError(e));
+      FeedbackHelper.showError(
+        context,
+        friendlyError(
+          e,
+          fallback:
+              'Não foi possível enviar o vídeo. Verifique a conexão e a configuração de mídia no servidor.',
+        ),
+      );
       return null;
     } finally {
       if (mounted) {
@@ -609,7 +631,14 @@ class _AddExercicioToTreinoScreenState
       FeedbackHelper.showSuccess(context, 'Vídeo removido do exercício.');
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+      FeedbackHelper.showError(
+        context,
+        friendlyError(
+          e,
+          fallback:
+              'Não foi possível enviar o vídeo. Verifique a conexão e a configuração de mídia no servidor.',
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _mediaLoading = false);
@@ -1008,12 +1037,34 @@ class _AddExercicioToTreinoScreenState
               listenable: BibliotecaSyncStatus.instance,
               builder: (context, _) {
                 final sync = BibliotecaSyncStatus.instance;
-                if (!sync.syncing) return const SizedBox.shrink();
-                return _BibliotecaSyncBanner(
-                  message: sync.message ?? 'Sincronizando biblioteca...',
-                  isDark: isDark,
-                  primary: primary,
-                );
+                if (sync.syncing) {
+                  return _BibliotecaSyncBanner(
+                    message: sync.message ?? 'Sincronizando biblioteca...',
+                    isDark: isDark,
+                    primary: primary,
+                    showProgress: true,
+                  );
+                }
+                if (sync.warningMessage != null) {
+                  return _BibliotecaSyncBanner(
+                    message: sync.warningMessage!,
+                    isDark: isDark,
+                    primary: primary,
+                    showProgress: false,
+                    icon: Icons.info_outline_rounded,
+                  );
+                }
+                if (sync.showPendingHint) {
+                  return _BibliotecaSyncBanner(
+                    message:
+                        '${sync.pendingMediaCount} exercícios ainda sem miniatura — envie seu vídeo ou aguarde a sincronização.',
+                    isDark: isDark,
+                    primary: primary,
+                    showProgress: false,
+                    icon: Icons.cloud_queue_rounded,
+                  );
+                }
+                return const SizedBox.shrink();
               },
             ),
             Expanded(
@@ -1314,11 +1365,15 @@ class _BibliotecaSyncBanner extends StatelessWidget {
     required this.message,
     required this.isDark,
     required this.primary,
+    this.showProgress = true,
+    this.icon,
   });
 
   final String message;
   final bool isDark;
   final Color primary;
+  final bool showProgress;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -1332,15 +1387,19 @@ class _BibliotecaSyncBanner extends StatelessWidget {
           border: Border.all(color: primary.withValues(alpha: 0.2)),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: primary,
-              ),
-            ),
+            if (showProgress)
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: primary,
+                ),
+              )
+            else
+              Icon(icon ?? Icons.info_outline_rounded, color: primary, size: 18),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -1348,6 +1407,7 @@ class _BibliotecaSyncBanner extends StatelessWidget {
                 style: AppTypography.inter(
                   color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                   fontSize: 12.5,
+                  height: 1.35,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -3421,8 +3481,8 @@ class _ExercisePickerTile extends StatelessWidget {
                 IconButton(
                   tooltip:
                       exercicioHasPersonalVideo(exercicio)
-                          ? 'Trocar vídeo'
-                          : 'Enviar meu vídeo',
+                          ? 'Trocar vídeo do personal'
+                          : 'Enviar vídeo do personal',
                   onPressed: uploadEnabled ? onUploadVideo : null,
                   icon: Icon(
                     exercicioHasPersonalVideo(exercicio)

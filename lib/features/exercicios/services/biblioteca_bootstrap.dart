@@ -48,30 +48,63 @@ class BibliotecaBootstrap {
       }
 
       if (_needsMediaPublish(list)) {
-        final pending = list.where(exercicioMissingPreviewPoster).length;
-        BibliotecaSyncStatus.instance.start(
-          'Publicando demonstrações ($pending)...',
-        );
-        await repo.publicarMidiasCuradas();
-        ref.invalidate(exerciciosProvider);
-        list = await ref.read(exerciciosProvider.future);
-        if (!_needsMediaPublish(list)) {
-          await prefs.setBool(_mediaPublishKey, true);
-        } else {
-          await prefs.remove(_mediaPublishKey);
-        }
+        list = await _publishAllMedia(ref, repo, prefs, list);
       } else {
         await prefs.setBool(_mediaPublishKey, true);
       }
-    } catch (e) {
-      BibliotecaSyncStatus.instance.start(
-        'Não foi possível sincronizar todas as demonstrações.',
+
+      final pending = list.where(exercicioMissingPreviewPoster).length;
+      final cloudinaryHint =
+          pending > 0
+              ? 'Configure CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY e CLOUDINARY_API_SECRET no servidor para publicar demonstrações e aceitar uploads.'
+              : null;
+      BibliotecaSyncStatus.instance.stop(
+        pendingMediaCount: pending,
+        warningMessage: cloudinaryHint,
       );
-      await Future<void>.delayed(const Duration(seconds: 2));
+    } catch (_) {
+      final pending =
+          (await ref.read(exerciciosProvider.future))
+              .where(exercicioMissingPreviewPoster)
+              .length;
+      BibliotecaSyncStatus.instance.stop(
+        pendingMediaCount: pending,
+        warningMessage:
+            'Sincronização parcial. As demonstrações continuam em segundo plano.',
+      );
     } finally {
-      BibliotecaSyncStatus.instance.stop();
       _running = false;
     }
+  }
+
+  static Future<List<Exercicio>> _publishAllMedia(
+    WidgetRef ref,
+    ExercicioRepository repo,
+    SharedPreferences prefs,
+    List<Exercicio> list,
+  ) async {
+    for (var attempt = 0; attempt < 2; attempt++) {
+      final pending = list.where(exercicioMissingPreviewPoster).length;
+      if (pending == 0) break;
+
+      BibliotecaSyncStatus.instance.start(
+        attempt == 0
+            ? 'Publicando demonstrações ($pending)...'
+            : 'Repetindo publicação ($pending)...',
+      );
+      BibliotecaSyncStatus.instance.updatePendingMedia(pending);
+
+      await repo.publicarMidiasCuradas();
+      ref.invalidate(exerciciosProvider);
+      list = await ref.read(exerciciosProvider.future);
+
+      if (!_needsMediaPublish(list)) {
+        await prefs.setBool(_mediaPublishKey, true);
+        return list;
+      }
+      await prefs.remove(_mediaPublishKey);
+    }
+    return list;
   }
 
   static bool _needsMediaPublish(List<Exercicio> list) {

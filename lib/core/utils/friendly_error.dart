@@ -14,10 +14,12 @@ String friendlyError(Object error, {String? fallback}) {
     if (data is Map<String, dynamic>) {
       final msg =
           data['message'] ?? data['error'] ?? data['erro'] ?? data['mensagem'];
-      if (msg is String && msg.trim().isNotEmpty) return msg;
+      if (msg is String && msg.trim().isNotEmpty) {
+        return _humanizeServerMessage(msg);
+      }
     }
     if (data is String && data.trim().isNotEmpty && data.length < 200) {
-      return data;
+      return _humanizeServerMessage(data);
     }
 
     // Map common HTTP status codes to friendly messages
@@ -40,7 +42,9 @@ String friendlyError(Object error, {String? fallback}) {
         return 'Erro no servidor. Tente novamente em instantes.';
       case 502:
       case 503:
-        return 'Servidor temporariamente indisponível.';
+        return _humanizeServerMessage(
+          error.message ?? 'Servidor temporariamente indisponível.',
+        );
     }
 
     // Network / timeout
@@ -65,8 +69,27 @@ String friendlyError(Object error, {String? fallback}) {
   if (msg.length < 100 &&
       !msg.contains('Exception') &&
       !msg.contains('Error:')) {
-    return msg;
+    return _humanizeServerMessage(msg);
   }
 
   return fb;
+}
+
+String _humanizeServerMessage(String raw) {
+  final msg = raw.trim();
+  if (msg.isEmpty) return 'Algo deu errado. Tente novamente.';
+
+  final lower = msg.toLowerCase();
+  if (lower.contains('cloudinary') && lower.contains('configur')) {
+    return 'Envio de vídeo indisponível: configure Cloudinary no servidor (cloud-name, api-key e api-secret) e reinicie o backend.';
+  }
+  if (lower.contains('upload') &&
+      (lower.contains('indispon') || lower.contains('midia'))) {
+    return 'Envio de vídeo indisponível no momento. Verifique a configuração de mídia no servidor.';
+  }
+  if (lower.contains('service unavailable') || lower.contains('503')) {
+    return 'Serviço de mídia temporariamente indisponível. Tente novamente em instantes.';
+  }
+
+  return msg;
 }

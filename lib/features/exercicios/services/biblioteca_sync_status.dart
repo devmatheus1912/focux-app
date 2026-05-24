@@ -8,19 +8,50 @@ class BibliotecaSyncStatus extends ChangeNotifier {
 
   bool _syncing = false;
   String? _message;
+  int _pendingMediaCount = 0;
+  String? _warningMessage;
 
   bool get syncing => _syncing;
   String? get message => _message;
+  int get pendingMediaCount => _pendingMediaCount;
+  String? get warningMessage => _warningMessage;
+
+  bool get showPendingHint => !_syncing && _pendingMediaCount > 0;
 
   void start(String message) {
     _syncing = true;
     _message = message;
+    _warningMessage = null;
     notifyListeners();
   }
 
-  void stop() {
+  void updatePendingMedia(int count) {
+    _pendingMediaCount = count;
+    notifyListeners();
+  }
+
+  void warn(String message) {
+    _warningMessage = message;
+    notifyListeners();
+  }
+
+  void stop({int? pendingMediaCount, String? warningMessage}) {
     _syncing = false;
     _message = null;
+    if (pendingMediaCount != null) {
+      _pendingMediaCount = pendingMediaCount;
+    }
+    if (warningMessage != null) {
+      _warningMessage = warningMessage;
+    } else if (warningMessage == null && pendingMediaCount == 0) {
+      _warningMessage = null;
+    }
+    notifyListeners();
+  }
+
+  void clearWarnings() {
+    _warningMessage = null;
+    _pendingMediaCount = 0;
     notifyListeners();
   }
 }

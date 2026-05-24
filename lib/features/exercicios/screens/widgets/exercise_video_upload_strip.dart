@@ -5,6 +5,7 @@ import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/fx_motion.dart';
 import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/exercicio_repository.dart';
+import '../../services/biblioteca_sync_status.dart';
 import 'exercise_media_thumb.dart';
 
 enum ExerciseVideoUploadAction { preview, upload, remove }
@@ -34,6 +35,21 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: BibliotecaSyncStatus.instance,
+      builder: (context, _) {
+        final sync = BibliotecaSyncStatus.instance;
+        final librarySyncing =
+            sync.syncing &&
+            !exercicioHasPublishedLibraryMedia(exercicio) &&
+            !exercicioHasPersonalVideo(exercicio);
+
+        return _buildContent(context, librarySyncing: librarySyncing);
+      },
+    );
+  }
+
+  Widget _buildContent(BuildContext context, {required bool librarySyncing}) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final hasPersonalVideo = exercicioHasPersonalVideo(exercicio);
@@ -41,14 +57,16 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
         exercicio.hasPlayableMedia && !hasPersonalVideo;
     final hasAnyMedia = hasPersonalVideo || hasLibraryDemo;
     final statusColor =
-        hasAnyMedia
+        hasAnyMedia || librarySyncing
             ? primary
             : isDark
             ? Colors.white.withValues(alpha: 0.68)
             : TokensStrip.textSecondary;
     final statusIcon =
         mediaLoading
-            ? Icons.hourglass_empty_rounded
+            ? Icons.hourglass_top_rounded
+            : librarySyncing
+            ? Icons.cloud_sync_rounded
             : hasPersonalVideo
             ? Icons.play_circle_fill_rounded
             : hasLibraryDemo
@@ -56,26 +74,107 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
             : Icons.video_call_outlined;
     final statusTitle =
         mediaLoading
-            ? 'Processando vídeo'
+            ? 'Enviando vídeo...'
+            : librarySyncing
+            ? 'Sincronizando demonstração'
             : hasPersonalVideo
             ? 'Vídeo próprio disponível'
             : hasLibraryDemo
             ? 'Demonstração da biblioteca'
             : 'Sem demonstração';
     final statusSubtitle =
-        hasPersonalVideo
+        mediaLoading
+            ? 'Aguarde. A prévia libera em alguns segundos.'
+            : librarySyncing
+            ? 'As imagens da biblioteca estão sendo publicadas.'
+            : hasPersonalVideo
             ? 'Confira a prévia ou troque seu vídeo.'
             : hasLibraryDemo
-            ? 'Assista a demo ou envie seu próprio vídeo.'
+            ? 'Assista à demo da biblioteca ou envie seu vídeo.'
             : 'Envie sua demonstração antes de prescrever.';
 
+    final uploadLabel =
+        hasPersonalVideo
+            ? 'Trocar vídeo'
+            : hasLibraryDemo
+            ? 'Enviar meu vídeo'
+            : 'Enviar vídeo';
+
+    final decoration = fxListCardDecoration(
+      context,
+      accent: hasAnyMedia || librarySyncing ? primary : null,
+    );
+
+    if (dense) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+        decoration: decoration,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: isDark ? 0.16 : 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(statusIcon, color: statusColor, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        statusTitle,
+                        style: AppTypography.inter(
+                          color: ink,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        statusSubtitle,
+                        style: AppTypography.inter(
+                          color: mute,
+                          fontSize: 11.5,
+                          height: 1.3,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _DenseActions(
+              primary: primary,
+              mute: mute,
+              mediaLoading: mediaLoading,
+              hasPersonalVideo: hasPersonalVideo,
+              hasLibraryDemo: hasLibraryDemo,
+              hasAnyMedia: hasAnyMedia,
+              uploadLabel: uploadLabel,
+              onPreview: onPreview,
+              onUpload: onUpload,
+              onRemove: onRemove,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
-      padding: EdgeInsets.fromLTRB(12, dense ? 8 : 10, 8, dense ? 8 : 10),
-      decoration: fxListCardDecoration(
-        context,
-        accent: hasAnyMedia ? primary : null,
-      ),
+      padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+      decoration: decoration,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: 34,
@@ -93,8 +192,6 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
               children: [
                 Text(
                   statusTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: AppTypography.inter(
                     color: ink,
                     fontSize: 12.5,
@@ -104,28 +201,24 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   statusSubtitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  maxLines: 3,
                   style: AppTypography.inter(
                     color: mute,
                     fontSize: 11.2,
+                    height: 1.3,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
           ),
-          if (hasAnyMedia)
+          if (hasAnyMedia && !mediaLoading)
             TextButton(
-              onPressed: mediaLoading ? null : onPreview,
+              onPressed: onPreview,
               style: TextButton.styleFrom(
                 foregroundColor: primary,
                 visualDensity: VisualDensity.compact,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                textStyle: AppTypography.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                ),
               ),
               child: const Text('Prévia'),
             ),
@@ -155,33 +248,83 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
                     ),
                   ],
             )
-          else ...[
-            if (hasLibraryDemo)
-              TextButton(
-                onPressed: mediaLoading ? null : onPreview,
-                style: TextButton.styleFrom(
-                  foregroundColor: primary,
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  textStyle: AppTypography.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                child: const Text('Demo'),
-              ),
+          else
             Padding(
               padding: const EdgeInsets.only(left: 4),
               child: FxLiquidPrimaryButton(
-                label: hasLibraryDemo ? 'Meu vídeo' : 'Enviar vídeo',
+                label: uploadLabel,
                 onPressed: mediaLoading ? null : onUpload,
                 loading: mediaLoading,
                 expand: false,
               ),
             ),
-          ],
         ],
       ),
+    );
+  }
+}
+
+class _DenseActions extends StatelessWidget {
+  const _DenseActions({
+    required this.primary,
+    required this.mute,
+    required this.mediaLoading,
+    required this.hasPersonalVideo,
+    required this.hasLibraryDemo,
+    required this.hasAnyMedia,
+    required this.uploadLabel,
+    required this.onPreview,
+    required this.onUpload,
+    required this.onRemove,
+  });
+
+  final Color primary;
+  final Color mute;
+  final bool mediaLoading;
+  final bool hasPersonalVideo;
+  final bool hasLibraryDemo;
+  final bool hasAnyMedia;
+  final String uploadLabel;
+  final VoidCallback onPreview;
+  final VoidCallback onUpload;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (hasAnyMedia && !mediaLoading) ...[
+          Expanded(
+            child: OutlinedButton(
+              onPressed: onPreview,
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(40),
+                foregroundColor: primary,
+                side: BorderSide(color: primary.withValues(alpha: 0.35)),
+              ),
+              child: Text(hasLibraryDemo ? 'Ver demo' : 'Prévia'),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+        Expanded(
+          flex: hasAnyMedia ? 1 : 2,
+          child: FxLiquidPrimaryButton(
+            label: uploadLabel,
+            onPressed: mediaLoading ? null : onUpload,
+            loading: mediaLoading,
+            expand: true,
+          ),
+        ),
+        if (hasPersonalVideo) ...[
+          const SizedBox(width: 4),
+          IconButton(
+            tooltip: 'Remover vídeo',
+            onPressed: mediaLoading ? null : onRemove,
+            icon: Icon(Icons.delete_outline_rounded, color: mute),
+          ),
+        ],
+      ],
     );
   }
 }
