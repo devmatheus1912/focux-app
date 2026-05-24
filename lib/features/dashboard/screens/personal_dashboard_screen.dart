@@ -82,6 +82,22 @@ String _attentionSignalSub(Aluno aluno) {
   return 'Acompanhar antes de perder ritmo';
 }
 
+TextStyle _dashboardSectionKickerStyle(
+  BuildContext context, {
+  required bool isDark,
+}) {
+  final primary = Theme.of(context).colorScheme.primary;
+  return AppTypography.inter(
+    fontSize: 12,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.35,
+    color: BrandPalette.sectionLink(primary, dark: isDark),
+  );
+}
+
+String _financeInadimplLabel(double width) =>
+    width < 360 ? 'Inadimpl.' : 'Inadimplentes';
+
 class _PersonalDashboardScreenState
     extends ConsumerState<PersonalDashboardScreen>
     with TickerProviderStateMixin {
@@ -534,14 +550,9 @@ class _PersonalDashboardScreenState
                         ),
                         child: Text(
                           'Panorama financeiro',
-                          style: AppTypography.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.45,
-                            color:
-                                themeDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary,
+                          style: _dashboardSectionKickerStyle(
+                            context,
+                            isDark: themeDark,
                           ),
                         ),
                       ),
@@ -744,6 +755,10 @@ class _PersonalDashboardScreenState
                                         progress: progressRaw.clamp(0.0, 1.0),
                                         exceeded: metaSuperada,
                                         glow: BrandPalette.accent(heroPrimary),
+                                        percentLabel:
+                                            metaSuperada
+                                                ? '${(progressRaw * 100).round()}% da meta'
+                                                : '${(progressRaw * 100).round()}% da meta',
                                       ),
                                       const SizedBox(height: TokensStrip.s3),
                                       Row(
@@ -751,7 +766,7 @@ class _PersonalDashboardScreenState
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           _HeroMiniStat(
-                                            label: 'PENDENTE',
+                                            label: 'Pendente',
                                             value: 'R\$ ${pendente.toInt()}',
                                           ),
                                           Container(
@@ -762,7 +777,9 @@ class _PersonalDashboardScreenState
                                             ),
                                           ),
                                           _HeroMiniStat(
-                                            label: 'INADIMPL.',
+                                            label: _financeInadimplLabel(
+                                              MediaQuery.sizeOf(context).width,
+                                            ),
                                             value:
                                                 '${_finData?.totalInadimplentes ?? 0}',
                                             suffix: ' alunos',
@@ -775,7 +792,7 @@ class _PersonalDashboardScreenState
                                             ),
                                           ),
                                           _HeroMiniStat(
-                                            label: 'TICKET',
+                                            label: 'Ticket médio',
                                             value:
                                                 'R\$ ${_finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
                                           ),
@@ -1065,82 +1082,107 @@ class _HeroProgressRail extends StatelessWidget {
     required this.progress,
     required this.glow,
     this.exceeded = false,
+    this.percentLabel,
   });
 
   final double progress;
   final Color glow;
   final bool exceeded;
+  final String? percentLabel;
 
   @override
   Widget build(BuildContext context) {
     final clamped = progress.clamp(0.0, 1.0);
     final displayProgress = exceeded ? 1.0 : clamped;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final fillWidth = width * displayProgress;
-
-        return SizedBox(
-          height: exceeded ? 12 : 14,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.centerLeft,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(99),
-                  color: Colors.white.withValues(alpha: exceeded ? 0.20 : 0.14),
-                  border: Border.all(
-                    color: Colors.white.withValues(
-                      alpha: exceeded ? 0.30 : 0.20,
-                    ),
-                  ),
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (percentLabel != null)
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              percentLabel!,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.78),
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.2,
               ),
-              if (fillWidth > 2)
-                Positioned(
-                  left: 0,
-                  width: fillWidth,
-                  height: exceeded ? 10 : 10,
-                  top: exceeded ? 1 : 2,
-                  child: DecoratedBox(
+            ),
+          ),
+        if (percentLabel != null) const SizedBox(height: 5),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final fillWidth = width * displayProgress;
+
+            return SizedBox(
+              height: exceeded ? 12 : 14,
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.centerLeft,
+                children: [
+                  Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(99),
-                      gradient: LinearGradient(
-                        colors:
-                            exceeded
-                                ? [
-                                  Colors.white.withValues(alpha: 0.65),
-                                  Colors.white.withValues(alpha: 0.95),
-                                ]
-                                : [
-                                  Colors.white.withValues(alpha: 0.58),
-                                  Colors.white.withValues(alpha: 0.86),
-                                  glow.withValues(alpha: 0.88),
-                                ],
+                      color: Colors.white.withValues(
+                        alpha: exceeded ? 0.20 : 0.14,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white.withValues(
-                            alpha: exceeded ? 0.48 : 0.36,
-                          ),
-                          blurRadius: exceeded ? 16 : 12,
-                          spreadRadius: exceeded ? 1 : 0,
+                      border: Border.all(
+                        color: Colors.white.withValues(
+                          alpha: exceeded ? 0.30 : 0.20,
                         ),
-                        BoxShadow(
-                          color: glow.withValues(alpha: exceeded ? 0.72 : 0.58),
-                          blurRadius: exceeded ? 22 : 18,
-                          spreadRadius: exceeded ? 2 : 1,
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-            ],
-          ),
-        );
-      },
+                  if (fillWidth > 2)
+                    Positioned(
+                      left: 0,
+                      width: fillWidth,
+                      height: exceeded ? 10 : 10,
+                      top: exceeded ? 1 : 2,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(99),
+                          gradient: LinearGradient(
+                            colors:
+                                exceeded
+                                    ? [
+                                      Colors.white.withValues(alpha: 0.65),
+                                      Colors.white.withValues(alpha: 0.95),
+                                    ]
+                                    : [
+                                      Colors.white.withValues(alpha: 0.58),
+                                      Colors.white.withValues(alpha: 0.86),
+                                      glow.withValues(alpha: 0.88),
+                                    ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withValues(
+                                alpha: exceeded ? 0.48 : 0.36,
+                              ),
+                              blurRadius: exceeded ? 16 : 12,
+                              spreadRadius: exceeded ? 1 : 0,
+                            ),
+                            BoxShadow(
+                              color: glow.withValues(
+                                alpha: exceeded ? 0.72 : 0.58,
+                              ),
+                              blurRadius: exceeded ? 22 : 18,
+                              spreadRadius: exceeded ? 2 : 1,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -1231,8 +1273,6 @@ class _DayPulseStrip extends StatelessWidget {
         riscoAlto > 0 ? EagleTokens.warn : TokensStrip.badgeSuccess;
     final tight = MediaQuery.sizeOf(context).width < 400;
     final gap = tight ? 6.0 : TokensStrip.s2;
-    final mute =
-        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final neutralAccent =
         isDark
             ? EagleTokens.darkInkMute.withValues(alpha: 0.72)
@@ -1247,12 +1287,7 @@ class _DayPulseStrip extends StatelessWidget {
           children: [
             Text(
               'Pulso operacional',
-              style: AppTypography.inter(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.45,
-                color: mute,
-              ),
+              style: _dashboardSectionKickerStyle(context, isDark: isDark),
             ),
             const SizedBox(height: 6),
             Row(
@@ -1555,7 +1590,14 @@ class _CollapsibleToolsSectionState extends State<_CollapsibleToolsSection> {
         children: [
           Material(
             color: Colors.transparent,
-            child: InkWell(
+            child: Semantics(
+              button: true,
+              expanded: _expanded,
+              label:
+                  _expanded
+                      ? 'Recolher mais ferramentas'
+                      : 'Expandir mais ferramentas, 6 atalhos',
+              child: InkWell(
               onTap: () => setState(() => _expanded = !_expanded),
               borderRadius: BorderRadius.circular(TokensStrip.rCard),
               child: Ink(
@@ -1611,6 +1653,7 @@ class _CollapsibleToolsSectionState extends State<_CollapsibleToolsSection> {
                   ],
                 ),
               ),
+            ),
             ),
           ),
           AnimatedCrossFade(
@@ -1704,7 +1747,10 @@ class _AttentionCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final accent = statusAccent ?? EagleTokens.warn;
 
-    return InkWell(
+    return Semantics(
+      label: '$nome, $titulo. $subt. Toque para $acao',
+      button: true,
+      child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
@@ -1842,6 +1888,7 @@ class _AttentionCard extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -1866,7 +1913,10 @@ class _ShortcutBtn extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
-    return InkWell(
+    return Semantics(
+      label: label,
+      button: true,
+      child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
@@ -1930,6 +1980,7 @@ class _ShortcutBtn extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -2501,7 +2552,6 @@ class _CommandActionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final heading = BrandPalette.sectionHeading(primary, dark: isDark);
     final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
     return Column(
@@ -2520,11 +2570,12 @@ class _CommandActionPanel extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              'impacto hoje',
+              'Impacto hoje',
               style: TextStyle(
-                color: mute,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
+                color: BrandPalette.sectionLink(primary, dark: isDark),
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.2,
               ),
             ),
           ],
@@ -2653,7 +2704,10 @@ class _CommandActionTile extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final accent = _commandToneAccent(item.tone, primary);
-    return InkWell(
+    return Semantics(
+      label: '${item.title}. ${item.subtitle}',
+      button: true,
+      child: InkWell(
       onTap: onTap ?? () => context.go(item.route),
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: AnimatedScale(
@@ -2714,6 +2768,7 @@ class _CommandActionTile extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }
