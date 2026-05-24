@@ -50,21 +50,20 @@ void main() {
     expect(repository, contains('/exercicios/ordem'));
     expect(repository, contains('duplicarExercicio'));
     expect(repository, contains('/duplicar'));
-    expect(detail, contains('Mover para cima'));
-    expect(detail, contains('Mover para baixo'));
+    expect(detail, contains('SliverReorderableList'));
+    expect(detail, contains('ReorderableDelayedDragStartListener'));
     expect(detail, contains('Duplicar item'));
   });
 
-  test('workout detail persists order through action menu controls', () {
+  test('workout detail persists order through drag reorder', () {
     final detail =
         File(
           'lib/features/treinos/screens/treino_detail_screen.dart',
         ).readAsStringSync();
 
-    expect(detail, contains('Mover para cima'));
-    expect(detail, contains('Mover para baixo'));
-    expect(detail, contains('ids.removeAt'));
-    expect(detail, contains('ids.insert'));
-    expect(detail, contains('reordenarExercicios(treinoId, ids)'));
+    expect(detail, contains('_TreinoExerciseReorderList'));
+    expect(detail, contains('removeAt'));
+    expect(detail, contains('insert'));
+    expect(detail, contains('reordenarExercicios(widget.treinoId, ids)'));
   });
 }
