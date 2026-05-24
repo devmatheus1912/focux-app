@@ -55,6 +55,24 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
     return n;
   }
 
+  int get _advancedActiveCount {
+    var n = 0;
+    if (widget.filter.espaco != null) n++;
+    if (widget.filter.equipamento != null) n++;
+    if (widget.filter.filtrarPorAluno) n++;
+    return n;
+  }
+
+  String _espacoLabel(Espaco espaco) {
+    return TaxonomyLabels.espacoShort[espaco] ??
+        TaxonomyLabels.espaco[espaco] ??
+        espaco.name;
+  }
+
+  String _equipamentoLabel(Equipamento equipamento) {
+    return TaxonomyLabels.equipamento[equipamento] ?? equipamento.name;
+  }
+
   @override
   Widget build(BuildContext context) {
     final mute = widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
@@ -114,10 +132,41 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
               },
             ),
             const SizedBox(width: 8),
+            if (widget.filter.espaco != null) ...[
+              _FilterChip(
+                label: _espacoLabel(widget.filter.espaco!),
+                selected: true,
+                primary: widget.primary,
+                isDark: widget.isDark,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  widget.onChanged(widget.filter.copyWith(clearEspaco: true));
+                },
+              ),
+              const SizedBox(width: 8),
+            ],
+            if (widget.filter.equipamento != null) ...[
+              _FilterChip(
+                label: _equipamentoLabel(widget.filter.equipamento!),
+                selected: true,
+                primary: widget.primary,
+                isDark: widget.isDark,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  widget.onChanged(
+                    widget.filter.copyWith(clearEquipamento: true),
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+            ],
             _FilterChip(
-              label: 'Filtros',
+              label:
+                  _advancedActiveCount > 0
+                      ? 'Filtros ($_advancedActiveCount)'
+                      : 'Filtros',
               icon: Icons.tune_rounded,
-              selected: false,
+              selected: _advancedActiveCount > 0,
               primary: widget.primary,
               isDark: widget.isDark,
               onTap: () {

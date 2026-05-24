@@ -67,6 +67,31 @@ void main() {
       expect(preview, contains('f_jpg'));
       expect(preview, isNot(contains('.mp4')));
     });
+
+    test('preview com transformação Cloudinary existente', () {
+      const video =
+          'https://res.cloudinary.com/demo/video/upload/f_mp4,vc_h264/v123/sample.mp4';
+      final preview = exercisePreviewMediaUrl(gifUrl: video);
+      expect(preview, contains('f_jpg'));
+      expect(preview, isNot(contains('.mp4')));
+    });
+
+    test('exercicioMissingPreviewPoster detecta mídia sem poster', () {
+      final ok = Exercicio(
+        id: 1,
+        nome: 'Supino',
+        gifUrl:
+            'https://res.cloudinary.com/demo/video/upload/v123/sample.mp4',
+      );
+      expect(exercicioMissingPreviewPoster(ok), isFalse);
+
+      final missing = Exercicio(
+        id: 2,
+        nome: 'Custom',
+        videoUrl: 'https://cdn.example/video.mp4',
+      );
+      expect(exercicioMissingPreviewPoster(missing), isTrue);
+    });
   });
 
   group('workoutBuilderPresets', () {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/skeleton_loader.dart';
+import '../../data/exercicio_repository.dart';
 
 class ExerciseMediaThumb extends StatelessWidget {
   const ExerciseMediaThumb({
@@ -32,6 +33,8 @@ class ExerciseMediaThumb extends StatelessWidget {
                 height: size,
                 fit: BoxFit.cover,
                 gaplessPlayback: true,
+                cacheWidth: (size * 2).round(),
+                cacheHeight: (size * 2).round(),
                 errorBuilder: (_, __, ___) => _fallback(primary),
                 loadingBuilder: (context, child, progress) {
                   if (progress == null) return child;
@@ -91,36 +94,58 @@ String? exercisePreviewMediaUrl({
   String? gifUrl,
   String? videoUrl,
 }) {
-  for (final raw in [thumbnailUrl, gifUrl]) {
+  final thumb = thumbnailUrl?.trim();
+  if (thumb != null && thumb.isNotEmpty && _isRasterImageUrl(thumb)) {
+    return thumb;
+  }
+
+  for (final raw in [gifUrl, videoUrl, thumbnailUrl]) {
     final value = raw?.trim();
     if (value == null || value.isEmpty) continue;
-    if (value.contains('/video/upload/')) {
-      return cloudinaryVideoPosterUrl(value) ?? value;
-    }
-    if (value.endsWith('.mp4') || value.endsWith('.mov')) {
-      return cloudinaryVideoPosterUrl(value) ?? value;
-    }
-    return value;
-  }
-  final video = videoUrl?.trim();
-  if (video != null && video.isNotEmpty) {
-    return cloudinaryVideoPosterUrl(video);
+    if (_isRasterImageUrl(value)) return value;
+    final poster = cloudinaryVideoPosterUrl(value);
+    if (poster != null && !poster.contains('.mp4')) return poster;
   }
   return null;
+}
+
+bool exercicioMissingPreviewPoster(Exercicio exercicio) {
+  if (!exercicio.hasPlayableMedia) return false;
+  final poster = exercisePreviewMediaUrl(
+    thumbnailUrl: exercicio.thumbnailUrl,
+    gifUrl: exercicio.gifUrl,
+    videoUrl: exercicio.videoUrl,
+  );
+  return poster == null || poster.contains('.mp4');
+}
+
+bool _isRasterImageUrl(String url) {
+  if (url.contains('.mp4') || url.contains('.mov')) return false;
+  return RegExp(
+    r'\.(jpg|jpeg|png|webp)(\?|$)',
+    caseSensitive: false,
+  ).hasMatch(url);
 }
 
 /// Gera URL de poster JPG a partir de vídeo Cloudinary (evita usar MP4 no Image).
 String? cloudinaryVideoPosterUrl(String videoUrl) {
   const marker = '/video/upload/';
-  if (!videoUrl.contains(marker)) return null;
-  if (videoUrl.contains('f_jpg') || videoUrl.contains('/image/upload/')) {
+  final idx = videoUrl.indexOf(marker);
+  if (idx < 0) return null;
+
+  if (videoUrl.contains('/image/upload/') || videoUrl.contains('f_jpg')) {
     return videoUrl;
   }
-  final transformed = videoUrl.replaceFirst(
-    marker,
-    '${marker}so_0,f_jpg,w_160,h_160,c_fill,q_auto/',
-  );
-  return transformed.replaceAll(
+
+  final prefix = videoUrl.substring(0, idx + marker.length);
+  final afterMarker = videoUrl.substring(idx + marker.length);
+  final versionMatch = RegExp(r'(v\d+/).+').firstMatch(afterMarker);
+  if (versionMatch == null) return null;
+
+  final pathFromVersion = afterMarker.substring(afterMarker.indexOf(versionMatch.group(1)!));
+  final poster =
+      '${prefix}so_0,f_jpg,w_160,h_160,c_fill,q_auto/$pathFromVersion';
+  return poster.replaceAll(
     RegExp(r'\.(mp4|mov|webm|m4v)(\?.*)?$', caseSensitive: false),
     '.jpg',
   );

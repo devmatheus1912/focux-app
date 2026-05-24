@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/exercicio_repository.dart';
 import '../providers/exercicios_provider.dart';
+import '../screens/widgets/exercise_media_thumb.dart';
 import 'biblioteca_sync_status.dart';
 
 const _bootstrapKey = 'biblioteca_bootstrap_v1_done';
@@ -42,18 +44,20 @@ class BibliotecaBootstrap {
         await repo.enriquecerBibliotecaCurada();
         ref.invalidate(exerciciosProvider);
         await prefs.setBool(_bootstrapKey, true);
+        list = await ref.read(exerciciosProvider.future);
       }
 
-      list = await ref.read(exerciciosProvider.future);
-      final needsMediaPublish = list.any(
-        (exercicio) =>
-            exercicio.curado &&
-            !(exercicio.gifUrl?.contains('/upload/v') ?? false),
-      );
-      if (needsMediaPublish && !(prefs.getBool(_mediaPublishKey) ?? false)) {
+      if (_needsMediaPublish(list)) {
         BibliotecaSyncStatus.instance.start('Publicando vídeos da biblioteca...');
         await repo.publicarMidiasCuradas();
         ref.invalidate(exerciciosProvider);
+        list = await ref.read(exerciciosProvider.future);
+        if (!_needsMediaPublish(list)) {
+          await prefs.setBool(_mediaPublishKey, true);
+        } else {
+          await prefs.remove(_mediaPublishKey);
+        }
+      } else {
         await prefs.setBool(_mediaPublishKey, true);
       }
     } catch (_) {
@@ -62,5 +66,9 @@ class BibliotecaBootstrap {
       BibliotecaSyncStatus.instance.stop();
       _running = false;
     }
+  }
+
+  static bool _needsMediaPublish(List<Exercicio> list) {
+    return list.any(exercicioMissingPreviewPoster);
   }
 }
