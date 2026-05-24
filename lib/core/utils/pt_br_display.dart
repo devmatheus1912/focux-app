@@ -95,6 +95,23 @@ String displayPtBr(String value) {
 
 String displayExerciseName(String nome) => displayPtBr(nome.trim());
 
+/// Nome do treino com acentos comuns (ex.: Força).
+String displayWorkoutName(String raw) {
+  var name = raw.trim();
+  if (name.isEmpty) return name;
+  const fixes = {
+    ' Forca': ' Força',
+    ' forca': ' Força',
+    ' FORCA': ' Força',
+    'Forca ': 'Força ',
+    'Forca': 'Força',
+  };
+  for (final entry in fixes.entries) {
+    name = name.replaceAll(entry.key, entry.value);
+  }
+  return displayPtBr(name);
+}
+
 String displayMetaToken(String value) {
   final normalized = value.trim().replaceAll('_', ' ').toLowerCase();
   if (normalized.isEmpty) return normalized;

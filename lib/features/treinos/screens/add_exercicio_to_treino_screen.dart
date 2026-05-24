@@ -67,6 +67,7 @@ class _AddExercicioToTreinoScreenState
   String _buscaQuery = '';
   bool _videoExpanded = false;
   bool _seedingBiblioteca = false;
+  bool _bottomBarHidden = false;
   ExercisePickerFilter _pickerFilter = const ExercisePickerFilter();
   String? _alunoFilterNome;
   final _prescriptionAnchor = GlobalKey();
@@ -349,21 +350,29 @@ class _AddExercicioToTreinoScreenState
     final alvo = _selecionado;
     if (alvo == null) return;
     Exercicio? replacement;
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.34),
-      builder:
-          (_) => SubstituirExercicioBottomSheet(
-            alvo: alvo,
-            equipamentosAluno:
-                _pickerFilter.equipamento == null
-                    ? null
-                    : {_pickerFilter.equipamento!},
-            onEscolher: (exercicio) => replacement = exercicio,
-          ),
-    );
+    setState(() => _bottomBarHidden = true);
+    try {
+      await showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        barrierColor: Colors.black.withValues(alpha: 0.52),
+        builder:
+            (_) => SubstituirExercicioBottomSheet(
+              alvo: alvo,
+              equipamentosAluno:
+                  _pickerFilter.filtrarPorAluno &&
+                          _pickerFilter.equipamentosAluno.isNotEmpty
+                      ? _pickerFilter.equipamentosAluno
+                      : _pickerFilter.equipamento == null
+                      ? null
+                      : {_pickerFilter.equipamento!},
+              onEscolher: (exercicio) => replacement = exercicio,
+            ),
+      );
+    } finally {
+      if (mounted) setState(() => _bottomBarHidden = false);
+    }
     if (replacement != null && mounted) {
       _selectExercise(replacement!);
     }
@@ -378,19 +387,25 @@ class _AddExercicioToTreinoScreenState
     required Set<int> alreadyInTreinoIds,
   }) async {
     HapticFeedback.selectionClick();
-    final selected = await showModalBottomSheet<Exercicio>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.34),
-      isScrollControlled: true,
-      builder:
-          (sheetContext) => _ExercisePickerSheet(
-            exercicios: exercicios,
-            selected: _selecionado,
-            alreadyInTreinoIds: alreadyInTreinoIds,
-            initialQuery: _buscaQuery,
-          ),
-    );
+    setState(() => _bottomBarHidden = true);
+    Exercicio? selected;
+    try {
+      selected = await showModalBottomSheet<Exercicio>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        barrierColor: Colors.black.withValues(alpha: 0.52),
+        isScrollControlled: true,
+        builder:
+            (sheetContext) => _ExercisePickerSheet(
+              exercicios: exercicios,
+              selected: _selecionado,
+              alreadyInTreinoIds: alreadyInTreinoIds,
+              initialQuery: _buscaQuery,
+            ),
+      );
+    } finally {
+      if (mounted) setState(() => _bottomBarHidden = false);
+    }
     if (selected != null && mounted) {
       _selectExercise(selected);
     }
@@ -707,7 +722,7 @@ class _AddExercicioToTreinoScreenState
       appBar: FxShellAppBar(
         title: 'Adicionar Exercício',
         subtitle: treinoAsync.maybeWhen(
-          data: (treino) => treino.nome,
+          data: (treino) => displayWorkoutName(treino.nome),
           orElse: () => 'Montando treino',
         ),
         onBack:
@@ -954,7 +969,9 @@ class _AddExercicioToTreinoScreenState
                             primary: primary,
                             onEdit: () => setState(() => _tabIndex = 0),
                           ),
-                        if (_tabIndex == 0 && _selecionado != null)
+                        if (_tabIndex == 0 &&
+                            _selecionado != null &&
+                            !_bottomBarHidden)
                           _StickyAddExerciseBar(
                             error: _error,
                             loading: _loading,

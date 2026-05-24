@@ -5,6 +5,12 @@ import 'package:focux_app/features/exercicios/screens/widgets/exercise_media_thu
 import 'package:focux_app/features/treinos/data/workout_builder_preset.dart';
 
 void main() {
+  group('displayWorkoutName', () {
+    test('corrige Forca para Força', () {
+      expect(displayWorkoutName('Treino Forca'), 'Treino Força');
+    });
+  });
+
   group('displayExerciseName', () {
     test('corrige acentos comuns da biblioteca', () {
       expect(
