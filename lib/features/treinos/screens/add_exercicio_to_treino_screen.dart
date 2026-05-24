@@ -33,6 +33,7 @@ import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/services/biblioteca_bootstrap.dart';
 import '../../exercicios/services/biblioteca_sync_status.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
+import '../../exercicios/screens/widgets/exercise_video_upload_strip.dart';
 import '../data/exercise_prescription_memory.dart';
 import '../data/exercise_prescription_memory_store.dart';
 import '../screens/widgets/exercise_picker_filter_bar.dart';
@@ -507,6 +508,11 @@ class _AddExercicioToTreinoScreenState
               selected: _selecionado,
               alreadyInTreinoIds: alreadyInTreinoIds,
               initialQuery: _buscaQuery,
+              onUploadVideo:
+                  (exercicio) => _uploadExerciseVideo(
+                    exercicio,
+                    origin: 'treino_library_sheet',
+                  ),
             ),
       );
     } finally {
@@ -519,14 +525,28 @@ class _AddExercicioToTreinoScreenState
 
   Future<void> _uploadSelectedExerciseVideo() async {
     final exercicio = _selecionado;
-    if (exercicio == null || _mediaLoading) return;
+    if (exercicio == null) return;
+    final updated = await _uploadExerciseVideo(
+      exercicio,
+      origin: 'treino_add_exercise',
+    );
+    if (updated != null && mounted) {
+      setState(() => _selecionado = updated);
+    }
+  }
+
+  Future<Exercicio?> _uploadExerciseVideo(
+    Exercicio exercicio, {
+    String origin = 'treino_add_exercise',
+  }) async {
+    if (_mediaLoading) return null;
     final file = await _videoPicker.pickVideo(source: ImageSource.gallery);
-    if (file == null || !mounted) return;
+    if (file == null || !mounted) return null;
     final messenger = FeedbackHelper.messengerOf(context);
     setState(() => _mediaLoading = true);
     FeedbackHelper.showSuccess(
       context,
-      'Enviando vídeo de ${exercicio.nome}...',
+      'Enviando vídeo de ${exercicio.nomeDisplay}...',
     );
     try {
       final updated = await ref
@@ -538,20 +558,24 @@ class _AddExercicioToTreinoScreenState
           );
       AnalyticsService.instance.track(
         'video_personal_upload',
-        props: {'exId': exercicio.id, 'origin': 'treino_add_exercise'},
+        props: {'exId': exercicio.id, 'origin': origin},
       );
       ref.invalidate(exerciciosProvider);
-      if (!mounted) return;
-      setState(() => _selecionado = updated);
+      if (!mounted) return null;
+      if (_selecionado?.id == updated.id) {
+        setState(() => _selecionado = updated);
+      }
       messenger.clearSnackBars();
       FeedbackHelper.showSuccess(
         context,
         'Vídeo enviado. A prévia pode levar alguns segundos para liberar.',
       );
+      return updated;
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) return null;
       messenger.clearSnackBars();
       FeedbackHelper.showError(context, friendlyError(e));
+      return null;
     } finally {
       if (mounted) {
         setState(() => _mediaLoading = false);
@@ -723,6 +747,17 @@ class _AddExercicioToTreinoScreenState
                     _selecionado!.hasPlayableMedia
                         ? _previewSelectedExerciseVideo
                         : null,
+              ),
+              const SizedBox(height: 8),
+              ExerciseVideoUploadStrip(
+                exercicio: _selecionado!,
+                isDark: isDark,
+                primary: primary,
+                mediaLoading: _mediaLoading,
+                dense: true,
+                onPreview: _previewSelectedExerciseVideo,
+                onUpload: _uploadSelectedExerciseVideo,
+                onRemove: _removeSelectedExerciseVideo,
               ),
               const SizedBox(height: 10),
             ],
@@ -2493,194 +2528,18 @@ class _ExercisePickerCard extends StatelessWidget {
           ),
           if (videoExpanded) ...[
             const SizedBox(height: 6),
-            _ExerciseMediaStatus(
+            ExerciseVideoUploadStrip(
               exercicio: exercicio!,
               isDark: isDark,
               primary: primary,
               mediaLoading: mediaLoading,
-              onPreviewVideo: onPreviewVideo,
-              onUploadVideo: onUploadVideo,
-              onRemoveVideo: onRemoveVideo,
+              onPreview: onPreviewVideo,
+              onUpload: onUploadVideo,
+              onRemove: onRemoveVideo,
             ),
           ],
         ],
       ],
-    );
-  }
-}
-
-enum _ExerciseMediaAction { preview, upload, remove }
-
-class _ExerciseMediaStatus extends StatelessWidget {
-  final Exercicio exercicio;
-  final bool isDark;
-  final Color primary;
-  final bool mediaLoading;
-  final VoidCallback onPreviewVideo;
-  final VoidCallback onUploadVideo;
-  final VoidCallback onRemoveVideo;
-
-  const _ExerciseMediaStatus({
-    required this.exercicio,
-    required this.isDark,
-    required this.primary,
-    required this.mediaLoading,
-    required this.onPreviewVideo,
-    required this.onUploadVideo,
-    required this.onRemoveVideo,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final hasPersonalVideo = exercicioHasPersonalVideo(exercicio);
-    final hasLibraryDemo =
-        exercicio.hasPlayableMedia && !hasPersonalVideo;
-    final hasAnyMedia = hasPersonalVideo || hasLibraryDemo;
-    final statusColor =
-        hasAnyMedia
-            ? primary
-            : isDark
-            ? Colors.white.withValues(alpha: 0.68)
-            : TokensStrip.textSecondary;
-    final statusIcon =
-        mediaLoading
-            ? Icons.hourglass_empty_rounded
-            : hasPersonalVideo
-            ? Icons.play_circle_fill_rounded
-            : hasLibraryDemo
-            ? Icons.video_library_rounded
-            : Icons.video_call_outlined;
-    final statusTitle =
-        mediaLoading
-            ? 'Processando vídeo'
-            : hasPersonalVideo
-            ? 'Vídeo próprio disponível'
-            : hasLibraryDemo
-            ? 'Demonstração da biblioteca'
-            : 'Sem demonstração';
-    final statusSubtitle =
-        hasPersonalVideo
-            ? 'Confira a prévia ou troque seu vídeo.'
-            : hasLibraryDemo
-            ? 'Você pode assistir a demo ou enviar seu próprio vídeo.'
-            : 'Adicione sua demonstração para revisar antes de prescrever.';
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-      decoration:
-          fxListCardDecoration(
-            context,
-            accent: hasAnyMedia ? primary : null,
-          ),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: isDark ? 0.16 : 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(statusIcon, color: statusColor, size: 18),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  statusTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.inter(
-                    color: ink,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  statusSubtitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.inter(
-                    color: mute,
-                    fontSize: 11.2,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (hasAnyMedia)
-            TextButton(
-              onPressed: mediaLoading ? null : onPreviewVideo,
-              style: TextButton.styleFrom(
-                foregroundColor: primary,
-                visualDensity: VisualDensity.compact,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                textStyle: AppTypography.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              child: const Text('Prévia'),
-            ),
-          if (hasPersonalVideo)
-            PopupMenuButton<_ExerciseMediaAction>(
-              enabled: !mediaLoading,
-              tooltip: 'Ações de vídeo',
-              icon: Icon(Icons.more_horiz_rounded, color: mute),
-              onSelected: (action) {
-                if (action == _ExerciseMediaAction.preview) onPreviewVideo();
-                if (action == _ExerciseMediaAction.upload) onUploadVideo();
-                if (action == _ExerciseMediaAction.remove) onRemoveVideo();
-              },
-              itemBuilder:
-                  (context) => const [
-                    PopupMenuItem(
-                      value: _ExerciseMediaAction.preview,
-                      child: Text('Ver prévia'),
-                    ),
-                    PopupMenuItem(
-                      value: _ExerciseMediaAction.upload,
-                      child: Text('Trocar vídeo'),
-                    ),
-                    PopupMenuItem(
-                      value: _ExerciseMediaAction.remove,
-                      child: Text('Remover vídeo'),
-                    ),
-                  ],
-            )
-          else ...[
-            if (hasLibraryDemo)
-              TextButton(
-                onPressed: mediaLoading ? null : onPreviewVideo,
-                style: TextButton.styleFrom(
-                  foregroundColor: primary,
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  textStyle: AppTypography.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                child: const Text('Ver demo'),
-              ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: FxLiquidPrimaryButton(
-                label: hasLibraryDemo ? 'Enviar meu vídeo' : 'Adicionar',
-                onPressed: mediaLoading ? null : onUploadVideo,
-                loading: mediaLoading,
-                expand: false,
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 }
@@ -3115,12 +2974,14 @@ class _ExercisePickerSheet extends StatefulWidget {
   final Exercicio? selected;
   final Set<int> alreadyInTreinoIds;
   final String initialQuery;
+  final Future<Exercicio?> Function(Exercicio exercicio)? onUploadVideo;
 
   const _ExercisePickerSheet({
     required this.exercicios,
     required this.selected,
     this.alreadyInTreinoIds = const {},
     this.initialQuery = '',
+    this.onUploadVideo,
   });
 
   @override
@@ -3132,6 +2993,30 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
   late String _query;
   Timer? _searchDebounce;
   String _highlightQuery = '';
+  final Map<int, Exercicio> _localUpdates = {};
+  bool _uploadingInSheet = false;
+
+  List<Exercicio> get _exercicios =>
+      widget.exercicios
+          .map((exercicio) => _localUpdates[exercicio.id] ?? exercicio)
+          .toList();
+
+  Exercicio _resolve(Exercicio exercicio) =>
+      _localUpdates[exercicio.id] ?? exercicio;
+
+  Future<void> _handleUpload(Exercicio exercicio) async {
+    final upload = widget.onUploadVideo;
+    if (upload == null || _uploadingInSheet) return;
+    setState(() => _uploadingInSheet = true);
+    try {
+      final updated = await upload(exercicio);
+      if (updated != null && mounted) {
+        setState(() => _localUpdates[updated.id] = updated);
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingInSheet = false);
+    }
+  }
 
   @override
   void initState() {
@@ -3171,8 +3056,8 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
     final normalized = _query.trim().toLowerCase();
     final filtered = sortExerciciosForPicker(
       normalized.isEmpty
-          ? widget.exercicios
-          : widget.exercicios.where((exercicio) {
+          ? _exercicios
+          : _exercicios.where((exercicio) {
             final haystack =
                 '${exercicio.nome} ${exercicio.musculoAlvo ?? ''} '
                         '${exercicio.equipamento ?? ''} ${exercicio.nivel ?? ''}'
@@ -3236,7 +3121,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              '${filtered.length} de ${widget.exercicios.length} disponíveis',
+                              '${filtered.length} de ${_exercicios.length} disponíveis',
                               style: AppTypography.inter(
                                 color: mute,
                                 fontSize: 12,
@@ -3316,7 +3201,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                               separatorBuilder:
                                   (_, __) => const SizedBox(height: 8),
                               itemBuilder: (context, index) {
-                                final exercicio = filtered[index];
+                                final exercicio = _resolve(filtered[index]);
                                 final selected =
                                     widget.selected?.id == exercicio.id;
                                 return _ExercisePickerTile(
@@ -3329,6 +3214,9 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                                   highlightQuery: _highlightQuery,
                                   primary: primary,
                                   isDark: isDark,
+                                  uploadEnabled:
+                                      widget.onUploadVideo != null &&
+                                      !_uploadingInSheet,
                                   onTap: () {
                                     HapticFeedback.selectionClick();
                                     Navigator.pop(context, exercicio);
@@ -3340,6 +3228,10 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                                             exercicio: exercicio,
                                           )
                                           : null,
+                                  onUploadVideo:
+                                      widget.onUploadVideo == null
+                                          ? null
+                                          : () => _handleUpload(exercicio),
                                 );
                               },
                             ),
@@ -3429,6 +3321,8 @@ class _ExercisePickerTile extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
   final VoidCallback? onPreviewThumb;
+  final VoidCallback? onUploadVideo;
+  final bool uploadEnabled;
 
   const _ExercisePickerTile({
     required this.exercicio,
@@ -3439,6 +3333,8 @@ class _ExercisePickerTile extends StatelessWidget {
     required this.isDark,
     required this.onTap,
     this.onPreviewThumb,
+    this.onUploadVideo,
+    this.uploadEnabled = true,
   });
 
   @override
@@ -3521,6 +3417,22 @@ class _ExercisePickerTile extends StatelessWidget {
                   ],
                 ),
               ),
+              if (onUploadVideo != null) ...[
+                IconButton(
+                  tooltip:
+                      exercicioHasPersonalVideo(exercicio)
+                          ? 'Trocar vídeo'
+                          : 'Enviar meu vídeo',
+                  onPressed: uploadEnabled ? onUploadVideo : null,
+                  icon: Icon(
+                    exercicioHasPersonalVideo(exercicio)
+                        ? Icons.swap_horiz_rounded
+                        : Icons.video_call_outlined,
+                    color: primary,
+                    size: 22,
+                  ),
+                ),
+              ],
               Icon(Icons.chevron_right_rounded, color: mute, size: 20),
             ],
           ),

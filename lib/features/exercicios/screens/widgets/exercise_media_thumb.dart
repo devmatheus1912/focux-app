@@ -32,6 +32,8 @@ class ExerciseMediaThumb extends StatelessWidget {
     bool? showPlayBadge,
     Key? key,
   }) {
+    final pendingPublish =
+        exercicio.hasPlayableMedia && !exercicioHasPublishedLibraryMedia(exercicio);
     return ExerciseMediaThumb(
       key: key,
       exercicio: exercicio,
@@ -40,7 +42,7 @@ class ExerciseMediaThumb extends StatelessWidget {
       radius: radius,
       iconSize: iconSize,
       showPlayBadge: showPlayBadge ?? exercicio.hasPlayableMedia,
-      expectMedia: exercicio.hasPlayableMedia,
+      expectMedia: pendingPublish,
     );
   }
 
@@ -124,12 +126,62 @@ class ExerciseMediaThumb extends StatelessWidget {
                 : null,
       ),
       child: Icon(
-        missing ? Icons.perm_media_outlined : Icons.fitness_center_rounded,
+        missing
+            ? Icons.cloud_sync_outlined
+            : Icons.fitness_center_rounded,
         color: primary.withValues(alpha: missing ? 0.55 : 1),
         size: iconSize,
       ),
     );
   }
+}
+
+bool isCloudinaryTemplateUrl(String? url) {
+  final value = url?.trim();
+  if (value == null || value.isEmpty) return false;
+  return value.contains('/curated/gifs/') ||
+      value.contains('/curated/thumbs/');
+}
+
+/// Cloudinary com versão publicada (evita templates 404 do seed).
+bool isCloudinaryPublishedUrl(String? url) {
+  final value = url?.trim();
+  if (value == null || value.isEmpty) return false;
+  if (!value.contains('res.cloudinary.com')) return true;
+  if (isCloudinaryTemplateUrl(value)) return false;
+  return RegExp(r'/v\d+/').hasMatch(value);
+}
+
+bool exercicioHasPublishedLibraryMedia(Exercicio exercicio) {
+  if (exercicio.isPersonalUpload && exercicio.videoUrl?.trim().isNotEmpty == true) {
+    return true;
+  }
+  return isCloudinaryPublishedUrl(exercicio.thumbnailUrl) ||
+      isCloudinaryPublishedUrl(exercicio.gifUrl);
+}
+
+/// URLs para tentar carregar prévia da biblioteca (GIF, thumb, transform).
+List<String> exerciseLibraryPreviewCandidates(Exercicio exercicio) {
+  final seen = <String>{};
+  final out = <String>[];
+
+  void add(String? raw) {
+    final value = raw?.trim();
+    if (value == null || value.isEmpty || !seen.add(value)) return;
+    out.add(value);
+  }
+
+  add(exercicio.gifUrl);
+  add(exercicio.thumbnailUrl);
+  final gif = exercicio.gifUrl?.trim();
+  if (gif != null && gif.isNotEmpty) {
+    add(cloudinaryImageThumbUrl(gif));
+  }
+  final thumb = exercicio.thumbnailUrl?.trim();
+  if (thumb != null && thumb.isNotEmpty) {
+    add(cloudinaryImageThumbUrl(thumb));
+  }
+  return out;
 }
 
 /// URL estática para thumb na lista (prioriza vídeo do personal, depois biblioteca).
@@ -141,6 +193,7 @@ String? exercisePreviewMediaUrlFor(Exercicio exercicio) {
       if (poster != null) return poster;
     }
   }
+  if (!exercicioHasPublishedLibraryMedia(exercicio)) return null;
   return exercisePreviewMediaUrl(
     thumbnailUrl: exercicio.thumbnailUrl,
     gifUrl: exercicio.gifUrl,
@@ -169,6 +222,9 @@ String? exercisePreviewMediaUrl({
 }
 
 String? _resolveCloudinaryOrRaster(String url) {
+  if (url.contains('res.cloudinary.com') && !isCloudinaryPublishedUrl(url)) {
+    return null;
+  }
   if (url.contains('.gif') && url.contains('res.cloudinary.com')) {
     return cloudinaryImageThumbUrl(url) ?? url;
   }
@@ -180,6 +236,7 @@ String? _resolveCloudinaryOrRaster(String url) {
 
 bool exercicioMissingPreviewPoster(Exercicio exercicio) {
   if (!exercicio.hasPlayableMedia) return false;
+  if (!exercicioHasPublishedLibraryMedia(exercicio)) return true;
   final poster = exercisePreviewMediaUrlFor(exercicio);
   return poster == null || poster.contains('.mp4');
 }

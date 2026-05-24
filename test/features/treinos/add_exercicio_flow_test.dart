@@ -85,6 +85,17 @@ void main() {
       );
       expect(exercicioMissingPreviewPoster(ok), isFalse);
 
+      final template = Exercicio(
+        id: 3,
+        nome: 'Agachamento',
+        curatedId: 10,
+        gifUrl:
+            'https://res.cloudinary.com/focux/image/upload/focux/exercicios/curated/gifs/10.gif',
+        thumbnailUrl:
+            'https://res.cloudinary.com/focux/image/upload/focux/exercicios/curated/thumbs/10.webp',
+      );
+      expect(exercicioMissingPreviewPoster(template), isTrue);
+
       final missing = Exercicio(
         id: 2,
         nome: 'Custom',

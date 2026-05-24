@@ -48,7 +48,10 @@ class BibliotecaBootstrap {
       }
 
       if (_needsMediaPublish(list)) {
-        BibliotecaSyncStatus.instance.start('Publicando vídeos da biblioteca...');
+        final pending = list.where(exercicioMissingPreviewPoster).length;
+        BibliotecaSyncStatus.instance.start(
+          'Publicando demonstrações ($pending)...',
+        );
         await repo.publicarMidiasCuradas();
         ref.invalidate(exerciciosProvider);
         list = await ref.read(exerciciosProvider.future);
@@ -60,8 +63,11 @@ class BibliotecaBootstrap {
       } else {
         await prefs.setBool(_mediaPublishKey, true);
       }
-    } catch (_) {
-      // Falha silenciosa — telas individuais ainda têm fallback manual.
+    } catch (e) {
+      BibliotecaSyncStatus.instance.start(
+        'Não foi possível sincronizar todas as demonstrações.',
+      );
+      await Future<void>.delayed(const Duration(seconds: 2));
     } finally {
       BibliotecaSyncStatus.instance.stop();
       _running = false;

@@ -44,7 +44,7 @@ Future<void> showExerciseVideoPreview(
   );
 }
 
-class ExerciseGifPreviewSheet extends StatelessWidget {
+class ExerciseGifPreviewSheet extends StatefulWidget {
   const ExerciseGifPreviewSheet({
     super.key,
     required this.exercicio,
@@ -55,13 +55,43 @@ class ExerciseGifPreviewSheet extends StatelessWidget {
   final String url;
 
   @override
+  State<ExerciseGifPreviewSheet> createState() =>
+      _ExerciseGifPreviewSheetState();
+}
+
+class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
+  late final List<String> _candidates;
+  int _candidateIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    final seen = <String>{};
+    _candidates = <String>[];
+    for (final raw in exerciseLibraryPreviewCandidates(widget.exercicio)) {
+      if (seen.add(raw)) _candidates.add(raw);
+    }
+    if (_candidates.isEmpty) {
+      final fallback = widget.url.trim();
+      if (fallback.isNotEmpty) _candidates.add(fallback);
+    }
+  }
+
+  void _tryNextCandidate() {
+    if (_candidateIndex >= _candidates.length - 1) return;
+    setState(() => _candidateIndex += 1);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final bottom = MediaQuery.of(context).padding.bottom;
-    final displayUrl = cloudinaryImageThumbUrl(url) ?? url;
+    final pending = !exercicioHasPublishedLibraryMedia(widget.exercicio);
+    final displayUrl =
+        _candidates.isEmpty ? null : _candidates[_candidateIndex];
 
     return SafeArea(
       top: false,
@@ -74,7 +104,7 @@ class ExerciseGifPreviewSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                exercicio.nomeDisplay,
+                widget.exercicio.nomeDisplay,
                 style: AppTypography.inter(
                   color: ink,
                   fontSize: 16,
@@ -83,7 +113,9 @@ class ExerciseGifPreviewSheet extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Demonstração da biblioteca',
+                pending
+                    ? 'Sincronizando demonstração da biblioteca...'
+                    : 'Demonstração da biblioteca',
                 style: AppTypography.inter(
                   color: mute,
                   fontSize: 12,
@@ -95,32 +127,65 @@ class ExerciseGifPreviewSheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: AspectRatio(
                   aspectRatio: 1,
-                  child: Image.network(
-                    displayUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (_, __, ___) => ColoredBox(
-                          color: Colors.black,
-                          child: Center(
-                            child: Text(
-                              'Prévia indisponível agora.',
-                              style: AppTypography.inter(color: mute),
-                            ),
+                  child:
+                      displayUrl == null
+                          ? _PreviewUnavailable(mute: mute, pending: pending)
+                          : Image.network(
+                            displayUrl,
+                            key: ValueKey(displayUrl),
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) _tryNextCandidate();
+                              });
+                              return _PreviewUnavailable(
+                                mute: mute,
+                                pending:
+                                    _candidateIndex <
+                                    _candidates.length - 1,
+                              );
+                            },
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return const ColoredBox(
+                                color: Colors.black,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        ),
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return const ColoredBox(
-                        color: Colors.black,
-                        child: Center(
-                          child: CircularProgressIndicator(color: Colors.white),
-                        ),
-                      );
-                    },
-                  ),
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PreviewUnavailable extends StatelessWidget {
+  const _PreviewUnavailable({required this.mute, required this.pending});
+
+  final Color mute;
+  final bool pending;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.black,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text(
+            pending
+                ? 'Demonstração ainda sincronizando.\nTente novamente em instantes.'
+                : 'Prévia indisponível agora.',
+            textAlign: TextAlign.center,
+            style: AppTypography.inter(color: mute, height: 1.35),
           ),
         ),
       ),
