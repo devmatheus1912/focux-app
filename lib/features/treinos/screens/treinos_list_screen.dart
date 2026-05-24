@@ -256,6 +256,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                 treinos
                     .where((treino) => _selectedIds.contains(treino.id))
                     .toList();
+            final singlePlan = treinos.length == 1;
 
             return RefreshIndicator(
               color: primary,
@@ -288,30 +289,31 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                       ),
                     )
                   else ...[
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s5,
-                          0,
-                          20,
-                          16,
-                        ),
-                        child: _TreinosCommandCard(
-                          treinos: treinos,
-                          isDark: isDark,
-                          primary: primary,
-                          compact: treinos.length <= 2,
-                          onCreate: createWorkout,
+                    if (!singlePlan)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s5,
+                            0,
+                            20,
+                            16,
+                          ),
+                          child: _TreinosCommandCard(
+                            treinos: treinos,
+                            isDark: isDark,
+                            primary: primary,
+                            compact: treinos.length <= 2,
+                            onCreate: createWorkout,
+                          ),
                         ),
                       ),
-                    ),
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
+                        padding: EdgeInsets.fromLTRB(
                           TokensStrip.s5,
                           0,
                           20,
-                          14,
+                          singlePlan ? 12 : 14,
                         ),
                         child: _LibraryControls(
                           controller: _searchController,
@@ -2113,7 +2115,7 @@ class _TreinoCard extends StatelessWidget {
                   child: _PlanPill(
                     icon: Icons.list_alt_rounded,
                     value:
-                        '${treino.exercicios.length} exercício${treino.exercicios.length == 1 ? '' : 's'}',
+                        '${treino.exercicios.length} exerc${treino.exercicios.length == 1 ? '.' : 's.'}',
                     isDark: isDark,
                     color: primary,
                   ),
@@ -2231,22 +2233,25 @@ class _PlanPill extends StatelessWidget {
           Icon(icon, color: color, size: 13),
           const SizedBox(width: 5),
           Expanded(
-            child: Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style:
-                  isMetric
-                      ? AppTypography.mono(
-                        color: ink,
-                        fontSize: 10.2,
-                        fontWeight: FontWeight.w800,
-                      )
-                      : AppTypography.inter(
-                        color: ink,
-                        fontSize: 10.2,
-                        fontWeight: FontWeight.w800,
-                      ),
+            child: FittedBox(
+              alignment: Alignment.centerLeft,
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                maxLines: 1,
+                style:
+                    isMetric
+                        ? AppTypography.mono(
+                          color: ink,
+                          fontSize: 10.2,
+                          fontWeight: FontWeight.w800,
+                        )
+                        : AppTypography.inter(
+                          color: ink,
+                          fontSize: 10.2,
+                          fontWeight: FontWeight.w800,
+                        ),
+              ),
             ),
           ),
         ],
