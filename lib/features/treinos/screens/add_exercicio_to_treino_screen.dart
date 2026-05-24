@@ -784,7 +784,7 @@ class _AddExercicioToTreinoScreenState
                               20,
                               20,
                               _tabIndex == 0 && _selecionado != null
-                                  ? 128 +
+                                  ? 152 +
                                       MediaQuery.paddingOf(context).bottom
                                   : 12,
                             ),
@@ -1406,6 +1406,7 @@ class _StickyAddExerciseBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final bottom = MediaQuery.paddingOf(context).bottom;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       padding: EdgeInsets.fromLTRB(20, 12, 20, bottom + 12),
@@ -1428,31 +1429,41 @@ class _StickyAddExerciseBar extends StatelessWidget {
             _AddExerciseErrorBanner(message: error!),
             const SizedBox(height: 10),
           ],
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: loading ? null : onContinue,
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text('Adicionar e continuar'),
-                ),
+          OutlinedButton.icon(
+            onPressed: loading ? null : onContinue,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(46),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              foregroundColor: primary,
+              side: BorderSide(color: primary.withValues(alpha: 0.45)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                flex: 2,
-                child: FxLiquidPrimaryButton(
-                  label: 'Adicionar ao Treino',
-                  icon: Icons.add_rounded,
-                  onPressed: loading ? null : onSubmit,
-                  loading: loading,
-                ),
+            ),
+            icon: Icon(Icons.playlist_add_rounded, color: primary, size: 20),
+            label: Text(
+              'Adicionar e continuar',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.inter(
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
               ),
-            ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: Theme.of(context).colorScheme.copyWith(
+                onPrimary: Colors.white,
+              ),
+            ),
+            child: FxLiquidPrimaryButton(
+              label: 'Adicionar ao treino',
+              icon: Icons.add_rounded,
+              onPressed: loading ? null : onSubmit,
+              loading: loading,
+            ),
           ),
         ],
       ),
