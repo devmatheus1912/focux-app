@@ -69,9 +69,30 @@ String? exercisePreviewMediaUrl({
   String? gifUrl,
   String? videoUrl,
 }) {
-  for (final raw in [thumbnailUrl, gifUrl, videoUrl]) {
+  for (final raw in [thumbnailUrl, gifUrl]) {
     final value = raw?.trim();
     if (value != null && value.isNotEmpty) return value;
   }
+  final video = videoUrl?.trim();
+  if (video != null && video.isNotEmpty) {
+    return cloudinaryVideoPosterUrl(video);
+  }
   return null;
+}
+
+/// Gera URL de poster JPG a partir de vídeo Cloudinary (evita usar MP4 no Image).
+String? cloudinaryVideoPosterUrl(String videoUrl) {
+  const marker = '/video/upload/';
+  if (!videoUrl.contains(marker)) return null;
+  if (videoUrl.contains('f_jpg') || videoUrl.contains('/image/upload/')) {
+    return videoUrl;
+  }
+  final transformed = videoUrl.replaceFirst(
+    marker,
+    '${marker}so_0,f_jpg,w_160,h_160,c_fill,q_auto/',
+  );
+  return transformed.replaceAll(
+    RegExp(r'\.(mp4|mov|webm|m4v)(\?.*)?$', caseSensitive: false),
+    '.jpg',
+  );
 }

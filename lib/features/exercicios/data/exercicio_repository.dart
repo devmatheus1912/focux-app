@@ -134,6 +134,10 @@ class Exercicio {
 
   bool get isLicensedMedia => licenseStatus == 'LICENSED';
 
+  /// Exercício da biblioteca curada Focux (seed + mídia padrão).
+  bool get isFocuxLibrary =>
+      videoSource == 'FOCUX_LIBRARY' || curado || curatedId != null;
+
   bool get isProductionPending =>
       videoSource == 'PRODUCTION_PENDING' || videoSource == 'CURATION_REQUIRED';
 
@@ -150,23 +154,47 @@ class Exercicio {
 
   bool get isReadyForStudent =>
       hasPlayableMedia &&
-      isEditorialApproved &&
-      (isLicensedMedia || isPersonalUpload);
+      (isLicensedMedia ||
+          isPersonalUpload ||
+          (isFocuxLibrary && isEditorialApproved));
+
+  /// Biblioteca curada com mídia já pode ser prescrita sem alerta no treino.
+  bool get isReadyForPrescription =>
+      hasPlayableMedia &&
+      (isLicensedMedia || isPersonalUpload || isFocuxLibrary);
+
+  /// Evita badge de “licença pendente” em exercícios curados com demonstração.
+  bool get showMediaBadgeInWorkoutList {
+    if (isFocuxLibrary && hasPlayableMedia) return false;
+    if (mediaTrustLevel == 'READY') return false;
+    return true;
+  }
 
   String get mediaTrustLevel {
-    if (isReadyForStudent) return 'READY';
+    if (isReadyForPrescription &&
+        (isEditorialApproved || isFocuxLibrary || isPersonalUpload)) {
+      return 'READY';
+    }
     if (!hasPlayableMedia) return 'NO_VIDEO';
-    if (!isEditorialApproved) return 'NEEDS_REVIEW';
-    if (!isLicensedMedia && !isPersonalUpload) return 'NEEDS_LICENSE';
+    if (!isEditorialApproved && !isFocuxLibrary) return 'NEEDS_REVIEW';
+    if (!isLicensedMedia && !isPersonalUpload && !isFocuxLibrary) {
+      return 'NEEDS_LICENSE';
+    }
     return 'NEEDS_REVIEW';
   }
 
   String get mediaTrustLabel {
     return switch (mediaTrustLevel) {
-      'READY' => isPersonalUpload ? 'video do personal' : 'licenciado',
-      'NO_VIDEO' => 'sem video',
-      'NEEDS_LICENSE' => 'licenca pendente',
-      _ => 'revisar midia',
+      'READY' =>
+        isPersonalUpload
+            ? 'Vídeo do personal'
+            : isFocuxLibrary
+            ? 'Demonstração Focux'
+            : 'Demonstração licenciada',
+      'NO_VIDEO' => 'Sem demonstração',
+      'NEEDS_LICENSE' =>
+        isFocuxLibrary ? 'Demonstração Focux' : 'Mídia em validação',
+      _ => 'Revisar demonstração',
     };
   }
 
@@ -174,12 +202,16 @@ class Exercicio {
     return switch (mediaTrustLevel) {
       'READY' =>
         isPersonalUpload
-            ? 'Demonstracao propria validada para passar mais confianca ao aluno.'
-            : 'Midia licenciada e aprovada para prescricao.',
-      'NO_VIDEO' => 'Adicione video ou GIF antes de priorizar este exercicio.',
+            ? 'Demonstração própria validada para passar mais confiança ao aluno.'
+            : isFocuxLibrary
+            ? 'Vídeo padrão da biblioteca Focux, pronto para prescrição.'
+            : 'Mídia licenciada e aprovada para prescrição.',
+      'NO_VIDEO' => 'Adicione vídeo ou GIF antes de priorizar este exercício.',
       'NEEDS_LICENSE' =>
-        'Informe se a midia e licenciada ou propria do personal.',
-      _ => 'Aprove a curadoria antes de usar como exercicio premium.',
+        isFocuxLibrary
+            ? 'A demonstração da biblioteca será liberada em instantes.'
+            : 'Informe se a mídia é licenciada ou própria do personal.',
+      _ => 'Aprove a curadoria antes de usar como exercício premium.',
     };
   }
 }

@@ -191,16 +191,19 @@ class _TreinoDetailBody extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.34),
+      isScrollControlled: true,
       builder: (sheetContext) {
         final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
         final mute =
             isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+        final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.82;
 
         return SafeArea(
           top: false,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
             child: Container(
+              constraints: BoxConstraints(maxHeight: maxHeight),
               padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
               decoration: fxListCardDecoration(context),
               child: Column(
@@ -249,7 +252,7 @@ class _TreinoDetailBody extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Organize, publique ou replique este treino.',
+                              'Atribua, duplique ou salve como modelo.',
                               style: AppTypography.inter(
                                 color: mute,
                                 fontSize: 12.5,
@@ -262,36 +265,46 @@ class _TreinoDetailBody extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: TokensStrip.s4),
-                  _MenuActionTile(
-                    icon: Icons.add_circle_outline,
-                    label: 'Adicionar exercício',
-                    onTap: () => Navigator.pop(sheetContext, 'add'),
-                  ),
-                  _MenuActionTile(
-                    icon: Icons.person_add_alt_1_outlined,
-                    label: 'Atribuir a aluno',
-                    onTap: () => Navigator.pop(sheetContext, 'assign'),
-                  ),
-                  _MenuActionTile(
-                    icon: Icons.content_copy_rounded,
-                    label: 'Copiar para aluno',
-                    onTap: () => Navigator.pop(sheetContext, 'clone'),
-                  ),
-                  _MenuActionTile(
-                    icon: Icons.copy_outlined,
-                    label: 'Duplicar treino',
-                    onTap: () => Navigator.pop(sheetContext, 'duplicate'),
-                  ),
-                  _MenuActionTile(
-                    icon: Icons.bookmark_border,
-                    label: 'Salvar como template',
-                    onTap: () => Navigator.pop(sheetContext, 'template'),
-                  ),
-                  _MenuActionTile(
-                    icon: Icons.delete_outline,
-                    label: 'Excluir treino',
-                    color: EagleTokens.bad,
-                    onTap: () => Navigator.pop(sheetContext, 'delete'),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _MenuActionTile(
+                            icon: Icons.add_circle_outline,
+                            label: 'Adicionar exercício',
+                            onTap: () => Navigator.pop(sheetContext, 'add'),
+                          ),
+                          _MenuActionTile(
+                            icon: Icons.person_add_alt_1_outlined,
+                            label: 'Atribuir a aluno',
+                            onTap: () => Navigator.pop(sheetContext, 'assign'),
+                          ),
+                          _MenuActionTile(
+                            icon: Icons.content_copy_rounded,
+                            label: 'Copiar para aluno',
+                            onTap: () => Navigator.pop(sheetContext, 'clone'),
+                          ),
+                          _MenuActionTile(
+                            icon: Icons.copy_outlined,
+                            label: 'Duplicar treino',
+                            onTap: () => Navigator.pop(sheetContext, 'duplicate'),
+                          ),
+                          _MenuActionTile(
+                            icon: Icons.bookmark_border,
+                            label: 'Salvar como template',
+                            onTap: () => Navigator.pop(sheetContext, 'template'),
+                          ),
+                          _MenuActionTile(
+                            icon: Icons.delete_outline,
+                            label: 'Excluir treino',
+                            color: EagleTokens.bad,
+                            onTap: () => Navigator.pop(sheetContext, 'delete'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -1479,7 +1492,6 @@ class _ExercicioRow extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final hasMedia = te.exercicio.hasPlayableMedia;
     final isAdvanced = te.tipoSerie != 'NORMAL';
     final trustColor = _trustColor(te.exercicio, primary);
 
@@ -1575,18 +1587,19 @@ class _ExercicioRow extends StatelessWidget {
                   ],
                 ),
                 if (isAdvanced ||
-                    hasMedia ||
+                    te.exercicio.showMediaBadgeInWorkoutList ||
                     te.observacoes?.trim().isNotEmpty == true) ...[
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 6,
                     children: [
-                      _ExerciseMeta(
-                        icon: _trustIcon(te.exercicio),
-                        text: te.exercicio.mediaTrustLabel,
-                        color: trustColor,
-                      ),
+                      if (te.exercicio.showMediaBadgeInWorkoutList)
+                        _ExerciseMeta(
+                          icon: _trustIcon(te.exercicio),
+                          text: te.exercicio.mediaTrustLabel,
+                          color: trustColor,
+                        ),
                       if (isAdvanced)
                         _ExerciseMeta(
                           icon:

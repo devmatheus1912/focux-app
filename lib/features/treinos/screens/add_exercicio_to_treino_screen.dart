@@ -228,10 +228,16 @@ class _AddExercicioToTreinoScreenState
                     : null,
           );
       if (mounted) {
+        HapticFeedback.mediumImpact();
+        FeedbackHelper.showSuccess(
+          context,
+          '${_selecionado!.nomeDisplay} adicionado ao treino.',
+        );
         context.pop(true);
       }
     } catch (e) {
       if (mounted) {
+        HapticFeedback.lightImpact();
         setState(() {
           _error = 'Erro ao adicionar exercício.';
         });
@@ -273,6 +279,7 @@ class _AddExercicioToTreinoScreenState
                     : null,
           );
       if (!mounted) return;
+      HapticFeedback.mediumImpact();
       ref.invalidate(treinoProvider(widget.treinoId));
       setState(() {
         _selecionado = null;
@@ -499,6 +506,11 @@ class _AddExercicioToTreinoScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              _MontarComModeloCard(
+                onTap: _openTemplateBuilder,
+                isDark: isDark,
+                primary: primary,
+              ),
               if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno)
                 _AlunoEquipmentFilterBanner(
                   alunoNome: _alunoFilterNome!,
@@ -526,11 +538,6 @@ class _AddExercicioToTreinoScreenState
                   pickerFilter: _pickerFilter,
                   onAdicionar: _selectExercise,
                 ),
-              ),
-              _MontarComModeloCard(
-                onTap: _openTemplateBuilder,
-                isDark: isDark,
-                primary: primary,
               ),
             ],
           ),
@@ -699,7 +706,10 @@ class _AddExercicioToTreinoScreenState
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Adicionar Exercício',
-        subtitle: 'Novo item',
+        subtitle: treinoAsync.maybeWhen(
+          data: (treino) => treino.nome,
+          orElse: () => 'Montando treino',
+        ),
         onBack:
             () => safePopOrGo(context, '/treinos/${widget.treinoId}'),
       ),
@@ -1170,9 +1180,12 @@ class _MontarComModeloCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 10, 0, 4),
+      padding: const EdgeInsets.only(bottom: 12),
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
         borderRadius: BorderRadius.circular(18),
         child: Container(
           padding: const EdgeInsets.all(14),
@@ -1582,7 +1595,8 @@ class _ExercisePickerCard extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final selected = exercicio != null;
-    final hasMediaIssue = selected && exercicio!.mediaTrustLevel != 'READY';
+    final hasMediaIssue =
+        selected && exercicio!.showMediaBadgeInWorkoutList;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1651,7 +1665,7 @@ class _ExercisePickerCard extends StatelessWidget {
                               maxLines: selected ? 2 : 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.inter(
-                                color: mute,
+                                color: _metaTextColor(isDark),
                                 fontSize: 12,
                                 height: 1.18,
                                 fontWeight: FontWeight.w700,
@@ -1667,7 +1681,10 @@ class _ExercisePickerCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            InkWell(
+            Semantics(
+              button: true,
+              label: 'Criar exercício personalizado',
+              child: InkWell(
               onTap: onCreate,
               borderRadius: BorderRadius.circular(18),
               child: Container(
@@ -1688,6 +1705,7 @@ class _ExercisePickerCard extends StatelessWidget {
                 ),
                 child: Icon(Icons.add_rounded, color: primary, size: 26),
               ),
+            ),
             ),
           ],
         ),
@@ -2388,7 +2406,6 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final bottom = MediaQuery.of(context).padding.bottom;
     final normalized = _query.trim().toLowerCase();
     final filtered = sortExerciciosForPicker(
       normalized.isEmpty
@@ -2403,143 +2420,150 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
       alreadyInTreinoIds: widget.alreadyInTreinoIds,
     );
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(10, 0, 10, bottom + 8),
-        child: Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.82,
-          ),
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 16),
-          decoration: fxListCardDecoration(context, accent: primary),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color:
-                      isDark
-                          ? Colors.white.withValues(alpha: 0.16)
-                          : TokensStrip.borderDefault,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-              Row(
+    return DraggableScrollableSheet(
+      initialChildSize: 0.82,
+      minChildSize: 0.45,
+      maxChildSize: 0.92,
+      expand: false,
+      builder: (context, scrollController) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 16),
+              decoration: fxListCardDecoration(context, accent: primary),
+              child: Column(
                 children: [
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: EagleTokens.brandSofter,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(Icons.fitness_center_rounded, color: primary),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Biblioteca de exercícios',
-                          style: AppTypography.inter(
-                            color: ink,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          '${filtered.length} de ${widget.exercicios.length} disponíveis',
-                          style: AppTypography.inter(
-                            color: mute,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
+                      color:
+                          isDark
+                              ? Colors.white.withValues(alpha: 0.16)
+                              : TokensStrip.borderDefault,
+                      borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _searchCtrl,
-                autofocus: true,
-                onChanged: (value) => setState(() => _query = value),
-                decoration: InputDecoration(
-                  hintText: 'Buscar por nome, músculo ou equipamento',
-                  prefixIcon: Icon(Icons.search_rounded, color: primary),
-                  filled: true,
-                  fillColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
-                  ),
-                  border: FxInputDeco.outlineBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide(color: line),
-                  ),
-                  enabledBorder: FxInputDeco.outlineBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide(color: line),
-                  ),
-                  focusedBorder: FxInputDeco.outlineBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide(color: primary, width: 1.4),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Flexible(
-                child:
-                    filtered.isEmpty
-                        ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(28),
-                            child: Text(
-                              'Nenhum exercício encontrado.',
+                  Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: EagleTokens.brandSofter,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(Icons.fitness_center_rounded, color: primary),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Biblioteca de exercícios',
+                              style: AppTypography.inter(
+                                color: ink,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '${filtered.length} de ${widget.exercicios.length} disponíveis',
                               style: AppTypography.inter(
                                 color: mute,
-                                fontSize: 14,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                          ),
-                        )
-                        : ListView.separated(
-                          shrinkWrap: true,
-                          itemCount: filtered.length,
-                          separatorBuilder:
-                              (_, __) => const SizedBox(height: 8),
-                          itemBuilder: (context, index) {
-                            final exercicio = filtered[index];
-                            final selected =
-                                widget.selected?.id == exercicio.id;
-                            return _ExercisePickerTile(
-                              exercicio: exercicio,
-                              selected: selected,
-                              alreadyInTreino: widget.alreadyInTreinoIds.contains(
-                                exercicio.id,
-                              ),
-                              primary: primary,
-                              isDark: isDark,
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                Navigator.pop(context, exercicio);
-                              },
-                            );
-                          },
+                          ],
                         ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: _searchCtrl,
+                    autofocus: true,
+                    onChanged: (value) => setState(() => _query = value),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar por nome, músculo ou equipamento',
+                      prefixIcon: Icon(Icons.search_rounded, color: primary),
+                      filled: true,
+                      fillColor:
+                          isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 14,
+                      ),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide(color: line),
+                      ),
+                      enabledBorder: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide(color: line),
+                      ),
+                      focusedBorder: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide(color: primary, width: 1.4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child:
+                        filtered.isEmpty
+                            ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(28),
+                                child: Text(
+                                  'Nenhum exercício encontrado.',
+                                  style: AppTypography.inter(
+                                    color: mute,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            )
+                            : ListView.separated(
+                              controller: scrollController,
+                              padding: const EdgeInsets.only(bottom: 8),
+                              itemCount: filtered.length,
+                              separatorBuilder:
+                                  (_, __) => const SizedBox(height: 8),
+                              itemBuilder: (context, index) {
+                                final exercicio = filtered[index];
+                                final selected =
+                                    widget.selected?.id == exercicio.id;
+                                return _ExercisePickerTile(
+                                  exercicio: exercicio,
+                                  selected: selected,
+                                  alreadyInTreino:
+                                      widget.alreadyInTreinoIds.contains(
+                                        exercicio.id,
+                                      ),
+                                  primary: primary,
+                                  isDark: isDark,
+                                  onTap: () {
+                                    HapticFeedback.selectionClick();
+                                    Navigator.pop(context, exercicio);
+                                  },
+                                );
+                              },
+                            ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -2622,7 +2646,7 @@ class _ExercisePickerTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.inter(
-                      color: mute,
+                      color: _metaTextColor(isDark),
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                     ),
@@ -2663,7 +2687,13 @@ String _exerciseMeta(Exercicio exercicio) {
       _humanizeMetaToken(exercicio.nivel!),
   ];
   final clean = parts.whereType<String>().where((e) => e.isNotEmpty).toList();
-  return clean.isEmpty ? exercicio.mediaTrustLabel : clean.take(3).join(' · ');
+  return clean.isEmpty ? 'Sem detalhes' : clean.take(3).join(' · ');
+}
+
+Color _metaTextColor(bool isDark) {
+  final base =
+      isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+  return isDark ? base : Color.lerp(base, TokensStrip.textPrimary, 0.22)!;
 }
 
 String _humanizeMetaToken(String value) => displayMetaToken(value);

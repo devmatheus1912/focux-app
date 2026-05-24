@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/tokens_strip.dart';
@@ -6,7 +7,7 @@ import '../../../exercicios/data/enums.dart';
 import '../../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../utils/exercise_picker_filter.dart';
 
-class ExercisePickerFilterBar extends StatelessWidget {
+class ExercisePickerFilterBar extends StatefulWidget {
   const ExercisePickerFilterBar({
     super.key,
     required this.filter,
@@ -19,6 +20,14 @@ class ExercisePickerFilterBar extends StatelessWidget {
   final bool isDark;
   final Color primary;
   final ValueChanged<ExercisePickerFilter> onChanged;
+
+  @override
+  State<ExercisePickerFilterBar> createState() =>
+      _ExercisePickerFilterBarState();
+}
+
+class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
+  bool _expanded = false;
 
   static final _espacos = [
     Espaco.academiaCompleta,
@@ -37,54 +46,179 @@ class ExercisePickerFilterBar extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+  void didUpdateWidget(covariant ExercisePickerFilterBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.filter.isActive && !_expanded) {
+      _expanded = true;
+    }
+  }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              if (filter.filtrarPorAluno && filter.equipamentosAluno.isNotEmpty)
+  int get _activeCount {
+    var n = 0;
+    if (widget.filter.somenteFavoritos) n++;
+    if (widget.filter.espaco != null) n++;
+    if (widget.filter.equipamento != null) n++;
+    if (widget.filter.filtrarPorAluno) n++;
+    return n;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final showFull = _expanded || widget.filter.isActive;
+
+    if (!showFull) {
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(right: 12),
+        child: Row(
+          children: [
+            if (widget.filter.filtrarPorAluno &&
+                widget.filter.equipamentosAluno.isNotEmpty)
+              ...[
                 _FilterChip(
                   label: 'Do aluno',
                   icon: Icons.person_rounded,
                   selected: true,
-                  primary: primary,
-                  isDark: isDark,
+                  primary: widget.primary,
+                  isDark: widget.isDark,
                   onTap:
-                      () => onChanged(filter.copyWith(clearAluno: true)),
+                      () => widget.onChanged(
+                        widget.filter.copyWith(clearAluno: true),
+                      ),
                 ),
-              if (filter.filtrarPorAluno && filter.equipamentosAluno.isNotEmpty)
                 const SizedBox(width: 8),
+              ],
+            _FilterChip(
+              label: 'Favoritos',
+              icon: Icons.star_rounded,
+              selected: widget.filter.somenteFavoritos,
+              primary: widget.primary,
+              isDark: widget.isDark,
+              onTap: () {
+                HapticFeedback.selectionClick();
+                widget.onChanged(
+                  widget.filter.copyWith(
+                    somenteFavoritos: !widget.filter.somenteFavoritos,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(width: 8),
+            _FilterChip(
+              label: 'Filtros',
+              icon: Icons.tune_rounded,
+              selected: false,
+              primary: widget.primary,
+              isDark: widget.isDark,
+              onTap: () {
+                HapticFeedback.selectionClick();
+                setState(() => _expanded = true);
+              },
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Filtros',
+                style: AppTypography.inter(
+                  color: mute,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ),
+            if (_activeCount > 0)
+              Text(
+                '$_activeCount ativo${_activeCount == 1 ? '' : 's'}',
+                style: AppTypography.inter(
+                  color: widget.primary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            TextButton(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                if (widget.filter.isActive) {
+                  widget.onChanged(const ExercisePickerFilter());
+                }
+                setState(() => _expanded = false);
+              },
+              child: Text(
+                widget.filter.isActive ? 'Limpar' : 'Recolher',
+                style: AppTypography.inter(
+                  color: mute,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.only(right: 16),
+          child: Row(
+            children: [
+              if (widget.filter.filtrarPorAluno &&
+                  widget.filter.equipamentosAluno.isNotEmpty) ...[
+                _FilterChip(
+                  label: 'Do aluno',
+                  icon: Icons.person_rounded,
+                  selected: true,
+                  primary: widget.primary,
+                  isDark: widget.isDark,
+                  onTap:
+                      () => widget.onChanged(
+                        widget.filter.copyWith(clearAluno: true),
+                      ),
+                ),
+                const SizedBox(width: 8),
+              ],
               _FilterChip(
                 label: 'Favoritos',
                 icon: Icons.star_rounded,
-                selected: filter.somenteFavoritos,
-                primary: primary,
-                isDark: isDark,
-                onTap:
-                    () => onChanged(
-                      filter.copyWith(
-                        somenteFavoritos: !filter.somenteFavoritos,
-                      ),
+                selected: widget.filter.somenteFavoritos,
+                primary: widget.primary,
+                isDark: widget.isDark,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  widget.onChanged(
+                    widget.filter.copyWith(
+                      somenteFavoritos: !widget.filter.somenteFavoritos,
                     ),
+                  );
+                },
               ),
               const SizedBox(width: 8),
               for (final espaco in _espacos) ...[
                 _FilterChip(
-                  label: TaxonomyLabels.espaco[espaco] ?? espaco.name,
-                  selected: filter.espaco == espaco,
-                  primary: primary,
-                  isDark: isDark,
-                  onTap:
-                      () => onChanged(
-                        filter.espaco == espaco
-                            ? filter.copyWith(clearEspaco: true)
-                            : filter.copyWith(espaco: espaco),
-                      ),
+                  label:
+                      TaxonomyLabels.espacoShort[espaco] ??
+                      TaxonomyLabels.espaco[espaco] ??
+                      espaco.name,
+                  selected: widget.filter.espaco == espaco,
+                  primary: widget.primary,
+                  isDark: widget.isDark,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    widget.onChanged(
+                      widget.filter.espaco == espaco
+                          ? widget.filter.copyWith(clearEspaco: true)
+                          : widget.filter.copyWith(espaco: espaco),
+                    );
+                  },
                 ),
                 const SizedBox(width: 8),
               ],
@@ -94,37 +228,28 @@ class ExercisePickerFilterBar extends StatelessWidget {
         const SizedBox(height: 8),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.only(right: 16),
           child: Row(
             children: [
               for (final equipamento in _equipamentos) ...[
                 _FilterChip(
                   label:
-                      TaxonomyLabels.equipamento[equipamento] ?? equipamento.name,
-                  selected: filter.equipamento == equipamento,
-                  primary: primary,
-                  isDark: isDark,
-                  onTap:
-                      () => onChanged(
-                        filter.equipamento == equipamento
-                            ? filter.copyWith(clearEquipamento: true)
-                            : filter.copyWith(equipamento: equipamento),
-                      ),
+                      TaxonomyLabels.equipamento[equipamento] ??
+                      equipamento.name,
+                  selected: widget.filter.equipamento == equipamento,
+                  primary: widget.primary,
+                  isDark: widget.isDark,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    widget.onChanged(
+                      widget.filter.equipamento == equipamento
+                          ? widget.filter.copyWith(clearEquipamento: true)
+                          : widget.filter.copyWith(equipamento: equipamento),
+                    );
+                  },
                 ),
                 const SizedBox(width: 8),
               ],
-              if (filter.isActive)
-                TextButton.icon(
-                  onPressed: () => onChanged(const ExercisePickerFilter()),
-                  icon: Icon(Icons.filter_alt_off_rounded, color: mute, size: 16),
-                  label: Text(
-                    'Limpar',
-                    style: AppTypography.inter(
-                      color: mute,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
@@ -152,26 +277,34 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      avatar: icon == null ? null : Icon(icon, size: 16),
+    return Semantics(
+      button: true,
       selected: selected,
-      showCheckmark: false,
-      onSelected: (_) => onTap(),
-      labelStyle: AppTypography.inter(
-        fontSize: 12,
-        fontWeight: FontWeight.w700,
-        color: selected ? primary : null,
-      ),
-      selectedColor: primary.withValues(alpha: isDark ? 0.18 : 0.12),
-      backgroundColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-      side: BorderSide(
-        color:
-            selected
-                ? primary.withValues(alpha: 0.35)
-                : (isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : TokensStrip.borderDefault),
+      label: label,
+      child: FilterChip(
+        label: Text(label),
+        avatar: icon == null ? null : Icon(icon, size: 16),
+        selected: selected,
+        showCheckmark: false,
+        onSelected: (_) => onTap(),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+        labelStyle: AppTypography.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: selected ? primary : null,
+        ),
+        selectedColor: primary.withValues(alpha: isDark ? 0.18 : 0.12),
+        backgroundColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
+        side: BorderSide(
+          color:
+              selected
+                  ? primary.withValues(alpha: 0.35)
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : TokensStrip.borderDefault),
+        ),
       ),
     );
   }

@@ -79,6 +79,15 @@ class TaxonomyLabels {
     Espaco.outdoor: 'Outdoor',
   };
 
+  /// Rótulos curtos para chips horizontais (sem truncar).
+  static const espacoShort = {
+    Espaco.academiaCompleta: 'Acad. completa',
+    Espaco.academiaBasica: 'Acad. básica',
+    Espaco.casaEquipada: 'Casa equip.',
+    Espaco.casaSemEquipo: 'Sem equip.',
+    Espaco.outdoor: 'Outdoor',
+  };
+
   static const dificuldade = {
     Dificuldade.iniciante: 'Iniciante',
     Dificuldade.intermediario: 'Intermediário',
