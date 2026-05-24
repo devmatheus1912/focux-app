@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -287,40 +289,45 @@ class _StickyCreateBar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg =
         isDark
-            ? EagleTokens.darkBg.withValues(alpha: 0.82)
-            : TokensStrip.pageBg.withValues(alpha: 0.82);
+            ? EagleTokens.darkBg.withValues(alpha: 0.44)
+            : Colors.white.withValues(alpha: 0.46);
     final enabled = canSubmit && !loading;
 
     return SafeArea(
       top: false,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(22, 10, 22, 12),
-        decoration: BoxDecoration(
-          color: bg,
-          border: Border(
-            top: BorderSide(
-              color:
-                  isDark
-                      ? EagleTokens.darkLine.withValues(alpha: 0.62)
-                      : TokensStrip.borderDefault,
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(22, 10, 22, 12),
+            decoration: BoxDecoration(
+              color: bg,
+              border: Border(
+                top: BorderSide(
+                  color:
+                      isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.white.withValues(alpha: 0.58),
+                ),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.035),
+                  blurRadius: 22,
+                  offset: const Offset(0, -12),
+                  spreadRadius: -18,
+                ),
+              ],
             ),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.06),
-              blurRadius: 18,
-              offset: const Offset(0, -10),
-              spreadRadius: -16,
+            child: Opacity(
+              opacity: enabled ? 1 : 0.48,
+              child: FxLiquidPrimaryButton(
+                label: 'Criar treino',
+                icon: Icons.add_rounded,
+                onPressed: enabled ? onSubmit : null,
+                loading: loading,
+              ),
             ),
-          ],
-        ),
-        child: Opacity(
-          opacity: enabled ? 1 : 0.48,
-          child: FxLiquidPrimaryButton(
-            label: 'Criar treino',
-            icon: Icons.add_rounded,
-            onPressed: enabled ? onSubmit : null,
-            loading: loading,
           ),
         ),
       ),

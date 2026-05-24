@@ -1218,24 +1218,18 @@ class _TreinosCommandCard extends StatelessWidget {
     final ready = treinos.where((t) => t.exercicios.isNotEmpty).length;
     final templates = treinos.where((t) => t.isTemplate).length;
     final assembling = treinos.length - ready;
-    final ultraCompact = treinos.length <= 1;
+    final ultraCompact = compact;
     final metricGap = compact ? 8.0 : 10.0;
 
     return Container(
-      padding: EdgeInsets.all(
-        ultraCompact
-            ? 13
-            : compact
-            ? 14
-            : 18,
-      ),
+      padding: EdgeInsets.all(ultraCompact ? 13 : 18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [primary, primaryDeep],
         ),
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(ultraCompact ? 22 : 26),
         boxShadow: [
           BoxShadow(
             color: primary.withValues(alpha: isDark ? 0.08 : 0.14),
@@ -1273,7 +1267,7 @@ class _TreinosCommandCard extends StatelessWidget {
                       'Biblioteca sob controle',
                       style: AppTypography.inter(
                         color: Colors.white,
-                        fontSize: ultraCompact ? 15.5 : 17,
+                        fontSize: ultraCompact ? 15 : 17,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -1281,12 +1275,12 @@ class _TreinosCommandCard extends StatelessWidget {
                     Text(
                       assembling == 0
                           ? ultraCompact
-                              ? '1 plano pronto para uso.'
+                              ? '${treinos.length} plano${treinos.length == 1 ? '' : 's'} prontos para uso.'
                               : 'Todos os planos têm exercícios.'
                           : '$assembling plano${assembling == 1 ? '' : 's'} ainda em montagem.',
                       style: AppTypography.inter(
                         color: Colors.white.withValues(alpha: 0.74),
-                        fontSize: ultraCompact ? 11.5 : 12.2,
+                        fontSize: ultraCompact ? 11.2 : 12.2,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1318,14 +1312,7 @@ class _TreinosCommandCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(
-            height:
-                ultraCompact
-                    ? 10
-                    : compact
-                    ? 12
-                    : TokensStrip.s4,
-          ),
+          SizedBox(height: ultraCompact ? 9 : TokensStrip.s4),
           if (ultraCompact)
             _CommandInlineMetrics(
               ready: ready,
