@@ -148,7 +148,13 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
 
     switch (action) {
       case _TreinoAction.open:
-        context.push('/treinos/${treino.id}');
+        context.push(
+          '/treinos/${treino.id}',
+          extra:
+              widget.alunoId == null
+                  ? null
+                  : {'alunoId': widget.alunoId, 'alunoNome': widget.alunoNome},
+        );
         break;
       case _TreinoAction.assign:
         await _assignTreino(treino);
@@ -406,6 +412,8 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                   index: i,
                                   isDark: isDark,
                                   primary: primary,
+                                  alunoId: widget.alunoId,
+                                  alunoNome: widget.alunoNome,
                                   selectionMode: _selectionMode,
                                   selected: _selectedIds.contains(
                                     filteredTreinos[i].id,
@@ -1899,6 +1907,8 @@ class _TreinoCard extends StatelessWidget {
   final int index;
   final bool isDark;
   final Color primary;
+  final int? alunoId;
+  final String? alunoNome;
   final bool selectionMode;
   final bool selected;
   final VoidCallback onToggleSelection;
@@ -1910,6 +1920,8 @@ class _TreinoCard extends StatelessWidget {
     required this.index,
     required this.isDark,
     required this.primary,
+    required this.alunoId,
+    required this.alunoNome,
     required this.selectionMode,
     required this.selected,
     required this.onToggleSelection,
@@ -1964,7 +1976,13 @@ class _TreinoCard extends StatelessWidget {
       onTap:
           selectionMode
               ? onToggleSelection
-              : () => context.push('/treinos/${treino.id}'),
+              : () => context.push(
+                '/treinos/${treino.id}',
+                extra:
+                    alunoId == null
+                        ? null
+                        : {'alunoId': alunoId, 'alunoNome': alunoNome},
+              ),
       onLongPress: onStartSelection,
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(

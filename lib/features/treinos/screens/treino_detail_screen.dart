@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,9 +20,30 @@ import '../providers/treinos_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/tokens_strip.dart';
 
+String _workoutContextLabel(Treino treino, String? alunoNome) {
+  final name = alunoNome?.trim();
+  if (name != null && name.isNotEmpty) return name;
+  if (treino.isTemplate) return 'Template base';
+  return 'Plano base';
+}
+
+String _formatLoadKg(double? value) {
+  if (value == null || value <= 0) return '—';
+  if (value == value.roundToDouble()) return '${value.toStringAsFixed(0)}kg';
+  return '${value.toStringAsFixed(1)}kg';
+}
+
 class TreinoDetailScreen extends ConsumerWidget {
   final int treinoId;
-  const TreinoDetailScreen({super.key, required this.treinoId});
+  final int? alunoId;
+  final String? alunoNome;
+
+  const TreinoDetailScreen({
+    super.key,
+    required this.treinoId,
+    this.alunoId,
+    this.alunoNome,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,6 +72,8 @@ class TreinoDetailScreen extends ConsumerWidget {
             (treino) => _TreinoDetailBody(
               treino: treino,
               treinoId: treinoId,
+              alunoId: alunoId,
+              alunoNome: alunoNome,
               isDark: isDark,
               ref: ref,
             ),
@@ -62,11 +85,15 @@ class TreinoDetailScreen extends ConsumerWidget {
 class _TreinoDetailBody extends StatelessWidget {
   final Treino treino;
   final int treinoId;
+  final int? alunoId;
+  final String? alunoNome;
   final bool isDark;
   final WidgetRef ref;
   const _TreinoDetailBody({
     required this.treino,
     required this.treinoId,
+    required this.alunoId,
+    required this.alunoNome,
     required this.isDark,
     required this.ref,
   });
@@ -78,7 +105,8 @@ class _TreinoDetailBody extends StatelessWidget {
       barrierColor: Colors.black.withValues(alpha: 0.34),
       builder: (sheetContext) {
         final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-        final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+        final mute =
+            isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
         return SafeArea(
           top: false,
@@ -124,17 +152,17 @@ class _TreinoDetailBody extends StatelessWidget {
                           children: [
                             Text(
                               'Opções do treino',
-                              style: TextStyle(
+                              style: AppTypography.inter(
                                 color: ink,
                                 fontSize: 19,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.4,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Organize, publique ou replique este treino.',
-                              style: TextStyle(
+                              style: AppTypography.inter(
                                 color: mute,
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w600,
@@ -282,6 +310,7 @@ class _TreinoDetailBody extends StatelessWidget {
     final repo = ref.read(treinoRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
+    final contextLabel = _workoutContextLabel(treino, alunoNome);
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final orderedExercises = [...treino.exercicios]
       ..sort((a, b) => a.ordem.compareTo(b.ordem));
@@ -346,7 +375,12 @@ class _TreinoDetailBody extends StatelessWidget {
                 CustomPaint(painter: const _GridTexturePainter()),
                 // Content
                 Container(
-                  padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 66, 20, 16),
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s5,
+                    66,
+                    20,
+                    16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -400,24 +434,26 @@ class _TreinoDetailBody extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'ALUNO FOCO',
-                                    style: TextStyle(
+                                    contextLabel,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.inter(
                                       color: Colors.white.withValues(
                                         alpha: 0.68,
                                       ),
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 1.1,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     treino.nome,
-                                    style: const TextStyle(
+                                    style: AppTypography.inter(
                                       color: Colors.white,
                                       fontSize: 22,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: -0.8,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0,
                                       height: 1.02,
                                     ),
                                   ),
@@ -432,17 +468,18 @@ class _TreinoDetailBody extends StatelessWidget {
                                       const SizedBox(width: 4),
                                       Text(
                                         '~${durationMin}min',
-                                        style: TextStyle(
+                                        style: AppTypography.mono(
                                           color: Colors.white.withValues(
                                             alpha: 0.7,
                                           ),
                                           fontSize: 12,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
                                         '·',
-                                        style: TextStyle(
+                                        style: AppTypography.inter(
                                           color: Colors.white.withValues(
                                             alpha: 0.7,
                                           ),
@@ -452,11 +489,12 @@ class _TreinoDetailBody extends StatelessWidget {
                                       const SizedBox(width: 8),
                                       Text(
                                         '${treino.exercicios.length} ex.',
-                                        style: TextStyle(
+                                        style: AppTypography.mono(
                                           color: Colors.white.withValues(
                                             alpha: 0.7,
                                           ),
                                           fontSize: 12,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ],
@@ -526,17 +564,17 @@ class _TreinoDetailBody extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      Icons.play_arrow_rounded,
+                                      Icons.add_circle_outline_rounded,
                                       color: primary,
                                       size: 19,
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
                                       'Adicionar exercício',
-                                      style: TextStyle(
+                                      style: AppTypography.inter(
                                         color: primary,
                                         fontSize: 13.5,
-                                        fontWeight: FontWeight.w900,
+                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
                                   ],
@@ -584,11 +622,12 @@ class _TreinoDetailBody extends StatelessWidget {
               children: [
                 Text(
                   'Exercícios',
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     fontSize: 21,
-                    fontWeight: FontWeight.w900,
-                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                    letterSpacing: -0.8,
+                    fontWeight: FontWeight.w800,
+                    color:
+                        isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                    letterSpacing: 0,
                   ),
                 ),
                 Container(
@@ -611,10 +650,10 @@ class _TreinoDetailBody extends StatelessWidget {
                   ),
                   child: Text(
                     '${treino.exercicios.length} ${treino.exercicios.length == 1 ? 'exercício' : 'exercícios'}',
-                    style: TextStyle(
+                    style: AppTypography.inter(
                       color: primary,
                       fontSize: 11.5,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: 0,
                     ),
                   ),
@@ -667,26 +706,26 @@ class _TreinoDetailBody extends StatelessWidget {
                           const SizedBox(width: 9),
                           Text(
                             entry.key.toUpperCase(),
-                            style: TextStyle(
-                              color:
-                                  isDark
-                                      ? EagleTokens.darkInkMute
-                                      : TokensStrip.textSecondary,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.3,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            '${entry.value.length} ex.',
-                            style: TextStyle(
+                            style: AppTypography.inter(
                               color:
                                   isDark
                                       ? EagleTokens.darkInkMute
                                       : TokensStrip.textSecondary,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
+                              letterSpacing: 1.3,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '${entry.value.length} ex.',
+                            style: AppTypography.mono(
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkInkMute
+                                      : TokensStrip.textSecondary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -694,8 +733,10 @@ class _TreinoDetailBody extends StatelessWidget {
                     ),
                     Container(
                       margin: const EdgeInsets.only(bottom: 14),
-                      decoration:
-                          fxListCardDecoration(context, accent: primary),
+                      decoration: fxListCardDecoration(
+                        context,
+                        accent: primary,
+                      ),
                       child: Column(
                         children:
                             entry.value.asMap().entries.map((e) {
@@ -862,7 +903,8 @@ class _MenuActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = color ?? (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+    final ink =
+        color ?? (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     final border =
         isDark
             ? Colors.white.withValues(alpha: 0.06)
@@ -914,10 +956,10 @@ class _MenuActionTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     color: ink,
                     fontSize: 13.8,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -954,7 +996,8 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
     final bottom = MediaQuery.of(context).padding.bottom;
     final primary = Theme.of(context).colorScheme.primary;
     final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute =
+        widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final border =
         widget.isDark
             ? Colors.white.withValues(alpha: 0.08)
@@ -1245,7 +1288,7 @@ class _HeroMetricChip extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: AppTypography.inter(
                 color: Colors.white.withValues(alpha: 0.62),
                 fontSize: 9.5,
                 fontWeight: FontWeight.w700,
@@ -1256,11 +1299,11 @@ class _HeroMetricChip extends StatelessWidget {
               value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: AppTypography.mono(
                 color: Colors.white,
                 fontSize: 12.5,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.2,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0,
               ),
             ),
           ],
@@ -1329,10 +1372,10 @@ class _ExercicioRow extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               '$index',
-              style: TextStyle(
+              style: AppTypography.mono(
                 color: primary,
                 fontSize: 14,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -1343,11 +1386,11 @@ class _ExercicioRow extends StatelessWidget {
               children: [
                 Text(
                   te.exercicio.nome,
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     color: ink,
                     fontSize: 14.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.2,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -1355,10 +1398,10 @@ class _ExercicioRow extends StatelessWidget {
                   children: [
                     Text(
                       '${te.series}×${te.repeticoes}',
-                      style: TextStyle(
+                      style: AppTypography.mono(
                         color: ink,
                         fontSize: 12.2,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -1372,11 +1415,11 @@ class _ExercicioRow extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${te.cargaKg ?? 0}kg',
-                      style: TextStyle(
+                      _formatLoadKg(te.cargaKg),
+                      style: AppTypography.mono(
                         color: ink,
                         fontSize: 12.2,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -1393,7 +1436,11 @@ class _ExercicioRow extends StatelessWidget {
                     const SizedBox(width: 3),
                     Text(
                       '${te.descansoSegundos ?? 60}s',
-                      style: TextStyle(color: mute, fontSize: 11.5),
+                      style: AppTypography.mono(
+                        color: mute,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -1609,11 +1656,11 @@ class _ExerciseActionsSheet extends StatelessWidget {
                       children: [
                         Text(
                           'Ações do exercício',
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: ink,
                             fontSize: 19,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.4,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -1621,7 +1668,7 @@ class _ExerciseActionsSheet extends StatelessWidget {
                           title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: mute,
                             fontSize: 12.5,
                             fontWeight: FontWeight.w600,
@@ -1685,7 +1732,8 @@ class _ExerciseActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = color ?? (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+    final ink =
+        color ?? (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     final border =
         isDark
             ? Colors.white.withValues(alpha: 0.06)
@@ -1727,10 +1775,10 @@ class _ExerciseActionTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     color: ink,
                     fontSize: 13.8,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),

@@ -275,508 +275,535 @@ class AppRouter {
       ShellRoute(
         builder: (context, state, child) => FxRouteChrome(child: child),
         routes: [
-      GoRoute(
-        path: '/dashboard/qualidade',
-        builder: (context, state) => const QualidadeOperacionalScreen(),
-      ),
-      GoRoute(
-        path: '/dashboard/command-center/copiloto',
-        builder: (context, state) => const CopilotActionsScreen(),
-      ),
+          GoRoute(
+            path: '/dashboard/qualidade',
+            builder: (context, state) => const QualidadeOperacionalScreen(),
+          ),
+          GoRoute(
+            path: '/dashboard/command-center/copiloto',
+            builder: (context, state) => const CopilotActionsScreen(),
+          ),
 
-      // Alunos sub-routes (specific before parameterized)
-      GoRoute(
-        path: '/alunos/novo',
-        builder: (context, state) => const AddAlunoScreen(),
-      ),
-      GoRoute(
-        path: '/alunos/acoes-massa',
-        builder: (context, state) => const AcoesMassaScreen(),
-      ),
-      GoRoute(
-        path: '/kanban',
-        redirect: (context, state) => '/alunos/acoes-massa',
-      ),
-      GoRoute(
-        path: '/alunos/:id',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) =>
-                AlunoDetailScreen(alunoId: _intPathParam(state, 'id')!),
-      ),
-      GoRoute(
-        path: '/alunos/:id/editar',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null
-                    ? '/alunos'
-                    : state.extra is Aluno
-                    ? null
-                    : '/alunos/${state.pathParameters['id']}',
-        builder:
-            (context, state) => EditarAlunoScreen(aluno: state.extra as Aluno),
-      ),
-      GoRoute(
-        path: '/alunos/:id/equipamentos',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) =>
-                AlunoEquipamentosScreen(alunoId: _intPathParam(state, 'id')!),
-      ),
-      GoRoute(
-        path: '/alunos/:id/relatorio',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) => RelatorioScreen(
-              alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _stringExtra(state) ?? 'Aluno',
-            ),
-      ),
-      GoRoute(
-        path: '/alunos/:id/evolucao',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) => EvolucaoScreen(
-              alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _stringExtra(state) ?? 'Aluno',
-            ),
-      ),
-      GoRoute(
-        path: '/alunos/:id/plano-sucesso',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) => ChangeNotifierProvider(
-              create: (_) => PlanoSucessoProvider(),
-              child: PlanoSucessoScreen(alunoId: _intPathParam(state, 'id')!),
-            ),
-      ),
-      GoRoute(
-        path: '/alunos/:id/fotos',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) => EvolucaoFotosScreen(
-              alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _stringExtra(state) ?? 'Aluno',
-            ),
-      ),
-      GoRoute(
-        path: '/treino-presencial/:id',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/treinos' : null,
-        builder:
-            (context, state) =>
-                ModoPresencialScreen(treinoId: _intPathParam(state, 'id')!),
-      ),
-      GoRoute(
-        path: '/alunos/:id/anamnese',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) =>
-                AnamneseScreen(alunoId: _intPathParam(state, 'id')!),
-      ),
-      GoRoute(
-        path: '/alunos/:id/alimentar',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) =>
-                AlimentarScreen(alunoId: _intPathParam(state, 'id')!),
-      ),
-      GoRoute(
-        path: '/alunos/:id/treinos-list',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) => TreinosListScreen(
-              alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _stringExtra(state),
-            ),
-      ),
-      GoRoute(
-        path: '/alunos/:id/ia/progressao',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) => IaProgressaoScreen(
-              alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _stringExtra(state) ?? 'Aluno',
-            ),
-      ),
-      GoRoute(
-        path: '/alunos/:id/chat',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) => ChatScreen(
-              alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _chatAlunoNomeExtra(state) ?? 'Aluno',
-              initialDraft: _chatDraftExtra(state),
-            ),
-      ),
-      GoRoute(
-        path: '/alunos/:id/feedback-video',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) => FeedbackVideoScreen(
-              alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _stringExtra(state) ?? 'Aluno',
-            ),
-      ),
-      GoRoute(
-        path: '/alunos/:id/engajamento',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder: (context, state) {
-          final id = _intPathParam(state, 'id')!;
-          final nome = _stringExtra(state) ?? 'Aluno';
-          return EngajamentoScreen(alunoId: id, alunoNome: nome);
-        },
-      ),
-      GoRoute(
-        path: '/alunos/:id/evolucao-comparativo',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) => EvolucaoComparativoScreen(
-              alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _stringExtra(state) ?? 'Aluno',
-            ),
-      ),
-      GoRoute(
-        path: '/alunos/:id/trilhas',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) => TrilhasScreen(
-              alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _stringExtra(state) ?? 'Aluno',
-            ),
-      ),
-      GoRoute(
-        path: '/alunos/:id/feedback-videos',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alunos' : null,
-        builder:
-            (context, state) => FeedbackVideoScreen(
-              alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _stringExtra(state) ?? 'Aluno',
-            ),
-      ),
+          // Alunos sub-routes (specific before parameterized)
+          GoRoute(
+            path: '/alunos/novo',
+            builder: (context, state) => const AddAlunoScreen(),
+          ),
+          GoRoute(
+            path: '/alunos/acoes-massa',
+            builder: (context, state) => const AcoesMassaScreen(),
+          ),
+          GoRoute(
+            path: '/kanban',
+            redirect: (context, state) => '/alunos/acoes-massa',
+          ),
+          GoRoute(
+            path: '/alunos/:id',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) =>
+                    AlunoDetailScreen(alunoId: _intPathParam(state, 'id')!),
+          ),
+          GoRoute(
+            path: '/alunos/:id/editar',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null
+                        ? '/alunos'
+                        : state.extra is Aluno
+                        ? null
+                        : '/alunos/${state.pathParameters['id']}',
+            builder:
+                (context, state) =>
+                    EditarAlunoScreen(aluno: state.extra as Aluno),
+          ),
+          GoRoute(
+            path: '/alunos/:id/equipamentos',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => AlunoEquipamentosScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/relatorio',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => RelatorioScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                  alunoNome: _stringExtra(state) ?? 'Aluno',
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/evolucao',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => EvolucaoScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                  alunoNome: _stringExtra(state) ?? 'Aluno',
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/plano-sucesso',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => ChangeNotifierProvider(
+                  create: (_) => PlanoSucessoProvider(),
+                  child: PlanoSucessoScreen(
+                    alunoId: _intPathParam(state, 'id')!,
+                  ),
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/fotos',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => EvolucaoFotosScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                  alunoNome: _stringExtra(state) ?? 'Aluno',
+                ),
+          ),
+          GoRoute(
+            path: '/treino-presencial/:id',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/treinos' : null,
+            builder:
+                (context, state) =>
+                    ModoPresencialScreen(treinoId: _intPathParam(state, 'id')!),
+          ),
+          GoRoute(
+            path: '/alunos/:id/anamnese',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) =>
+                    AnamneseScreen(alunoId: _intPathParam(state, 'id')!),
+          ),
+          GoRoute(
+            path: '/alunos/:id/alimentar',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) =>
+                    AlimentarScreen(alunoId: _intPathParam(state, 'id')!),
+          ),
+          GoRoute(
+            path: '/alunos/:id/treinos-list',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => TreinosListScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                  alunoNome: _stringExtra(state),
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/ia/progressao',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => IaProgressaoScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                  alunoNome: _stringExtra(state) ?? 'Aluno',
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/chat',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => ChatScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                  alunoNome: _chatAlunoNomeExtra(state) ?? 'Aluno',
+                  initialDraft: _chatDraftExtra(state),
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/feedback-video',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => FeedbackVideoScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                  alunoNome: _stringExtra(state) ?? 'Aluno',
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/engajamento',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder: (context, state) {
+              final id = _intPathParam(state, 'id')!;
+              final nome = _stringExtra(state) ?? 'Aluno';
+              return EngajamentoScreen(alunoId: id, alunoNome: nome);
+            },
+          ),
+          GoRoute(
+            path: '/alunos/:id/evolucao-comparativo',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => EvolucaoComparativoScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                  alunoNome: _stringExtra(state) ?? 'Aluno',
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/trilhas',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => TrilhasScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                  alunoNome: _stringExtra(state) ?? 'Aluno',
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/feedback-videos',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => FeedbackVideoScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                  alunoNome: _stringExtra(state) ?? 'Aluno',
+                ),
+          ),
 
-      // Treinos sub-routes
-      GoRoute(
-        path: '/treinos/novo',
-        builder: (context, state) {
-          final extra = state.extra;
-          int? alunoId;
-          String? alunoNome;
-          if (extra is Map) {
-            final rawAlunoId = extra['alunoId'];
-            alunoId =
-                rawAlunoId is int
-                    ? rawAlunoId
-                    : int.tryParse(rawAlunoId?.toString() ?? '');
-            alunoNome = extra['alunoNome']?.toString();
-          }
-          return CreateTreinoScreen(alunoId: alunoId, alunoNome: alunoNome);
-        },
-      ),
-      GoRoute(
-        path: '/treinos/:id',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/treinos' : null,
-        builder:
-            (context, state) =>
-                TreinoDetailScreen(treinoId: _intPathParam(state, 'id')!),
-      ),
-      GoRoute(
-        path: '/treinos/:id/exercicios/add',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/treinos' : null,
-        builder:
-            (context, state) => AddExercicioToTreinoScreen(
-              treinoId: _intPathParam(state, 'id')!,
-            ),
-      ),
+          // Treinos sub-routes
+          GoRoute(
+            path: '/treinos/novo',
+            builder: (context, state) {
+              final extra = state.extra;
+              int? alunoId;
+              String? alunoNome;
+              if (extra is Map) {
+                final rawAlunoId = extra['alunoId'];
+                alunoId =
+                    rawAlunoId is int
+                        ? rawAlunoId
+                        : int.tryParse(rawAlunoId?.toString() ?? '');
+                alunoNome = extra['alunoNome']?.toString();
+              }
+              return CreateTreinoScreen(alunoId: alunoId, alunoNome: alunoNome);
+            },
+          ),
+          GoRoute(
+            path: '/treinos/:id',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/treinos' : null,
+            builder: (context, state) {
+              final extra = state.extra;
+              int? alunoId;
+              String? alunoNome;
+              if (extra is Map) {
+                final rawAlunoId = extra['alunoId'];
+                alunoId =
+                    rawAlunoId is int
+                        ? rawAlunoId
+                        : int.tryParse(rawAlunoId?.toString() ?? '');
+                alunoNome = extra['alunoNome']?.toString();
+              }
+              return TreinoDetailScreen(
+                treinoId: _intPathParam(state, 'id')!,
+                alunoId: alunoId,
+                alunoNome: alunoNome,
+              );
+            },
+          ),
+          GoRoute(
+            path: '/treinos/:id/exercicios/add',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/treinos' : null,
+            builder:
+                (context, state) => AddExercicioToTreinoScreen(
+                  treinoId: _intPathParam(state, 'id')!,
+                ),
+          ),
 
-      // Exercícios
-      GoRoute(
-        path: '/exercicios',
-        builder: (context, state) => const ExerciciosListScreen(),
-      ),
-      GoRoute(
-        path: '/exercicios/novo',
-        builder: (context, state) => const AddExercicioScreen(),
-      ),
-      GoRoute(
-        path: '/exercicios/biblioteca-wizard',
-        builder: (context, state) => const OnboardingBibliotecaWizard(),
-      ),
-      GoRoute(
-        path: '/exercicios/:id',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/exercicios' : null,
-        builder:
-            (context, state) =>
-                ExercicioDetailScreen(exercicioId: _intPathParam(state, 'id')!),
-      ),
+          // Exercícios
+          GoRoute(
+            path: '/exercicios',
+            builder: (context, state) => const ExerciciosListScreen(),
+          ),
+          GoRoute(
+            path: '/exercicios/novo',
+            builder: (context, state) => const AddExercicioScreen(),
+          ),
+          GoRoute(
+            path: '/exercicios/biblioteca-wizard',
+            builder: (context, state) => const OnboardingBibliotecaWizard(),
+          ),
+          GoRoute(
+            path: '/exercicios/:id',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/exercicios' : null,
+            builder:
+                (context, state) => ExercicioDetailScreen(
+                  exercicioId: _intPathParam(state, 'id')!,
+                ),
+          ),
 
-      // Check-in
-      GoRoute(
-        path: '/checkin/executar',
-        redirect:
-            (context, state) =>
-                _treinoIdFromState(state) == null ? '/checkin/treinos' : null,
-        builder:
-            (context, state) =>
-                CheckinScreen(treinoId: _treinoIdFromState(state)!),
-      ),
-      GoRoute(
-        path: '/checkin/historico',
-        builder: (context, state) => const HistoricoCheckinScreen(),
-      ),
+          // Check-in
+          GoRoute(
+            path: '/checkin/executar',
+            redirect:
+                (context, state) =>
+                    _treinoIdFromState(state) == null
+                        ? '/checkin/treinos'
+                        : null,
+            builder:
+                (context, state) =>
+                    CheckinScreen(treinoId: _treinoIdFromState(state)!),
+          ),
+          GoRoute(
+            path: '/checkin/historico',
+            builder: (context, state) => const HistoricoCheckinScreen(),
+          ),
 
-      // Agenda aluno sub-route (agenda tab is now in shell)
-      GoRoute(
-        path: '/agenda/aluno',
-        builder: (context, state) => const AgendaAlunoScreen(),
-      ),
+          // Agenda aluno sub-route (agenda tab is now in shell)
+          GoRoute(
+            path: '/agenda/aluno',
+            builder: (context, state) => const AgendaAlunoScreen(),
+          ),
 
-      // Financeiro (moved out of dock — accessible via push)
-      GoRoute(
-        path: '/financeiro',
-        builder: (context, state) => const FinanceiroScreen(),
-      ),
+          // Financeiro (moved out of dock — accessible via push)
+          GoRoute(
+            path: '/financeiro',
+            builder: (context, state) => const FinanceiroScreen(),
+          ),
 
-      // Perfil
-      GoRoute(
-        path: '/perfil',
-        builder: (context, state) => const PerfilScreen(),
-      ),
-      GoRoute(
-        path: '/configuracoes',
-        builder: (context, state) => const PerfilScreen(),
-      ),
-      GoRoute(
-        path: '/perfil/editar',
-        redirect:
-            (context, state) =>
-                state.extra is PerfilPersonal ? null : '/perfil',
-        pageBuilder:
-            (context, state) => fxTransitionPage(
-              state: state,
-              child: EditarPerfilScreen(perfil: state.extra as PerfilPersonal),
-            ),
-      ),
-      GoRoute(
-        path: '/perfil/wallet',
-        builder: (context, state) => const WalletScreen(),
-      ),
-      GoRoute(
-        path: '/identidade-visual',
-        pageBuilder:
-            (context, state) => fxTransitionPage(
-              state: state,
-              child: const IdentidadeVisualScreen(),
-            ),
-      ),
-      GoRoute(
-        path: '/white-label',
-        redirect: (context, state) => '/identidade-visual',
-      ),
-      GoRoute(
-        path: '/setup/identidade',
-        builder:
-            (context, state) => const IdentidadeVisualScreen(isSetup: true),
-      ),
+          // Perfil
+          GoRoute(
+            path: '/perfil',
+            builder: (context, state) => const PerfilScreen(),
+          ),
+          GoRoute(
+            path: '/configuracoes',
+            builder: (context, state) => const PerfilScreen(),
+          ),
+          GoRoute(
+            path: '/perfil/editar',
+            redirect:
+                (context, state) =>
+                    state.extra is PerfilPersonal ? null : '/perfil',
+            pageBuilder:
+                (context, state) => fxTransitionPage(
+                  state: state,
+                  child: EditarPerfilScreen(
+                    perfil: state.extra as PerfilPersonal,
+                  ),
+                ),
+          ),
+          GoRoute(
+            path: '/perfil/wallet',
+            builder: (context, state) => const WalletScreen(),
+          ),
+          GoRoute(
+            path: '/identidade-visual',
+            pageBuilder:
+                (context, state) => fxTransitionPage(
+                  state: state,
+                  child: const IdentidadeVisualScreen(),
+                ),
+          ),
+          GoRoute(
+            path: '/white-label',
+            redirect: (context, state) => '/identidade-visual',
+          ),
+          GoRoute(
+            path: '/setup/identidade',
+            builder:
+                (context, state) => const IdentidadeVisualScreen(isSetup: true),
+          ),
 
-      // IA sub-routes
-      GoRoute(
-        path: '/ia/chat',
-        builder: (context, state) => const IaChatScreen(),
-      ),
-      GoRoute(
-        path: '/ia/aluno',
-        builder: (context, state) => const IaAlunoScreen(),
-      ),
-      GoRoute(
-        path: '/ia/checkin',
-        redirect: (context, state) => '/ia/copiloto',
-      ),
-      GoRoute(
-        path: '/ia/progressao/aceitar',
-        builder: (context, state) => const ProgressaoAceitarScreen(),
-      ),
+          // IA sub-routes
+          GoRoute(
+            path: '/ia/chat',
+            builder: (context, state) => const IaChatScreen(),
+          ),
+          GoRoute(
+            path: '/ia/aluno',
+            builder: (context, state) => const IaAlunoScreen(),
+          ),
+          GoRoute(
+            path: '/ia/checkin',
+            redirect: (context, state) => '/ia/copiloto',
+          ),
+          GoRoute(
+            path: '/ia/progressao/aceitar',
+            builder: (context, state) => const ProgressaoAceitarScreen(),
+          ),
 
-      // Chat
-      GoRoute(
-        path: '/chat/inbox',
-        builder: (context, state) => const ChatInboxScreen(),
-      ),
-      GoRoute(
-        path: '/chat/aluno',
-        builder: (context, state) => const ChatAlunoScreen(),
-      ),
+          // Chat
+          GoRoute(
+            path: '/chat/inbox',
+            builder: (context, state) => const ChatInboxScreen(),
+          ),
+          GoRoute(
+            path: '/chat/aluno',
+            builder: (context, state) => const ChatAlunoScreen(),
+          ),
 
-      // Financeiro sub-routes
-      GoRoute(
-        path: '/financeiro/aluno',
-        builder: (context, state) => const FinanceiroAlunoScreen(),
-      ),
+          // Financeiro sub-routes
+          GoRoute(
+            path: '/financeiro/aluno',
+            builder: (context, state) => const FinanceiroAlunoScreen(),
+          ),
 
-      // Feed
-      GoRoute(path: '/feed', builder: (context, state) => const FeedScreen()),
-      GoRoute(
-        path: '/feed/aluno',
-        builder: (context, state) => const FeedAlunoScreen(),
-      ),
+          // Feed
+          GoRoute(
+            path: '/feed',
+            builder: (context, state) => const FeedScreen(),
+          ),
+          GoRoute(
+            path: '/feed/aluno',
+            builder: (context, state) => const FeedAlunoScreen(),
+          ),
 
-      // Leads
-      GoRoute(
-        path: '/leads',
-        builder: (context, state) => const LeadsListScreen(),
-      ),
+          // Leads
+          GoRoute(
+            path: '/leads',
+            builder: (context, state) => const LeadsListScreen(),
+          ),
 
-      // Alertas
-      GoRoute(
-        path: '/alertas',
-        builder: (context, state) => const AlertasScreen(),
-      ),
-      GoRoute(
-        path: '/alertas/aluno/:id',
-        redirect:
-            (context, state) =>
-                _intPathParam(state, 'id') == null ? '/alertas' : null,
-        builder:
-            (context, state) => AlertaDetalheScreen(
-              alunoId: _intPathParam(state, 'id')!,
-              alunoNome: _stringExtra(state) ?? 'Aluno',
-            ),
-      ),
-      GoRoute(
-        path: '/alertas/config',
-        builder: (context, state) => const AlertasConfigScreen(),
-      ),
+          // Alertas
+          GoRoute(
+            path: '/alertas',
+            builder: (context, state) => const AlertasScreen(),
+          ),
+          GoRoute(
+            path: '/alertas/aluno/:id',
+            redirect:
+                (context, state) =>
+                    _intPathParam(state, 'id') == null ? '/alertas' : null,
+            builder:
+                (context, state) => AlertaDetalheScreen(
+                  alunoId: _intPathParam(state, 'id')!,
+                  alunoNome: _stringExtra(state) ?? 'Aluno',
+                ),
+          ),
+          GoRoute(
+            path: '/alertas/config',
+            builder: (context, state) => const AlertasConfigScreen(),
+          ),
 
-      // Relatórios
-      GoRoute(
-        path: '/relatorios/global',
-        builder: (context, state) => const RelatorioGlobalScreen(),
-      ),
+          // Relatórios
+          GoRoute(
+            path: '/relatorios/global',
+            builder: (context, state) => const RelatorioGlobalScreen(),
+          ),
 
-      // Subscription / plans
-      GoRoute(
-        path: '/convites',
-        builder: (context, state) => const ConvitesScreen(),
-      ),
-      GoRoute(
-        path: '/planos',
-        builder: (context, state) => const PlanosScreen(),
-      ),
-      GoRoute(
-        path: '/paywall',
-        builder: (context, state) => const PaywallScreen(),
-      ),
-      GoRoute(
-        path: '/assinatura',
-        builder:
-            (context, state) => AssinaturaScreen(
-              initialPlan:
-                  _stringExtra(state) ??
-                  state.uri.queryParameters['plano'] ??
-                  state.uri.queryParameters['plan'],
-            ),
-      ),
-      GoRoute(
-        path: '/migracao-magica',
-        builder: (context, state) => const MigracaoMagicaScreen(),
-      ),
-      GoRoute(
-        path: '/growth/migracao',
-        redirect: (context, state) => '/migracao-magica',
-      ),
-      GoRoute(
-        path: '/promo-enterprise',
-        builder: (context, state) => const EnterprisePromoScreen(),
-      ),
+          // Subscription / plans
+          GoRoute(
+            path: '/convites',
+            builder: (context, state) => const ConvitesScreen(),
+          ),
+          GoRoute(
+            path: '/planos',
+            builder: (context, state) => const PlanosScreen(),
+          ),
+          GoRoute(
+            path: '/paywall',
+            builder: (context, state) => const PaywallScreen(),
+          ),
+          GoRoute(
+            path: '/assinatura',
+            builder:
+                (context, state) => AssinaturaScreen(
+                  initialPlan:
+                      _stringExtra(state) ??
+                      state.uri.queryParameters['plano'] ??
+                      state.uri.queryParameters['plan'],
+                ),
+          ),
+          GoRoute(
+            path: '/migracao-magica',
+            builder: (context, state) => const MigracaoMagicaScreen(),
+          ),
+          GoRoute(
+            path: '/growth/migracao',
+            redirect: (context, state) => '/migracao-magica',
+          ),
+          GoRoute(
+            path: '/promo-enterprise',
+            builder: (context, state) => const EnterprisePromoScreen(),
+          ),
 
-      // Misc
-      GoRoute(
-        path: '/ranking',
-        builder: (context, state) => const RankingScreen(),
-      ),
-      GoRoute(
-        path: '/suporte',
-        builder: (context, state) => const SuporteScreen(),
-      ),
-      GoRoute(
-        path: '/broadcasts',
-        builder: (context, state) => const BroadcastScreen(),
-      ),
-      GoRoute(
-        path: '/depoimentos-aluno',
-        builder: (context, state) => const DepoimentoAlunoScreen(),
-      ),
-      GoRoute(
-        path: '/depoimentos',
-        builder: (context, state) => const DepoimentosPersonalScreen(),
-      ),
-      GoRoute(
-        path: '/galeria',
-        builder: (context, state) => const GaleriaScreen(),
-      ),
-      GoRoute(
-        path: '/feedback-videos',
-        builder: (context, state) => const FeedbackVideoScreen(),
-      ),
-      GoRoute(
-        path: '/busca',
-        builder: (context, state) => const BuscaGlobalScreen(),
-      ),
-      GoRoute(
-        path: '/analytics',
-        builder: (context, state) => const AnalyticsScreen(),
-      ),
-      GoRoute(
-        path: '/admin/rbac',
-        builder: (context, state) => const RbacScreen(),
-      ),
-      GoRoute(
-        path: '/gamificacao',
-        pageBuilder:
-            (context, state) => fxTransitionPage(
-              state: state,
-              child: const GamificacaoScreen(),
-            ),
-      ),
+          // Misc
+          GoRoute(
+            path: '/ranking',
+            builder: (context, state) => const RankingScreen(),
+          ),
+          GoRoute(
+            path: '/suporte',
+            builder: (context, state) => const SuporteScreen(),
+          ),
+          GoRoute(
+            path: '/broadcasts',
+            builder: (context, state) => const BroadcastScreen(),
+          ),
+          GoRoute(
+            path: '/depoimentos-aluno',
+            builder: (context, state) => const DepoimentoAlunoScreen(),
+          ),
+          GoRoute(
+            path: '/depoimentos',
+            builder: (context, state) => const DepoimentosPersonalScreen(),
+          ),
+          GoRoute(
+            path: '/galeria',
+            builder: (context, state) => const GaleriaScreen(),
+          ),
+          GoRoute(
+            path: '/feedback-videos',
+            builder: (context, state) => const FeedbackVideoScreen(),
+          ),
+          GoRoute(
+            path: '/busca',
+            builder: (context, state) => const BuscaGlobalScreen(),
+          ),
+          GoRoute(
+            path: '/analytics',
+            builder: (context, state) => const AnalyticsScreen(),
+          ),
+          GoRoute(
+            path: '/admin/rbac',
+            builder: (context, state) => const RbacScreen(),
+          ),
+          GoRoute(
+            path: '/gamificacao',
+            pageBuilder:
+                (context, state) => fxTransitionPage(
+                  state: state,
+                  child: const GamificacaoScreen(),
+                ),
+          ),
         ],
       ),
 
@@ -786,8 +813,7 @@ class AppRouter {
         GoRoute(
           path: '/qa/smoke',
           builder:
-              (context, state) =>
-                  const FxRouteChrome(child: QaSmokeScreen()),
+              (context, state) => const FxRouteChrome(child: QaSmokeScreen()),
         ),
         GoRoute(
           path: '/qa/tokens-strip',
