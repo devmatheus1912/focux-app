@@ -213,6 +213,33 @@ class TreinoRepository {
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<Treino> atualizarExercicioPrescricao(
+    int treinoId,
+    int itemId, {
+    required int series,
+    required String repeticoes,
+    required int descansoSegundos,
+    double? cargaKg,
+    String? observacoes,
+    required String tipoSerie,
+    int? grupoSuperset,
+  }) async {
+    final response = await _dio.patch(
+      '/api/treinos/$treinoId/exercicios/$itemId',
+      data: {
+        'series': series,
+        'repeticoes': repeticoes,
+        'descansoSegundos': descansoSegundos,
+        'cargaKg': cargaKg,
+        'observacoes': observacoes?.trim(),
+        'tipoSerie': tipoSerie,
+        if (tipoSerie == 'SUPERSET' && grupoSuperset != null)
+          'grupoSuperset': grupoSuperset,
+      },
+    );
+    return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<Treino> duplicarExercicio(int treinoId, int itemId) async {
     final response = await _dio.post(
       '/api/treinos/$treinoId/exercicios/$itemId/duplicar',

@@ -81,6 +81,7 @@ class _AddExercicioToTreinoScreenState
   bool _videoExpanded = false;
   bool _seedingBiblioteca = false;
   bool _bottomBarHidden = false;
+  bool _prescriptionEditorOpen = false;
   ExercisePickerFilter _pickerFilter = const ExercisePickerFilter();
   String? _alunoFilterNome;
   final _prescriptionAnchor = GlobalKey();
@@ -130,6 +131,29 @@ class _AddExercicioToTreinoScreenState
     if (inView != _prescriptionInView) {
       setState(() => _prescriptionInView = inView);
     }
+  }
+
+  bool get _showPrescriptionPanel =>
+      _tabIndex == 0 && (_selecionado != null || _prescriptionEditorOpen);
+
+  void _openPrescriptionEditor() {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _tabIndex = 0;
+      _prescriptionEditorOpen = true;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final ctx = _prescriptionAnchor.currentContext;
+      if (ctx == null) return;
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+        alignment: 0.06,
+      );
+      _syncPrescriptionVisibility();
+    });
   }
 
   Future<void> _applyAlunoEquipmentFilter() async {
@@ -265,6 +289,7 @@ class _AddExercicioToTreinoScreenState
     setState(() {
       _selecionado = exercicio;
       _tabIndex = 0;
+      _prescriptionEditorOpen = true;
       _error = null;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1152,8 +1177,10 @@ class _AddExercicioToTreinoScreenState
                               20,
                               20,
                               20,
-                              _tabIndex == 0 && _selecionado != null
-                                  ? 152 +
+                              _showPrescriptionPanel
+                                  ? (_selecionado != null
+                                          ? 152
+                                          : 48) +
                                       MediaQuery.paddingOf(context).bottom
                                   : 12,
                             ),
@@ -1171,9 +1198,21 @@ class _AddExercicioToTreinoScreenState
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
                                 AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 180),
+                                  duration: const Duration(milliseconds: 220),
                                   switchInCurve: Curves.easeOutCubic,
-                                  switchOutCurve: Curves.easeOutCubic,
+                                  switchOutCurve: Curves.easeInCubic,
+                                  transitionBuilder: (child, animation) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(0, 0.02),
+                                          end: Offset.zero,
+                                        ).animate(animation),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
                                   child: KeyedSubtree(
                                     key: ValueKey(_tabIndex),
                                     child: _buildTabContent(
@@ -1187,7 +1226,7 @@ class _AddExercicioToTreinoScreenState
                                     ),
                                   ),
                                 ),
-                                if (_tabIndex == 0 && _selecionado != null) ...[
+                                if (_showPrescriptionPanel) ...[
                                   KeyedSubtree(
                                     key: _prescriptionAnchor,
                                     child: const SizedBox(height: 0),
@@ -1196,6 +1235,7 @@ class _AddExercicioToTreinoScreenState
                                   _PrescriptionSectionHeader(
                                     isDark: isDark,
                                     primary: primary,
+                                    globalPresetMode: _selecionado == null,
                                   ),
                                   if (_lastPrescription != null) ...[
                                     const SizedBox(height: 10),
@@ -1367,7 +1407,7 @@ class _AddExercicioToTreinoScreenState
                             tipoSerie: _tipoSerie,
                             isDark: isDark,
                             primary: primary,
-                            onEdit: () => setState(() => _tabIndex = 0),
+                            onEdit: _openPrescriptionEditor,
                           ),
                         if (_tabIndex == 0 &&
                             _selecionado != null &&
@@ -2216,10 +2256,12 @@ class _StickyAddExerciseBar extends StatelessWidget {
 class _PrescriptionSectionHeader extends StatelessWidget {
   final bool isDark;
   final Color primary;
+  final bool globalPresetMode;
 
   const _PrescriptionSectionHeader({
     required this.isDark,
     required this.primary,
+    this.globalPresetMode = false,
   });
 
   @override
@@ -2243,7 +2285,9 @@ class _PrescriptionSectionHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Prescrição do exercício',
+                globalPresetMode
+                    ? 'Prescrição padrão do treino'
+                    : 'Prescrição do exercício',
                 style: AppTypography.inter(
                   color: ink,
                   fontSize: 15,
@@ -2253,7 +2297,9 @@ class _PrescriptionSectionHeader extends StatelessWidget {
               ),
               const SizedBox(height: 3),
               Text(
-                'Ajuste séries, carga, descanso e observações antes de salvar.',
+                globalPresetMode
+                    ? 'Vale para explorar, modelos e adições rápidas.'
+                    : 'Ajuste séries, carga, descanso e observações antes de salvar.',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.inter(
@@ -2358,36 +2404,56 @@ class _BrowseLibraryCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onOpenPicker,
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
-              side: BorderSide(color: primary.withValues(alpha: 0.35)),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            icon: Icon(Icons.library_books_outlined, color: primary, size: 20),
-            label: Text(
-              'Ver biblioteca ($totalCount)',
-              style: AppTypography.inter(
-                color: primary,
-                fontWeight: FontWeight.w900,
-                fontSize: 13.5,
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final narrow = constraints.maxWidth < 360;
+        final libraryButton = OutlinedButton.icon(
+          onPressed: onOpenPicker,
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(48),
+            side: BorderSide(color: primary.withValues(alpha: 0.35)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
-        ),
-        const SizedBox(width: 10),
-        _CreateExerciseButton(
-          primary: primary,
-          compact: true,
-          onPressed: onCreate,
-        ),
-      ],
+          icon: Icon(Icons.library_books_outlined, color: primary, size: 20),
+          label: Text(
+            'Ver biblioteca ($totalCount)',
+            style: AppTypography.inter(
+              color: primary,
+              fontWeight: FontWeight.w900,
+              fontSize: 13.5,
+            ),
+          ),
+        );
+
+        if (narrow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              libraryButton,
+              const SizedBox(height: 8),
+              _CreateExerciseButton(
+                primary: primary,
+                expand: true,
+                onPressed: onCreate,
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(child: libraryButton),
+            const SizedBox(width: 10),
+            _CreateExerciseButton(
+              primary: primary,
+              compact: true,
+              onPressed: onCreate,
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -14,6 +14,7 @@ import 'package:go_router/go_router.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../exercicios/data/exercicio_repository.dart';
+import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../exercicios/screens/widgets/substituir_exercicio_bottom_sheet.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
@@ -49,6 +50,21 @@ String _displayWorkoutName(String raw) {
     name = name.replaceAll(entry.key, entry.value);
   }
   return name;
+}
+
+String _workoutGroupLabel(TreinoExercicioItem te) {
+  final grupo = te.exercicio.grupoMuscularPrimario;
+  if (grupo != null) {
+    final label = TaxonomyLabels.grupo[grupo];
+    if (label != null && label.isNotEmpty) return label.toUpperCase();
+  }
+  final alvo = te.exercicio.musculoAlvo?.trim();
+  if (alvo != null && alvo.isNotEmpty) return alvo.toUpperCase();
+  return 'OUTROS';
+}
+
+int _minOrdem(Iterable<TreinoExercicioItem> items) {
+  return items.map((item) => item.ordem).reduce((a, b) => a < b ? a : b);
 }
 
 class TreinoDetailScreen extends ConsumerWidget {
@@ -452,16 +468,20 @@ class _TreinoDetailBody extends StatelessWidget {
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final orderedExercises = [...treino.exercicios]
       ..sort((a, b) => a.ordem.compareTo(b.ordem));
+    final displayIndexById = <int, int>{
+      for (var i = 0; i < orderedExercises.length; i++)
+        orderedExercises[i].id: i + 1,
+    };
 
-    // Group by muscle
+    // Group by muscle taxonomy (consistent labels)
     final grouped = <String, List<TreinoExercicioItem>>{};
-    for (final te in treino.exercicios) {
-      final group =
-          te.exercicio.musculoAlvo?.isNotEmpty == true
-              ? te.exercicio.musculoAlvo!
-              : 'Outros';
+    for (final te in orderedExercises) {
+      final group = _workoutGroupLabel(te);
       grouped.putIfAbsent(group, () => []).add(te);
     }
+    final sortedGroupEntries =
+        grouped.entries.toList()
+          ..sort((a, b) => _minOrdem(a.value).compareTo(_minOrdem(b.value)));
     final durationMin = math.max(4, (treino.exercicios.length * 3.5).round());
     double volumeKg = 0;
     for (final te in treino.exercicios) {
@@ -471,12 +491,35 @@ class _TreinoDetailBody extends StatelessWidget {
           0;
       volumeKg += te.series * reps * (te.cargaKg ?? 0);
     }
+    final hasLoadVolume = volumeKg > 0;
     final volumeLabel =
-        volumeKg > 0
+        hasLoadVolume
             ? '${(volumeKg / 1000).toStringAsFixed(1)}t'
-            : '${grouped.keys.length} ${grouped.keys.length == 1 ? 'grupo' : 'grupos'}';
+            : '${grouped.keys.length}';
     final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight + 6;
     final expandedHeight = topInset + 132;
+
+    Future<void> openEditPrescription(TreinoExercicioItem item) async {
+      HapticFeedback.selectionClick();
+      final saved = await showModalBottomSheet<bool>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        barrierColor: Colors.black.withValues(alpha: 0.34),
+        builder:
+            (_) => _EditPrescriptionSheet(
+              treinoId: treinoId,
+              item: item,
+              isDark: isDark,
+              repo: repo,
+            ),
+      );
+      if (saved != true) return;
+      ref.invalidate(treinoProvider(treinoId));
+      if (context.mounted) {
+        FeedbackHelper.showSuccess(context, 'Prescrição atualizada.');
+      }
+    }
 
     return CustomScrollView(
       slivers: [
@@ -615,7 +658,7 @@ class _TreinoDetailBody extends StatelessWidget {
                       Row(
                         children: [
                           _HeroMetricChip(
-                            label: 'Duração',
+                            label: 'Duração est.',
                             value: '~${durationMin}min',
                           ),
                           const SizedBox(width: 8),
@@ -624,7 +667,10 @@ class _TreinoDetailBody extends StatelessWidget {
                             value: '${treino.exercicios.length}',
                           ),
                           const SizedBox(width: 8),
-                          _HeroMetricChip(label: 'Volume', value: volumeLabel),
+                          _HeroMetricChip(
+                            label: hasLoadVolume ? 'Volume' : 'Grupos',
+                            value: volumeLabel,
+                          ),
                         ],
                       ),
                     ],
@@ -731,7 +777,7 @@ class _TreinoDetailBody extends StatelessWidget {
             ),
           )
         else ...[
-          ...grouped.entries.map(
+          ...sortedGroupEntries.map(
             (entry) => SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -754,7 +800,7 @@ class _TreinoDetailBody extends StatelessWidget {
                           ),
                           const SizedBox(width: 9),
                           Text(
-                            entry.key.toUpperCase(),
+                            entry.key,
                             style: AppTypography.inter(
                               color:
                                   isDark
@@ -788,7 +834,12 @@ class _TreinoDetailBody extends StatelessWidget {
                       ),
                       child: Column(
                         children:
-                            entry.value.asMap().entries.map((e) {
+                            ([...entry.value]..sort(
+                                  (a, b) => a.ordem.compareTo(b.ordem),
+                                ))
+                                .asMap()
+                                .entries
+                                .map((e) {
                               final i = e.key;
                               final te = e.value;
                               final globalIndex = orderedExercises.indexWhere(
@@ -822,7 +873,7 @@ class _TreinoDetailBody extends StatelessWidget {
 
                               return _ExercicioRow(
                                 te: te,
-                                index: globalIndex + 1,
+                                index: displayIndexById[te.id] ?? (globalIndex + 1),
                                 isDark: isDark,
                                 primary: primary,
                                 primarySoft: primarySoft,
@@ -830,6 +881,8 @@ class _TreinoDetailBody extends StatelessWidget {
                                 canMoveUp: globalIndex > 0,
                                 canMoveDown:
                                     globalIndex < orderedExercises.length - 1,
+                                onEditPrescription:
+                                    () => openEditPrescription(te),
                                 onMoveUp: () => reorder(-1),
                                 onMoveDown: () => reorder(1),
                                 onDuplicate: () async {
@@ -1470,6 +1523,7 @@ class _ExercicioRow extends StatelessWidget {
   final VoidCallback onDuplicate;
   final VoidCallback onSubstitute;
   final VoidCallback onRemove;
+  final VoidCallback onEditPrescription;
 
   const _ExercicioRow({
     required this.te,
@@ -1485,6 +1539,7 @@ class _ExercicioRow extends StatelessWidget {
     required this.onDuplicate,
     required this.onSubstitute,
     required this.onRemove,
+    required this.onEditPrescription,
   });
 
   @override
@@ -1523,11 +1578,18 @@ class _ExercicioRow extends StatelessWidget {
           ),
           const SizedBox(width: 13),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  te.exercicio.nomeDisplay,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onEditPrescription,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        te.exercicio.nomeDisplay,
                   style: AppTypography.inter(
                     color: ink,
                     fontSize: 14.5,
@@ -1625,6 +1687,9 @@ class _ExercicioRow extends StatelessWidget {
                   ),
                 ],
               ],
+                  ),
+                ),
+              ),
             ),
           ),
           InkWell(
@@ -1636,12 +1701,13 @@ class _ExercicioRow extends StatelessWidget {
                 barrierColor: Colors.black.withValues(alpha: 0.34),
                 builder:
                     (_) => _ExerciseActionsSheet(
-                      title: te.exercicio.nome,
+                      title: te.exercicio.nomeDisplay,
                       canMoveUp: canMoveUp,
                       canMoveDown: canMoveDown,
                       isDark: isDark,
                     ),
               );
+              if (action == 'edit') onEditPrescription();
               if (action == 'up') onMoveUp();
               if (action == 'down') onMoveDown();
               if (action == 'duplicate') onDuplicate();
@@ -1823,6 +1889,11 @@ class _ExerciseActionsSheet extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: TokensStrip.s4),
+              _ExerciseActionTile(
+                icon: Icons.edit_note_rounded,
+                label: 'Editar prescrição',
+                onTap: () => Navigator.pop(context, 'edit'),
+              ),
               if (canMoveUp)
                 _ExerciseActionTile(
                   icon: Icons.keyboard_arrow_up_rounded,
@@ -2429,6 +2500,265 @@ class _EmptyExercisesState extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _EditPrescriptionSheet extends StatefulWidget {
+  const _EditPrescriptionSheet({
+    required this.treinoId,
+    required this.item,
+    required this.isDark,
+    required this.repo,
+  });
+
+  final int treinoId;
+  final TreinoExercicioItem item;
+  final bool isDark;
+  final TreinoRepository repo;
+
+  @override
+  State<_EditPrescriptionSheet> createState() => _EditPrescriptionSheetState();
+}
+
+class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
+  late final TextEditingController _seriesCtrl;
+  late final TextEditingController _repCtrl;
+  late final TextEditingController _descansoCtrl;
+  late final TextEditingController _cargaCtrl;
+  late final TextEditingController _obsCtrl;
+  late final TextEditingController _supersetCtrl;
+  late String _tipoSerie;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final item = widget.item;
+    _seriesCtrl = TextEditingController(text: '${item.series}');
+    _repCtrl = TextEditingController(text: item.repeticoes);
+    _descansoCtrl = TextEditingController(
+      text: '${item.descansoSegundos ?? 60}',
+    );
+    _cargaCtrl = TextEditingController(
+      text:
+          item.cargaKg != null && item.cargaKg! > 0
+              ? item.cargaKg!.toString()
+              : '',
+    );
+    _obsCtrl = TextEditingController(text: item.observacoes ?? '');
+    _supersetCtrl = TextEditingController(
+      text: '${item.grupoSuperset ?? 1}',
+    );
+    _tipoSerie = item.tipoSerie;
+  }
+
+  @override
+  void dispose() {
+    _seriesCtrl.dispose();
+    _repCtrl.dispose();
+    _descansoCtrl.dispose();
+    _cargaCtrl.dispose();
+    _obsCtrl.dispose();
+    _supersetCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (_saving) return;
+    setState(() => _saving = true);
+    try {
+      await widget.repo.atualizarExercicioPrescricao(
+        widget.treinoId,
+        widget.item.id,
+        series: int.tryParse(_seriesCtrl.text) ?? widget.item.series,
+        repeticoes: _repCtrl.text.trim(),
+        descansoSegundos: int.tryParse(_descansoCtrl.text) ?? 60,
+        cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
+        observacoes: _obsCtrl.text,
+        tipoSerie: _tipoSerie,
+        grupoSuperset:
+            _tipoSerie == 'SUPERSET'
+                ? int.tryParse(_supersetCtrl.text)
+                : null,
+      );
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  InputDecoration _decoration(String label, Color primary) {
+    return InputDecoration(
+      labelText: label,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: primary.withValues(alpha: 0.22)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: primary, width: 1.4),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute =
+        widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final bottom = MediaQuery.viewInsetsOf(context).bottom;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          decoration: fxListCardDecoration(context, accent: primary),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: mute.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Editar prescrição',
+                  style: AppTypography.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: ink,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.item.exercicio.nomeDisplay,
+                  style: AppTypography.inter(
+                    color: mute,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _seriesCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: _decoration('Séries', primary),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: TextField(
+                        controller: _repCtrl,
+                        decoration: _decoration('Repetições', primary),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _descansoCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: _decoration('Descanso (s)', primary),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: _cargaCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: _decoration('Carga (kg)', primary),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: _tipoSerie,
+                  decoration: _decoration('Tipo de série', primary),
+                  items: const [
+                    DropdownMenuItem(value: 'NORMAL', child: Text('Normal')),
+                    DropdownMenuItem(
+                      value: 'SUPERSET',
+                      child: Text('Superset'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'DROPSET',
+                      child: Text('Drop set'),
+                    ),
+                  ],
+                  onChanged:
+                      _saving
+                          ? null
+                          : (value) {
+                            if (value == null) return;
+                            setState(() => _tipoSerie = value);
+                          },
+                ),
+                if (_tipoSerie == 'SUPERSET') ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _supersetCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: _decoration('Grupo superset', primary),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _obsCtrl,
+                  minLines: 2,
+                  maxLines: 4,
+                  decoration: _decoration('Observações', primary),
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: _saving ? null : _save,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    backgroundColor: primary,
+                  ),
+                  child:
+                      _saving
+                          ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : const Text('Salvar prescrição'),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
