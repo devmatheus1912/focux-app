@@ -106,7 +106,11 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
 
     if (dense) {
       return Semantics(
-        label: statusTitle,
+        liveRegion: mediaLoading,
+        label:
+            mediaLoading
+                ? 'Enviando vídeo, aguarde. Não feche o app.'
+                : statusTitle,
         child: Container(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
           decoration: decoration,
@@ -172,7 +176,11 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
     }
 
     return Semantics(
-      label: statusTitle,
+      liveRegion: mediaLoading,
+      label:
+          mediaLoading
+              ? 'Enviando vídeo, aguarde. Não feche o app.'
+              : statusTitle,
       child: Container(
         padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
         decoration: decoration,
@@ -308,28 +316,32 @@ class _DenseActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (mediaLoading) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              minHeight: 6,
-              backgroundColor: primary.withValues(alpha: 0.12),
-              color: primary,
+      return Semantics(
+        liveRegion: true,
+        label: 'Enviando vídeo para a nuvem, aguarde.',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                minHeight: 6,
+                backgroundColor: primary.withValues(alpha: 0.12),
+                color: primary,
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Enviando para a nuvem...',
-            textAlign: TextAlign.center,
-            style: AppTypography.inter(
-              color: mute,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+            const SizedBox(height: 10),
+            Text(
+              'Enviando para a nuvem...',
+              textAlign: TextAlign.center,
+              style: AppTypography.inter(
+                color: mute,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 

@@ -397,7 +397,7 @@ class _FilterChip extends StatelessWidget {
                 color:
                     selected
                         ? primary
-                        : primary.withValues(alpha: isDark ? 0.22 : 0.18),
+                        : primary.withValues(alpha: isDark ? 0.28 : 0.32),
               ),
             ),
             child: Row(

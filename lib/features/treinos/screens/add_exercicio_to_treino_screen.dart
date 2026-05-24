@@ -86,6 +86,8 @@ class _AddExercicioToTreinoScreenState
   final _scrollCtrl = ScrollController();
   bool _prescriptionInView = false;
   Timer? _searchDebounce;
+  Timer? _celebrateVideoTimer;
+  bool _celebrateVideoSuccess = false;
   List<int> _recentIds = const [];
   ExercisePrescriptionMemory? _lastPrescription;
 
@@ -156,10 +158,19 @@ class _AddExercicioToTreinoScreenState
     _grupoSupersetCtrl.dispose();
     _buscaCtrl.dispose();
     _searchDebounce?.cancel();
+    _celebrateVideoTimer?.cancel();
     _scrollCtrl
       ..removeListener(_syncPrescriptionVisibility)
       ..dispose();
     super.dispose();
+  }
+
+  void _triggerVideoUploadCelebration() {
+    _celebrateVideoTimer?.cancel();
+    setState(() => _celebrateVideoSuccess = true);
+    _celebrateVideoTimer = Timer(const Duration(milliseconds: 1600), () {
+      if (mounted) setState(() => _celebrateVideoSuccess = false);
+    });
   }
 
   Future<void> _loadPickerMemory() async {
@@ -610,6 +621,7 @@ class _AddExercicioToTreinoScreenState
       messenger.clearSnackBars();
       if (!mounted) return fresh;
       HapticFeedback.mediumImpact();
+      _triggerVideoUploadCelebration();
       FeedbackHelper.showSuccess(
         context,
         'Vídeo enviado! Miniatura e prévia atualizadas.',
@@ -798,6 +810,7 @@ class _AddExercicioToTreinoScreenState
                 exercicio: _selecionado!,
                 isDark: isDark,
                 primary: primary,
+                celebrateVideoSuccess: _celebrateVideoSuccess,
                 onChange: () => _openExercisePicker(
                   allExercicios,
                   alreadyInTreinoIds: alreadyInTreinoIds,
@@ -1730,9 +1743,13 @@ class _BuscarFilterEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
           ],
-          FilledButton.tonal(
+          OutlinedButton(
             onPressed: onClearFilters,
-            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(44)),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(44),
+              foregroundColor: primary,
+              side: BorderSide(color: primary.withValues(alpha: 0.42)),
+            ),
             child: const Text('Limpar filtros e busca'),
           ),
         ],
@@ -1748,6 +1765,7 @@ class _CompactSelectedExerciseBar extends StatelessWidget {
     required this.primary,
     required this.onChange,
     this.onPreview,
+    this.celebrateVideoSuccess = false,
   });
 
   final Exercicio exercicio;
@@ -1755,6 +1773,7 @@ class _CompactSelectedExerciseBar extends StatelessWidget {
   final Color primary;
   final VoidCallback onChange;
   final VoidCallback? onPreview;
+  final bool celebrateVideoSuccess;
 
   @override
   Widget build(BuildContext context) {
@@ -1769,6 +1788,7 @@ class _CompactSelectedExerciseBar extends StatelessWidget {
               child: ExerciseMediaThumb.fromExercicio(
                 exercicio,
                 size: 44,
+                celebrateSuccess: celebrateVideoSuccess,
                 key: ValueKey(
                   'thumb-${exercicio.id}-${exercicio.videoUrl}-${exercicio.thumbnailUrl}',
                 ),
@@ -1778,6 +1798,7 @@ class _CompactSelectedExerciseBar extends StatelessWidget {
             ExerciseMediaThumb.fromExercicio(
               exercicio,
               size: 44,
+              celebrateSuccess: celebrateVideoSuccess,
               key: ValueKey(
                 'thumb-${exercicio.id}-${exercicio.videoUrl}-${exercicio.thumbnailUrl}',
               ),
@@ -3575,7 +3596,7 @@ Color _metaTextColor(bool isDark, {bool muted = true}) {
   final base =
       isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
   if (isDark) return base;
-  final lerp = muted ? 0.38 : 0.22;
+  final lerp = muted ? 0.55 : 0.38;
   return Color.lerp(base, TokensStrip.textPrimary, lerp)!;
 }
 

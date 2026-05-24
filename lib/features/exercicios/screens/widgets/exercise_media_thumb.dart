@@ -4,7 +4,7 @@ import '../../../../core/widgets/skeleton_loader.dart';
 import '../../data/exercicio_repository.dart';
 import '../../services/biblioteca_media_config.dart';
 
-class ExerciseMediaThumb extends StatelessWidget {
+class ExerciseMediaThumb extends StatefulWidget {
   const ExerciseMediaThumb({
     super.key,
     this.mediaUrl,
@@ -14,6 +14,7 @@ class ExerciseMediaThumb extends StatelessWidget {
     this.iconSize = 20,
     this.showPlayBadge = false,
     this.expectMedia = false,
+    this.celebrateSuccess = false,
   });
 
   final String? mediaUrl;
@@ -24,6 +25,7 @@ class ExerciseMediaThumb extends StatelessWidget {
   final bool showPlayBadge;
   /// Quando true e sem URL, mostra estado "sem demonstração" em vez de haltere genérico.
   final bool expectMedia;
+  final bool celebrateSuccess;
 
   factory ExerciseMediaThumb.fromExercicio(
     Exercicio exercicio, {
@@ -31,6 +33,7 @@ class ExerciseMediaThumb extends StatelessWidget {
     double radius = 14,
     double iconSize = 20,
     bool? showPlayBadge,
+    bool celebrateSuccess = false,
     Key? key,
   }) {
     final pendingPublish =
@@ -49,35 +52,82 @@ class ExerciseMediaThumb extends StatelessWidget {
           showPlayBadge ??
           (exercicioHasPersonalVideo(exercicio) || exercicio.hasPlayableMedia),
       expectMedia: pendingPublish,
+      celebrateSuccess: celebrateSuccess,
     );
+  }
+
+  @override
+  State<ExerciseMediaThumb> createState() => _ExerciseMediaThumbState();
+}
+
+class _ExerciseMediaThumbState extends State<ExerciseMediaThumb>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _celebrateCtrl;
+  late Animation<double> _celebrateScale;
+  late Animation<double> _celebrateOpacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _celebrateCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520),
+    );
+    _celebrateScale = Tween<double>(begin: 0.45, end: 1).animate(
+      CurvedAnimation(parent: _celebrateCtrl, curve: Curves.elasticOut),
+    );
+    _celebrateOpacity = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _celebrateCtrl,
+        curve: const Interval(0, 0.35, curve: Curves.easeOut),
+      ),
+    );
+    if (widget.celebrateSuccess) {
+      _celebrateCtrl.forward(from: 0);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ExerciseMediaThumb oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.celebrateSuccess && !oldWidget.celebrateSuccess) {
+      _celebrateCtrl.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _celebrateCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final url = mediaUrl?.trim();
-    final label = exercicio?.nomeDisplay ?? 'Exercício';
-    final ex = exercicio;
+    final url = widget.mediaUrl?.trim();
+    final label = widget.exercicio?.nomeDisplay ?? 'Exercício';
+    final ex = widget.exercicio;
 
     Widget thumb;
     if (url != null && url.isNotEmpty) {
       thumb = ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
+        borderRadius: BorderRadius.circular(widget.radius),
         child: Image.network(
           url,
-          width: size,
-          height: size,
+          width: widget.size,
+          height: widget.size,
           fit: BoxFit.cover,
           gaplessPlayback: true,
-          cacheWidth: (size * 2).round(),
-          cacheHeight: (size * 2).round(),
-          errorBuilder: (_, __, ___) => _fallback(primary, missing: expectMedia),
+          cacheWidth: (widget.size * 2).round(),
+          cacheHeight: (widget.size * 2).round(),
+          errorBuilder: (_, __, ___) =>
+              _fallback(primary, missing: widget.expectMedia),
           loadingBuilder: (context, child, progress) {
             if (progress == null) return child;
             return SkeletonLoader(
-              width: size,
-              height: size,
-              borderRadius: radius,
+              width: widget.size,
+              height: widget.size,
+              borderRadius: widget.radius,
             );
           },
         ),
@@ -85,7 +135,7 @@ class ExerciseMediaThumb extends StatelessWidget {
     } else {
       thumb = _fallback(
         primary,
-        missing: expectMedia,
+        missing: widget.expectMedia,
         personalPending:
             ex != null &&
             exercicioHasPersonalVideo(ex) &&
@@ -103,18 +153,46 @@ class ExerciseMediaThumb extends StatelessWidget {
       ),
     );
 
+    if (widget.celebrateSuccess || _celebrateCtrl.isAnimating) {
+      thumb = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          thumb,
+          Positioned.fill(
+            child: FadeTransition(
+              opacity: _celebrateOpacity,
+              child: ScaleTransition(
+                scale: _celebrateScale,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.38),
+                    borderRadius: BorderRadius.circular(widget.radius),
+                  ),
+                  child: Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: widget.size * 0.46,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     thumb = Semantics(
       label:
           ex != null && exercicioHasPersonalVideo(ex)
               ? 'Seu vídeo de $label'
-              : expectMedia
+              : widget.expectMedia
               ? 'Demonstração de $label'
               : label,
       image: url != null && url.isNotEmpty,
       child: thumb,
     );
 
-    if (!showPlayBadge) return thumb;
+    if (!widget.showPlayBadge) return thumb;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -124,8 +202,8 @@ class ExerciseMediaThumb extends StatelessWidget {
           right: -2,
           bottom: -2,
           child: Container(
-            width: size * 0.42,
-            height: size * 0.42,
+            width: widget.size * 0.42,
+            height: widget.size * 0.42,
             decoration: BoxDecoration(
               color: primary,
               shape: BoxShape.circle,
@@ -134,7 +212,7 @@ class ExerciseMediaThumb extends StatelessWidget {
             child: Icon(
               Icons.play_arrow_rounded,
               color: Colors.white,
-              size: size * 0.26,
+              size: widget.size * 0.26,
             ),
           ),
         ),
@@ -148,11 +226,11 @@ class ExerciseMediaThumb extends StatelessWidget {
     bool personalPending = false,
   }) {
     return Container(
-      width: size,
-      height: size,
+      width: widget.size,
+      height: widget.size,
       decoration: BoxDecoration(
         color: primary.withValues(alpha: missing ? 0.06 : 0.10),
-        borderRadius: BorderRadius.circular(radius),
+        borderRadius: BorderRadius.circular(widget.radius),
         border:
             missing || personalPending
                 ? Border.all(color: primary.withValues(alpha: 0.2))
@@ -165,7 +243,7 @@ class ExerciseMediaThumb extends StatelessWidget {
             ? Icons.cloud_sync_outlined
             : Icons.fitness_center_rounded,
         color: primary.withValues(alpha: missing ? 0.55 : 1),
-        size: iconSize,
+        size: widget.iconSize,
       ),
     );
   }
