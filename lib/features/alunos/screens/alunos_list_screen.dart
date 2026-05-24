@@ -2,7 +2,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/env.dart';
 import '../data/aluno_contact_utils.dart';
@@ -684,8 +683,8 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                           children: [
                             Text(
                               headerOps,
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: AppTypography.inter(
+                                fontSize: TokensStrip.fontBodySm,
                                 color: _modoSelecao
                                     ? BrandPalette.sectionAction(
                                       primary,
@@ -697,17 +696,18 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                                         ? FontWeight.w600
                                         : FontWeight.w500,
                                 letterSpacing: _modoSelecao ? 1.2 : 0,
+                                height: 1.2,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Alunos',
                               style: AppTypography.inter(
-                                fontSize: 32,
+                                fontSize: TokensStrip.fontH1,
                                 color: ink,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -1.0,
-                                height: 1,
+                                fontWeight: TokensStrip.weightH1,
+                                letterSpacing: TokensStrip.trackingH1,
+                                height: 1.15,
                               ),
                             ),
                           ],
@@ -832,8 +832,8 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                             },
                             textInputAction: TextInputAction.search,
                             cursorColor: primary,
-                            style: TextStyle(
-                              fontSize: 14,
+                            style: AppTypography.inter(
+                              fontSize: TokensStrip.fontBody,
                               color: ink,
                               fontWeight: FontWeight.w500,
                             ),
@@ -843,9 +843,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                                 vertical: 10,
                               ),
                               hintText: 'Buscar por nome ou objetivo',
-                              hintStyle: TextStyle(
-                                fontSize: 14,
-                                color: mute.withValues(alpha: 0.9),
+                              hintStyle: AppTypography.inter(
+                                fontSize: TokensStrip.fontBody,
+                                color: mute,
                                 fontWeight: FontWeight.w500,
                               ),
                               border: InputBorder.none,
@@ -1253,7 +1253,7 @@ class _FxChip extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
+              style: AppTypography.inter(
                 color: color,
                 fontSize: 12.5,
                 fontWeight: FontWeight.w800,
@@ -1277,7 +1277,7 @@ class _FxChip extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 '$count',
-                style: TextStyle(
+                style: AppTypography.inter(
                   color:
                       isSelected
                           ? primary
@@ -1655,11 +1655,12 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                       Flexible(
                         child: Text(
                           displayName,
-                          style: TextStyle(
-                            fontSize: 15,
+                          style: AppTypography.inter(
+                            fontSize: TokensStrip.fontBody,
                             fontWeight: FontWeight.w700,
                             color: ink,
                             letterSpacing: -0.15,
+                            height: 1.2,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1694,11 +1695,12 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                               const SizedBox(width: 5),
                               Text(
                                 statusText,
-                                style: TextStyle(
+                                style: AppTypography.inter(
                                   color: statusColor,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 0.5,
+                                  height: 1.1,
                                 ),
                               ),
                             ],
@@ -1710,7 +1712,11 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                   const SizedBox(height: 2),
                   Text(
                     '$objetivo · ${aluno.email.toLowerCase()}',
-                    style: TextStyle(fontSize: 12, color: mute),
+                    style: AppTypography.inter(
+                      fontSize: TokensStrip.fontBodySm,
+                      color: mute,
+                      height: 1.25,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1729,13 +1735,14 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                       const SizedBox(width: 5),
                       Text(
                         aderenciaPercent == null ? '—' : '$aderenciaPercent%',
-                        style: GoogleFonts.jetBrainsMono(
+                        style: AppTypography.mono(
                           fontSize: 12.5,
                           fontWeight:
                               hasTreinoRecente
                                   ? FontWeight.w700
                                   : FontWeight.w500,
                           color: hasTreinoRecente ? aderColor : mute,
+                          height: 1.1,
                         ),
                       ),
                       if (adherenceLabel.isNotEmpty) ...[
@@ -1743,16 +1750,21 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                           padding: const EdgeInsets.symmetric(horizontal: 6),
                           child: Text(
                             '·',
-                            style: TextStyle(
+                            style: AppTypography.inter(
                               fontSize: 11,
                               color: mute.withValues(alpha: 0.65),
+                              height: 1.1,
                             ),
                           ),
                         ),
                         Expanded(
                           child: Text(
                             adherenceLabel,
-                            style: TextStyle(fontSize: 11, color: mute),
+                            style: AppTypography.inter(
+                              fontSize: 11,
+                              color: mute,
+                              height: 1.1,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -2065,6 +2077,7 @@ class _AlunosTriageBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final warn = isDark ? const Color(0xFFFFB77A) : EagleTokens.warn;
 
     return Material(
@@ -2098,25 +2111,31 @@ class _AlunosTriageBanner extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
-                        fontSize: 13,
+                      style: AppTypography.inter(
+                        fontSize: TokensStrip.fontBodySm,
                         fontWeight: FontWeight.w700,
                         color: ink,
+                        height: 1.25,
                       ),
                     ),
                     Text(
                       subtitle,
-                      style: TextStyle(fontSize: 11.5, color: warn),
+                      style: AppTypography.inter(
+                        fontSize: 11.5,
+                        color: mute,
+                        height: 1.3,
+                      ),
                     ),
                   ],
                 ),
               ),
               Text(
                 'Ver lista',
-                style: TextStyle(
-                  fontSize: 12,
+                style: AppTypography.inter(
+                  fontSize: TokensStrip.fontBodySm,
                   fontWeight: FontWeight.w700,
                   color: BrandPalette.sectionLink(primary, dark: isDark),
+                  height: 1.1,
                 ),
               ),
               Icon(
