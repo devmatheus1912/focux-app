@@ -23,6 +23,7 @@ import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
 import '../../exercicios/screens/widgets/padrao_movimento_grid.dart';
+import '../../exercicios/data/template_splits.dart';
 import '../../exercicios/screens/widgets/template_split_picker.dart';
 import '../data/treino_repository.dart';
 import '../data/workout_builder_preset.dart';
@@ -277,6 +278,13 @@ class _AddExercicioToTreinoScreenState
       }
       _syncPrescriptionVisibility();
     });
+  }
+
+  Future<void> _openCreateExercise() async {
+    final criado = await context.push<bool>('/exercicios/novo');
+    if (criado == true && mounted) {
+      ref.invalidate(exerciciosProvider);
+    }
   }
 
   Future<void> _openTemplateBuilder() async {
@@ -719,7 +727,15 @@ class _AddExercicioToTreinoScreenState
                 onTap: _openTemplateBuilder,
                 isDark: isDark,
                 primary: primary,
+                templateCount: templateSplits.length,
               ),
+              const SizedBox(height: 8),
+              _CreateExerciseButton(
+                primary: primary,
+                expand: true,
+                onPressed: _openCreateExercise,
+              ),
+              const SizedBox(height: 10),
               if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno)
                 _AlunoEquipmentFilterBanner(
                   alunoNome: _alunoFilterNome!,
@@ -982,12 +998,7 @@ class _AddExercicioToTreinoScreenState
                       allExercicios,
                       alreadyInTreinoIds: alreadyInTreinoIds,
                     ),
-                onCreate: () async {
-                  final criado = await context.push<bool>('/exercicios/novo');
-                  if (criado == true) {
-                    ref.invalidate(exerciciosProvider);
-                  }
-                },
+                onCreate: _openCreateExercise,
               ),
             ] else if (!compact)
               _ExercisePickerCard(
@@ -1010,12 +1021,7 @@ class _AddExercicioToTreinoScreenState
                 onPreviewVideo: _previewSelectedExerciseVideo,
                 onUploadVideo: _uploadSelectedExerciseVideo,
                 onRemoveVideo: _removeSelectedExerciseVideo,
-                onCreate: () async {
-                  final criado = await context.push<bool>('/exercicios/novo');
-                  if (criado == true) {
-                    ref.invalidate(exerciciosProvider);
-                  }
-                },
+                onCreate: _openCreateExercise,
               ),
             if (_selecionado != null) ...[
               const SizedBox(height: 8),
@@ -1929,11 +1935,13 @@ class _MontarComModeloCard extends StatelessWidget {
     required this.onTap,
     required this.isDark,
     required this.primary,
+    required this.templateCount,
   });
 
   final VoidCallback onTap;
   final bool isDark;
   final Color primary;
+  final int templateCount;
 
   @override
   Widget build(BuildContext context) {
@@ -1974,7 +1982,7 @@ class _MontarComModeloCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Full body, upper/lower, PPL ou casa — preencha os slots.',
+                      'Full body, PPL, bro split e mais — $templateCount modelos.',
                       style: AppTypography.inter(
                         color: mute,
                         fontSize: 12,
@@ -2374,23 +2382,63 @@ class _BrowseLibraryCta extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        Semantics(
-          button: true,
-          label: 'Criar exercício personalizado',
-          child: IconButton.filled(
-            onPressed: onCreate,
-            style: IconButton.styleFrom(
-              minimumSize: const Size(48, 48),
-              backgroundColor: primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            icon: const Icon(Icons.add_rounded, size: 26),
-          ),
+        _CreateExerciseButton(
+          primary: primary,
+          compact: true,
+          onPressed: onCreate,
         ),
       ],
+    );
+  }
+}
+
+class _CreateExerciseButton extends StatelessWidget {
+  const _CreateExerciseButton({
+    required this.primary,
+    required this.onPressed,
+    this.compact = false,
+    this.expand = false,
+  });
+
+  final Color primary;
+  final VoidCallback onPressed;
+  final bool compact;
+  final bool expand;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = compact ? 'Novo' : 'Novo exercício';
+    final button = OutlinedButton.icon(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        minimumSize: Size(expand ? double.infinity : 0, 48),
+        padding: EdgeInsets.symmetric(horizontal: compact ? 12 : 14),
+        foregroundColor: primary,
+        side: BorderSide(color: primary.withValues(alpha: 0.42)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      icon: Icon(Icons.add_rounded, color: primary, size: compact ? 20 : 21),
+      label: Text(
+        label,
+        style: AppTypography.inter(
+          color: primary,
+          fontWeight: FontWeight.w900,
+          fontSize: compact ? 13 : 13.5,
+        ),
+      ),
+    );
+
+    return Semantics(
+      button: true,
+      label: 'Criar exercício personalizado',
+      child: Tooltip(
+        message: 'Criar exercício personalizado',
+        preferBelow: false,
+        child:
+            expand
+                ? SizedBox(width: double.infinity, child: button)
+                : button,
+      ),
     );
   }
 }
@@ -2549,35 +2597,10 @@ class _ExercisePickerCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Tooltip(
-              message: 'Criar exercício personalizado',
-              preferBelow: false,
-              child: Semantics(
-              button: true,
-              label: 'Criar exercício personalizado',
-              child: InkWell(
-              onTap: onCreate,
-              borderRadius: BorderRadius.circular(18),
-              child: Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color:
-                      isDark
-                          ? Colors.white.withValues(alpha: 0.06)
-                          : EagleTokens.brandSofter,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color:
-                        isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : primary.withValues(alpha: 0.10),
-                  ),
-                ),
-                child: Icon(Icons.add_rounded, color: primary, size: 26),
-              ),
-            ),
-            ),
+            _CreateExerciseButton(
+              primary: primary,
+              compact: true,
+              onPressed: onCreate,
             ),
           ],
         ),

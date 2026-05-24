@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/widgets/feedback_helper.dart';
 import '../../../../core/widgets/fx_bottom_sheet.dart';
 import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/exercicio_repository.dart';
@@ -94,7 +96,7 @@ class _TemplateIntro extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Escolha um modelo abaixo e preencha cada slot com exercícios da biblioteca.',
+                  'Escolha um modelo abaixo e preencha cada slot com exercícios da biblioteca (${templateSplits.length} opções).',
                   maxLines: 3,
                   style: AppTypography.inter(
                     color: scheme.onSurfaceVariant,
@@ -308,6 +310,79 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
                 ),
               ),
             ),
+          if (done == slotsTotal && slotsTotal > 0) ...[
+            const SizedBox(height: 8),
+            _TemplateCompleteCard(
+              onBackToWorkout: () {
+                HapticFeedback.mediumImpact();
+                FeedbackHelper.showSuccess(
+                  context,
+                  'Modelo concluído! Exercícios adicionados ao treino.',
+                );
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TemplateCompleteCard extends StatelessWidget {
+  const _TemplateCompleteCard({required this.onBackToWorkout});
+
+  final VoidCallback onBackToWorkout;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final primary = scheme.primary;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: primary.withValues(alpha: 0.28)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.check_circle_rounded, color: primary, size: 24),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Modelo concluído',
+                  style: AppTypography.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Todos os slots foram preenchidos com a prescrição ativa.',
+            style: AppTypography.inter(
+              color: scheme.onSurfaceVariant,
+              fontSize: 12.5,
+              height: 1.35,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 14),
+          FilledButton(
+            onPressed: onBackToWorkout,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+              backgroundColor: primary,
+            ),
+            child: const Text('Voltar ao treino'),
+          ),
         ],
       ),
     );
