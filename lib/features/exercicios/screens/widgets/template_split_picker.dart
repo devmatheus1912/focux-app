@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/widgets/fx_bottom_sheet.dart';
 import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/template_splits.dart';
@@ -58,26 +59,32 @@ class _TemplateIntro extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
-        color: scheme.surface,
+        color: primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.7)),
+        border: Border.all(
+          color: primary.withValues(alpha: 0.22),
+          style: BorderStyle.solid,
+        ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.view_agenda_rounded, color: primary, size: 18),
-          ),
+          Icon(Icons.lightbulb_outline_rounded, color: primary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  'Dica',
+                  style: AppTypography.inter(
+                    color: primary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 2),
                 Text(
                   'Comece por uma estrutura',
                   style: AppTypography.inter(
@@ -87,13 +94,13 @@ class _TemplateIntro extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Escolha um modelo e preencha cada slot com exercícios da biblioteca.',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  'Escolha um modelo abaixo e preencha cada slot com exercícios da biblioteca.',
+                  maxLines: 3,
                   style: AppTypography.inter(
                     color: scheme.onSurfaceVariant,
                     fontSize: 11.5,
                     height: 1.25,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -396,11 +403,8 @@ class _SlotTile extends StatelessWidget {
       onTap:
           saving
               ? null
-              : () => showModalBottomSheet(
+              : () => showFxBottomSheet(
                 context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                barrierColor: Colors.black.withValues(alpha: 0.42),
                 builder:
                     (_) => PadraoExerciciosBottomSheet(
                       padrao: slot.padrao,

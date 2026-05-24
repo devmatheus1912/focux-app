@@ -9,6 +9,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_bottom_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -31,6 +32,7 @@ import '../../exercicios/services/biblioteca_bootstrap.dart';
 import '../screens/widgets/exercise_picker_filter_bar.dart';
 import '../utils/exercise_picker_filter.dart';
 import '../utils/exercise_picker_sort.dart';
+import '../utils/exercise_picker_suggestions.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
@@ -71,6 +73,8 @@ class _AddExercicioToTreinoScreenState
   ExercisePickerFilter _pickerFilter = const ExercisePickerFilter();
   String? _alunoFilterNome;
   final _prescriptionAnchor = GlobalKey();
+  final _scrollCtrl = ScrollController();
+  bool _prescriptionInView = false;
 
   @override
   void initState() {
@@ -80,10 +84,31 @@ class _AddExercicioToTreinoScreenState
       final next = _buscaCtrl.text.trim();
       if (next != _buscaQuery) setState(() => _buscaQuery = next);
     });
+    _scrollCtrl.addListener(_syncPrescriptionVisibility);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureBiblioteca();
       _applyAlunoEquipmentFilter();
     });
+  }
+
+  void _syncPrescriptionVisibility() {
+    if (_selecionado == null) {
+      if (_prescriptionInView) {
+        setState(() => _prescriptionInView = false);
+      }
+      return;
+    }
+    final ctx = _prescriptionAnchor.currentContext;
+    if (ctx == null) return;
+    final box = ctx.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return;
+
+    final top = box.localToGlobal(Offset.zero).dy;
+    final threshold = MediaQuery.sizeOf(ctx).height * 0.62;
+    final inView = top < threshold;
+    if (inView != _prescriptionInView) {
+      setState(() => _prescriptionInView = inView);
+    }
   }
 
   Future<void> _applyAlunoEquipmentFilter() async {
@@ -112,6 +137,9 @@ class _AddExercicioToTreinoScreenState
     _observacoesCtrl.dispose();
     _grupoSupersetCtrl.dispose();
     _buscaCtrl.dispose();
+    _scrollCtrl
+      ..removeListener(_syncPrescriptionVisibility)
+      ..dispose();
     super.dispose();
   }
 
@@ -143,6 +171,7 @@ class _AddExercicioToTreinoScreenState
           curve: Curves.easeOutCubic,
         );
       }
+      _syncPrescriptionVisibility();
     });
   }
 
@@ -352,11 +381,8 @@ class _AddExercicioToTreinoScreenState
     Exercicio? replacement;
     setState(() => _bottomBarHidden = true);
     try {
-      await showModalBottomSheet<void>(
+      await showFxBottomSheet<void>(
         context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        barrierColor: Colors.black.withValues(alpha: 0.52),
         builder:
             (_) => SubstituirExercicioBottomSheet(
               alvo: alvo,
@@ -390,11 +416,8 @@ class _AddExercicioToTreinoScreenState
     setState(() => _bottomBarHidden = true);
     Exercicio? selected;
     try {
-      selected = await showModalBottomSheet<Exercicio>(
+      selected = await showFxBottomSheet<Exercicio>(
         context: context,
-        backgroundColor: Colors.transparent,
-        barrierColor: Colors.black.withValues(alpha: 0.52),
-        isScrollControlled: true,
         builder:
             (sheetContext) => _ExercisePickerSheet(
               exercicios: exercicios,
@@ -579,6 +602,15 @@ class _AddExercicioToTreinoScreenState
                   }),
                   alreadyInTreinoIds: alreadyInTreinoIds,
                 ).take(6).toList();
+        final curatedSuggestions =
+            _selecionado == null &&
+                    query.isEmpty &&
+                    favoriteShortcuts.isEmpty
+                ? curatedPickerSuggestions(
+                  exercicios,
+                  alreadyInTreinoIds: alreadyInTreinoIds,
+                )
+                : const <Exercicio>[];
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -622,6 +654,30 @@ class _AddExercicioToTreinoScreenState
                 ),
               ),
             ),
+            if (curatedSuggestions.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                'Mais usados pelos personais',
+                style: AppTypography.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color:
+                      isDark
+                          ? EagleTokens.darkInkMute
+                          : TokensStrip.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...curatedSuggestions.map(
+                (exercicio) => _QuickSearchResultTile(
+                  exercicio: exercicio,
+                  alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
+                  primary: primary,
+                  isDark: isDark,
+                  onTap: () => _selectExercise(exercicio),
+                ),
+              ),
+            ],
             if (favoriteShortcuts.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
@@ -661,6 +717,7 @@ class _AddExercicioToTreinoScreenState
               isDark: isDark,
               primary: primary,
               total: exercicios.length,
+              showPrescriptionHint: !_prescriptionInView,
               onTap:
                   () => _openExercisePicker(
                     exercicios,
@@ -779,6 +836,7 @@ class _AddExercicioToTreinoScreenState
                           ),
                         Expanded(
                           child: SingleChildScrollView(
+                            controller: _scrollCtrl,
                             padding: EdgeInsets.fromLTRB(
                               20,
                               20,
@@ -1602,6 +1660,7 @@ class _ExercisePickerCard extends StatelessWidget {
   final bool isDark;
   final Color primary;
   final int total;
+  final bool showPrescriptionHint;
   final VoidCallback onTap;
   final bool mediaLoading;
   final bool videoExpanded;
@@ -1616,6 +1675,7 @@ class _ExercisePickerCard extends StatelessWidget {
     required this.isDark,
     required this.primary,
     required this.total,
+    this.showPrescriptionHint = true,
     required this.onTap,
     required this.mediaLoading,
     required this.videoExpanded,
@@ -1717,7 +1777,10 @@ class _ExercisePickerCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Semantics(
+            Tooltip(
+              message: 'Criar exercício personalizado',
+              preferBelow: false,
+              child: Semantics(
               button: true,
               label: 'Criar exercício personalizado',
               child: InkWell(
@@ -1743,11 +1806,15 @@ class _ExercisePickerCard extends StatelessWidget {
               ),
             ),
             ),
+            ),
           ],
         ),
-        if (!selected || !hasMediaIssue) ...[
+        if ((!selected || (showPrescriptionHint && !hasMediaIssue))) ...[
           const SizedBox(height: 12),
-          Container(
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: fxListCardDecoration(context, accent: primary),
             child: Row(
@@ -1775,6 +1842,7 @@ class _ExercisePickerCard extends StatelessWidget {
                 ),
               ],
             ),
+          ),
           ),
         ],
         if (selected) ...[

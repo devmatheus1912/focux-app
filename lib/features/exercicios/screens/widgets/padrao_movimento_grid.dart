@@ -7,6 +7,7 @@ import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../../treinos/utils/exercise_picker_filter.dart';
 import '../../providers/exercicios_provider.dart';
+import '../../../../core/widgets/fx_bottom_sheet.dart';
 import 'padrao_exercicios_bottom_sheet.dart';
 
 enum PadraoGridMode { padrao, grupo }
@@ -143,11 +144,8 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
   }
 
   void _open({PadraoMovimento? padrao, GrupoMuscular? grupo}) {
-    showModalBottomSheet(
+    showFxBottomSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.42),
       builder:
           (_) => PadraoExerciciosBottomSheet(
             padrao: padrao,

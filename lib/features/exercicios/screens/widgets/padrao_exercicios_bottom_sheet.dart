@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
@@ -8,6 +9,7 @@ import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../providers/exercicios_provider.dart';
 import '../../../treinos/utils/exercise_picker_filter.dart';
+import 'exercise_media_thumb.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class PadraoExerciciosBottomSheet extends ConsumerWidget {
@@ -130,6 +132,7 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
                     subtitle: subtitle,
                     alreadyInTreino: alreadyInTreinoIds.contains(ex.id),
                     onTap: () {
+                      HapticFeedback.selectionClick();
                       Navigator.pop(context);
                       onAdicionar(ex);
                     },
@@ -229,6 +232,12 @@ class _ExerciseChoiceTile extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final nome = exercicio.nomeDisplay;
     final muted = alreadyInTreino;
+    final mediaUrl = exercisePreviewMediaUrl(
+      thumbnailUrl: exercicio.thumbnailUrl,
+      gifUrl: exercicio.gifUrl,
+      videoUrl: exercicio.videoUrl,
+    );
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -236,26 +245,34 @@ class _ExerciseChoiceTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 11),
         child: Row(
           children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color:
-                    exercicio.hasPlayableMedia
-                        ? scheme.primary.withValues(alpha: 0.1)
-                        : scheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                exercicio.hasPlayableMedia
-                    ? Icons.play_circle_fill_rounded
-                    : Icons.videocam_off_outlined,
-                color:
-                    exercicio.hasPlayableMedia
-                        ? scheme.primary
-                        : scheme.onSurfaceVariant,
-                size: 19,
-              ),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ExerciseMediaThumb(
+                  mediaUrl: mediaUrl,
+                  size: 44,
+                  radius: 14,
+                ),
+                if (exercicio.hasPlayableMedia)
+                  Positioned(
+                    right: -2,
+                    bottom: -2,
+                    child: Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: scheme.primary,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: scheme.surface, width: 1.5),
+                      ),
+                      child: const Icon(
+                        Icons.play_arrow_rounded,
+                        color: Colors.white,
+                        size: 12,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -264,7 +281,7 @@ class _ExerciseChoiceTile extends StatelessWidget {
                 children: [
                   Text(
                     nome,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.inter(
                       fontSize: 14,
@@ -286,12 +303,13 @@ class _ExerciseChoiceTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.inter(
                         color: scheme.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
+                        height: 1.2,
                       ),
                     ),
                   ],
