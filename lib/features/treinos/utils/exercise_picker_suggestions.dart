@@ -29,6 +29,7 @@ List<Exercicio> curatedPickerSuggestions(
     if (picked.length >= limit) break;
     for (final exercicio in pool) {
       if (seen.contains(exercicio.id)) continue;
+      if (alreadyInTreinoIds.contains(exercicio.id)) continue;
       final haystack =
           '${exercicio.nome} ${exercicio.musculoAlvo ?? ''} ${exercicio.equipamento ?? ''}'
               .toLowerCase();
