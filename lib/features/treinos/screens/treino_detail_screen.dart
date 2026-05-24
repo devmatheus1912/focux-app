@@ -64,10 +64,6 @@ String _workoutGroupLabel(TreinoExercicioItem te) {
   return 'OUTROS';
 }
 
-int _minOrdem(Iterable<TreinoExercicioItem> items) {
-  return items.map((item) => item.ordem).reduce((a, b) => a < b ? a : b);
-}
-
 bool _showsExerciseGroupHeader(List<TreinoExercicioItem> items, int index) {
   if (index <= 0) return true;
   return _workoutGroupLabel(items[index]) !=
