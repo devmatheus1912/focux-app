@@ -6,6 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -154,32 +155,26 @@ class _TreinoDetailBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final chrome = ShellChrome.of(context);
+    final ink = onHero ? Colors.white : chrome.ink;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _popTreinoDetail(context, alunoId: alunoId),
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          width: 38,
-          height: 38,
-          decoration:
-              onHero
-                  ? BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.14),
-                    ),
-                  )
-                  : ShellChrome.of(context).headerAction(radius: 12),
-          child: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 16,
-            color: onHero ? Colors.white : ink,
-          ),
+    return IconButton(
+      onPressed: () => _popTreinoDetail(context, alunoId: alunoId),
+      icon: Container(
+        width: 38,
+        height: 38,
+        decoration:
+            onHero
+                ? BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.14),
+                  ),
+                )
+                : chrome.headerAction(radius: 12),
+        child: Center(
+          child: FxIcon(name: 'arrow-left', size: 18, color: ink),
         ),
       ),
     );
@@ -468,10 +463,6 @@ class _TreinoDetailBody extends StatelessWidget {
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final orderedExercises = [...treino.exercicios]
       ..sort((a, b) => a.ordem.compareTo(b.ordem));
-    final displayIndexById = <int, int>{
-      for (var i = 0; i < orderedExercises.length; i++)
-        orderedExercises[i].id: i + 1,
-    };
 
     // Group by muscle taxonomy (consistent labels)
     final grouped = <String, List<TreinoExercicioItem>>{};
@@ -873,7 +864,7 @@ class _TreinoDetailBody extends StatelessWidget {
 
                               return _ExercicioRow(
                                 te: te,
-                                index: displayIndexById[te.id] ?? (globalIndex + 1),
+                                index: i + 1,
                                 isDark: isDark,
                                 primary: primary,
                                 primarySoft: primarySoft,
