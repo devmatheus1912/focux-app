@@ -1717,14 +1717,14 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                   Row(
                     children: [
                       Container(
-                        width: 7,
-                        height: 7,
+                        width: 6,
+                        height: 6,
                         decoration: BoxDecoration(
                           color: aderColor,
                           shape: BoxShape.circle,
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 5),
                       Text(
                         aderenciaPercent == null ? '—' : '$aderenciaPercent%',
                         style: GoogleFonts.jetBrainsMono(
@@ -1736,102 +1736,55 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                           color: hasTreinoRecente ? aderColor : mute,
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'aderência',
-                        style: TextStyle(fontSize: 11, color: mute),
-                      ),
-
-                      const SizedBox(width: 10),
-                      Container(width: 1, height: 10, color: line),
-                      const SizedBox(width: 10),
-                      Flexible(
-                        child: Text(
-                          adherenceLabel,
-                          style: TextStyle(fontSize: 11, color: mute),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      if (adherenceLabel.isNotEmpty) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Text(
+                            '·',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: mute.withValues(alpha: 0.65),
+                            ),
+                          ),
                         ),
-                      ),
+                        Expanded(
+                          child: Text(
+                            adherenceLabel,
+                            style: TextStyle(fontSize: 11, color: mute),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ],
               ),
             ),
 
-            // Adherence rail + ações rápidas
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _AdherenceRail(
-                  value: (aderenciaPercent ?? 0).toDouble(),
-                  color: aderColor,
-                  line: line,
-                  isEmpty: !hasTreinoRecente,
-                ),
-                if (needsOutreach) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _AlunoQuickActionIcon(
-                        icon: Icons.forum_outlined,
-                        tooltip: 'Chat in-app',
-                        color: BrandPalette.sectionAction(primary, dark: isDark),
-                        onTap:
-                            () => context.push(
-                              '/alunos/${aluno.id}/chat',
-                              extra: displayName,
-                            ),
-                      ),
-                      if (hasWhatsapp)
-                        _AlunoQuickActionIcon(
-                          icon: Icons.chat_rounded,
-                          tooltip: 'WhatsApp',
-                          color: const Color(0xFF25D366),
-                          onTap: () => _openWhatsappOutreach(
-                            context,
-                            displayName: displayName,
-                            whatsappNumber: whatsappNumber,
-                            emRisco: aluno.emRisco,
-                          ),
-                        ),
-                      _AlunoQuickActionIcon(
-                        icon: Icons.snooze_rounded,
-                        tooltip: 'Adiar 24h',
-                        color: mute,
-                        onTap: () async {
-                          await ref
-                              .read(alunoFollowUpActionsProvider)
-                              .snooze(aluno.id);
-                          if (context.mounted) {
-                            FeedbackHelper.showSuccess(
-                              context,
-                              'Lembrete adiado por 24h',
-                            );
-                          }
-                        },
-                      ),
-                      _AlunoQuickActionIcon(
-                        icon: Icons.check_circle_outline_rounded,
-                        tooltip: 'Contato feito',
-                        color: EagleTokens.good,
-                        onTap: () async {
-                          await ref
-                              .read(alunoFollowUpActionsProvider)
-                              .markContactDone(aluno.id);
-                          if (context.mounted) {
-                            FeedbackHelper.showSuccess(
-                              context,
-                              'Contato registrado',
-                            );
-                          }
-                        },
-                      ),
-                    ],
+            // Rail (só fora da fila de contato) ou ações rápidas compactas
+            if (needsOutreach)
+              _AlunoOutreachActions(
+                alunoId: aluno.id,
+                displayName: displayName,
+                whatsappNumber: whatsappNumber,
+                hasWhatsapp: hasWhatsapp,
+                emRisco: aluno.emRisco,
+                primary: primary,
+                isDark: isDark,
+                mute: mute,
+              )
+            else
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _AdherenceRail(
+                    value: (aderenciaPercent ?? 0).toDouble(),
+                    color: aderColor,
+                    line: line,
+                    isEmpty: !hasTreinoRecente,
                   ),
-                ] else ...[
                   const SizedBox(height: 6),
                   Icon(
                     Icons.chevron_right_rounded,
@@ -1839,8 +1792,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                     color: mute.withValues(alpha: 0.5),
                   ),
                 ],
-              ],
-            ),
+              ),
           ],
         ),
       ),
@@ -1997,9 +1949,9 @@ String _adherenceActivityLabel({
 }) {
   final dias = aluno.diasSemTreino;
   if (dias != null && dias > 0) {
-    return '${dias}d sem treino';
+    return '${dias}d s/ treino';
   }
-  if (weeklyCheckins == 0) return 'sem treinos';
+  if (weeklyCheckins == 0) return 's/ treinos';
   return '$weeklyCheckins ${weeklyCheckins == 1 ? 'treino' : 'treinos'}';
 }
 
@@ -2174,35 +2126,123 @@ class _AlunosTriageBanner extends StatelessWidget {
   }
 }
 
+class _AlunoOutreachActions extends ConsumerWidget {
+  const _AlunoOutreachActions({
+    required this.alunoId,
+    required this.displayName,
+    required this.whatsappNumber,
+    required this.hasWhatsapp,
+    required this.emRisco,
+    required this.primary,
+    required this.isDark,
+    required this.mute,
+  });
+
+  final int alunoId;
+  final String displayName;
+  final String whatsappNumber;
+  final bool hasWhatsapp;
+  final bool emRisco;
+  final Color primary;
+  final bool isDark;
+  final Color mute;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _AlunoQuickActionIcon(
+          compact: true,
+          icon: Icons.forum_outlined,
+          tooltip: 'Chat in-app',
+          color: BrandPalette.sectionAction(primary, dark: isDark),
+          onTap:
+              () => context.push(
+                '/alunos/$alunoId/chat',
+                extra: displayName,
+              ),
+        ),
+        if (hasWhatsapp) ...[
+          const SizedBox(width: 3),
+          _AlunoQuickActionIcon(
+            compact: true,
+            icon: Icons.chat_rounded,
+            tooltip: 'WhatsApp',
+            color: const Color(0xFF25D366),
+            onTap: () => _openWhatsappOutreach(
+              context,
+              displayName: displayName,
+              whatsappNumber: whatsappNumber,
+              emRisco: emRisco,
+            ),
+          ),
+        ],
+        const SizedBox(width: 3),
+        _AlunoQuickActionIcon(
+          compact: true,
+          icon: Icons.snooze_rounded,
+          tooltip: 'Adiar 24h',
+          color: mute,
+          onTap: () async {
+            await ref.read(alunoFollowUpActionsProvider).snooze(alunoId);
+            if (context.mounted) {
+              FeedbackHelper.showSuccess(context, 'Lembrete adiado por 24h');
+            }
+          },
+        ),
+        const SizedBox(width: 3),
+        _AlunoQuickActionIcon(
+          compact: true,
+          icon: Icons.check_circle_outline_rounded,
+          tooltip: 'Contato feito',
+          color: EagleTokens.good,
+          onTap: () async {
+            await ref.read(alunoFollowUpActionsProvider).markContactDone(alunoId);
+            if (context.mounted) {
+              FeedbackHelper.showSuccess(context, 'Contato registrado');
+            }
+          },
+        ),
+      ],
+    );
+  }
+}
+
 class _AlunoQuickActionIcon extends StatelessWidget {
   final IconData icon;
   final String tooltip;
   final Color color;
   final VoidCallback onTap;
+  final bool compact;
 
   const _AlunoQuickActionIcon({
     required this.icon,
     required this.tooltip,
     required this.color,
     required this.onTap,
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final size = compact ? 24.0 : 28.0;
+    final iconSize = compact ? 14.0 : 15.0;
+
     return Tooltip(
       message: tooltip,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(999),
         child: Container(
-          width: 28,
-          height: 28,
+          width: size,
+          height: size,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
+            color: color.withValues(alpha: compact ? 0.1 : 0.12),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, size: 15, color: color),
+          child: Icon(icon, size: iconSize, color: color),
         ),
       ),
     );
