@@ -538,6 +538,14 @@ class _AddExercicioToTreinoScreenState
     }
   }
 
+  Future<Exercicio?> _freshExercicio(int exercicioId) async {
+    final list = await ref.read(exerciciosProvider.future);
+    for (final exercicio in list) {
+      if (exercicio.id == exercicioId) return exercicio;
+    }
+    return null;
+  }
+
   Future<void> _uploadSelectedExerciseVideo() async {
     final exercicio = _selecionado;
     if (exercicio == null) return;
@@ -577,15 +585,18 @@ class _AddExercicioToTreinoScreenState
       );
       ref.invalidate(exerciciosProvider);
       if (!mounted) return null;
-      if (_selecionado?.id == updated.id) {
-        setState(() => _selecionado = updated);
+      final fresh = await _freshExercicio(updated.id) ?? updated;
+      if (_selecionado?.id == fresh.id) {
+        setState(() => _selecionado = fresh);
       }
       messenger.clearSnackBars();
+      if (!mounted) return fresh;
+      HapticFeedback.mediumImpact();
       FeedbackHelper.showSuccess(
         context,
-        'Vídeo enviado. A prévia pode levar alguns segundos para liberar.',
+        'Vídeo enviado! Miniatura e prévia atualizadas.',
       );
-      return updated;
+      return fresh;
     } catch (e) {
       if (!mounted) return null;
       messenger.clearSnackBars();
@@ -648,7 +659,12 @@ class _AddExercicioToTreinoScreenState
 
   Future<void> _previewSelectedExerciseVideo() async {
     final exercicio = _selecionado;
-    if (exercicio == null || !exercicio.hasPlayableMedia) return;
+    if (exercicio == null) return;
+    if (!exercicioHasPersonalVideo(exercicio) &&
+        !exercicioHasPublishedLibraryMedia(exercicio) &&
+        !exercicio.hasPlayableMedia) {
+      return;
+    }
     HapticFeedback.selectionClick();
     await showExerciseMediaPreview(context, exercicio: exercicio);
   }
@@ -773,7 +789,8 @@ class _AddExercicioToTreinoScreenState
                   alreadyInTreinoIds: alreadyInTreinoIds,
                 ),
                 onPreview:
-                    _selecionado!.hasPlayableMedia
+                    exercicioHasPersonalVideo(_selecionado!) ||
+                            exercicioHasPublishedLibraryMedia(_selecionado!)
                         ? _previewSelectedExerciseVideo
                         : null,
               ),
@@ -1037,34 +1054,13 @@ class _AddExercicioToTreinoScreenState
               listenable: BibliotecaSyncStatus.instance,
               builder: (context, _) {
                 final sync = BibliotecaSyncStatus.instance;
-                if (sync.syncing) {
-                  return _BibliotecaSyncBanner(
-                    message: sync.message ?? 'Sincronizando biblioteca...',
-                    isDark: isDark,
-                    primary: primary,
-                    showProgress: true,
-                  );
-                }
-                if (sync.warningMessage != null) {
-                  return _BibliotecaSyncBanner(
-                    message: sync.warningMessage!,
-                    isDark: isDark,
-                    primary: primary,
-                    showProgress: false,
-                    icon: Icons.info_outline_rounded,
-                  );
-                }
-                if (sync.showPendingHint) {
-                  return _BibliotecaSyncBanner(
-                    message:
-                        '${sync.pendingMediaCount} exercícios ainda sem miniatura — envie seu vídeo ou aguarde a sincronização.',
-                    isDark: isDark,
-                    primary: primary,
-                    showProgress: false,
-                    icon: Icons.cloud_queue_rounded,
-                  );
-                }
-                return const SizedBox.shrink();
+                if (!sync.syncing) return const SizedBox.shrink();
+                return _BibliotecaSyncBanner(
+                  message: sync.message ?? 'Preparando biblioteca...',
+                  isDark: isDark,
+                  primary: primary,
+                  showProgress: true,
+                );
               },
             ),
             Expanded(
@@ -1366,14 +1362,12 @@ class _BibliotecaSyncBanner extends StatelessWidget {
     required this.isDark,
     required this.primary,
     this.showProgress = true,
-    this.icon,
   });
 
   final String message;
   final bool isDark;
   final Color primary;
   final bool showProgress;
-  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -1399,7 +1393,7 @@ class _BibliotecaSyncBanner extends StatelessWidget {
                 ),
               )
             else
-              Icon(icon ?? Icons.info_outline_rounded, color: primary, size: 18),
+              Icon(Icons.sync_rounded, color: primary, size: 18),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -1737,10 +1731,22 @@ class _CompactSelectedExerciseBar extends StatelessWidget {
           if (onPreview != null)
             GestureDetector(
               onTap: onPreview,
-              child: ExerciseMediaThumb.fromExercicio(exercicio, size: 44),
+              child: ExerciseMediaThumb.fromExercicio(
+                exercicio,
+                size: 44,
+                key: ValueKey(
+                  'thumb-${exercicio.id}-${exercicio.videoUrl}-${exercicio.thumbnailUrl}',
+                ),
+              ),
             )
           else
-            ExerciseMediaThumb.fromExercicio(exercicio, size: 44),
+            ExerciseMediaThumb.fromExercicio(
+              exercicio,
+              size: 44,
+              key: ValueKey(
+                'thumb-${exercicio.id}-${exercicio.videoUrl}-${exercicio.thumbnailUrl}',
+              ),
+            ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

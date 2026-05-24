@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/skeleton_loader.dart';
 import '../../data/exercicio_repository.dart';
+import '../../services/biblioteca_media_config.dart';
 
 class ExerciseMediaThumb extends StatelessWidget {
   const ExerciseMediaThumb({
@@ -33,7 +34,10 @@ class ExerciseMediaThumb extends StatelessWidget {
     Key? key,
   }) {
     final pendingPublish =
-        exercicio.hasPlayableMedia && !exercicioHasPublishedLibraryMedia(exercicio);
+        !kBibliotecaLibraryVideosStandby &&
+        exercicio.hasPlayableMedia &&
+        !exercicioHasPublishedLibraryMedia(exercicio) &&
+        !exercicioHasPersonalVideo(exercicio);
     return ExerciseMediaThumb(
       key: key,
       exercicio: exercicio,
@@ -79,8 +83,14 @@ class ExerciseMediaThumb extends StatelessWidget {
       thumb = _fallback(primary, missing: expectMedia);
     }
 
+    final ex = exercicio;
     thumb = Semantics(
-      label: expectMedia ? 'Demonstração de $label' : label,
+      label:
+          ex != null && exercicioHasPersonalVideo(ex)
+              ? 'Seu vídeo de $label'
+              : expectMedia
+              ? 'Demonstração de $label'
+              : label,
       image: url != null && url.isNotEmpty,
       child: thumb,
     );

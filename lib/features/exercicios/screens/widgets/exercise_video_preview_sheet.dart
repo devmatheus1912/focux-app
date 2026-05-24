@@ -5,6 +5,7 @@ import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/exercicio_repository.dart';
+import '../../services/biblioteca_media_config.dart';
 import '../../services/biblioteca_sync_status.dart';
 import 'exercise_media_thumb.dart';
 
@@ -16,6 +17,10 @@ Future<void> showExerciseMediaPreview(
   final video = exercicio.videoUrl?.trim();
   if (video != null && video.isNotEmpty) {
     return showExerciseVideoPreview(context, exercicio: exercicio, url: video);
+  }
+  if (kBibliotecaLibraryVideosStandby &&
+      !exercicioHasPublishedLibraryMedia(exercicio)) {
+    return showLibraryDemoStandbySheet(context, exercicio: exercicio);
   }
   final gif = exercicio.gifUrl?.trim();
   if (gif == null || gif.isEmpty) return Future.value();
@@ -41,8 +46,148 @@ Future<void> showExerciseVideoPreview(
     backgroundColor: Colors.transparent,
     barrierColor: Colors.black.withValues(alpha: 0.52),
     builder:
-        (_) => ExerciseVideoPreviewSheet(exercicio: exercicio, url: resolved),
+        (_) => ExerciseVideoPreviewSheet(
+          exercicio: exercicio,
+          url: resolved,
+          isPersonalVideo: exercicioHasPersonalVideo(exercicio),
+        ),
   );
+}
+
+Future<void> showLibraryDemoStandbySheet(
+  BuildContext context, {
+  required Exercicio exercicio,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: 0.52),
+    builder: (_) => ExerciseLibraryDemoStandbySheet(exercicio: exercicio),
+  );
+}
+
+class ExerciseLibraryDemoStandbySheet extends StatelessWidget {
+  const ExerciseLibraryDemoStandbySheet({super.key, required this.exercicio});
+
+  final Exercicio exercicio;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final bottom = MediaQuery.of(context).padding.bottom;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(12, 0, 12, bottom + 10),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 16),
+          decoration: fxListCardDecoration(context, accent: primary),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                exercicio.nomeDisplay,
+                style: AppTypography.inter(
+                  color: ink,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              _PreviewSourceLabel(
+                label: 'Demo oficial em breve',
+                color: mute,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: ColoredBox(
+                    color: primary.withValues(alpha: isDark ? 0.12 : 0.08),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.video_library_outlined,
+                            color: primary,
+                            size: 40,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'A demonstração oficial deste exercício será '
+                            'publicada em breve.',
+                            textAlign: TextAlign.center,
+                            style: AppTypography.inter(
+                              color: mute,
+                              fontSize: 13,
+                              height: 1.4,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Enquanto isso, envie seu vídeo na tela anterior.',
+                            textAlign: TextAlign.center,
+                            style: AppTypography.inter(
+                              color: mute.withValues(alpha: 0.85),
+                              fontSize: 12,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PreviewSourceLabel extends StatelessWidget {
+  const _PreviewSourceLabel({
+    required this.label,
+    required this.color,
+    required this.isDark,
+  });
+
+  final String label;
+  final Color color;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: isDark ? 0.12 : 0.08),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: AppTypography.inter(
+            color: color,
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class ExerciseGifPreviewSheet extends StatefulWidget {
@@ -103,6 +248,11 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final bottom = MediaQuery.of(context).padding.bottom;
+
+    if (kBibliotecaLibraryVideosStandby &&
+        !exercicioHasPublishedLibraryMedia(widget.exercicio)) {
+      return ExerciseLibraryDemoStandbySheet(exercicio: widget.exercicio);
+    }
 
     return ListenableBuilder(
       listenable: BibliotecaSyncStatus.instance,
@@ -250,10 +400,12 @@ class ExerciseVideoPreviewSheet extends StatefulWidget {
     super.key,
     required this.exercicio,
     required this.url,
+    this.isPersonalVideo = false,
   });
 
   final Exercicio exercicio;
   final String url;
+  final bool isPersonalVideo;
 
   @override
   State<ExerciseVideoPreviewSheet> createState() =>
@@ -329,6 +481,15 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
                   fontSize: 16,
                   fontWeight: FontWeight.w900,
                 ),
+              ),
+              const SizedBox(height: 8),
+              _PreviewSourceLabel(
+                label:
+                    widget.isPersonalVideo
+                        ? 'Seu vídeo'
+                        : 'Demonstração da biblioteca',
+                color: widget.isPersonalVideo ? primary : mute,
+                isDark: isDark,
               ),
               const SizedBox(height: 12),
               ClipRRect(

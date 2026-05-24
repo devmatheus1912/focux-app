@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'biblioteca_media_config.dart';
+
 /// Estado global leve para banner de sincronização da biblioteca.
 class BibliotecaSyncStatus extends ChangeNotifier {
   BibliotecaSyncStatus._();
@@ -16,7 +18,10 @@ class BibliotecaSyncStatus extends ChangeNotifier {
   int get pendingMediaCount => _pendingMediaCount;
   String? get warningMessage => _warningMessage;
 
-  bool get showPendingHint => !_syncing && _pendingMediaCount > 0;
+  bool get showPendingHint =>
+      !kBibliotecaLibraryVideosStandby &&
+      !_syncing &&
+      _pendingMediaCount > 0;
 
   void start(String message) {
     _syncing = true;
