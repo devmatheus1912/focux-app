@@ -369,16 +369,15 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       useSafeArea: true,
       isScrollControlled: true,
       showDragHandle: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-        final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-        final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+        final chrome = ShellChrome.forDark(isDark);
+        final ink = chrome.ink;
+        final mute = chrome.mute;
+        final line = chrome.line;
         final primary = Theme.of(ctx).colorScheme.primary;
+        final linkColor = BrandPalette.sectionLink(primary, dark: isDark);
 
         Widget option({
           required String title,
@@ -434,18 +433,19 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                       children: [
                         Text(
                           title,
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: ink,
-                            fontSize: 14,
+                            fontSize: TokensStrip.fontBody,
                             fontWeight: FontWeight.w800,
+                            height: 1.2,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           subtitle,
-                          style: TextStyle(
+                          style: AppTypography.inter(
                             color: mute,
-                            fontSize: 12,
+                            fontSize: TokensStrip.fontBodySm,
                             height: 1.25,
                           ),
                         ),
@@ -460,44 +460,58 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
         final sheetMaxHeight = MediaQuery.sizeOf(ctx).height * 0.72;
 
-        return ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: sheetMaxHeight),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 0, 18, 26),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Organizar alunos',
-                        style: AppTypography.inter(
-                          color: ink,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.4,
+        return DecoratedBox(
+          decoration: chrome.bottomSheet(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: sheetMaxHeight),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 26),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Organizar alunos',
+                          style: AppTypography.inter(
+                            color: ink,
+                            fontSize: TokensStrip.fontH2,
+                            fontWeight: TokensStrip.weightH2,
+                            letterSpacing: TokensStrip.trackingH2,
+                            height: 1.2,
+                          ),
                         ),
                       ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _filtro = AlunoFiltro.todos;
+                            _ordenacao = AlunoOrdenacao.prioridade;
+                          });
+                          Navigator.pop(ctx);
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: linkColor,
+                          textStyle: AppTypography.inter(
+                            fontWeight: FontWeight.w700,
+                            fontSize: TokensStrip.fontBodySm,
+                          ),
+                        ),
+                        child: const Text('Redefinir'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Escolha como a lista deve aparecer agora.',
+                    style: AppTypography.inter(
+                      color: mute,
+                      fontSize: TokensStrip.fontBodySm,
+                      height: 1.35,
                     ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _filtro = AlunoFiltro.todos;
-                          _ordenacao = AlunoOrdenacao.prioridade;
-                        });
-                        Navigator.pop(ctx);
-                      },
-                      child: const Text('Redefinir'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Escolha como a lista deve aparecer agora.',
-                  style: TextStyle(color: mute, fontSize: 13),
-                ),
+                  ),
                 const SizedBox(height: TokensStrip.s4),
                 option(
                   title: 'Prioridade do dia',
@@ -531,10 +545,11 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                 const SizedBox(height: 18),
                 Text(
                   'Atalhos de foco',
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     color: ink,
-                    fontSize: 13,
+                    fontSize: TokensStrip.fontBodySm,
                     fontWeight: FontWeight.w800,
+                    height: 1.2,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -587,6 +602,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
               ],
             ),
           ),
+        ),
         );
       },
     );
@@ -661,6 +677,11 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
               _modoSelecao
                   ? _selectionSummary()
                   : '$contatoCount contato hoje · $riscoCount risco · $novosCount convites';
+          final triageContextActive =
+              !_modoSelecao &&
+              _filtro == AlunoFiltro.todos &&
+              (contatoCount > 0 || riscoCount > 0);
+          final listBottomGap = MediaQuery.sizeOf(context).width < 390 ? 28.0 : 36.0;
 
           return SafeArea(
             bottom: false,
@@ -1058,11 +1079,11 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                               ref.invalidate(alertasConfigProvider);
                             },
                             child: ListView.separated(
-                              padding: const EdgeInsets.only(
+                              padding: EdgeInsets.only(
                                 left: 16,
                                 right: 16,
                                 top: 8,
-                                bottom: 120,
+                                bottom: listBottomGap,
                               ),
                               itemCount: filtrados.length,
                               separatorBuilder:
@@ -1081,6 +1102,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                                             ? null
                                             : _toggleModoSelecao,
                                     activeFiltro: _filtro,
+                                    triageContextActive: triageContextActive,
                                     diasSemTreinoLimite: diasLimite,
                                   ),
                                 );
@@ -1336,10 +1358,11 @@ class _SheetShortcutChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTypography.inter(
             color: selected ? Colors.white : ink,
-            fontSize: 13,
+            fontSize: TokensStrip.fontBodySm,
             fontWeight: FontWeight.w800,
+            height: 1.1,
           ),
         ),
       ),
@@ -1474,6 +1497,7 @@ class _AlunoCardFX extends ConsumerStatefulWidget {
 
   /// Active filter — used to suppress redundant status badges.
   final AlunoFiltro activeFiltro;
+  final bool triageContextActive;
   final int diasSemTreinoLimite;
 
   const _AlunoCardFX({
@@ -1483,6 +1507,7 @@ class _AlunoCardFX extends ConsumerStatefulWidget {
     this.onToggle,
     this.onLongPress,
     this.activeFiltro = AlunoFiltro.todos,
+    this.triageContextActive = false,
     this.diasSemTreinoLimite = AlunoFollowUpStore.diasSemTreinoLimite,
   });
 
@@ -1670,6 +1695,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                       if (_shouldShowBadge(
                         statusText,
                         widget.activeFiltro,
+                        triageContextActive: widget.triageContextActive,
                       )) ...[
                         const SizedBox(width: 8),
                         Container(
@@ -2004,14 +2030,24 @@ Future<void> _openWhatsappOutreach(
 /// Returns true if the status badge should be shown on the card.
 /// When a filter is active that already implies the status, the badge is
 /// redundant and just adds visual noise to every card.
-bool _shouldShowBadge(String statusText, AlunoFiltro activeFiltro) {
-  if (statusText == 'ATIVO') return false; // Never show badge for active
-  // Suppress when the filter already communicates the status
-  if (statusText == 'RISCO ALTO' && activeFiltro == AlunoFiltro.risco) {
-    return false;
+bool _shouldShowBadge(
+  String statusText,
+  AlunoFiltro activeFiltro, {
+  bool triageContextActive = false,
+}) {
+  if (statusText == 'ATIVO') return false;
+  if (statusText == 'RISCO ALTO') {
+    if (activeFiltro == AlunoFiltro.risco) return false;
+    if (activeFiltro == AlunoFiltro.contatoHoje) return false;
+    if (activeFiltro == AlunoFiltro.todos && triageContextActive) {
+      return false;
+    }
   }
-  if (statusText == 'INADIMPLENTE' &&
-      activeFiltro == AlunoFiltro.inadimplentes) {
+  if (statusText == 'INADIMPLENTE') {
+    if (activeFiltro == AlunoFiltro.inadimplentes) return false;
+    if (activeFiltro == AlunoFiltro.contatoHoje) return false;
+  }
+  if (statusText == 'INATIVO' && activeFiltro == AlunoFiltro.ativos) {
     return false;
   }
   return true;

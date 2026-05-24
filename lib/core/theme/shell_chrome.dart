@@ -38,12 +38,12 @@ class ShellPalette {
       );
     }
     return BoxDecoration(
-      color: EagleTokens.card,
+      color: TokensStrip.cardBg.withValues(alpha: 0.94),
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
         color:
             accent != null
-                ? accent.withValues(alpha: 0.22)
+                ? accent.withValues(alpha: 0.28)
                 : TokensStrip.borderDefault,
         width: accent != null ? 1.2 : 1,
       ),
@@ -51,7 +51,7 @@ class ShellPalette {
         ...TokensStrip.cardShadow(),
         ...TokensStrip.coloredDepthGlow(
           accent ?? TokensStrip.primary,
-          strength: 0.2,
+          strength: accent != null ? 0.32 : 0.22,
         ),
       ],
     );

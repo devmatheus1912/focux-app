@@ -17,7 +17,7 @@ class MainShell extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final compact = MediaQuery.sizeOf(context).width < 390;
-    final dockClearance = bottomInset + (compact ? 88.0 : 98.0);
+    final dockClearance = bottomInset + (compact ? 102.0 : 112.0);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
