@@ -1266,7 +1266,7 @@ class _FxChip extends StatelessWidget {
               decoration: BoxDecoration(
                 color:
                     isSelected
-                        ? Colors.white.withValues(alpha: isDark ? 0.18 : 0.16)
+                        ? Colors.white.withValues(alpha: isDark ? 0.94 : 0.96)
                         : (isDark
                             ? Colors.white.withValues(alpha: 0.07)
                             : TokensStrip.pageBg),
@@ -1278,13 +1278,13 @@ class _FxChip extends StatelessWidget {
                 style: TextStyle(
                   color:
                       isSelected
-                          ? color
+                          ? primary
                           : (isDark
                               ? EagleTokens.darkInkMute
                               : TokensStrip.textSecondary),
                   fontSize: 10.5,
                   fontWeight: FontWeight.w900,
-                  height: 1,
+                  height: 1.1,
                 ),
               ),
             ),
@@ -1812,7 +1812,6 @@ class _AlunoPhotoAvatar extends StatelessWidget {
   });
 
   static const double _photoOuter = 46;
-  static const double _photoInner = 42;
   static const double _initialsSize = 44;
 
   @override
@@ -1823,6 +1822,10 @@ class _AlunoPhotoAvatar extends StatelessWidget {
     final resolvedUrl = _resolveMediaUrl(photoUrl);
 
     if (resolvedUrl != null) {
+      const ring = 2.0;
+      const gap = 2.0;
+      final avatarRadius = (_photoOuter - ring * 2 - gap * 2) / 2;
+
       return Container(
         width: _photoOuter,
         height: _photoOuter,
@@ -1830,7 +1833,7 @@ class _AlunoPhotoAvatar extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(
             color: neon.withValues(alpha: isDark ? 0.96 : 0.88),
-            width: 2,
+            width: ring,
           ),
           boxShadow: [
             BoxShadow(
@@ -1839,21 +1842,22 @@ class _AlunoPhotoAvatar extends StatelessWidget {
             ),
           ],
         ),
-        padding: const EdgeInsets.all(2),
-        clipBehavior: Clip.antiAlias,
-        child: Image.network(
-          resolvedUrl,
-          width: _photoInner,
-          height: _photoInner,
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.medium,
-          loadingBuilder: (context, child, progress) {
-            if (progress == null) return child;
-            return _AlunoInitials(name: name, size: _photoInner);
-          },
-          errorBuilder:
-              (context, error, stackTrace) =>
-                  _AlunoInitials(name: name, size: _photoInner),
+        padding: const EdgeInsets.all(gap),
+        child: ClipOval(
+          child: Image.network(
+            resolvedUrl,
+            width: avatarRadius * 2,
+            height: avatarRadius * 2,
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.medium,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return _AlunoInitials(name: name, size: avatarRadius * 2);
+            },
+            errorBuilder:
+                (context, error, stackTrace) =>
+                    _AlunoInitials(name: name, size: avatarRadius * 2),
+          ),
         ),
       );
     }
