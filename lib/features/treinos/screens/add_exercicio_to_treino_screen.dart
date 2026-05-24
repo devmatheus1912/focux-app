@@ -779,7 +779,15 @@ class _AddExercicioToTreinoScreenState
                           ),
                         Expanded(
                           child: SingleChildScrollView(
-                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                            padding: EdgeInsets.fromLTRB(
+                              20,
+                              20,
+                              20,
+                              _tabIndex == 0 && _selecionado != null
+                                  ? 128 +
+                                      MediaQuery.paddingOf(context).bottom
+                                  : 12,
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
@@ -952,7 +960,7 @@ class _AddExercicioToTreinoScreenState
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
-                                  const SizedBox(height: 96),
+                                  const SizedBox(height: 16),
                                 ],
                               ],
                             ),
