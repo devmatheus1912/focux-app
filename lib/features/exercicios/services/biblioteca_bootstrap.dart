@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,20 +16,25 @@ class BibliotecaBootstrap {
 
   static bool _running = false;
 
-  static Future<void> ensureReady(WidgetRef ref) async {
+  /// Captura o [ProviderContainer] de forma síncrona — seguro após dispose da tela.
+  static Future<void> ensureReady(BuildContext context) {
+    return ensureReadyWithContainer(ProviderScope.containerOf(context));
+  }
+
+  static Future<void> ensureReadyWithContainer(ProviderContainer container) async {
     if (_running) return;
     _running = true;
     BibliotecaSyncStatus.instance.start('Preparando biblioteca de exercícios...');
     try {
       final prefs = await SharedPreferences.getInstance();
-      final repo = ref.read(exercicioRepositoryProvider);
-      var list = await ref.read(exerciciosProvider.future);
+      final repo = container.read(exercicioRepositoryProvider);
+      var list = await container.read(exerciciosProvider.future);
 
       if (list.isEmpty) {
         BibliotecaSyncStatus.instance.start('Importando exercícios padrão...');
         await repo.importarSeedPremiumV1();
-        ref.invalidate(exerciciosProvider);
-        list = await ref.read(exerciciosProvider.future);
+        container.invalidate(exerciciosProvider);
+        list = await container.read(exerciciosProvider.future);
       }
 
       final needsEnrich =
@@ -42,13 +48,13 @@ class BibliotecaBootstrap {
       if (needsEnrich || !(prefs.getBool(_bootstrapKey) ?? false)) {
         BibliotecaSyncStatus.instance.start('Enriquecendo demonstrações...');
         await repo.enriquecerBibliotecaCurada();
-        ref.invalidate(exerciciosProvider);
+        container.invalidate(exerciciosProvider);
         await prefs.setBool(_bootstrapKey, true);
-        list = await ref.read(exerciciosProvider.future);
+        list = await container.read(exerciciosProvider.future);
       }
 
       if (_needsMediaPublish(list)) {
-        list = await _publishAllMedia(ref, repo, prefs, list);
+        list = await _publishAllMedia(container, repo, prefs, list);
       } else {
         await prefs.setBool(_mediaPublishKey, true);
       }
@@ -56,8 +62,16 @@ class BibliotecaBootstrap {
       final pending = list.where(exercicioMissingPreviewPoster).length;
       BibliotecaSyncStatus.instance.stop(pendingMediaCount: pending);
     } catch (_) {
+      await _stopAfterPartialFailure(container);
+    } finally {
+      _running = false;
+    }
+  }
+
+  static Future<void> _stopAfterPartialFailure(ProviderContainer container) async {
+    try {
       final pending =
-          (await ref.read(exerciciosProvider.future))
+          (await container.read(exerciciosProvider.future))
               .where(exercicioMissingPreviewPoster)
               .length;
       BibliotecaSyncStatus.instance.stop(
@@ -65,13 +79,13 @@ class BibliotecaBootstrap {
         warningMessage:
             'Sincronização parcial. As demonstrações continuam em segundo plano.',
       );
-    } finally {
-      _running = false;
+    } catch (_) {
+      BibliotecaSyncStatus.instance.stop();
     }
   }
 
   static Future<List<Exercicio>> _publishAllMedia(
-    WidgetRef ref,
+    ProviderContainer container,
     ExercicioRepository repo,
     SharedPreferences prefs,
     List<Exercicio> list,
@@ -88,8 +102,8 @@ class BibliotecaBootstrap {
       BibliotecaSyncStatus.instance.updatePendingMedia(pending);
 
       await repo.publicarMidiasCuradas();
-      ref.invalidate(exerciciosProvider);
-      list = await ref.read(exerciciosProvider.future);
+      container.invalidate(exerciciosProvider);
+      list = await container.read(exerciciosProvider.future);
 
       if (!_needsMediaPublish(list)) {
         await prefs.setBool(_mediaPublishKey, true);

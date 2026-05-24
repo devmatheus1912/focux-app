@@ -222,7 +222,7 @@ class _AddExercicioToTreinoScreenState
   }
 
   Future<void> _ensureBiblioteca() async {
-    await BibliotecaBootstrap.ensureReady(ref);
+    await BibliotecaBootstrap.ensureReady(context);
     if (!mounted) return;
     final selectedId = _selecionado?.id;
     if (selectedId == null) return;

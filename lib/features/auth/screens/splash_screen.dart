@@ -126,7 +126,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     try {
       final perfil = await ref.read(perfilProvider.future);
-      BibliotecaBootstrap.ensureReady(ref);
+      if (!mounted) return '/dashboard/personal';
+      BibliotecaBootstrap.ensureReadyWithContainer(
+        ProviderScope.containerOf(context),
+      );
       final prefs = await SharedPreferences.getInstance();
       final promoShown = prefs.getBool('promo_shown_${perfil.id}') ?? false;
       final trialUsed = perfil.trialUsed ?? false;
