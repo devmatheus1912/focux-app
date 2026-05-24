@@ -80,12 +80,13 @@ String _humanizeServerMessage(String raw) {
   if (msg.isEmpty) return 'Algo deu errado. Tente novamente.';
 
   final lower = msg.toLowerCase();
-  if (lower.contains('cloudinary') && lower.contains('configur')) {
-    return 'Envio de vídeo indisponível: configure Cloudinary no servidor (cloud-name, api-key e api-secret) e reinicie o backend.';
+  if (lower.contains('cloudinary') &&
+      lower.contains('nao configurado')) {
+    return 'Envio de vídeo indisponível: Cloudinary não está configurado no servidor (CLOUDINARY_CLOUD_NAME, API_KEY e API_SECRET).';
   }
   if (lower.contains('upload') &&
       (lower.contains('indispon') || lower.contains('midia'))) {
-    return 'Envio de vídeo indisponível no momento. Verifique a configuração de mídia no servidor.';
+    return 'Envio de vídeo falhou no servidor. Confira os logs do backend (Cloudinary, tamanho do arquivo ou rede) e tente de novo.';
   }
   if (lower.contains('service unavailable') || lower.contains('503')) {
     return 'Serviço de mídia temporariamente indisponível. Tente novamente em instantes.';

@@ -54,14 +54,7 @@ class BibliotecaBootstrap {
       }
 
       final pending = list.where(exercicioMissingPreviewPoster).length;
-      final cloudinaryHint =
-          pending > 0
-              ? 'Configure CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY e CLOUDINARY_API_SECRET no servidor para publicar demonstrações e aceitar uploads.'
-              : null;
-      BibliotecaSyncStatus.instance.stop(
-        pendingMediaCount: pending,
-        warningMessage: cloudinaryHint,
-      );
+      BibliotecaSyncStatus.instance.stop(pendingMediaCount: pending);
     } catch (_) {
       final pending =
           (await ref.read(exerciciosProvider.future))
